@@ -1,0 +1,73 @@
+{
+    "name": "pollen/framework",
+    "description": "Laravel & WordPress blend for coding as sweet as honey. Join the hive!",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Olivier Gorzalka",
+            "email": "olivier@amphibee.fr",
+            "role": "Developer"
+        },
+        {
+            "name": "Jordan Doyle",
+            "email": "jordan@doyle.wf",
+            "role": "Inspirer"
+        }
+    ],
+    "type": "project",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://ruche.amphibee.fr/satispress/"
+        },
+        {
+            "type": "composer",
+            "url": "https://wpackagist.org"
+        },
+        {
+            "type": "composer",
+            "url": "https://connect.advancedcustomfields.com"
+        }
+    ],
+    "require": {
+        "illuminate/support": "^10.10",
+        "illuminate/database": "^10.10",
+        "illuminate/routing": "^10.10",
+        "watson/rememberable": "^6.1",
+        "cweagans/composer-patches": "^1.7",
+        "johnbillion/extended-cpts": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pollen\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Pollen\\Providers\\PollenServiceProvider"
+            ],
+            "aliases": {
+                "Wordpress": "Pollen\\Support\\Wordpress",
+                "Meta": "Pollen\\Models\\Meta",
+                "Query": "Pollen\\Support\\Facades\\Query",
+                "Loop": "Pollen\\Support\\Facades\\Loop",
+                "Action": "Pollen\\Support\\Facades\\Action",
+                "Filter": "Pollen\\Support\\Facades\\Filter"
+            }
+        },
+        "patches": {
+            "johnpbloch/wordpress-core": {
+                "Patch __ method in l10n to stop conflicting with Laravel": "https://github.com/koselig/wordpress-core/commit/0881e719711b68812934608a01e986f420658674.diff"
+            }
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "cweagans/composer-patches": true
+        }
+    }
+}

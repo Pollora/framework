@@ -1,0 +1,19 @@
+engines:
+  phpcodesniffer:
+    enabled: true
+    config:
+      file_extensions: "php"
+      standard: "PSR1,PSR2"
+      ignore_warnings: true
+      encoding: utf-8
+  phpmd:
+    enabled: true
+    config:
+      file_extensions: "php"
+      rulesets: "codesize,controversial,design,phpmd.xml"
+    checks:
+      CyclomaticComplexity:
+        enabled: false
+ratings:
+  paths:
+  - "**.php"
