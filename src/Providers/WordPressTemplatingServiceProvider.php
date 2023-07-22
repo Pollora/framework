@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Providers;
 
 use Illuminate\Support\Facades\Blade;

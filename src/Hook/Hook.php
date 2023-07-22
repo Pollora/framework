@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Hook;
 
 use BadMethodCallException;
@@ -30,8 +32,8 @@ abstract class Hook implements IHook
      */
     public function __construct(Application $container)
     {
-        if (!function_exists('add_filter')) {
-            require_once ABSPATH . '/wp-includes/plugin.php';
+        if (! function_exists('add_filter')) {
+            require_once ABSPATH.'/wp-includes/plugin.php';
         }
         $this->container = $container;
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
@@ -11,7 +13,6 @@ use Pollen\Hook\Hook;
  * @method static bool exists(string $hook)
  * @method static Hook|false remove(string $hook, \Closure|string $callback, int $priority = 10)
  * @method static array|null getCallback(string $hook)
- *
  */
 class Action extends Facade
 {

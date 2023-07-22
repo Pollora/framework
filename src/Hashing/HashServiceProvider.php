@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Hashing;
 
 use Illuminate\Support\ServiceProvider;

@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Providers;
 
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -28,8 +29,8 @@ class WordPressServiceProvider extends ServiceProvider
     {
         $this->maybeForceUrlScheme();
         // get the path wordpress is installed in
-        define('WP_PATH', json_decode(file_get_contents($this->app->basePath() . DIRECTORY_SEPARATOR . 'composer.json'),
-                true)['extra']['wordpress-install-dir'] . '/');
+        define('WP_PATH', json_decode(file_get_contents($this->app->basePath().DIRECTORY_SEPARATOR.'composer.json'),
+            true)['extra']['wordpress-install-dir'].'/');
 
         $this->setConfig();
 
@@ -51,12 +52,12 @@ class WordPressServiceProvider extends ServiceProvider
         $table_prefix = 'wp_';
         $this->setDatabaseConstants($table_prefix);
 
-        if (!(defined('WP_CLI') && WP_CLI)) {
-            require_once ABSPATH . 'wp-settings.php';
+        if (! (defined('WP_CLI') && WP_CLI)) {
+            require_once ABSPATH.'wp-settings.php';
         }
 
         // Set up the WordPress query.
-        if (!app()->runningInConsole() && !wp_installing()) {
+        if (! app()->runningInConsole() && ! wp_installing()) {
             wp();
         }
 
@@ -66,7 +67,7 @@ class WordPressServiceProvider extends ServiceProvider
             $this->triggerHooks();
         }
 
-        if (!$this->app->runningInConsole()
+        if (! $this->app->runningInConsole()
             && (defined('WP_ADMIN') || str_contains(Request::server('SCRIPT_NAME'), strrchr(wp_login_url(), '/')))) {
             // disable query caching when in WordPress admin
             config(['wordpress.caching' => 0]);
@@ -76,7 +77,8 @@ class WordPressServiceProvider extends ServiceProvider
     /**
      * Forces the URL scheme to HTTPS if it is not already.
      */
-    protected function maybeForceUrlScheme() {
+    protected function maybeForceUrlScheme()
+    {
         if (is_secured()) {
             URL::forceScheme('https');
         }
@@ -115,21 +117,18 @@ class WordPressServiceProvider extends ServiceProvider
 
     /**
      * Translate the given items using the specified keys.
-     *
-     * @param array $items
-     * @param array $keys
-     * @return array
      */
-    protected function maybeTranslate($items, $keys = [])
+    protected function maybeTranslate(array $items, array $keys = []): array
     {
         return collect($items)->map(function ($item) use ($keys) {
             if (is_string($item)) {
-                return __('wordpress.' . $item);
+                return __('wordpress.'.$item);
             } else {
                 return collect($item)->map(function ($value, $key) use ($keys) {
                     if (in_array($key, $keys)) {
-                        return __('wordpress.' . $value);
+                        return __('wordpress.'.$value);
                     }
+
                     return $value;
                 })->all();
             }
@@ -161,11 +160,11 @@ class WordPressServiceProvider extends ServiceProvider
         if ($scheme === 'relative') {
             $url = WordPress::site()->path;
         } else {
-            $url = set_url_scheme((is_secured() ? 'https://' : 'http://') . WordPress::site()->domain . WordPress::site()->path, $scheme);
+            $url = set_url_scheme((is_secured() ? 'https://' : 'http://').WordPress::site()->domain.WordPress::site()->path, $scheme);
         }
 
         if ($path && is_string($path)) {
-            $url .= str_replace('public/', '', WP_PATH) . ltrim($path, '/');
+            $url .= str_replace('public/', '', WP_PATH).ltrim($path, '/');
         }
 
         return $url;
@@ -238,7 +237,7 @@ class WordPressServiceProvider extends ServiceProvider
     /**
      * Set all the database constants used by WordPress.
      *
-     * @param string $tablePrefix
+     * @param  string  $tablePrefix
      */
     private function setDatabaseConstants($tablePrefix)
     {
@@ -275,15 +274,15 @@ class WordPressServiceProvider extends ServiceProvider
      */
     private function setLocationConstants()
     {
-        if (!defined('ABSPATH')) {
-            define('ABSPATH', $this->app->basePath() . DIRECTORY_SEPARATOR . WP_PATH);
+        if (! defined('ABSPATH')) {
+            define('ABSPATH', $this->app->basePath().DIRECTORY_SEPARATOR.WP_PATH);
         }
 
         define('WP_SITEURL', url(str_replace('public/', '', WP_PATH)));
 
         define('WP_HOME', url('/'));
 
-        define('WP_CONTENT_DIR', $this->app->basePath() . DIRECTORY_SEPARATOR . 'public/content');
+        define('WP_CONTENT_DIR', $this->app->basePath().DIRECTORY_SEPARATOR.'public/content');
         define('WP_CONTENT_URL', url('content'));
     }
 

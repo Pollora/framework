@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'auth_key' => env('AUTH_KEY'),
     'secure_auth_key' => env('SECURE_AUTH_KEY'),

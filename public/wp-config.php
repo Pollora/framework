@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // wp-config file to make the wordpress backend aware of our presence
 
 /*

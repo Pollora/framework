@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Foundation\Support;
 
 use Symfony\Component\Finder\Finder;

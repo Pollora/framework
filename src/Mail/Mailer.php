@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
-use Pollen\Support\Facades\Filter;
 
 if (! function_exists('wp_mail')) {
     /**
@@ -18,7 +19,6 @@ if (! function_exists('wp_mail')) {
     function wp_mail($to, $subject, $message, $headers = '', $attachments = [])
     {
         $values = apply_filters('wp_mail', [$to, $subject, $message, $headers, $attachments]);
-
 
         [$to, $subject, $headers, $attachments] = array_values($values);
 

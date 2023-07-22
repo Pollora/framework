@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Lang;
 use Pollen\Models\Meta;
 use Pollen\Models\Post;
 use Pollen\Support\RecursiveMenuIterator;
-use Illuminate\Support\Facades\Lang;
-
 
 if (! function_exists('__')) {
     /**
@@ -17,7 +18,7 @@ if (! function_exists('__')) {
      */
     function __($key, $replace = [], $locale = null)
     {
-        if (!$locale) {
+        if (! $locale) {
             $locale = get_locale();
         }
         if (is_array($replace) && Lang::has($key, $locale)) {
@@ -115,6 +116,6 @@ if (! function_exists('menu')) {
 if (! function_exists('is_secured')) {
     function is_secured()
     {
-        return str_contains('http://', config('url'));
+        return str_contains('http://', config('app.url'));
     }
 }

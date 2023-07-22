@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'post-formats' => [],
     'post-thumbnails' => ['post'],

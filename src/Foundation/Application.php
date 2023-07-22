@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Foundation;
 
+use Application\Hooks\HooksRepository;
 use Illuminate\Events\EventServiceProvider;
 use Illuminate\Log\LogServiceProvider;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\URL;
 use Pollen\Route\RouteServiceProvider;
-use Application\Hooks\HooksRepository;
 
 class Application extends \Illuminate\Foundation\Application
 {
-
     public function registerBaseServiceProviders()
     {
         $this->register(new EventServiceProvider($this));

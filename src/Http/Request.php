@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Http;
 
 use Illuminate\Http\Request as BaseRequest;
