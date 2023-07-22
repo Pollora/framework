@@ -32,9 +32,6 @@ abstract class Hook implements IHook
      */
     public function __construct(Application $container)
     {
-        if (! function_exists('add_filter')) {
-            require_once ABSPATH.'/wp-includes/plugin.php';
-        }
         $this->container = $container;
     }
 

@@ -7,6 +7,7 @@ namespace Pollen\Providers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Pollen\Services\Translater;
 use Pollen\Support\Facades\Action;
 use Pollen\Support\WordPress;
 use Request;
@@ -34,9 +35,25 @@ class WordPressServiceProvider extends ServiceProvider
 
         $this->setConfig();
 
+        $this->ensureAddFilterExists();
+
         Action::add('after_setup_theme', [$this, 'addThemeSupport']);
         Action::add('widgets_init', [$this, 'registerSidebars']);
         Action::add('after_setup_theme', [$this, 'registerNavMenus']);
+    }
+
+    /**
+     * Method for requiring the 'plugin.php' file if add_filter function doesn't exist.
+     *
+     * @return void
+     */
+    protected function ensureAddFilterExists(): void
+    {
+        if (function_exists('add_filter')) {
+            return;
+        }
+
+        require_once ABSPATH.'/wp-includes/plugin.php';
     }
 
     /**
@@ -98,53 +115,6 @@ class WordPressServiceProvider extends ServiceProvider
                 add_theme_support($value);
             }
         });
-    }
-
-    /**
-     * Register all of the site's theme sidebars.
-     *
-     * @return void
-     */
-    public function registerSidebars()
-    {
-        $sidebars = config('theme.sidebars');
-        $sidebars = $this->maybeTranslate($sidebars, ['name', 'description']);
-
-        collect($sidebars)->each(function ($value) {
-            register_sidebar($value);
-        });
-    }
-
-    /**
-     * Translate the given items using the specified keys.
-     */
-    protected function maybeTranslate(array $items, array $keys = []): array
-    {
-        return collect($items)->map(function ($item) use ($keys) {
-            if (is_string($item)) {
-                return __('wordpress.'.$item);
-            } else {
-                return collect($item)->map(function ($value, $key) use ($keys) {
-                    if (in_array($key, $keys)) {
-                        return __('wordpress.'.$value);
-                    }
-
-                    return $value;
-                })->all();
-            }
-        })->all();
-    }
-
-    /**
-     * Register all of the site's theme menus.
-     *
-     * @return void
-     */
-    public function registerNavMenus()
-    {
-        $menus = config('theme.menus');
-        $menus = $this->maybeTranslate($menus);
-        register_nav_menus($menus);
     }
 
     /**
@@ -214,24 +184,6 @@ class WordPressServiceProvider extends ServiceProvider
 
         // register custom post types defined in post-types
         $this->registerPostTypes();
-    }
-
-    /**
-     * Register all the site's custom post types with WordPress.
-     *
-     * @return void
-     */
-    public function registerPostTypes()
-    {
-        collect(config('post-types'))->each(function ($item, $key) {
-            $names = isset($item['names']) ? $this->maybeTranslate($item['names']) : [];
-
-            if (isset($item['labels'])) {
-                $item['labels'] = $this->maybeTranslate($item['labels']);
-            }
-            unset($item['names']);
-            register_extended_post_type($key, $item, $names);
-        });
     }
 
     /**
@@ -307,5 +259,68 @@ class WordPressServiceProvider extends ServiceProvider
                 define('BLOG_ID_CURRENT_SITE', config('wordpress.blog_id_current_site'));
             }
         }
+    }
+
+
+    /**
+     * Register all of the site's theme sidebars.
+     *
+     * @return void
+     */
+    public function registerSidebars()
+    {
+        $sidebars = config('theme.sidebars');
+        $translater = new Translater($sidebars, 'sidebars');
+        $sidebars = $translater->translate(['*.name', '*.description']);
+
+        collect($sidebars)->each(function ($value) {
+            register_sidebar($value);
+        });
+    }
+
+    /**
+     * Register all of the site's theme menus.
+     *
+     * @return void
+     */
+    public function registerNavMenus()
+    {
+        $menus = config('theme.menus');
+        $translater = new Translater($menus, 'menus');
+        $menus = $translater->translate(['*']);
+
+        register_nav_menus($menus);
+    }
+
+    /**
+     * Register all the site's custom post types with WordPress.
+     *
+     * @return void
+     */
+    public function registerPostTypes()
+    {
+        // Get the post types from the config.
+        $postTypes = config('post-types');
+
+        $translater = new Translater($postTypes, 'post-types');
+        $postTypes = $translater->translate([
+            '*.label',
+            '*.labels.*',
+            '*.names.singular',
+            '*.names.plural',
+        ]);
+
+        // Iterate over each post type.
+        collect($postTypes)->each(function ($item, $key) {
+
+            // Check if names are set, if not keep it as an empty array
+            $names = $item['names'] ?? [];
+
+            // Unset names from item
+            unset($item['names']);
+
+            // Register the extended post type.
+            register_extended_post_type($key, $item, $names);
+        });
     }
 }
