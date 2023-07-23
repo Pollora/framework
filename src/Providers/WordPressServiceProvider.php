@@ -66,8 +66,11 @@ class WordPressServiceProvider extends ServiceProvider
     public function boot()
     {
         // WordPress requires $table_prefix rather than another constant.
-        $table_prefix = 'wp_';
-        $this->setDatabaseConstants($table_prefix);
+
+        $db = DB::getConfig(null);
+
+        $table_prefix = $db['prefix'];
+        $this->setDatabaseConstants($db);
 
         if (! (defined('WP_CLI') && WP_CLI)) {
             require_once ABSPATH.'wp-settings.php';
@@ -181,10 +184,6 @@ class WordPressServiceProvider extends ServiceProvider
 
         // hacky fix to get network admin working
         Action::add('network_site_url', [$this, 'rewriteNetworkUrl'], 10, 3);
-
-        // register custom post types defined in post-types
-        $this->registerPostTypes();
-        $this->registerTaxonomies();
     }
 
     /**
@@ -192,17 +191,15 @@ class WordPressServiceProvider extends ServiceProvider
      *
      * @param  string  $tablePrefix
      */
-    private function setDatabaseConstants($tablePrefix)
+    private function setDatabaseConstants(array $db)
     {
-        $db = DB::getConfig(null);
-
         define('DB_NAME', $db['database']);
         define('DB_USER', $db['username']);
         define('DB_PASSWORD', $db['password']);
         define('DB_HOST', $db['host']);
         define('DB_CHARSET', $db['charset']);
         define('DB_COLLATE', $db['collation']);
-        define('DB_PREFIX', $tablePrefix);
+        define('DB_PREFIX', $db['prefix']);
     }
 
     /**
@@ -291,75 +288,5 @@ class WordPressServiceProvider extends ServiceProvider
         $menus = $translater->translate(['*']);
 
         register_nav_menus($menus);
-    }
-
-
-    /**
-     * Register all the site's taxonomies
-     *
-     * @return void
-     */
-    public function registerTaxonomies()
-    {
-        // Get the post types from the config.
-        $taxonomies = config('taxonomies');
-
-        $translater = new Translater($taxonomies, 'taxonomies');
-        $taxonomies = $translater->translate([
-            '*.labels.*',
-            '*.names.singular',
-            '*.names.plural',
-        ]);
-
-        // Iterate over each post type.
-        collect($taxonomies)->each(function ($args, $key) {
-
-            // Check if names are set, if not keep it as an empty array
-            $links = $args['links'] ?? [];
-
-            // Unset names from item
-            unset($args['links']);
-
-            // Check if names are set, if not keep it as an empty array
-            $names = $args['names'] ?? [];
-
-            // Unset names from item
-            unset($args['names']);
-
-            // Register the extended post type.
-            register_extended_taxonomy($key, $links, $args, $names);
-        });
-    }
-
-    /**
-     * Register all the site's custom post types
-     *
-     * @return void
-     */
-    public function registerPostTypes()
-    {
-        // Get the post types from the config.
-        $postTypes = config('post-types');
-
-        $translater = new Translater($postTypes, 'post-types');
-        $postTypes = $translater->translate([
-            '*.label',
-            '*.labels.*',
-            '*.names.singular',
-            '*.names.plural',
-        ]);
-
-        // Iterate over each post type.
-        collect($postTypes)->each(function ($item, $key) {
-
-            // Check if names are set, if not keep it as an empty array
-            $names = $item['names'] ?? [];
-
-            // Unset names from item
-            unset($item['names']);
-
-            // Register the extended post type.
-            register_extended_post_type($key, $item, $names);
-        });
     }
 }
