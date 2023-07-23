@@ -2,16 +2,20 @@
 
 declare(strict_types=1);
 
+/**
+ * Class PostTypeServiceProvider
+ * @package Pollen\Providers
+ */
 namespace Pollen\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Services\Translater;
 use Pollen\Support\Facades\Action;
+use Pollen\Services\Translater;
 
 /**
- * Lets Laravel know about the configuration files we have to publish.
+ * Class PostTypeServiceProvider
  *
- * @author Jordan Doyle <jordan@doyle.wf>
+ * A service provider for registering custom post types.
  */
 class PostTypeServiceProvider extends ServiceProvider
 {

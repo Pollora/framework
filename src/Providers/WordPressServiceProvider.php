@@ -36,10 +36,6 @@ class WordPressServiceProvider extends ServiceProvider
         $this->setConfig();
 
         $this->ensureAddFilterExists();
-
-        Action::add('after_setup_theme', [$this, 'addThemeSupport']);
-        Action::add('widgets_init', [$this, 'registerSidebars']);
-        Action::add('after_setup_theme', [$this, 'registerNavMenus']);
     }
 
     /**
@@ -102,22 +98,6 @@ class WordPressServiceProvider extends ServiceProvider
         if (is_secured()) {
             URL::forceScheme('https');
         }
-    }
-
-    /**
-     * Register all of the site's theme support.
-     *
-     * @return void
-     */
-    public function addThemeSupport()
-    {
-        collect(config('theme.supports'))->each(function ($value, $key) {
-            if (is_string($key)) {
-                add_theme_support($key, $value);
-            } else {
-                add_theme_support($value);
-            }
-        });
     }
 
     /**
@@ -257,36 +237,5 @@ class WordPressServiceProvider extends ServiceProvider
                 define('BLOG_ID_CURRENT_SITE', config('wordpress.blog_id_current_site'));
             }
         }
-    }
-
-
-    /**
-     * Register all of the site's theme sidebars.
-     *
-     * @return void
-     */
-    public function registerSidebars()
-    {
-        $sidebars = config('theme.sidebars');
-        $translater = new Translater($sidebars, 'sidebars');
-        $sidebars = $translater->translate(['*.name', '*.description']);
-
-        collect($sidebars)->each(function ($value) {
-            register_sidebar($value);
-        });
-    }
-
-    /**
-     * Register all of the site's theme menus.
-     *
-     * @return void
-     */
-    public function registerNavMenus()
-    {
-        $menus = config('theme.menus');
-        $translater = new Translater($menus, 'menus');
-        $menus = $translater->translate(['*']);
-
-        register_nav_menus($menus);
     }
 }

@@ -2,12 +2,23 @@
 
 declare(strict_types=1);
 
+/**
+ * Class TaxonomyServiceProvider
+ *
+ * @package Pollen\Providers
+ */
+
 namespace Pollen\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Pollen\Services\Translater;
-use Pollen\Support\Facades\Action;
+ use Illuminate\Support\ServiceProvider;
+ use Pollen\Support\Facades\Action;
+ use Pollen\Services\Translater;
 
+/**
+ * Class TaxonomyServiceProvider
+ *
+ * Responsible for registering all the site's taxonomies.
+ */
 class TaxonomyServiceProvider extends ServiceProvider
 {
     public function register()

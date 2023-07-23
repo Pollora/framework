@@ -33,6 +33,9 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(WordPressServiceProvider::class);
         $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(TaxonomyServiceProvider::class);
+        $this->app->register(ThemeSupportServiceProvider::class);
+        $this->app->register(MenuServiceProvider::class);
+        $this->app->register(SidebarServiceProvider::class);
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
 
