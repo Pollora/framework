@@ -41,7 +41,10 @@ class PostTypeServiceProvider extends ServiceProvider
         // Iterate over each post type.
         collect($postTypes)->each(function ($args, $key) {
             // Register the extended post type.
-            PostType::make($key)->setArgs($args)->setNames($args['names'] ?? []);
+            $singular = $args['names']['singular'] ?? null;
+            $plural = $args['names']['plural'] ?? null;
+            $slug = $args['names']['slug'] ?? null;
+            PostType::make($key, $singular, $plural)->setSlug($slug)->setArgs($args);
         });
     }
 }
