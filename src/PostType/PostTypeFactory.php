@@ -12,8 +12,8 @@ namespace Pollen\PostType;
 
 class PostTypeFactory
 {
-    public function make(string $slug, array $names = [])
+    public function make(string $slug, string|null $singular, string|null $plural)
     {
-        return new PostType($slug, $names);
+        return new PostType($slug, $singular, $plural);
     }
 }

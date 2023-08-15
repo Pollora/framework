@@ -500,7 +500,6 @@ class PostType
     public function setArgs(array $args): PostType
     {
         $this->args = $args;
-
         return $this;
     }
 
@@ -514,31 +513,27 @@ class PostType
         return $this->label;
     }
 
-    public function setSingular(string $singular): PostType
+    public function setSingular(string|null $singular): PostType
     {
         $this->names['singular'] = $singular;
-
         return $this;
     }
 
-    public function setPlural(string $plural): PostType
+    public function setPlural(string|null $plural): PostType
     {
         $this->names['plural'] = $plural;
-
         return $this;
     }
 
-    public function setSlug(string $slug): PostType
+    public function setSlug(string|null $slug): PostType
     {
         $this->names['slug'] = $slug;
-
         return $this;
     }
 
     public function setNames(array $names): PostType
     {
         $this->names = $names;
-
         return $this;
     }
 
@@ -550,7 +545,6 @@ class PostType
     public function setLabel(string $label): PostType
     {
         $this->label = $label;
-
         return $this;
     }
 
@@ -562,7 +556,6 @@ class PostType
     public function setLabels(stdClass $labels): PostType
     {
         $this->labels = $labels;
-
         return $this;
     }
 
@@ -574,7 +567,6 @@ class PostType
     public function setDescription(string $description): PostType
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -586,7 +578,6 @@ class PostType
     public function setPublic(bool $public): PostType
     {
         $this->public = $public;
-
         return $this;
     }
 
@@ -598,7 +589,6 @@ class PostType
     public function setHierarchical(bool $hierarchical): PostType
     {
         $this->hierarchical = $hierarchical;
-
         return $this;
     }
 
@@ -610,7 +600,6 @@ class PostType
     public function setExcludeFromSearch(?bool $excludeFromSearch): PostType
     {
         $this->excludeFromSearch = $excludeFromSearch;
-
         return $this;
     }
 
@@ -622,7 +611,6 @@ class PostType
     public function setPubliclyQueryable(?bool $publiclyQueryable): PostType
     {
         $this->publiclyQueryable = $publiclyQueryable;
-
         return $this;
     }
 
@@ -634,7 +622,6 @@ class PostType
     public function setShowUi(?bool $showUi): PostType
     {
         $this->showUi = $showUi;
-
         return $this;
     }
 
@@ -646,7 +633,6 @@ class PostType
     public function setShowInMenu(bool|string|null $showInMenu): PostType
     {
         $this->showInMenu = $showInMenu;
-
         return $this;
     }
 
@@ -658,7 +644,6 @@ class PostType
     public function setShowInNavMenus(?bool $showInNavMenus): PostType
     {
         $this->showInNavMenus = $showInNavMenus;
-
         return $this;
     }
 
@@ -670,7 +655,6 @@ class PostType
     public function setShowInAdminBar(?bool $showInAdmin_bar): PostType
     {
         $this->showInAdmin_bar = $showInAdmin_bar;
-
         return $this;
     }
 
@@ -682,7 +666,6 @@ class PostType
     public function setMenuPosition(?int $menuPosition): PostType
     {
         $this->menuPosition = $menuPosition;
-
         return $this;
     }
 
@@ -694,7 +677,6 @@ class PostType
     public function setMenuIcon(?string $menuIcon): PostType
     {
         $this->menuIcon = $menuIcon;
-
         return $this;
     }
 
@@ -706,7 +688,6 @@ class PostType
     public function setCapabilityType(string $capabilityType): PostType
     {
         $this->capabilityType = $capabilityType;
-
         return $this;
     }
 
@@ -718,7 +699,6 @@ class PostType
     public function setMapMetaCap(bool $mapMetaCap): PostType
     {
         $this->mapMetaCap = $mapMetaCap;
-
         return $this;
     }
 
@@ -730,7 +710,6 @@ class PostType
     public function setRegisterMetaBoxCb(?callable $registerMetaBoxCb): PostType
     {
         $this->registerMetaBoxCb = $registerMetaBoxCb;
-
         return $this;
     }
 
@@ -742,7 +721,6 @@ class PostType
     public function setTaxonomies(array $taxonomies): PostType
     {
         $this->taxonomies = $taxonomies;
-
         return $this;
     }
 
@@ -754,7 +732,6 @@ class PostType
     public function setHasArchive(bool|string $hasArchive): PostType
     {
         $this->hasArchive = $hasArchive;
-
         return $this;
     }
 
@@ -766,7 +743,6 @@ class PostType
     public function setQueryVar(bool|string $queryVar): PostType
     {
         $this->queryVar = $queryVar;
-
         return $this;
     }
 
@@ -778,7 +754,6 @@ class PostType
     public function setCanExport(bool $canExport): PostType
     {
         $this->canExport = $canExport;
-
         return $this;
     }
 
@@ -790,7 +765,6 @@ class PostType
     public function setDeleteWithUser(?bool $deleteWithUser): PostType
     {
         $this->deleteWithUser = $deleteWithUser;
-
         return $this;
     }
 
@@ -802,7 +776,6 @@ class PostType
     public function setTemplate(array $template): PostType
     {
         $this->template = $template;
-
         return $this;
     }
 
@@ -814,7 +787,6 @@ class PostType
     public function setTemplateLock(bool|string $templateLock): PostType
     {
         $this->templateLock = $templateLock;
-
         return $this;
     }
 
@@ -826,7 +798,6 @@ class PostType
     public function setBuiltin(bool $builtin): PostType
     {
         $this->_builtin = $builtin;
-
         return $this;
     }
 
@@ -838,7 +809,6 @@ class PostType
     public function setEditLink(string $editLink): PostType
     {
         $this->_editLink = $editLink;
-
         return $this;
     }
 
@@ -850,7 +820,6 @@ class PostType
     public function setCap(stdClass $cap): PostType
     {
         $this->cap = $cap;
-
         return $this;
     }
 
@@ -862,7 +831,6 @@ class PostType
     public function setRewrite(bool|array $rewrite): PostType
     {
         $this->rewrite = $rewrite;
-
         return $this;
     }
 
@@ -874,7 +842,6 @@ class PostType
     public function setSupports(bool|array $supports): PostType
     {
         $this->supports = $supports;
-
         return $this;
     }
 
@@ -886,7 +853,6 @@ class PostType
     public function setShowInRest(bool $showInRest): PostType
     {
         $this->showInRest = $showInRest;
-
         return $this;
     }
 
@@ -898,7 +864,6 @@ class PostType
     public function setRestBase(bool|string $restBase): PostType
     {
         $this->restBase = $restBase;
-
         return $this;
     }
 
@@ -910,7 +875,6 @@ class PostType
     public function setRestNamespace(bool|string $restNamespace): PostType
     {
         $this->restNamespace = $restNamespace;
-
         return $this;
     }
 
@@ -922,7 +886,6 @@ class PostType
     public function setRestControllerClass(bool|string $restControllerClass): PostType
     {
         $this->restControllerClass = $restControllerClass;
-
         return $this;
     }
 
@@ -934,7 +897,6 @@ class PostType
     public function setRestController(WP_REST_Controller $restController): PostType
     {
         $this->restController = $restController;
-
         return $this;
     }
 
@@ -946,7 +908,6 @@ class PostType
     public function setAdminCols(array $adminCols): PostType
     {
         $this->adminCols = $adminCols;
-
         return $this;
     }
 
@@ -958,7 +919,6 @@ class PostType
     public function setAdminFilters(array $adminFilters): PostType
     {
         $this->adminFilters = $adminFilters;
-
         return $this;
     }
 
@@ -970,7 +930,6 @@ class PostType
     public function setArchive(array $archive): PostType
     {
         $this->archive = $archive;
-
         return $this;
     }
 
@@ -982,7 +941,6 @@ class PostType
     public function setBlockEditor(bool $blockEditor): PostType
     {
         $this->blockEditor = $blockEditor;
-
         return $this;
     }
 
@@ -994,7 +952,6 @@ class PostType
     public function setDashboardGlance(bool $dashboardGlance): PostType
     {
         $this->dashboardGlance = $dashboardGlance;
-
         return $this;
     }
 
@@ -1006,7 +963,6 @@ class PostType
     public function setDashboardActivity(bool $dashboardActivity): PostType
     {
         $this->dashboardActivity = $dashboardActivity;
-
         return $this;
     }
 
@@ -1018,7 +974,6 @@ class PostType
     public function setEnterTitleHere(string $enterTitleHere): PostType
     {
         $this->enterTitleHere = $enterTitleHere;
-
         return $this;
     }
 
@@ -1030,7 +985,6 @@ class PostType
     public function setFeaturedImage(string $featuredImage): PostType
     {
         $this->featuredImage = $featuredImage;
-
         return $this;
     }
 
@@ -1042,7 +996,6 @@ class PostType
     public function setQuickEdit(bool $quickEdit): PostType
     {
         $this->quickEdit = $quickEdit;
-
         return $this;
     }
 
@@ -1054,7 +1007,6 @@ class PostType
     public function setShowInFeed(bool $showInFeed): PostType
     {
         $this->showInFeed = $showInFeed;
-
         return $this;
     }
 
@@ -1066,7 +1018,6 @@ class PostType
     public function setSiteFilters(array $siteFilters): PostType
     {
         $this->siteFilters = $siteFilters;
-
         return $this;
     }
 
@@ -1078,14 +1029,17 @@ class PostType
     public function setSiteSortables(array $siteSortables): PostType
     {
         $this->siteSortables = $siteSortables;
-
         return $this;
     }
 
     public function __construct(
         public string $slug,
-        public array $names = [])
+        string $singular = null,
+        string $plural = null
+    )
     {
+        $this->setSingular($singular);
+        $this->setPlural($plural);
     }
 
     public function __destruct()
