@@ -10,6 +10,7 @@ use Pollen\Hashing\HashServiceProvider;
 use Pollen\Http\Request;
 use Pollen\Mail\WordPressMailServiceProvider;
 use Pollen\PostType\PostTypeServiceProvider;
+use Pollen\Taxonomy\TaxonomyServiceProvider;
 
 /**
  * Registers all the other service providers used by this package.
@@ -32,8 +33,8 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);
-        $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(TaxonomyServiceProvider::class);
+        $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(ThemeSupportServiceProvider::class);
         $this->app->register(MenuServiceProvider::class);
         $this->app->register(SidebarServiceProvider::class);
