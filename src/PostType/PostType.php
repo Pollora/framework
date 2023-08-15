@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\PostType;
 
-use Pollen\Services\Translater;
 use Pollen\Support\ExtendedCpt;
+use Pollen\Support\Facades\Action;
 use Pollen\Support\WordPressArgumentHelper;
 
 class PostType
@@ -23,7 +23,18 @@ class PostType
      *
      * @var bool
      */
-    public $excludeFromSearch = null;
+    public $excludeFromSearch;
+
+    /**
+     * Whether the post type is hierarchical (e.g. page).
+     *
+     * Default false.
+     *
+     * @since 4.6.0
+     *
+     * @var bool
+     */
+    public $hierarchical;
 
     /**
      * The position in the menu order the post type should appear.
@@ -34,7 +45,7 @@ class PostType
      *
      * @var int
      */
-    public $menuPosition = null;
+    public $menuPosition;
 
     /**
      * Makes this post type available via the admin bar.
@@ -45,7 +56,7 @@ class PostType
      *
      * @var bool
      */
-    public $showInAdminBar = null;
+    public $showInAdminBar;
 
     /**
      * The URL or reference to the icon to be used for this menu.
@@ -61,7 +72,7 @@ class PostType
      *
      * @var string
      */
-    public $menuIcon = null;
+    public $menuIcon;
 
     /**
      * The string to use to build the read, edit, and delete capabilities.
@@ -74,7 +85,7 @@ class PostType
      *
      * @var string
      */
-    public $capabilityType = 'post';
+    public $capabilityType;
 
     /**
      * Whether to use the internal default meta capability handling.
@@ -85,7 +96,7 @@ class PostType
      *
      * @var bool
      */
-    public $mapMetaCap = false;
+    public $mapMetaCap;
 
     /**
      * Provide a callback function that sets up the meta boxes for the edit form.
@@ -96,7 +107,7 @@ class PostType
      *
      * @var callable
      */
-    public $registerMetaBoxCb = null;
+    public $registerMetaBoxCb;
 
     /**
      * An array of taxonomy identifiers that will be registered for the post type.
@@ -109,7 +120,7 @@ class PostType
      *
      * @var string[]
      */
-    public $taxonomies = [];
+    public $taxonomies;
 
     /**
      * Whether there should be post type archives, or if a string, the archive slug to use.
@@ -120,7 +131,7 @@ class PostType
      *
      * @var bool|string
      */
-    public $hasArchive = false;
+    public $hasArchive;
 
     /**
      * Whether to allow this post type to be exported.
@@ -131,7 +142,7 @@ class PostType
      *
      * @var bool
      */
-    public $canExport = true;
+    public $canExport;
 
     /**
      * Whether to delete posts of this type when deleting a user.
@@ -147,7 +158,7 @@ class PostType
      *
      * @var bool
      */
-    public $deleteWithUser = null;
+    public $deleteWithUser;
 
     /**
      * Array of blocks to use as the default initial state for an editor session.
@@ -161,7 +172,7 @@ class PostType
      *
      * @var array[]
      */
-    public $template = [];
+    public $template;
 
     /**
      * Whether the block template should be locked if $template is set.
@@ -178,29 +189,7 @@ class PostType
      *
      * @var string|false
      */
-    public $templateLock = false;
-
-    /**
-     * Whether this post type is a native or "built-in" post_type.
-     *
-     * Default false.
-     *
-     * @since 4.6.0
-     *
-     * @var bool
-     */
-    public $_builtin = false;
-
-    /**
-     * URL segment to use for edit link of this post type.
-     *
-     * Default 'post.php?post=%d'.
-     *
-     * @since 4.6.0
-     *
-     * @var string
-     */
-    public $_editLink = 'post.php?post=%d';
+    public $templateLock;
 
     /**
      * Post type capabilities.
@@ -210,17 +199,6 @@ class PostType
      * @var stdClass
      */
     public $cap;
-
-    /**
-     * Triggers the handling of rewrites for this post type.
-     *
-     * Defaults to true, using $post_type as slug.
-     *
-     * @since 4.6.0
-     *
-     * @var array|false
-     */
-    public $rewrite;
 
     /**
      * The features supported by the post type.
@@ -254,14 +232,6 @@ class PostType
      * `show_in_rest` is set to true.
      */
     public $blockEditor;
-
-    /**
-     * Whether to show this post type on the 'At a Glance' section of the admin
-     * dashboard.
-     *
-     * Default true.
-     */
-    public $dashboardGlance;
 
     /**
      * Whether to show this post type on the 'Recently Published' section of the
@@ -314,6 +284,13 @@ class PostType
         return $this->excludeFromSearch;
     }
 
+    public function excludeFromSearch(): self
+    {
+        $this->excludeFromSearch = true;
+
+        return $this;
+    }
+
     public function setExcludeFromSearch(?bool $excludeFromSearch): self
     {
         $this->excludeFromSearch = $excludeFromSearch;
@@ -321,9 +298,42 @@ class PostType
         return $this;
     }
 
+    public function isHierarchical(): ?bool
+    {
+        return $this->hierarchical;
+    }
+
+    public function hierarchical(): self
+    {
+        $this->hierarchical = true;
+
+        return $this;
+    }
+
+    public function chronological(): self
+    {
+        $this->hierarchical = false;
+
+        return $this;
+    }
+
+    public function setHierarchical(bool $hierarchical): self
+    {
+        $this->hierarchical = $hierarchical;
+
+        return $this;
+    }
+
     public function getShowInAdminBar(): ?bool
     {
         return $this->showInAdminBar;
+    }
+
+    public function showInAdminBar(): self
+    {
+        $this->showInAdminBar = true;
+
+        return $this;
     }
 
     public function setShowInAdminBar(?bool $showInAdminBar): self
@@ -357,7 +367,7 @@ class PostType
         return $this;
     }
 
-    public function getCapabilityType(): string
+    public function getCapabilityType(): ?string
     {
         return $this->capabilityType;
     }
@@ -369,9 +379,16 @@ class PostType
         return $this;
     }
 
-    public function isMapMetaCap(): bool
+    public function isMapMetaCap(): ?bool
     {
         return $this->mapMetaCap;
+    }
+
+    public function mapMetaCap(): self
+    {
+        $this->mapMetaCap = true;
+
+        return $this;
     }
 
     public function setMapMetaCap(bool $mapMetaCap): self
@@ -393,33 +410,40 @@ class PostType
         return $this;
     }
 
-    public function getTaxonomies(): array
+    public function getTaxonomies(): ?array
     {
         return $this->taxonomies;
     }
 
-    public function setTaxonomies(array $taxonomies): self
+    public function setTaxonomies(array $taxonomies): ?self
     {
         $this->taxonomies = $taxonomies;
 
         return $this;
     }
 
-    public function getHasArchive(): bool|string
+    public function getHasArchive(): bool|string|null
     {
         return $this->hasArchive;
     }
 
-    public function setHasArchive(bool|string $hasArchive): self
+    public function hasArchive(bool|string $hasArchive = true): self
     {
         $this->hasArchive = $hasArchive;
 
         return $this;
     }
 
-    public function getCanExport(): bool
+    public function getCanExport(): ?bool
     {
         return $this->canExport;
+    }
+
+    public function canExport(): self
+    {
+        $this->canExport = true;
+
+        return $this;
     }
 
     public function setCanExport(bool $canExport): self
@@ -434,6 +458,13 @@ class PostType
         return $this->deleteWithUser;
     }
 
+    public function deletedWithUser(): self
+    {
+        $this->deleteWithUser = true;
+
+        return $this;
+    }
+
     public function setDeleteWithUser(?bool $deleteWithUser): self
     {
         $this->deleteWithUser = $deleteWithUser;
@@ -441,7 +472,7 @@ class PostType
         return $this;
     }
 
-    public function getTemplate(): array
+    public function getTemplate(): ?array
     {
         return $this->template;
     }
@@ -453,7 +484,7 @@ class PostType
         return $this;
     }
 
-    public function getTemplateLock(): bool|string
+    public function getTemplateLock(): bool|string|null
     {
         return $this->templateLock;
     }
@@ -461,30 +492,6 @@ class PostType
     public function setTemplateLock(bool|string $templateLock): self
     {
         $this->templateLock = $templateLock;
-
-        return $this;
-    }
-
-    public function get_Builtin(): bool
-    {
-        return $this->_builtin;
-    }
-
-    public function setBuiltin(bool $builtin): self
-    {
-        $this->_builtin = $builtin;
-
-        return $this;
-    }
-
-    public function getEditLink(): string
-    {
-        return $this->_editLink;
-    }
-
-    public function setEditLink(string $editLink): self
-    {
-        $this->_editLink = $editLink;
 
         return $this;
     }
@@ -501,43 +508,31 @@ class PostType
         return $this;
     }
 
-    public function getRewrite(): bool|array|null
-    {
-        return $this->rewrite;
-    }
-
-    public function setRewrite(bool|array $rewrite): self
-    {
-        $this->rewrite = $rewrite;
-
-        return $this;
-    }
-
     public function getSupports(): bool|array|null
     {
         return $this->supports;
     }
 
-    public function setSupports(bool|array $supports): self
+    public function supports(bool|array $supports): self
     {
         $this->supports = $supports;
 
         return $this;
     }
 
-    public function getAdminFilters(): array|null
+    public function getAdminFilters(): ?array
     {
         return $this->adminFilters;
     }
 
-    public function setAdminFilters(array $adminFilters): self
+    public function adminFilters(array $adminFilters): self
     {
         $this->adminFilters = $adminFilters;
 
         return $this;
     }
 
-    public function getArchive(): array|null
+    public function getArchive(): ?array
     {
         return $this->archive;
     }
@@ -549,9 +544,16 @@ class PostType
         return $this;
     }
 
-    public function isBlockEditor(): bool
+    public function isBlockEditor(): ?bool
     {
         return $this->blockEditor;
+    }
+
+    public function enableBlockEditor(): self
+    {
+        $this->blockEditor = true;
+
+        return $this;
     }
 
     public function setBlockEditor(bool $blockEditor): self
@@ -561,21 +563,16 @@ class PostType
         return $this;
     }
 
-    public function isDashboardGlance(): bool
-    {
-        return $this->dashboardGlance;
-    }
-
-    public function setDashboardGlance(bool $dashboardGlance): self
-    {
-        $this->dashboardGlance = $dashboardGlance;
-
-        return $this;
-    }
-
-    public function isDashboardActivity(): bool
+    public function isDashboardActivity(): ?bool
     {
         return $this->dashboardActivity;
+    }
+
+    public function enableDashboardActivity(): self
+    {
+        $this->dashboardActivity = true;
+
+        return $this;
     }
 
     public function setDashboardActivity(bool $dashboardActivity): self
@@ -585,19 +582,19 @@ class PostType
         return $this;
     }
 
-    public function getEnterTitleHere(): string|null
+    public function getEnterTitleHere(): ?string
     {
         return $this->enterTitleHere;
     }
 
-    public function setEnterTitleHere(string $enterTitleHere): self
+    public function titlePlaceholder(string $enterTitleHere): self
     {
         $this->enterTitleHere = $enterTitleHere;
 
         return $this;
     }
 
-    public function getFeaturedImage(): string|null
+    public function getFeaturedImage(): ?string
     {
         return $this->featuredImage;
     }
@@ -609,7 +606,7 @@ class PostType
         return $this;
     }
 
-    public function isQuickEdit(): bool
+    public function isQuickEdit(): ?bool
     {
         return $this->quickEdit;
     }
@@ -621,7 +618,14 @@ class PostType
         return $this;
     }
 
-    public function isShowInFeed(): bool
+    public function enableQuickEdit(): self
+    {
+        $this->quickEdit = true;
+
+        return $this;
+    }
+
+    public function isShowInFeed(): ?bool
     {
         return $this->showInFeed;
     }
@@ -633,24 +637,31 @@ class PostType
         return $this;
     }
 
-    public function getSiteFilters(): array|null
+    public function showInFeed(): self
+    {
+        $this->showInFeed = true;
+
+        return $this;
+    }
+
+    public function getSiteFilters(): ?array
     {
         return $this->siteFilters;
     }
 
-    public function setSiteFilters(array $siteFilters): self
+    public function siteFilters(array $siteFilters): self
     {
         $this->siteFilters = $siteFilters;
 
         return $this;
     }
 
-    public function getSiteSortables(): array|null
+    public function getSiteSortables(): ?array
     {
         return $this->siteSortables;
     }
 
-    public function setSiteSortables(array $siteSortables): self
+    public function siteSortables(array $siteSortables): self
     {
         $this->siteSortables = $siteSortables;
 
@@ -664,27 +675,23 @@ class PostType
     ) {
         $this->setSingular($singular);
         $this->setPlural($plural);
+        $this->register();
     }
 
-    public function __destruct()
+    public function register()
     {
-        $args = $this->getRawArgs() ?? $this->extractArgumentFromProperties();
+        Action::add('init', function () {
 
-        $args['names'] = $this->getNames();
+            $args = $this->buildArguments();
+            $args = $this->translateArguments($args, 'post-types');
 
-        $translater = new Translater($args, 'post-types');
-        $args = $translater->translate([
-            'label',
-            'labels.*',
-            'names.singular',
-            'names.plural',
-        ]);
+            $names = $args['names'];
 
-        $names = $args['names'];
+            // Unset names from item
+            unset($args['names']);
 
-        // Unset names from item
-        unset($args['names']);
+            register_extended_post_type($this->slug, $args, $names);
+        }, 99);
 
-        register_extended_post_type($this->slug, $args, $names);
     }
 }

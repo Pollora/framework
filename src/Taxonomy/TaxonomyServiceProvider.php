@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Pollen\Taxonomy;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Support\Facades\Action;
 use Pollen\Support\Facades\Taxonomy;
 
 /**
@@ -21,11 +20,11 @@ class TaxonomyServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        Action::add('init', [$this, 'registerTaxonomies'], 1);
-
         $this->app->bind('taxonomy', function ($app) {
             return new TaxonomyFactory($app);
         });
+
+        $this->registerTaxonomies();
     }
 
     /**

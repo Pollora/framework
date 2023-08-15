@@ -40,7 +40,7 @@ trait ExtendedCpt
      *
      * @var string
      */
-    public $description = '';
+    public $description;
 
     /**
      * Whether a post type is intended for use publicly either via the admin interface or by front-end users.
@@ -54,27 +54,26 @@ trait ExtendedCpt
      *
      * @var bool
      */
-    public $public = false;
+    public $public;
 
     /**
-     * Whether the post type is hierarchical (e.g. page).
-     *
-     * Default false.
-     *
-     * @since 4.6.0
+     * Whether queries can be performed on the front end for the post type as part of `parse_request()` for post types or whether a taxonomy is intended for use publicly either via the admin interface or by front-end users
      *
      * @var bool
      */
-    public $hierarchical = false;
+    public $publiclyQueryable;
 
     /**
-     * Whether queries can be performed on the front end for the post type as part of `parse_request()`.
+     * Rewrites information for this post type or taxonomy.
      *
-     * Endpoints would include:
+     * @since 4.7.0
      *
-     * - `?post_type={post_type_key}`
-     * - `?{post_type_key}={single_post_slug}`
-     * - `?{post_type_query_var}={single_post_slug}`
+     * @var array|false
+     */
+    public $rewrite;
+
+    /**
+     * Whether to generate and allow a UI for managing this post type or taxonomy in the admin.
      *
      * Default is the value of $public.
      *
@@ -82,18 +81,7 @@ trait ExtendedCpt
      *
      * @var bool
      */
-    public $publiclyQueryable = null;
-
-    /**
-     * Whether to generate and allow a UI for managing this post type in the admin.
-     *
-     * Default is the value of $public.
-     *
-     * @since 4.6.0
-     *
-     * @var bool
-     */
-    public $showUi = null;
+    public $showUi;
 
     /**
      * Where to show the post type in the admin menu.
@@ -108,7 +96,7 @@ trait ExtendedCpt
      *
      * @var bool|string
      */
-    public $showInMenu = null;
+    public $showInMenu;
 
     /**
      * Makes this post type available for selection in navigation menus.
@@ -119,7 +107,7 @@ trait ExtendedCpt
      *
      * @var bool
      */
-    public $showInNavMenus = null;
+    public $showInNavMenus;
 
     /**
      * Sets the query_var key for this post type.
@@ -181,9 +169,16 @@ trait ExtendedCpt
      *
      * @since 5.3.0
      *
-     * @var WP_REST_Controller
+     * @var \WP_REST_Controller
      */
     public $restController;
+
+    /**
+     * Whether to show this post type or taxonomy on the 'At a Glance' section of the admin dashboard.
+     *
+     * Default false.
+     */
+    public $dashboardGlance;
 
     /**
      * Associative array of admin screen columns to show for this post type or taxonomy.
@@ -192,7 +187,14 @@ trait ExtendedCpt
      */
     public $adminCols;
 
-    public function getLabel(): string|null
+    /**
+     * Names of the post type or taxonomy.
+     *
+     * @var array
+     */
+    public $names;
+
+    public function getLabel(): ?string
     {
         return $this->label;
     }
@@ -204,7 +206,7 @@ trait ExtendedCpt
         return $this;
     }
 
-    public function getLabels(): stdClass|null
+    public function getLabels(): ?stdClass
     {
         return $this->labels;
     }
@@ -216,7 +218,7 @@ trait ExtendedCpt
         return $this;
     }
 
-    public function getDescription(): string|null
+    public function getDescription(): ?string
     {
         return $this->description;
     }
@@ -228,9 +230,23 @@ trait ExtendedCpt
         return $this;
     }
 
-    public function isPublic(): bool
+    public function isPublic(): ?bool
     {
         return $this->public;
+    }
+
+    public function public(): self
+    {
+        $this->public = true;
+
+        return $this;
+    }
+
+    public function private(): self
+    {
+        $this->public = false;
+
+        return $this;
     }
 
     public function setPublic(bool $public): self
@@ -240,21 +256,16 @@ trait ExtendedCpt
         return $this;
     }
 
-    public function isHierarchical(): bool
-    {
-        return $this->hierarchical;
-    }
-
-    public function setHierarchical(bool $hierarchical): self
-    {
-        $this->hierarchical = $hierarchical;
-
-        return $this;
-    }
-
     public function getPubliclyQueryable(): ?bool
     {
         return $this->publiclyQueryable;
+    }
+
+    public function publiclyQueryable(): self
+    {
+        $this->publiclyQueryable = true;
+
+        return $this;
     }
 
     public function setPubliclyQueryable(?bool $publiclyQueryable): self
@@ -269,6 +280,13 @@ trait ExtendedCpt
         return $this->showUi;
     }
 
+    public function showUi(): self
+    {
+        $this->showUi = true;
+
+        return $this;
+    }
+
     public function setShowUi(?bool $showUi): self
     {
         $this->showUi = $showUi;
@@ -276,12 +294,19 @@ trait ExtendedCpt
         return $this;
     }
 
-    public function getShowInMenu(): bool|string|null
+    public function isShowInMenu(): bool|string|null
     {
         return $this->showInMenu;
     }
 
-    public function setShowInMenu(bool|string|null $showInMenu): self
+    public function showInMenu()
+    {
+        $this->showInMenu = true;
+
+        return $this;
+    }
+
+    public function setShowInMenu(bool|string $showInMenu): self
     {
         $this->showInMenu = $showInMenu;
 
@@ -312,9 +337,28 @@ trait ExtendedCpt
         return $this;
     }
 
+    public function getRewrite(): bool|array|null
+    {
+        return $this->rewrite;
+    }
+
+    public function setRewrite(bool|array $rewrite): self
+    {
+        $this->rewrite = $rewrite;
+
+        return $this;
+    }
+
     public function getShowInRest(): bool|null
     {
         return $this->showInRest;
+    }
+
+    public function showInRest(): self
+    {
+        $this->showInRest = true;
+
+        return $this;
     }
 
     public function setShowInRest(bool $showInRest): self
@@ -360,12 +404,12 @@ trait ExtendedCpt
         return $this;
     }
 
-    public function getRestController(): WP_REST_Controller|null
+    public function getRestController(): \WP_REST_Controller|null
     {
         return $this->restController;
     }
 
-    public function setRestController(WP_REST_Controller $restController): self
+    public function setRestController(\WP_REST_Controller $restController): self
     {
         $this->restController = $restController;
 
@@ -403,6 +447,25 @@ trait ExtendedCpt
     public function getNames(): array
     {
         return $this->names ?? [];
+    }
+
+    public function isDashboardGlance(): bool|null
+    {
+        return $this->dashboardGlance;
+    }
+
+    public function enableDashboardGlance(): self
+    {
+        $this->dashboardGlance = true;
+
+        return $this;
+    }
+
+    public function setDashboardGlance(bool $dashboardGlance): self
+    {
+        $this->dashboardGlance = $dashboardGlance;
+
+        return $this;
     }
 
     public function getAdminCols(): array|null

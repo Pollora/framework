@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollen\Support;
 
 use Illuminate\Support\Str;
+use Pollen\Services\Translater;
 
 /**
  * The ArgumentHelper class is a trait that provides methods to extract arguments from properties using getter methods.
@@ -18,6 +19,12 @@ trait WordPressArgumentHelper
      */
     protected $rawArgs;
 
+    /**
+     * Set the raw arguments for the method.
+     *
+     * @param  array  $rawArgs The raw arguments to be set.
+     * @return self Returns the instance of the object for method chaining.
+     */
     public function setRawArgs(array $rawArgs): self
     {
         $this->rawArgs = $rawArgs;
@@ -25,9 +32,53 @@ trait WordPressArgumentHelper
         return $this;
     }
 
-    public function getRawArgs(): array|null
+    /**
+     * Get the raw arguments
+     *
+     * @return array|null The raw arguments, or null if not set
+     */
+    public function getRawArgs(): ?array
     {
         return $this->rawArgs;
+    }
+
+    /**
+     * Translate the arguments using the given entity and key to translate
+     *
+     * @param  array  $args The arguments to be translated (passed by reference)
+     * @param  string  $entity The entity used for translation
+     * @param  array  $keyToTranslate The keys to be translated (default: [
+     * 'label',
+     * 'labels.*',
+     * 'names.singular',
+     * 'names.plural',
+     * ])
+     * @return void
+     */
+    protected function translateArguments(array $args, string $entity, array $keyToTranslate = [
+        'label',
+        'labels.*',
+        'names.singular',
+        'names.plural',
+    ]): array
+    {
+        $translater = new Translater($args, $entity);
+
+        return $translater->translate($keyToTranslate);
+    }
+
+    /**
+     * Build the arguments array
+     *
+     * @return array The built arguments array
+     */
+    protected function buildArguments(): array
+    {
+        $args = $this->extractArgumentFromProperties();
+        $args = wp_parse_args($this->getRawArgs() ?? [], $args);
+        $args['names'] = $this->getNames();
+
+        return $args;
     }
 
     /**
@@ -40,7 +91,7 @@ trait WordPressArgumentHelper
         $allMethods = get_class_methods($this);
 
         return array_filter($allMethods, function ($method) {
-            return str_starts_with($method, 'get') && $method !== 'getRawArgs';
+            return (str_starts_with($method, 'get') || str_starts_with($method, 'is') || str_starts_with($method, 'has')) && $method !== 'getRawArgs';
         });
     }
 
@@ -51,9 +102,27 @@ trait WordPressArgumentHelper
      */
     private function makeArgName(string $getter): string
     {
-        $propertyName = substr($getter, 3);
+        $propertyName = $this->removeMethodPrefix($getter);
 
         return Str::snake($propertyName);
+    }
+
+    /**
+     * Remove the prefix of getter method name (e.g. get, is, has)
+     *
+     * @return string The property name without prefix
+     */
+    private function removeMethodPrefix(string $methodName): string
+    {
+        $prefixes = ['get', 'is', 'has'];
+
+        foreach ($prefixes as $prefix) {
+            if (str_starts_with($methodName, $prefix)) {
+                return substr($methodName, strlen($prefix));
+            }
+        }
+
+        return $methodName;
     }
 
     /**
@@ -71,7 +140,7 @@ trait WordPressArgumentHelper
             if ($argValue === null) {
                 continue;
             }
-            $args[$this->makeArgName($getter)] = $this->{$getter}();
+            $args[$this->makeArgName($getter)] = $argValue;
         }
 
         return $args;

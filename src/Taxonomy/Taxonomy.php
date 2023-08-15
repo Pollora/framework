@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\Taxonomy;
 
-use Pollen\Services\Translater;
 use Pollen\Support\ExtendedCpt;
+use Pollen\Support\Facades\Action;
 use Pollen\Support\WordPressArgumentHelper;
 
 class Taxonomy
@@ -20,7 +20,7 @@ class Taxonomy
      *
      * @var bool
      */
-    public $showTagcloud = true;
+    public $showTagcloud;
 
     /**
      * Whether to show the taxonomy in the quick/bulk edit panel.
@@ -29,7 +29,7 @@ class Taxonomy
      *
      * @var bool
      */
-    public $showInQuickEdit = true;
+    public $showInQuickEdit;
 
     /**
      * Whether to display a column for the taxonomy on its post type listing screens.
@@ -38,7 +38,7 @@ class Taxonomy
      *
      * @var bool
      */
-    public $showAdminColumn = false;
+    public $showAdminColumn;
 
     /**
      * The callback function for the meta box display.
@@ -47,7 +47,7 @@ class Taxonomy
      *
      * @var bool|callable
      */
-    public $metaBoxCb = null;
+    public $metaBoxCb;
 
     /**
      * The callback function for sanitizing taxonomy data saved from a meta box.
@@ -56,7 +56,7 @@ class Taxonomy
      *
      * @var callable
      */
-    public $metaBoxSanitizeCb = null;
+    public $metaBoxSanitizeCb;
 
     /**
      * Capabilities for this taxonomy.
@@ -66,24 +66,6 @@ class Taxonomy
      * @var stdClass
      */
     public $cap;
-
-    /**
-     * Rewrites information for this taxonomy.
-     *
-     * @since 4.7.0
-     *
-     * @var array|false
-     */
-    public $rewrite;
-
-    /**
-     * Query var string for this taxonomy.
-     *
-     * @since 4.7.0
-     *
-     * @var string|false
-     */
-    public $queryVar;
 
     /**
      * Function that will be called when the count is updated.
@@ -113,7 +95,7 @@ class Taxonomy
      *
      * @var bool|null
      */
-    public $sort = null;
+    public $sort;
 
     /**
      * Array of arguments to automatically use inside `wp_get_object_terms()` for this taxonomy.
@@ -122,30 +104,14 @@ class Taxonomy
      *
      * @var array|null
      */
-    public $args = null;
-
-    /**
-     * Whether it is a built-in taxonomy.
-     *
-     * @since 4.7.0
-     *
-     * @var bool
-     */
-    public $_builtin;
+    public $args;
 
     /**
      * This allows you to override WordPress' default behaviour if necessary.
      *
      * Default false if you're using a custom meta box (see the `$meta_box` argument), default true otherwise.
      */
-    public bool $checkedOntop;
-
-    /**
-     * Whether to show this taxonomy on the 'At a Glance' section of the admin dashboard.
-     *
-     * Default false.
-     */
-    public bool $dashboardGlance;
+    public $checkedOntop;
 
     /**
      * This parameter isn't feature complete. All it does currently is set the meta box
@@ -157,18 +123,25 @@ class Taxonomy
      * complete because you can edit a post in Quick Edit and give it more than one term
      * from the taxonomy.
      */
-    public bool $exclusive;
+    public $exclusive;
 
     /**
      * All this does currently is disable hierarchy in the taxonomy's rewrite rules.
      *
      * Default false.
      */
-    public bool $allowHierarchy;
+    public $allowHierarchy;
 
-    public function isShowTagcloud(): bool
+    public function isShowTagcloud(): ?bool
     {
         return $this->showTagcloud;
+    }
+
+    public function showTagcloud(): Taxonomy
+    {
+        $this->showTagcloud = true;
+
+        return $this;
     }
 
     public function setShowTagcloud(bool $showTagcloud): Taxonomy
@@ -178,9 +151,16 @@ class Taxonomy
         return $this;
     }
 
-    public function isShowInQuickEdit(): bool
+    public function isShowInQuickEdit(): ?bool
     {
         return $this->showInQuickEdit;
+    }
+
+    public function showInQuickEdit(): Taxonomy
+    {
+        $this->showInQuickEdit = true;
+
+        return $this;
     }
 
     public function setShowInQuickEdit(bool $showInQuickEdit): Taxonomy
@@ -190,9 +170,16 @@ class Taxonomy
         return $this;
     }
 
-    public function isShowAdminColumn(): bool
+    public function isShowAdminColumn(): ?bool
     {
         return $this->showAdminColumn;
+    }
+
+    public function showAdminColumn(): Taxonomy
+    {
+        $this->showAdminColumn = true;
+
+        return $this;
     }
 
     public function setShowAdminColumn(bool $showAdminColumn): Taxonomy
@@ -226,7 +213,7 @@ class Taxonomy
         return $this;
     }
 
-    public function getCap(): stdClass
+    public function getCap(): ?stdClass
     {
         return $this->cap;
     }
@@ -238,31 +225,7 @@ class Taxonomy
         return $this;
     }
 
-    public function getRewrite(): bool|array
-    {
-        return $this->rewrite;
-    }
-
-    public function setRewrite(bool|array $rewrite): Taxonomy
-    {
-        $this->rewrite = $rewrite;
-
-        return $this;
-    }
-
-    public function getQueryVar(): bool|string
-    {
-        return $this->queryVar;
-    }
-
-    public function setQueryVar(bool|string $queryVar): Taxonomy
-    {
-        $this->queryVar = $queryVar;
-
-        return $this;
-    }
-
-    public function getUpdateCountCallback(): callable
+    public function getUpdateCountCallback(): ?callable
     {
         return $this->updateCountCallback;
     }
@@ -274,7 +237,7 @@ class Taxonomy
         return $this;
     }
 
-    public function getDefaultTerm(): array|string
+    public function getDefaultTerm(): array|string|null
     {
         return $this->defaultTerm;
     }
@@ -289,6 +252,13 @@ class Taxonomy
     public function getSort(): ?bool
     {
         return $this->sort;
+    }
+
+    public function sort(): Taxonomy
+    {
+        $this->sort = true;
+
+        return $this;
     }
 
     public function setSort(?bool $sort): Taxonomy
@@ -310,21 +280,16 @@ class Taxonomy
         return $this;
     }
 
-    public function isBuiltin(): bool
-    {
-        return $this->_builtin;
-    }
-
-    public function setBuiltin(bool $builtin): Taxonomy
-    {
-        $this->_builtin = $builtin;
-
-        return $this;
-    }
-
-    public function isCheckedOntop(): bool
+    public function isCheckedOntop(): ?bool
     {
         return $this->checkedOntop;
+    }
+
+    public function checkedOntop(): Taxonomy
+    {
+        $this->checkedOntop = true;
+
+        return $this;
     }
 
     public function setCheckedOntop(bool $checkedOntop): Taxonomy
@@ -334,21 +299,16 @@ class Taxonomy
         return $this;
     }
 
-    public function getDashboardGlance(): bool
-    {
-        return $this->dashboardGlance;
-    }
-
-    public function setDashboardGlance(bool $dashboardGlance): Taxonomy
-    {
-        $this->dashboardGlance = $dashboardGlance;
-
-        return $this;
-    }
-
-    public function getExclusive(): bool
+    public function isExclusive(): ?bool
     {
         return $this->exclusive;
+    }
+
+    public function exclusive(): Taxonomy
+    {
+        $this->exclusive = true;
+
+        return $this;
     }
 
     public function setExclusive(bool $exclusive): Taxonomy
@@ -358,9 +318,16 @@ class Taxonomy
         return $this;
     }
 
-    public function getAllowHierarchy(): bool
+    public function isAllowHierarchy(): ?bool
     {
         return $this->allowHierarchy;
+    }
+
+    public function allowHierarchy(): Taxonomy
+    {
+        $this->allowHierarchy = true;
+
+        return $this;
     }
 
     public function setAllowHierarchy(bool $allowHierarchy): Taxonomy
@@ -378,30 +345,25 @@ class Taxonomy
     ) {
         $this->setSingular($singular);
         $this->setPlural($plural);
+        $this->register();
     }
 
-    public function __destruct()
+    public function register()
     {
-        $args = $this->getRawArgs() ?? $this->extractArgumentFromProperties();
+        Action::add('init', function () {
 
-        $args['names'] = $this->getNames();
+            $args = $this->buildArguments();
+            $args = $this->translateArguments($args, 'taxonomies');
 
-        $translater = new Translater($args, 'taxonomies');
-        $args = $translater->translate([
-            'label',
-            'labels.*',
-            'names.singular',
-            'names.plural',
-        ]);
+            $names = $args['names'];
 
-        $names = $args['names'];
+            // Unset names from item
+            unset($args['names']);
 
-        // Unset names from item
-        unset($args['names']);
+            // Unset links from item
+            unset($args['links']);
 
-        // Unset links from item
-        unset($args['links']);
-
-        register_extended_taxonomy($this->slug, $this->objectType, $args, $names);
+            register_extended_taxonomy($this->slug, $this->objectType, $args, $names);
+        }, 99);
     }
 }

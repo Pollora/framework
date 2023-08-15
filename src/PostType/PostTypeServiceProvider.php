@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Pollen\PostType;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Support\Facades\Action;
 use Pollen\Support\Facades\PostType;
 
 /**
@@ -21,11 +20,10 @@ class PostTypeServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        Action::add('init', [$this, 'registerPostTypes'], 1);
-
         $this->app->bind('posttype', function ($app) {
             return new PostTypeFactory($app);
         });
+        $this->registerPostTypes();
     }
 
     /**
