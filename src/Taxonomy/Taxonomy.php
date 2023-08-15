@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Pollen\Taxonomy;
 
-use Pollen\Support\ExtendedCpt;
-use Pollen\Support\Facades\Action;
 use Pollen\Support\WordPressArgumentHelper;
+use Pollen\Support\WordPressEntity;
 
-class Taxonomy
+class Taxonomy extends WordPressEntity
 {
     use WordPressArgumentHelper;
-    use ExtendedCpt;
+
+    /**
+     * The entity name, used for registration.
+     *
+     * @var string
+     */
+    protected $entity = 'taxonomies';
 
     /**
      * Whether to list the taxonomy in the tag cloud widget controls.
@@ -132,11 +137,21 @@ class Taxonomy
      */
     public $allowHierarchy;
 
+    /**
+     * Determines whether the tag cloud should be displayed or not.
+     *
+     * @return bool|null Returns true if the tag cloud should be displayed, false if not, and null if not set.
+     */
     public function isShowTagcloud(): ?bool
     {
         return $this->showTagcloud;
     }
 
+    /**
+     * Sets the property showTagcloud to true and returns the Taxonomy object.
+     *
+     * @return Taxonomy The updated Taxonomy object.
+     */
     public function showTagcloud(): Taxonomy
     {
         $this->showTagcloud = true;
@@ -144,6 +159,12 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Sets whether to show the tagcloud.
+     *
+     * @param  bool  $showTagcloud Whether to show the tagcloud.
+     * @return Taxonomy The updated Taxonomy object.
+     */
     public function setShowTagcloud(bool $showTagcloud): Taxonomy
     {
         $this->showTagcloud = $showTagcloud;
@@ -151,11 +172,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Checks if the object should be shown in quick edit.
+     *
+     * @return bool|null True if the object should be shown in quick edit, false if it should not be shown,
+     *                   or null if it is not defined.
+     */
     public function isShowInQuickEdit(): ?bool
     {
         return $this->showInQuickEdit;
     }
 
+    /**
+     * Sets the showInQuickEdit property to true.
+     *
+     * @return Taxonomy The updated Taxonomy object.
+     */
     public function showInQuickEdit(): Taxonomy
     {
         $this->showInQuickEdit = true;
@@ -163,6 +195,11 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Set the value of showInQuickEdit property.
+     *
+     * @param  bool  $showInQuickEdit The new value for the showInQuickEdit property.
+     */
     public function setShowInQuickEdit(bool $showInQuickEdit): Taxonomy
     {
         $this->showInQuickEdit = $showInQuickEdit;
@@ -170,11 +207,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Checks whether the admin column should be shown or not.
+     *
+     * @return bool|null Returns true if the admin column should be shown, false if it should not be shown,
+     *                   or null if the value is not set.
+     */
     public function isShowAdminColumn(): ?bool
     {
         return $this->showAdminColumn;
     }
 
+    /**
+     * Sets the showAdminColumn property to true.
+     *
+     * @return Taxonomy The updated Taxonomy object.
+     */
     public function showAdminColumn(): Taxonomy
     {
         $this->showAdminColumn = true;
@@ -182,6 +230,12 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Sets whether or not to show the admin column for the taxonomy.
+     *
+     * @param  bool  $showAdminColumn Whether or not to show the admin column.
+     * @return Taxonomy The Taxonomy object.
+     */
     public function setShowAdminColumn(bool $showAdminColumn): Taxonomy
     {
         $this->showAdminColumn = $showAdminColumn;
@@ -189,11 +243,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Retrieves the metabox callback function.
+     *
+     * @return callable|bool|null The metabox callback function, or null if it does not exist.
+     */
     public function getMetaBoxCb(): callable|bool|null
     {
         return $this->metaBoxCb;
     }
 
+    /**
+     * Sets the callback function for the meta box.
+     *
+     * @param  callable|bool|null  $metaBoxCb The callback function for the meta box. Can be a callable, boolean, or null.
+     * @return Taxonomy The updated Taxonomy object.
+     */
     public function setMetaBoxCb(callable|bool|null $metaBoxCb): Taxonomy
     {
         $this->metaBoxCb = $metaBoxCb;
@@ -201,11 +266,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Retrieves the meta box sanitize callback.
+     *
+     * @return callable|null The sanitize callback, or null if it does not exist.
+     */
     public function getMetaBoxSanitizeCb(): ?callable
     {
         return $this->metaBoxSanitizeCb;
     }
 
+    /**
+     * Sets the meta box sanitize callback function.
+     *
+     * @param  callable|null  $metaBoxSanitizeCb The meta box sanitize callback function, or null if none.
+     * @return Taxonomy The Taxonomy object.
+     */
     public function setMetaBoxSanitizeCb(?callable $metaBoxSanitizeCb): Taxonomy
     {
         $this->metaBoxSanitizeCb = $metaBoxSanitizeCb;
@@ -213,11 +289,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Retrieves the cap object.
+     *
+     * @return stdClass|null The cap object, or null if it does not exist.
+     */
     public function getCap(): ?stdClass
     {
         return $this->cap;
     }
 
+    /**
+     * Set the cap property.
+     *
+     * @param  stdClass  $cap The stdClass object representing the cap.
+     * @return Taxonomy Returns the updated Taxonomy object.
+     */
     public function setCap(stdClass $cap): Taxonomy
     {
         $this->cap = $cap;
@@ -225,11 +312,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Retrieves the update count callback.
+     *
+     * @return callable|null The update count callback if set, null otherwise.
+     */
     public function getUpdateCountCallback(): ?callable
     {
         return $this->updateCountCallback;
     }
 
+    /**
+     * Sets the callback function for updating the count.
+     *
+     * @param  callable  $updateCountCallback The callback function to be set.
+     * @return Taxonomy Returns the current instance of the Taxonomy class.
+     */
     public function setUpdateCountCallback(callable $updateCountCallback): Taxonomy
     {
         $this->updateCountCallback = $updateCountCallback;
@@ -237,11 +335,23 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Retrieves the default term value.
+     *
+     * @return array|string|null The default term value. If a default term is set, it will be returned as an array,
+     *                          otherwise it can be null or a string.
+     */
     public function getDefaultTerm(): array|string|null
     {
         return $this->defaultTerm;
     }
 
+    /**
+     * Sets the default term for the taxonomy.
+     *
+     * @param  array|string  $defaultTerm The default term for the taxonomy. Can be either an array or a string.
+     * @return Taxonomy  The current instance of the Taxonomy object.
+     */
     public function setDefaultTerm(array|string $defaultTerm): Taxonomy
     {
         $this->defaultTerm = $defaultTerm;
@@ -249,11 +359,21 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Returns the value of the `sort` property.
+     *
+     * @return ?bool The value of the `sort` property.
+     */
     public function getSort(): ?bool
     {
         return $this->sort;
     }
 
+    /**
+     * Set the sort flag to true for the Taxonomy object.
+     *
+     * @return Taxonomy Returns the updated Taxonomy object.
+     */
     public function sort(): Taxonomy
     {
         $this->sort = true;
@@ -261,6 +381,13 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Sets the sorting option for the Taxonomy.
+     *
+     * @param  bool|null  $sort The sorting option for the Taxonomy. Pass true to enable sorting, false to disable sorting,
+     *                        or null to use the default sorting option.
+     * @return Taxonomy Returns the Taxonomy object for method chaining.
+     */
     public function setSort(?bool $sort): Taxonomy
     {
         $this->sort = $sort;
@@ -268,11 +395,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Get the arguments for the method.
+     *
+     * @return array|null The arguments for the method.
+     */
     public function getArgs(): ?array
     {
         return $this->args;
     }
 
+    /**
+     * Set the arguments for the taxonomy.
+     *
+     * @param  array|null  $args The arguments for the taxonomy.
+     * @return Taxonomy Returns the updated Taxonomy object.
+     */
     public function setArgs(?array $args): Taxonomy
     {
         $this->args = $args;
@@ -280,11 +418,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Check if the Taxonomy is on top.
+     *
+     * @return bool|null Returns the value indicating if the Taxonomy is on top or not.
+     */
     public function isCheckedOntop(): ?bool
     {
         return $this->checkedOntop;
     }
 
+    /**
+     * Set the "checkedOntop" flag for the taxonomy.
+     *
+     * @param  bool  $checkedOntop The value to set for the "checkedOntop" flag.
+     * @return Taxonomy Returns an instance of the Taxonomy class.
+     */
     public function checkedOntop(): Taxonomy
     {
         $this->checkedOntop = true;
@@ -292,6 +441,12 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Sets the checkedOntop flag for the Taxonomy object.
+     *
+     * @param  bool  $checkedOntop The flag indicating whether the Taxonomy should be checked on top or not.
+     * @return Taxonomy Returns the updated Taxonomy object.
+     */
     public function setCheckedOntop(bool $checkedOntop): Taxonomy
     {
         $this->checkedOntop = $checkedOntop;
@@ -299,11 +454,22 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Returns the value of the "exclusive" variable.
+     *
+     * @return bool|null The value of the "exclusive" variable.
+     */
     public function isExclusive(): ?bool
     {
         return $this->exclusive;
     }
 
+    /**
+     * Set the exclusive flag for the taxonomy.
+     *
+     * @param  bool  $exclusive The value of the exclusive flag.
+     * @return Taxonomy The updated Taxonomy instance.
+     */
     public function exclusive(): Taxonomy
     {
         $this->exclusive = true;
@@ -311,6 +477,12 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Sets the exclusive flag.
+     *
+     * @param  bool  $exclusive The exclusive flag value.
+     * @return Taxonomy The Taxonomy instance.
+     */
     public function setExclusive(bool $exclusive): Taxonomy
     {
         $this->exclusive = $exclusive;
@@ -318,11 +490,21 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Determines whether or not the taxonomy is allowed to have a hierarchy.
+     *
+     * @return bool|null Returns the value of the allowHierarchy property, which indicates whether the taxonomy is allowed to have a hierarchy. If the value is not set, null is returned.
+     */
     public function isAllowHierarchy(): ?bool
     {
         return $this->allowHierarchy;
     }
 
+    /**
+     * Allows for hierarchy in taxonomy.
+     *
+     * @return Taxonomy The updated Taxonomy object.
+     */
     public function allowHierarchy(): Taxonomy
     {
         $this->allowHierarchy = true;
@@ -330,6 +512,12 @@ class Taxonomy
         return $this;
     }
 
+    /**
+     * Sets whether the taxonomy allows hierarchical terms or not.
+     *
+     * @param  bool  $allowHierarchy The value indicating whether hierarchical terms are allowed.
+     * @return Taxonomy The updated Taxonomy object.
+     */
     public function setAllowHierarchy(bool $allowHierarchy): Taxonomy
     {
         $this->allowHierarchy = $allowHierarchy;
@@ -340,30 +528,9 @@ class Taxonomy
     public function __construct(
         public string $slug,
         public string|array $objectType,
-        string $singular = null,
-        string $plural = null
+        public ?string $singular = null,
+        public ?string $plural = null
     ) {
-        $this->setSingular($singular);
-        $this->setPlural($plural);
-        $this->register();
-    }
-
-    public function register()
-    {
-        Action::add('init', function () {
-
-            $args = $this->buildArguments();
-            $args = $this->translateArguments($args, 'taxonomies');
-
-            $names = $args['names'];
-
-            // Unset names from item
-            unset($args['names']);
-
-            // Unset links from item
-            unset($args['links']);
-
-            register_extended_taxonomy($this->slug, $this->objectType, $args, $names);
-        }, 99);
+        $this->init();
     }
 }
