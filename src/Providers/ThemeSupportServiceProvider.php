@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 /**
  * Class ThemeSupportServiceProvider
- * @package Pollen\Providers
  */
+
 namespace Pollen\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollen\Support\Facades\Action;
-use Pollen\Services\Translater;
 
 /**
  * Class ThemeSupportServiceProvider
@@ -21,7 +20,7 @@ class ThemeSupportServiceProvider extends ServiceProvider
 {
     public function register()
     {
-            Action::add('after_setup_theme', [$this, 'addThemeSupport'], 1);
+        Action::add('after_setup_theme', [$this, 'addThemeSupport'], 1);
     }
 
     /**
