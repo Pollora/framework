@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 /**
  * Class SidebarServiceProvider
- * @package Pollen\Providers
  */
+
 namespace Pollen\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Support\Facades\Action;
 use Pollen\Services\Translater;
+use Pollen\Support\Facades\Action;
 
 /**
  * Class SidebarServiceProvider
@@ -21,7 +21,7 @@ class SidebarServiceProvider extends ServiceProvider
 {
     public function register()
     {
-            Action::add('after_setup_theme', [$this, 'registerSidebars'], 1);
+        Action::add('after_setup_theme', [$this, 'registerSidebars'], 1);
     }
 
     /**

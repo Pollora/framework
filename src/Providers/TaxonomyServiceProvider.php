@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 /**
  * Class TaxonomyServiceProvider
- *
- * @package Pollen\Providers
  */
 
 namespace Pollen\Providers;
 
- use Illuminate\Support\ServiceProvider;
- use Pollen\Support\Facades\Action;
- use Pollen\Services\Translater;
+use Illuminate\Support\ServiceProvider;
+use Pollen\Services\Translater;
+use Pollen\Support\Facades\Action;
 
 /**
  * Class TaxonomyServiceProvider
@@ -23,7 +21,7 @@ class TaxonomyServiceProvider extends ServiceProvider
 {
     public function register()
     {
-            Action::add('init', [$this, 'registerTaxonomies'], 1);
+        Action::add('init', [$this, 'registerTaxonomies'], 1);
     }
 
     /**

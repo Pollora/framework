@@ -56,7 +56,8 @@
                 "Query": "Pollen\\Support\\Facades\\Query",
                 "Loop": "Pollen\\Support\\Facades\\Loop",
                 "Action": "Pollen\\Support\\Facades\\Action",
-                "Filter": "Pollen\\Support\\Facades\\Filter"
+                "Filter": "Pollen\\Support\\Facades\\Filter",
+                "PostType": "Pollen\\Support\\Facades\\PostType",
             }
         },
         "patches": {

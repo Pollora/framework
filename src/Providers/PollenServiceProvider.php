@@ -9,6 +9,7 @@ use Pollen\Auth\AuthServiceProvider;
 use Pollen\Hashing\HashServiceProvider;
 use Pollen\Http\Request;
 use Pollen\Mail\WordPressMailServiceProvider;
+use Pollen\PostType\PostTypeServiceProvider;
 
 /**
  * Registers all the other service providers used by this package.

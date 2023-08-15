@@ -7,7 +7,6 @@ namespace Pollen\Providers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Pollen\Services\Translater;
 use Pollen\Support\Facades\Action;
 use Pollen\Support\WordPress;
 use Request;
@@ -40,8 +39,6 @@ class WordPressServiceProvider extends ServiceProvider
 
     /**
      * Method for requiring the 'plugin.php' file if add_filter function doesn't exist.
-     *
-     * @return void
      */
     protected function ensureAddFilterExists(): void
     {

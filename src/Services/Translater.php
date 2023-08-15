@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Pollen\Services;
@@ -7,23 +8,16 @@ class Translater
 {
     /**
      * The items to be used in translations.
-     *
-     * @var array
      */
     protected array $items;
 
     /**
      * The domain of the translation.
-     *
-     * @var string
      */
     protected string $domain;
 
     /**
      * Create a new translator instance.
-     *
-     * @param array $items
-     * @param string $domain
      */
     public function __construct(array $items = [], string $domain = 'wordpress')
     {
@@ -36,7 +30,7 @@ class Translater
      *
      * This method is used to translate an array of keys.
      *
-     * @param array $keysToTranslate The keys that need to be translated.
+     * @param  array  $keysToTranslate The keys that need to be translated.
      * @return array The translated array.
      */
     public function translate(array $keysToTranslate): array
@@ -49,15 +43,14 @@ class Translater
                 $this->translateKey($key);
             }
         }
+
         return $this->items;
     }
 
     /**
      * Translate a key.
      *
-     * @param string $key The key to translate.
-     *
-     * @return void
+     * @param  string  $key The key to translate.
      */
     protected function translateKey(string $key): void
     {
@@ -75,9 +68,8 @@ class Translater
     /**
      * Translates the values of nested arrays by key recursively.
      *
-     * @param array $keys The array of keys to traverse.
-     * @param array $item The item array to be modified.
-     * @return void
+     * @param  array  $keys The array of keys to traverse.
+     * @param  array  $item The item array to be modified.
      */
     protected function recursiveTranslateByKey(array $keys, &$item): void
     {
@@ -106,8 +98,7 @@ class Translater
     /**
      * Recursively translates the given item.
      *
-     * @param array $item The item to be translated.
-     * @return void
+     * @param  array  $item The item to be translated.
      */
     protected function recursiveTranslate(&$item): void
     {
@@ -123,12 +114,11 @@ class Translater
     /**
      * Translates a given item using the specified domain.
      *
-     * @param string $value The item to be translated.
-     *
+     * @param  string  $value The item to be translated.
      * @return string The translated item.
      */
     protected function translateItem(string $value): string
     {
-        return __($this->domain . '.' . $value);
+        return str_replace($this->domain.'.', '', __($this->domain.'.'.$value));
     }
 }
