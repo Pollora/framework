@@ -12,6 +12,25 @@ use Illuminate\Support\Str;
 trait WordPressArgumentHelper
 {
     /**
+     * Raw post type args.
+     *
+     * @var args
+     */
+    protected $rawArgs;
+
+    public function setRawArgs(array $rawArgs): self
+    {
+        $this->rawArgs = $rawArgs;
+
+        return $this;
+    }
+
+    public function getRawArgs(): array|null
+    {
+        return $this->rawArgs;
+    }
+
+    /**
      * Collects all getter methods of the current object.
      *
      * @return array An array containing all getter method names.
@@ -21,7 +40,7 @@ trait WordPressArgumentHelper
         $allMethods = get_class_methods($this);
 
         return array_filter($allMethods, function ($method) {
-            return str_starts_with($method, 'get') && $method !== 'getArgs';
+            return str_starts_with($method, 'get') && $method !== 'getRawArgs';
         });
     }
 

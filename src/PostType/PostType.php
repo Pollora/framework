@@ -5,76 +5,13 @@ declare(strict_types=1);
 namespace Pollen\PostType;
 
 use Pollen\Services\Translater;
+use Pollen\Support\ExtendedCpt;
 use Pollen\Support\WordPressArgumentHelper;
 
 class PostType
 {
     use WordPressArgumentHelper;
-
-    /**
-     * Raw post type args.
-     *
-     * @var args
-     */
-    protected $args;
-
-    /**
-     * Name of the post type shown in the menu. Usually plural.
-     *
-     * @since 4.6.0
-     *
-     * @var string
-     */
-    public $label;
-
-    /**
-     * Labels object for this post type.
-     *
-     * If not set, post labels are inherited for non-hierarchical types
-     * and page labels for hierarchical ones.
-     *
-     * @see get_post_type_labels()
-     * @since 4.6.0
-     *
-     * @var stdClass
-     */
-    public $labels;
-
-    /**
-     * A short descriptive summary of what the post type is.
-     *
-     * Default empty.
-     *
-     * @since 4.6.0
-     *
-     * @var string
-     */
-    public $description = '';
-
-    /**
-     * Whether a post type is intended for use publicly either via the admin interface or by front-end users.
-     *
-     * While the default settings of $exclude_from_search, $publicly_queryable, $show_ui, and $show_in_nav_menus
-     * are inherited from public, each does not rely on this relationship and controls a very specific intention.
-     *
-     * Default false.
-     *
-     * @since 4.6.0
-     *
-     * @var bool
-     */
-    public $public = false;
-
-    /**
-     * Whether the post type is hierarchical (e.g. page).
-     *
-     * Default false.
-     *
-     * @since 4.6.0
-     *
-     * @var bool
-     */
-    public $hierarchical = false;
+    use ExtendedCpt;
 
     /**
      * Whether to exclude posts with this post type from front end search
@@ -89,58 +26,15 @@ class PostType
     public $excludeFromSearch = null;
 
     /**
-     * Whether queries can be performed on the front end for the post type as part of `parse_request()`.
+     * The position in the menu order the post type should appear.
      *
-     * Endpoints would include:
-     *
-     * - `?post_type={post_type_key}`
-     * - `?{post_type_key}={single_post_slug}`
-     * - `?{post_type_query_var}={single_post_slug}`
-     *
-     * Default is the value of $public.
+     * To work, $show_in_menu must be true. Default null (at the bottom).
      *
      * @since 4.6.0
      *
-     * @var bool
+     * @var int
      */
-    public $publiclyQueryable = null;
-
-    /**
-     * Whether to generate and allow a UI for managing this post type in the admin.
-     *
-     * Default is the value of $public.
-     *
-     * @since 4.6.0
-     *
-     * @var bool
-     */
-    public $showUi = null;
-
-    /**
-     * Where to show the post type in the admin menu.
-     *
-     * To work, $show_ui must be true. If true, the post type is shown in its own top level menu. If false, no menu is
-     * shown. If a string of an existing top level menu ('tools.php' or 'edit.php?post_type=page', for example), the
-     * post type will be placed as a sub-menu of that.
-     *
-     * Default is the value of $show_ui.
-     *
-     * @since 4.6.0
-     *
-     * @var bool|string
-     */
-    public $showInMenu = null;
-
-    /**
-     * Makes this post type available for selection in navigation menus.
-     *
-     * Default is the value $public.
-     *
-     * @since 4.6.0
-     *
-     * @var bool
-     */
-    public $showInNavMenus = null;
+    public $menuPosition = null;
 
     /**
      * Makes this post type available via the admin bar.
@@ -151,18 +45,7 @@ class PostType
      *
      * @var bool
      */
-    public $showInAdmin_bar = null;
-
-    /**
-     * The position in the menu order the post type should appear.
-     *
-     * To work, $show_in_menu must be true. Default null (at the bottom).
-     *
-     * @since 4.6.0
-     *
-     * @var int
-     */
-    public $menuPosition = null;
+    public $showInAdminBar = null;
 
     /**
      * The URL or reference to the icon to be used for this menu.
@@ -238,18 +121,6 @@ class PostType
      * @var bool|string
      */
     public $hasArchive = false;
-
-    /**
-     * Sets the query_var key for this post type.
-     *
-     * Defaults to $post_type key. If false, a post type cannot be loaded at `?{query_var}={post_slug}`.
-     * If specified as a string, the query `?{query_var_string}={post_slug}` will be valid.
-     *
-     * @since 4.6.0
-     *
-     * @var string|bool
-     */
-    public $queryVar;
 
     /**
      * Whether to allow this post type to be exported.
@@ -361,65 +232,6 @@ class PostType
     public $supports;
 
     /**
-     * Whether this post type should appear in the REST API.
-     *
-     * Default false. If true, standard endpoints will be registered with
-     * respect to $rest_base and $rest_controller_class.
-     *
-     * @since 4.7.4
-     *
-     * @var bool
-     */
-    public $showInRest;
-
-    /**
-     * The base path for this post type's REST API endpoints.
-     *
-     * @since 4.7.4
-     *
-     * @var string|bool
-     */
-    public $restBase;
-
-    /**
-     * The namespace for this post type's REST API endpoints.
-     *
-     * @since 5.9.0
-     *
-     * @var string|bool
-     */
-    public $restNamespace;
-
-    /**
-     * The controller for this post type's REST API endpoints.
-     *
-     * Custom controllers must extend WP_REST_Controller.
-     *
-     * @since 4.7.4
-     *
-     * @var string|bool
-     */
-    public $restControllerClass;
-
-    /**
-     * The controller instance for this post type's REST API endpoints.
-     *
-     * Lazily computed. Should be accessed using {@see WP_Post_Type::get_rest_controller()}.
-     *
-     * @since 5.3.0
-     *
-     * @var WP_REST_Controller
-     */
-    public $restController;
-
-    /**
-     * Associative array of admin screen columns to show for this post type.
-     *
-     * @var array<string,mixed>
-     */
-    public $adminCols;
-
-    /**
      * Associative array of admin screen filters to show for this post type.
      *
      * @var array<string,mixed>
@@ -497,164 +309,27 @@ class PostType
      */
     public $siteSortables;
 
-    public function setArgs(array $args): PostType
-    {
-        $this->args = $args;
-        return $this;
-    }
-
-    public function getArgs(): array|null
-    {
-        return $this->args;
-    }
-
-    public function getLabel(): string|null
-    {
-        return $this->label;
-    }
-
-    public function setSingular(string|null $singular): PostType
-    {
-        $this->names['singular'] = $singular;
-        return $this;
-    }
-
-    public function setPlural(string|null $plural): PostType
-    {
-        $this->names['plural'] = $plural;
-        return $this;
-    }
-
-    public function setSlug(string|null $slug): PostType
-    {
-        $this->names['slug'] = $slug;
-        return $this;
-    }
-
-    public function setNames(array $names): PostType
-    {
-        $this->names = $names;
-        return $this;
-    }
-
-    public function getNames(): array
-    {
-        return $this->names ?? [];
-    }
-
-    public function setLabel(string $label): PostType
-    {
-        $this->label = $label;
-        return $this;
-    }
-
-    public function getLabels(): stdClass|null
-    {
-        return $this->labels;
-    }
-
-    public function setLabels(stdClass $labels): PostType
-    {
-        $this->labels = $labels;
-        return $this;
-    }
-
-    public function getDescription(): string|null
-    {
-        return $this->description;
-    }
-
-    public function setDescription(string $description): PostType
-    {
-        $this->description = $description;
-        return $this;
-    }
-
-    public function isPublic(): bool
-    {
-        return $this->public;
-    }
-
-    public function setPublic(bool $public): PostType
-    {
-        $this->public = $public;
-        return $this;
-    }
-
-    public function isHierarchical(): bool
-    {
-        return $this->hierarchical;
-    }
-
-    public function setHierarchical(bool $hierarchical): PostType
-    {
-        $this->hierarchical = $hierarchical;
-        return $this;
-    }
-
     public function getExcludeFromSearch(): ?bool
     {
         return $this->excludeFromSearch;
     }
 
-    public function setExcludeFromSearch(?bool $excludeFromSearch): PostType
+    public function setExcludeFromSearch(?bool $excludeFromSearch): self
     {
         $this->excludeFromSearch = $excludeFromSearch;
-        return $this;
-    }
 
-    public function getPubliclyQueryable(): ?bool
-    {
-        return $this->publiclyQueryable;
-    }
-
-    public function setPubliclyQueryable(?bool $publiclyQueryable): PostType
-    {
-        $this->publiclyQueryable = $publiclyQueryable;
-        return $this;
-    }
-
-    public function getShowUi(): ?bool
-    {
-        return $this->showUi;
-    }
-
-    public function setShowUi(?bool $showUi): PostType
-    {
-        $this->showUi = $showUi;
-        return $this;
-    }
-
-    public function getShowInMenu(): bool|string|null
-    {
-        return $this->showInMenu;
-    }
-
-    public function setShowInMenu(bool|string|null $showInMenu): PostType
-    {
-        $this->showInMenu = $showInMenu;
-        return $this;
-    }
-
-    public function getShowInNavMenus(): ?bool
-    {
-        return $this->showInNavMenus;
-    }
-
-    public function setShowInNavMenus(?bool $showInNavMenus): PostType
-    {
-        $this->showInNavMenus = $showInNavMenus;
         return $this;
     }
 
     public function getShowInAdminBar(): ?bool
     {
-        return $this->showInAdmin_bar;
+        return $this->showInAdminBar;
     }
 
-    public function setShowInAdminBar(?bool $showInAdmin_bar): PostType
+    public function setShowInAdminBar(?bool $showInAdminBar): self
     {
-        $this->showInAdmin_bar = $showInAdmin_bar;
+        $this->showInAdminBar = $showInAdminBar;
+
         return $this;
     }
 
@@ -663,9 +338,10 @@ class PostType
         return $this->menuPosition;
     }
 
-    public function setMenuPosition(?int $menuPosition): PostType
+    public function setMenuPosition(?int $menuPosition): self
     {
         $this->menuPosition = $menuPosition;
+
         return $this;
     }
 
@@ -674,9 +350,10 @@ class PostType
         return $this->menuIcon;
     }
 
-    public function setMenuIcon(?string $menuIcon): PostType
+    public function setMenuIcon(?string $menuIcon): self
     {
         $this->menuIcon = $menuIcon;
+
         return $this;
     }
 
@@ -685,9 +362,10 @@ class PostType
         return $this->capabilityType;
     }
 
-    public function setCapabilityType(string $capabilityType): PostType
+    public function setCapabilityType(string $capabilityType): self
     {
         $this->capabilityType = $capabilityType;
+
         return $this;
     }
 
@@ -696,9 +374,10 @@ class PostType
         return $this->mapMetaCap;
     }
 
-    public function setMapMetaCap(bool $mapMetaCap): PostType
+    public function setMapMetaCap(bool $mapMetaCap): self
     {
         $this->mapMetaCap = $mapMetaCap;
+
         return $this;
     }
 
@@ -707,9 +386,10 @@ class PostType
         return $this->registerMetaBoxCb;
     }
 
-    public function setRegisterMetaBoxCb(?callable $registerMetaBoxCb): PostType
+    public function setRegisterMetaBoxCb(?callable $registerMetaBoxCb): self
     {
         $this->registerMetaBoxCb = $registerMetaBoxCb;
+
         return $this;
     }
 
@@ -718,9 +398,10 @@ class PostType
         return $this->taxonomies;
     }
 
-    public function setTaxonomies(array $taxonomies): PostType
+    public function setTaxonomies(array $taxonomies): self
     {
         $this->taxonomies = $taxonomies;
+
         return $this;
     }
 
@@ -729,31 +410,22 @@ class PostType
         return $this->hasArchive;
     }
 
-    public function setHasArchive(bool|string $hasArchive): PostType
+    public function setHasArchive(bool|string $hasArchive): self
     {
         $this->hasArchive = $hasArchive;
+
         return $this;
     }
 
-    public function getQueryVar(): bool|string|null
-    {
-        return $this->queryVar;
-    }
-
-    public function setQueryVar(bool|string $queryVar): PostType
-    {
-        $this->queryVar = $queryVar;
-        return $this;
-    }
-
-    public function isCanExport(): bool
+    public function getCanExport(): bool
     {
         return $this->canExport;
     }
 
-    public function setCanExport(bool $canExport): PostType
+    public function setCanExport(bool $canExport): self
     {
         $this->canExport = $canExport;
+
         return $this;
     }
 
@@ -762,9 +434,10 @@ class PostType
         return $this->deleteWithUser;
     }
 
-    public function setDeleteWithUser(?bool $deleteWithUser): PostType
+    public function setDeleteWithUser(?bool $deleteWithUser): self
     {
         $this->deleteWithUser = $deleteWithUser;
+
         return $this;
     }
 
@@ -773,9 +446,10 @@ class PostType
         return $this->template;
     }
 
-    public function setTemplate(array $template): PostType
+    public function setTemplate(array $template): self
     {
         $this->template = $template;
+
         return $this;
     }
 
@@ -784,20 +458,22 @@ class PostType
         return $this->templateLock;
     }
 
-    public function setTemplateLock(bool|string $templateLock): PostType
+    public function setTemplateLock(bool|string $templateLock): self
     {
         $this->templateLock = $templateLock;
+
         return $this;
     }
 
-    public function isBuiltin(): bool
+    public function get_Builtin(): bool
     {
         return $this->_builtin;
     }
 
-    public function setBuiltin(bool $builtin): PostType
+    public function setBuiltin(bool $builtin): self
     {
         $this->_builtin = $builtin;
+
         return $this;
     }
 
@@ -806,9 +482,10 @@ class PostType
         return $this->_editLink;
     }
 
-    public function setEditLink(string $editLink): PostType
+    public function setEditLink(string $editLink): self
     {
         $this->_editLink = $editLink;
+
         return $this;
     }
 
@@ -817,9 +494,10 @@ class PostType
         return $this->cap;
     }
 
-    public function setCap(stdClass $cap): PostType
+    public function setCap(stdClass $cap): self
     {
         $this->cap = $cap;
+
         return $this;
     }
 
@@ -828,9 +506,10 @@ class PostType
         return $this->rewrite;
     }
 
-    public function setRewrite(bool|array $rewrite): PostType
+    public function setRewrite(bool|array $rewrite): self
     {
         $this->rewrite = $rewrite;
+
         return $this;
     }
 
@@ -839,75 +518,10 @@ class PostType
         return $this->supports;
     }
 
-    public function setSupports(bool|array $supports): PostType
+    public function setSupports(bool|array $supports): self
     {
         $this->supports = $supports;
-        return $this;
-    }
 
-    public function isShowInRest(): bool
-    {
-        return $this->showInRest;
-    }
-
-    public function setShowInRest(bool $showInRest): PostType
-    {
-        $this->showInRest = $showInRest;
-        return $this;
-    }
-
-    public function getRestBase(): bool|string|null
-    {
-        return $this->restBase;
-    }
-
-    public function setRestBase(bool|string $restBase): PostType
-    {
-        $this->restBase = $restBase;
-        return $this;
-    }
-
-    public function getRestNamespace(): bool|string|null
-    {
-        return $this->restNamespace;
-    }
-
-    public function setRestNamespace(bool|string $restNamespace): PostType
-    {
-        $this->restNamespace = $restNamespace;
-        return $this;
-    }
-
-    public function getRestControllerClass(): bool|string|null
-    {
-        return $this->restControllerClass;
-    }
-
-    public function setRestControllerClass(bool|string $restControllerClass): PostType
-    {
-        $this->restControllerClass = $restControllerClass;
-        return $this;
-    }
-
-    public function getRestController(): WP_REST_Controller|null
-    {
-        return $this->restController;
-    }
-
-    public function setRestController(WP_REST_Controller $restController): PostType
-    {
-        $this->restController = $restController;
-        return $this;
-    }
-
-    public function getAdminCols(): array|null
-    {
-        return $this->adminCols;
-    }
-
-    public function setAdminCols(array $adminCols): PostType
-    {
-        $this->adminCols = $adminCols;
         return $this;
     }
 
@@ -916,9 +530,10 @@ class PostType
         return $this->adminFilters;
     }
 
-    public function setAdminFilters(array $adminFilters): PostType
+    public function setAdminFilters(array $adminFilters): self
     {
         $this->adminFilters = $adminFilters;
+
         return $this;
     }
 
@@ -927,9 +542,10 @@ class PostType
         return $this->archive;
     }
 
-    public function setArchive(array $archive): PostType
+    public function setArchive(array $archive): self
     {
         $this->archive = $archive;
+
         return $this;
     }
 
@@ -938,9 +554,10 @@ class PostType
         return $this->blockEditor;
     }
 
-    public function setBlockEditor(bool $blockEditor): PostType
+    public function setBlockEditor(bool $blockEditor): self
     {
         $this->blockEditor = $blockEditor;
+
         return $this;
     }
 
@@ -949,9 +566,10 @@ class PostType
         return $this->dashboardGlance;
     }
 
-    public function setDashboardGlance(bool $dashboardGlance): PostType
+    public function setDashboardGlance(bool $dashboardGlance): self
     {
         $this->dashboardGlance = $dashboardGlance;
+
         return $this;
     }
 
@@ -960,9 +578,10 @@ class PostType
         return $this->dashboardActivity;
     }
 
-    public function setDashboardActivity(bool $dashboardActivity): PostType
+    public function setDashboardActivity(bool $dashboardActivity): self
     {
         $this->dashboardActivity = $dashboardActivity;
+
         return $this;
     }
 
@@ -971,9 +590,10 @@ class PostType
         return $this->enterTitleHere;
     }
 
-    public function setEnterTitleHere(string $enterTitleHere): PostType
+    public function setEnterTitleHere(string $enterTitleHere): self
     {
         $this->enterTitleHere = $enterTitleHere;
+
         return $this;
     }
 
@@ -982,9 +602,10 @@ class PostType
         return $this->featuredImage;
     }
 
-    public function setFeaturedImage(string $featuredImage): PostType
+    public function setFeaturedImage(string $featuredImage): self
     {
         $this->featuredImage = $featuredImage;
+
         return $this;
     }
 
@@ -993,9 +614,10 @@ class PostType
         return $this->quickEdit;
     }
 
-    public function setQuickEdit(bool $quickEdit): PostType
+    public function setQuickEdit(bool $quickEdit): self
     {
         $this->quickEdit = $quickEdit;
+
         return $this;
     }
 
@@ -1004,9 +626,10 @@ class PostType
         return $this->showInFeed;
     }
 
-    public function setShowInFeed(bool $showInFeed): PostType
+    public function setShowInFeed(bool $showInFeed): self
     {
         $this->showInFeed = $showInFeed;
+
         return $this;
     }
 
@@ -1015,9 +638,10 @@ class PostType
         return $this->siteFilters;
     }
 
-    public function setSiteFilters(array $siteFilters): PostType
+    public function setSiteFilters(array $siteFilters): self
     {
         $this->siteFilters = $siteFilters;
+
         return $this;
     }
 
@@ -1026,9 +650,10 @@ class PostType
         return $this->siteSortables;
     }
 
-    public function setSiteSortables(array $siteSortables): PostType
+    public function setSiteSortables(array $siteSortables): self
     {
         $this->siteSortables = $siteSortables;
+
         return $this;
     }
 
@@ -1036,15 +661,14 @@ class PostType
         public string $slug,
         string $singular = null,
         string $plural = null
-    )
-    {
+    ) {
         $this->setSingular($singular);
         $this->setPlural($plural);
     }
 
     public function __destruct()
     {
-        $args = $this->getArgs() ?? $this->extractArgumentFromProperties();
+        $args = $this->getRawArgs() ?? $this->extractArgumentFromProperties();
 
         $args['names'] = $this->getNames();
 

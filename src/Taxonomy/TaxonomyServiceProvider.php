@@ -6,25 +6,25 @@ declare(strict_types=1);
  * Class PostTypeServiceProvider
  */
 
-namespace Pollen\PostType;
+namespace Pollen\Taxonomy;
 
 use Illuminate\Support\ServiceProvider;
 use Pollen\Support\Facades\Action;
-use Pollen\Support\Facades\PostType;
+use Pollen\Support\Facades\Taxonomy;
 
 /**
  * Class PostTypeServiceProvider
  *
  * A service provider for registering custom post types.
  */
-class PostTypeServiceProvider extends ServiceProvider
+class TaxonomyServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        Action::add('init', [$this, 'registerPostTypes'], 1);
+        Action::add('init', [$this, 'registerTaxonomies'], 1);
 
-        $this->app->bind('posttype', function ($app) {
-            return new PostTypeFactory($app);
+        $this->app->bind('taxonomy', function ($app) {
+            return new TaxonomyFactory($app);
         });
     }
 
@@ -33,18 +33,19 @@ class PostTypeServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerPostTypes()
+    public function registerTaxonomies()
     {
         // Get the post types from the config.
-        $postTypes = config('post-types');
+        $taxonomies = config('taxonomies');
 
         // Iterate over each post type.
-        collect($postTypes)->each(function ($args, $key) {
+        collect($taxonomies)->each(function ($args, $key) {
             // Register the extended post type.
+            $links = $args['links'] ?? [];
             $singular = $args['names']['singular'] ?? null;
             $plural = $args['names']['plural'] ?? null;
             $slug = $args['names']['slug'] ?? null;
-            PostType::make($key, $singular, $plural)->setSlug($slug)->setRawArgs($args);
+            Taxonomy::make($key, $links, $singular, $plural)->setSlug($slug)->setRawArgs($args);
         });
     }
 }
