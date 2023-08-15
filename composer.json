@@ -57,7 +57,7 @@
                 "Loop": "Pollen\\Support\\Facades\\Loop",
                 "Action": "Pollen\\Support\\Facades\\Action",
                 "Filter": "Pollen\\Support\\Facades\\Filter",
-                "PostType": "Pollen\\Support\\Facades\\PostType",
+                "PostType": "Pollen\\Support\\Facades\\PostType"
             }
         },
         "patches": {
