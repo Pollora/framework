@@ -15,10 +15,8 @@ class FilterBuilder extends Hook
      * Run all filters registered with the hook.
      *
      * @param  string  $hook The filter hook name.
-     * @param  mixed  $args
-     * @return mixed
      */
-    public function run($hook, $args = null)
+    public function run(string $hook, mixed $args = null): mixed
     {
         if (is_array($args)) {
             return $this->applyFiltersRefArray($hook, $args);
@@ -31,10 +29,8 @@ class FilterBuilder extends Hook
      * Shortcut for run method.
      *
      * @param  string  $hook The filter hook name.
-     * @param  mixed  $args
-     * @return mixed
      */
-    public function apply($hook, $args = null)
+    public function apply(string $hook, mixed $args = null): mixed
     {
         return $this->run($hook, $args);
     }
@@ -44,9 +40,8 @@ class FilterBuilder extends Hook
      *
      * @param  string  $hook The hook name.
      * @param  array  $args Filter data passed with the hook as an array.
-     * @return mixed
      */
-    protected function applyFiltersRefArray($hook, array $args)
+    protected function applyFiltersRefArray(string $hook, array $args): mixed
     {
         return apply_filters_ref_array($hook, $args);
     }
@@ -56,22 +51,16 @@ class FilterBuilder extends Hook
      *
      * @param  string  $hook The hook name.
      * @param  mixed  $args Filter data passed with the hook.
-     * @return mixed
      */
-    protected function applyFilters($hook, $args)
+    protected function applyFilters(string $hook, mixed $args): mixed
     {
         return apply_filters($hook, $args);
     }
 
     /**
      * Add a filter event for the specified hook.
-     *
-     * @param  string  $name
-     * @param  \Closure|string|array  $callback
-     * @param  int  $priority
-     * @param  int  $accepted_args
      */
-    protected function addEventListener($name, $callback, $priority, $accepted_args)
+    protected function addEventListener(string $name, array|string|\Closure $callback, int $priority, int $accepted_args): void
     {
         $this->hooks[$name] = [$callback, $priority, $accepted_args];
         $this->addFilter($name, $callback, $priority, $accepted_args);
@@ -79,13 +68,8 @@ class FilterBuilder extends Hook
 
     /**
      * Calls the WordPress add_filter function in order to listen to a filter hook.
-     *
-     * @param  string  $name
-     * @param  \Closure|string|array  $callback
-     * @param  int  $priority
-     * @param  int  $accepted_args
      */
-    protected function addFilter($name, $callback, $priority, $accepted_args)
+    protected function addFilter(string $name, array|string|\Closure $callback, int $priority, int $accepted_args): void
     {
         add_filter($name, $callback, $priority, $accepted_args);
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\Hook;
 
-use Illuminate\Contracts\Foundation\Application;
+use Pollen\Foundation\Application;
 
 /**
  * Hookable class
@@ -13,20 +13,14 @@ use Illuminate\Contracts\Foundation\Application;
  */
 class Hookable
 {
-    /**
-     * @var Application
-     */
-    protected $app;
+    protected Application $app;
 
     /**
      * @var string|array
      */
     public $hook;
 
-    /**
-     * @var int
-     */
-    public $priority = 10;
+    public int $priority = 10;
 
     public function __construct(Application $app)
     {
