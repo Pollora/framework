@@ -59,8 +59,10 @@ class FilterBuilder extends Hook
 
     /**
      * Add a filter event for the specified hook.
+     *
+     * @param  array|string|\Closure  $callback
      */
-    protected function addEventListener(string $name, array|string|\Closure $callback, int $priority, int $accepted_args): void
+    protected function addEventListener(string $name, $callback, int $priority, int $accepted_args): void
     {
         $this->hooks[$name] = [$callback, $priority, $accepted_args];
         $this->addFilter($name, $callback, $priority, $accepted_args);

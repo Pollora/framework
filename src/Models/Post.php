@@ -29,7 +29,7 @@ class Post extends Model
 
     public $timestamps = false;
 
-    protected $table = DB_PREFIX.'posts';
+    protected $table = 'posts';
 
     protected $primaryKey = 'ID';
 
@@ -173,10 +173,10 @@ class Post extends Model
                 continue;
             }
 
-            $value = Filter::add('acf/load_value', $value, $k, $field);
-            $value = Filter::add('acf/load_value/type='.$field['type'], $value, $this->ID, $field);
-            $value = Filter::add('acf/load_value/name='.$field['_name'], $value, $this->ID, $field);
-            $value = Filter::add('acf/load_value/key='.$field['key'], $value, $this->ID, $field);
+            $value = Filter::apply('acf/load_value', $value, $k, $field);
+            $value = Filter::apply('acf/load_value/type='.$field['type'], $value, $this->ID, $field);
+            $value = Filter::apply('acf/load_value/name='.$field['_name'], $value, $this->ID, $field);
+            $value = Filter::apply('acf/load_value/key='.$field['key'], $value, $this->ID, $field);
 
             if ($format) {
                 $value = acf_format_value($value, $this->ID, $field);
@@ -195,7 +195,7 @@ class Post extends Model
      */
     public function getTitleAttribute()
     {
-        return Filter::add('the_title', $this->post_title, $this->ID);
+        return Filter::apply('the_title', $this->post_title, $this->ID);
     }
 
     /**
@@ -205,7 +205,7 @@ class Post extends Model
      */
     public function getExcerptAttribute()
     {
-        return Filter::add('the_excerpt', $this->post_excerpt);
+        return Filter::apply('the_excerpt', $this->post_excerpt);
     }
 
     /**
