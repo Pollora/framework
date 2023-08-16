@@ -626,7 +626,7 @@ class PostType extends WordPressEntity
      *
      * @return \WP_REST_Controller|null The WP_REST_Controller object associated with this object, or null if no WP_REST_Controller is set.
      */
-    public function getRestController(): \WP_REST_Controller|null
+    public function getRestController(): ?\WP_REST_Controller
     {
         return $this->restController;
     }

@@ -500,7 +500,7 @@ abstract class WordPressEntity
      *
      * @return bool|null The value of the showInRest property.
      */
-    public function getShowInRest(): bool|null
+    public function getShowInRest(): ?bool
     {
         return $this->showInRest;
     }
@@ -627,7 +627,7 @@ abstract class WordPressEntity
      *
      * @param  string|null  $singular The value to set for the singular property.
      */
-    public function setSingular(string|null $singular): self
+    public function setSingular(?string $singular): self
     {
         $this->names['singular'] = $singular;
 
@@ -640,7 +640,7 @@ abstract class WordPressEntity
      * @param  string|null  $plural The new value for the plural property.
      * @return self Returns the instance of the current object.
      */
-    public function setPlural(string|null $plural): self
+    public function setPlural(?string $plural): self
     {
         $this->names['plural'] = $plural;
 
@@ -656,7 +656,7 @@ abstract class WordPressEntity
      * @param  string|null  $slug The slug to be set for the object. If null, the slug will be unset.
      * @return self Returns the current object instance.
      */
-    public function setSlug(string|null $slug): self
+    public function setSlug(?string $slug): self
     {
         $this->names['slug'] = $slug;
 
@@ -691,7 +691,7 @@ abstract class WordPressEntity
      *
      * @return bool|null Returns true if the dashboard glance is enabled, false if it is disabled, or null if not set.
      */
-    public function isDashboardGlance(): bool|null
+    public function isDashboardGlance(): ?bool
     {
         return $this->dashboardGlance;
     }
@@ -725,7 +725,7 @@ abstract class WordPressEntity
      *
      * @return array|null The admin columns array or null if no admin columns are defined.
      */
-    public function getAdminCols(): array|null
+    public function getAdminCols(): ?array
     {
         return $this->adminCols;
     }

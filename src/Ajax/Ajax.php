@@ -62,7 +62,7 @@ class Ajax
         private $callback
     ) {
         if (empty($this->action) || empty($this->callback)) {
-            throw new InvalidArgumentException("Action and callback must be provided.");
+            throw new InvalidArgumentException('Action and callback must be provided.');
         }
     }
 

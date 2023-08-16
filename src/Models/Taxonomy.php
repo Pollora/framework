@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollen\Models;
 
 /**
- * Option class.
+ * Class Taxonomy
  */
-class Option extends \Corcel\Model\Option
+class Taxonomy extends \Corcel\Model\Taxonomy
 {
 }

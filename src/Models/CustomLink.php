@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollen\Models;
 
 /**
- * Option class.
+ * Class CustomLink
  */
-class Option extends \Corcel\Model\Option
+class CustomLink extends \Corcel\Model\CustomLink
 {
 }

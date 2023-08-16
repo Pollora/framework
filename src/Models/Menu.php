@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollen\Models;
 
 /**
- * Option class.
+ * Class Menu
  */
-class Option extends \Corcel\Model\Option
+class Menu extends \Corcel\Model\Menu
 {
 }
