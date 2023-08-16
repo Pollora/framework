@@ -55,7 +55,7 @@ class ActionBuilder extends Hook
      *
      * @param  array|string|\Closure  $callback
      */
-    protected function addEventListener(string $name, $callback, int $priority, int $accepted_args)
+    protected function addEventListener(string $name, $callback, int $priority, int $accepted_args): void
     {
         $this->hooks[$name] = [$callback, $priority, $accepted_args];
         $this->addAction($name, $callback, $priority, $accepted_args);
