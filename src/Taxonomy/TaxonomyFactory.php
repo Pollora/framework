@@ -12,7 +12,7 @@ namespace Pollen\Taxonomy;
 
 class TaxonomyFactory
 {
-    public function make(string $slug, string|array $objectType, string|null $singular, string|null $plural)
+    public function make(string $slug, string|array $objectType, ?string $singular, ?string $plural)
     {
         return new Taxonomy($slug, $objectType, $singular, $plural);
     }

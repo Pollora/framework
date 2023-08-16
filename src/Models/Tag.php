@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollen\Models;
 
 /**
- * Option class.
+ * Tag class.
  */
-class Option extends \Corcel\Model\Option
+class Tag extends \Corcel\Model\Tag
 {
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollen\Models;
 
 /**
- * Option class.
+ * Class Attachment
  */
-class Option extends \Corcel\Model\Option
+class Attachment extends \Corcel\Model\Attachment
 {
 }

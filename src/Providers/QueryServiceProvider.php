@@ -27,6 +27,8 @@ class QueryServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind('Corcel\Model\User', 'Pollen\Model\User');
+
         $this->app->singleton('query', function () {
             // main page query
             return Query::instance($GLOBALS['wp_the_query']);
