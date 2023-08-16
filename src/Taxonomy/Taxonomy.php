@@ -64,15 +64,6 @@ class Taxonomy extends WordPressEntity
     public $metaBoxSanitizeCb;
 
     /**
-     * Capabilities for this taxonomy.
-     *
-     * @since 4.7.0
-     *
-     * @var stdClass
-     */
-    public $cap;
-
-    /**
      * Function that will be called when the count is updated.
      *
      * @since 4.7.0
@@ -285,29 +276,6 @@ class Taxonomy extends WordPressEntity
     public function setMetaBoxSanitizeCb(?callable $metaBoxSanitizeCb): Taxonomy
     {
         $this->metaBoxSanitizeCb = $metaBoxSanitizeCb;
-
-        return $this;
-    }
-
-    /**
-     * Retrieves the cap object.
-     *
-     * @return stdClass|null The cap object, or null if it does not exist.
-     */
-    public function getCap(): ?stdClass
-    {
-        return $this->cap;
-    }
-
-    /**
-     * Set the cap property.
-     *
-     * @param  stdClass  $cap The stdClass object representing the cap.
-     * @return Taxonomy Returns the updated Taxonomy object.
-     */
-    public function setCap(stdClass $cap): Taxonomy
-    {
-        $this->cap = $cap;
 
         return $this;
     }

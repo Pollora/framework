@@ -12,47 +12,31 @@ use Pollen\Support\Facades\Action;
 abstract class WordPressEntity
 {
     /**
-     * Name of the post type shown in the menu. Usually plural.
-     *
-     * @since 4.6.0
+     * Name of the post type or taxonomy shown in the menu. Usually plural.
      *
      * @var string
      */
     public $label;
 
     /**
-     * Labels object for this post type.
+     * Labels array for this post type or taxonomy.
      *
-     * If not set, post labels are inherited for non-hierarchical types
-     * and page labels for hierarchical ones.
-     *
-     * @see get_post_type_labels()
-     * @since 4.6.0
-     *
-     * @var stdClass
+     * @var array
      */
     public $labels;
 
     /**
-     * A short descriptive summary of what the post type is.
-     *
-     * Default empty.
-     *
-     * @since 4.6.0
+     * A short descriptive summary of what the post type or taxonomy is.
      *
      * @var string
      */
     public $description;
 
     /**
-     * Whether a post type is intended for use publicly either via the admin interface or by front-end users.
+     * Whether a post type or taxonomy is intended for use publicly either via the admin interface or by front-end users.
      *
      * While the default settings of $exclude_from_search, $publicly_queryable, $show_ui, and $show_in_nav_menus
      * are inherited from public, each does not rely on this relationship and controls a very specific intention.
-     *
-     * Default false.
-     *
-     * @since 4.6.0
      *
      * @var bool
      */
@@ -66,9 +50,14 @@ abstract class WordPressEntity
     public $publiclyQueryable;
 
     /**
-     * Rewrites information for this post type or taxonomy.
+     * Whether the post type or taxonomy is hierarchical.
      *
-     * @since 4.7.0
+     * @var bool
+     */
+    public $hierarchical;
+
+    /**
+     * Rewrites information for this post type or taxonomy.
      *
      * @var array|false
      */
@@ -79,106 +68,80 @@ abstract class WordPressEntity
      *
      * Default is the value of $public.
      *
-     * @since 4.6.0
-     *
      * @var bool
      */
     public $showUi;
 
     /**
-     * Where to show the post type in the admin menu.
-     *
-     * To work, $show_ui must be true. If true, the post type is shown in its own top level menu. If false, no menu is
-     * shown. If a string of an existing top level menu ('tools.php' or 'edit.php?post_type=page', for example), the
-     * post type will be placed as a sub-menu of that.
-     *
-     * Default is the value of $show_ui.
-     *
-     * @since 4.6.0
+     * Where to show the post type or taxonomy in the admin menu.
      *
      * @var bool|string
      */
     public $showInMenu;
 
     /**
-     * Makes this post type available for selection in navigation menus.
+     * Makes this post type or taxonomy available for selection in navigation menus.
      *
      * Default is the value $public.
-     *
-     * @since 4.6.0
      *
      * @var bool
      */
     public $showInNavMenus;
 
     /**
-     * Sets the query_var key for this post type.
+     * Sets the query_var key for this post type or taxonomy.
      *
-     * Defaults to $post_type key. If false, a post type cannot be loaded at `?{query_var}={post_slug}`.
+     * For post types, defaults to $post_type key. If false, a post type cannot be loaded at `?{query_var}={post_slug}`.
      * If specified as a string, the query `?{query_var_string}={post_slug}` will be valid.
-     *
-     * @since 4.6.0
+     * For taxonomy, sets the query var key for this taxonomy. Default $taxonomy key.
+     * If false, a taxonomy cannot be loaded at `?{query_var}={term_slug}`. If a string, the query `?{query_var}={term_slug}` will be valid.
      *
      * @var string|bool
      */
     public $queryVar;
 
     /**
-     * Whether this post type should appear in the REST API.
+     * Whether this post type or taxonomy should appear in the REST API.
      *
      * Default false. If true, standard endpoints will be registered with
      * respect to $rest_base and $rest_controller_class.
-     *
-     * @since 4.7.4
      *
      * @var bool
      */
     public $showInRest;
 
     /**
-     * The base path for this post type's REST API endpoints.
-     *
-     * @since 4.7.4
+     * The base path for this REST API endpoints.
      *
      * @var string|bool
      */
     public $restBase;
 
     /**
-     * The namespace for this post type's REST API endpoints.
-     *
-     * @since 5.9.0
+     * The namespace for this REST API endpoints.
      *
      * @var string|bool
      */
     public $restNamespace;
 
     /**
-     * The controller for this post type's REST API endpoints.
+     * The controller for this REST API endpoints.
      *
      * Custom controllers must extend WP_REST_Controller.
-     *
-     * @since 4.7.4
      *
      * @var string|bool
      */
     public $restControllerClass;
 
     /**
-     * The controller instance for this post type's REST API endpoints.
+     * Post type or Taxonomy capabilities.
      *
-     * Lazily computed. Should be accessed using {@see WP_Post_Type::get_rest_controller()}.
-     *
-     * @since 5.3.0
-     *
-     * @var \WP_REST_Controller
+     * @var array
      */
-    public $restController;
+    public $capabilities;
 
     /**
      * Whether to show this post type or taxonomy on the 'At a Glance' section of the admin dashboard.
-     *
-     * Default false.
      */
     public $dashboardGlance;
 
@@ -197,9 +160,9 @@ abstract class WordPressEntity
     public $names;
 
     /**
-     * Retrieves the label for the item.
+     * Retrieves the label for the entity.
      *
-     * @return string|null Returns the label for the item as a string.
+     * @return string|null Returns the label for the entity as a string.
      *                    If the label is set, the method will return the label string.
      *                    If the label is not set, the method will return null.
      */
@@ -209,9 +172,9 @@ abstract class WordPressEntity
     }
 
     /**
-     * Sets the label for the item.
+     * Sets the label for the entity.
      *
-     * @param  string  $label The label to set for the item.
+     * @param  string  $label The label to set for the entity.
      * @return self Returns the instance of the class for method chaining.
      */
     public function setLabel(string $label): self
@@ -222,24 +185,24 @@ abstract class WordPressEntity
     }
 
     /**
-     * Retrieves the labels associated with the item.
+     * Retrieves the labels associated with the entity.
      *
-     * @return stdClass|null Returns an object containing the labels associated with the item.
-     *                      If labels are available, an object is returned with the label properties.
+     * @return array|null Returns an object containing the labels associated with the entity.
+     *                      If labels are available, an array is returned with the label properties.
      *                      If labels are not available, null is returned.
      */
-    public function getLabels(): ?stdClass
+    public function getLabels(): ?array
     {
         return $this->labels;
     }
 
     /**
-     * Sets the labels for the item.
+     * Sets the labels for the entity.
      *
-     * @param  stdClass  $labels The labels object containing the labels for the item.
+     * @param  array  $labels The labels array containing the labels for the entity.
      * @return self Returns an instance of the class.
      */
-    public function setLabels(stdClass $labels): self
+    public function setLabels(array $labels): self
     {
         $this->labels = $labels;
 
@@ -247,9 +210,9 @@ abstract class WordPressEntity
     }
 
     /**
-     * Retrieves the description for the item.
+     * Retrieves the description for the entity.
      *
-     * @return string|null Returns the description for the item.
+     * @return string|null Returns the description for the entity.
      *                    If the value is null, no description is available.
      */
     public function getDescription(): ?string
@@ -258,9 +221,9 @@ abstract class WordPressEntity
     }
 
     /**
-     * Sets the description of the item.
+     * Sets the description of the entity.
      *
-     * @param  string  $description The description of the item.
+     * @param  string  $description The description of the entity.
      * @return self Returns an instance of the class with the updated description.
      */
     public function setDescription(string $description): self
@@ -271,12 +234,12 @@ abstract class WordPressEntity
     }
 
     /**
-     * Checks if the item is public.
+     * Checks if the entity is public.
      *
-     * @return bool|null Returns a boolean indicating if the item is public.
-     *                  If the value is true, the item is public.
-     *                  If the value is false, the item is not public.
-     *                  If the value is null, the item's visibility is not defined and may require further processing.
+     * @return bool|null Returns a boolean indicating if the entity is public.
+     *                  If the value is true, the entity is public.
+     *                  If the value is false, the entity is not public.
+     *                  If the value is null, the entity's visibility is not defined and may require further processing.
      */
     public function isPublic(): ?bool
     {
@@ -284,7 +247,7 @@ abstract class WordPressEntity
     }
 
     /**
-     * Marks the item as public.
+     * Set the entity as public.
      *
      * @return self Returns an instance of the current object with the public property set to true.
      */
@@ -296,7 +259,7 @@ abstract class WordPressEntity
     }
 
     /**
-     * Sets the visibility of the item to private.
+     * Sets the entity as private.
      *
      * @return self Returns the current instance of the class.
      */
@@ -308,9 +271,9 @@ abstract class WordPressEntity
     }
 
     /**
-     * Sets whether the item should be public or not.
+     * Sets whether the entity should be public or not.
      *
-     * @param  bool  $public The boolean indicating if the item should be public or not.
+     * @param  bool  $public The boolean indicating if the entity should be public or not.
      * @return self Returns the modified instance of the object.
      */
     public function setPublic(bool $public): self
@@ -321,11 +284,11 @@ abstract class WordPressEntity
     }
 
     /**
-     * Checks if the item is publicly queryable.
+     * Checks if the entity is publicly queryable.
      *
-     * @return bool|null Returns a boolean indicating if the item is publicly queryable.
-     *                  If the value is true, the item is publicly queryable.
-     *                  If the value is false, the item is not publicly queryable.
+     * @return bool|null Returns a boolean indicating if the entity is publicly queryable.
+     *                  If the value is true, the entity is publicly queryable.
+     *                  If the value is false, the entity is not publicly queryable.
      *                  If the value is null, the value is not defined and may require further processing.
      */
     public function getPubliclyQueryable(): ?bool
@@ -346,9 +309,9 @@ abstract class WordPressEntity
     }
 
     /**
-     * Sets whether the item can be publicly queried.
+     * Sets whether the entity can be publicly queried.
      *
-     * @param  bool|null  $publiclyQueryable The value indicating whether the item can be publicly queried.
+     * @param  bool|null  $publiclyQueryable The value indicating whether the entity can be publicly queried.
      * @return self Returns an instance of the current object.
      */
     public function setPubliclyQueryable(?bool $publiclyQueryable): self
@@ -359,9 +322,33 @@ abstract class WordPressEntity
     }
 
     /**
+     * Check if the entity is hierarchical or not.
+     *
+     * @return bool|null Returns the hierarchical status of the capability. If the capability is
+     * hierarchical (true), returns true. If the capability is not hierarchical (false), returns
+     * false. If the hierarchical status is unknown, returns null.
+     */
+    public function isHierarchical(): ?bool
+    {
+        return $this->hierarchical;
+    }
+
+    /**
+     * Enable hierarchical mode for entity.
+     *
+     * @return self Returns the current object instance to allow method chaining.
+     */
+    public function hierarchical(): self
+    {
+        $this->hierarchical = true;
+
+        return $this;
+    }
+
+    /**
      * Gets the value of the showUi property.
      *
-     * @return bool|null Returns a boolean indicating if the UI should be shown for this item.
+     * @return bool|null Returns a boolean indicating if the UI should be shown for this entity.
      *                  If the value is true, the UI should be shown.
      *                  If the value is false, the UI should not be shown.
      *                  If the value is null, the decision is not defined and may require further processing.
@@ -372,7 +359,7 @@ abstract class WordPressEntity
     }
 
     /**
-     * Sets the flag to show the UI for the item.
+     * Sets the flag to show the UI for the entity.
      *
      * @return self Returns the updated instance of the class.
      */
@@ -384,7 +371,7 @@ abstract class WordPressEntity
     }
 
     /**
-     * Sets whether the UI should be displayed for the item.
+     * Sets whether the UI should be displayed for the entity.
      *
      * @param  bool|null  $showUi The value indicating if the UI should be displayed.
      *                          - If the value is true, the UI should be displayed.
@@ -400,11 +387,11 @@ abstract class WordPressEntity
     }
 
     /**
-     * Checks if the item should be displayed in the menu.
+     * Checks if the entity should be displayed in the menu.
      *
-     * @return bool|string|null Returns a boolean indicating if the item should be displayed in the menu.
-     *                         If the value is true, the item should be displayed.
-     *                         If the value is false, the item should not be displayed.
+     * @return bool|string|null Returns a boolean indicating if the entity should be displayed in the menu.
+     *                         If the value is true, the entity should be displayed.
+     *                         If the value is false, the entity should not be displayed.
      *                         If the value is null, the decision is not defined and may require further processing.
      */
     public function isShowInMenu(): bool|string|null
@@ -448,11 +435,11 @@ abstract class WordPressEntity
     }
 
     /**
-     * Sets whether the item should be displayed in navigation menus.
+     * Sets whether the entity should be displayed in navigation menus.
      *
-     * @param  bool|null  $showInNavMenus Whether the item should be displayed in navigation menus.
-     *                                  Set to true if the item should be displayed, false if it should not be displayed,
-     *                                  or null if the item's visibility in navigation menus should not be modified.
+     * @param  bool|null  $showInNavMenus Whether the entity should be displayed in navigation menus.
+     *                                  Set to true if the entity should be displayed, false if it should not be displayed,
+     *                                  or null if the entity's visibility in navigation menus should not be modified.
      * @return self Returns the modified instance of the object.
      */
     public function setShowInNavMenus(?bool $showInNavMenus): self
@@ -613,24 +600,24 @@ abstract class WordPressEntity
     }
 
     /**
-     * Retrieves the WP_REST_Controller associated with this object.
+     * Retrieves the capabilities.
      *
-     * @return \WP_REST_Controller|null The WP_REST_Controller object associated with this object, or null if no WP_REST_Controller is set.
+     * @return array|null The capabilities array, or null if it is not set.
      */
-    public function getRestController(): \WP_REST_Controller|null
+    public function getCapabilities(): ?array
     {
-        return $this->restController;
+        return $this->capabilities;
     }
 
     /**
-     * Sets the REST controller.
+     * Sets the capability for the object.
      *
-     * @param  \WP_REST_Controller  $restController The REST controller to set.
-     * @return self Returns the updated instance of the object.
+     * @param  array  $capabilities The capability to set.
+     * @return self Returns a reference to the object.
      */
-    public function setRestController(\WP_REST_Controller $restController): self
+    public function setCapabilities(array $capabilities): self
     {
-        $this->restController = $restController;
+        $this->capabilities = $capabilities;
 
         return $this;
     }

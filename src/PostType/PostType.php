@@ -13,10 +13,8 @@ class PostType extends WordPressEntity
 
     /**
      * The entity name, used for registration.
-     *
-     * @var string
      */
-    protected $entity = 'post-types';
+    protected string $entity = 'post-types';
 
     /**
      * Whether to exclude posts with this post type from front end search
@@ -31,17 +29,6 @@ class PostType extends WordPressEntity
     public $excludeFromSearch;
 
     /**
-     * Whether the post type is hierarchical (e.g. page).
-     *
-     * Default false.
-     *
-     * @since 4.6.0
-     *
-     * @var bool
-     */
-    public $hierarchical;
-
-    /**
      * The position in the menu order the post type should appear.
      *
      * To work, $show_in_menu must be true. Default null (at the bottom).
@@ -51,17 +38,6 @@ class PostType extends WordPressEntity
      * @var int
      */
     public $menuPosition;
-
-    /**
-     * Makes this post type available via the admin bar.
-     *
-     * Default is the value of $show_in_menu.
-     *
-     * @since 4.6.0
-     *
-     * @var bool
-     */
-    public $showInAdminBar;
 
     /**
      * The URL or reference to the icon to be used for this menu.
@@ -78,6 +54,17 @@ class PostType extends WordPressEntity
      * @var string
      */
     public $menuIcon;
+
+    /**
+     * Makes this post type available via the admin bar.
+     *
+     * Default is the value of $show_in_menu.
+     *
+     * @since 4.6.0
+     *
+     * @var bool
+     */
+    public $showInAdminBar;
 
     /**
      * The string to use to build the read, edit, and delete capabilities.
@@ -166,6 +153,17 @@ class PostType extends WordPressEntity
     public $deleteWithUser;
 
     /**
+     * The controller instance for this post type's REST API endpoints.
+     *
+     * Lazily computed. Should be accessed using {@see WP_Post_Type::get_rest_controller()}.
+     *
+     * @since 5.3.0
+     *
+     * @var \WP_REST_Controller
+     */
+    public $restController;
+
+    /**
      * Array of blocks to use as the default initial state for an editor session.
      *
      * Each item should be an array containing block name and optional attributes.
@@ -195,15 +193,6 @@ class PostType extends WordPressEntity
      * @var string|false
      */
     public $templateLock;
-
-    /**
-     * Post type capabilities.
-     *
-     * @since 4.6.0
-     *
-     * @var stdClass
-     */
-    public $cap;
 
     /**
      * The features supported by the post type.
@@ -307,7 +296,7 @@ class PostType extends WordPressEntity
     }
 
     /**
-     * Set whether the item should be excluded from search.
+     * Set whether the posts should be excluded from search.
      *
      * @param  bool|null  $excludeFromSearch Determines if the item should be excluded from search. Set to null to unset.
      * @return self Returns the current object instance to allow method chaining.
@@ -320,31 +309,7 @@ class PostType extends WordPressEntity
     }
 
     /**
-     * Check if the capability is hierarchical.
-     *
-     * @return bool|null Returns the hierarchical status of the capability. If the capability is
-     * hierarchical (true), returns true. If the capability is not hierarchical (false), returns
-     * false. If the hierarchical status is unknown, returns null.
-     */
-    public function isHierarchical(): ?bool
-    {
-        return $this->hierarchical;
-    }
-
-    /**
-     * Enable hierarchical capability.
-     *
-     * @return self Returns the current object instance to allow method chaining.
-     */
-    public function hierarchical(): self
-    {
-        $this->hierarchical = true;
-
-        return $this;
-    }
-
-    /**
-     * Disable chronological ordering.
+     * Enable chronological ordering.
      *
      * @return self Returns the current object instance to allow method chaining.
      */
@@ -657,6 +622,29 @@ class PostType extends WordPressEntity
     }
 
     /**
+     * Retrieves the WP_REST_Controller associated with this object.
+     *
+     * @return \WP_REST_Controller|null The WP_REST_Controller object associated with this object, or null if no WP_REST_Controller is set.
+     */
+    public function getRestController(): \WP_REST_Controller|null
+    {
+        return $this->restController;
+    }
+
+    /**
+     * Sets the REST controller.
+     *
+     * @param  \WP_REST_Controller  $restController The REST controller to set.
+     * @return self Returns the updated instance of the object.
+     */
+    public function setRestController(\WP_REST_Controller $restController): self
+    {
+        $this->restController = $restController;
+
+        return $this;
+    }
+
+    /**
      * Retrieves the template for the site.
      *
      * @return array|null The template for the site, or null if none is set.
@@ -701,29 +689,6 @@ class PostType extends WordPressEntity
     public function setTemplateLock(bool|string $templateLock): self
     {
         $this->templateLock = $templateLock;
-
-        return $this;
-    }
-
-    /**
-     * Retrieves the cap object.
-     *
-     * @return stdClass|null The cap object, or null if it is not set.
-     */
-    public function getCap(): stdClass|null
-    {
-        return $this->cap;
-    }
-
-    /**
-     * Sets the capability for the object.
-     *
-     * @param  stdClass  $cap The capability to set.
-     * @return self Returns a reference to the object.
-     */
-    public function setCap(stdClass $cap): self
-    {
-        $this->cap = $cap;
 
         return $this;
     }
