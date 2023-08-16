@@ -55,6 +55,7 @@
                 "Meta": "Pollen\\Models\\Meta",
                 "Query": "Pollen\\Support\\Facades\\Query",
                 "Loop": "Pollen\\Support\\Facades\\Loop",
+                "Ajax": "Pollen\\Support\\Facades\\Ajax",
                 "Action": "Pollen\\Support\\Facades\\Action",
                 "Filter": "Pollen\\Support\\Facades\\Filter",
                 "PostType": "Pollen\\Support\\Facades\\PostType",

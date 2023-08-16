@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollen\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Pollen\Ajax\AjaxServiceProvider;
 use Pollen\Auth\AuthServiceProvider;
 use Pollen\Hashing\HashServiceProvider;
 use Pollen\Hook\HookServiceProvider;
@@ -35,6 +36,7 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);
+        $this->app->register(AjaxServiceProvider::class);
         $this->app->register(TaxonomyServiceProvider::class);
         $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(ThemeSupportServiceProvider::class);
