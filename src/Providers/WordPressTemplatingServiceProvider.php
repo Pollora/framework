@@ -7,12 +7,15 @@ namespace Pollen\Providers;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Pollen\Support\Facades\Filter;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
  */
 class WordPressTemplatingServiceProvider extends ServiceProvider
 {
+    protected $wp_theme;
+
     /**
      * Perform post-registration booting of services.
      *
@@ -20,6 +23,11 @@ class WordPressTemplatingServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->wp_theme = wp_get_theme();
+        $this->app->singleton('wp.theme', function () {
+            return $this->wp_theme;
+        });
+
         Blade::directive('usercan', function ($expression) {
             return "<?php if( User::current()->can({$expression}) ): ?>";
         });
@@ -84,6 +92,21 @@ class WordPressTemplatingServiceProvider extends ServiceProvider
             });
         }
 
-        View::addNamespace('theme', base_path().'/resources/views/themes/'.wp_get_theme()->stylesheet);
+        View::addNamespace('theme', base_path().'/resources/views/themes/'.$this->wp_theme->get_stylesheet());
+
+        $this->overrideThemeJsonResolver();
+    }
+
+    public function overrideThemeJsonResolver()
+    {
+        Filter::add('theme_file_path', function ($path, $file) {
+            $blade_theme_json = base_path().'/resources/views/themes/'.wp_get_theme()->get_stylesheet().'/'.$file;
+
+            if ($file !== 'theme.json' || ! file_exists($blade_theme_json)) {
+                return $path;
+            }
+
+            return $blade_theme_json;
+        }, 90, 2);
     }
 }
