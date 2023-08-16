@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollen\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollen\Ajax\AjaxServiceProvider;
 use Pollen\Auth\AuthServiceProvider;
 use Pollen\Hashing\HashServiceProvider;
@@ -44,6 +45,7 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(SidebarServiceProvider::class);
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
+        $this->app->register(SageDirectivesServiceProvider::class);
 
         // Blade service provider
         $this->app->register(WordPressTemplatingServiceProvider::class);
