@@ -7,6 +7,7 @@ namespace Pollen\Providers;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Auth\AuthServiceProvider;
 use Pollen\Hashing\HashServiceProvider;
+use Pollen\Hook\HookServiceProvider;
 use Pollen\Http\Request;
 use Pollen\Mail\WordPressMailServiceProvider;
 use Pollen\PostType\PostTypeServiceProvider;
@@ -15,6 +16,7 @@ use Pollen\Taxonomy\TaxonomyServiceProvider;
 /**
  * Registers all the other service providers used by this package.
  *
+ * @author Olivier Gorzalka <olivier@amphibee.fr>
  * @author Jordan Doyle <jordan@doyle.wf>
  */
 class PollenServiceProvider extends ServiceProvider

@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Providers;
+namespace Pollen\Hook;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
-use Pollen\Hook\ActionBuilder;
-use Pollen\Hook\FilterBuilder;
 
 class HookServiceProvider extends ServiceProvider
 {

@@ -16,6 +16,7 @@ use Request;
  * everything that needs configuring then boots the backend
  * of WordPress.
  *
+ * @author Olivier Gorzalka <olivier@amphibee.fr>
  * @author Jordan Doyle <jordan@doyle.wf>
  */
 class WordPressServiceProvider extends ServiceProvider
