@@ -9,7 +9,7 @@ return [
     'endusercan' => fn () => '<?php endif; ?>',
     'loop' => fn () => '<?php if (have_posts()) { while (have_posts()) { the_post(); ?>',
     'endloop' => fn () => '<?php }} ?>',
-    'template' => function () {
+    'template' => function ($expression) {
         $args = array_map(fn ($arg) => trim($arg, '\/\'\" ()'), explode(',', $expression));
 
         if (isset($args[1]) && is_callable($args[1])) {
