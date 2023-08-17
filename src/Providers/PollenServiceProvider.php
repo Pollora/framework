@@ -8,12 +8,14 @@ use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollen\Ajax\AjaxServiceProvider;
 use Pollen\Auth\AuthServiceProvider;
+use Pollen\Gutenberg\PatternServiceProvider;
 use Pollen\Hashing\HashServiceProvider;
 use Pollen\Hook\HookServiceProvider;
 use Pollen\Http\Request;
 use Pollen\Mail\WordPressMailServiceProvider;
 use Pollen\PostType\PostTypeServiceProvider;
 use Pollen\Taxonomy\TaxonomyServiceProvider;
+use Pollen\Theme\ThemeServiceProvider;
 
 /**
  * Registers all the other service providers used by this package.
@@ -48,7 +50,8 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(SageDirectivesServiceProvider::class);
 
         // Blade service provider
-        $this->app->register(WordPressTemplatingServiceProvider::class);
+        $this->app->register(ThemeServiceProvider::class);
+        $this->app->register(PatternServiceProvider::class);
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);

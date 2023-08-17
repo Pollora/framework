@@ -116,6 +116,6 @@ if (! function_exists('menu')) {
 if (! function_exists('is_secured')) {
     function is_secured()
     {
-        return str_contains('http://', config('app.url'));
+        return str_contains(config('app.url'), 'https://');
     }
 }
