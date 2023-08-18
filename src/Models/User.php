@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Modelss;
+namespace Pollen\Models;
 
 /**
  * Class User.
