@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Models\Option;
 use Pollen\Support\Facades\Action;
+use Pollen\Support\Facades\Filter;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -49,11 +50,28 @@ class ThemeServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->theme_root = base_path().'/resources/views/themes';
+
+        $this->theme_root = base_path().'/resources';
 
         Action::add('init', function () {
+            if (wp_installing()) {
+                return;
+            }
             $this->initializeTheme();
         }, 1);
+
+        Action::add('admin_print_styles-themes.php', [$this, 'hideBrokenThemeNotice']);
+    }
+
+    /**
+     * Hide the broken theme notice.
+     *
+     * This method adds a CSS style to hide the broken theme notice on the front end. Ugly but no other option :(
+     *
+     * @return void
+     */
+    public function hideBrokenThemeNotice(): void {
+        echo '<style>.broken-themes { display: none; }<style>';
     }
 
     private function initializeTheme()
@@ -63,8 +81,6 @@ class ThemeServiceProvider extends ServiceProvider
         register_theme_directory($this->theme_root);
 
         $GLOBALS['wp_theme_directories'][] = WP_CONTENT_DIR.'/themes';
-
-        View::addNamespace('theme', base_path().'/resources/views/themes/'.Option::get('stylesheet'));
 
         $this->wp_theme = wp_get_theme();
 

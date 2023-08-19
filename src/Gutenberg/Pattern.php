@@ -180,7 +180,7 @@ class Pattern
                         }
 
                         // The actual pattern content is the output of the file.
-                        $pattern_data['content'] = view('theme::'.str_replace([get_stylesheet_directory().'/', '.blade.php'], '', $file))->render();
+                        $pattern_data['content'] = view(str_replace([get_stylesheet_directory().'/', '.blade.php'], '', $file))->render();
 
                         if (! $pattern_data['content']) {
                             continue;

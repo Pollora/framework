@@ -31,7 +31,7 @@ class MenuServiceProvider extends ServiceProvider
      */
     public function registerMenus()
     {
-        $menus = config('theme.menus');
+        $menus = (array) config('theme.menus');
         $translater = new Translater($menus, 'menus');
         $menus = $translater->translate(['*']);
 

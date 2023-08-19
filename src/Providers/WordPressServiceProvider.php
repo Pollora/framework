@@ -133,7 +133,7 @@ class WordPressServiceProvider extends ServiceProvider
     {
         define('WP_DEBUG', config('app.debug'));
         define('WP_DEBUG_DISPLAY', WP_DEBUG);
-        define('WP_DEFAULT_THEME', 'koselig');
+        define('WP_DEFAULT_THEME', 'views');
         define('DISALLOW_FILE_MODS', true);
 
         $this->setAuthenticationConstants();
@@ -157,7 +157,7 @@ class WordPressServiceProvider extends ServiceProvider
     {
         // register the user's templates
         Action::add('theme_page_templates', function ($pageTemplates) {
-            return array_merge($pageTemplates, config('templates'));
+            return array_merge($pageTemplates, (array) config('templates'));
         });
 
         // hacky fix to get network admin working

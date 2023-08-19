@@ -49,7 +49,7 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
 
-        // Blade service provider
+        // Theme service provider
         $this->app->register(ThemeServiceProvider::class);
         $this->app->register(PatternServiceProvider::class);
 

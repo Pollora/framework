@@ -18,6 +18,9 @@ class PatternServiceProvider extends ServiceProvider
     public function register()
     {
         Action::add('init', function () {
+            if (wp_installing()) {
+                return;
+            }
             $pattern = new Pattern($this->app);
             $pattern->registerThemeBlockPatterns();
             $pattern->registerThemeBlockPatternCategories();

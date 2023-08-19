@@ -31,7 +31,7 @@ class SidebarServiceProvider extends ServiceProvider
      */
     public function registerSidebars()
     {
-        $sidebars = config('theme.sidebars');
+        $sidebars = (array) config('theme.sidebars');
         $translater = new Translater($sidebars, 'sidebars');
         $sidebars = $translater->translate(['*.name', '*.description']);
 
