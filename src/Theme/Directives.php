@@ -22,7 +22,7 @@ return [
         return "<?php if (\$__env->exists('{$path}')) { echo \$__env->make('{$path}', {$data}, \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); } else { echo \$__env->make('{$args[0]}', {$data}, \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); } ?>";
     },
     'gravityform' => function ($expression) {
-        if (!function_exists('gravity_form')) {
+        if (! function_exists('gravity_form')) {
             return '<div><b>Gravity form is not installed or activated</b></div>';
         }
 
