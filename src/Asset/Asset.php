@@ -13,6 +13,7 @@ namespace Pollen\Asset;
 use Illuminate\Foundation\ViteManifestNotFoundException;
 use Illuminate\Support\Facades\Vite;
 use Pollen\Support\Facades\Action;
+use Pollen\Support\Facades\Filter;
 
 /**
  * Class Asset
@@ -451,6 +452,21 @@ class Asset
     protected function enqueueScript()
     {
         wp_enqueue_script($this->handle, $this->path, $this->dependencies, $this->version, $this->loadInFooter);
+
+        if ($this->useVite) {
+            // Update script tag with module attribute.
+            Filter::add('script_loader_tag', function ($tag, $handle, $src) {
+                if ($handle !== $this->handle) {
+                    return $tag;
+                }
+
+                // Change the script tag by adding type="module" and return it.
+                $tag = '<script type="module" crossorigin src="'.esc_url($src).'"></script>';
+
+                return $tag;
+            }, 10, 3);
+        }
+
         if ($this->loadStrategy) {
             wp_script_add_data($this->handle, 'defer', true);
         }
