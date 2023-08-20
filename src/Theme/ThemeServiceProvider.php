@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Models\Option;
 use Pollen\Support\Facades\Action;
-use Pollen\Support\Facades\Filter;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -67,10 +66,9 @@ class ThemeServiceProvider extends ServiceProvider
      * Hide the broken theme notice.
      *
      * This method adds a CSS style to hide the broken theme notice on the front end. Ugly but no other option :(
-     *
-     * @return void
      */
-    public function hideBrokenThemeNotice(): void {
+    public function hideBrokenThemeNotice(): void
+    {
         echo '<style>.broken-themes { display: none; }<style>';
     }
 
