@@ -7,7 +7,7 @@ namespace Pollen\Hashing;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Provide 'wphash' service to allow for hashing using WordPress'
+ * Provide 'wp.hash' service to allow for hashing using WordPress'
  * hashing methods.
  *
  * @author Jordan Doyle <jordan@doyle.wf>
@@ -28,7 +28,7 @@ class HashServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('wphash', function () {
+        $this->app->singleton('wp.hash', function () {
             return new WordPressHasher();
         });
     }
@@ -40,6 +40,6 @@ class HashServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['wphash'];
+        return ['wp.hash'];
     }
 }

@@ -20,7 +20,7 @@ class PostTypeServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind('posttype', function ($app) {
+        $this->app->bind('wp.posttype', function ($app) {
             return new PostTypeFactory($app);
         });
         $this->registerPostTypes();

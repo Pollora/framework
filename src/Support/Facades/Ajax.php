@@ -15,6 +15,6 @@ class Ajax extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'ajax';
+        return 'wp.ajax';
     }
 }

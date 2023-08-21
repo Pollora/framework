@@ -15,6 +15,6 @@ class PostType extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'posttype';
+        return 'wp.posttype';
     }
 }

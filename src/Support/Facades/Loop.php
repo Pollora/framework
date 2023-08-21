@@ -36,6 +36,6 @@ class Loop extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'loop';
+        return 'wp.loop';
     }
 }

@@ -15,6 +15,6 @@ class Taxonomy extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'taxonomy';
+        return 'wp.taxonomy';
     }
 }

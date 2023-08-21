@@ -22,11 +22,11 @@ class HookServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind('action', function ($container) {
+        $this->app->bind('wp.action', function ($container) {
             return new ActionBuilder($container);
         });
 
-        $this->app->bind('filter', function ($container) {
+        $this->app->bind('wp.filter', function ($container) {
             return new FilterBuilder($container);
         });
     }
@@ -52,7 +52,7 @@ class HookServiceProvider extends ServiceProvider
         if (method_exists($instance, 'register')) {
             empty($hooks)
                 ? $instance->register()
-                : $this['action']->add($hooks, [$instance, 'register'], $instance->priority);
+                : $this['wp.action']->add($hooks, [$instance, 'register'], $instance->priority);
         }
     }
 }

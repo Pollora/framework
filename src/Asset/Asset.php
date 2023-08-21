@@ -99,7 +99,7 @@ class Asset
         $this->handle = $handle;
         $this->path = $path;
         $this->type = $this->determineFileType($path);
-        $this->vite = app('vite');
+        $this->vite = app('wp.vite');
 
         return $this;
     }
@@ -378,7 +378,7 @@ class Asset
                 return $tag;
             }, 10, 3);
         }
-        
+
         if ($this->loadStrategy) {
             wp_script_add_data($this->handle, 'defer', true);
         }

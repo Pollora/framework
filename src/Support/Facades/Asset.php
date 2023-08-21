@@ -10,6 +10,6 @@ class Asset extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'asset';
+        return 'wp.asset';
     }
 }

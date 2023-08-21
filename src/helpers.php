@@ -49,7 +49,7 @@ if (! function_exists('query')) {
      */
     function query(WP_Query $query = null)
     {
-        return ($query === null) ? app('query') : Query::instance($query);
+        return ($query === null) ? app('wp.query') : Query::instance($query);
     }
 }
 
@@ -63,7 +63,7 @@ if (! function_exists('post')) {
      */
     function post(WP_Post $post = null)
     {
-        return ($post === null) ? app('loop') : Post::find($post->ID);
+        return ($post === null) ? app('wp.loop') : Post::find($post->ID);
     }
 }
 

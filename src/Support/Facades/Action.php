@@ -23,6 +23,6 @@ class Action extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'action';
+        return 'wp.action';
     }
 }

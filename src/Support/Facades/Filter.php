@@ -23,6 +23,6 @@ class Filter extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'filter';
+        return 'wp.filter';
     }
 }

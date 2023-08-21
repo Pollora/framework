@@ -11,11 +11,11 @@ class AssetServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->singleton('vite', function (Application $app) {
+        $this->app->singleton('wp.vite', function (Application $app) {
             return new Vite($app);
         });
 
-        $this->app->singleton('asset', function ($app) {
+        $this->app->singleton('wp.asset', function ($app) {
             return new AssetFactory();
         });
     }

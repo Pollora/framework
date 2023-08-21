@@ -24,6 +24,6 @@ class WPHash extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'wphash';
+        return 'wp.hash';
     }
 }

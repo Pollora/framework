@@ -24,6 +24,6 @@ class Query extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'query';
+        return 'wp.query';
     }
 }
