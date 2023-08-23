@@ -52,7 +52,7 @@ class Vite
 
     public function __construct(Application $app)
     {
-        $this->client = $app->get(\Illuminate\Foundation\Vite::class)([]);
+        $this->client = $app->get(\Illuminate\Foundation\Vite::class)([], 'pollen');
     }
 
     /**
