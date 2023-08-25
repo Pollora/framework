@@ -36,6 +36,7 @@
         "watson/rememberable": "^6.1",
         "cweagans/composer-patches": "^1.7",
         "johnbillion/extended-cpts": "^5.0",
+        "qirolab/laravel-themer": "^2.1",
         "jgrossi/corcel": "^7.0",
         "log1x/sage-directives": "^2.0"
     },

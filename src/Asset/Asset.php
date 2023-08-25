@@ -97,7 +97,7 @@ class Asset
     public function __construct(string $handle, string $path)
     {
         $this->handle = $handle;
-        $this->path = $path;
+        $this->path = str_replace(base_path('/'), '', $path);
         $this->type = $this->determineFileType($path);
         $this->vite = app('wp.vite');
 

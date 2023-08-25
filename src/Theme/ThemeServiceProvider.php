@@ -7,8 +7,8 @@ namespace Pollen\Theme;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Pollen\Models\Option;
 use Pollen\Support\Facades\Action;
+use Qirolab\Theme\Theme;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -49,8 +49,7 @@ class ThemeServiceProvider extends ServiceProvider
 
     public function register()
     {
-
-        $this->theme_root = base_path().'/resources';
+        $this->theme_root = config('theme.base_path');
 
         Action::add('init', function () {
             if (wp_installing()) {
@@ -58,18 +57,6 @@ class ThemeServiceProvider extends ServiceProvider
             }
             $this->initializeTheme();
         }, 1);
-
-        Action::add('admin_print_styles-themes.php', [$this, 'hideBrokenThemeNotice']);
-    }
-
-    /**
-     * Hide the broken theme notice.
-     *
-     * This method adds a CSS style to hide the broken theme notice on the front end. Ugly but no other option :(
-     */
-    public function hideBrokenThemeNotice(): void
-    {
-        echo '<style>.broken-themes { display: none; }<style>';
     }
 
     private function initializeTheme()
@@ -77,6 +64,8 @@ class ThemeServiceProvider extends ServiceProvider
         global $wp_theme_directories;
 
         register_theme_directory($this->theme_root);
+
+        Theme::set(get_stylesheet());
 
         $GLOBALS['wp_theme_directories'][] = WP_CONTENT_DIR.'/themes';
 

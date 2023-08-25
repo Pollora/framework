@@ -24,7 +24,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      */
     public function __construct($menu)
     {
-        if (is_string($menu)) {
+        if (is_string($menu) && function_exists('wp_get_nav_menu_object')) {
             $menu = wp_get_nav_menu_object(get_nav_menu_locations()[$menu]);
 
             // WordPress is nice and will always place children below parents so we can easily create a tree out of it
