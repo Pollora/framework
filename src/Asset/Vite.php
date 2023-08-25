@@ -24,31 +24,23 @@ class Vite
 
     /**
      * The path to the build directory.
-     *
-     * @var string
      */
-    protected $buildDirectory = 'build';
+    protected string $buildDirectory = 'build';
 
     /**
      * The name of the manifest file.
-     *
-     * @var string
      */
-    protected $manifestFilename = 'manifest.json';
+    protected string $manifestFilename = 'manifest.json';
 
     /**
      * The cached manifest files.
-     *
-     * @var array
      */
-    protected static $manifests = [];
+    protected static array $manifests = [];
 
     /**
      * The path to the "hot" file.
-     *
-     * @var string|null
      */
-    protected $hotFile;
+    protected ?string $hotFile = null;
 
     public function __construct(Application $app)
     {
@@ -61,7 +53,7 @@ class Vite
      * @param  string  $hook The hook to reference not to duplicate the client markup.
      * @return HtmlString The HTML object for the Vite client script tag.
      */
-    public function viteClientHtml($hook): HtmlString
+    public function viteClientHtml(string $hook): HtmlString
     {
         $this->loadInHook($hook);
 
@@ -73,7 +65,7 @@ class Vite
      *
      * @param  string  $hook The hook to Reference.
      */
-    public function loadInHook($hook): void
+    public function loadInHook(string $hook): void
     {
         $this->loadedInHooks[$hook] = true;
     }
@@ -99,6 +91,12 @@ class Vite
     public function retrieveHotAsset(string $path): string
     {
         $hotAsset = $this->hotAsset($path);
+        $theme = $this->getThemeFromAssetPath($path);
+
+        if ($theme) {
+            $themePath = str_replace(base_path('/'), '', config('theme.base_path')).'/'.$theme.'/';
+            $hotAsset = str_replace($themePath, '', $hotAsset);
+        }
 
         return $hotAsset;
     }
@@ -114,6 +112,15 @@ class Vite
      */
     public function lookupAssetInManifest(string $path): string
     {
+        $theme = $this->getThemeFromAssetPath($path);
+
+        if ($theme) {
+            $themePath = str_replace(base_path('/'), '', config('theme.base_path'));
+            $this->setBuildDirectory('build/'.$theme);
+            $pathPieces = explode($themePath.'/'.$theme.'/', $path);
+            $path = end($pathPieces);
+        }
+
         $manifest = $this->manifest($this->buildDirectory);
 
         if (isset($manifest[$path])) {
@@ -124,19 +131,48 @@ class Vite
     }
 
     /**
+     * Retrieves the theme name from the provided asset path.
+     *
+     * @param  string  $path The asset path to extract the theme name from.
+     * @return string|false Returns the theme name if it is found in the asset path, otherwise false.
+     */
+    public function getThemeFromAssetPath(string $path): ?string
+    {
+        $themePath = str_replace(base_path('/'), '', config('theme.base_path'));
+
+        if (str_starts_with($path, $themePath)) {
+            $themePathOffset = strlen($themePath) + 1;
+            $truncatedPath = substr($path, $themePathOffset);
+            $theme = strtok($truncatedPath, '/');
+
+            return $theme;
+        }
+
+        return null;
+    }
+
+    /**
+     * Sets the Vite build directory for the project.
+     *
+     * @param  string  $buildDirectory The directory path where the build files will be generated.
+     */
+    public function setBuildDirectory(string $buildDirectory): void
+    {
+        $this->buildDirectory = $buildDirectory;
+    }
+
+    /**
      * Get the the manifest file for the given build directory.
      *
-     * @param  string  $buildDirectory
-     * @return array
      *
      * @throws \Illuminate\Foundation\ViteManifestNotFoundException
      */
-    public function manifest($buildDirectory)
+    public function manifest(string $buildDirectory): array
     {
         $path = $this->manifestPath($buildDirectory);
 
         if (! isset(static::$manifests[$path])) {
-            if (! is_file($path)) {
+            if (! file_exists($path)) {
                 throw new ViteManifestNotFoundException("Vite manifest not found at: $path");
             }
 
@@ -152,17 +188,15 @@ class Vite
      * @param  string  $buildDirectory The build directory.
      * @return string The path to the manifest file.
      */
-    protected function manifestPath($buildDirectory)
+    protected function manifestPath(string $buildDirectory): string
     {
         return public_path($buildDirectory.'/'.$this->manifestFilename);
     }
 
     /**
      * Get the path to a given asset when running in HMR mode.
-     *
-     * @return string
      */
-    public function hotAsset($asset)
+    public function hotAsset(string $asset): string
     {
         return rtrim(file_get_contents(\Illuminate\Support\Facades\Vite::hotFile())).'/'.$asset;
     }

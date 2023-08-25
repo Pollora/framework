@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Support\Facades\Action;
-use Qirolab\Theme\Presets\Vite\TailwindPreset;
 use Qirolab\Theme\Theme;
 
 /**
@@ -51,8 +50,6 @@ class ThemeServiceProvider extends ServiceProvider
     public function register()
     {
         $this->theme_root = config('theme.base_path');
-
-        $this->app->bind(TailwindPreset::class, \Pollen\Theme\Presets\Vite\TailwindPreset::class);
 
         Action::add('init', function () {
             if (wp_installing()) {

@@ -16,6 +16,7 @@ use Pollen\Http\Request;
 use Pollen\Mail\WordPressMailServiceProvider;
 use Pollen\PostType\PostTypeServiceProvider;
 use Pollen\Taxonomy\TaxonomyServiceProvider;
+use Pollen\Theme\ThemeCommandServiceProvider;
 use Pollen\Theme\ThemeServiceProvider;
 
 /**
@@ -53,6 +54,7 @@ class PollenServiceProvider extends ServiceProvider
 
         // Theme service provider
         $this->app->register(ThemeServiceProvider::class);
+        $this->app->register(ThemeCommandServiceProvider::class);
         $this->app->register(PatternServiceProvider::class);
 
         // Authentication service provider

@@ -38,7 +38,7 @@
         "johnbillion/extended-cpts": "^5.0",
         "qirolab/laravel-themer": "^2.1",
         "jgrossi/corcel": "^7.0",
-        "log1x/sage-directives": "^2.0",
+        "log1x/sage-directives": "^2.0"
     },
     "autoload": {
         "psr-4": {
