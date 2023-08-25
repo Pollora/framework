@@ -14,7 +14,7 @@ class TailwindPreset
 
     public function export(): void
     {
-        $this->updatePackages()
+        $this->addPackages()
             ->exportBootstrapping();
     }
 
@@ -41,6 +41,7 @@ class TailwindPreset
     {
         $this->ensureDirectoryExists($this->themePath('js'));
         $this->ensureDirectoryExists($this->themePath('css'));
+        $this->ensureDirectoryExists($this->themePath('images'));
 
         copy($this->stubPath('tailwind-stubs/tailwind.config.js'), $this->themePath('tailwind.config.js'));
         $this->replaceInFile(
@@ -53,6 +54,13 @@ class TailwindPreset
             copy(
                 $this->stubPath('tailwind-stubs/js/app.js'),
                 $this->themePath('js/app.js')
+            );
+        }
+
+        if (! $this->exists($this->themePath('images/pollen.svg'))) {
+            copy(
+                $this->stubPath('tailwind-stubs/images/pollen.svg'),
+                $this->themePath('images/pollen.svg')
             );
         }
 
