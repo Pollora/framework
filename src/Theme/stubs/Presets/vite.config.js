@@ -1,14 +1,18 @@
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
+import path from "path";
+
+let publicPath = path.resolve(__dirname) + '/../../public';
 
 export default defineConfig({
     plugins: [
         laravel({
             input: [
-                "%theme_path%%app_css_input%",
-                "%theme_path%js/app.js"
+                "css/app.css",
+                "js/app.js"
             ],
-            buildDirectory: "%theme_name%",
+            hotFile: publicPath + '/hot',
+            buildDirectory: "build/%theme_name%",
         }),
         {
             name: "blade",
@@ -21,6 +25,5 @@ export default defineConfig({
                 }
             },
         },
-    ],
-    %css_config%
+    ]
 });
