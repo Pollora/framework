@@ -1,17 +1,14 @@
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
-import path from "path";
-
-let publicPath = path.resolve(__dirname) + '/../../public';
+import { readFileSync } from 'node:fs';
 
 export default defineConfig({
     plugins: [
         laravel({
             input: [
-                "css/app.css",
-                "js/app.js"
+                "themes/%theme_name%/css/app.css",
+                "themes/%theme_name%/js/app.js"
             ],
-            hotFile: publicPath + '/hot',
             buildDirectory: "build/%theme_name%",
         }),
         {
@@ -25,5 +22,23 @@ export default defineConfig({
                 }
             },
         },
-    ]
+    ],
+    build: {
+        emptyOutDir: false,
+    },
+    server: {
+        cors: true,
+        strictPort: true,
+        port: 5173,
+        host: '0.0.0.0',
+        open: false,
+        hmr: {
+            port: 5173,
+            clientPort: 5173,
+        },
+        https: {
+            key: readFileSync('/etc/certs/local-key.pem'),
+            cert: readFileSync('/etc/certs/local-cert.pem'),
+        }
+    },
 });

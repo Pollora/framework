@@ -37,6 +37,10 @@ class Vite
      */
     protected static array $manifests = [];
 
+    protected ?string $theme = null;
+
+    protected Application $app;
+
     /**
      * The path to the "hot" file.
      */
@@ -44,12 +48,20 @@ class Vite
 
     public function __construct(Application $app)
     {
+        $this->app = $app;
 
-        if (app()->runningInConsole()) {
+        if ($this->app->runningInConsole()) {
             return;
         }
+    }
 
-        $this->client = $app->get(\Illuminate\Foundation\Vite::class)([], 'pollen');
+    public function setClient(string $path)
+    {
+        $this->theme = $this->getThemeFromAssetPath($path);
+        if ($this->theme) {
+            $this->setBuildDirectory('build/'.$this->theme);
+        }
+        $this->client = $this->app->get(\Illuminate\Foundation\Vite::class)([], $this->theme ? "build/{$this->theme}" : 'build');
     }
 
     /**
@@ -95,15 +107,7 @@ class Vite
      */
     public function retrieveHotAsset(string $path): string
     {
-        $hotAsset = $this->hotAsset($path);
-        $theme = $this->getThemeFromAssetPath($path);
-
-        if ($theme) {
-            $themePath = str_replace(base_path('/'), '', config('theme.base_path')).'/'.$theme.'/';
-            $hotAsset = str_replace($themePath, '', $hotAsset);
-        }
-
-        return $hotAsset;
+        return $this->hotAsset($path);
     }
 
     /**
@@ -117,15 +121,6 @@ class Vite
      */
     public function lookupAssetInManifest(string $path): string
     {
-        $theme = $this->getThemeFromAssetPath($path);
-
-        if ($theme) {
-            $themePath = str_replace(base_path('/'), '', config('theme.base_path'));
-            $this->setBuildDirectory('build/'.$theme);
-            $pathPieces = explode($themePath.'/'.$theme.'/', $path);
-            $path = end($pathPieces);
-        }
-
         $manifest = $this->manifest($this->buildDirectory);
 
         if (isset($manifest[$path])) {
@@ -143,7 +138,7 @@ class Vite
      */
     public function getThemeFromAssetPath(string $path): ?string
     {
-        $themePath = str_replace(base_path('/'), '', config('theme.base_path'));
+        $themePath = config('theme.base_path');
 
         if (str_starts_with($path, $themePath)) {
             $themePathOffset = strlen($themePath) + 1;

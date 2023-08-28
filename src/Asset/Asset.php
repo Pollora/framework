@@ -41,9 +41,16 @@ class Asset
      */
     protected array $dependencies = [];
 
-    protected \Pollen\Asset\Vite $vite;
+    protected ?\Pollen\Asset\Vite $vite = null;
 
     protected $requireViteClient = false;
+
+    /**
+     * Asset theme.
+     *
+     * @param  ?string  $theme
+     */
+    protected ?string $theme = null;
 
     /**
      * Determines whether ViteJS should be used or not.
@@ -96,10 +103,12 @@ class Asset
      */
     public function __construct(string $handle, string $path)
     {
+
         $this->handle = $handle;
         $this->path = str_replace(base_path('/'), '', $path);
         $this->type = $this->determineFileType($path);
         $this->vite = app('wp.vite');
+        $this->vite->setClient($path);
 
         return $this;
     }
