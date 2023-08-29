@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
+/**
+ * Class ThemeCommandServiceProvider
+ *
+ * Override the default service provider for the theme command.
+ */
+
 namespace Pollen\Theme;
 
 use Pollen\Theme\Commands\MakeThemeCommand;
 
-/**
- * Provide extra blade directives to aid in WordPress view development.
- */
 class ThemeCommandServiceProvider extends \Qirolab\Theme\ThemeServiceProvider
 {
-    protected $wp_theme;
-
-    protected $theme_root;
-
     /**
      * Perform post-registration booting of services.
      */

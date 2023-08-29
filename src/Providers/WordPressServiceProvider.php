@@ -155,11 +155,6 @@ class WordPressServiceProvider extends ServiceProvider
      */
     public function triggerHooks()
     {
-        // register the user's templates
-        Action::add('theme_page_templates', function ($pageTemplates) {
-            return array_merge($pageTemplates, (array) config('templates'));
-        });
-
         // hacky fix to get network admin working
         Action::add('network_site_url', [$this, 'rewriteNetworkUrl'], 10, 3);
     }

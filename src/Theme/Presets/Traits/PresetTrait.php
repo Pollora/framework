@@ -11,7 +11,6 @@ use Qirolab\Theme\Theme;
 trait PresetTrait
 {
     use HandleFiles;
-    use PackagesTrait;
 
     /**
      * @var VitePresetExport

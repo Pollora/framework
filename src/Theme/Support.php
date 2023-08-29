@@ -2,23 +2,18 @@
 
 declare(strict_types=1);
 
-/**
- * Class ThemeSupportServiceProvider
- */
+namespace Pollen\Theme;
 
-namespace Pollen\Providers;
-
-use Illuminate\Support\ServiceProvider;
 use Pollen\Support\Facades\Action;
 
 /**
- * Class ThemeSupportServiceProvider
+ * Class Support
  *
- * A service provider dedicated to theme support.
+ * The Support class is responsible for registering all of the site's theme support.
  */
-class ThemeSupportServiceProvider extends ServiceProvider
+class Support
 {
-    public function register()
+    public function init()
     {
         Action::add('after_setup_theme', [$this, 'addThemeSupport'], 1);
     }

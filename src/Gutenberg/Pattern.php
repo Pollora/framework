@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace Pollen\Gutenberg;
 
-use Pollen\Foundation\Application;
+use Pollen\Support\Facades\Action;
 
 class Pattern
 {
-    public function __construct(Application $app)
+    public function init()
     {
+        Action::add('init', function () {
+            if (wp_installing()) {
+                return;
+            }
+            $this->registerThemeBlockPatterns();
+            $this->registerThemeBlockPatternCategories();
+        });
     }
 
     public function registerThemeBlockPatternCategories()
     {
-        foreach (config('gutenberg.categories.patterns') as $key => $args) {
+        foreach ((array) config('theme.gutenberg.categories.patterns') as $key => $args) {
             register_block_pattern_category($key, $args);
         }
     }
@@ -75,10 +82,8 @@ class Pattern
         $themes[] = wp_get_theme($template);
 
         foreach ($themes as $theme) {
-            $dirpath = $theme->get_stylesheet_directory().'/patterns/';
-            //dd($dirpath);
-            //dd(app()->make('wp.theme'));
-            //dd($theme, $dirpath);
+            $dirpath = $theme->get_stylesheet_directory().'/views/patterns/';
+
             if (! is_dir($dirpath) || ! is_readable($dirpath)) {
                 continue;
             }

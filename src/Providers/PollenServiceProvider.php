@@ -9,7 +9,6 @@ use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollen\Ajax\AjaxServiceProvider;
 use Pollen\Asset\AssetServiceProvider;
 use Pollen\Auth\AuthServiceProvider;
-use Pollen\Gutenberg\PatternServiceProvider;
 use Pollen\Hashing\HashServiceProvider;
 use Pollen\Hook\HookServiceProvider;
 use Pollen\Http\Request;
@@ -45,9 +44,6 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(AjaxServiceProvider::class);
         $this->app->register(TaxonomyServiceProvider::class);
         $this->app->register(PostTypeServiceProvider::class);
-        $this->app->register(ThemeSupportServiceProvider::class);
-        $this->app->register(MenuServiceProvider::class);
-        $this->app->register(SidebarServiceProvider::class);
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
@@ -55,7 +51,6 @@ class PollenServiceProvider extends ServiceProvider
         // Theme service provider
         $this->app->register(ThemeServiceProvider::class);
         $this->app->register(ThemeCommandServiceProvider::class);
-        $this->app->register(PatternServiceProvider::class);
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);

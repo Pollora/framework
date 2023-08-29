@@ -2,24 +2,19 @@
 
 declare(strict_types=1);
 
-/**
- * Class SidebarServiceProvider
- */
+namespace Pollen\Theme;
 
-namespace Pollen\Providers;
-
-use Illuminate\Support\ServiceProvider;
 use Pollen\Services\Translater;
 use Pollen\Support\Facades\Action;
 
 /**
- * Class SidebarServiceProvider
+ * Class Sidebar
  *
- * A service provider for registering sidebars.
+ * This class is responsible for registering theme sidebars.
  */
-class SidebarServiceProvider extends ServiceProvider
+class Sidebar
 {
-    public function register()
+    public function init()
     {
         Action::add('after_setup_theme', [$this, 'registerSidebars'], 1);
     }

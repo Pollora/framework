@@ -6,16 +6,19 @@ namespace Pollen\Theme\Presets\Vite;
 
 use Pollen\Theme\Presets\Traits\PresetTrait;
 use Pollen\Theme\Presets\Traits\StubTrait;
+use Pollen\Theme\Presets\Traits\ThemeConfigTrait;
+use Pollen\Theme\Presets\Traits\ThemeProviderTrait;
 
 class TailwindPreset
 {
     use PresetTrait;
     use StubTrait;
+    use ThemeProviderTrait;
+    use ThemeConfigTrait;
 
     public function export(): void
     {
-        $this->addPackages()
-            ->exportBootstrapping();
+        $this->exportBootstrapping()->addProvider()->addThemeConfig();
     }
 
     /**
@@ -44,6 +47,7 @@ class TailwindPreset
         $this->ensureDirectoryExists($this->themePath('images'));
 
         copy($this->stubPath('tailwind-stubs/tailwind.config.js'), $this->themePath('tailwind.config.js'));
+
         $this->replaceInFile(
             '%theme_path%',
             $this->relativeThemePath($this->getTheme()),
