@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\Theme\Presets\Traits;
 
-use Qirolab\Theme\Theme;
+use Pollen\Theme\Theme;
 
 trait StubTrait
 {

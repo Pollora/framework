@@ -6,7 +6,7 @@ namespace Pollen\Theme\Presets\Traits;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
-use Qirolab\Theme\Theme;
+use Pollen\Theme\Theme;
 
 trait ThemeConfigTrait
 {

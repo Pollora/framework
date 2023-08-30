@@ -55,14 +55,16 @@
             ],
             "aliases": {
                 "Wordpress": "Pollen\\Support\\Wordpress",
-                "Meta": "Pollen\\Models\\Meta",
-                "Query": "Pollen\\Support\\Facades\\Query",
-                "Loop": "Pollen\\Support\\Facades\\Loop",
-                "Ajax": "Pollen\\Support\\Facades\\Ajax",
                 "Action": "Pollen\\Support\\Facades\\Action",
                 "Filter": "Pollen\\Support\\Facades\\Filter",
+                "Query": "Pollen\\Support\\Facades\\Query",
+                "Hash": "Pollen\\Support\\Facades\\WPHash",
+                "Loop": "Pollen\\Support\\Facades\\Loop",
+                "Ajax": "Pollen\\Support\\Facades\\Ajax",
                 "PostType": "Pollen\\Support\\Facades\\PostType",
-                "Taxonomy": "Pollen\\Support\\Facades\\Taxonomy"
+                "Taxonomy": "Pollen\\Support\\Facades\\Taxonomy",
+                "Theme": "Pollen\\Support\\Facades\\Theme",
+                "Asset": "Pollen\\Support\\Facades\\Asset"
             }
         },
         "patches": {

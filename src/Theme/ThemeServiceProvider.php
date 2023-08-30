@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Gutenberg\Pattern;
-use Qirolab\Theme\Theme;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -58,6 +57,9 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('theme', function ($app) {
+            return new Theme(); // Remplacez ceci par la manière dont vous instanciez votre classe Theme
+        });
         (new ThemeInitializer($this))->init();
         (new Pattern($this))->init();
         (new Menus($this))->init();

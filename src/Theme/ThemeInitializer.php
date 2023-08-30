@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Pollen\Theme;
 
 use Pollen\Support\Facades\Action;
-use Qirolab\Theme\Theme;
 
 /**
  * Class ThemeInitializer

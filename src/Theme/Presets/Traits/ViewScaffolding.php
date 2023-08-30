@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\Theme\Presets\Traits;
 
+use Pollen\Theme\Theme;
 use Qirolab\Theme\Presets\Traits\HandleFiles;
-use Qirolab\Theme\Theme;
 
 trait ViewScaffolding
 {
