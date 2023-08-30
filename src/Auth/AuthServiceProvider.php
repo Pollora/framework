@@ -31,6 +31,7 @@ class AuthServiceProvider extends ServiceProvider
             $authManager->provider('wp', function ($app, $config) {
                 return new WordPressUserProvider($config['model']);
             });
+
             if (function_exists('user_can')) {
                 Gate::after(function ($user, $ability, $result, $arguments) {
                     return user_can($user, $ability, ...$arguments);

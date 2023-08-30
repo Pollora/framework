@@ -13,10 +13,7 @@ use Pollen\Support\Facades\Action;
 use WP_Error;
 
 /**
- * WordPress user guard, provides a bridge between Laravel's authentication
- * and WordPress.
- *
- * @author Jordan Doyle <jordan@doyle.wf>
+ * WordPress guard implementation for Laravel
  */
 class WordPressGuard implements StatefulGuard
 {
@@ -46,14 +43,7 @@ class WordPressGuard implements StatefulGuard
      */
     public function user()
     {
-        // If we've already retrieved the user for the current request we can just
-        // return it back immediately. We do not want to fetch the user data on
-        // every call to this method because that would be tremendously slow.
-        if (! is_null($this->user)) {
-            return $this->user;
-        }
-
-        return $this->user = ($this->check() ? User::find(get_current_user_id()) : null);
+        return $this->user ??= $this->check() ? User::find(get_current_user_id()) : null;
     }
 
     /**
@@ -65,7 +55,6 @@ class WordPressGuard implements StatefulGuard
     public function validate(array $credentials = [])
     {
         $user = wp_authenticate($credentials['username'], $credentials['password']);
-
         $this->lastAttempted = User::find($user->ID);
 
         return ! ($user instanceof WP_Error);
@@ -82,19 +71,14 @@ class WordPressGuard implements StatefulGuard
     {
         $validate = $this->validate($credentials);
 
-        if (! $login) {
-            return $validate;
+        if ($validate && $login) {
+            $user = $this->lastAttempted;
+            wp_set_auth_cookie($user->ID, $credentials['remember'], Request::secure());
+            Action::run('wp_login', $user->user_login, $user);
+            $this->setUser($user);
         }
 
-        $user = $this->lastAttempted;
-
-        // check if we should use a secure cookie
-        wp_set_auth_cookie($user->ID, $credentials['remember'], Request::secure());
-        Action::run('wp_login', $user->user_login, $user);
-
-        $this->setUser($user);
-
-        return true;
+        return $validate;
     }
 
     /**
@@ -124,9 +108,8 @@ class WordPressGuard implements StatefulGuard
     {
         wp_set_auth_cookie($user->ID, $remember);
         Action::run('wp_login', $user->user_login, get_userdata($user->ID));
+        $this->setUser($user);
         wp_set_current_user($user->ID);
-
-        $this->user = $user;
     }
 
     /**
@@ -138,17 +121,14 @@ class WordPressGuard implements StatefulGuard
      */
     public function loginUsingId($id, $remember = false)
     {
-        $user = User::find($id);
-
-        if (! $user) {
-            return false;
+        if ($user = User::find($id)) {
+            wp_set_auth_cookie($user->ID, $remember);
+            Action::run('wp_login', $user->user_login, get_userdata($user->ID));
+            $this->setUser($user);
+            wp_set_current_user($user->ID);
         }
 
-        wp_set_auth_cookie($user->ID, $remember);
-        Action::run('wp_login', $user->user_login, get_userdata($user->ID));
-        wp_set_current_user($user->ID);
-
-        return $this->user = $user;
+        return $this->user ?? null;
     }
 
     /**
@@ -159,15 +139,14 @@ class WordPressGuard implements StatefulGuard
      */
     public function onceUsingId($id)
     {
-        $user = User::find($id);
+        if ($user = User::find($id)) {
+            wp_set_current_user($id);
+            $this->setUser($user);
 
-        if (! $user) {
-            return false;
+            return true;
         }
 
-        wp_set_current_user($id);
-
-        return $this->user = $user;
+        return false;
     }
 
     /**
