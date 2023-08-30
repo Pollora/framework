@@ -92,10 +92,7 @@ class ThemeInitializer
 
         if (! app()->configurationIsCached()) {
             foreach ($themeConfigs as $themeConfig) {
-                if (! $this->isThemeIdentical($childTheme)) {
-                    $this->themeProvider->registerThemeConfig(get_stylesheet_directory()."/config/{$themeConfig}.php", "theme.{$themeConfig}");
-                }
-                $this->themeProvider->registerThemeConfig(get_stylesheet_directory()."/config/{$themeConfig}.php", "theme.{$themeConfig}");
+                $this->themeProvider->registerThemeConfig(Theme::path("config/{$themeConfig}.php"), "theme.{$themeConfig}");
             }
         }
     }
