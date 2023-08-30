@@ -59,10 +59,10 @@ class ThemeServiceProvider extends ServiceProvider
     public function register()
     {
         (new ThemeInitializer($this))->init();
+        (new Pattern($this))->init();
         (new Menus($this))->init();
         (new Support($this))->init();
         (new Sidebar($this))->init();
-        (new Pattern($this))->init();
         (new Templates($this))->init();
         (new ImageSize($this))->init();
     }
