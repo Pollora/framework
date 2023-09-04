@@ -18,8 +18,6 @@ use Pollen\View\Loop;
  */
 class QueryServiceProvider extends ServiceProvider
 {
-    private $cached = [];
-
     /**
      * Bootstrap any application services.
      *
@@ -30,7 +28,6 @@ class QueryServiceProvider extends ServiceProvider
         $this->app->bind('Corcel\Model\User', 'Pollen\Model\User');
 
         $this->app->singleton('wp.query', function () {
-            // main page query
             return Query::instance($GLOBALS['wp_the_query']);
         });
 

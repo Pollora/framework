@@ -17,6 +17,7 @@ use Pollen\PostType\PostTypeServiceProvider;
 use Pollen\Taxonomy\TaxonomyServiceProvider;
 use Pollen\Theme\ThemeCommandServiceProvider;
 use Pollen\Theme\ThemeServiceProvider;
+use Pollen\View\ViewServiceProvider;
 
 /**
  * Registers all the other service providers used by this package.
@@ -37,6 +38,7 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->alias('request', Request::class);
 
         // Generic service providers
+        $this->app->register(ViewServiceProvider::class);
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);

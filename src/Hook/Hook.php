@@ -35,12 +35,19 @@ abstract class Hook implements IHook
 
     public function remove(string $hook, $callback = null, int $priority = 10): self|bool
     {
-        if (is_null($callback) && ! $callback = $this->getCallback($hook)) {
-            return false;
+        // If $callback is null, it means we have chained the methods to
+        // the action/filter instance. If the instance has no callback, return false.
+        if (is_null($callback)) {
+            if (! $callback = $this->getCallback($hook)) {
+                return false;
+            }
+
+            [$callback, $priority, $accepted_args] = $callback;
+
+            // Unset the hook.
+            unset($this->hooks[$hook]);
         }
 
-        [$callback, $priority, $accepted_args] = $callback ?? [];
-        unset($this->hooks[$hook]);
         $this->removeAction($hook, $callback, $priority);
 
         return $this;

@@ -13,8 +13,8 @@ class TailwindPreset
 {
     use PresetTrait;
     use StubTrait;
-    use ThemeProviderTrait;
     use ThemeConfigTrait;
+    use ThemeProviderTrait;
 
     public function export(): void
     {

@@ -53,7 +53,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      *
      * @since 5.0.0
      */
-    public function current()
+    public function current(): \WP_Post
     {
         return $this->items[$this->current];
     }
@@ -67,7 +67,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      *
      * @since 5.0.0
      */
-    public function next()
+    public function next(): void
     {
         $this->current++;
     }
@@ -81,7 +81,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      *
      * @since 5.0.0
      */
-    public function key()
+    public function key(): mixed
     {
         return $this->current;
     }
@@ -96,7 +96,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      *
      * @since 5.0.0
      */
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->items[$this->current]);
     }
@@ -110,7 +110,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      *
      * @since 5.0.0
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->current = 0;
     }
@@ -124,7 +124,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      *
      * @since 5.1.0
      */
-    public function hasChildren()
+    public function hasChildren(): bool
     {
         return ! $this->current()->children->isEmpty();
     }
@@ -138,7 +138,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      *
      * @since 5.1.0
      */
-    public function getChildren()
+    public function getChildren(): ?RecursiveIterator
     {
         return new static($this->current()->children);
     }

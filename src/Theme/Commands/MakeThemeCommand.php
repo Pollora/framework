@@ -14,9 +14,9 @@ use function Laravel\Prompts\text;
 
 class MakeThemeCommand extends \Qirolab\Theme\Commands\MakeThemeCommand
 {
-    use ViewScaffolding;
     use PackagesTrait;
     use StubTrait;
+    use ViewScaffolding;
 
     public $signature = 'make:theme {theme?}';
 

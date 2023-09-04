@@ -33,7 +33,6 @@ class WordPressDatabase extends wpdb
      * done this for us.
      *
      * @param  string  $db
-     * @param  null  $dbh
      */
     public function select($db, $dbh = null)
     {

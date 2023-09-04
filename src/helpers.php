@@ -18,7 +18,7 @@ if (! function_exists('__')) {
      */
     function __($key, $replace = [], $locale = null)
     {
-        if (! $locale) {
+        if (! $locale && function_exists('get_locale')) {
             $locale = get_locale();
         }
         if (is_array($replace) && Lang::has($key, $locale)) {
@@ -40,14 +40,14 @@ if (! function_exists('__')) {
     }
 }
 
-if (! function_exists('query')) {
+if (! function_exists('wp_query')) {
     /**
      * Get the main query or convert a {@link WP_Query} to a {@link \Pollen\Proxy\Query} proxy instance.
      *
      *
      * @return \Pollen\Proxy\Query
      */
-    function query(WP_Query $query = null)
+    function wp_query(WP_Query $query = null)
     {
         return ($query === null) ? app('wp.query') : Query::instance($query);
     }

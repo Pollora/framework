@@ -29,6 +29,10 @@ class ThemeInitializer
     public function init()
     {
         $this->theme_root = config('theme.base_path');
+        Action::add('init', function () {
+            ///do_action('template_redirect');
+        });
+
         Action::add('after_setup_theme', function () {
             if (wp_installing()) {
                 return;

@@ -22,7 +22,7 @@ class WordPress
     public static function id()
     {
         // can't use facades to access properties unfortunately!
-        return query()->post->ID ?? null;
+        return wp_query()->post->ID ?? null;
     }
 
     /**
@@ -33,7 +33,7 @@ class WordPress
      */
     public static function singular($types = '')
     {
-        return query()->singular($types);
+        return wp_query()->singular($types);
     }
 
     /**
@@ -44,7 +44,7 @@ class WordPress
      */
     public static function category($categories = '')
     {
-        return query()->category($categories);
+        return wp_query()->category($categories);
     }
 
     /**
@@ -55,7 +55,7 @@ class WordPress
      */
     public static function archive($types = null)
     {
-        return $types === null || empty($types) ? query()->archive() : query()->postTypeArchive($types);
+        return $types === null || empty($types) ? wp_query()->archive() : wp_query()->postTypeArchive($types);
     }
 
     /**
@@ -76,7 +76,7 @@ class WordPress
             }
         }
 
-        return query()->author($users);
+        return wp_query()->author($users);
     }
 
     /**

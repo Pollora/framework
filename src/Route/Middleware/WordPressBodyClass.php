@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\Route\Middleware;
 
+use Pollen\Hook\FilterBuilder;
 use Pollen\Route\Route;
-use Themosis\Hook\FilterBuilder;
 
 class WordPressBodyClass
 {

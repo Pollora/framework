@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Pollen\Providers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Support\Facades\Action;
 use Pollen\Support\WordPress;
-use Request;
 
 /**
  * Service provider for everything WordPress, configures
@@ -21,6 +21,8 @@ use Request;
  */
 class WordPressServiceProvider extends ServiceProvider
 {
+    protected $db;
+
     /**
      * Bootstrap any application services.
      *
@@ -59,28 +61,96 @@ class WordPressServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // WordPress requires $table_prefix rather than another constant.
+        $this->db = DB::getConfig(null);
+        $this->setDatabaseConstants();
+        $this->loadWordpressSettings();
 
-        $db = DB::getConfig(null);
+        if (! app()->runningInConsole() && ! wp_installing()) {
+            $this->setupWordpressQuery();
+        }
 
-        $table_prefix = $db['prefix'];
-        $this->setDatabaseConstants($db);
+        $this->setupActionHooks();
+        $this->disableQueryCachingInAdmin();
+    }
 
+    protected function loadWordpressSettings(): void
+    {
+        $table_prefix = $this->db['prefix'];
         if (! (defined('WP_CLI') && WP_CLI)) {
             require_once ABSPATH.'wp-settings.php';
         }
+    }
 
-        // Set up the WordPress query.
-        if (! app()->runningInConsole() && ! wp_installing()) {
-            wp();
+    protected function setupWordpressQuery(): void
+    {
+        wp();
+        do_action('template_redirect');
+
+        if ($this->isHeadRequest() || $this->isRobots() || $this->isFavicon() || $this->isFeed() || $this->isTrackback()) {
+            exit;
+        }
+    }
+
+    protected function isHeadRequest(): bool
+    {
+        return 'HEAD' === $_SERVER['REQUEST_METHOD'] && apply_filters('exit_on_http_head', true);
+    }
+
+    protected function isRobots(): bool
+    {
+        if (is_robots()) {
+            do_action('do_robots');
+
+            return true;
         }
 
+        return false;
+    }
+
+    protected function isFavicon(): bool
+    {
+        if (is_favicon()) {
+            do_action('do_favicon');
+
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function isFeed(): bool
+    {
+        if (is_feed()) {
+            do_feed();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function isTrackback(): bool
+    {
+        if (is_trackback()) {
+            require ABSPATH.'wp-trackback.php';
+
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function setupActionHooks(): void
+    {
         if (defined('WP_CLI') && WP_CLI) {
             Action::add('init', [$this, 'triggerHooks'], 1);
         } else {
             $this->triggerHooks();
         }
+    }
 
+    protected function disableQueryCachingInAdmin(): void
+    {
         if (! $this->app->runningInConsole()
             && (defined('WP_ADMIN') || str_contains(Request::server('SCRIPT_NAME'), strrchr(wp_login_url(), '/')))) {
             // disable query caching when in WordPress admin
@@ -164,15 +234,15 @@ class WordPressServiceProvider extends ServiceProvider
      *
      * @param  string  $tablePrefix
      */
-    private function setDatabaseConstants(array $db)
+    private function setDatabaseConstants()
     {
-        define('DB_NAME', $db['database']);
-        define('DB_USER', $db['username']);
-        define('DB_PASSWORD', $db['password']);
-        define('DB_HOST', $db['host']);
-        define('DB_CHARSET', $db['charset']);
-        define('DB_COLLATE', $db['collation']);
-        define('DB_PREFIX', $db['prefix']);
+        define('DB_NAME', $this->db['database']);
+        define('DB_USER', $this->db['username']);
+        define('DB_PASSWORD', $this->db['password']);
+        define('DB_HOST', $this->db['host']);
+        define('DB_CHARSET', $this->db['charset']);
+        define('DB_COLLATE', $this->db['collation']);
+        define('DB_PREFIX', $this->db['prefix']);
     }
 
     /**

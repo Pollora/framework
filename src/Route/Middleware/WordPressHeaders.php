@@ -18,6 +18,7 @@ class WordPressHeaders
     public function handle(Request $request, \Closure $next)
     {
         $route = $request->route();
+
         $response = $next($request);
 
         if (! $route->hasCondition() && function_exists('is_user_logged_in') && ! is_user_logged_in()) {
