@@ -13,6 +13,7 @@ use Pollen\Hashing\HashServiceProvider;
 use Pollen\Hook\HookServiceProvider;
 use Pollen\Http\Request;
 use Pollen\Mail\WordPressMailServiceProvider;
+use Pollen\Permalink\RewriteServiceProvider;
 use Pollen\PostType\PostTypeServiceProvider;
 use Pollen\Taxonomy\TaxonomyServiceProvider;
 use Pollen\Theme\ThemeCommandServiceProvider;
@@ -42,6 +43,7 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);
+        $this->app->register(RewriteServiceProvider::class);
         $this->app->register(AssetServiceProvider::class);
         $this->app->register(AjaxServiceProvider::class);
         $this->app->register(TaxonomyServiceProvider::class);
