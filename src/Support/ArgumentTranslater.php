@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollen\Support;
 
-use Illuminate\Support\Str;
 use Pollen\Services\Translater;
 
 /**
@@ -33,6 +32,7 @@ trait ArgumentTranslater
     ]): array
     {
         $translater = new Translater($args, $entity);
+
         return $translater->translate($keyToTranslate);
     }
 }
