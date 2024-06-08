@@ -37,7 +37,7 @@
         "watson/rememberable": "^6.1",
         "cweagans/composer-patches": "^1.7",
         "qirolab/laravel-themer": "^2.1",
-        "jgrossi/corcel": "^7.0",
+        "jgrossi/corcel": "^8.0",
         "log1x/sage-directives": "^2.0",
         "roots/bedrock-autoloader": "^1.0"
     },
