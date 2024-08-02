@@ -52,7 +52,11 @@ class HookServiceProvider extends ServiceProvider
         if (method_exists($instance, 'register')) {
             empty($hooks)
                 ? $instance->register()
-                : $this['wp.action']->add($hooks, [$instance, 'register'], $instance->priority);
+                : $this->app->make('wp.action')->add(
+                    $hooks,
+                    [$instance, 'register'],
+                    $instance->priority
+            );
         }
     }
 }

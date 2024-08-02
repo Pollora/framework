@@ -15,10 +15,12 @@ use Pollen\Http\Request;
 use Pollen\Mail\WordPressMailServiceProvider;
 use Pollen\Permalink\RewriteServiceProvider;
 use Pollen\PostType\PostTypeServiceProvider;
+use Pollen\Scheduler\SchedulerServiceProvider;
 use Pollen\Taxonomy\TaxonomyServiceProvider;
 use Pollen\Theme\ThemeCommandServiceProvider;
 use Pollen\Theme\ThemeServiceProvider;
 use Pollen\View\ViewServiceProvider;
+use Pollen\Scheduler\JobDispatcher;
 
 /**
  * Registers all the other service providers used by this package.
@@ -51,6 +53,7 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
+        $this->app->register(SchedulerServiceProvider::class);
 
         // Theme service provider
         $this->app->register(ThemeServiceProvider::class);
@@ -61,6 +64,9 @@ class PollenServiceProvider extends ServiceProvider
 
         // Hashing service provider
         $this->app->register(HashServiceProvider::class);
+        $this->app->singleton(JobDispatcher::class, function ($app) {
+            return new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class));
+        });
     }
 
     /**

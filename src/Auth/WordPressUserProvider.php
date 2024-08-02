@@ -22,18 +22,23 @@ class WordPressUserProvider implements UserProvider
         // TODO: Implement retrieveByToken() method.
     }
 
-    public function updateRememberToken(Authenticatable $user, $token)
+    public function updateRememberToken(Authenticatable $user, #[\SensitiveParameter] $token)
     {
         // TODO: Implement updateRememberToken() method.
     }
 
-    public function retrieveByCredentials(array $credentials)
+    public function retrieveByCredentials(#[\SensitiveParameter] array $credentials)
     {
         // TODO: Implement retrieveByCredentials() method.
     }
 
-    public function validateCredentials(Authenticatable $user, array $credentials)
+    public function validateCredentials(Authenticatable $user, #[\SensitiveParameter]  array $credentials)
     {
         // TODO: Implement validateCredentials() method.
+    }
+
+    public function rehashPasswordIfRequired(Authenticatable $user, #[\SensitiveParameter] array $credentials, bool $force = false)
+    {
+        // TODO: Implement rehashPasswordIfRequired() method.
     }
 }

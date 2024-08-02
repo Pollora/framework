@@ -23,8 +23,12 @@ class RewriteServiceProvider extends ServiceProvider
     /**
      * Remove trailing slash from permalink structure
      */
-    protected function removeTrailingSlash(string $old_permalink_structure, string $permalink_structure): void
+    protected function removeTrailingSlash(string|bool $old_permalink_structure, string|bool $permalink_structure): void
     {
+        if (!$old_permalink_structure) {
+            return;
+        }
+        
         update_option('permalink_structure', rtrim($permalink_structure, '/'));
     }
 }
