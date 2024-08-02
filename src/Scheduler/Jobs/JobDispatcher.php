@@ -1,13 +1,12 @@
 <?php
-
 declare(strict_types=1);
 
-namespace Pollen\Scheduler;
+namespace Pollen\Scheduler\Jobs;
 
 use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Support\Facades\DB;
+use Pollen\Scheduler\Contracts\JobDispatcherInterface;
 
-class JobDispatcher
+class JobDispatcher implements JobDispatcherInterface
 {
     protected $dispatcher;
 
@@ -18,7 +17,6 @@ class JobDispatcher
 
     public function dispatch($job): int
     {
-        $jobId = $this->dispatcher->dispatch($job);
-        return $jobId;
+        return $this->dispatcher->dispatch($job);
     }
 }

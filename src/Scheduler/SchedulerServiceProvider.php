@@ -3,47 +3,55 @@
 namespace Pollen\Scheduler;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Scheduler\WpScheduler;
+use Pollen\Scheduler\Contracts\SchedulerInterface;
+use Pollen\Scheduler\Scheduler;
 use Pollen\Support\Facades\Action;
 use Pollen\Support\Facades\Filter;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\DB;
 
 class SchedulerServiceProvider extends ServiceProvider
 {
-    public $scheduler;
-
     public function register(): void
     {
-        $this->app->singleton(WpScheduler::class);
+        $this->app->singleton(SchedulerInterface::class, Scheduler::class);
 
-        $this->scheduler = $this->app->make(WpScheduler::class);
+        $scheduler = $this->app->make(SchedulerInterface::class);
 
-        Filter::add('pre_update_option_cron', [$this->scheduler, 'preUpdateOptionCron'], 10, 2);
-        Filter::add('pre_update_option_cron', [$this->scheduler, 'preUpdateOptionCron'], 10, 2);
-        Filter::add('pre_option_cron', [$this->scheduler, 'preOptionCron']);
-        Filter::add('pre_schedule_event', [$this->scheduler, 'preScheduleEvent'], 10, 4);
-        Filter::add('pre_reschedule_event', [$this->scheduler, 'preRescheduleEvent'], 10, 3);
-        Filter::add('pre_unschedule_event', [$this->scheduler, 'preUnscheduleEvent'], 10, 5);
-        Filter::add('pre_clear_scheduled_hook', [$this->scheduler, 'preClearScheduledHook'], 10, 4);
-        Filter::add('pre_unschedule_hook', [$this->scheduler, 'preUnscheduleHook'], 10, 3);
-        Filter::add('pre_get_scheduled_event', [$this->scheduler, 'preGetScheduledEvent'], 10, 4);
-        Filter::add('pre_get_ready_cron_jobs', [$this->scheduler, 'preGetReadyCronJobs']);
+        $this->registerFilters($scheduler);
     }
 
     public function boot(): void
     {
         $this->app->booted(function () {
-           $this->scheduleRecurringEvents();
+            $this->scheduleRecurringEvents();
         });
     }
 
-    protected function scheduleRecurringEvents()
+    protected function registerFilters(SchedulerInterface $scheduler): void
+    {
+        $filters = [
+            'pre_update_option_cron' => 'preUpdateOptionCron',
+            'pre_option_cron' => 'preOptionCron',
+            'pre_schedule_event' => 'preScheduleEvent',
+            'pre_reschedule_event' => 'preRescheduleEvent',
+            'pre_unschedule_event' => 'preUnscheduleEvent',
+            'pre_clear_scheduled_hook' => 'preClearScheduledHook',
+            'pre_unschedule_hook' => 'preUnscheduleHook',
+            'pre_get_scheduled_event' => 'preGetScheduledEvent',
+            'pre_get_ready_cron_jobs' => 'preGetReadyCronJobs',
+        ];
+
+        foreach ($filters as $hook => $method) {
+            Filter::add($hook, [$scheduler, $method], 10, 5);
+        }
+    }
+
+    protected function scheduleRecurringEvents(): void
     {
         if (defined('WP_CLI')) {
             return;
         }
         $schedule = $this->app->make(Schedule::class);
-        WordPressRecurringEvent::scheduleAllEvents($schedule);
+        \Pollen\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
     }
 }

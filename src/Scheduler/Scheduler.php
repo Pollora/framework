@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Pollen\Scheduler;
 
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\PendingDispatch;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\DB;
+use Pollen\Scheduler\Contracts\SchedulerInterface;
+use Pollen\Scheduler\Events\RecurringEvent;
+use Pollen\Scheduler\Events\SingleEvent;
 use WP_Error;
 
-class WpScheduler
+class Scheduler implements SchedulerInterface
 {
     /**
      * Handle the cron option update.
@@ -54,7 +54,7 @@ class WpScheduler
             return $pre;
         }
 
-        //try {
+        try {
             if ($event->schedule) {
                 $job = new WordPressRecurringEvent($event);
             } else {
@@ -62,9 +62,9 @@ class WpScheduler
             }
 
             return $job->createJob($event);
-        /*} catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             return $wp_error ? new WP_Error('schedule_error', $e->getMessage()) : null;
-        }*/
+        }
     }
 
     /**
@@ -83,8 +83,7 @@ class WpScheduler
 
         try {
             $job = new WordPressRecurringEvent($event);
-            Queue::push($job);
-            return $job;
+            return $job->createJob($event);
         } catch (\Throwable $e) {
             return $wp_error ? new WP_Error('reschedule_error', $e->getMessage()) : null;
         }
@@ -236,7 +235,7 @@ class WpScheduler
 
     protected function getNextRunTime(string $schedule, ?int $interval): int
     {
-        $cron = WordPressRecurringEvent::getCronExpression($schedule, $interval);
+        $cron = RecurringEvent::getCronExpression($schedule, $interval);
         $cron = new \Cron\CronExpression($cron);
         return $cron->getNextRunDate()->getTimestamp();
     }

@@ -1,18 +1,13 @@
 <?php
-
 declare(strict_types=1);
 
-namespace Pollen\Scheduler;
+namespace Pollen\Scheduler\Events;
 
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
-class WordPressRecurringEvent extends WordPressEvent
+class RecurringEvent extends AbstractEvent
 {
-    protected ?string $schedule;
-    protected ?int $interval;
-
     public function __construct(?object $event = null)
     {
         parent::__construct($event);
@@ -22,7 +17,7 @@ class WordPressRecurringEvent extends WordPressEvent
         }
     }
 
-    public static function createJob(object $event)
+    public static function createJob(object $event): self
     {
         $job = new static($event);
         $job->saveToDatabase();
@@ -89,7 +84,8 @@ class WordPressRecurringEvent extends WordPressEvent
         }
     }
 
-    public function handle()
+    public function handle(): void
     {
+        do_action_ref_array($this->hook, $this->args);
     }
 }

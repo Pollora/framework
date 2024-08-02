@@ -1,15 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Pollen\Scheduler;
+namespace Pollen\Scheduler\Events;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Pollen\Scheduler\Contracts\EventInterface;
+use Pollen\Scheduler\Jobs\JobDispatcher;
 
-abstract class WordPressEvent implements ShouldQueue
+abstract class AbstractEvent implements EventInterface, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, SerializesModels;
 
@@ -43,7 +45,7 @@ abstract class WordPressEvent implements ShouldQueue
         return $this->args;
     }
 
-    public static function createJob(object $event)
+    public static function createJob(object $event): self
     {
         $job = new static($event);
         $dispatcher = app(JobDispatcher::class);
@@ -67,14 +69,7 @@ abstract class WordPressEvent implements ShouldQueue
         ]);
     }
 
-    public function handle()
-    {
-        do_action_ref_array($this->hook, $this->args);
-
-        if (!$this->schedule) {
-            $this->deleteEvent();
-        }
-    }
+    abstract public function handle(): void;
 
     protected function deleteEvent()
     {
