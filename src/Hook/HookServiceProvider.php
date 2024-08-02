@@ -6,56 +6,44 @@ namespace Pollen\Hook;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
+use Pollen\Hook\Action;
+use Pollen\Hook\Filter;
 
 class HookServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap the application services.
-     */
     public function boot(): void
     {
         $this->loadHooks();
     }
 
-    /**
-     * Register the application services.
-     */
     public function register(): void
     {
         $this->app->bind('wp.action', function ($container) {
-            return new ActionBuilder($container);
+            return new Action($container);
         });
 
         $this->app->bind('wp.filter', function ($container) {
-            return new FilterBuilder($container);
+            return new Filter($container);
         });
     }
 
-    /**
-     * Load all hooks from the configuration.
-     */
     protected function loadHooks(): void
     {
-        Collection::make(config('app.hooks'))->each(fn ($hook) => $this->registerHook($hook));
+        collect(config('app.hooks'))->each(fn ($hook) => $this->registerHook($hook));
     }
 
-    /**
-     * Register the specified hook.
-     *
-     * @param  string  $hook The name of the hook.
-     */
     public function registerHook(string $hook): void
     {
-        $instance = new $hook($this->app);
+        $instance = $this->app->make($hook);
         $hooks = (array) $instance->hook;
 
         if (method_exists($instance, 'register')) {
             empty($hooks)
                 ? $instance->register()
                 : $this->app->make('wp.action')->add(
-                    $hooks,
-                    [$instance, 'register'],
-                    $instance->priority
+                $hooks,
+                [$instance, 'register'],
+                $instance->priority
             );
         }
     }

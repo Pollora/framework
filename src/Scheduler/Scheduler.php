@@ -56,9 +56,9 @@ class Scheduler implements SchedulerInterface
 
         try {
             if ($event->schedule) {
-                $job = new WordPressRecurringEvent($event);
+                $job = new RecurringEvent($event);
             } else {
-                $job = new WordPressSingleEvent($event);
+                $job = new SingleEvent($event);
             }
 
             return $job->createJob($event);

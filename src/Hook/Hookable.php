@@ -4,26 +4,21 @@ declare(strict_types=1);
 
 namespace Pollen\Hook;
 
-use Pollen\Foundation\Application;
+use Illuminate\Contracts\Container\Container;
+use Pollen\Hook\Contracts\HookableInterface;
 
-/**
- * Hookable class
- *
- * @author Julien Lambé <julien@themosis.com>
- */
-class Hookable
+abstract class Hookable implements HookableInterface
 {
-    protected Application $app;
+    protected Container $container;
 
-    /**
-     * @var string|array
-     */
     public $hook;
 
     public int $priority = 10;
 
-    public function __construct(Application $app)
+    public function __construct(Container $container)
     {
-        $this->app = $app;
+        $this->container = $container;
     }
+
+    abstract public function register();
 }
