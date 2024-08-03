@@ -97,8 +97,8 @@ class Asset
     /**
      * Constructor for the Asset class
      *
-     * @param  string  $handle The handle for the style or script.
-     * @param  string  $path The path for the style or script.
+     * @param  string  $handle  The handle for the style or script.
+     * @param  string  $path  The path for the style or script.
      * @return self
      */
     public function __construct(string $handle, string $path)
@@ -116,7 +116,7 @@ class Asset
     /**
      * Set an array of dependencies for the styule or script.
      *
-     * @param  array  $dependencies An array of dependencies for the style or script.
+     * @param  array  $dependencies  An array of dependencies for the style or script.
      */
     public function dependencies(array $dependencies): self
     {
@@ -150,7 +150,7 @@ class Asset
     /**
      * Set the version for the asset.
      *
-     * @param  string  $version The version for the asset.
+     * @param  string  $version  The version for the asset.
      */
     public function version(string $version): self
     {
@@ -162,7 +162,7 @@ class Asset
     /**
      * Sets the media attribute for the stylesheet.
      *
-     * @param  string  $media The media attribute value.
+     * @param  string  $media  The media attribute value.
      */
     public function media(string $media): self
     {
@@ -186,7 +186,7 @@ class Asset
     /**
      * Sets the load strategy for the asset (defer, async)
      *
-     * @param  string  $strategy The load strategy for the asset.
+     * @param  string  $strategy  The load strategy for the asset.
      */
     public function loadStrategy(string $strategy): self
     {
@@ -198,7 +198,7 @@ class Asset
     /**
      * Set the type of the asset.
      *
-     * @param  string  $type The type of the asset.
+     * @param  string  $type  The type of the asset.
      */
     public function setType(string $type): self
     {
@@ -270,8 +270,8 @@ class Asset
     /**
      * Localizes data to be passed to a script.
      *
-     * @param  string  $objectName The name of the object to attach the data to.
-     * @param  array  $data The data to be localized.
+     * @param  string  $objectName  The name of the object to attach the data to.
+     * @param  array  $data  The data to be localized.
      * @return self Returns an instance of the current object.
      */
     public function localize(string $objectName, array $data): self
@@ -286,8 +286,8 @@ class Asset
     /**
      * Sets the content and position for inline content for style or script.
      *
-     * @param  string  $content The content to be inserted inline.
-     * @param  string  $position The position where the content should be inserted (before or after), defaults to 'after'.
+     * @param  string  $content  The content to be inserted inline.
+     * @param  string  $position  The position where the content should be inserted (before or after), defaults to 'after'.
      * @return self Returns an instance of the current object.
      */
     public function inline(string $content, string $position = 'after'): self
@@ -321,7 +321,7 @@ class Asset
     /**
      * Determine if the Vite client needs to be loaded in the specified hook.
      *
-     * @param  string  $hook The hook to check for Vite client loading.
+     * @param  string  $hook  The hook to check for Vite client loading.
      * @return bool True if the Vite client needs to be loaded in the specified hook, false otherwise.
      */
     protected function needToLoadViteClient(string $hook): bool
@@ -335,7 +335,7 @@ class Asset
      * This method checks if the Vite client needs to be loaded for a given hook.
      * If it does, it loads the Vite client using the Vite instance and echos the script tag.
      *
-     * @param  string  $hook The hook name.
+     * @param  string  $hook  The hook name.
      */
     protected function maybeLoadViteClient(string $hook): void
     {
@@ -422,7 +422,7 @@ class Asset
      * This method takes a file path as a parameter and determines the file type
      * based on the file extension. It returns the corresponding file type as a string.
      *
-     * @param  string  $path The path of the file.
+     * @param  string  $path  The path of the file.
      * @return string The file type. Possible values are 'style', 'script', or 'style' if the extension is unknown.
      */
     protected function determineFileType($path)

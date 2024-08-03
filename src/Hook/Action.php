@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Pollen\Hook;
 
-use Closure;
-use Pollen\Hook\AbstractHook;
 use Pollen\Hook\Contracts\ActionInterface;
 
 class Action extends AbstractHook implements ActionInterface
@@ -19,16 +17,5 @@ class Action extends AbstractHook implements ActionInterface
         }
 
         return $this;
-    }
-
-    protected function addHookEvent(string $hook, array|string|Closure $callback, int $priority, int $acceptedArgs): void
-    {
-        $this->hooks[$hook] = [$callback, $priority, $acceptedArgs];
-        add_action($hook, $callback, $priority, $acceptedArgs);
-    }
-
-    protected function removeHookEvent(string $hook, array|string|Closure $callback, int $priority): void
-    {
-        remove_action($hook, $callback, $priority);
     }
 }

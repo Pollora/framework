@@ -20,7 +20,7 @@ class RecursiveMenuIterator implements RecursiveIterator
     /**
      * Create a new RecursiveMenuIterator instance.
      *
-     * @param  string  $menu menu to get items of
+     * @param  string  $menu  menu to get items of
      */
     public function __construct($menu)
     {
@@ -92,7 +92,7 @@ class RecursiveMenuIterator implements RecursiveIterator
      * @link http://php.net/manual/en/iterator.valid.php
      *
      * @return bool The return value will be casted to boolean and then evaluated.
-     * Returns true on success or false on failure.
+     *              Returns true on success or false on failure.
      *
      * @since 5.0.0
      */

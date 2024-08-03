@@ -11,9 +11,9 @@ if (! function_exists('__')) {
     /**
      * Tries to get a translation from both Laravel and WordPress.
      *
-     * @param $key key of the translation
-     * @param  array|string  $replace replacements for laravel or domain for wordpress
-     * @param  string  $locale locale for laravel, not used for wordpress
+     * @param  $key  key of the translation
+     * @param  array|string  $replace  replacements for laravel or domain for wordpress
+     * @param  string  $locale  locale for laravel, not used for wordpress
      * @return string
      */
     function __($key, $replace = [], $locale = null)
@@ -47,7 +47,7 @@ if (! function_exists('wp_query')) {
      *
      * @return \Pollen\Proxy\Query
      */
-    function wp_query(WP_Query $query = null)
+    function wp_query(?WP_Query $query = null)
     {
         return ($query === null) ? app('wp.query') : Query::instance($query);
     }
@@ -61,7 +61,7 @@ if (! function_exists('post')) {
      *
      * @return Post|null
      */
-    function post(WP_Post $post = null)
+    function post(?WP_Post $post = null)
     {
         return ($post === null) ? app('wp.loop') : Post::find($post->ID);
     }
@@ -71,7 +71,7 @@ if (! function_exists('meta')) {
     /**
      * Grab a meta item from the database for the current page.
      *
-     * @param  string|null  $name name of the field to get (or null for all)
+     * @param  string|null  $name  name of the field to get (or null for all)
      * @return mixed
      */
     function meta($name = null)
@@ -86,7 +86,7 @@ if (! function_exists('field')) {
      *
      * @see Meta::acf()
      *
-     * @param  string|null  $name name of the field to get (or null for all)
+     * @param  string|null  $name  name of the field to get (or null for all)
      * @return mixed
      */
     function field($name = null)
@@ -99,9 +99,9 @@ if (! function_exists('menu')) {
     /**
      * Get a {@link RecursiveIteratorIterator} for a WordPress menu.
      *
-     * @param  string  $name name of the menu to get
-     * @param  int  $depth how far to recurse down the nodes
-     * @param  int  $mode flags to pass to the {@link RecursiveIteratorIterator}
+     * @param  string  $name  name of the menu to get
+     * @param  int  $depth  how far to recurse down the nodes
+     * @param  int  $mode  flags to pass to the {@link RecursiveIteratorIterator}
      * @return RecursiveIteratorIterator
      */
     function menu($name, $depth = -1, $mode = RecursiveIteratorIterator::SELF_FIRST)

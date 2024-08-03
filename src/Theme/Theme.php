@@ -19,6 +19,4 @@ namespace Pollen\Theme;
  *
  * {@inheritDoc}
  */
-class Theme extends \Qirolab\Theme\Theme
-{
-}
+class Theme extends \Qirolab\Theme\Theme {}

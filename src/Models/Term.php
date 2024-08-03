@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Class Term.
  */
-class Term extends \Corcel\Model\Term
-{
-}
+class Term extends \Corcel\Model\Term {}

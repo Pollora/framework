@@ -6,15 +6,16 @@ namespace Pollen\Theme;
 
 use Pollen\Services\Translater;
 use Pollen\Support\Facades\Action;
+use Pollen\Theme\Contracts\ThemeComponent;
 
 /**
  * Class Sidebar
  *
  * This class is responsible for registering theme sidebars.
  */
-class Sidebar
+class Sidebar implements ThemeComponent
 {
-    public function init()
+    public function register(): void
     {
         Action::add('after_setup_theme', [$this, 'registerSidebars'], 1);
     }

@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Scheduler;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Scheduler\Contracts\SchedulerInterface;
-use Pollen\Scheduler\Scheduler;
-use Pollen\Support\Facades\Action;
 use Pollen\Support\Facades\Filter;
-use Illuminate\Console\Scheduling\Schedule;
 
 class SchedulerServiceProvider extends ServiceProvider
 {

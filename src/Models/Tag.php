@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Tag class.
  */
-class Tag extends \Corcel\Model\Tag
-{
-}
+class Tag extends \Corcel\Model\Tag {}

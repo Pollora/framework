@@ -7,6 +7,4 @@ namespace Pollen\Models\Meta;
 /**
  * Class CommentMeta
  */
-class CommentMeta extends \Corcel\Model\Meta\CommentMeta
-{
-}
+class CommentMeta extends \Corcel\Model\Meta\CommentMeta {}

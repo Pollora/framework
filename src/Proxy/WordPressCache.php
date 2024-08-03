@@ -73,7 +73,7 @@ class WordPressCache
     /**
      * Switches the internal blog ID used for non-global caching.
      *
-     * @param  int  $blog blog to switch to
+     * @param  int  $blog  blog to switch to
      */
     public function switchBlog($blog)
     {
@@ -86,11 +86,11 @@ class WordPressCache
      * If the specified key already exists, the value is not stored and the function
      * returns false.
      *
-     * @param  string  $key The key under which to store the value.
-     * @param  mixed  $value The value to store.
-     * @param  string  $group The group value appended to the $key.
-     * @param  int  $expiration The expiration time, defaults to 0.
-     * @return  bool Returns TRUE on success or FALSE on failure.
+     * @param  string  $key  The key under which to store the value.
+     * @param  mixed  $value  The value to store.
+     * @param  string  $group  The group value appended to the $key.
+     * @param  int  $expiration  The expiration time, defaults to 0.
+     * @return bool Returns TRUE on success or FALSE on failure.
      */
     public function add($key, $value, $group = 'default', $expiration = 0)
     {
@@ -129,11 +129,11 @@ class WordPressCache
      * If the specified key doesn't exist, the value is not stored and the function
      * returns false.
      *
-     * @param  string  $key The key under which to store the value.
-     * @param  mixed  $value The value to store.
-     * @param  string  $group The group value appended to the $key.
-     * @param  int  $expiration The expiration time, defaults to 0.
-     * @return  bool Returns TRUE on success or FALSE on failure.
+     * @param  string  $key  The key under which to store the value.
+     * @param  mixed  $value  The value to store.
+     * @param  string  $group  The group value appended to the $key.
+     * @param  int  $expiration  The expiration time, defaults to 0.
+     * @return bool Returns TRUE on success or FALSE on failure.
      */
     public function replace($key, $value, $group = 'default', $expiration = 0)
     {
@@ -165,9 +165,9 @@ class WordPressCache
     /**
      * Remove the item from the cache.
      *
-     * @param  string  $key The key under which to store the value.
-     * @param  string  $group The group value appended to the $key.
-     * @return  bool  Returns TRUE on success or FALSE on failure.
+     * @param  string  $key  The key under which to store the value.
+     * @param  string  $group  The group value appended to the $key.
+     * @return bool Returns TRUE on success or FALSE on failure.
      */
     public function delete($key, $group = 'default')
     {
@@ -185,7 +185,7 @@ class WordPressCache
     /**
      * Invalidate all items in the cache.
      *
-     * @return  bool  Returns TRUE on success or FALSE on failure.
+     * @return bool Returns TRUE on success or FALSE on failure.
      */
     public function flush()
     {
@@ -207,12 +207,12 @@ class WordPressCache
      *
      * Gets an object from cache based on $key and $group.
      *
-     * @param  string  $key The key under which to store the value.
-     * @param  string  $group The group value appended to the $key.
-     * @param  bool  $force Optional. Ignored
-     * @param  bool  &$found Optional. Whether the key was found in the cache. Disambiguates a return of
-     *                                    false, a storable value. Passed by reference. Default null.
-     * @return  bool|mixed                Cached object value.
+     * @param  string  $key  The key under which to store the value.
+     * @param  string  $group  The group value appended to the $key.
+     * @param  bool  $force  Optional. Ignored
+     * @param  bool  &$found  Optional. Whether the key was found in the cache. Disambiguates a return of
+     *                        false, a storable value. Passed by reference. Default null.
+     * @return bool|mixed Cached object value.
      */
     public function get($key, $group = 'default', $force = false, &$found = null)
     {
@@ -306,11 +306,11 @@ class WordPressCache
      *
      * The value is set whether or not this key already exists in our store.
      *
-     * @param  string  $key The key under which to store the value.
-     * @param  mixed  $value The value to store.
-     * @param  string  $group The group value appended to the $key.
-     * @param  int  $expiration The expiration time, defaults to 0.
-     * @return  bool               Returns TRUE on success or FALSE on failure.
+     * @param  string  $key  The key under which to store the value.
+     * @param  mixed  $value  The value to store.
+     * @param  string  $group  The group value appended to the $key.
+     * @param  int  $expiration  The expiration time, defaults to 0.
+     * @return bool Returns TRUE on success or FALSE on failure.
      */
     public function set($key, $value, $group = 'default', $expiration = 0)
     {
@@ -338,7 +338,7 @@ class WordPressCache
     /**
      * Sets the list of global cache groups.
      *
-     * @param  array  $groups List of groups that are global.
+     * @param  array  $groups  List of groups that are global.
      */
     public function addGlobalGroups($groups)
     {
@@ -348,7 +348,7 @@ class WordPressCache
     /**
      * Sets the list of non-persistent cache groups.
      *
-     * @param  array  $groups List of groups that should not be persisted.
+     * @param  array  $groups  List of groups that should not be persisted.
      */
     public function addNonPersistentGroups($groups)
     {
@@ -372,8 +372,8 @@ class WordPressCache
     /**
      * Build a unique key for this cache object.
      *
-     * @param  string  $group The group value appended to the $key.
-     * @param  string  $key The key under which to store the value.
+     * @param  string  $group  The group value appended to the $key.
+     * @param  string  $key  The key under which to store the value.
      * @return string
      */
     protected function buildKey($group, $key)

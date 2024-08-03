@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Class ThemeCommandServiceProvider
+ * Class ThemeCommandProvider
  *
  * Override the default service provider for the theme command.
  */
@@ -12,7 +12,7 @@ namespace Pollen\Theme;
 
 use Pollen\Theme\Commands\MakeThemeCommand;
 
-class ThemeCommandServiceProvider extends \Qirolab\Theme\ThemeServiceProvider
+class ThemeCommandProvider extends \Qirolab\Theme\ThemeServiceProvider
 {
     /**
      * Perform post-registration booting of services.

@@ -7,6 +7,4 @@ namespace Pollen\Models\Meta;
 /**
  * Class ThumbnailMeta
  */
-class ThumbnailMeta extends \Corcel\Model\Meta\ThumbnailMeta
-{
-}
+class ThumbnailMeta extends \Corcel\Model\Meta\ThumbnailMeta {}

@@ -9,6 +9,4 @@ use Corcel\Model;
 /**
  * Class TermRelationship.
  */
-class TermRelationship extends Model\TermRelationship
-{
-}
+class TermRelationship extends Model\TermRelationship {}

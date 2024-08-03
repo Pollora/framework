@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Class Post
  */
-class Post extends \Corcel\Model\Post
-{
-}
+class Post extends \Corcel\Model\Post {}

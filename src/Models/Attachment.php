@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Class Attachment
  */
-class Attachment extends \Corcel\Model\Attachment
-{
-}
+class Attachment extends \Corcel\Model\Attachment {}

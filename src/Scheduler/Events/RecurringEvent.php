@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Pollen\Scheduler\Events;
@@ -21,6 +22,7 @@ class RecurringEvent extends AbstractEvent
     {
         $job = new static($event);
         $job->saveToDatabase();
+
         return $job;
     }
 
@@ -72,14 +74,16 @@ class RecurringEvent extends AbstractEvent
                     if ($minutes < 60) {
                         return "*/{$minutes} * * * *";
                     } elseif ($minutes == 60) {
-                        return "0 * * * *";
+                        return '0 * * * *';
                     } elseif ($minutes % 60 == 0) {
                         $hours = $minutes / 60;
+
                         return "0 */{$hours} * * *";
                     } else {
                         return "*/{$minutes} * * * *";
                     }
                 }
+
                 return '0 0 * * *';
         }
     }

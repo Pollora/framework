@@ -2,37 +2,25 @@
 
 declare(strict_types=1);
 
-/**
- * Class ThemeInitializer
- *
- * This class is responsible for initializing the theme and registering the theme provider.
- */
-
 namespace Pollen\Theme;
 
+use Illuminate\Contracts\Foundation\Application;
 use Pollen\Support\Facades\Action;
+use Pollen\Theme\Contracts\ThemeComponent;
 
-/**
- * Class ThemeInitializer
- *
- * The ThemeInitializer class is responsible for initializing and configuring the theme.
- */
-class ThemeInitializer
+class ThemeInitializer implements ThemeComponent
 {
     protected $themeRoot;
 
-    public function __construct(protected ?ThemeServiceProvider $themeProvider)
+    protected $wp_theme;
+
+    public function __construct(protected Application $app)
     {
         $this->themeRoot = config('theme.base_path');
     }
 
-    public function init()
+    public function register(): void
     {
-        $this->theme_root = config('theme.base_path');
-        Action::add('init', function () {
-            ///do_action('template_redirect');
-        });
-
         Action::add('after_setup_theme', function () {
             if (wp_installing()) {
                 return;
@@ -41,14 +29,11 @@ class ThemeInitializer
         }, 1);
     }
 
-    /**
-     * Initializes the theme.
-     */
-    private function initializeTheme()
+    private function initializeTheme(): void
     {
         global $wp_theme_directories;
 
-        register_theme_directory($this->theme_root);
+        register_theme_directory($this->themeRoot);
 
         $this->setThemes();
         $this->registerThemeProvider();
@@ -57,27 +42,19 @@ class ThemeInitializer
 
         $this->wp_theme = wp_get_theme();
 
-        $this->themeProvider->singleton('wp.theme', function () {
+        $this->app->singleton('wp.theme', function () {
             return $this->wp_theme;
         });
     }
 
-    /**
-     * Registers all the theme providers.
-     *
-     * @return void
-     */
-    private function registerThemeProvider()
+    private function registerThemeProvider(): void
     {
         foreach (config('theme.providers') as $provider) {
-            $this->themeProvider->registerProvider($provider);
+            $this->app->register($provider);
         }
     }
 
-    /**
-     * Sets up the theme and its configuration.
-     */
-    public function setThemes()
+    public function setThemes(): void
     {
         $childTheme = get_stylesheet();
         $parentTheme = $this->isThemeIdentical($childTheme) ? null : get_template();
@@ -94,21 +71,21 @@ class ThemeInitializer
             'providers',
         ];
 
-        if (! app()->configurationIsCached()) {
+        if (! $this->app->configurationIsCached()) {
             foreach ($themeConfigs as $themeConfig) {
-                $this->themeProvider->registerThemeConfig(Theme::path("config/{$themeConfig}.php"), "theme.{$themeConfig}");
+                $this->mergeConfigFrom(Theme::path("config/{$themeConfig}.php"), "theme.{$themeConfig}");
             }
         }
     }
 
-    /**
-     * Check if the child theme is identical to the parent theme.
-     *
-     * @param  string  $childTheme The name of the child theme to check.
-     * @return bool Returns true if the child theme is identical to the parent theme, false otherwise.
-     */
-    public function isThemeIdentical($childTheme)
+    public function isThemeIdentical($childTheme): bool
     {
         return get_template() === $childTheme;
+    }
+
+    protected function mergeConfigFrom($path, $key): void
+    {
+        $config = $this->app['config']->get($key, []);
+        $this->app['config']->set($key, array_merge(require $path, $config));
     }
 }

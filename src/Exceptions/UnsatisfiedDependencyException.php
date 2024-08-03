@@ -12,6 +12,4 @@ use RuntimeException;
  *
  * @author Jordan Doyle <jordan@doyle.wf>
  */
-class UnsatisfiedDependencyException extends RuntimeException
-{
-}
+class UnsatisfiedDependencyException extends RuntimeException {}

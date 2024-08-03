@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Class MenuItem
  */
-class MenuItem extends \Corcel\Model\MenuItem
-{
-}
+class MenuItem extends \Corcel\Model\MenuItem {}

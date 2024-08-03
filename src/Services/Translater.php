@@ -30,7 +30,7 @@ class Translater
      *
      * This method is used to translate an array of keys.
      *
-     * @param  array  $keysToTranslate The keys that need to be translated.
+     * @param  array  $keysToTranslate  The keys that need to be translated.
      * @return array The translated array.
      */
     public function translate(array $keysToTranslate): array
@@ -50,7 +50,7 @@ class Translater
     /**
      * Translate a key.
      *
-     * @param  string  $key The key to translate.
+     * @param  string  $key  The key to translate.
      */
     protected function translateKey(string $key): void
     {
@@ -68,8 +68,8 @@ class Translater
     /**
      * Translates the values of nested arrays by key recursively.
      *
-     * @param  array  $keys The array of keys to traverse.
-     * @param  array  $item The item array to be modified.
+     * @param  array  $keys  The array of keys to traverse.
+     * @param  array  $item  The item array to be modified.
      */
     protected function recursiveTranslateByKey(array $keys, &$item): void
     {
@@ -98,7 +98,7 @@ class Translater
     /**
      * Recursively translates the given item.
      *
-     * @param  array  $item The item to be translated.
+     * @param  array  $item  The item to be translated.
      */
     protected function recursiveTranslate(&$item): void
     {
@@ -114,7 +114,7 @@ class Translater
     /**
      * Translates a given item using the specified domain.
      *
-     * @param  string  $value The item to be translated.
+     * @param  string  $value  The item to be translated.
      * @return string The translated item.
      */
     protected function translateItem(string $value): string

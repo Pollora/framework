@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Option class.
  */
-class Option extends \Corcel\Model\Option
-{
-}
+class Option extends \Corcel\Model\Option {}

@@ -18,7 +18,7 @@ class Router extends IlluminateRouter
      */
     protected $conditions = [];
 
-    public function __construct(Dispatcher $events, Container $container = null)
+    public function __construct(Dispatcher $events, ?Container $container = null)
     {
         parent::__construct($events, $container);
         $this->routes = new RouteCollection();
@@ -99,7 +99,7 @@ class Router extends IlluminateRouter
         global $post, $wp_query;
 
         foreach (compact('post', 'wp_query') as $key => $value) {
-            if ('post' === $key && null === $value && class_exists('WP_Post')) {
+            if ($key === 'post' && $value === null && class_exists('WP_Post')) {
                 $value = (new NullableWpPost())
                     ->toWpPost();
             }

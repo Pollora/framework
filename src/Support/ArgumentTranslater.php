@@ -14,14 +14,14 @@ trait ArgumentTranslater
     /**
      * Translate the arguments using the given entity and key to translate
      *
-     * @param  array  $args The arguments to be translated (passed by reference)
-     * @param  string  $entity The entity used for translation
-     * @param  array  $keyToTranslate The keys to be translated (default: [
-     * 'label',
-     * 'labels.*',
-     * 'names.singular',
-     * 'names.plural',
-     * ])
+     * @param  array  $args  The arguments to be translated (passed by reference)
+     * @param  string  $entity  The entity used for translation
+     * @param  array  $keyToTranslate  The keys to be translated (default: [
+     *                                 'label',
+     *                                 'labels.*',
+     *                                 'names.singular',
+     *                                 'names.plural',
+     *                                 ])
      * @return void
      */
     protected function translateArguments(array $args, string $entity, array $keyToTranslate = [

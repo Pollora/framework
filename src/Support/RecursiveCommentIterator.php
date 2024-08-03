@@ -77,7 +77,7 @@ class RecursiveCommentIterator implements RecursiveIterator
      * @link http://php.net/manual/en/iterator.valid.php
      *
      * @return bool The return value will be casted to boolean and then evaluated.
-     * Returns true on success or false on failure.
+     *              Returns true on success or false on failure.
      *
      * @since 5.0.0
      */

@@ -67,7 +67,7 @@ class Vite
     /**
      * Generates the HTML markup for the Vite client script tag associated with a given hook.
      *
-     * @param  string  $hook The hook to reference not to duplicate the client markup.
+     * @param  string  $hook  The hook to reference not to duplicate the client markup.
      * @return HtmlString The HTML object for the Vite client script tag.
      */
     public function viteClientHtml(string $hook): HtmlString
@@ -80,7 +80,7 @@ class Vite
     /**
      * Reference a hook into the loadedInHooks property.
      *
-     * @param  string  $hook The hook to Reference.
+     * @param  string  $hook  The hook to Reference.
      */
     public function loadInHook(string $hook): void
     {
@@ -90,7 +90,7 @@ class Vite
     /**
      * Checks if a given hook is referenced in the loadedInHooks property.
      *
-     * @param  string  $hook The hook to check.
+     * @param  string  $hook  The hook to check.
      * @return bool Returns true if the hook is referenced, false otherwise.
      */
     public function loadedInHook(string $hook): bool
@@ -133,7 +133,7 @@ class Vite
     /**
      * Retrieves the theme name from the provided asset path.
      *
-     * @param  string  $path The asset path to extract the theme name from.
+     * @param  string  $path  The asset path to extract the theme name from.
      * @return string|false Returns the theme name if it is found in the asset path, otherwise false.
      */
     public function getThemeFromAssetPath(string $path): ?string
@@ -154,7 +154,7 @@ class Vite
     /**
      * Sets the Vite build directory for the project.
      *
-     * @param  string  $buildDirectory The directory path where the build files will be generated.
+     * @param  string  $buildDirectory  The directory path where the build files will be generated.
      */
     public function setBuildDirectory(string $buildDirectory): void
     {
@@ -185,7 +185,7 @@ class Vite
     /**
      * Returns the path to the manifest file for a given build directory.
      *
-     * @param  string  $buildDirectory The build directory.
+     * @param  string  $buildDirectory  The build directory.
      * @return string The path to the manifest file.
      */
     protected function manifestPath(string $buildDirectory): string

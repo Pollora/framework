@@ -15,12 +15,12 @@ use Pollen\Http\Request;
 use Pollen\Mail\WordPressMailServiceProvider;
 use Pollen\Permalink\RewriteServiceProvider;
 use Pollen\PostType\PostTypeServiceProvider;
+use Pollen\Scheduler\JobDispatcher;
 use Pollen\Scheduler\SchedulerServiceProvider;
 use Pollen\Taxonomy\TaxonomyServiceProvider;
-use Pollen\Theme\ThemeCommandServiceProvider;
+use Pollen\Theme\ThemeCommandProvider;
 use Pollen\Theme\ThemeServiceProvider;
 use Pollen\View\ViewServiceProvider;
-use Pollen\Scheduler\JobDispatcher;
 
 /**
  * Registers all the other service providers used by this package.
@@ -57,7 +57,7 @@ class PollenServiceProvider extends ServiceProvider
 
         // Theme service provider
         $this->app->register(ThemeServiceProvider::class);
-        $this->app->register(ThemeCommandServiceProvider::class);
+        $this->app->register(ThemeCommandProvider::class);
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);

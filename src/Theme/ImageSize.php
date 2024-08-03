@@ -11,13 +11,14 @@ declare(strict_types=1);
 namespace Pollen\Theme;
 
 use Pollen\Support\Facades\Action;
+use Pollen\Theme\Contracts\ThemeComponent;
 
 /**
  * Represents a class for handling image sizes.
  */
-class ImageSize
+class ImageSize implements ThemeComponent
 {
-    public function init()
+    public function register(): void
     {
         Action::add('after_setup_theme', [$this, 'addImageSize']);
     }

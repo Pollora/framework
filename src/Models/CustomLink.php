@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Class CustomLink
  */
-class CustomLink extends \Corcel\Model\CustomLink
-{
-}
+class CustomLink extends \Corcel\Model\CustomLink {}

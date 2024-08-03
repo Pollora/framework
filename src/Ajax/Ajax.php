@@ -44,8 +44,8 @@ class Ajax
     /**
      * Constructs a new instance of the class.
      *
-     * @param  string  $action The action to be performed.
-     * @param  callable|string  $callback The callback function to be executed.
+     * @param  string  $action  The action to be performed.
+     * @param  callable|string  $callback  The callback function to be executed.
      *
      * @throws InvalidArgumentException If either the action or callback is empty.
      */
@@ -69,7 +69,7 @@ class Ajax
     /**
      * Sets the user type.
      *
-     * @param  string  $userType The user type to set.
+     * @param  string  $userType  The user type to set.
      * @return static Returns the object instance for method chaining.
      */
     public function setUserType(string $userType): static

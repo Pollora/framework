@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Pollen\Theme;
 
 use Pollen\Support\Facades\Action;
+use Pollen\Theme\Contracts\ThemeComponent;
 
 /**
  * Class Support
  *
  * The Support class is responsible for registering all of the site's theme support.
  */
-class Support
+class Support implements ThemeComponent
 {
-    public function init()
+    public function register(): void
     {
         Action::add('after_setup_theme', [$this, 'addThemeSupport'], 1);
     }

@@ -26,7 +26,7 @@ class Post
 
     private array $queryBuilder = [];
 
-    public function __construct(array|int $postId = null, $fields = null)
+    public function __construct(array|int|null $postId = null, $fields = null)
     {
         if (is_int($postId)) {
             $this->postId($postId);
@@ -39,7 +39,7 @@ class Post
         }
     }
 
-    public static function find(array|string|int $postId = null): self
+    public static function find(array|string|int|null $postId = null): self
     {
         return new static($postId);
     }

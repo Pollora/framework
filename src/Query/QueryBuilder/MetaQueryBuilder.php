@@ -31,10 +31,9 @@ class MetaQueryBuilder extends SubQuery
     public function __construct(
         private mixed $key,
         private mixed $value = null,
-    ) {
-    }
+    ) {}
 
-    private function compareWith(string $compare, mixed $value, string $type = null): self
+    private function compareWith(string $compare, mixed $value, ?string $type = null): self
     {
         $this->compare = $compare;
         if ($type !== null) {
@@ -140,7 +139,7 @@ class MetaQueryBuilder extends SubQuery
             'state' => $this->state,
         ];
 
-        if (null !== $this->value) {
+        if ($this->value !== null) {
             $config['value'] = $this->value;
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Pollen\Scheduler\Events;
@@ -16,9 +17,13 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
     use Dispatchable, InteractsWithQueue, SerializesModels;
 
     protected string $hook;
+
     protected int $timestamp;
+
     protected array $args;
+
     protected ?string $schedule = null;
+
     protected ?int $interval = null;
 
     public function __construct(?object $event = null)
@@ -51,6 +56,7 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
         $dispatcher = app(JobDispatcher::class);
         $jobId = $dispatcher->dispatch($job);
         $job->saveToDatabase($jobId);
+
         return $job;
     }
 
@@ -61,7 +67,7 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
             'args' => json_encode($this->args),
             'schedule' => $this->schedule,
             'interval' => $this->interval,
-            'is_recurring' => !is_null($this->schedule),
+            'is_recurring' => ! is_null($this->schedule),
             'timestamp' => $this->timestamp,
             'job_id' => $jobId,
             'created_at' => now(),

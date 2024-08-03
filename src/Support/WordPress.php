@@ -39,7 +39,7 @@ class WordPress
     /**
      * Check if the current page is a category page.
      *
-     * @param  array|string  $categories categories to test for
+     * @param  array|string  $categories  categories to test for
      * @return bool
      */
     public static function category($categories = '')
@@ -50,7 +50,7 @@ class WordPress
     /**
      * Check if the current page is an archive page.
      *
-     * @param  string|array|null  $types check if the archive page is for this type
+     * @param  string|array|null  $types  check if the archive page is for this type
      * @return bool
      */
     public static function archive($types = null)
@@ -82,8 +82,8 @@ class WordPress
     /**
      * Check if we are on a multisite, and optionally check the multisite we are on.
      *
-     * @param  null|int|array  $id id (or ids) to check against the site, or null if you want to just check
-     *                           if we are actually on a multisite
+     * @param  null|int|array  $id  id (or ids) to check against the site, or null if you want to just check
+     *                              if we are actually on a multisite
      * @return bool
      */
     public static function multisite($id = null)
@@ -102,8 +102,8 @@ class WordPress
     /**
      * Get a WordPress option from the database.
      *
-     * @param  string  $name name of the option to get
-     * @param  mixed  $default value to return if we don't have a value for the option.
+     * @param  string  $name  name of the option to get
+     * @param  mixed  $default  value to return if we don't have a value for the option.
      * @return mixed
      */
     public static function option($name, $default = false)

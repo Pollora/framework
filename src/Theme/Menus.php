@@ -28,15 +28,16 @@ use /**
  * @method static \Pollen\Support\Actions\Action trigger(string $event, array $params = [], \Closure|null $before = null, \Closure|null $after = null)
  */
 Pollen\Support\Facades\Action;
+use Pollen\Theme\Contracts\ThemeComponent;
 
 /**
  * Class Menus
  *
  * This class is responsible for registering the theme menus.
  */
-class Menus
+class Menus implements ThemeComponent
 {
-    public function init()
+    public function register(): void
     {
         Action::add('after_setup_theme', [$this, 'registerMenus'], 1);
     }

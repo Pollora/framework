@@ -22,8 +22,7 @@ class TaxQueryBuilder extends SubQuery
 
     public function __construct(
         private $taxonomy
-    ) {
-    }
+    ) {}
 
     public function notExists()
     {

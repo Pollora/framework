@@ -7,6 +7,4 @@ namespace Pollen\Models\Meta;
 /**
  * Class Meta
  */
-abstract class Meta extends \Corcel\Model\Meta\Meta
-{
-}
+abstract class Meta extends \Corcel\Model\Meta\Meta {}

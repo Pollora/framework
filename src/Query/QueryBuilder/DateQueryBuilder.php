@@ -30,9 +30,7 @@ class DateQueryBuilder extends SubQuery
 
     const ALLOWED_KEYS = ['year', 'month', 'day', 'hour', 'minute', 'second'];
 
-    public function __construct(private $column = 'post_date')
-    {
-    }
+    public function __construct(private $column = 'post_date') {}
 
     public function created()
     {
@@ -113,29 +111,29 @@ class DateQueryBuilder extends SubQuery
         if (! is_numeric($date)) {
             $date = strtotime($date);
 
-            if (false === $date) {
+            if ($date === false) {
                 throw new QueryException('Provided datestring '.$date.' could not be converted to time');
             }
         }
 
         $extracted = [];
 
-        if (false !== strpos($extract, 'Y')) {
+        if (strpos($extract, 'Y') !== false) {
             $extracted['year'] = date('Y', $date);
         }
-        if (false !== strpos($extract, 'm')) {
+        if (strpos($extract, 'm') !== false) {
             $extracted['month'] = date('m', $date);
         }
-        if (false !== strpos($extract, 'd')) {
+        if (strpos($extract, 'd') !== false) {
             $extracted['day'] = date('d', $date);
         }
-        if (false !== strpos($extract, 'h')) {
+        if (strpos($extract, 'h') !== false) {
             $extracted['hour'] = date('h', $date);
         }
-        if (false !== strpos($extract, 'i')) {
+        if (strpos($extract, 'i') !== false) {
             $extracted['minute'] = date('i', $date);
         }
-        if (false !== strpos($extract, 's')) {
+        if (strpos($extract, 's') !== false) {
             $extracted['second'] = date('s', $date);
         }
 

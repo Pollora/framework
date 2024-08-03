@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Gutenberg\Pattern;
+use Pollen\Theme\Factories\ComponentFactory;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -25,6 +26,9 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        $this->app->make(ThemeComponentProvider::class)->boot();
+
         $this->directives()
             ->each(function ($directive, $function) {
                 Blade::directive($function, $directive);
@@ -58,21 +62,24 @@ class ThemeServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('theme', function ($app) {
-            return new Theme(); // Remplacez ceci par la manière dont vous instanciez votre classe Theme
+            return new Theme();
         });
-        (new ThemeInitializer($this))->init();
-        (new Pattern($this))->init();
-        (new Menus($this))->init();
-        (new Support($this))->init();
-        (new Sidebar($this))->init();
-        (new Templates($this))->init();
-        (new ImageSize($this))->init();
+
+        $this->app->singleton(ComponentFactory::class, function ($app) {
+            return new ComponentFactory($app);
+        });
+
+        $this->app->singleton(ThemeComponentsProvider::class, function ($app) {
+            return new ThemeComponentProvider($app, $app->make(ComponentFactory::class));
+        });
+
+        $this->app->make(ThemeComponentProvider::class)->register();
     }
 
     /**
      * Register a service provider.
      *
-     * @param  string  $provider The class or interface name of the service provider.
+     * @param  string  $provider  The class or interface name of the service provider.
      * @return void
      */
     public function registerProvider($provider)
@@ -96,8 +103,8 @@ class ThemeServiceProvider extends ServiceProvider
      * This method reads and merges the configuration settings from a theme
      * configuration file into the application's configuration.
      *
-     * @param  string  $path The path to the theme configuration file.
-     * @param  string  $key The configuration key to use for the merged settings.
+     * @param  string  $path  The path to the theme configuration file.
+     * @param  string  $key  The configuration key to use for the merged settings.
      * @return void
      */
     public function registerThemeConfig($path, $key)

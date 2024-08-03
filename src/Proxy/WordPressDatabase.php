@@ -73,9 +73,9 @@ class WordPressDatabase extends wpdb
      *
      * @see wpdb::has_cap()
      *
-     * @param  string  $capability The feature to check for. Accepts 'collation',
-     *                           'group_concat', 'subqueries', 'set_charset',
-     *                           'utf8mb4', or 'utf8mb4_520'.
+     * @param  string  $capability  The feature to check for. Accepts 'collation',
+     *                              'group_concat', 'subqueries', 'set_charset',
+     *                              'utf8mb4', or 'utf8mb4_520'.
      * @return int|false Whether the database feature is supported, false otherwise.
      */
     public function has_cap($capability)
@@ -112,7 +112,7 @@ class WordPressDatabase extends wpdb
      *
      * @since 3.9.0
      *
-     * @param  array  $modes Optional. A list of SQL modes to set.
+     * @param  array  $modes  Optional. A list of SQL modes to set.
      */
     public function set_sql_mode($modes = [])
     {
@@ -147,7 +147,7 @@ class WordPressDatabase extends wpdb
      *
      * TODO: eventually swap this out for proper prepared statements rather than working around WordPress' limitations.
      *
-     * @param  string  $string to escape
+     * @param  string  $string  to escape
      * @return string escaped
      */
     public function _real_escape($string)
@@ -162,7 +162,7 @@ class WordPressDatabase extends wpdb
      *
      * @since 0.71
      *
-     * @param  string  $query Database query
+     * @param  string  $query  Database query
      * @return false|int Number of rows affected/selected or false on error
      */
     public function query($query)
@@ -181,7 +181,7 @@ class WordPressDatabase extends wpdb
          *
          * @since 2.1.0
          *
-         * @param  string  $query Database query.
+         * @param  string  $query  Database query.
          */
         $query = apply_filters('query', $query);
 
@@ -247,7 +247,7 @@ class WordPressDatabase extends wpdb
      * @since 3.9.0
      * @see wpdb::query()
      *
-     * @param  string  $query The query to run.
+     * @param  string  $query  The query to run.
      */
     private function _do_query($query)
     {

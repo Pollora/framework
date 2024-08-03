@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Pollen\Theme;
 
 use Pollen\Support\Facades\Action;
+use Pollen\Theme\Contracts\ThemeComponent;
 
 /**
  * Class Templates
  *
  * This class is responsible for registering theme templates and retrieving page templates for a specific post type.
  */
-class Templates
+class Templates implements ThemeComponent
 {
-    public function init()
+    public function register(): void
     {
         Action::add('theme_page_templates', [$this, 'registerTemplates'], 10, 3);
     }
@@ -33,13 +34,15 @@ class Templates
     /**
      * Retrieves the page templates available for a specific post type.
      *
-     * @param  string  $postType The post type for which to retrieve the page templates.
+     * @param  string  $postType  The post type for which to retrieve the page templates.
      * @return array An associative array of page templates, where the keys are the template slugs
      *               and the values are the template labels.
      */
     public function getThemePageTemplates($postType)
     {
-        $configPageTemplates = config('theme.templates');
+        $configPageTemplates = (array) config('theme.templates');
+
+        $pageTemplates = [];
 
         foreach ($configPageTemplates as $slug => $template) {
             if (! isset($template['post_types']) || ! in_array($postType, (array) $template['post_types'])) {

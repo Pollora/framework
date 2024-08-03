@@ -7,6 +7,4 @@ namespace Pollen\Models\Meta;
 /**
  * Class UserMeta
  */
-class UserMeta extends \Corcel\Model\Meta\UserMeta
-{
-}
+class UserMeta extends \Corcel\Model\Meta\UserMeta {}

@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Class Comment
  */
-class Comment extends \Corcel\Model\Comment
-{
-}
+class Comment extends \Corcel\Model\Comment {}

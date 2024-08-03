@@ -15,20 +15,21 @@ class Scheduler implements SchedulerInterface
     /**
      * Handle the cron option update.
      *
-     * @param array $value The new cron option value.
-     * @param array $old_value The old cron option value.
+     * @param  array  $value  The new cron option value.
+     * @param  array  $old_value  The old cron option value.
      * @return array The old value to prevent WordPress from updating the option.
      */
     public function preUpdateOptionCron(array $value, array $old_value): array
     {
         $this->processCronDifferences($old_value, $value);
+
         return $old_value;
     }
 
     /**
      * Retrieve the cron option.
      *
-     * @param mixed $value The current option value.
+     * @param  mixed  $value  The current option value.
      * @return array The cron jobs array.
      */
     public function preOptionCron($value): array
@@ -43,9 +44,9 @@ class Scheduler implements SchedulerInterface
     /**
      * Schedule a new event.
      *
-     * @param mixed $pre The pre-filtered value.
-     * @param object $event The event to schedule.
-     * @param bool $wp_error Whether to return a WP_Error on failure.
+     * @param  mixed  $pre  The pre-filtered value.
+     * @param  object  $event  The event to schedule.
+     * @param  bool  $wp_error  Whether to return a WP_Error on failure.
      * @return ShouldQueue|WP_Error|null The scheduled job or WP_Error.
      */
     public function preScheduleEvent($pre, object $event, bool $wp_error)
@@ -70,9 +71,9 @@ class Scheduler implements SchedulerInterface
     /**
      * Reschedule an event.
      *
-     * @param mixed $pre The pre-filtered value.
-     * @param object $event The event to reschedule.
-     * @param bool $wp_error Whether to return a WP_Error on failure.
+     * @param  mixed  $pre  The pre-filtered value.
+     * @param  object  $event  The event to reschedule.
+     * @param  bool  $wp_error  Whether to return a WP_Error on failure.
      * @return ShouldQueue|WP_Error|null The rescheduled job or WP_Error.
      */
     public function preRescheduleEvent($pre, object $event, bool $wp_error): ShouldQueue|WP_Error|null
@@ -83,6 +84,7 @@ class Scheduler implements SchedulerInterface
 
         try {
             $job = new WordPressRecurringEvent($event);
+
             return $job->createJob($event);
         } catch (\Throwable $e) {
             return $wp_error ? new WP_Error('reschedule_error', $e->getMessage()) : null;
@@ -92,11 +94,11 @@ class Scheduler implements SchedulerInterface
     /**
      * Unschedule an event.
      *
-     * @param mixed $pre The pre-filtered value.
-     * @param int $timestamp The event timestamp.
-     * @param string $hook The event hook.
-     * @param array $args The event arguments.
-     * @param bool $wp_error Whether to return a WP_Error on failure.
+     * @param  mixed  $pre  The pre-filtered value.
+     * @param  int  $timestamp  The event timestamp.
+     * @param  string  $hook  The event hook.
+     * @param  array  $args  The event arguments.
+     * @param  bool  $wp_error  Whether to return a WP_Error on failure.
      * @return bool|WP_Error Whether the event was unscheduled.
      */
     public function preUnscheduleEvent($pre, int $timestamp, string $hook, array $args, bool $wp_error): bool|WP_Error
@@ -125,10 +127,10 @@ class Scheduler implements SchedulerInterface
     /**
      * Clear all scheduled hooks.
      *
-     * @param mixed $pre The pre-filtered value.
-     * @param string $hook The hook to clear.
-     * @param array|null $args The arguments to match.
-     * @param bool $wp_error Whether to return a WP_Error on failure.
+     * @param  mixed  $pre  The pre-filtered value.
+     * @param  string  $hook  The hook to clear.
+     * @param  array|null  $args  The arguments to match.
+     * @param  bool  $wp_error  Whether to return a WP_Error on failure.
      * @return int|WP_Error The number of events cleared.
      */
     public function preClearScheduledHook($pre, string $hook, ?array $args, bool $wp_error): int|WP_Error
@@ -175,9 +177,9 @@ class Scheduler implements SchedulerInterface
     /**
      * Unschedule all events attached to a specific hook.
      *
-     * @param mixed $pre The pre-filtered value.
-     * @param string $hook The hook to unschedule.
-     * @param bool $wp_error Whether to return a WP_Error on failure.
+     * @param  mixed  $pre  The pre-filtered value.
+     * @param  string  $hook  The hook to unschedule.
+     * @param  bool  $wp_error  Whether to return a WP_Error on failure.
      * @return int|WP_Error The number of events unscheduled.
      */
     public function preUnscheduleHook($pre, string $hook, bool $wp_error): int|WP_Error
@@ -188,10 +190,10 @@ class Scheduler implements SchedulerInterface
     /**
      * Retrieve a scheduled event.
      *
-     * @param mixed $pre The pre-filtered value.
-     * @param string $hook The event hook.
-     * @param array $args The event arguments.
-     * @param int|null $timestamp Unix timestamp (UTC) of the event. Null to retrieve next scheduled event.
+     * @param  mixed  $pre  The pre-filtered value.
+     * @param  string  $hook  The event hook.
+     * @param  array  $args  The event arguments.
+     * @param  int|null  $timestamp  Unix timestamp (UTC) of the event. Null to retrieve next scheduled event.
      * @return object|false The event object or false if not found.
      */
     public function preGetScheduledEvent($pre, string $hook, array $args, ?int $timestamp): object|false
@@ -203,7 +205,7 @@ class Scheduler implements SchedulerInterface
         $query = DB::table('wp_events')
             ->where('hook', $hook);
 
-        if ($args && !empty($args)) {
+        if ($args && ! empty($args)) {
             $query->where('args', json_encode($args));
         }
 
@@ -213,8 +215,7 @@ class Scheduler implements SchedulerInterface
 
         $event = $query->first();
 
-
-        if (!$event) {
+        if (! $event) {
             return false;
         }
 
@@ -232,21 +233,20 @@ class Scheduler implements SchedulerInterface
         ];
     }
 
-
     protected function getNextRunTime(string $schedule, ?int $interval): int
     {
         $cron = RecurringEvent::getCronExpression($schedule, $interval);
         $cron = new \Cron\CronExpression($cron);
+
         return $cron->getNextRunDate()->getTimestamp();
     }
-
 
     /**
      * Generate a unique job ID.
      *
-     * @param int|null $timestamp The event timestamp.
-     * @param string $hook The event hook.
-     * @param array $args The event arguments.
+     * @param  int|null  $timestamp  The event timestamp.
+     * @param  string  $hook  The event hook.
+     * @param  array  $args  The event arguments.
      * @return string The generated job ID.
      */
     protected function generateJobId(?int $timestamp, string $hook, array $args): string
@@ -257,7 +257,7 @@ class Scheduler implements SchedulerInterface
     /**
      * Convert a job to a WordPress event object.
      *
-     * @param object $job The job to convert.
+     * @param  object  $job  The job to convert.
      * @return object The converted event object.
      */
     protected function convertJobToEvent(object $job): object
@@ -275,8 +275,8 @@ class Scheduler implements SchedulerInterface
     /**
      * Process the differences between old and new cron arrays.
      *
-     * @param array $oldCrons The old cron array.
-     * @param array $newCrons The new cron array.
+     * @param  array  $oldCrons  The old cron array.
+     * @param  array  $newCrons  The new cron array.
      */
     protected function processCronDifferences(array $oldCrons, array $newCrons): void
     {
@@ -291,13 +291,12 @@ class Scheduler implements SchedulerInterface
     protected function generateCronArray(): array
     {
         $jobs = $this->getAllJobs();
+
         return $this->convertJobsToWordPressCronArray($jobs);
     }
 
     /**
      * Get all jobs from the queue.
-     *
-     * @return array
      */
     protected function getAllJobs(): array
     {
@@ -313,7 +312,7 @@ class Scheduler implements SchedulerInterface
     /**
      * Retrieve cron jobs ready to be run.
      *
-     * @param mixed $pre The pre-filtered value.
+     * @param  mixed  $pre  The pre-filtered value.
      * @return array The array of ready cron jobs.
      */
     public function preGetReadyCronJobs($pre): array
@@ -328,7 +327,7 @@ class Scheduler implements SchedulerInterface
     /**
      * Convert an array of jobs to a WordPress cron array format.
      *
-     * @param array $jobs The jobs to convert.
+     * @param  array  $jobs  The jobs to convert.
      * @return array The converted cron array.
      */
     protected function convertJobsToWordPressCronArray(array $jobs): array
@@ -336,7 +335,7 @@ class Scheduler implements SchedulerInterface
         $crons = [];
 
         foreach ($jobs as $job) {
-            if (!$job->hook) {
+            if (! $job->hook) {
                 continue; // Skip jobs that are not WordPress cron jobs
             }
 
@@ -344,11 +343,11 @@ class Scheduler implements SchedulerInterface
             $hook = $job->hook;
             $key = md5(serialize($job->args));
 
-            if (!isset($crons[$timestamp])) {
+            if (! isset($crons[$timestamp])) {
                 $crons[$timestamp] = [];
             }
 
-            if (!isset($crons[$timestamp][$hook])) {
+            if (! isset($crons[$timestamp][$hook])) {
                 $crons[$timestamp][$hook] = [];
             }
 

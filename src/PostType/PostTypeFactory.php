@@ -24,9 +24,9 @@ class PostTypeFactory
     /**
      * Creates a new post type and registers it in the container.
      *
-     * @param  string  $slug The slug for the post type.
-     * @param  string|null  $singular The singular name for the post type. Optional.
-     * @param  string|null  $plural The plural name for the post type. Optional.
+     * @param  string  $slug  The slug for the post type.
+     * @param  string|null  $singular  The singular name for the post type. Optional.
+     * @param  string|null  $plural  The plural name for the post type. Optional.
      * @return PostType The created post type object.
      *
      * @throws PostTypeException if the post type with the given slug already exists.

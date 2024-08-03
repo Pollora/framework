@@ -32,7 +32,7 @@ class WordPressUserProvider implements UserProvider
         // TODO: Implement retrieveByCredentials() method.
     }
 
-    public function validateCredentials(Authenticatable $user, #[\SensitiveParameter]  array $credentials)
+    public function validateCredentials(Authenticatable $user, #[\SensitiveParameter] array $credentials)
     {
         // TODO: Implement validateCredentials() method.
     }

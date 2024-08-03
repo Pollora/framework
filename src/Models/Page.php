@@ -7,6 +7,4 @@ namespace Pollen\Models;
 /**
  * Class Page
  */
-class Page extends \Corcel\Model\Page
-{
-}
+class Page extends \Corcel\Model\Page {}
