@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Pollen\Route\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Routing\Registrar;
+use Pollen\Route\Router;
 
 class WordPressBindings
 {
-    public function __construct(private Registrar $router) {}
+    public function __construct(private Router $router) {}
 
     public function handle($request, Closure $next)
     {

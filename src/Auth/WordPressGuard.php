@@ -7,16 +7,21 @@ namespace Pollen\Auth;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Facades\Request;
 use Pollen\Models\User;
 use Pollen\Support\Facades\Action;
 use WP_Error;
+use WP_User;
 
 class WordPressGuard implements StatefulGuard
 {
     use GuardHelpers;
 
     private ?User $lastAttempted = null;
+
+
+    public function __construct(UserProvider $provider) {}
 
     public function check(): bool
     {
@@ -25,6 +30,7 @@ class WordPressGuard implements StatefulGuard
 
     public function user(): ?Authenticatable
     {
+        $user = User::find(get_current_user_id());
         return $this->user ??= $this->check() ? User::find(get_current_user_id()) : null;
     }
 
@@ -39,10 +45,12 @@ class WordPressGuard implements StatefulGuard
     {
         if ($this->validate($credentials)) {
             $user = $this->lastAttempted;
-            wp_set_auth_cookie($user->ID, $remember, Request::secure());
-            Action::do('wp_login', $user->user_login, $user);
-            $this->setUser($user);
-            return true;
+            if ($user instanceof User) {
+                wp_set_auth_cookie($user->ID, $remember, Request::secure());
+                do_action('wp_login', $user->user_login, $user->toWpUser());
+                $this->setUser($user);
+                return true;
+            }
         }
         return false;
     }
@@ -58,10 +66,12 @@ class WordPressGuard implements StatefulGuard
 
     public function login(Authenticatable $user, $remember = false): void
     {
-        wp_set_auth_cookie($user->ID, $remember);
-        Action::do('wp_login', $user->user_login, get_userdata($user->ID));
-        $this->setUser($user);
-        wp_set_current_user($user->ID);
+        if ($user instanceof User) {
+            wp_set_auth_cookie($user->ID, $remember);
+            do_action('wp_login', $user->user_login, $user->toWpUser());
+            $this->setUser($user);
+            wp_set_current_user($user->ID);
+        }
     }
 
     public function loginUsingId($id, $remember = false): ?Authenticatable
@@ -76,7 +86,7 @@ class WordPressGuard implements StatefulGuard
     public function onceUsingId($id): bool
     {
         if ($user = User::find($id)) {
-            wp_set_current_user($id);
+            wp_set_current_user($user->ID);
             $this->setUser($user);
             return true;
         }
@@ -96,8 +106,10 @@ class WordPressGuard implements StatefulGuard
 
     public function setUser(Authenticatable $user): static
     {
-        wp_set_current_user($user->ID);
-        $this->user = $user;
+        if ($user instanceof User) {
+            wp_set_current_user($user->ID);
+            $this->user = $user;
+        }
         return $this;
     }
 }

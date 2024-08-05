@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Pollen\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use Pollen\Ajax\Ajax as AjaxBuilder;
 
+/**
+ * @method static AjaxBuilder listen(string $action, callable|string $callback)
+ */
 class Ajax extends Facade
 {
     /**

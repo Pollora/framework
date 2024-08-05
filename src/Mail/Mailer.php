@@ -18,15 +18,19 @@ class Mailer
         string|array $headers = '',
         array $attachments = []
     ): ?SentMessage {
-        $values = Filter::apply('wp_mail', compact('to', 'subject', 'message', 'headers', 'attachments'));
+        $values = Filter::apply('wp_mail', [$to, $subject, $message, $headers, $attachments]);
+        [$to, $subject, $message, $headers, $attachments] = $values;
 
-        extract($values);
+        try {
+            return Mail::html($message, function (Message $mail) use ($to, $subject, $attachments) {
+                $mail->to($to)
+                    ->subject($subject);
 
-        return Mail::raw($message, function (Message $mail) use ($to, $subject, $attachments) {
-            $mail->to($to)->subject($subject);
-
-            $this->addAttachments($mail, $attachments);
-        });
+                $this->addAttachments($mail, $attachments);
+            });
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     private function addAttachments(Message $mail, array|string $attachments): void

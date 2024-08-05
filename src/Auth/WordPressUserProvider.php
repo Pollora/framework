@@ -11,6 +11,9 @@ use WP_Error;
 
 class WordPressUserProvider implements UserProvider
 {
+
+    public function __construct() {}
+
     public function retrieveById($identifier): ?Authenticatable
     {
         return User::find($identifier);
@@ -35,7 +38,10 @@ class WordPressUserProvider implements UserProvider
 
     public function validateCredentials(Authenticatable $user, #[\SensitiveParameter] array $credentials): bool
     {
-        return wp_check_password($credentials['password'], $user->user_pass, $user->ID);
+        if ($user instanceof User) {
+            return wp_check_password($credentials['password'], $user->user_pass, $user->ID);
+        }
+        return false;
     }
 
     public function rehashPasswordIfRequired(Authenticatable $user, #[\SensitiveParameter] array $credentials, bool $force = false): bool

@@ -23,7 +23,7 @@ class AuthServiceProvider extends ServiceProvider
         );
 
         $this->app['auth']->provider('wp', fn($app, $config) =>
-        new WordPressUserProvider($config['model'])
+            new WordPressUserProvider()
         );
 
         $this->registerWordPressGate();

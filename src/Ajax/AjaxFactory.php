@@ -6,7 +6,7 @@ namespace Pollen\Ajax;
 
 class AjaxFactory
 {
-    public function listen($action, $callback)
+    public function listen(string $action, callable|string $callback)
     {
         return new Ajax($action, $callback);
     }

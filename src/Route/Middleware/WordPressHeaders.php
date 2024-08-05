@@ -14,7 +14,7 @@ class WordPressHeaders
     private const FRAMEWORK_NAME = 'Pollen';
     private const FRAMEWORK_HEADER = 'X-Powered-By';
     
-    public function handle(Request $request, Closure $next): SymfonyResponse
+    public function handle(Request $request, Closure $next)
     {
         $response = $next($request);
 

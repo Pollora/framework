@@ -6,11 +6,12 @@ namespace Pollen\Route\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class WordPressAuthorize
 {
-    public function handle(Request $request, Closure $next, string $capability = 'edit_posts')
+    public function handle(Request $request, Closure $next, string $capability = 'edit_posts'): Response
     {
         if ($this->isUserAuthorized($capability)) {
             return $next($request);

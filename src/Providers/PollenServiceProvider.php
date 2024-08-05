@@ -6,6 +6,7 @@ namespace Pollen\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
+use Pollen\Admin\PageServiceProvider;
 use Pollen\Ajax\AjaxServiceProvider;
 use Pollen\Asset\AssetServiceProvider;
 use Pollen\Auth\AuthServiceProvider;
@@ -41,6 +42,7 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);
         $this->app->register(RewriteServiceProvider::class);
+        $this->app->register(PageServiceProvider::class);
         $this->app->register(AssetServiceProvider::class);
         $this->app->register(AjaxServiceProvider::class);
         $this->app->register(TaxonomyServiceProvider::class);

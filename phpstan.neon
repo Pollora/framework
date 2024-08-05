@@ -19,6 +19,7 @@ parameters:
 
     scanFiles:
         - ../../../_ide_helper.php
+        - ../../../.phpstorm.meta.php
 
     scanDirectories:
           - ../../../public/cms
