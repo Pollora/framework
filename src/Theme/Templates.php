@@ -22,9 +22,9 @@ class Templates implements ThemeComponent
     /**
      * Register all of the site's theme templates.
      *
-     * @return void
+     * @return array An associative array of page templates, where the keys are the template slugs
      */
-    public function registerTemplates($pageTemplates, $wp_themes, $post)
+    public function registerTemplates($pageTemplates, $wp_themes, $post): array
     {
         $themePageTemplates = $this->getThemePageTemplates($post->post_type);
 

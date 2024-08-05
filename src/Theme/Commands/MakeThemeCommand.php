@@ -34,6 +34,8 @@ class MakeThemeCommand extends \Qirolab\Theme\Commands\MakeThemeCommand
 
     public $themeAuthorUri;
 
+    public $themeName;
+
     public function handle(): void
     {
         $this->theme = $this->askTheme();

@@ -13,12 +13,8 @@ class VitePresetExport
     use HandleFiles;
     use StubTrait;
 
-    public function __construct(string $theme, string $themeName, string $cssFramework)
+    public function __construct(protected string $theme, protected string $themeName, protected string $cssFramework)
     {
-        $this->theme = $theme;
-        $this->themeName = $themeName;
-        $this->cssFramework = $cssFramework;
-
         $this->ensureDirectoryExists(Theme::path('', $theme));
     }
 

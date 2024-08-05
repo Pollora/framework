@@ -1,0 +1,38 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    treatPhpDocTypesAsCertain: false
+    paths:
+        - src/
+
+    noModelMake: false
+
+    noEnvCallsOutsideOfConfig: true
+
+    databaseMigrationsPath:
+        - ../../../database/migrations
+
+    universalObjectCratesClasses:
+        - WP_Post
+        - wpdb
+
+    scanFiles:
+        - ../../../_ide_helper.php
+
+    scanDirectories:
+          - ../../../public/cms
+          - ../../laravel/framework
+          - ../entity
+          - ../wordpress-args
+
+    # Level 9 is the highest level
+    level: 5
+
+#    ignoreErrors:
+#        - '#PHPDoc tag @var#'
+#
+#    excludePaths:
+#        - ./*/*/FileToBeExcluded.php
+#
+#    checkMissingIterableValueType: false

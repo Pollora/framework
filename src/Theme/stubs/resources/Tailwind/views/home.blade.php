@@ -34,7 +34,7 @@
                                         <time class="relative z-10 order-first mb-3 flex items-center text-sm text-zinc-400 pl-3.5" datetime="{{ $post->post_date->format('c') }}">
                                             <span class="absolute inset-y-0 left-0 flex items-center" aria-hidden="true">
                                             <span class="h-4 w-0.5 rounded-full bg-zinc-200"></span>
-                                            </span>{{ $post->post_date->format(Wordpress::option('date_format')) }}
+                                            </span>{{ $post->post_date->format(WordPress::option('date_format')) }}
                                         </time>
                                         <p class="relative z-10 mt-2 text-sm text-zinc-600">
                                             {{ get_the_excerpt($post->ID) }}

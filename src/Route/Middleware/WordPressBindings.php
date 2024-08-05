@@ -4,30 +4,14 @@ declare(strict_types=1);
 
 namespace Pollen\Route\Middleware;
 
+use Closure;
 use Illuminate\Contracts\Routing\Registrar;
 
 class WordPressBindings
 {
-    /**
-     * @var Registrar
-     */
-    protected $router;
+    public function __construct(private Registrar $router) {}
 
-    /**
-     * Create a new WordPressBindings substitutor.
-     */
-    public function __construct(Registrar $router)
-    {
-        $this->router = $router;
-    }
-
-    /**
-     * Handle an incoming request.
-     *
-     *
-     * @return mixed
-     */
-    public function handle($request, \Closure $next)
+    public function handle($request, Closure $next)
     {
         $route = $request->route();
 

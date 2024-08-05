@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 namespace Pollen\WordPress;
+use Pollen\Support\Facades\Filter;
 
 trait QueryTrait
 {
-    protected function setupWordpressQuery(): void
+    protected function setupWordPressQuery(): void
     {
         wp();
         do_action('template_redirect');
@@ -27,7 +28,7 @@ trait QueryTrait
 
     private function isHeadRequest(): bool
     {
-        return $_SERVER['REQUEST_METHOD'] === 'HEAD' && apply_filters('exit_on_http_head', true);
+        return $_SERVER['REQUEST_METHOD'] === 'HEAD' && Filter::apply('exit_on_http_head', true);
     }
 
     private function isRobots(): bool

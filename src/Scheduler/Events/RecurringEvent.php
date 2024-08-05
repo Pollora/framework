@@ -7,8 +7,16 @@ namespace Pollen\Scheduler\Events;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Class RecurringEvent
+ * @package Pollen\Scheduler\Events
+ */
 class RecurringEvent extends AbstractEvent
 {
+    /**
+     * RecurringEvent constructor.
+     * @param object|null $event
+     */
     public function __construct(?object $event = null)
     {
         parent::__construct($event);
@@ -18,6 +26,12 @@ class RecurringEvent extends AbstractEvent
         }
     }
 
+    /**
+     * Create a new job instance.
+     *
+     * @param object $event
+     * @return static
+     */
     public static function createJob(object $event): self
     {
         $job = new static($event);
@@ -26,7 +40,13 @@ class RecurringEvent extends AbstractEvent
         return $job;
     }
 
-    protected function saveToDatabase($jobId = null)
+    /**
+     * Save the job to the database.
+     *
+     * @param int|null $jobId
+     * @return void
+     */
+    protected function saveToDatabase($jobId = null): void
     {
         DB::table('wp_events')->insert([
             'hook' => $this->hook,
@@ -38,7 +58,13 @@ class RecurringEvent extends AbstractEvent
         ]);
     }
 
-    public static function scheduleAllEvents(Schedule $schedule)
+    /**
+     * Schedule all events.
+     *
+     * @param Schedule $schedule
+     * @return void
+     */
+    public static function scheduleAllEvents(Schedule $schedule): void
     {
         $events = DB::table('wp_events')->whereNotNull('schedule')->get();
 
@@ -49,6 +75,13 @@ class RecurringEvent extends AbstractEvent
         }
     }
 
+    /**
+     * Get the cron expression for a schedule.
+     *
+     * @param string $schedule
+     * @param int|null $interval
+     * @return string
+     */
     public static function getCronExpression(string $schedule, ?int $interval): string
     {
         $schedules = wp_get_schedules();
@@ -88,6 +121,11 @@ class RecurringEvent extends AbstractEvent
         }
     }
 
+    /**
+     * Handle the event.
+     *
+     * @return void
+     */
     public function handle(): void
     {
         do_action_ref_array($this->hook, $this->args);

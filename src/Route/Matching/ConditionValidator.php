@@ -10,18 +10,8 @@ use Illuminate\Routing\Route;
 
 class ConditionValidator implements ValidatorInterface
 {
-    /**
-     * Validate a given rule against a route and request.
-     *
-     *
-     * @return bool
-     */
-    public function matches(Route $route, Request $request)
+    public function matches(Route $route, Request $request): bool
     {
-        if (call_user_func_array($route->getCondition(), $route->getConditionParameters())) {
-            return true;
-        }
-
-        return false;
+        return call_user_func_array($route->getCondition(), $route->getConditionParameters());
     }
 }

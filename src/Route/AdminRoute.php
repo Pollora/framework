@@ -10,35 +10,15 @@ use Illuminate\Routing\Router as IlluminateRouter;
 
 class AdminRoute
 {
-    /**
-     * @var Request
-     */
-    private $request;
+    public function __construct(
+        private Request $request,
+        private IlluminateRouter $router
+    ) {}
 
-    /**
-     * @var IlluminateRouter
-     */
-    private $router;
-
-    public function __construct(Request $request, IlluminateRouter $router)
-    {
-        $this->request = $request;
-        $this->router = $router;
-    }
-
-    /**
-     * Return the catch-all WordPress administration route.
-     *
-     * @return \Illuminate\Routing\Route
-     *
-     * @throws \Illuminate\Container\EntryNotFoundException
-     */
-    public function get()
+    public function get(): \Illuminate\Routing\Route
     {
         $wordpressUri = trim(config('app.wp.dir', 'cms'), '\/');
-        $route = $this->router->any($wordpressUri.'/wp-admin/{any?}', function () {
-            return new Response();
-        });
+        $route = $this->router->any("$wordpressUri/wp-admin/{any?}", fn() => new Response());
 
         $route->middleware('admin');
         $route->bind($this->request);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\View;
 
+use Pollen\Support\Facades\Filter;
+
 class Loop
 {
     /**
@@ -19,7 +21,7 @@ class Loop
     /**
      * Get the title of the current post.
      *
-     * @param  int|\WP_post  $post  The post ID or \WP_Post object
+     * @param  int|\WP_Post  $post  The post ID or \WP_Post object
      * @return string The title of the current post.
      */
     public function title($post = null)
@@ -58,7 +60,7 @@ class Loop
      */
     public function content($more_text = null, $strip_teaser = false)
     {
-        $content = apply_filters('the_content', get_the_content($more_text, $strip_teaser));
+        $content = Filter::apply('the_content', get_the_content($more_text, $strip_teaser));
         $content = str_replace(']]>', ']]&gt;', $content);
 
         return $content;
@@ -72,7 +74,7 @@ class Loop
      */
     public function excerpt($post = null)
     {
-        return apply_filters('the_excerpt', get_the_excerpt($post));
+        return Filter::apply('the_excerpt', get_the_excerpt($post));
     }
 
     /**
@@ -146,14 +148,13 @@ class Loop
      * Get the terms (custom taxonomies) of the current post.
      *
      * @param  string  $taxonomy  The custom taxonomy slug.
-     * @param int|\WP_Post The post ID or WP_Post object
-     * @param  mixed  $post
+     * @param int|\WP_Post $post The post ID or WP_Post object
      *
      * @see https://codex.wordpress.org/Function_Reference/get_the_terms
      *
      * @return array|false|\WP_Error
      */
-    public function terms($taxonomy, $post = 0)
+    public function terms(string $taxonomy, int|\WP_Post $post = 0): array|false|\WP_Error
     {
         if (! $post) {
             $post = $this->id();

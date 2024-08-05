@@ -9,7 +9,7 @@ use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    public function register(): void
     {
         if ($this->app->bound('auth')) {
             $this->registerWordPressAuthDriver();
@@ -18,32 +18,29 @@ class AuthServiceProvider extends ServiceProvider
 
     protected function registerWordPressAuthDriver(): void
     {
-        $authManager = $this->app->make('auth');
+        $this->app['auth']->extend('wp', fn($app, $name, $config) =>
+        $this->createWordPressGuard($config)
+        );
 
-        $authManager->extend('wp', function ($app, $name, $config) use ($authManager) {
-            return $this->createWordPressGuard($authManager, $config);
-        });
-
-        $authManager->provider('wp', function ($app, $config) {
-            return new WordPressUserProvider($config['model']);
-        });
+        $this->app['auth']->provider('wp', fn($app, $config) =>
+        new WordPressUserProvider($config['model'])
+        );
 
         $this->registerWordPressGate();
     }
 
-    protected function createWordPressGuard($authManager, array $config): WordPressGuard
+    protected function createWordPressGuard(array $config): WordPressGuard
     {
-        $provider = $authManager->createUserProvider($config['provider'] ?? null);
-
+        $provider = $this->app['auth']->createUserProvider($config['provider'] ?? null);
         return new WordPressGuard($provider);
     }
 
     protected function registerWordPressGate(): void
     {
         if (function_exists('user_can')) {
-            Gate::after(function ($user, $ability, $result, $arguments) {
-                return user_can($user, $ability, ...$arguments);
-            });
+            Gate::after(fn($user, $ability, $result, $arguments) =>
+            user_can($user, $ability, ...$arguments)
+            );
         }
     }
 }

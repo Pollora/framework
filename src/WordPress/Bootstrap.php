@@ -24,18 +24,22 @@ class Bootstrap
         $this->ensureAddFilterExists();
     }
 
+    public function isOrchestraWorkbench()
+    {
+        return str_contains(App::basePath(), '/orchestra/');
+    }
+
     public function boot(): void
     {
         $this->db = DB::getConfig(null);
         $this->setDatabaseConstants();
-        $this->loadWordpressSettings();
+        $this->loadWordPressSettings();
 
         if (! App::runningInConsole() && ! wp_installing()) {
-            $this->setupWordpressQuery();
+            $this->setupWordPressQuery();
         }
 
         $this->setupActionHooks();
-        $this->disableQueryCachingInAdmin();
     }
 
     private function ensureAddFilterExists(): void
@@ -45,10 +49,10 @@ class Bootstrap
         }
     }
 
-    private function loadWordpressSettings(): void
+    private function loadWordPressSettings(): void
     {
         $table_prefix = $this->db['prefix'];
-        if (! (defined('WP_CLI') && WP_CLI)) {
+        if (! (defined('WP_CLI') && WP_CLI) && ! $this->isOrchestraWorkbench()) {
             require_once ABSPATH.'wp-settings.php';
         }
     }
@@ -59,13 +63,6 @@ class Bootstrap
             Action::add('init', [$this, 'fixNetworkUrl'], 1);
         } else {
             $this->fixNetworkUrl();
-        }
-    }
-
-    private function disableQueryCachingInAdmin(): void
-    {
-        if (! App::runningInConsole() && $this->isWordPressAdmin()) {
-            config(['wordpress.caching' => 0]);
         }
     }
 
@@ -89,7 +86,7 @@ class Bootstrap
         ) : WordPress::site()->path;
 
         if ($path) {
-            $url .= str_replace('public/', '', WP_PATH).ltrim($path, '/');
+            $url .= str_replace('public/', '', WP_PATH).ltrim($path, '/'); // @phpstan-ignore-line
         }
 
         return $url;
@@ -132,7 +129,7 @@ class Bootstrap
         ];
 
         foreach ($constants as $constant => $key) {
-            if (! defined($constant)) {
+            if (! defined($constant) && isset($this->db[$key])) {
                 define($constant, $this->db[$key]);
             }
         }
@@ -140,7 +137,7 @@ class Bootstrap
 
     private function setWPConstants(): void
     {
-        foreach (config('wordpress') as $key => $value) {
+        foreach ((array) config('wordpress.constants') as $key => $value) {
             $key = strtoupper($key);
             if (! defined($key)) {
                 define($key, $value);
@@ -153,7 +150,11 @@ class Bootstrap
         define('WP_PATH', 'public/cms/');
 
         if (! defined('ABSPATH')) {
-            define('ABSPATH', App::basePath().DIRECTORY_SEPARATOR.WP_PATH);
+            if ($this->isOrchestraWorkbench()) { // if Orchestra Platform
+                define('ABSPATH', dirname(__FILE__) . '/../../../../../' . WP_PATH);
+            } else {
+                define('ABSPATH', App::basePath().DIRECTORY_SEPARATOR.WP_PATH);
+            }
         }
 
         define('WP_SITEURL', url(str_replace('public/', '', WP_PATH)));

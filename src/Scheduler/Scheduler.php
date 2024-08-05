@@ -6,6 +6,7 @@ namespace Pollen\Scheduler;
 
 use Illuminate\Support\Facades\DB;
 use Pollen\Scheduler\Contracts\SchedulerInterface;
+use Pollen\Scheduler\Events\AbstractEvent;
 use Pollen\Scheduler\Events\RecurringEvent;
 use Pollen\Scheduler\Events\SingleEvent;
 use WP_Error;
@@ -47,9 +48,9 @@ class Scheduler implements SchedulerInterface
      * @param  mixed  $pre  The pre-filtered value.
      * @param  object  $event  The event to schedule.
      * @param  bool  $wp_error  Whether to return a WP_Error on failure.
-     * @return ShouldQueue|WP_Error|null The scheduled job or WP_Error.
+     * @return AbstractEvent|WP_Error|null The scheduled job or WP_Error.
      */
-    public function preScheduleEvent($pre, object $event, bool $wp_error)
+    public function preScheduleEvent($pre, object $event, bool $wp_error): AbstractEvent|WP_Error|null
     {
         if ($pre !== null) {
             return $pre;
@@ -74,16 +75,16 @@ class Scheduler implements SchedulerInterface
      * @param  mixed  $pre  The pre-filtered value.
      * @param  object  $event  The event to reschedule.
      * @param  bool  $wp_error  Whether to return a WP_Error on failure.
-     * @return ShouldQueue|WP_Error|null The rescheduled job or WP_Error.
+     * @return AbstractEvent|WP_Error|null The rescheduled job or WP_Error.
      */
-    public function preRescheduleEvent($pre, object $event, bool $wp_error): ShouldQueue|WP_Error|null
+    public function preRescheduleEvent($pre, object $event, bool $wp_error): AbstractEvent|WP_Error|null
     {
         if ($pre !== null) {
             return $pre;
         }
 
         try {
-            $job = new WordPressRecurringEvent($event);
+            $job = new RecurringEvent($event);
 
             return $job->createJob($event);
         } catch (\Throwable $e) {
@@ -205,7 +206,7 @@ class Scheduler implements SchedulerInterface
         $query = DB::table('wp_events')
             ->where('hook', $hook);
 
-        if ($args && ! empty($args)) {
+        if (! empty($args)) {
             $query->where('args', json_encode($args));
         }
 

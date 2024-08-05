@@ -4,39 +4,65 @@ declare(strict_types=1);
 
 namespace Pollen\Route\Middleware;
 
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class WordPressHeaders
 {
-    /**
-     * Cleanup response headers.
-     *
-     *
-     * @return Response
-     */
-    public function handle(Request $request, \Closure $next)
+    private const FRAMEWORK_NAME = 'Pollen';
+    private const FRAMEWORK_HEADER = 'X-Powered-By';
+    
+    public function handle(Request $request, Closure $next): SymfonyResponse
     {
-        $route = $request->route();
-
         $response = $next($request);
 
-        if (! $route->hasCondition() && function_exists('is_user_logged_in') && ! is_user_logged_in()) {
-            // We're on a custom route. Remove "no-cache" headers added by WordPress:
-            // - Cache-Control
-            // - Expires
-            // - Content-type (provided by the response instance as well)
-            @header_remove('Cache-Control');
-            @header_remove('Expires');
-            @header_remove('Content-Type');
+        if (!$response instanceof SymfonyResponse) {
+            return $response;
         }
 
-        // Set the response cache control to "public"
-        // on pages visited by guest users only.
-        if (function_exists('is_user_logged_in') && ! is_user_logged_in()) {
+        $this->addFrameworkHeader($response);
+
+        if ($this->shouldCleanupHeaders($request)) {
+            $this->removeWordPressHeaders($response);
+        }
+
+        if ($this->shouldSetPublicCache()) {
             $response->setPublic();
+            $response->headers->addCacheControlDirective('must-revalidate', true);
+            $response->headers->addCacheControlDirective('max-age', '3600'); // 1 heure, ajustez selon vos besoins
         }
 
         return $response;
+    }
+
+    private function addFrameworkHeader(SymfonyResponse $response): void
+    {
+        $response->headers->set(self::FRAMEWORK_HEADER, self::FRAMEWORK_NAME);
+    }
+
+    private function shouldCleanupHeaders(Request $request): bool
+    {
+        return !$request->route()?->hasCondition() &&
+            $this->isWordPressFunctionAvailable('is_user_logged_in') &&
+            !is_user_logged_in();
+    }
+
+    private function removeWordPressHeaders(SymfonyResponse $response): void
+    {
+        $response->headers->remove('Cache-Control');
+        $response->headers->remove('Expires');
+        $response->headers->remove('Content-Type');
+    }
+
+    private function shouldSetPublicCache(): bool
+    {
+        return $this->isWordPressFunctionAvailable('is_user_logged_in') && !is_user_logged_in();
+    }
+
+    private function isWordPressFunctionAvailable(string $function): bool
+    {
+        return function_exists($function);
     }
 }

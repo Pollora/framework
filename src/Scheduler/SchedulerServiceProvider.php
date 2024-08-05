@@ -8,6 +8,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Scheduler\Contracts\SchedulerInterface;
 use Pollen\Support\Facades\Filter;
+use Illuminate\Support\Facades\DB;
 
 class SchedulerServiceProvider extends ServiceProvider
 {
@@ -29,6 +30,10 @@ class SchedulerServiceProvider extends ServiceProvider
 
     protected function registerFilters(SchedulerInterface $scheduler): void
     {
+        if ($this->isOrchastraTest()) {
+            return;
+        }
+        
         $filters = [
             'pre_update_option_cron' => 'preUpdateOptionCron',
             'pre_option_cron' => 'preOptionCron',
@@ -48,10 +53,16 @@ class SchedulerServiceProvider extends ServiceProvider
 
     protected function scheduleRecurringEvents(): void
     {
-        if (defined('WP_CLI')) {
+        if ($this->isOrchastraTest() || defined('WP_CLI')) {
             return;
         }
+
         $schedule = $this->app->make(Schedule::class);
         \Pollen\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
+    }
+
+    protected function isOrchastraTest() {
+        $db = DB::getConfig(null);
+        return str_contains($db['database'], '/orchestra/');
     }
 }

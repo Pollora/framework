@@ -8,8 +8,6 @@ use Illuminate\Support\ServiceProvider;
 
 /**
  * Lets Laravel know about the configuration files we have to publish.
- *
- * @author Jordan Doyle <jordan@doyle.wf>
  */
 class ConfigServiceProvider extends ServiceProvider
 {

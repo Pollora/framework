@@ -7,15 +7,13 @@ namespace Pollen\Support\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Facade for {@link Pollen\Proxy\Query} proxy. Provides access to the main query.
+ * Facade for {@link \Pollen\Query\PostQuery}.
  *
- * @see \Pollen\Proxy\Query
+ * @see \Pollen\Query\PostQuery
  *
- * @mixin \Pollen\Proxy\Query
- *
- * @author Jordan Doyle <jordan@doyle.wf>
+ * @mixin \Pollen\Query\PostQuery
  */
-class Query extends Facade
+class PostQuery extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -24,6 +22,6 @@ class Query extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'wp.query';
+        return 'wp.query.post';
     }
 }

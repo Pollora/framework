@@ -22,7 +22,7 @@ trait ArgumentTranslater
      *                                 'names.singular',
      *                                 'names.plural',
      *                                 ])
-     * @return void
+     * @return array The translated arguments
      */
     protected function translateArguments(array $args, string $entity, array $keyToTranslate = [
         'label',

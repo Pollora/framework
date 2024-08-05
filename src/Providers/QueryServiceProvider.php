@@ -6,15 +6,16 @@ namespace Pollen\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollen\Models\Post;
-use Pollen\Proxy\Query;
+use Pollen\Query\DateQuery;
+use Pollen\Query\MetaQuery;
+use Pollen\Query\PostQuery;
+use Pollen\Query\TaxQuery;
 use Pollen\Support\WordPress;
 use Pollen\View\Loop;
 
 /**
  * Service provider that provides bindings for the several queries that WordPress
  * has running at once.
- *
- * @author Jordan Doyle <jordan@doyle.wf>
  */
 class QueryServiceProvider extends ServiceProvider
 {
@@ -27,8 +28,20 @@ class QueryServiceProvider extends ServiceProvider
     {
         $this->app->bind('Corcel\Model\User', 'Pollen\Model\User');
 
-        $this->app->singleton('wp.query', function () {
-            return Query::instance($GLOBALS['wp_the_query']);
+        $this->app->singleton('wp.query.post', function () {
+            return new PostQuery();
+        });
+
+        $this->app->singleton('wp.query.taxonomy', function () {
+            return new TaxQuery();
+        });
+
+        $this->app->singleton('wp.query.meta', function () {
+            return new MetaQuery();
+        });
+
+        $this->app->singleton('wp.query.date', function () {
+            return new DateQuery();
         });
 
         $this->app->bind('wp.loop', function () {
@@ -36,7 +49,7 @@ class QueryServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(Post::class, function () {
-            return Post::find(WordPress::id());
+            return Post::find(get_the_ID());
         });
     }
 }

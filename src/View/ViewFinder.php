@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollen\View;
 
 use Illuminate\Support\Collection;
-use Illuminate\View\FileViewFinder;
+use Pollen\View\FileViewFinder;
 use Pollen\Filesystem\Filesystem;
 
 class ViewFinder

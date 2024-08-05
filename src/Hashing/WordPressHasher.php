@@ -14,6 +14,24 @@ use Illuminate\Contracts\Hashing\Hasher as HasherContract;
  */
 class WordPressHasher implements HasherContract
 {
+
+    /**
+     * Get information about the given hashed value.
+     *
+     * @param string $hashedValue
+     * @return array
+     */
+    /**
+     * Get information about the given hashed value.
+     *
+     * @param  string  $hashedValue
+     * @return array
+     */
+    public function info($hashedValue)
+    {
+        return [];
+    }
+
     /**
      * Hash the given value.
      *

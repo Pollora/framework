@@ -3,20 +3,41 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Lang;
-use Pollen\Models\Meta;
 use Pollen\Models\Post;
 use Pollen\Support\RecursiveMenuIterator;
+use Pollen\Support\Facades\Mail;
+
+
+if (!function_exists('wp_mail')) {
+    function wp_mail($to, $subject, $message, $headers = '', $attachments = []): bool
+    {
+        $result = app('wp.mail')->send($to, $subject, $message, $headers, $attachments);
+        return $result !== null;
+    }
+}
+
+if (! function_exists('mysqli_report')) {
+    /**
+     * Report MySQL errors.
+     *
+     * @return void
+     */
+    function mysqli_report()
+    {
+        // silence is golden
+    }
+}
 
 if (! function_exists('__')) {
     /**
      * Tries to get a translation from both Laravel and WordPress.
      *
-     * @param  $key  key of the translation
+     * @param  string  $key  key of the translation
      * @param  array|string  $replace  replacements for laravel or domain for wordpress
-     * @param  string  $locale  locale for laravel, not used for wordpress
+     * @param  string|null  $locale  locale for laravel, not used for wordpress
      * @return string
      */
-    function __($key, $replace = [], $locale = null)
+    function __(string $key, array|string $replace = [], ?string $locale = null)
     {
         if (! $locale && function_exists('get_locale')) {
             $locale = get_locale();
@@ -26,7 +47,7 @@ if (! function_exists('__')) {
                 return trans($key, $replace, $locale);
             } catch (\Exception $e) {
                 // failed to get translation from Laravel
-                if ((! empty($replace) && ! is_string($replace)) || ! empty($locale)) {
+                if ((! empty($replace)) || ! empty($locale)) {
                     // this doesn't look like something we can pass to WordPress, lets
                     // rethrow the exception
                     throw $e;
@@ -40,71 +61,16 @@ if (! function_exists('__')) {
     }
 }
 
-if (! function_exists('wp_query')) {
-    /**
-     * Get the main query or convert a {@link WP_Query} to a {@link \Pollen\Proxy\Query} proxy instance.
-     *
-     *
-     * @return \Pollen\Proxy\Query
-     */
-    function wp_query(?WP_Query $query = null)
-    {
-        return ($query === null) ? app('wp.query') : Query::instance($query);
-    }
-}
-
-if (! function_exists('post')) {
-    /**
-     * Get the current post in The Loop, or convert a {@link \WP_Post} instance to a Pollen
-     * post.
-     *
-     *
-     * @return Post|null
-     */
-    function post(?WP_Post $post = null)
-    {
-        return ($post === null) ? app('wp.loop') : Post::find($post->ID);
-    }
-}
-
-if (! function_exists('meta')) {
-    /**
-     * Grab a meta item from the database for the current page.
-     *
-     * @param  string|null  $name  name of the field to get (or null for all)
-     * @return mixed
-     */
-    function meta($name = null)
-    {
-        return Meta::get($name);
-    }
-}
-
-if (! function_exists('field')) {
-    /**
-     * Grab an ACF field from the database for the current page.
-     *
-     * @see Meta::acf()
-     *
-     * @param  string|null  $name  name of the field to get (or null for all)
-     * @return mixed
-     */
-    function field($name = null)
-    {
-        return Meta::acf($name);
-    }
-}
-
 if (! function_exists('menu')) {
     /**
      * Get a {@link RecursiveIteratorIterator} for a WordPress menu.
      *
-     * @param  string  $name  name of the menu to get
+     * @param string $name  name of the menu to get
      * @param  int  $depth  how far to recurse down the nodes
      * @param  int  $mode  flags to pass to the {@link RecursiveIteratorIterator}
      * @return RecursiveIteratorIterator
      */
-    function menu($name, $depth = -1, $mode = RecursiveIteratorIterator::SELF_FIRST)
+    function menu(string $name, $depth = -1, int $mode = RecursiveIteratorIterator::SELF_FIRST): RecursiveIteratorIterator
     {
         $iterator = new RecursiveIteratorIterator(new RecursiveMenuIterator($name), $mode);
         $iterator->setMaxDepth($depth);
@@ -114,7 +80,7 @@ if (! function_exists('menu')) {
 }
 
 if (! function_exists('is_secured')) {
-    function is_secured()
+    function is_secured(): bool
     {
         return str_contains(config('app.url'), 'https://');
     }

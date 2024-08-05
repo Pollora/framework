@@ -39,7 +39,8 @@
         "qirolab/laravel-themer": "^2.1",
         "jgrossi/corcel": "^8.0",
         "log1x/sage-directives": "^2.0",
-        "roots/bedrock-autoloader": "^1.0"
+        "roots/bedrock-autoloader": "^1.0",
+        "pollen/query": "dev-main"
     },
     "autoload": {
         "psr-4": {
@@ -49,13 +50,14 @@
             "src/helpers.php"
         ]
     },
+    "minimum-stability": "dev",
     "extra": {
         "laravel": {
             "providers": [
                 "Pollen\\Providers\\PollenServiceProvider"
             ],
             "aliases": {
-                "Wordpress": "Pollen\\Support\\Wordpress",
+                "Wordpress": "Pollen\\Support\\WordPress",
                 "Action": "Pollen\\Support\\Facades\\Action",
                 "Filter": "Pollen\\Support\\Facades\\Filter",
                 "Query": "Pollen\\Support\\Facades\\Query",
@@ -78,5 +80,35 @@
         "allow-plugins": {
             "cweagans/composer-patches": true
         }
+    },
+    "require-dev": {
+        "driftingly/rector-laravel": "dev-main",
+        "larastan/larastan": "^2.0",
+        "orchestra/testbench": "9.x-dev"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve"
+        ],
+        "lint": [
+            "pint",
+            "@php vendor/bin/phpstan analyse"
+        ]
     }
 }

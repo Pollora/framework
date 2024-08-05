@@ -6,39 +6,41 @@ namespace Pollen\Auth;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
+use Pollen\Models\User;
+use WP_Error;
 
-/**
- * Class WordPressUserProvider
- */
 class WordPressUserProvider implements UserProvider
 {
-    public function retrieveById($identifier)
+    public function retrieveById($identifier): ?Authenticatable
     {
-        // TODO: Implement retrieveById() method.
+        return User::find($identifier);
     }
 
-    public function retrieveByToken($identifier, $token)
+    public function retrieveByToken($identifier, $token): ?Authenticatable
     {
-        // TODO: Implement retrieveByToken() method.
+        // WordPress n'utilise pas de token de rappel par défaut
+        return null;
     }
 
-    public function updateRememberToken(Authenticatable $user, #[\SensitiveParameter] $token)
+    public function updateRememberToken(Authenticatable $user, #[\SensitiveParameter] $token): void
     {
-        // TODO: Implement updateRememberToken() method.
+        // WordPress n'utilise pas de token de rappel par défaut
     }
 
-    public function retrieveByCredentials(#[\SensitiveParameter] array $credentials)
+    public function retrieveByCredentials(#[\SensitiveParameter] array $credentials): ?Authenticatable
     {
-        // TODO: Implement retrieveByCredentials() method.
+        $user = wp_authenticate($credentials['username'], $credentials['password']);
+        return $user instanceof WP_Error ? null : User::find($user->ID);
     }
 
-    public function validateCredentials(Authenticatable $user, #[\SensitiveParameter] array $credentials)
+    public function validateCredentials(Authenticatable $user, #[\SensitiveParameter] array $credentials): bool
     {
-        // TODO: Implement validateCredentials() method.
+        return wp_check_password($credentials['password'], $user->user_pass, $user->ID);
     }
 
-    public function rehashPasswordIfRequired(Authenticatable $user, #[\SensitiveParameter] array $credentials, bool $force = false)
+    public function rehashPasswordIfRequired(Authenticatable $user, #[\SensitiveParameter] array $credentials, bool $force = false): bool
     {
-        // TODO: Implement rehashPasswordIfRequired() method.
+        // WordPress gère automatiquement le rehashage des mots de passe
+        return false;
     }
 }

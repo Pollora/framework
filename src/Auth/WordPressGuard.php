@@ -12,175 +12,92 @@ use Pollen\Models\User;
 use Pollen\Support\Facades\Action;
 use WP_Error;
 
-/**
- * WordPress guard implementation for Laravel
- */
 class WordPressGuard implements StatefulGuard
 {
     use GuardHelpers;
 
-    /**
-     * Get the last user we attempted to login as.
-     *
-     * @var User
-     */
-    private $lastAttempted = null;
+    private ?User $lastAttempted = null;
 
-    /**
-     * Determine if the current user is authenticated.
-     *
-     * @return bool
-     */
-    public function check()
+    public function check(): bool
     {
         return is_user_logged_in();
     }
 
-    /**
-     * Get the currently authenticated user.
-     *
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
-     */
-    public function user()
+    public function user(): ?Authenticatable
     {
         return $this->user ??= $this->check() ? User::find(get_current_user_id()) : null;
     }
 
-    /**
-     * Validate a user's credentials.
-     *
-     *
-     * @return bool
-     */
-    public function validate(array $credentials = [])
+    public function validate(array $credentials = []): bool
     {
         $user = wp_authenticate($credentials['username'], $credentials['password']);
-        $this->lastAttempted = User::find($user->ID);
-
-        return ! ($user instanceof WP_Error);
+        $this->lastAttempted = $user instanceof WP_Error ? null : User::find($user->ID);
+        return !($user instanceof WP_Error);
     }
 
-    /**
-     * Attempt to authenticate a user using the given credentials.
-     *
-     * @param  bool  $remember
-     * @param  bool  $login
-     * @return bool
-     */
-    public function attempt(array $credentials = [], $remember = false, $login = true)
-    {
-        $validate = $this->validate($credentials);
-
-        if ($validate && $login) {
-            $user = $this->lastAttempted;
-            wp_set_auth_cookie($user->ID, $credentials['remember'], Request::secure());
-            Action::run('wp_login', $user->user_login, $user);
-            $this->setUser($user);
-        }
-
-        return $validate;
-    }
-
-    /**
-     * Log a user into the application without sessions or cookies.
-     *
-     *
-     * @return bool
-     */
-    public function once(array $credentials = [])
+    public function attempt(array $credentials = [], $remember = false): bool
     {
         if ($this->validate($credentials)) {
-            $this->setUser($this->lastAttempted);
-
+            $user = $this->lastAttempted;
+            wp_set_auth_cookie($user->ID, $remember, Request::secure());
+            Action::do('wp_login', $user->user_login, $user);
+            $this->setUser($user);
             return true;
         }
-
         return false;
     }
 
-    /**
-     * Log a user into the application.
-     *
-     * @param  bool  $remember
-     * @return void
-     */
-    public function login(Authenticatable $user, $remember = false)
+    public function once(array $credentials = []): bool
+    {
+        if ($this->validate($credentials)) {
+            $this->setUser($this->lastAttempted);
+            return true;
+        }
+        return false;
+    }
+
+    public function login(Authenticatable $user, $remember = false): void
     {
         wp_set_auth_cookie($user->ID, $remember);
-        Action::run('wp_login', $user->user_login, get_userdata($user->ID));
+        Action::do('wp_login', $user->user_login, get_userdata($user->ID));
         $this->setUser($user);
         wp_set_current_user($user->ID);
     }
 
-    /**
-     * Log the given user ID into the application.
-     *
-     * @param  mixed  $id
-     * @param  bool  $remember
-     * @return \Illuminate\Contracts\Auth\Authenticatable|bool
-     */
-    public function loginUsingId($id, $remember = false)
+    public function loginUsingId($id, $remember = false): ?Authenticatable
     {
         if ($user = User::find($id)) {
-            wp_set_auth_cookie($user->ID, $remember);
-            Action::run('wp_login', $user->user_login, get_userdata($user->ID));
-            $this->setUser($user);
-            wp_set_current_user($user->ID);
+            $this->login($user, $remember);
+            return $user;
         }
-
-        return $this->user ?? null;
+        return null;
     }
 
-    /**
-     * Log the given user ID into the application without sessions or cookies.
-     *
-     * @param  mixed  $id
-     * @return bool
-     */
-    public function onceUsingId($id)
+    public function onceUsingId($id): bool
     {
         if ($user = User::find($id)) {
             wp_set_current_user($id);
             $this->setUser($user);
-
             return true;
         }
-
         return false;
     }
 
-    /**
-     * Determine if the user was authenticated via "remember me" cookie.
-     *
-     * @return bool
-     */
-    public function viaRemember()
+    public function viaRemember(): bool
     {
         return Request::hasCookie(Request::secure() ? SECURE_AUTH_COOKIE : AUTH_COOKIE);
     }
 
-    /**
-     * Log the user out of the application.
-     *
-     * @return void
-     */
-    public function logout()
+    public function logout(): void
     {
         wp_logout();
         $this->user = null;
     }
 
-    /**
-     * Set the current user.
-     *
-     *
-     * @return $this
-     */
-    public function setUser(Authenticatable $user)
+    public function setUser(Authenticatable $user): static
     {
         wp_set_current_user($user->ID);
         $this->user = $user;
-
         return $this;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\Theme;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -38,9 +39,9 @@ class ThemeServiceProvider extends ServiceProvider
     /**
      * Get the Blade directives.
      *
-     * @return array
+     * @return Collection
      */
-    public function directives()
+    public function directives(): Collection
     {
         return collect(['Directives'])
             ->flatMap(function ($directive) {
@@ -69,7 +70,7 @@ class ThemeServiceProvider extends ServiceProvider
             return new ComponentFactory($app);
         });
 
-        $this->app->singleton(ThemeComponentsProvider::class, function ($app) {
+        $this->app->singleton(ThemeComponentProvider::class, function ($app) {
             return new ThemeComponentProvider($app, $app->make(ComponentFactory::class));
         });
 

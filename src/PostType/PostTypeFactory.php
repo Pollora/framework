@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Pollen\PostType;
 
+use Pollen\Entity\PostTypeException;
 use Pollen\Foundation\Application;
 
 class PostTypeFactory

@@ -17,18 +17,18 @@ class RewriteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // For remove the trailing slash.
-        Action::add('permalink_structure_changed', fn ($old_permalink_structure, $new_permalink_structure) => $this->removeTrailingSlash($old_permalink_structure, $new_permalink_structure), 90);
+        Action::add('permalink_structure_changed', fn ($oldPermalinkStructure, $new_permalink_structure) => $this->removeTrailingSlash($oldPermalinkStructure, $new_permalink_structure), 90);
     }
 
     /**
      * Remove trailing slash from permalink structure
      */
-    protected function removeTrailingSlash(string|bool $old_permalink_structure, string|bool $permalink_structure): void
+    protected function removeTrailingSlash(string|bool $oldPermalinkStructure, string|bool $permalinkStructure): void
     {
-        if (! $old_permalink_structure) {
+        if (! $oldPermalinkStructure) {
             return;
         }
 
-        update_option('permalink_structure', rtrim($permalink_structure, '/'));
+        update_option('permalink_structure', rtrim($permalinkStructure, '/'));
     }
 }

@@ -10,13 +10,13 @@ declare(strict_types=1);
 
 namespace Pollen\Taxonomy;
 
+use Pollen\Entity\TaxonomyException;
 use Pollen\Foundation\Application;
 
 class TaxonomyFactory
 {
-    public function __construct(Application $container)
+    public function __construct(protected Application $container)
     {
-        $this->container = $container;
     }
 
     /**

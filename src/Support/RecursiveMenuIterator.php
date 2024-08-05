@@ -1,145 +1,89 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Pollen\Support;
 
-use RecursiveIterator;
+    use RecursiveIterator;
+    use WP_Post;
+    use Illuminate\Support\Collection;
 
-/**
- * Interface to allow easier menu item iteration.
- *
- * @author Jordan Doyle <jordan@doyle.wf>
- */
-class RecursiveMenuIterator implements RecursiveIterator
+    /**
+     * Interface to allow easier menu item iteration.
+     */
+final class RecursiveMenuIterator extends AbstractRecursiveIterator
 {
-    public $items;
-
-    private $current = 0;
-
     /**
      * Create a new RecursiveMenuIterator instance.
      *
-     * @param  string  $menu  menu to get items of
+     * @param string|Collection $menu Menu to get items of
      */
-    public function __construct($menu)
+    public function __construct(string|Collection $menu)
     {
-        if (is_string($menu) && function_exists('wp_get_nav_menu_object')) {
-            $menu = wp_get_nav_menu_object(get_nav_menu_locations()[$menu]);
-
-            // WordPress is nice and will always place children below parents so we can easily create a tree out of it
-            $items = collect(wp_get_nav_menu_items($menu))->keyBy('ID')->reverse();
-            $itemsArray = $items->all();
-
-            foreach ($itemsArray as $id => $item) {
-                $itemsArray[$id]->children = $items->where('menu_item_parent', $id)->values();
-            }
-
-            // only have nodes without a parent at the top level of the tree
-            $this->items = collect($itemsArray)->filter(function ($item) {
-                return $item->menu_item_parent === 0 || $item->menu_item_parent === '0';
-            })->reverse()->values();
-        } else {
-            $this->items = $menu;
-        }
+        $this->items = $this->initializeItems($menu);
     }
 
     /**
-     * Return the current element.
+     * Initialize menu items.
      *
-     * @link http://php.net/manual/en/iterator.current.php
-     *
-     * @return \WP_Post Can return any type.
-     *
-     * @since 5.0.0
+     * @param string|Collection $menu
+     * @return Collection
      */
-    public function current(): \WP_Post
+    private function initializeItems(string|Collection $menu): Collection
+    {
+        if (is_string($menu) && function_exists('wp_get_nav_menu_object')) {
+            return $this->getWordPressMenuItems($menu);
+        }
+
+        return $menu instanceof Collection ? $menu : collect([]);
+    }
+
+    /**
+     * Get WordPress menu items.
+     *
+     * @param string $menuName
+     * @return Collection
+     */
+    private function getWordPressMenuItems(string $menuName): Collection
+    {
+        $navLocations = get_nav_menu_locations();
+
+        if (!isset($navLocations[$menuName])) {
+            return collect([]);
+        }
+
+        $menu = wp_get_nav_menu_object($navLocations[$menuName]);
+        $items = collect(wp_get_nav_menu_items($menu))->keyBy('ID')->reverse();
+
+        $this->buildMenuTree($items);
+
+        return $items->filter(fn($item) => $item->menu_item_parent == 0)->reverse()->values();
+    }
+
+    /**
+     * Build menu tree by assigning children to parent items.
+     *
+     * @param Collection $items
+     */
+    private function buildMenuTree(Collection $items): void
+    {
+        $items->each(function ($item) use ($items) {
+            $item->children = $items->where('menu_item_parent', $item->ID)->values();
+        });
+    }
+
+    public function current(): WP_Post
     {
         return $this->items[$this->current];
     }
 
-    /**
-     * Move forward to next element.
-     *
-     * @link http://php.net/manual/en/iterator.next.php
-     *
-     * @return void Any returned value is ignored.
-     *
-     * @since 5.0.0
-     */
-    public function next(): void
-    {
-        $this->current++;
-    }
-
-    /**
-     * Return the key of the current element.
-     *
-     * @link http://php.net/manual/en/iterator.key.php
-     *
-     * @return mixed scalar on success, or null on failure.
-     *
-     * @since 5.0.0
-     */
-    public function key(): mixed
-    {
-        return $this->current;
-    }
-
-    /**
-     * Checks if current position is valid.
-     *
-     * @link http://php.net/manual/en/iterator.valid.php
-     *
-     * @return bool The return value will be casted to boolean and then evaluated.
-     *              Returns true on success or false on failure.
-     *
-     * @since 5.0.0
-     */
-    public function valid(): bool
-    {
-        return isset($this->items[$this->current]);
-    }
-
-    /**
-     * Rewind the Iterator to the first element.
-     *
-     * @link http://php.net/manual/en/iterator.rewind.php
-     *
-     * @return void Any returned value is ignored.
-     *
-     * @since 5.0.0
-     */
-    public function rewind(): void
-    {
-        $this->current = 0;
-    }
-
-    /**
-     * Returns if an iterator can be created for the current entry.
-     *
-     * @link http://php.net/manual/en/recursiveiterator.haschildren.php
-     *
-     * @return bool true if the current entry can be iterated over, otherwise returns false.
-     *
-     * @since 5.1.0
-     */
+    
     public function hasChildren(): bool
     {
-        return ! $this->current()->children->isEmpty();
+        return !$this->current()->children->isEmpty();
     }
 
-    /**
-     * Returns an iterator for the current entry.
-     *
-     * @link http://php.net/manual/en/recursiveiterator.getchildren.php
-     *
-     * @return RecursiveIterator An iterator for the current entry.
-     *
-     * @since 5.1.0
-     */
-    public function getChildren(): ?RecursiveIterator
+    public function getChildren(): ?self
     {
-        return new static($this->current()->children);
+        return new self($this->current()->children);
     }
 }

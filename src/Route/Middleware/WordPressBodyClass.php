@@ -4,78 +4,57 @@ declare(strict_types=1);
 
 namespace Pollen\Route\Middleware;
 
-use Pollen\Hook\FilterBuilder;
+use Closure;
+use Pollen\Hook\Filter;
 use Pollen\Route\Route;
 
 class WordPressBodyClass
 {
-    /**
-     * @var FilterBuilder
-     */
-    protected $filter;
+    public function __construct(protected Filter $filter) {}
 
-    public function __construct(FilterBuilder $filter)
+    public function handle($request, Closure $next)
     {
-        $this->filter = $filter;
-    }
-
-    /**
-     * Handle incoming request.
-     *
-     *
-     * @return mixed
-     */
-    public function handle($request, \Closure $next)
-    {
-        $this->filter->add(
-            'body_class',
-            $this->dispatchBodyClass($request->route()),
-        );
-
+        $this->filter->add('body_class', $this->getBodyClassCallback($request->route()));
         return $next($request);
     }
 
-    /**
-     * Return the callback managing route body CSS classes.
-     *
-     *
-     * @return \Closure
-     */
-    protected function dispatchBodyClass(Route $route)
+    private function getBodyClassCallback(Route $route): Closure
     {
-        return function ($classes) use ($route) {
+        return function (array $classes) use ($route): array {
             if ($route->hasCondition()) {
                 return $classes;
             }
 
-            $tokens = array_filter(array_map(function ($token) use ($route) {
-                switch ($type = $token[0]) {
-                    case 'variable':
-                        if (isset($token[3]) && $route->hasParameter($paramKey = $token[3])) {
-                            $param = $route->parameter($paramKey);
+            $tokens = $this->getRouteTokens($route);
 
-                            return is_string($param) ? sprintf('%s-%s', $paramKey, sanitize_title($param)) : false;
-                        }
-
-                        return false;
-
-                        break;
-                    case 'text':
-                        return sanitize_title($token[1]);
-
-                        break;
-                    default:
-                        return false;
-                }
-            }, array_reverse($route->getCompiled()->getTokens())));
-
-            if (! empty($tokens)) {
-                return array_filter(array_merge($tokens, $classes), function ($class) {
-                    return $class !== 'error404';
-                });
+            if (!empty($tokens)) {
+                return array_filter(array_merge($tokens, $classes), fn($class) => $class !== 'error404');
             }
 
             return $classes;
         };
+    }
+
+    private function getRouteTokens(Route $route): array
+    {
+        return array_filter(array_map(function ($token) use ($route) {
+            switch ($token[0]) {
+                case 'variable':
+                    return $this->handleVariableToken($token, $route);
+                case 'text':
+                    return sanitize_title($token[1]);
+                default:
+                    return false;
+            }
+        }, array_reverse($route->getCompiled()->getTokens())));
+    }
+
+    private function handleVariableToken(array $token, Route $route): string|false
+    {
+        if (isset($token[3]) && $route->hasParameter($paramKey = $token[3])) {
+            $param = $route->parameter($paramKey);
+            return is_string($param) ? sprintf('%s-%s', $paramKey, sanitize_title($param)) : false;
+        }
+        return false;
     }
 }
