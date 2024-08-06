@@ -47,7 +47,6 @@ class WordPressDatabase extends wpdb
     public function mysqli_real_connect($host, $port, $socket, $client_flags)
     {
         $this->dbh = $this->eloquentConnection->getPdo();
-        dd($this->dbh);
     }
 
     /**
