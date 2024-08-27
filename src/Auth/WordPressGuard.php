@@ -10,16 +10,13 @@ use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Facades\Request;
 use Pollen\Models\User;
-use Pollen\Support\Facades\Action;
 use WP_Error;
-use WP_User;
 
 class WordPressGuard implements StatefulGuard
 {
     use GuardHelpers;
 
     private ?User $lastAttempted = null;
-
 
     public function __construct(UserProvider $provider) {}
 
@@ -31,6 +28,7 @@ class WordPressGuard implements StatefulGuard
     public function user(): ?Authenticatable
     {
         $user = User::find(get_current_user_id());
+
         return $this->user ??= $this->check() ? User::find(get_current_user_id()) : null;
     }
 
@@ -38,7 +36,8 @@ class WordPressGuard implements StatefulGuard
     {
         $user = wp_authenticate($credentials['username'], $credentials['password']);
         $this->lastAttempted = $user instanceof WP_Error ? null : User::find($user->ID);
-        return !($user instanceof WP_Error);
+
+        return ! ($user instanceof WP_Error);
     }
 
     public function attempt(array $credentials = [], $remember = false): bool
@@ -49,9 +48,11 @@ class WordPressGuard implements StatefulGuard
                 wp_set_auth_cookie($user->ID, $remember, Request::secure());
                 do_action('wp_login', $user->user_login, $user->toWpUser());
                 $this->setUser($user);
+
                 return true;
             }
         }
+
         return false;
     }
 
@@ -59,8 +60,10 @@ class WordPressGuard implements StatefulGuard
     {
         if ($this->validate($credentials)) {
             $this->setUser($this->lastAttempted);
+
             return true;
         }
+
         return false;
     }
 
@@ -78,8 +81,10 @@ class WordPressGuard implements StatefulGuard
     {
         if ($user = User::find($id)) {
             $this->login($user, $remember);
+
             return $user;
         }
+
         return null;
     }
 
@@ -88,8 +93,10 @@ class WordPressGuard implements StatefulGuard
         if ($user = User::find($id)) {
             wp_set_current_user($user->ID);
             $this->setUser($user);
+
             return true;
         }
+
         return false;
     }
 
@@ -110,6 +117,7 @@ class WordPressGuard implements StatefulGuard
             wp_set_current_user($user->ID);
             $this->user = $user;
         }
+
         return $this;
     }
 }

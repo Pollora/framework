@@ -263,7 +263,7 @@ class Scheduler implements SchedulerInterface
      */
     protected function convertJobToEvent(object $job): object
     {
-        $event = new \stdClass();
+        $event = new \stdClass;
         $event->hook = $job->wp_hook;
         $event->timestamp = $job->available_at;
         $event->args = json_decode($job->wp_args, true);

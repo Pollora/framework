@@ -38,8 +38,6 @@ class ThemeServiceProvider extends ServiceProvider
 
     /**
      * Get the Blade directives.
-     *
-     * @return Collection
      */
     public function directives(): Collection
     {
@@ -63,7 +61,7 @@ class ThemeServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('theme', function ($app) {
-            return new Theme();
+            return new Theme;
         });
 
         $this->app->singleton(ComponentFactory::class, function ($app) {

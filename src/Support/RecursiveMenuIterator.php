@@ -1,21 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Pollen\Support;
 
-    use RecursiveIterator;
-    use WP_Post;
-    use Illuminate\Support\Collection;
+use Illuminate\Support\Collection;
+use WP_Post;
 
-    /**
-     * Interface to allow easier menu item iteration.
-     */
+/**
+ * Interface to allow easier menu item iteration.
+ */
 final class RecursiveMenuIterator extends AbstractRecursiveIterator
 {
     /**
      * Create a new RecursiveMenuIterator instance.
      *
-     * @param string|Collection $menu Menu to get items of
+     * @param  string|Collection  $menu  Menu to get items of
      */
     public function __construct(string|Collection $menu)
     {
@@ -24,9 +24,6 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
 
     /**
      * Initialize menu items.
-     *
-     * @param string|Collection $menu
-     * @return Collection
      */
     private function initializeItems(string|Collection $menu): Collection
     {
@@ -39,15 +36,12 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
 
     /**
      * Get WordPress menu items.
-     *
-     * @param string $menuName
-     * @return Collection
      */
     private function getWordPressMenuItems(string $menuName): Collection
     {
         $navLocations = get_nav_menu_locations();
 
-        if (!isset($navLocations[$menuName])) {
+        if (! isset($navLocations[$menuName])) {
             return collect([]);
         }
 
@@ -56,13 +50,11 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
 
         $this->buildMenuTree($items);
 
-        return $items->filter(fn($item) => $item->menu_item_parent == 0)->reverse()->values();
+        return $items->filter(fn ($item) => $item->menu_item_parent == 0)->reverse()->values();
     }
 
     /**
      * Build menu tree by assigning children to parent items.
-     *
-     * @param Collection $items
      */
     private function buildMenuTree(Collection $items): void
     {
@@ -76,10 +68,9 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
         return $this->items[$this->current];
     }
 
-    
     public function hasChildren(): bool
     {
-        return !$this->current()->children->isEmpty();
+        return ! $this->current()->children->isEmpty();
     }
 
     public function getChildren(): ?self

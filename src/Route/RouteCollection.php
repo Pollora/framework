@@ -14,15 +14,15 @@ class RouteCollection extends IlluminateRouteCollection
 
         foreach ($route->methods() as $method) {
             $this->routes[$method][$domainAndUri] = $route;
-            $this->allRoutes[$method . $domainAndUri] = $route;
+            $this->allRoutes[$method.$domainAndUri] = $route;
         }
     }
 
     private function buildDomainAndUri($route): string
     {
-        $domainAndUri = $route->getDomain() . $route->uri();
+        $domainAndUri = $route->getDomain().$route->uri();
 
-        if ($route->hasCondition() && !empty($route->getConditionParameters())) {
+        if ($route->hasCondition() && ! empty($route->getConditionParameters())) {
             $domainAndUri .= serialize($route->getConditionParameters());
         }
 

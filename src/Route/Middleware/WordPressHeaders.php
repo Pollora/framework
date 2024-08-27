@@ -6,19 +6,19 @@ namespace Pollen\Route\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class WordPressHeaders
 {
     private const FRAMEWORK_NAME = 'Pollen';
+
     private const FRAMEWORK_HEADER = 'X-Powered-By';
-    
+
     public function handle(Request $request, Closure $next)
     {
         $response = $next($request);
 
-        if (!$response instanceof SymfonyResponse) {
+        if (! $response instanceof SymfonyResponse) {
             return $response;
         }
 
@@ -44,9 +44,9 @@ class WordPressHeaders
 
     private function shouldCleanupHeaders(Request $request): bool
     {
-        return !$request->route()?->hasCondition() &&
+        return ! $request->route()?->hasCondition() &&
             $this->isWordPressFunctionAvailable('is_user_logged_in') &&
-            !is_user_logged_in();
+            ! is_user_logged_in();
     }
 
     private function removeWordPressHeaders(SymfonyResponse $response): void
@@ -58,7 +58,7 @@ class WordPressHeaders
 
     private function shouldSetPublicCache(): bool
     {
-        return $this->isWordPressFunctionAvailable('is_user_logged_in') && !is_user_logged_in();
+        return $this->isWordPressFunctionAvailable('is_user_logged_in') && ! is_user_logged_in();
     }
 
     private function isWordPressFunctionAvailable(string $function): bool

@@ -25,7 +25,6 @@ class FileViewFinder extends FileViewFinderBase
      * Get possible view name based on path
      *
      * @param  string  $file  Absolute or relative path to possible view file
-     *
      * @return string Possible view name
      */
     public function getPossibleViewNameFromPath(string $file): string

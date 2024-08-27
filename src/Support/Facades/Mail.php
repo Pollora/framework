@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\Support\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use Illuminate\Mail\SentMessage;
+use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static ?SentMessage send(string|array $to, string $subject, string $message, string|array $headers = '', array $attachments = [])

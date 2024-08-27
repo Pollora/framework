@@ -11,12 +11,19 @@ use Pollen\Foundation\Application;
 class Vite
 {
     protected ?HtmlString $client = null;
+
     protected array $loadedInHooks = [];
+
     protected string $buildDirectory = 'build';
+
     protected string $manifestFilename = 'manifest.json';
+
     protected static array $manifests = [];
+
     protected ?string $theme = null;
+
     protected Application $app;
+
     protected ?string $hotFile = null;
 
     public function __construct(Application $app)
@@ -36,6 +43,7 @@ class Vite
     public function viteClientHtml(string $hook): HtmlString
     {
         $this->loadInHook($hook);
+
         return $this->client;
     }
 
@@ -59,7 +67,7 @@ class Vite
         $manifest = $this->manifest($this->buildDirectory);
 
         if (isset($manifest[$path])) {
-            $path = home_url() . "/{$this->buildDirectory}/{$manifest[$path]['file']}";
+            $path = home_url()."/{$this->buildDirectory}/{$manifest[$path]['file']}";
         }
 
         return $path;
@@ -72,6 +80,7 @@ class Vite
         if (str_starts_with($path, $themePath)) {
             $themePathOffset = strlen($themePath) + 1;
             $truncatedPath = substr($path, $themePathOffset);
+
             return strtok($truncatedPath, '/');
         }
 
@@ -87,8 +96,8 @@ class Vite
     {
         $path = $this->manifestPath($buildDirectory);
 
-        if (!isset(static::$manifests[$path])) {
-            if (!file_exists($path)) {
+        if (! isset(static::$manifests[$path])) {
+            if (! file_exists($path)) {
                 throw new ViteManifestNotFoundException("Vite manifest not found at: $path");
             }
 
@@ -105,6 +114,6 @@ class Vite
 
     public function hotAsset(string $asset): string
     {
-        return rtrim(file_get_contents(\Illuminate\Support\Facades\Vite::hotFile())) . "/{$asset}";
+        return rtrim(file_get_contents(\Illuminate\Support\Facades\Vite::hotFile()))."/{$asset}";
     }
 }

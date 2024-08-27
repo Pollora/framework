@@ -151,7 +151,7 @@ class Bootstrap
 
         if (! defined('ABSPATH')) {
             if ($this->isOrchestraWorkbench()) { // if Orchestra Platform
-                define('ABSPATH', dirname(__FILE__) . '/../../../../../' . WP_PATH);
+                define('ABSPATH', dirname(__FILE__).'/../../../../../'.WP_PATH);
             } else {
                 define('ABSPATH', App::basePath().DIRECTORY_SEPARATOR.WP_PATH);
             }

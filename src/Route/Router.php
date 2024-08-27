@@ -16,7 +16,7 @@ class Router extends IlluminateRouter
     public function __construct(Dispatcher $events, ?Container $container = null)
     {
         parent::__construct($events, $container);
-        $this->routes = new RouteCollection();
+        $this->routes = new RouteCollection;
     }
 
     public function newRoute($methods, $uri, $action)
@@ -52,7 +52,7 @@ class Router extends IlluminateRouter
         global $post, $wp_query;
 
         $bindings = [
-            'post' => $post ?? (new NullableWpPost())->toWpPost(),
+            'post' => $post ?? (new NullableWpPost)->toWpPost(),
             'wp_query' => $wp_query,
         ];
 
@@ -73,6 +73,7 @@ class Router extends IlluminateRouter
     private function isWordPressAdminRequest(): bool
     {
         $app = $this->container['app'] ?? null;
+
         return $app && method_exists($app, 'isWordPressAdmin') && $app->isWordPressAdmin();
     }
 
@@ -81,6 +82,7 @@ class Router extends IlluminateRouter
         $route = (new AdminRoute($request, $this))->get();
         $this->current = $route;
         $this->container->instance(Route::class, $route);
+
         return $route;
     }
 }

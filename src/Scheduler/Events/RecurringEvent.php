@@ -9,13 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Class RecurringEvent
- * @package Pollen\Scheduler\Events
  */
 class RecurringEvent extends AbstractEvent
 {
     /**
      * RecurringEvent constructor.
-     * @param object|null $event
      */
     public function __construct(?object $event = null)
     {
@@ -29,7 +27,6 @@ class RecurringEvent extends AbstractEvent
     /**
      * Create a new job instance.
      *
-     * @param object $event
      * @return static
      */
     public static function createJob(object $event): self
@@ -43,8 +40,7 @@ class RecurringEvent extends AbstractEvent
     /**
      * Save the job to the database.
      *
-     * @param int|null $jobId
-     * @return void
+     * @param  int|null  $jobId
      */
     protected function saveToDatabase($jobId = null): void
     {
@@ -60,9 +56,6 @@ class RecurringEvent extends AbstractEvent
 
     /**
      * Schedule all events.
-     *
-     * @param Schedule $schedule
-     * @return void
      */
     public static function scheduleAllEvents(Schedule $schedule): void
     {
@@ -77,10 +70,6 @@ class RecurringEvent extends AbstractEvent
 
     /**
      * Get the cron expression for a schedule.
-     *
-     * @param string $schedule
-     * @param int|null $interval
-     * @return string
      */
     public static function getCronExpression(string $schedule, ?int $interval): string
     {
@@ -123,8 +112,6 @@ class RecurringEvent extends AbstractEvent
 
     /**
      * Handle the event.
-     *
-     * @return void
      */
     public function handle(): void
     {

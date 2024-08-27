@@ -45,11 +45,9 @@ class Post extends \Corcel\Model\Post
 {
     /**
      * Convert the Post instance to a WP_Post object.
-     *
-     * @return \WP_Post
      */
     public function toWpPost(): \WP_Post
     {
-        return new \WP_Post((object)$this->toArray());
+        return new \WP_Post((object) $this->toArray());
     }
 }

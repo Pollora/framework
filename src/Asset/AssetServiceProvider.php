@@ -16,7 +16,7 @@ class AssetServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton('wp.asset', function ($app) {
-            return new AssetFactory();
+            return new AssetFactory;
         });
     }
 }

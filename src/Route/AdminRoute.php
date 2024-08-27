@@ -18,7 +18,7 @@ class AdminRoute
     public function get(): \Illuminate\Routing\Route
     {
         $wordpressUri = trim(config('app.wp.dir', 'cms'), '\/');
-        $route = $this->router->any("$wordpressUri/wp-admin/{any?}", fn() => new Response());
+        $route = $this->router->any("$wordpressUri/wp-admin/{any?}", fn () => new Response);
 
         $route->middleware('admin');
         $route->bind($this->request);

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Pollen\Admin;
 
 use Closure;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Contracts\Container\Container;
 
 /**
  * Various helper methods to allow for extension of the WordPress administration panel.

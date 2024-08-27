@@ -15,6 +15,7 @@ class WordPressBodyClass
     public function handle($request, Closure $next)
     {
         $this->filter->add('body_class', $this->getBodyClassCallback($request->route()));
+
         return $next($request);
     }
 
@@ -27,8 +28,8 @@ class WordPressBodyClass
 
             $tokens = $this->getRouteTokens($route);
 
-            if (!empty($tokens)) {
-                return array_filter(array_merge($tokens, $classes), fn($class) => $class !== 'error404');
+            if (! empty($tokens)) {
+                return array_filter(array_merge($tokens, $classes), fn ($class) => $class !== 'error404');
             }
 
             return $classes;
@@ -53,8 +54,10 @@ class WordPressBodyClass
     {
         if (isset($token[3]) && $route->hasParameter($paramKey = $token[3])) {
             $param = $route->parameter($paramKey);
+
             return is_string($param) ? sprintf('%s-%s', $paramKey, sanitize_title($param)) : false;
         }
+
         return false;
     }
 }

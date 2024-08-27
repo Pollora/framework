@@ -18,12 +18,10 @@ class AuthServiceProvider extends ServiceProvider
 
     protected function registerWordPressAuthDriver(): void
     {
-        $this->app['auth']->extend('wp', fn($app, $name, $config) =>
-        $this->createWordPressGuard($config)
+        $this->app['auth']->extend('wp', fn ($app, $name, $config) => $this->createWordPressGuard($config)
         );
 
-        $this->app['auth']->provider('wp', fn($app, $config) =>
-            new WordPressUserProvider()
+        $this->app['auth']->provider('wp', fn ($app, $config) => new WordPressUserProvider
         );
 
         $this->registerWordPressGate();
@@ -32,14 +30,14 @@ class AuthServiceProvider extends ServiceProvider
     protected function createWordPressGuard(array $config): WordPressGuard
     {
         $provider = $this->app['auth']->createUserProvider($config['provider'] ?? null);
+
         return new WordPressGuard($provider);
     }
 
     protected function registerWordPressGate(): void
     {
         if (function_exists('user_can')) {
-            Gate::after(fn($user, $ability, $result, $arguments) =>
-            user_can($user, $ability, ...$arguments)
+            Gate::after(fn ($user, $ability, $result, $arguments) => user_can($user, $ability, ...$arguments)
             );
         }
     }

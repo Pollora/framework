@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollen\Proxy;
 
 use Exception;
@@ -13,7 +15,7 @@ use wpdb;
 class WordPressDatabase extends wpdb
 {
     protected Connection $eloquentConnection;
-    
+
     /** @var \PDO|false|null */
     public $dbh;
 
@@ -21,7 +23,6 @@ class WordPressDatabase extends wpdb
      * @var float
      */
     public $time_start;
-    
 
     public function __construct()
     {

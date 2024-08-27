@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Pollen\WordPress;
+
 use Pollen\Support\Facades\Filter;
 
 trait QueryTrait

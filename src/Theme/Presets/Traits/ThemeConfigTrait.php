@@ -36,7 +36,7 @@ trait ThemeConfigTrait
             $providerStubPath
         );
 
-        (new Filesystem())->move($providerStubPath, $providerPath);
+        (new Filesystem)->move($providerStubPath, $providerPath);
 
         return $this;
     }

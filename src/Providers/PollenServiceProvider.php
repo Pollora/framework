@@ -10,6 +10,7 @@ use Pollen\Admin\PageServiceProvider;
 use Pollen\Ajax\AjaxServiceProvider;
 use Pollen\Asset\AssetServiceProvider;
 use Pollen\Auth\AuthServiceProvider;
+use Pollen\Gutenberg\GutenbergServiceProvider;
 use Pollen\Hashing\HashServiceProvider;
 use Pollen\Hook\HookServiceProvider;
 use Pollen\Mail\WordPressMailServiceProvider;
@@ -38,6 +39,7 @@ class PollenServiceProvider extends ServiceProvider
     {
         // Generic service providers
         $this->app->register(ViewServiceProvider::class);
+        $this->app->register(GutenbergServiceProvider::class);
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);

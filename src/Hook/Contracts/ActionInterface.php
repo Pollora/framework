@@ -6,5 +6,5 @@ namespace Pollen\Hook\Contracts;
 
 interface ActionInterface extends HookInterface
 {
-    public function do(string $hook, mixed $args = null): self;
+    public function do(string $hook, ...$args): self;
 }

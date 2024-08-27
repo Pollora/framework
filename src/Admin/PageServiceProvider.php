@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Pollen\Admin;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Admin\Contracts\PageInterface;
 
 class PageServiceProvider extends ServiceProvider
 {

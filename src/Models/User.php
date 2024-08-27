@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollen\Models;
 
 use Illuminate\Auth\Authenticatable;
-use Watson\Rememberable\Rememberable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Watson\Rememberable\Rememberable;
 
 /**
  * Class User.
@@ -28,8 +28,6 @@ class User extends \Corcel\Model\User implements AuthenticatableContract
 
     /**
      * Convert the User instance to a WP_User object.
-     *
-     * @return \WP_User
      */
     public function toWpUser(): \WP_User
     {

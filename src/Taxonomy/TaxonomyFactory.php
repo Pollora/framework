@@ -15,9 +15,7 @@ use Pollen\Foundation\Application;
 
 class TaxonomyFactory
 {
-    public function __construct(protected Application $container)
-    {
-    }
+    public function __construct(protected Application $container) {}
 
     /**
      * Creates a new taxonomy.

@@ -13,8 +13,11 @@ use Pollen\Route\Matching\ConditionValidator;
 class Route extends IlluminateRoute
 {
     protected array $conditions = [];
+
     protected string $condition = '';
+
     protected array $conditionParams = [];
+
     protected ?array $wordpressValidators = null;
 
     public function matches(Request $request, $includingMethod = true): bool
@@ -30,7 +33,7 @@ class Route extends IlluminateRoute
 
     public function hasCondition(): bool
     {
-        return !empty($this->condition);
+        return ! empty($this->condition);
     }
 
     public function setConditions(array $conditions = []): self
@@ -38,6 +41,7 @@ class Route extends IlluminateRoute
         $this->conditions = $conditions;
         $this->condition = $this->parseCondition($this->uri());
         $this->conditionParams = $this->parseConditionParams($this->getAction());
+
         return $this;
     }
 
@@ -58,7 +62,7 @@ class Route extends IlluminateRoute
 
     public function getWordPressValidators(): array
     {
-        return $this->wordpressValidators ??= [new ConditionValidator()];
+        return $this->wordpressValidators ??= [new ConditionValidator];
     }
 
     protected function parseCondition(string $condition): string
@@ -69,6 +73,7 @@ class Route extends IlluminateRoute
                 return $signature;
             }
         }
+
         return '';
     }
 
@@ -78,30 +83,33 @@ class Route extends IlluminateRoute
             return [];
         }
 
-        $params = Arr::first($action, fn($value, $key) => is_numeric($key));
+        $params = Arr::first($action, fn ($value, $key) => is_numeric($key));
+
         return [$params];
     }
 
     private function matchesWordPressConditions(Request $request): bool
     {
         foreach ($this->getWordPressValidators() as $validator) {
-            if (!$validator->matches($this, $request)) {
+            if (! $validator->matches($this, $request)) {
                 return false;
             }
         }
+
         return true;
     }
 
     private function matchesIlluminateValidators(Request $request, bool $includingMethod): bool
     {
         foreach ($this->getValidators() as $validator) {
-            if (!$includingMethod && $validator instanceof MethodValidator) {
+            if (! $includingMethod && $validator instanceof MethodValidator) {
                 continue;
             }
-            if (!$validator->matches($this, $request)) {
+            if (! $validator->matches($this, $request)) {
                 return false;
             }
         }
+
         return true;
     }
 }

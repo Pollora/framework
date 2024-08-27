@@ -148,11 +148,9 @@ class Loop
      * Get the terms (custom taxonomies) of the current post.
      *
      * @param  string  $taxonomy  The custom taxonomy slug.
-     * @param int|\WP_Post $post The post ID or WP_Post object
+     * @param  int|\WP_Post  $post  The post ID or WP_Post object
      *
      * @see https://codex.wordpress.org/Function_Reference/get_the_terms
-     *
-     * @return array|false|\WP_Error
      */
     public function terms(string $taxonomy, int|\WP_Post $post = 0): array|false|\WP_Error
     {

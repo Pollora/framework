@@ -11,7 +11,6 @@ use WP_Error;
 
 class WordPressUserProvider implements UserProvider
 {
-
     public function __construct() {}
 
     public function retrieveById($identifier): ?Authenticatable
@@ -33,6 +32,7 @@ class WordPressUserProvider implements UserProvider
     public function retrieveByCredentials(#[\SensitiveParameter] array $credentials): ?Authenticatable
     {
         $user = wp_authenticate($credentials['username'], $credentials['password']);
+
         return $user instanceof WP_Error ? null : User::find($user->ID);
     }
 
@@ -41,6 +41,7 @@ class WordPressUserProvider implements UserProvider
         if ($user instanceof User) {
             return wp_check_password($credentials['password'], $user->user_pass, $user->ID);
         }
+
         return false;
     }
 

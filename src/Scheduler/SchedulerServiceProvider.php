@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Pollen\Scheduler;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Scheduler\Contracts\SchedulerInterface;
 use Pollen\Support\Facades\Filter;
-use Illuminate\Support\Facades\DB;
 
 class SchedulerServiceProvider extends ServiceProvider
 {
@@ -33,7 +33,7 @@ class SchedulerServiceProvider extends ServiceProvider
         if ($this->isOrchastraTest()) {
             return;
         }
-        
+
         $filters = [
             'pre_update_option_cron' => 'preUpdateOptionCron',
             'pre_option_cron' => 'preOptionCron',
@@ -61,8 +61,10 @@ class SchedulerServiceProvider extends ServiceProvider
         \Pollen\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
     }
 
-    protected function isOrchastraTest() {
+    protected function isOrchastraTest()
+    {
         $db = DB::getConfig(null);
+
         return str_contains($db['database'], '/orchestra/');
     }
 }

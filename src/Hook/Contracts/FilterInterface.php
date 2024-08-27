@@ -6,5 +6,5 @@ namespace Pollen\Hook\Contracts;
 
 interface FilterInterface extends HookInterface
 {
-    public function apply(string $hook, mixed $args = null): mixed;
+    public function apply(string $hook, mixed $value, ...$args): mixed;
 }

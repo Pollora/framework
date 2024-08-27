@@ -10,6 +10,7 @@ use RecursiveIterator;
 abstract class AbstractRecursiveIterator implements RecursiveIterator
 {
     protected int $current = 0;
+
     protected Collection $items;
 
     public function __construct(Collection|array $items)

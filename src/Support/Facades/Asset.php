@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollen\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollen\Asset\AssetFactory;
 use Pollen\Asset as AssetBuilder;
 
 /**

@@ -29,23 +29,23 @@ class QueryServiceProvider extends ServiceProvider
         $this->app->bind('Corcel\Model\User', 'Pollen\Model\User');
 
         $this->app->singleton('wp.query.post', function () {
-            return new PostQuery();
+            return new PostQuery;
         });
 
         $this->app->singleton('wp.query.taxonomy', function () {
-            return new TaxQuery();
+            return new TaxQuery;
         });
 
         $this->app->singleton('wp.query.meta', function () {
-            return new MetaQuery();
+            return new MetaQuery;
         });
 
         $this->app->singleton('wp.query.date', function () {
-            return new DateQuery();
+            return new DateQuery;
         });
 
         $this->app->bind('wp.loop', function () {
-            return new Loop();
+            return new Loop;
         });
 
         $this->app->singleton(Post::class, function () {

@@ -13,7 +13,8 @@ use Pollen\Models\User;
  * @author Jordan Doyle <jordan@doyle.wf>
  */
 class WordPress
-{/**
+{
+    /**
      * Check if we are on a multisite, and optionally check the multisite we are on.
      *
      * @param  null|int|array  $id  id (or ids) to check against the site, or null if you want to just check

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pollen\Mail;
 
+use Illuminate\Mail\Message;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Mail\Message;
 use Pollen\Support\Facades\Filter;
 
 class Mailer
@@ -35,7 +35,7 @@ class Mailer
 
     private function addAttachments(Message $mail, array|string $attachments): void
     {
-        if (!is_array($attachments)) {
+        if (! is_array($attachments)) {
             $attachments = explode("\n", str_replace("\r\n", "\n", $attachments));
         }
 

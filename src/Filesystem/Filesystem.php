@@ -47,7 +47,7 @@ class Filesystem extends FilesystemBase
         }
 
         $targetDirs[] = $targetFile;
-        $path = str_repeat('../', count($sourceDirs)) . implode('/', $targetDirs);
+        $path = str_repeat('../', count($sourceDirs)).implode('/', $targetDirs);
 
         return $this->ensureRelativePath($path);
     }
