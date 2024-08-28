@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\Gutenberg;
 
-use Pollen\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Pollen\Gutenberg\Registrars\CategoryRegistrar;
 use Pollen\Gutenberg\Registrars\PatternRegistrar;
 use Pollen\Support\Facades\Action;
