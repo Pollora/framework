@@ -1,8 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-        "./vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php",
-        "./%theme_path%/**/*.{blade.php,js,vue,ts}",
+        "./themes/%theme_name%/**/*.{blade.php,js,vue,ts}",
     ],
     theme: {
         extend: {},

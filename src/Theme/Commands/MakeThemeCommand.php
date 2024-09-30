@@ -4,130 +4,296 @@ declare(strict_types=1);
 
 namespace Pollen\Theme\Commands;
 
-use Pollen\Theme\Presets\Traits\StubTrait;
-use Pollen\Theme\Presets\Traits\ViewScaffolding;
-use Pollen\Theme\Presets\Vite\VitePresetExport;
-use Qirolab\Theme\Enums\CssFramework;
-use Qirolab\Theme\Presets\Traits\PackagesTrait;
+use Illuminate\Config\Repository;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Pollen\Theme\ThemeMetadata;
 
 use function Laravel\Prompts\text;
 
-class MakeThemeCommand extends \Qirolab\Theme\Commands\MakeThemeCommand
+class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput
 {
-    use PackagesTrait;
-    use StubTrait;
-    use ViewScaffolding;
+    protected $signature = 'make:theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name}';
 
-    public $signature = 'make:theme {theme?}';
+    protected $description = 'Generate theme structure with the ability to copy an existing folder and replace strings';
 
-    public $description = 'Create a new WordPress theme';
+    protected $textExtensions = ['php', 'js', 'css', 'html', 'htm', 'xml', 'txt', 'md', 'json', 'yaml', 'yml', 'svg', 'twig', 'blade.php', 'stub'];
 
-    public $themeTitle;
+    protected array $containerFolder;
 
-    public $themeDescription;
-
-    public $themeUri;
-
-    public $themeAuthor;
-
-    public $themeVersion;
-
-    public $themeAuthorUri;
-
-    public $themeName;
-
-    public function handle(): void
+    public function __construct(Repository $config, Filesystem $files)
     {
-        $this->theme = $this->askTheme();
-        $this->themeName = text(
-            label: 'Name of your awesome theme?',
-            placeholder: 'E.g. Twenty Twenty',
-            default: $this->theme,
-            required: true
-        ) ?? $this->theme;
+        parent::__construct($config, $files);
+    }
 
-        $this->themeDescription = text(
-            label: 'Description of your theme?',
-            placeholder: 'E.g. Twenty Twenty'
-        );
+    public function handle(): int
+    {
+        if (! $this->validateThemeName()) {
+            return self::FAILURE;
+        }
 
-        $this->themeUri = text(
-            label: 'Theme URI?',
-            required: true,
-        );
+        if (! $this->canGenerateTheme()) {
+            return self::FAILURE;
+        }
 
-        $this->themeAuthor = text(
-            label: 'Author of the theme? (maybe you ?)',
-            placeholder: 'E.g. Robert Mitchum',
-            required: true
-        );
+        $this->setupContainerFolders();
+        $this->generateThemeStructure();
+        $this->generateViteAssets();
 
-        $this->themeAuthorUri = text(
-            label: "Author URI of the theme? (let's advertise !)",
-            default: $this->themeUri,
-        ) ?? $this->themeUri;
+        if ($this->option('source')) {
+            $this->copySourceFolder();
+        }
 
-        $this->themeVersion = text(
-            label: 'Theme version ?',
-            placeholder: '1.0?',
-            default: '1.0',
-            required: true
-        );
+        $this->info("Theme \"{$this->getTheme()->getName()}\" created successfully.");
 
-        $this->cssFramework = CssFramework::Tailwind;
+        return self::SUCCESS;
+    }
 
-        if (! $this->themeExists($this->theme)) {
-            (new VitePresetExport(
-                $this->theme,
-                $this->themeName,
-                $this->cssFramework,
-            ))
-                ->export();
+    protected function validateThemeName(): bool
+    {
+        $message = $this->validateValue($this->argument('name'));
+        if ($message) {
+            $this->error($message);
 
-            $this->exportViewScaffolding();
+            return false;
+        }
 
-            $this->line("<options=bold>Theme slug:</options=bold> {$this->themeName}");
-            $this->line("<options=bold>Theme Name:</options=bold> {$this->themeName}");
-            $this->line("<options=bold>CSS Framework:</options=bold> {$this->cssFramework}");
-            $this->line('');
+        return true;
+    }
 
-            $this->info("Theme scaffolding installed successfully.\n");
+    protected function canGenerateTheme(): bool
+    {
+        if (! $this->directoryExists()) {
+            return true;
+        }
 
-            $themePath = $this->relativeThemePath($this->theme);
-            $scriptDevCmd = '    "dev:'.$this->theme.'": "vite --config '.$themePath.'/vite.config.js",';
-            $scriptBuildCmd = '    "build:'.$this->theme.'": "vite build --config '.$themePath.'/vite.config.js"';
+        $name = $this->getTheme()->getName();
 
-            $this->comment('Add following line in the `<fg=blue>scripts</fg=blue>` section of the `<fg=blue>package.json</fg=blue>` file:');
-            $this->line('');
+        $this->error("Theme \"{$name}\" already exists.");
 
-            $this->line('"scripts": {', 'fg=magenta');
-            $this->line('    ...', 'fg=magenta');
-            $this->line('');
-            $this->line($scriptDevCmd, 'fg=magenta');
-            $this->line($scriptBuildCmd, 'fg=magenta');
-            $this->line('}');
+        return $this->option('force') || $this->confirm("Are you sure you want to override \"{$name}\" theme folder?");
+    }
 
-            $this->line('');
-            $this->comment('And please run `<fg=blue>npm install && npm run dev:'.$this->theme.'</fg=blue>` to compile your fresh scaffolding.');
+    protected function setupContainerFolders(): void
+    {
+        $dirMapping = $this->config->get('theme.structure', []);
+        $this->containerFolder = [
+            'assets' => $dirMapping['assets'] ?? 'assets',
+            'lang' => $dirMapping['lang'] ?? 'lang',
+            'layout' => $dirMapping['layouts'] ?? 'views/layouts',
+            'partial' => $dirMapping['partials'] ?? 'views/partials',
+            'view' => $dirMapping['views'] ?? 'views',
+        ];
+    }
+
+    protected function generateThemeStructure(): void
+    {
+        $this->copyDirectory($this->getTemplatePath('common'), $this->getTheme()->getBasePath());
+    }
+
+    protected function generateViteAssets(): void
+    {
+        $assets = $this->containerFolder['assets'];
+        $this->makeFile("{$assets}/fonts/.gitkeep");
+        $this->makeFile("{$assets}/js/app.js", $this->fromTemplate('vite/js/app.js'));
+        $this->makeFile("{$assets}/js/bootstrap.js", $this->fromTemplate('vite/js/bootstrap.js'));
+    }
+
+    protected function copySourceFolder(): void
+    {
+        $sourcePath = $this->option('source');
+        if (! File::isDirectory($sourcePath)) {
+            $this->error("The specified source folder does not exist: {$sourcePath}");
+
+            return;
+        }
+
+        $destinationPath = $this->getTheme()->getBasePath();
+        $this->info("Copying contents from {$sourcePath} to {$destinationPath}");
+        $this->copyDirectory($sourcePath, $destinationPath);
+        $this->info('Source folder contents copied successfully.');
+    }
+
+    protected function copyDirectory($source, $destination): void
+    {
+        if (! File::isDirectory($destination)) {
+            File::makeDirectory($destination, 0755, true);
+        }
+
+        $items = File::allFiles($source);
+
+        foreach ($items as $item) {
+            $relativePath = $item->getRelativePath();
+            $targetDir = $destination.($relativePath ? '/'.$relativePath : '');
+            $targetPath = $targetDir.'/'.$item->getFilename();
+            $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
+
+            if (strpos($relativePath, 'app/') === 0) {
+                $themeNamespace = ucfirst($this->getTheme()->getName());
+                $relativePath = str_replace('app/', '', $relativePath);
+                $targetPath = $this->insertThemeNamespaceInPath($targetPath, $destination);
+                $targetDir = dirname($targetPath);
+            }
+
+            if (! File::isDirectory($targetDir)) {
+                File::makeDirectory($targetDir, 0755, true);
+            }
+
+            if ($item->isDir()) {
+                $this->copyDirectory($item->getRealPath(), $targetPath);
+            } else {
+                if (File::exists($targetPath) && ! $this->option('force')) {
+                    if (! $this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")) {
+                        continue;
+                    }
+                }
+                $this->copyFileWithReplacements($item->getRealPath(), $targetPath);
+            }
         }
     }
 
-    protected function askTheme()
+    protected function insertThemeNamespaceInPath(string $path, string $themeLocacation): string
     {
-        $theme = $this->argument('theme');
 
-        if (! $theme) {
-            $theme = text(
-                label: 'Slug of your awesome theme?',
-                placeholder: 'E.g. Twenty Twenty',
-                required: true,
-                validate: fn (string $value) => match (true) {
-                    ! preg_match('/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/', $value) => 'Please respect the slug format.',
-                    default => null
-                }
-            );
+        $path = str_replace([$themeLocacation, 'app/'], '', $path);
+        $path = trim($path, '/');
+
+        $segments = explode('/', $path, 2);
+
+        if (count($segments) > 1) {
+            $themeNamespace = $this->getThemeNamespace();
+
+            return app_path($segments[0].'/Theme/'.$themeNamespace.'/'.$segments[1]);
         }
 
-        return $theme;
+        return app_path($path);
+    }
+
+    protected function getThemeNamespace(): string
+    {
+        return Str::studly($this->getTheme()->getName());
+    }
+
+    protected function copyFileWithReplacements($sourcePath, $destinationPath): void
+    {
+        $extension = pathinfo($destinationPath, PATHINFO_EXTENSION);
+
+        if ($this->isTextFile($sourcePath, $extension)) {
+            $content = File::get($sourcePath);
+            $replacements = $this->getReplacements();
+
+            // Appliquer les remplacements
+            $content = str_replace(
+                array_keys($replacements),
+                array_values($replacements),
+                $content
+            );
+
+            // Écrire le contenu modifié dans le fichier de destination
+            File::put($destinationPath, $content);
+        } else {
+            // Copier simplement les fichiers non textuels sans modification
+            File::copy($sourcePath, $destinationPath);
+        }
+    }
+
+    protected function isTextFile($filePath, $extension): bool
+    {
+        if (in_array(strtolower($extension), $this->textExtensions)) {
+            return true;
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $filePath);
+        finfo_close($finfo);
+
+        $textMimeTypes = [
+            'text/plain',
+            'text/html',
+            'text/css',
+            'text/javascript',
+            'application/javascript',
+            'application/json',
+            'application/xml',
+            'application/x-httpd-php',
+        ];
+
+        return in_array($mimeType, $textMimeTypes) || strpos($mimeType, 'text/') === 0;
+    }
+
+    protected function getReplacements(): array
+    {
+        return [
+            '%theme_name%' => $this->getTheme()->getName(),
+            '%theme_author%' => $this->argument('theme_author'),
+            '%theme_author_uri%' => $this->argument('theme_author_uri'),
+            '%theme_uri%' => $this->argument('theme_uri'),
+            '%theme_description%' => $this->argument('theme_description'),
+            '%theme_version%' => $this->argument('theme_version'),
+            '%theme_namespace%' => $this->getThemeNamespace(),
+        ];
+    }
+
+    protected function promptForMissingArgumentsUsing(): array
+    {
+        return [
+            'name' => fn () => text(
+                label: 'What is a name of the new theme?',
+                default: 'default',
+                validate: fn ($value) => $this->validateValue($value)
+            ),
+            'theme_author' => fn () => text(
+                label: 'What is the author of the new theme?',
+                default: 'Pollen',
+                validate: 'required'
+            ),
+            'theme_author_uri' => fn () => text(
+                label: 'What is the URL of the theme author?',
+                default: 'https://pollen.dev',
+                validate: 'required|url'
+            ),
+            'theme_description' => fn () => text(
+                label: 'What is the description of the new theme?',
+                default: 'A new theme using Pollen Framework',
+                validate: 'required'
+            ),
+            'theme_uri' => fn () => text(
+                label: 'What is the URL of the theme?',
+                default: 'https://pollen.dev',
+                validate: 'required|url'
+            ),
+            'theme_version' => fn () => text(
+                label: 'What is the version of the theme?',
+                default: '1.0',
+                validate: 'required'
+            ),
+        ];
+    }
+
+    protected function validateValue($value): ?string
+    {
+        return match (true) {
+            empty($value) => 'Name is required.',
+            ! empty(preg_match('/[^a-zA-Z0-9\-_\s]/', $value)) => 'Name must be alphanumeric, dash, space or underscore.',
+            $this->files->isDirectory($this->makeTheme($value)->getBasePath()) => "Theme \"{$value}\" already exists.",
+            default => null,
+        };
+    }
+
+    protected function getTemplatePath(string $templateName): string
+    {
+        return realpath(__DIR__.'/../stubs/'.$templateName);
+    }
+
+    protected function makeTheme(string $name): ThemeMetadata
+    {
+        return new ThemeMetadata($name, $this->getThemesPath());
+    }
+
+    protected function getThemesPath(): string
+    {
+        return $this->config->get('theme.directory', base_path('themes'));
     }
 }

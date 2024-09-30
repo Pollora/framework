@@ -19,7 +19,6 @@ use Pollen\PostType\PostTypeServiceProvider;
 use Pollen\Scheduler\Jobs\JobDispatcher;
 use Pollen\Scheduler\SchedulerServiceProvider;
 use Pollen\Taxonomy\TaxonomyServiceProvider;
-use Pollen\Theme\ThemeCommandProvider;
 use Pollen\Theme\ThemeServiceProvider;
 use Pollen\View\ViewServiceProvider;
 
@@ -59,7 +58,6 @@ class PollenServiceProvider extends ServiceProvider
 
         // Theme service provider
         $this->app->register(ThemeServiceProvider::class);
-        $this->app->register(ThemeCommandProvider::class);
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);

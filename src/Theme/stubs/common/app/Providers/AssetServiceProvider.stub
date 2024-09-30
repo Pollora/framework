@@ -6,7 +6,7 @@ namespace App\Providers\Theme\%theme_namespace%;
 
 use Illuminate\Support\ServiceProvider;
 use Pollen\Support\Facades\Asset;
-use Pollen\Theme\Theme;
+use Pollen\Support\Facades\Theme;
 
 class AssetServiceProvider extends ServiceProvider
 {

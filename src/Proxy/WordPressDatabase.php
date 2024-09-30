@@ -16,8 +16,7 @@ class WordPressDatabase extends wpdb
 {
     protected Connection $eloquentConnection;
 
-    /** @var \PDO|false|null */
-    public $dbh;
+    public $dbh = null;
 
     /**
      * @var float
@@ -45,7 +44,7 @@ class WordPressDatabase extends wpdb
         return [$dbUser, $dbPassword, $dbName, $dbHost];
     }
 
-    public function mysqli_real_connect($host, $port, $socket, $client_flags)
+    public function mysqli_real_connect($host, $port, $socket, $client_flags): void
     {
         $this->dbh = $this->eloquentConnection->getPdo();
     }
@@ -53,7 +52,7 @@ class WordPressDatabase extends wpdb
     /**
      * @throws \Exception
      */
-    public function mysql_connect($new_link, $client_flags)
+    public function mysql_connect($new_link, $client_flags): never
     {
         throw new Exception('Using mysql_connect is deprecated and not supported. Please use mysqli_real_connect.');
     }

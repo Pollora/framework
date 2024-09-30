@@ -5,3 +5,9 @@
  */
 
 import "./bootstrap";
+
+// styles
+import "../css/app.css";
+
+// Project scripts
+// ...

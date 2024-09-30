@@ -6,6 +6,7 @@ namespace Pollen\Theme;
 
 use Illuminate\Contracts\Foundation\Application;
 use Pollen\Support\Facades\Action;
+use Pollen\Support\Facades\Theme;
 use Pollen\Theme\Contracts\ThemeComponent;
 
 class ThemeInitializer implements ThemeComponent
@@ -49,7 +50,7 @@ class ThemeInitializer implements ThemeComponent
 
     private function registerThemeProvider(): void
     {
-        foreach (config('theme.providers') as $provider) {
+        foreach ((array) config('theme.providers') as $provider) {
             $this->app->register($provider);
         }
     }
@@ -57,9 +58,8 @@ class ThemeInitializer implements ThemeComponent
     public function setThemes(): void
     {
         $childTheme = get_stylesheet();
-        $parentTheme = $this->isThemeIdentical($childTheme) ? null : get_template();
 
-        Theme::set($childTheme, $parentTheme);
+        Theme::load($childTheme);
 
         $themeConfigs = [
             'supports',

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\Support;
 
-use Pollen\Models\User;
+use WP_Network;
+use WP_User;
 
 /**
  * Provides various base WordPress helper functionality in a nice
@@ -14,24 +15,21 @@ use Pollen\Models\User;
  */
 class WordPress
 {
+    private const DEFAULT_OPTION_VALUE = false;
+
     /**
      * Check if we are on a multisite, and optionally check the multisite we are on.
      *
      * @param  null|int|array  $id  id (or ids) to check against the site, or null if you want to just check
      *                              if we are actually on a multisite
-     * @return bool
      */
-    public static function multisite($id = null)
+    public function multisite(null|int|array $id = null): bool
     {
         if (is_array($id)) {
-            foreach ($id as $i) {
-                if (static::multisite($i)) {
-                    return true;
-                }
-            }
+            return array_reduce($id, fn ($carry, $i) => $carry || $this->multisite($i), false);
         }
 
-        return $id === null ? is_multisite() : ($id === static::getSiteId());
+        return $id === null ? is_multisite() : ($id === $this->getSiteId());
     }
 
     /**
@@ -39,29 +37,24 @@ class WordPress
      *
      * @param  string  $name  name of the option to get
      * @param  mixed  $default  value to return if we don't have a value for the option.
-     * @return mixed
      */
-    public static function option($name, $default = false)
+    public function option(string $name, mixed $default = self::DEFAULT_OPTION_VALUE): mixed
     {
         return get_option($name, $default);
     }
 
     /**
      * Get the current multisite id.
-     *
-     * @return int
      */
-    public static function getSiteId()
+    public function getSiteId(): int
     {
         return get_current_blog_id();
     }
 
     /**
      * Get the current site that the user is currently browsing.
-     *
-     * @return \WP_Network
      */
-    public static function site()
+    public function site(): WP_Network
     {
         return \get_current_site();
     }
@@ -71,7 +64,7 @@ class WordPress
      *
      * @return mixed
      */
-    public static function version()
+    public function version(): string
     {
         if (! isset($GLOBALS['wp_version'])) {
             require_once ABSPATH.WPINC.'/version.php';
@@ -88,10 +81,8 @@ class WordPress
      * Use of WP_User is deprecated, however this method will not be removed.
      *
      * @deprecated use <code>auth()->user()</code> instead.
-     *
-     * @return \WP_User
      */
-    public static function currentUser()
+    public function currentUser(): WP_User
     {
         return wp_get_current_user();
     }
