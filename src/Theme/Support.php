@@ -16,17 +16,15 @@ class Support implements ThemeComponent
 {
     public function register(): void
     {
-        Action::add('after_setup_theme', [$this, 'addThemeSupport'], 1);
+        Action::add('after_setup_theme', $this->addThemeSupport(...), 1);
     }
 
     /**
      * Register all of the site's theme support.
-     *
-     * @return void
      */
-    public function addThemeSupport()
+    public function addThemeSupport(): void
     {
-        collect(config('theme.supports'))->each(function ($value, $key) {
+        collect(config('theme.supports'))->each(function ($value, $key): void {
             if (is_string($key)) {
                 add_theme_support($key, $value);
             } else {

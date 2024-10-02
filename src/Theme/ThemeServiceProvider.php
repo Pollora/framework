@@ -29,49 +29,35 @@ class ThemeServiceProvider extends ServiceProvider
      * This method initializes various components of the theme such as
      * the theme initializer, menus, support options, sidebar, pattern,
      * templates, and image size settings.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton('theme', function (Container $app) {
-            return new ThemeManager(
-                $app,
-                $app['view']->getFinder(),
-                $app['translator']->getLoader()
-            );
-        });
+        $this->app->singleton('theme', fn(Container $app): \Pollen\Theme\ThemeManager => new ThemeManager(
+            $app,
+            $app['view']->getFinder(),
+            $app['translator']->getLoader()
+        ));
 
-        $this->app->singleton('theme.generator', function (Container $app) {
-            return new MakeThemeCommand($app['config'], $app['files']);
-        });
+        $this->app->singleton('theme.generator', fn(Container $app): \Pollen\Theme\Commands\MakeThemeCommand => new MakeThemeCommand($app['config'], $app['files']));
 
-        $this->app->singleton('theme.remover', function (Container $app) {
-            return new RemoveThemeCommand($app['config'], $app['files']);
-        });
+        $this->app->singleton('theme.remover', fn(Container $app): \Pollen\Theme\Commands\RemoveThemeCommand => new RemoveThemeCommand($app['config'], $app['files']));
 
         $this->commands([
             'theme.generator',
             'theme.remover',
         ]);
 
-        $this->app->singleton(ComponentFactory::class, function ($app) {
-            return new ComponentFactory($app);
-        });
+        $this->app->singleton(ComponentFactory::class, fn($app): \Pollen\Theme\Factories\ComponentFactory => new ComponentFactory($app));
 
-        $this->app->singleton(ThemeComponentProvider::class, function ($app) {
-            return new ThemeComponentProvider($app, $app->make(ComponentFactory::class));
-        });
+        $this->app->singleton(ThemeComponentProvider::class, fn($app): \Pollen\Theme\ThemeComponentProvider => new ThemeComponentProvider($app, $app->make(ComponentFactory::class)));
 
         $this->app->make(ThemeComponentProvider::class)->register();
     }
 
     /**
      * Perform post-registration booting of services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
 
         $this->publishConfigurations();
@@ -80,7 +66,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->make(ThemeComponentProvider::class)->boot();
 
         $this->directives()
-            ->each(function ($directive, $function) {
+            ->each(function ($directive, $function): void {
                 Blade::directive($function, $directive);
             });
     }
@@ -114,19 +100,16 @@ class ThemeServiceProvider extends ServiceProvider
      * Register a service provider.
      *
      * @param  string  $provider  The class or interface name of the service provider.
-     * @return void
      */
-    public function registerProvider($provider)
+    public function registerProvider($provider): void
     {
         $this->app->register($provider);
     }
 
     /**
      * Bind a singleton instance to the container.
-     *
-     * @return void
      */
-    public function singleton($abstract, $concrete)
+    public function singleton($abstract, $concrete): void
     {
         $this->app->singleton($abstract, $concrete);
     }
@@ -139,9 +122,8 @@ class ThemeServiceProvider extends ServiceProvider
      *
      * @param  string  $path  The path to the theme configuration file.
      * @param  string  $key  The configuration key to use for the merged settings.
-     * @return void
      */
-    public function registerThemeConfig($path, $key)
+    public function registerThemeConfig($path, $key): void
     {
         $this->mergeConfigFrom($path, $key);
     }

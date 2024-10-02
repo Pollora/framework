@@ -20,17 +20,15 @@ class ImageSize implements ThemeComponent
 {
     public function register(): void
     {
-        Action::add('after_setup_theme', [$this, 'addImageSize']);
+        Action::add('after_setup_theme', $this->addImageSize(...));
     }
 
     /**
      * Register the image sizes.
-     *
-     * @return void
      */
-    public function addImageSize()
+    public function addImageSize(): void
     {
-        collect(config('theme.images'))->each(function ($sizes, $name) {
+        collect(config('theme.images'))->each(function ($sizes, $name): void {
             add_image_size(
                 $name,
                 $sizes[0] ?? 0,

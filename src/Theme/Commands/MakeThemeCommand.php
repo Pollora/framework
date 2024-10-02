@@ -54,7 +54,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected function validateThemeName(): bool
     {
         $message = $this->validateValue($this->argument('name'));
-        if ($message) {
+        if ($message !== null && $message !== '' && $message !== '0') {
             $this->error($message);
 
             return false;
@@ -72,8 +72,10 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $name = $this->getTheme()->getName();
 
         $this->error("Theme \"{$name}\" already exists.");
-
-        return $this->option('force') || $this->confirm("Are you sure you want to override \"{$name}\" theme folder?");
+        if ($this->option('force')) {
+            return true;
+        }
+        return $this->confirm("Are you sure you want to override \"{$name}\" theme folder?");
     }
 
     protected function setupContainerFolders(): void
@@ -116,7 +118,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $this->info('Source folder contents copied successfully.');
     }
 
-    protected function copyDirectory($source, $destination): void
+    protected function copyDirectory($source, string $destination): void
     {
         if (! File::isDirectory($destination)) {
             File::makeDirectory($destination, 0755, true);
@@ -130,7 +132,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             $targetPath = $targetDir.'/'.$item->getFilename();
             $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
 
-            if (strpos($relativePath, 'app/') === 0) {
+            if (str_starts_with($relativePath, 'app/')) {
                 $themeNamespace = ucfirst($this->getTheme()->getName());
                 $relativePath = str_replace('app/', '', $relativePath);
                 $targetPath = $this->insertThemeNamespaceInPath($targetPath, $destination);
@@ -144,10 +146,8 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             if ($item->isDir()) {
                 $this->copyDirectory($item->getRealPath(), $targetPath);
             } else {
-                if (File::exists($targetPath) && ! $this->option('force')) {
-                    if (! $this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")) {
-                        continue;
-                    }
+                if (File::exists($targetPath) && ! $this->option('force') && ! $this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")) {
+                    continue;
                 }
                 $this->copyFileWithReplacements($item->getRealPath(), $targetPath);
             }
@@ -178,7 +178,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected function copyFileWithReplacements($sourcePath, $destinationPath): void
     {
-        $extension = pathinfo($destinationPath, PATHINFO_EXTENSION);
+        $extension = pathinfo((string) $destinationPath, PATHINFO_EXTENSION);
 
         if ($this->isTextFile($sourcePath, $extension)) {
             $content = File::get($sourcePath);
@@ -201,7 +201,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected function isTextFile($filePath, $extension): bool
     {
-        if (in_array(strtolower($extension), $this->textExtensions)) {
+        if (in_array(strtolower((string) $extension), $this->textExtensions)) {
             return true;
         }
 
@@ -220,7 +220,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             'application/x-httpd-php',
         ];
 
-        return in_array($mimeType, $textMimeTypes) || strpos($mimeType, 'text/') === 0;
+        return in_array($mimeType, $textMimeTypes) || str_starts_with($mimeType, 'text/');
     }
 
     protected function getReplacements(): array
@@ -239,32 +239,32 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected function promptForMissingArgumentsUsing(): array
     {
         return [
-            'name' => fn () => text(
+            'name' => fn (): string => text(
                 label: 'What is a name of the new theme?',
                 default: 'default',
-                validate: fn ($value) => $this->validateValue($value)
+                validate: fn ($value): ?string => $this->validateValue($value)
             ),
-            'theme_author' => fn () => text(
+            'theme_author' => fn (): string => text(
                 label: 'What is the author of the new theme?',
                 default: 'Pollen',
                 validate: 'required'
             ),
-            'theme_author_uri' => fn () => text(
+            'theme_author_uri' => fn (): string => text(
                 label: 'What is the URL of the theme author?',
                 default: 'https://pollen.dev',
                 validate: 'required|url'
             ),
-            'theme_description' => fn () => text(
+            'theme_description' => fn (): string => text(
                 label: 'What is the description of the new theme?',
                 default: 'A new theme using Pollen Framework',
                 validate: 'required'
             ),
-            'theme_uri' => fn () => text(
+            'theme_uri' => fn (): string => text(
                 label: 'What is the URL of the theme?',
                 default: 'https://pollen.dev',
                 validate: 'required|url'
             ),
-            'theme_version' => fn () => text(
+            'theme_version' => fn (): string => text(
                 label: 'What is the version of the theme?',
                 default: '1.0',
                 validate: 'required'
@@ -272,11 +272,11 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         ];
     }
 
-    protected function validateValue($value): ?string
+    protected function validateValue(string $value): ?string
     {
         return match (true) {
-            empty($value) => 'Name is required.',
-            ! empty(preg_match('/[^a-zA-Z0-9\-_\s]/', $value)) => 'Name must be alphanumeric, dash, space or underscore.',
+            $value === '' || $value === '0' => 'Name is required.',
+            preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== 0 && preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== false => 'Name must be alphanumeric, dash, space or underscore.',
             $this->files->isDirectory($this->makeTheme($value)->getBasePath()) => "Theme \"{$value}\" already exists.",
             default => null,
         };
@@ -284,6 +284,8 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected function getTemplatePath(string $templateName): string
     {
+        dd(realpath(__DIR__.'/../stubs/'.$templateName));
+
         return realpath(__DIR__.'/../stubs/'.$templateName);
     }
 

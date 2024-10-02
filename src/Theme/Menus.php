@@ -39,15 +39,13 @@ class Menus implements ThemeComponent
 {
     public function register(): void
     {
-        Action::add('after_setup_theme', [$this, 'registerMenus'], 1);
+        Action::add('after_setup_theme', $this->registerMenus(...), 1);
     }
 
     /**
      * Register all of the site's theme menus.
-     *
-     * @return void
      */
-    public function registerMenus()
+    public function registerMenus(): void
     {
         $menus = (array) config('theme.menus');
         $translater = new Translater($menus, 'menus');

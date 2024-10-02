@@ -88,7 +88,6 @@ class Vite
                 ));
             }
         }
-
         return $paths;
     }
 

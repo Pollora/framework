@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Pollen\Theme;
 
 return [
-    'usercan' => fn ($expression) => "<?php if( User::current()->can({$expression}) ): ?>",
-    'endusercan' => fn () => '<?php endif; ?>',
-    'loop' => fn () => '<?php if (have_posts()) { while (have_posts()) { the_post(); ?>',
-    'endloop' => fn () => '<?php }} ?>',
-    'template' => function ($expression) {
-        $args = array_map(fn ($arg) => trim($arg, '\/\'\" ()'), explode(',', $expression));
+    'usercan' => fn ($expression): string => "<?php if( User::current()->can({$expression}) ): ?>",
+    'endusercan' => fn (): string => '<?php endif; ?>',
+    'loop' => fn (): string => '<?php if (have_posts()) { while (have_posts()) { the_post(); ?>',
+    'endloop' => fn (): string => '<?php }} ?>',
+    'template' => function ($expression): string {
+        $args = array_map(fn ($arg): string => trim($arg, '\/\'\" ()'), explode(',', (string) $expression));
 
         if (isset($args[1]) && is_callable($args[1])) {
             $args[1] = call_user_func($args[1]);
@@ -21,7 +21,7 @@ return [
 
         return "<?php if (\$__env->exists('{$path}')) { echo \$__env->make('{$path}', {$data}, \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); } else { echo \$__env->make('{$args[0]}', {$data}, \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); } ?>";
     },
-    'gravityform' => function ($expression) {
+    'gravityform' => function ($expression): string {
         if (! function_exists('gravity_form')) {
             return '<div><b>Gravity form is not installed or activated</b></div>';
         }

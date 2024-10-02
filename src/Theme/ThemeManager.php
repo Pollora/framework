@@ -17,26 +17,17 @@ use Illuminate\View\ViewFinderInterface;
 
 class ThemeManager
 {
-    protected Container $app;
-
-    protected ViewFinderInterface $viewFinder;
-
-    protected Loader $localeLoader;
-
     protected array $config;
 
     protected array $parentThemes = [];
 
-    public function __construct(Container $app, ViewFinderInterface $finder, Loader $localeLoader)
+    public function __construct(protected Container $app, protected ViewFinderInterface $viewFinder, protected Loader $localeLoader)
     {
-        $this->app = $app;
-        $this->viewFinder = $finder;
-        $this->localeLoader = $localeLoader;
     }
 
     public function load(string $themeName): void
     {
-        if (empty($themeName)) {
+        if ($themeName === '' || $themeName === '0') {
             throw new ThemeException('Theme name cannot be empty.');
         }
 
@@ -55,7 +46,7 @@ class ThemeManager
 
             $parentThemeName = $currentTheme->getParentTheme();
 
-            if (empty($parentThemeName)) {
+            if ($parentThemeName === null || $parentThemeName === '' || $parentThemeName === '0') {
                 break;
             }
 
@@ -79,7 +70,7 @@ class ThemeManager
             return [];
         }
 
-        return array_filter(scandir($path), function ($entry) use ($path) {
+        return array_filter(scandir($path), function ($entry) use ($path): bool {
             if ($entry === '.' || $entry === '..') {
                 return false;
             }
@@ -91,7 +82,7 @@ class ThemeManager
 
     protected function getThemesPath(): string
     {
-        return rtrim($this->app['config']->get('theme.path', base_path('themes')), '/');
+        return rtrim((string) $this->app['config']->get('theme.path', base_path('themes')), '/');
     }
 
     public function active(): string

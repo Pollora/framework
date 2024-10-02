@@ -13,16 +13,9 @@ abstract class BaseThemeCommand extends Command
 {
     protected ThemeMetadata $themeInfo;
 
-    protected Repository $config;
-
-    protected Filesystem $files;
-
-    public function __construct(Repository $config, Filesystem $files)
+    public function __construct(protected Repository $config, protected Filesystem $files)
     {
         parent::__construct();
-
-        $this->config = $config;
-        $this->files = $files;
     }
 
     protected function directoryExists(): bool

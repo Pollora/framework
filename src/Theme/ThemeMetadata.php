@@ -11,14 +11,11 @@ class ThemeMetadata
 {
     protected string $name;
 
-    protected string $basePath;
-
     protected array $config = [];
 
-    public function __construct(string $name, string $themesRoot)
+    public function __construct(string $name, protected string $basePath)
     {
         $this->name = Str::snake(strtolower($name));
-        $this->basePath = $themesRoot;
     }
 
     public function getName(): string

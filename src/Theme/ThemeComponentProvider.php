@@ -28,9 +28,7 @@ class ThemeComponentProvider
     public function register(): void
     {
         foreach ($this->components as $component) {
-            $this->app->singleton($component, function () use ($component) {
-                return $this->factory->make($component);
-            });
+            $this->app->singleton($component, fn(): \Pollen\Theme\Contracts\ThemeComponent => $this->factory->make($component));
 
             $instance = $this->app->make($component);
             if ($instance instanceof ThemeComponent) {

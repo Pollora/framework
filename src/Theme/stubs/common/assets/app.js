@@ -4,10 +4,10 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-import "./bootstrap";
+import "./js/bootstrap.js";
 
 // styles
-import "../css/app.css";
+import "./css/app.css";
 
 // Project scripts
 // ...

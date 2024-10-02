@@ -74,6 +74,15 @@ class Asset
 
     public function useVite(): self
     {
+        if (!$this->container) {
+            throw new AssetException(
+                'Vite container has not been set.',
+                [
+                    'handle' => $this->handle,
+                    'path' => $this->path,
+                ]
+            );
+        }
         $this->useVite = true;
         Vite::useHotFile($this->container->getHotFile());
         $this->vite->setContainer($this->container);
@@ -218,8 +227,9 @@ class Asset
 
     protected function enqueueAsset(string $type, string $path): void
     {
+        $handle = $this->useVite && !Vite::isRunningHot() ? $this->handle.'/'.sanitize_title(basename($path)) : $this->handle;
         match ($type) {
-            'css' => $this->enqueueStyle($path),
+            'css' => $this->enqueueStyle($path, $handle),
             'js' => $this->enqueueScript($path),
             default => throw new \InvalidArgumentException("Unsupported asset type: {$type}")
         };
@@ -242,12 +252,12 @@ class Asset
         }
     }
 
-    protected function enqueueStyle(string $path): void
+    protected function enqueueStyle(string $path, string $handle): void
     {
-        wp_enqueue_style($this->handle, $path, $this->dependencies, $this->version, $this->media);
+        wp_enqueue_style($handle, $path, $this->dependencies, $this->version, $this->media);
 
         if ($this->inlineContent) {
-            wp_add_inline_style($this->handle, $this->inlineContent);
+            wp_add_inline_style($handle, $this->inlineContent);
         }
     }
 

@@ -16,7 +16,7 @@ class Templates implements ThemeComponent
 {
     public function register(): void
     {
-        Action::add('theme_page_templates', [$this, 'registerTemplates'], 10, 3);
+        Action::add('theme_page_templates', $this->registerTemplates(...), 10, 3);
     }
 
     /**
@@ -38,14 +38,17 @@ class Templates implements ThemeComponent
      * @return array An associative array of page templates, where the keys are the template slugs
      *               and the values are the template labels.
      */
-    public function getThemePageTemplates($postType)
+    public function getThemePageTemplates($postType): array
     {
         $configPageTemplates = (array) config('theme.templates');
 
         $pageTemplates = [];
 
         foreach ($configPageTemplates as $slug => $template) {
-            if (! isset($template['post_types']) || ! in_array($postType, (array) $template['post_types'])) {
+            if (! isset($template['post_types'])) {
+                continue;
+            }
+            if (! in_array($postType, (array) $template['post_types'])) {
                 continue;
             }
             $pageTemplates[$slug] = $template['label'];

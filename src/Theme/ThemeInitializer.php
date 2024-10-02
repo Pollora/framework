@@ -22,7 +22,7 @@ class ThemeInitializer implements ThemeComponent
 
     public function register(): void
     {
-        Action::add('after_setup_theme', function () {
+        Action::add('after_setup_theme', function (): void {
             if (wp_installing()) {
                 return;
             }
@@ -43,9 +43,7 @@ class ThemeInitializer implements ThemeComponent
 
         $this->wp_theme = wp_get_theme();
 
-        $this->app->singleton('wp.theme', function () {
-            return $this->wp_theme;
-        });
+        $this->app->singleton('wp.theme', fn() => $this->wp_theme);
     }
 
     private function registerThemeProvider(): void
