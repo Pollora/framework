@@ -5,6 +5,8 @@ parameters:
     treatPhpDocTypesAsCertain: false
     paths:
         - src/
+    includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
     noModelMake: false
 
@@ -29,7 +31,8 @@ parameters:
 
     # Level 9 is the highest level
     level: 5
-
+    excludePaths:
+        - ../../laravel/framework/Illuminate/Foundation/helpers.php
 #    ignoreErrors:
 #        - '#PHPDoc tag @var#'
 #

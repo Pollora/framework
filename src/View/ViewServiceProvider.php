@@ -12,20 +12,16 @@ class ViewServiceProvider extends ViewServiceProviderBase
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->registerMacros();
     }
 
     /**
      * Register View Macros
-     *
-     * @return void
      */
-    public function registerMacros()
+    public function registerMacros(): void
     {
         $app = $this->app;
 
@@ -51,7 +47,7 @@ class ViewServiceProvider extends ViewServiceProviderBase
          *
          * @return string
          */
-        View::macro('makeLoader', function () use ($app) {
+        View::macro('makeLoader', function () use ($app): string {
             $view = $this->getName();
             $path = $this->getPath();
             $id = md5($this->getCompiled());

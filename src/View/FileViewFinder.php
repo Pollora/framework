@@ -48,8 +48,8 @@ class FileViewFinder extends FileViewFinderBase
 
         $view = ltrim($view, '/\\');
 
-        if ($namespace) {
-            $view = "{$namespace}::$view";
+        if ($namespace !== 0 && ($namespace !== '' && $namespace !== '0')) {
+            return "{$namespace}::$view";
         }
 
         return $view;
@@ -74,7 +74,7 @@ class FileViewFinder extends FileViewFinderBase
      * @param  string|string[]  $path
      * @return string|string[]
      */
-    protected function normalizePath($path, string $separator = '/')
+    protected function normalizePath($path, string $separator = '/'): string|array|null
     {
         return preg_replace('#[\\/]+#', $separator, $path);
     }

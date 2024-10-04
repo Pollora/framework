@@ -18,26 +18,22 @@ use Pollen\Support\Facades\PostType;
  */
 class PostTypeServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
-        $this->app->bind('wp.posttype', function ($app) {
-            return new PostTypeFactory($app);
-        });
+        $this->app->bind('wp.posttype', fn($app): \Pollen\PostType\PostTypeFactory => new PostTypeFactory($app));
         $this->registerPostTypes();
     }
 
     /**
      * Register all the site's custom post types
-     *
-     * @return void
      */
-    public function registerPostTypes()
+    public function registerPostTypes(): void
     {
         // Get the post types from the config.
         $postTypes = config('post-types');
 
         // Iterate over each post type.
-        collect($postTypes)->each(function ($args, $key) {
+        collect($postTypes)->each(function (array $args, $key): void {
             // Register the extended post type.
             $singular = $args['names']['singular'] ?? null;
             $plural = $args['names']['plural'] ?? null;

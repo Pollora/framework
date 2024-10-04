@@ -11,7 +11,7 @@ use Illuminate\Support\ServiceProvider;
  */
 class ConfigServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         $this->publishes([
             realpath(__DIR__.'/../../config/wordpress.php') => config_path('wordpress.php'),

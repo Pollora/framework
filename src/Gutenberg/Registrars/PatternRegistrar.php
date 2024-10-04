@@ -60,7 +60,7 @@ class PatternRegistrar
 
         $content = $this->getPatternContent($file);
 
-        if (empty($content)) {
+        if ($content === null || $content === '' || $content === '0') {
             return;
         }
 

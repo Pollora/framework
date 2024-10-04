@@ -25,7 +25,7 @@ class RewriteServiceProvider extends ServiceProvider
      */
     protected function removeTrailingSlash(string|bool $oldPermalinkStructure, string|bool $permalinkStructure): void
     {
-        if (! $oldPermalinkStructure) {
+        if ($oldPermalinkStructure === '' || $oldPermalinkStructure === '0' || $oldPermalinkStructure === false) {
             return;
         }
 

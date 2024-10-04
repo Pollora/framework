@@ -20,11 +20,19 @@ trait QueryTrait
 
     private function shouldExitEarly(): bool
     {
-        return $this->isHeadRequest()
-            || $this->isRobots()
-            || $this->isFavicon()
-            || $this->isFeed()
-            || $this->isTrackback();
+        if ($this->isHeadRequest()) {
+            return true;
+        }
+        if ($this->isRobots()) {
+            return true;
+        }
+        if ($this->isFavicon()) {
+            return true;
+        }
+        if ($this->isFeed()) {
+            return true;
+        }
+        return (bool) $this->isTrackback();
     }
 
     private function isHeadRequest(): bool

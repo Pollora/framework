@@ -9,15 +9,12 @@ use Pollen\Hook\Contracts\HookableInterface;
 
 abstract class Hookable implements HookableInterface
 {
-    protected Container $container;
-
     public $hook;
 
     public int $priority = 10;
 
-    public function __construct(Container $container)
+    public function __construct(protected Container $container)
     {
-        $this->container = $container;
     }
 
     abstract public function register();

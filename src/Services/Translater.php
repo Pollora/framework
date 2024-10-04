@@ -7,22 +7,19 @@ namespace Pollen\Services;
 class Translater
 {
     /**
-     * The items to be used in translations.
-     */
-    protected array $items;
-
-    /**
-     * The domain of the translation.
-     */
-    protected string $domain;
-
-    /**
      * Create a new translator instance.
      */
-    public function __construct(array $items = [], string $domain = 'wordpress')
+    public function __construct(
+        /**
+         * The items to be used in translations.
+         */
+        protected array $items = [],
+        /**
+         * The domain of the translation.
+         */
+        protected string $domain = 'wordpress'
+    )
     {
-        $this->items = $items;
-        $this->domain = $domain;
     }
 
     /**
@@ -54,14 +51,12 @@ class Translater
      */
     protected function translateKey(string $key): void
     {
-        if (strpos($key, '.') !== false) {
+        if (str_contains($key, '.')) {
             // Handle nested keys
             $keys = explode('.', $key);
             $this->recursiveTranslateByKey($keys, $this->items);
-        } else {
-            if (isset($this->items[$key])) {
-                $this->items[$key] = $this->translateItem($this->items[$key]);
-            }
+        } elseif (isset($this->items[$key])) {
+            $this->items[$key] = $this->translateItem($this->items[$key]);
         }
     }
 
@@ -85,7 +80,7 @@ class Translater
                 }
             }
         } elseif (isset($item[$currentKey])) {
-            if (empty($keys)) {
+            if ($keys === []) {
                 // Last key reached, perform the translation
                 $item[$currentKey] = $this->translateItem($item[$currentKey]);
             } else {

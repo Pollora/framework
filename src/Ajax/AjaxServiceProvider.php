@@ -8,10 +8,8 @@ use Illuminate\Support\ServiceProvider;
 
 class AjaxServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton('wp.ajax', function ($app) {
-            return new AjaxFactory;
-        });
+        $this->app->singleton('wp.ajax', fn($app): \Pollen\Ajax\AjaxFactory => new AjaxFactory);
     }
 }

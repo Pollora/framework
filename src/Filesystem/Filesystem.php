@@ -35,7 +35,7 @@ class Filesystem extends FilesystemBase
 
         $sourceDirs = explode('/', ltrim($basePath, '/'));
         $targetDirs = explode('/', ltrim($targetPath, '/'));
-        $sourceFile = array_pop($sourceDirs);
+        array_pop($sourceDirs);
         $targetFile = array_pop($targetDirs);
 
         foreach ($sourceDirs as $i => $dir) {

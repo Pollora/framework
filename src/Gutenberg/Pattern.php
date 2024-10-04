@@ -24,7 +24,7 @@ class Pattern implements ThemeComponent
 
     public function register(): void
     {
-        Action::add('init', function () {
+        Action::add('init', function (): void {
             if (wp_installing()) {
                 return;
             }

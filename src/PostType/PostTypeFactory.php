@@ -15,11 +15,8 @@ use Pollen\Foundation\Application;
 
 class PostTypeFactory
 {
-    protected Application $container;
-
-    public function __construct(Application $container)
+    public function __construct(protected Application $container)
     {
-        $this->container = $container;
     }
 
     /**
@@ -32,7 +29,7 @@ class PostTypeFactory
      *
      * @throws PostTypeException if the post type with the given slug already exists.
      */
-    public function make(string $slug, ?string $singular, ?string $plural)
+    public function make(string $slug, ?string $singular, ?string $plural): \Pollen\PostType\PostType
     {
         $abstract = sprintf('wp.posttype.%s', $slug);
 

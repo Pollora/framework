@@ -22,13 +22,13 @@ class Mailer
         [$to, $subject, $message, $headers, $attachments] = $values;
 
         try {
-            return Mail::html($message, function (Message $mail) use ($to, $subject, $attachments) {
+            return Mail::html($message, function (Message $mail) use ($to, $subject, $attachments): void {
                 $mail->to($to)
                     ->subject($subject);
 
                 $this->addAttachments($mail, $attachments);
             });
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return null;
         }
     }

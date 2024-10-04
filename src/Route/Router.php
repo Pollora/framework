@@ -19,7 +19,7 @@ class Router extends IlluminateRouter
         $this->routes = new RouteCollection;
     }
 
-    public function newRoute($methods, $uri, $action)
+    public function newRoute($methods, $uri, $action): \Pollen\Route\Route
     {
         $this->setConditionsIfEmpty();
 
@@ -38,7 +38,7 @@ class Router extends IlluminateRouter
         return parent::findRoute($request);
     }
 
-    public function setConditions(array $conditions = [])
+    public function setConditions(array $conditions = []): void
     {
         $config = $this->container->make('config');
         $this->conditions = array_merge(
@@ -65,7 +65,7 @@ class Router extends IlluminateRouter
 
     private function setConditionsIfEmpty(): void
     {
-        if (empty($this->conditions)) {
+        if ($this->conditions === []) {
             $this->setConditions();
         }
     }

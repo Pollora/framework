@@ -85,8 +85,11 @@ class ThemeManager
         return rtrim((string) $this->app['config']->get('theme.path', base_path('themes')), '/');
     }
 
-    public function active(): string
+    public function active(): string|bool
     {
+        if (!function_exists('get_stylesheet')) {
+            return false;
+        }
         return get_stylesheet();
     }
 

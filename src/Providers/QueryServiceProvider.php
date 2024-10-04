@@ -21,35 +21,21 @@ class QueryServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
-        $this->app->bind('Corcel\Model\User', 'Pollen\Model\User');
+        $this->app->bind(\Corcel\Model\User::class, 'Pollen\Model\User');
 
-        $this->app->singleton('wp.query.post', function () {
-            return new PostQuery;
-        });
+        $this->app->singleton('wp.query.post', fn(): \Pollen\Query\PostQuery => new PostQuery);
 
-        $this->app->singleton('wp.query.taxonomy', function () {
-            return new TaxQuery;
-        });
+        $this->app->singleton('wp.query.taxonomy', fn(): \Pollen\Query\TaxQuery => new TaxQuery);
 
-        $this->app->singleton('wp.query.meta', function () {
-            return new MetaQuery;
-        });
+        $this->app->singleton('wp.query.meta', fn(): \Pollen\Query\MetaQuery => new MetaQuery);
 
-        $this->app->singleton('wp.query.date', function () {
-            return new DateQuery;
-        });
+        $this->app->singleton('wp.query.date', fn(): \Pollen\Query\DateQuery => new DateQuery);
 
-        $this->app->bind('wp.loop', function () {
-            return new Loop;
-        });
+        $this->app->bind('wp.loop', fn(): \Pollen\View\Loop => new Loop);
 
-        $this->app->singleton(Post::class, function () {
-            return Post::find(get_the_ID());
-        });
+        $this->app->singleton(Post::class, fn() => Post::find(get_the_ID()));
     }
 }

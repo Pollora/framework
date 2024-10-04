@@ -16,9 +16,7 @@ class WordPressMailServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.mail', function ($app) {
-            return new Mailer;
-        });
+        $this->app->singleton('wp.mail', fn($app): \Pollen\Mail\Mailer => new Mailer);
     }
 
     /**
@@ -27,12 +25,10 @@ class WordPressMailServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (! function_exists('wp_mail')) {
-            $this->app->bind('wp_mail', function ($app) {
-                return function ($to, $subject, $message, $headers = '', $attachments = []) use ($app) {
-                    $result = $app->make(Mailer::class)->send($to, $subject, $message, $headers, $attachments);
+            $this->app->bind('wp_mail', fn($app): \Closure => function ($to, $subject, $message, $headers = '', $attachments = []) use ($app): bool {
+                $result = $app->make(Mailer::class)->send($to, $subject, $message, $headers, $attachments);
 
-                    return $result !== null;
-                };
+                return $result !== null;
             });
         }
     }

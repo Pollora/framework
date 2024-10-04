@@ -28,8 +28,8 @@ class WordPressBodyClass
 
             $tokens = $this->getRouteTokens($route);
 
-            if (! empty($tokens)) {
-                return array_filter(array_merge($tokens, $classes), fn ($class) => $class !== 'error404');
+            if ($tokens !== []) {
+                return array_filter(array_merge($tokens, $classes), fn ($class): bool => $class !== 'error404');
             }
 
             return $classes;
@@ -38,15 +38,10 @@ class WordPressBodyClass
 
     private function getRouteTokens(Route $route): array
     {
-        return array_filter(array_map(function ($token) use ($route) {
-            switch ($token[0]) {
-                case 'variable':
-                    return $this->handleVariableToken($token, $route);
-                case 'text':
-                    return sanitize_title($token[1]);
-                default:
-                    return false;
-            }
+        return array_filter(array_map(fn($token) => match ($token[0]) {
+            'variable' => $this->handleVariableToken($token, $route),
+            'text' => sanitize_title($token[1]),
+            default => false,
         }, array_reverse($route->getCompiled()->getTokens())));
     }
 

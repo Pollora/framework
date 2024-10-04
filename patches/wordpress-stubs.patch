@@ -1,0 +1,20 @@
+--- a/vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
++++ b/vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+@@ -114944,7 +114944,7 @@
+      *                       Default 'default'.
+      * @return string Translated text.
+      */
+-    function __($text, $domain = 'default')
++    function __wp($text, $domain = 'default')
+     {
+     }
+     /**
+@@ -124855,7 +124855,7 @@
+      * @param string|string[] $attachments Optional. Paths to files to attach.
+      * @return bool Whether the email was sent successfully.
+      */
+-    function wp_mail($to, $subject, $message, $headers = '', $attachments = array())
++    function _original_wp_mail($to, $subject, $message, $headers = '', $attachments = array())
+     {
+     }
+     /**

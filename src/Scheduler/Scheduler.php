@@ -206,7 +206,7 @@ class Scheduler implements SchedulerInterface
         $query = DB::table('wp_events')
             ->where('hook', $hook);
 
-        if (! empty($args)) {
+        if ($args !== []) {
             $query->where('args', json_encode($args));
         }
 
@@ -304,9 +304,7 @@ class Scheduler implements SchedulerInterface
         return DB::table('wp_events')
             ->orderBy('timestamp', 'asc')
             ->get()
-            ->map(function ($job) {
-                return $this->convertDbEventToWpEvent($job);
-            })
+            ->map(fn($job): object => $this->convertDbEventToWpEvent($job))
             ->all();
     }
 

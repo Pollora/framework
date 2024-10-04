@@ -30,13 +30,13 @@
         }
     ],
     "require": {
+        "php": "^8.2.0",
         "illuminate/support": "^11.0",
         "illuminate/database": "^11.0",
         "illuminate/routing": "^11.0",
         "pollen/entity": "dev-main",
         "watson/rememberable": "^6.1",
         "cweagans/composer-patches": "^1.7",
-        "qirolab/laravel-themer": "^2.1",
         "jgrossi/corcel": "^8.0",
         "log1x/sage-directives": "^2.0",
         "roots/bedrock-autoloader": "^1.0",
@@ -52,6 +52,17 @@
     },
     "minimum-stability": "dev",
     "extra": {
+        "patches": {
+            "pollen/framework": [
+                "patches/php-stubs-wordpress-stubs-wordpress-stubs-php.patch"
+            ],
+            "johnpbloch/wordpress-core": {
+                "Patch __ method in l10n to stop conflicting with Laravel": "patches/wordpress-core.patch"
+            },
+            "php-stubs/wordpress-stubs": {
+                "Rename __ and wp_mail functions": "patches/wordpress-stubs.patch"
+            }
+        },
         "laravel": {
             "providers": [
                 "Pollen\\Providers\\PollenServiceProvider"
@@ -69,22 +80,25 @@
                 "Theme": "Pollen\\Support\\Facades\\Theme",
                 "Asset": "Pollen\\Support\\Facades\\Asset"
             }
-        },
-        "patches": {
-            "johnpbloch/wordpress-core": {
-                "Patch __ method in l10n to stop conflicting with Laravel": "https://github.com/koselig/wordpress-core/commit/0881e719711b68812934608a01e986f420658674.diff"
-            }
         }
     },
     "config": {
         "allow-plugins": {
-            "cweagans/composer-patches": true
+            "cweagans/composer-patches": true,
+            "pestphp/pest-plugin": true
         }
     },
     "require-dev": {
         "driftingly/rector-laravel": "dev-main",
         "larastan/larastan": "^2.0",
-        "orchestra/testbench": "9.x-dev"
+        "orchestra/testbench": "9.x-dev",
+        "laravel/pint": "^1.17.3",
+        "pestphp/pest": "^3.0.7",
+        "pestphp/pest-plugin-type-coverage": "^3.0",
+        "symfony/var-dumper": "^7.1.4",
+        "szepeviktor/phpstan-wordpress": "*",
+        "php-stubs/wordpress-stubs": "6.*",
+        "symplify/vendor-patches": "^11.3"
     },
     "autoload-dev": {
         "psr-4": {
@@ -106,9 +120,17 @@
             "@build",
             "@php vendor/bin/testbench serve"
         ],
-        "lint": [
-            "pint",
-            "@php vendor/bin/phpstan analyse"
+        "refacto": "rector",
+        "lint": "pint",
+        "test:refacto": "rector --dry-run",
+        "test:lint": "pint --test",
+        "test:types": "phpstan analyse --ansi",
+        "test:unit": "pest --colors=always --coverage --parallel --min=100",
+        "test": [
+            "@test:refacto",
+            "@test:lint",
+            "@test:types",
+            "@test:unit"
         ]
     }
 }

@@ -9,22 +9,16 @@ use Pollen\Support\Facades\Theme;
 
 class AssetServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton('asset.container', function ($app) {
-            return new AssetContainerManager($app);
-        });
+        $this->app->singleton('asset.container', fn($app): \Pollen\Asset\AssetContainerManager => new AssetContainerManager($app));
 
-        $this->app->singleton('wp.vite', function ($app) {
-            return new Vite($app);
-        });
+        $this->app->singleton('wp.vite', fn($app): \Pollen\Asset\Vite => new Vite($app));
 
-        $this->app->singleton('wp.asset', function ($app) {
-            return new AssetFactory($app);
-        });
+        $this->app->singleton('wp.asset', fn($app): \Pollen\Asset\AssetFactory => new AssetFactory($app));
     }
 
-    public function boot()
+    public function boot(): void
     {
         $theme = Theme::active();
         $this->app['asset.container']->addContainer('theme', [

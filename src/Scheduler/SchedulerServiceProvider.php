@@ -23,7 +23,7 @@ class SchedulerServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             $this->scheduleRecurringEvents();
         });
     }
@@ -61,10 +61,10 @@ class SchedulerServiceProvider extends ServiceProvider
         \Pollen\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
     }
 
-    protected function isOrchastraTest()
+    protected function isOrchastraTest(): bool
     {
         $db = DB::getConfig(null);
 
-        return str_contains($db['database'], '/orchestra/');
+        return str_contains((string) $db['database'], '/orchestra/');
     }
 }

@@ -26,7 +26,7 @@ class WordPress
     public function multisite(null|int|array $id = null): bool
     {
         if (is_array($id)) {
-            return array_reduce($id, fn ($carry, $i) => $carry || $this->multisite($i), false);
+            return array_reduce($id, fn ($carry, $i): bool => $carry || $this->multisite($i), false);
         }
 
         return $id === null ? is_multisite() : ($id === $this->getSiteId());
@@ -61,8 +61,6 @@ class WordPress
 
     /**
      * Get the current WordPress version, includes WordPress' version.php if it has to.
-     *
-     * @return mixed
      */
     public function version(): string
     {

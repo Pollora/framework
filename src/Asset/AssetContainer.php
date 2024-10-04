@@ -6,7 +6,7 @@ namespace Pollen\Asset;
 
 class AssetContainer
 {
-    protected string $name;
+    public $basePath;
 
     protected string $hotFile;
 
@@ -14,11 +14,10 @@ class AssetContainer
 
     protected string $manifestPath;
 
-    public function __construct(string $name, array $config = [])
+    public function __construct(protected string $name, array $config = [])
     {
-        $this->name = $name;
-        $this->hotFile = $config['hot_file'] ?? public_path("{$name}.hot");
-        $this->buildDirectory = $config['build_directory'] ?? "build/{$name}";
+        $this->hotFile = $config['hot_file'] ?? public_path("{$this->name}.hot");
+        $this->buildDirectory = $config['build_directory'] ?? "build/{$this->name}";
         $this->manifestPath = $config['manifest_path'] ?? public_path("{$this->buildDirectory}/manifest.json");
         $this->basePath = $config['base_path'] ?? '';
     }

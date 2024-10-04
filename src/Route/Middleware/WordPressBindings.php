@@ -9,7 +9,7 @@ use Pollen\Route\Router;
 
 class WordPressBindings
 {
-    public function __construct(private Router $router) {}
+    public function __construct(private readonly Router $router) {}
 
     public function handle($request, Closure $next)
     {

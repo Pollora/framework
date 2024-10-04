@@ -17,10 +17,8 @@ if (! function_exists('wp_mail')) {
 if (! function_exists('mysqli_report')) {
     /**
      * Report MySQL errors.
-     *
-     * @return void
      */
-    function mysqli_report()
+    function mysqli_report(): void
     {
         // silence is golden
     }
@@ -37,7 +35,7 @@ if (! function_exists('__')) {
      */
     function __(string $key, array|string $replace = [], ?string $locale = null)
     {
-        if (! $locale && function_exists('get_locale')) {
+        if (($locale === null || $locale === '' || $locale === '0') && function_exists('get_locale')) {
             $locale = get_locale();
         }
         if (is_array($replace) && Lang::has($key, $locale)) {
@@ -45,7 +43,7 @@ if (! function_exists('__')) {
                 return trans($key, $replace, $locale);
             } catch (\Exception $e) {
                 // failed to get translation from Laravel
-                if ((! empty($replace)) || ! empty($locale)) {
+                if (($replace !== []) || ! empty($locale)) {
                     // this doesn't look like something we can pass to WordPress, lets
                     // rethrow the exception
                     throw $e;
@@ -55,7 +53,7 @@ if (! function_exists('__')) {
 
         $key = str_replace('wordpress.', '', $key);
 
-        return translate($key, empty($replace) ? 'default' : $replace);
+        return translate($key, $replace === '' || $replace === '0' || $replace === [] ? 'default' : $replace);
     }
 }
 
@@ -79,6 +77,6 @@ if (! function_exists('menu')) {
 if (! function_exists('is_secured')) {
     function is_secured(): bool
     {
-        return str_contains(config('app.url'), 'https://');
+        return str_contains((string) config('app.url'), 'https://');
     }
 }

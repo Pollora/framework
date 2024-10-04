@@ -8,10 +8,8 @@ use Illuminate\Support\ServiceProvider;
 
 class PageServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton('wp.admin.page', function ($app) {
-            return new PageFactory(new Page($app));
-        });
+        $this->app->singleton('wp.admin.page', fn($app): \Pollen\Admin\PageFactory => new PageFactory(new Page($app)));
     }
 }

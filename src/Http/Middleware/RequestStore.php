@@ -12,16 +12,15 @@ use Symfony\Component\HttpFoundation\Response;
 class RequestStore
 {
     /**
-     * The application container instance.
-     */
-    protected Container $app;
-
-    /**
      * Create a new middleware instance.
      */
-    public function __construct(Container $app)
+    public function __construct(
+        /**
+         * The application container instance.
+         */
+        protected Container $app
+    )
     {
-        $this->app = $app;
     }
 
     /**

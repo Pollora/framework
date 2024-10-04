@@ -16,7 +16,7 @@ class WordPressDatabase extends wpdb
 {
     protected Connection $eloquentConnection;
 
-    public $dbh = null;
+    public $dbh;
 
     /**
      * @var float

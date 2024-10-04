@@ -58,12 +58,11 @@ class Loop
      * @param  bool  $strip_teaser  Strip teaser content before the more text.
      * @return string The content of the current post.
      */
-    public function content($more_text = null, $strip_teaser = false)
+    public function content($more_text = null, $strip_teaser = false): string|array
     {
         $content = Filter::apply('the_content', get_the_content($more_text, $strip_teaser));
-        $content = str_replace(']]>', ']]&gt;', $content);
 
-        return $content;
+        return str_replace(']]>', ']]&gt;', $content);
     }
 
     /**
@@ -141,7 +140,7 @@ class Loop
     {
         $tags = get_the_tags($id);
 
-        return $tags ? $tags : [];
+        return $tags ?: [];
     }
 
     /**
@@ -160,7 +159,7 @@ class Loop
 
         $terms = get_the_terms($post, $taxonomy);
 
-        return $terms ? $terms : [];
+        return $terms ?: [];
     }
 
     /**
@@ -182,9 +181,8 @@ class Loop
      *
      * @param  string|array  $class  One or more classes to add to the post class list.
      * @param  int|\WP_Post  $post_id  The post ID or the post object.
-     * @return string
      */
-    public function postClass($class = '', $post_id = null)
+    public function postClass($class = '', $post_id = null): string
     {
         return 'class="'.implode(' ', get_post_class($class, $post_id)).'"';
     }

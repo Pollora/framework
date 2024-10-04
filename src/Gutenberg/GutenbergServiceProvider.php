@@ -21,14 +21,10 @@ class GutenbergServiceProvider extends ServiceProvider
 
         $this->app->when(PatternRegistrar::class)
             ->needs(PatternDataProcessor::class)
-            ->give(function ($app) {
-                return $app->make(PatternDataProcessor::class);
-            });
+            ->give(fn($app) => $app->make(PatternDataProcessor::class));
 
         $this->app->when(PatternRegistrar::class)
             ->needs(PatternValidator::class)
-            ->give(function ($app) {
-                return $app->make(PatternValidator::class);
-            });
+            ->give(fn($app) => $app->make(PatternValidator::class));
     }
 }

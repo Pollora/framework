@@ -3,14 +3,26 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use RectorLaravel\Set\LaravelSetList;
+use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 
 return RectorConfig::configure()
-    ->withPaths([
-        __DIR__.'/config',
-        __DIR__.'/public',
-        __DIR__.'/src',
+    ->withBootstrapFiles([
+        __DIR__ . '/vendor/php-stubs/wordpress-stubs/wordpress-stubs.php',
     ])
-    ->withSets([
-        LaravelSetList::LARAVEL_110,
-    ]);
+    ->withPaths([
+        __DIR__ . '/config',
+        __DIR__ . '/src',
+        __DIR__ . '/tests',
+    ])
+    ->withSkip([
+        __DIR__ . '/src/Theme/stubs/common',
+    ])
+    ->withPreparedSets(
+        deadCode: true,
+        codeQuality: true,
+        typeDeclarations: true,
+        privatization: true,
+        earlyReturn: true,
+        strictBooleans: true,
+    )
+    ->withPhpSets();

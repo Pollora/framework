@@ -10,8 +10,6 @@ use Pollen\Support\Facades\Filter;
 
 class Asset
 {
-    protected string $handle;
-
     protected string|array $path;
 
     protected string $type;
@@ -38,9 +36,8 @@ class Asset
 
     protected ?AssetContainer $container = null;
 
-    public function __construct(string $handle, string $path)
+    public function __construct(protected string $handle, string $path)
     {
-        $this->handle = $handle;
         $this->path = str_replace(base_path('/'), '', $path);
         $this->type = $this->determineFileType($path);
         $this->vite = app('wp.vite');
@@ -74,7 +71,7 @@ class Asset
 
     public function useVite(): self
     {
-        if (!$this->container) {
+        if (!$this->container instanceof \Pollen\Asset\AssetContainer) {
             throw new AssetException(
                 'Vite container has not been set.',
                 [
@@ -173,11 +170,11 @@ class Asset
 
     public function __destruct()
     {
-        $this->hooks = $this->hooks ?: ['wp_enqueue_scripts'];
+        $this->hooks = $this->hooks !== [] ? $this->hooks : ['wp_enqueue_scripts'];
 
         foreach ($this->hooks as $hook) {
             $this->maybeLoadViteClient($hook);
-            Action::add($hook, [$this, 'enqueueStyleOrScript'], 99);
+            Action::add($hook, $this->enqueueStyleOrScript(...), 99);
         }
     }
 
@@ -202,7 +199,7 @@ class Asset
     protected function maybeLoadViteClient(string $hook): void
     {
         if ($this->needToLoadViteClient($hook)) {
-            Action::add($hook, function () use ($hook) {
+            Action::add($hook, function () use ($hook): void {
                 echo $this->vite->viteClientHtml($hook)->toHtml();
             }, 1);
         }
@@ -227,7 +224,7 @@ class Asset
 
     protected function enqueueAsset(string $type, string $path): void
     {
-        $handle = $this->useVite && !Vite::isRunningHot() ? $this->handle.'/'.sanitize_title(basename($path)) : $this->handle;
+        $handle = $this->useVite && ! Vite::isRunningHot() ? $this->handle.'/'.sanitize_title(basename($path)) : $this->handle;
         match ($type) {
             'css' => $this->enqueueStyle($path, $handle),
             'js' => $this->enqueueScript($path),
@@ -243,11 +240,11 @@ class Asset
             $this->addViteScriptAttributes();
         }
 
-        if ($this->loadStrategy) {
+        if ($this->loadStrategy !== null && $this->loadStrategy !== '' && $this->loadStrategy !== '0') {
             wp_script_add_data($this->handle, 'defer', true);
         }
 
-        if ($this->inlineContent) {
+        if ($this->inlineContent !== null && $this->inlineContent !== '' && $this->inlineContent !== '0') {
             wp_add_inline_script($this->handle, $this->inlineContent, $this->inlinePosition);
         }
     }
@@ -256,18 +253,16 @@ class Asset
     {
         wp_enqueue_style($handle, $path, $this->dependencies, $this->version, $this->media);
 
-        if ($this->inlineContent) {
+        if ($this->inlineContent !== null && $this->inlineContent !== '' && $this->inlineContent !== '0') {
             wp_add_inline_style($handle, $this->inlineContent);
         }
     }
 
     protected function addViteScriptAttributes(): void
     {
-        Filter::add('script_loader_tag', function ($tag, $handle, $src) {
-            return $handle === $this->handle
-                ? '<script type="module" crossorigin src="'.esc_url($src).'"></script>'
-                : $tag;
-        }, 10, 3);
+        Filter::add('script_loader_tag', fn($tag, $handle, $src) => $handle === $this->handle
+            ? '<script type="module" crossorigin src="'.esc_url($src).'"></script>'
+            : $tag, 10, 3);
     }
 
     protected function forceFullUrl(string $path): string

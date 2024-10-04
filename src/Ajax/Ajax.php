@@ -147,7 +147,10 @@ class Ajax
      */
     private function isBothOrLoggedUsers(): bool
     {
-        return $this->getUserType() === self::BOTH_USERS || $this->getUserType() === self::LOGGED_USERS;
+        if ($this->getUserType() === self::BOTH_USERS) {
+            return true;
+        }
+        return $this->getUserType() === self::LOGGED_USERS;
     }
 
     /**
@@ -157,6 +160,9 @@ class Ajax
      */
     private function isBothOrGuestUsers(): bool
     {
-        return $this->getUserType() === self::BOTH_USERS || $this->getUserType() === self::GUEST_USERS;
+        if ($this->getUserType() === self::BOTH_USERS) {
+            return true;
+        }
+        return $this->getUserType() === self::GUEST_USERS;
     }
 }

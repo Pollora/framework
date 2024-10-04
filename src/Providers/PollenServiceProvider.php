@@ -31,10 +31,8 @@ class PollenServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         // Generic service providers
         $this->app->register(ViewServiceProvider::class);
@@ -64,17 +62,13 @@ class PollenServiceProvider extends ServiceProvider
 
         // Hashing service provider
         $this->app->register(HashServiceProvider::class);
-        $this->app->singleton(JobDispatcher::class, function ($app) {
-            return new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class));
-        });
+        $this->app->singleton(JobDispatcher::class, fn($app): \Pollen\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class)));
     }
 
     /**
      * Perform post-registration booting of services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->publishes([
             __DIR__.'/../../public/wp-config.php' => public_path(),

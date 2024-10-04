@@ -11,8 +11,6 @@ use WP_Error;
 
 class WordPressUserProvider implements UserProvider
 {
-    public function __construct() {}
-
     public function retrieveById($identifier): ?Authenticatable
     {
         return User::find($identifier);

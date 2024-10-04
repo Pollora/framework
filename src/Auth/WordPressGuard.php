@@ -18,8 +18,6 @@ class WordPressGuard implements StatefulGuard
 
     private ?User $lastAttempted = null;
 
-    public function __construct(UserProvider $provider) {}
-
     public function check(): bool
     {
         return is_user_logged_in();
@@ -27,7 +25,7 @@ class WordPressGuard implements StatefulGuard
 
     public function user(): ?Authenticatable
     {
-        $user = User::find(get_current_user_id());
+        User::find(get_current_user_id());
 
         return $this->user ??= $this->check() ? User::find(get_current_user_id()) : null;
     }

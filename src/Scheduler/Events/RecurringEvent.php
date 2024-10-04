@@ -62,7 +62,7 @@ class RecurringEvent extends AbstractEvent
         $events = DB::table('wp_events')->whereNotNull('schedule')->get();
 
         foreach ($events as $event) {
-            $schedule->call(function () use ($event) {
+            $schedule->call(function () use ($event): void {
                 do_action_ref_array($event->hook, json_decode($event->args, true));
             })->cron(self::getCronExpression($event->schedule, $event->interval));
         }
@@ -95,15 +95,15 @@ class RecurringEvent extends AbstractEvent
                     $minutes = $interval / 60;
                     if ($minutes < 60) {
                         return "*/{$minutes} * * * *";
-                    } elseif ($minutes == 60) {
-                        return '0 * * * *';
-                    } elseif ($minutes % 60 == 0) {
-                        $hours = $minutes / 60;
-
-                        return "0 */{$hours} * * *";
-                    } else {
-                        return "*/{$minutes} * * * *";
                     }
+                    if ($minutes == 60) {
+                        return '0 * * * *';
+                    }
+                    if ($minutes % 60 == 0) {
+                        $hours = $minutes / 60;
+                        return "0 */{$hours} * * *";
+                    }
+                    return "*/{$minutes} * * * *";
                 }
 
                 return '0 0 * * *';

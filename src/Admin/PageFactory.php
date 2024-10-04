@@ -6,7 +6,7 @@ namespace Pollen\Admin;
 
 class PageFactory
 {
-    public function __construct(private Page $page) {}
+    public function __construct(private readonly Page $page) {}
 
     public function page(string $pageTitle, string $menuTitle, string $capability, string $slug, mixed $action, string $iconUrl = '', ?int $position = null): self
     {

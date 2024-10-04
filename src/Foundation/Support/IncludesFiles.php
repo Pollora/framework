@@ -14,7 +14,7 @@ trait IncludesFiles
      *
      * @param  string|array  $path
      */
-    public function includes($path, string $pattern = '*.php')
+    public function includes($path, string $pattern = '*.php'): void
     {
         foreach (Finder::create()->files()->name($pattern)->in($path)->sortByName() as $file) {
             /** @var \SplFileInfo $file */

@@ -33,7 +33,7 @@ class Route extends IlluminateRoute
 
     public function hasCondition(): bool
     {
-        return ! empty($this->condition);
+        return $this->condition !== '' && $this->condition !== '0';
     }
 
     public function setConditions(array $conditions = []): self
@@ -79,11 +79,11 @@ class Route extends IlluminateRoute
 
     protected function parseConditionParams(array $action): array
     {
-        if (empty($this->condition)) {
+        if ($this->condition === '' || $this->condition === '0') {
             return [];
         }
 
-        $params = Arr::first($action, fn ($value, $key) => is_numeric($key));
+        $params = Arr::first($action, fn ($value, $key): bool => is_numeric($key));
 
         return [$params];
     }

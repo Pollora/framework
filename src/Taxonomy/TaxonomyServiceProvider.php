@@ -18,27 +18,23 @@ use Pollen\Support\Facades\Taxonomy;
  */
 class TaxonomyServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
-        $this->app->bind('wp.taxonomy', function ($app) {
-            return new TaxonomyFactory($app);
-        });
+        $this->app->bind('wp.taxonomy', fn($app): \Pollen\Taxonomy\TaxonomyFactory => new TaxonomyFactory($app));
 
         $this->registerTaxonomies();
     }
 
     /**
      * Register all the site's custom post types
-     *
-     * @return void
      */
-    public function registerTaxonomies()
+    public function registerTaxonomies(): void
     {
         // Get the post types from the config.
         $taxonomies = config('taxonomies');
 
         // Iterate over each post type.
-        collect($taxonomies)->each(function ($args, $key) {
+        collect($taxonomies)->each(function ($args, $key): void {
             // Register the extended post type.
             $links = $args['links'] ?? [];
             $singular = $args['names']['singular'] ?? null;

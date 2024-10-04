@@ -28,7 +28,7 @@ class TaxonomyFactory
      *
      * @throws TaxonomyException If the taxonomy with the given slug already exists.
      */
-    public function make(string $slug, string|array $objectType, ?string $singular, ?string $plural)
+    public function make(string $slug, string|array $objectType, ?string $singular, ?string $plural): \Pollen\Taxonomy\Taxonomy
     {
         $abstract = sprintf('wp.taxonomy.%s', $slug);
 

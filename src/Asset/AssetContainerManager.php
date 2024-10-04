@@ -8,15 +8,12 @@ use Illuminate\Contracts\Foundation\Application;
 
 class AssetContainerManager
 {
-    protected Application $app;
-
     protected array $containers = [];
 
     protected ?string $defaultContainer = null;
 
-    public function __construct(Application $app)
+    public function __construct(protected Application $app)
     {
-        $this->app = $app;
     }
 
     public function addContainer(string $name, array $config): void
@@ -40,7 +37,7 @@ class AssetContainerManager
 
     public function getDefault(): AssetContainer
     {
-        if (! $this->defaultContainer) {
+        if ($this->defaultContainer === null || $this->defaultContainer === '' || $this->defaultContainer === '0') {
             throw new \RuntimeException('No default asset container has been set.');
         }
 

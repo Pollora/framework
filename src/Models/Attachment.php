@@ -154,9 +154,9 @@ class Attachment extends \Corcel\Model\Attachment
             return null;
         }
 
-        $baseUrl = $this->getUploadPath($type);
+        $this->getUploadPath($type);
         $relativeFilePath = $this->getFilePath();
-        $dirName = dirname($relativeFilePath);
+        $dirName = dirname((string) $relativeFilePath);
 
         return $dirName.'/'.$sizes[$size]['file'];
     }

@@ -6,7 +6,6 @@ namespace Pollen\Admin;
 
 use Closure;
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Http\Request as IlluminateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 class Page
 {
     public function __construct(
-        private Container $container
+        private readonly Container $container
     ) {}
 
     /**
@@ -66,7 +65,6 @@ class Page
     /**
      * Wrap the action given to us by the user to allow for dependency injection and nicer callable syntax.
      */
-
     protected function wrap(mixed $callback): Closure
     {
         return function () use ($callback) {

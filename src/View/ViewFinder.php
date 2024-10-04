@@ -10,20 +10,6 @@ use Pollen\Filesystem\Filesystem;
 class ViewFinder
 {
     /**
-     * The FileViewFinder instance.
-     *
-     * @var FileViewFinder
-     */
-    protected $finder;
-
-    /**
-     * The Filesystem instance.
-     *
-     * @var Filesystem
-     */
-    protected $files;
-
-    /**
      * Base path for theme or plugin in which views are located.
      *
      * @var string
@@ -36,56 +22,49 @@ class ViewFinder
      * @param  string  $path
      * @return void
      */
-    public function __construct(FileViewFinder $finder, Filesystem $files, $path = '')
+    public function __construct(/**
+     * The FileViewFinder instance.
+     */
+    protected \Pollen\View\FileViewFinder $finder, /**
+     * The Filesystem instance.
+     */
+    protected \Pollen\Filesystem\Filesystem $files, $path = '')
     {
-        $this->finder = $finder;
-        $this->files = $files;
         $this->path = $path ? realpath($path) : get_theme_file_path();
     }
 
     /**
      * Locate available view files.
      *
-     * @param  mixed  $file
      * @return array
      */
-    public function locate($file)
+    public function locate(mixed $file)
     {
         if (is_array($file)) {
-            return array_merge(...array_map([$this, 'locate'], $file));
+            return array_merge(...array_map($this->locate(...), $file));
         }
 
         return $this->getRelativeViewPaths()
-            ->flatMap(function ($viewPath) use ($file) {
-                return collect($this->finder->getPossibleViewFilesFromPath($file))
-                    ->merge([$file])
-                    ->map(function ($file) use ($viewPath) {
-                        return "{$viewPath}/{$file}";
-                    });
-            })
+            ->flatMap(fn($viewPath) => collect($this->finder->getPossibleViewFilesFromPath($file))
+                ->merge([$file])
+                ->map(fn($file): string => "{$viewPath}/{$file}"))
             ->unique()
-            ->map(function ($file) {
-                return trim($file, '\\/');
-            })
+            ->map(fn($file): string => trim($file, '\\/'))
             ->toArray();
     }
 
     /**
      * Return the FileViewFinder instance.
-     *
-     * @return FileViewFinder
      */
-    public function getFinder()
+    public function getFinder(): \Pollen\View\FileViewFinder
     {
         return $this->finder;
     }
 
     /**
      * Return the Filesystem instance.
-     *
-     * @return Filesystem
      */
-    public function getFilesystem()
+    public function getFilesystem(): \Pollen\Filesystem\Filesystem
     {
         return $this->files;
     }
@@ -98,8 +77,6 @@ class ViewFinder
     protected function getRelativeViewPaths()
     {
         return collect($this->finder->getPaths())
-            ->map(function ($viewsPath) {
-                return $this->files->getRelativePath($this->path, $viewsPath);
-            });
+            ->map(fn($viewsPath): string => $this->files->getRelativePath($this->path, $viewsPath));
     }
 }

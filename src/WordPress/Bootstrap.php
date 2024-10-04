@@ -24,7 +24,7 @@ class Bootstrap
         $this->ensureAddFilterExists();
     }
 
-    public function isOrchestraWorkbench()
+    public function isOrchestraWorkbench(): bool
     {
         return str_contains(App::basePath(), '/orchestra/');
     }
@@ -60,15 +60,10 @@ class Bootstrap
     private function setupActionHooks(): void
     {
         if (defined('WP_CLI') && WP_CLI) {
-            Action::add('init', [$this, 'fixNetworkUrl'], 1);
+            Action::add('init', $this->fixNetworkUrl(...), 1);
         } else {
             $this->fixNetworkUrl();
         }
-    }
-
-    private function isWordPressAdmin(): bool
-    {
-        return defined('WP_ADMIN') || str_contains(Request::server('SCRIPT_NAME'), strrchr(wp_login_url(), '/'));
     }
 
     private function maybeForceUrlScheme(): void
@@ -81,11 +76,11 @@ class Bootstrap
     public function rewriteNetworkUrl(string $url, string $path, string $scheme): string
     {
         $url = $scheme !== 'relative' ? set_url_scheme(
-            (is_secured() ? 'https://' : 'http://').WordPress::site()->domain.WordPress::site()->path,
+            (is_secured() ? 'https://' : 'http://').(new WordPress())->site()->domain.(new WordPress())->site()->path,
             $scheme
-        ) : WordPress::site()->path;
+        ) : (new WordPress())->site()->path;
 
-        if ($path) {
+        if ($path !== '' && $path !== '0') {
             $url .= str_replace('public/', '', WP_PATH).ltrim($path, '/'); // @phpstan-ignore-line
         }
 
@@ -113,7 +108,7 @@ class Bootstrap
 
     public function fixNetworkUrl(): void
     {
-        Action::add('network_site_url', [$this, 'rewriteNetworkUrl'], 10, 3);
+        Action::add('network_site_url', $this->rewriteNetworkUrl(...), 10, 3);
     }
 
     private function setDatabaseConstants(): void
@@ -151,7 +146,7 @@ class Bootstrap
 
         if (! defined('ABSPATH')) {
             if ($this->isOrchestraWorkbench()) { // if Orchestra Platform
-                define('ABSPATH', dirname(__FILE__).'/../../../../../'.WP_PATH);
+                define('ABSPATH', __DIR__.'/../../../../../'.WP_PATH);
             } else {
                 define('ABSPATH', App::basePath().DIRECTORY_SEPARATOR.WP_PATH);
             }
@@ -166,6 +161,6 @@ class Bootstrap
     private function setConsoleServerVariables(): void
     {
         $_SERVER['SERVER_PROTOCOL'] = 'https';
-        $_SERVER['HTTP_HOST'] = parse_url(config('app.url'))['host'];
+        $_SERVER['HTTP_HOST'] = parse_url((string) config('app.url'))['host'];
     }
 }

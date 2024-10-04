@@ -22,15 +22,12 @@ class Vite
 
     protected ?string $theme = null;
 
-    protected Application $app;
-
     protected ?string $hotFile = null;
 
     protected ?AssetContainer $container = null;
 
-    public function __construct(Application $app)
+    public function __construct(protected Application $app)
     {
-        $this->app = $app;
     }
 
     public function setContainer(AssetContainer $container): void
@@ -49,7 +46,7 @@ class Vite
     {
         $this->loadInHook($hook);
 
-        if ($this->client === null) {
+        if (!$this->client instanceof \Illuminate\Support\HtmlString) {
             throw new \RuntimeException('Vite client has not been initialized.');
         }
 
@@ -73,12 +70,12 @@ class Vite
 
     public function lookupAssetsInManifest(string $path): array
     {
-        $manifest = $this->manifest($this->buildDirectory);
+        $manifest = $this->manifest();
         $assets = $this->orderManifest($manifest);
 
         $paths = ['css' => [], 'js' => []];
         foreach ($assets as $value) {
-            $extension = pathinfo($value['file'], PATHINFO_EXTENSION);
+            $extension = pathinfo((string) $value['file'], PATHINFO_EXTENSION);
             $paths[$extension][] = home_url("/{$this->buildDirectory}/{$value['file']}");
 
             if (isset($value['css'])) {
@@ -88,6 +85,7 @@ class Vite
                 ));
             }
         }
+
         return $paths;
     }
 
@@ -97,7 +95,7 @@ class Vite
         $ordered = $this->moveLegacyAndPolyfill($entries);
 
         return array_combine(
-            array_map([$this, 'getTokenName'], array_column($ordered['ordered'], 'file')),
+            array_map($this->getTokenName(...), array_column($ordered['ordered'], 'file')),
             $ordered['ordered']
         );
     }
@@ -119,9 +117,9 @@ class Vite
         ];
 
         foreach ($manifest as $value) {
-            if (str_contains($value['src'], 'polyfills') && str_contains($value['src'], 'legacy')) {
+            if (str_contains((string) $value['src'], 'polyfills') && str_contains((string) $value['src'], 'legacy')) {
                 $categories['polyfill'][] = $value;
-            } elseif (str_contains($value['src'], 'legacy')) {
+            } elseif (str_contains((string) $value['src'], 'legacy')) {
                 $categories['legacy'][] = $value;
             } else {
                 $categories['standard'][] = $value;
@@ -140,8 +138,8 @@ class Vite
     {
         $themePath = config('theme.base_path');
 
-        if (str_starts_with($path, $themePath)) {
-            $themePathOffset = strlen($themePath) + 1;
+        if (str_starts_with($path, (string) $themePath)) {
+            $themePathOffset = strlen((string) $themePath) + 1;
             $truncatedPath = substr($path, $themePathOffset);
 
             return strtok($truncatedPath, '/');
@@ -157,7 +155,7 @@ class Vite
 
     public function manifest(): array
     {
-        $path = $this->container ? $this->container->getManifestPath() : $this->manifestPath($this->buildDirectory);
+        $path = $this->container instanceof \Pollen\Asset\AssetContainer ? $this->container->getManifestPath() : $this->manifestPath($this->buildDirectory);
 
         if (! isset(static::$manifests[$path])) {
             if (! file_exists($path)) {
@@ -178,9 +176,9 @@ class Vite
     public function removeThemesPath($path)
     {
         // Vérifier si le chemin contient "themes/"
-        if (strpos($path, 'themes/') === 0) {
+        if (str_starts_with((string) $path, 'themes/')) {
             // Découper le chemin par les slashes
-            $parts = explode('/', $path);
+            $parts = explode('/', (string) $path);
 
             // Supprimer les deux premières parties (themes/ et le nom du thème)
             $parts = array_slice($parts, 2);

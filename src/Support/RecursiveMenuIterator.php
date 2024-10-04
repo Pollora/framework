@@ -50,7 +50,7 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
 
         $this->buildMenuTree($items);
 
-        return $items->filter(fn ($item) => $item->menu_item_parent == 0)->reverse()->values();
+        return $items->filter(fn ($item): bool => $item->menu_item_parent == 0)->reverse()->values();
     }
 
     /**
@@ -58,7 +58,7 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
      */
     private function buildMenuTree(Collection $items): void
     {
-        $items->each(function ($item) use ($items) {
+        $items->each(function ($item) use ($items): void {
             $item->children = $items->where('menu_item_parent', $item->ID)->values();
         });
     }

@@ -9,11 +9,8 @@ use Pollen\Scheduler\Contracts\JobDispatcherInterface;
 
 class JobDispatcher implements JobDispatcherInterface
 {
-    protected $dispatcher;
-
-    public function __construct(Dispatcher $dispatcher)
+    public function __construct(protected \Illuminate\Contracts\Bus\Dispatcher $dispatcher)
     {
-        $this->dispatcher = $dispatcher;
     }
 
     public function dispatch($job): int

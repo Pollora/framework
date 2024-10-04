@@ -10,7 +10,7 @@ use Pollen\Route\RouteServiceProvider;
 
 class Application extends \Illuminate\Foundation\Application
 {
-    public function registerBaseServiceProviders()
+    public function registerBaseServiceProviders(): void
     {
         $this->register(new EventServiceProvider($this));
         $this->register(new LogServiceProvider($this));

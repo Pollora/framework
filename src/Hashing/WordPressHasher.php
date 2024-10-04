@@ -24,9 +24,8 @@ class WordPressHasher implements HasherContract
      * Get information about the given hashed value.
      *
      * @param  string  $hashedValue
-     * @return array
      */
-    public function info($hashedValue)
+    public function info($hashedValue): array
     {
         return [];
     }
@@ -53,16 +52,15 @@ class WordPressHasher implements HasherContract
      */
     public function check($value, $hashedValue, array $options = [])
     {
-        return wp_check_password($value, $hashedValue, isset($options['user_id']) ? $options['user_id'] : '');
+        return wp_check_password($value, $hashedValue, $options['user_id'] ?? '');
     }
 
     /**
      * Check if the given hash has been hashed using the given options.
      *
      * @param  string  $hashedValue
-     * @return bool
      */
-    public function needsRehash($hashedValue, array $options = [])
+    public function needsRehash($hashedValue, array $options = []): bool
     {
         // if the hashed value is md5 it needs rehashing.
         return strlen($hashedValue) <= 32;
