@@ -102,7 +102,7 @@ class Bootstrap
     {
         define('WP_DEBUG', config('app.debug'));
         define('WP_DEBUG_DISPLAY', WP_DEBUG);
-        define('WP_DEFAULT_THEME', 'pollen');
+        define('WP_DEFAULT_THEME', 'default');
         define('DISALLOW_FILE_MODS', true);
     }
 
