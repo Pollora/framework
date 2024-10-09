@@ -36,7 +36,7 @@ class ThemeManager
         $currentTheme = $baseTheme;
 
         while (true) {
-            if (! is_dir($currentTheme->getBasePath())) {
+            if (! is_dir($currentTheme->getBasePath()) && ! app()->runningInConsole()) {
                 throw new ThemeException("Theme directory {$currentTheme->getName()} not found.");
             }
 
