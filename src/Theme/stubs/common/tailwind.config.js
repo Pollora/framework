@@ -1,15 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-        "./themes/%theme_name%/**/*.{blade.php,js,vue,ts}",
+        "./../../resources/views/**/*.blade.php",
+        "./views/**/*.blade.php",
+        "./assets/**/*.{js,css}",
+        "./assets/**/*.{js,css}",
     ],
     theme: {
         extend: {},
     },
-    plugins: [
-        require('@tailwindcss/forms'),
-        require('@tailwindcss/aspect-ratio'),
-        require('@tailwindcss/typography'),
-    ],
+    plugins: [],
 }
 
