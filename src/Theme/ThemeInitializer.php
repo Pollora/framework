@@ -84,6 +84,10 @@ class ThemeInitializer implements ThemeComponent
     protected function mergeConfigFrom($path, $key): void
     {
         $config = $this->app['config']->get($key, []);
+        if (!file_exists($path)) {
+            return;
+        }
         $this->app['config']->set($key, array_merge(require $path, $config));
+
     }
 }
