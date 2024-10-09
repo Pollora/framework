@@ -57,7 +57,7 @@
                 "patches/php-stubs-wordpress-stubs-wordpress-stubs-php.patch"
             ],
             "johnpbloch/wordpress-core": {
-                "Patch __ method in l10n to stop conflicting with Laravel": "patches/wordpress-core.patch"
+                "Patch __ method in l10n to stop conflicting with Laravel": "https://github.com/koselig/wordpress-core/commit/0881e719711b68812934608a01e986f420658674.diff"
             },
             "php-stubs/wordpress-stubs": {
                 "Rename __ and wp_mail functions": "patches/wordpress-stubs.patch"
