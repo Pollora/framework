@@ -53,9 +53,6 @@
     "minimum-stability": "dev",
     "extra": {
         "patches": {
-            "pollen/framework": [
-                "patches/php-stubs-wordpress-stubs-wordpress-stubs-php.patch"
-            ],
             "johnpbloch/wordpress-core": {
                 "Patch __ method in l10n to stop conflicting with Laravel": "https://raw.githubusercontent.com/AmphiBee/pollen-framework/refs/heads/main/patches/wordpress-core.patch"
             },
