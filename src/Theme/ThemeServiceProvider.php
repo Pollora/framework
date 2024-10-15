@@ -8,8 +8,10 @@ use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Pollen\Gutenberg\Pattern;
+use Pollen\Support\Facades\Filter;
 use Pollen\Theme\Commands\MakeThemeCommand;
 use Pollen\Theme\Commands\RemoveThemeCommand;
 use Pollen\Theme\Factories\ComponentFactory;
@@ -52,6 +54,17 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(ThemeComponentProvider::class, fn($app): \Pollen\Theme\ThemeComponentProvider => new ThemeComponentProvider($app, $app->make(ComponentFactory::class)));
 
         $this->app->make(ThemeComponentProvider::class)->register();
+
+        $this->overrideThemeUri();
+    }
+
+    protected function overrideThemeUri(): void
+    {
+        Filter::add('theme_file_uri', function($uri): string {
+            $relativePath = str_replace(get_stylesheet_directory_uri() . '/', '', $uri);
+            $container = app('asset.container')->get('theme');
+            return $this->findThemeAsset($relativePath);
+        });
     }
 
     /**
@@ -59,9 +72,9 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
         $this->publishConfigurations();
         $this->loadConfigurations();
+        $this->imageMacro();
 
         $this->app->make(ThemeComponentProvider::class)->boot();
 
@@ -69,6 +82,24 @@ class ThemeServiceProvider extends ServiceProvider
             ->each(function ($directive, $function): void {
                 Blade::directive($function, $directive);
             });
+    }
+
+
+    protected function imageMacro(): void
+    {
+        $provider = $this;
+        Vite::macro('image', fn (string $asset) => $provider->findThemeAsset($asset, 'images'));
+        Vite::macro('font', fn (string $asset) => $provider->findThemeAsset($asset, 'fonts'));
+        Vite::macro('css', fn (string $asset) => $provider->findThemeAsset($asset, 'css'));
+        Vite::macro('js', fn (string $asset) => $provider->findThemeAsset($asset, 'js'));
+    }
+
+    public function findThemeAsset(string $path, string $prefix = ''):string {
+        $container = app('asset.container')->get('theme');
+        $path = str_replace(get_stylesheet_directory_uri() . '/', '', $path);
+        $prefix = $prefix? 'assets/'.$prefix.'/' : '';
+        $path = $prefix.$path;
+        return Vite::useHotFile($container->getHotFile())->useBuildDirectory($container->getBuildDirectory())->asset($path);
     }
 
     protected function publishConfigurations(): void
