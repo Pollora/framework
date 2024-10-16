@@ -15,6 +15,7 @@ use Pollen\Support\Facades\Filter;
 use Pollen\Theme\Commands\MakeThemeCommand;
 use Pollen\Theme\Commands\RemoveThemeCommand;
 use Pollen\Theme\Factories\ComponentFactory;
+use Pollen\Support\Facades\Theme;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -54,17 +55,6 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(ThemeComponentProvider::class, fn($app): \Pollen\Theme\ThemeComponentProvider => new ThemeComponentProvider($app, $app->make(ComponentFactory::class)));
 
         $this->app->make(ThemeComponentProvider::class)->register();
-
-        $this->overrideThemeUri();
-    }
-
-    protected function overrideThemeUri(): void
-    {
-        Filter::add('theme_file_uri', function($uri): string {
-            $relativePath = str_replace(get_stylesheet_directory_uri() . '/', '', $uri);
-            $container = app('asset.container')->get('theme');
-            return $this->findThemeAsset($relativePath);
-        });
     }
 
     /**
@@ -72,6 +62,16 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $theme = Theme::active();
+        $this->app['asset.container']->addContainer('theme', [
+            'hot_file' => public_path("{$theme}.hot"),
+            'build_directory' => "build/{$theme}",
+            'manifest_path' => public_path("build/{$theme}/manifest.json"),
+            'base_path' => '',
+        ]);
+
+        $this->app['asset.container']->setDefaultContainer('theme');
+
         $this->publishConfigurations();
         $this->loadConfigurations();
         $this->imageMacro();
@@ -87,19 +87,14 @@ class ThemeServiceProvider extends ServiceProvider
 
     protected function imageMacro(): void
     {
-        $provider = $this;
-        Vite::macro('image', fn (string $asset) => $provider->findThemeAsset($asset, 'images'));
-        Vite::macro('font', fn (string $asset) => $provider->findThemeAsset($asset, 'fonts'));
-        Vite::macro('css', fn (string $asset) => $provider->findThemeAsset($asset, 'css'));
-        Vite::macro('js', fn (string $asset) => $provider->findThemeAsset($asset, 'js'));
-    }
-
-    public function findThemeAsset(string $path, string $prefix = ''):string {
-        $container = app('asset.container')->get('theme');
-        $path = str_replace(get_stylesheet_directory_uri() . '/', '', $path);
-        $prefix = $prefix? 'assets/'.$prefix.'/' : '';
-        $path = $prefix.$path;
-        return Vite::useHotFile($container->getHotFile())->useBuildDirectory($container->getBuildDirectory())->asset($path);
+        $themeManager = $this->app->make('theme');
+        $assetTypes = ['image' => 'images', 'font' => 'fonts', 'css' => 'css', 'js' => 'js'];
+        
+        foreach ($assetTypes as $macroName => $assetType) {
+            Vite::macro($macroName, function (string $asset) use ($themeManager, $assetType) {
+                return $themeManager->asset($asset, $assetType);
+            });
+        }
     }
 
     protected function publishConfigurations(): void

@@ -8,6 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Pollen\Support\Facades\Action;
 use Pollen\Support\Facades\Theme;
 use Pollen\Theme\Contracts\ThemeComponent;
+use Pollen\Support\Facades\Filter;
 
 class ThemeInitializer implements ThemeComponent
 {
@@ -28,6 +29,8 @@ class ThemeInitializer implements ThemeComponent
             }
             $this->initializeTheme();
         }, 1);
+
+        $this->overrideThemeUri();
     }
 
     private function initializeTheme(): void
@@ -89,5 +92,20 @@ class ThemeInitializer implements ThemeComponent
         }
         $this->app['config']->set($key, array_merge(require $path, $config));
 
+    }
+
+    protected function overrideThemeUri(): void
+    {
+        Filter::add('theme_file_uri', function ($uri): string {
+            $assetConfig = Theme::assetConfig();
+            $rootDir = $assetConfig['root'];
+            $relativePath = $this->getRelativePath($uri, $rootDir);
+            return app('theme')->asset($relativePath);
+        });
+    }
+
+    protected function getRelativePath(string $uri, string $rootDir): string
+    {
+        return str_replace(get_stylesheet_directory_uri() . '/' . $rootDir . '/', '', $uri);
     }
 }

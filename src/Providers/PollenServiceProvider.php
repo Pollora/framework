@@ -42,6 +42,7 @@ class PollenServiceProvider extends ServiceProvider
         $this->app->register(WordPressServiceProvider::class);
         $this->app->register(RewriteServiceProvider::class);
         $this->app->register(PageServiceProvider::class);
+        $this->app->register(ThemeServiceProvider::class);
         $this->app->register(AssetServiceProvider::class);
         $this->app->register(AjaxServiceProvider::class);
         $this->app->register(TaxonomyServiceProvider::class);
@@ -53,9 +54,6 @@ class PollenServiceProvider extends ServiceProvider
         if (config('wordpress.use_laravel_scheduler')) {
             $this->app->register(SchedulerServiceProvider::class);
         }
-
-        // Theme service provider
-        $this->app->register(ThemeServiceProvider::class);
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);
