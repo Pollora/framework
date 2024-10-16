@@ -30,6 +30,40 @@ class Vite
     {
     }
 
+    public function retrieveAsset(string $path, string $assetType = '', ?string $assetContainer = null): string
+    {
+        $container = $assetContainer !== null && $assetContainer !== '' && $assetContainer !== '0' ? app('asset.container')->get($assetContainer) : null;
+
+        if ($container) {
+            $assetConfig = $container->getAssetDir();
+            $rootDir = $assetConfig['root'];
+            $assetTypeDir = $assetConfig[$assetType] ?? '';
+
+            $prefix = $this->buildAssetPrefix($rootDir, $assetTypeDir);
+            $path = $prefix . $path;
+            //$assetConfig = $this->assetConfig();
+        }
+
+
+
+        return $this->buildViteAsset($path, $container);
+    }
+
+    protected function buildViteAsset(string $path, $container = null): string
+    {
+        if (!$container) {
+            return \Illuminate\Support\Facades\Vite::asset($path);
+        }
+        return \Illuminate\Support\Facades\Vite::useHotFile($container->getHotFile())
+            ->useBuildDirectory($container->getBuildDirectory())
+            ->asset($path);
+    }
+
+    protected function buildAssetPrefix(string $rootDir, string $assetTypeDir): string
+    {
+        return $assetTypeDir !== '' && $assetTypeDir !== '0' ? "{$rootDir}/{$assetTypeDir}/" : "{$rootDir}/";
+    }
+
     public function setContainer(AssetContainer $container): void
     {
         $this->container = $container;

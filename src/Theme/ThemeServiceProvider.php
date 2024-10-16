@@ -7,11 +7,8 @@ namespace Pollen\Theme;
 use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
-use Pollen\Gutenberg\Pattern;
-use Pollen\Support\Facades\Filter;
 use Pollen\Theme\Commands\MakeThemeCommand;
 use Pollen\Theme\Commands\RemoveThemeCommand;
 use Pollen\Theme\Factories\ComponentFactory;
@@ -25,6 +22,14 @@ class ThemeServiceProvider extends ServiceProvider
     protected $wp_theme;
 
     protected $theme_root;
+
+    protected array $defaultAssetConfig = [
+        'root' => 'assets',
+        'images' => 'images',
+        'fonts' => 'fonts',
+        'css' => 'css',
+        'js' => 'js',
+    ];
 
     /**
      * Registers the theme.
@@ -68,13 +73,16 @@ class ThemeServiceProvider extends ServiceProvider
             'build_directory' => "build/{$theme}",
             'manifest_path' => public_path("build/{$theme}/manifest.json"),
             'base_path' => '',
+            'asset_dir' => array_merge(
+                $this->defaultAssetConfig,
+                config('theme.asset_dir', [])
+            )
         ]);
 
         $this->app['asset.container']->setDefaultContainer('theme');
 
         $this->publishConfigurations();
         $this->loadConfigurations();
-        $this->imageMacro();
 
         $this->app->make(ThemeComponentProvider::class)->boot();
 
@@ -84,16 +92,6 @@ class ThemeServiceProvider extends ServiceProvider
             });
     }
 
-
-    protected function imageMacro(): void
-    {
-        $themeManager = $this->app->make('theme');
-        $assetTypes = ['image' => 'images', 'font' => 'fonts', 'css' => 'css', 'js' => 'js'];
-        
-        foreach ($assetTypes as $macroName => $assetType) {
-            Vite::macro($macroName, fn(string $asset) => $themeManager->asset($asset, $assetType));
-        }
-    }
 
     protected function publishConfigurations(): void
     {

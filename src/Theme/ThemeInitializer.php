@@ -91,16 +91,15 @@ class ThemeInitializer implements ThemeComponent
             return;
         }
         $this->app['config']->set($key, array_merge(require $path, $config));
-
     }
 
     protected function overrideThemeUri(): void
     {
         Filter::add('theme_file_uri', function ($uri): string {
-            $assetConfig = Theme::assetConfig();
+            $assetConfig = $this->app['asset.container']->get('theme')->getAssetDir();
             $rootDir = $assetConfig['root'];
             $relativePath = $this->getRelativePath($uri, $rootDir);
-            return app('theme')->asset($relativePath);
+            return app('wp.vite')->retrieveAsset($relativePath, '', 'theme');
         });
     }
 
