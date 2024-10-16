@@ -146,7 +146,7 @@ class ThemeManager
 
     protected function buildAssetPrefix(string $rootDir, string $assetTypeDir): string
     {
-        return $assetTypeDir ? "{$rootDir}/{$assetTypeDir}/" : "{$rootDir}/";
+        return $assetTypeDir !== '' && $assetTypeDir !== '0' ? "{$rootDir}/{$assetTypeDir}/" : "{$rootDir}/";
     }
 
     protected function buildViteAsset($container, string $path): string

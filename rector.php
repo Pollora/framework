@@ -16,6 +16,7 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         __DIR__ . '/src/Theme/stubs/common',
+        __DIR__ . '/vendor',
     ])
     ->withPreparedSets(
         deadCode: true,

@@ -91,9 +91,7 @@ class ThemeServiceProvider extends ServiceProvider
         $assetTypes = ['image' => 'images', 'font' => 'fonts', 'css' => 'css', 'js' => 'js'];
         
         foreach ($assetTypes as $macroName => $assetType) {
-            Vite::macro($macroName, function (string $asset) use ($themeManager, $assetType) {
-                return $themeManager->asset($asset, $assetType);
-            });
+            Vite::macro($macroName, fn(string $asset) => $themeManager->asset($asset, $assetType));
         }
     }
 

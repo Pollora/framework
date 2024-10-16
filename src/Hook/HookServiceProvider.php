@@ -11,9 +11,7 @@ class HookServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton('wp.hooks', function () {
-            return $this->mergeHooksConfig();
-        });
+        $this->app->singleton('wp.hooks', fn(): array => $this->mergeHooksConfig());
         $this->app->singleton('wp.action', Action::class);
         $this->app->singleton('wp.filter', Filter::class);
     }
