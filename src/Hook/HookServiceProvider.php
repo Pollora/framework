@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Pollen\Hook;
 
 use Illuminate\Support\ServiceProvider;
+use Pollen\Foundation\Application;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton('wp.hooks', function () {
+            return $this->mergeHooksConfig();
+        });
         $this->app->singleton('wp.action', Action::class);
         $this->app->singleton('wp.filter', Filter::class);
     }
@@ -19,9 +23,17 @@ class HookServiceProvider extends ServiceProvider
         $this->loadHooks();
     }
 
+    protected function mergeHooksConfig(): array
+    {
+        $bootstrapHooks = require $this->app->bootstrapPath('hooks.php');
+        $appConfigHooks = config('app.hooks', []);
+        return array_merge($bootstrapHooks, $appConfigHooks);
+    }
+
     protected function loadHooks(): void
     {
-        collect(config('app.hooks'))->each(fn ($hook) => $this->registerHook($hook));
+        $hooks = $this->app->make('wp.hooks');
+        collect($hooks)->each(fn($hook) => $this->registerHook($hook));
     }
 
     protected function registerHook(string $hookClass): void
