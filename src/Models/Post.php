@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Models;
+namespace Pollora\Models;
 
 /**
  * Class Post
@@ -34,7 +34,7 @@ namespace Pollen\Models;
  * @property-read \Illuminate\Database\Eloquent\Collection $meta
  * @property-read \Illuminate\Database\Eloquent\Collection $taxonomies
  * @property-read \Illuminate\Database\Eloquent\Collection $comments
- * @property-read \Pollen\Models\User $author
+ * @property-read \Pollora\Models\User $author
  *
  * @method static \Illuminate\Database\Eloquent\Builder published()
  * @method static \Illuminate\Database\Eloquent\Builder status($status)

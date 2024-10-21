@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Gutenberg;
+namespace Pollora\Gutenberg;
 
 use Illuminate\Contracts\Foundation\Application;
-use Pollen\Gutenberg\Registrars\CategoryRegistrar;
-use Pollen\Gutenberg\Registrars\PatternRegistrar;
-use Pollen\Support\Facades\Action;
-use Pollen\Theme\Contracts\ThemeComponent;
+use Pollora\Gutenberg\Registrars\CategoryRegistrar;
+use Pollora\Gutenberg\Registrars\PatternRegistrar;
+use Pollora\Support\Facades\Action;
+use Pollora\Theme\Contracts\ThemeComponent;
 
 class Pattern implements ThemeComponent
 {

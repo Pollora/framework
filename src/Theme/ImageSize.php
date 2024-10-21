@@ -8,10 +8,10 @@ declare(strict_types=1);
  * This class is responsible for registering image sizes in a WordPress theme.
  */
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
-use Pollen\Support\Facades\Action;
-use Pollen\Theme\Contracts\ThemeComponent;
+use Pollora\Support\Facades\Action;
+use Pollora\Theme\Contracts\ThemeComponent;
 
 /**
  * Represents a class for handling image sizes.

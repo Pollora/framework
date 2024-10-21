@@ -9,7 +9,7 @@ declare(strict_types=1);
  * {@inheritDoc}
  */
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Translation\Loader;

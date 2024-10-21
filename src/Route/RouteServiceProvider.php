@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route;
+namespace Pollora\Route;
 
 use Illuminate\Routing\RoutingServiceProvider;
-use Pollen\Foundation\Application;
+use Pollora\Foundation\Application;
 
 class RouteServiceProvider extends RoutingServiceProvider
 {
     public function registerRouter(): void
     {
-        $this->app->singleton('router', fn(Application $app): \Pollen\Route\Router => new Router($app['events'], $app));
+        $this->app->singleton('router', fn(Application $app): \Pollora\Route\Router => new Router($app['events'], $app));
     }
 }

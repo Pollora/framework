@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route;
+namespace Pollora\Route;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Route as IlluminateRoute;
 use Illuminate\Support\Arr;
-use Pollen\Route\Matching\ConditionValidator;
+use Pollora\Route\Matching\ConditionValidator;
 
 class Route extends IlluminateRoute
 {

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support\Facades;
+namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Facade for {@link \Pollen\Query\PostQuery}.
+ * Facade for {@link \Pollora\Query\PostQuery}.
  *
- * @see \Pollen\Query\PostQuery
+ * @see \Pollora\Query\PostQuery
  *
- * @mixin \Pollen\Query\PostQuery
+ * @mixin \Pollora\Query\PostQuery
  */
 class PostQuery extends Facade
 {

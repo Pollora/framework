@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Services;
+namespace Pollora\Services;
 
 class Translater
 {

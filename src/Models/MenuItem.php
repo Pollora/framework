@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Models;
+namespace Pollora\Models;
 
 /**
  * Class MenuItem

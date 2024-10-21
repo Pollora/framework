@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Hook;
+namespace Pollora\Hook;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Foundation\Application;
+use Pollora\Foundation\Application;
 
 class HookServiceProvider extends ServiceProvider
 {

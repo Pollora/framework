@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route;
+namespace Pollora\Route;
 
 use Illuminate\Routing\RouteCollection as IlluminateRouteCollection;
 

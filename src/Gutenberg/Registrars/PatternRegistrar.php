@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Gutenberg\Registrars;
+namespace Pollora\Gutenberg\Registrars;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
-use Pollen\Gutenberg\Helpers\PatternDataProcessor;
-use Pollen\Gutenberg\Helpers\PatternValidator;
+use Pollora\Gutenberg\Helpers\PatternDataProcessor;
+use Pollora\Gutenberg\Helpers\PatternValidator;
 
 class PatternRegistrar
 {

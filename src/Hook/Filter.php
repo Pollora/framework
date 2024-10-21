@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Hook;
+namespace Pollora\Hook;
 
-use Pollen\Hook\Contracts\FilterInterface;
+use Pollora\Hook\Contracts\FilterInterface;
 
 class Filter extends AbstractHook implements FilterInterface
 {

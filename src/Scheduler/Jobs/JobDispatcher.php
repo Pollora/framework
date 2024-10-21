@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Scheduler\Jobs;
+namespace Pollora\Scheduler\Jobs;
 
 use Illuminate\Contracts\Bus\Dispatcher;
-use Pollen\Scheduler\Contracts\JobDispatcherInterface;
+use Pollora\Scheduler\Contracts\JobDispatcherInterface;
 
 class JobDispatcher implements JobDispatcherInterface
 {

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support\Facades;
+namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Facade for {@link \Pollen\Query\MetaQuery}.
+ * Facade for {@link \Pollora\Query\MetaQuery}.
  *
- * @see \Pollen\Query\MetaQuery
+ * @see \Pollora\Query\MetaQuery
  *
- * @mixin \Pollen\Query\MetaQuery
+ * @mixin \Pollora\Query\MetaQuery
  */
 class MetaQuery extends Facade
 {

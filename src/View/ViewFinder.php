@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\View;
+namespace Pollora\View;
 
 use Illuminate\Support\Collection;
-use Pollen\Filesystem\Filesystem;
+use Pollora\Filesystem\Filesystem;
 
 class ViewFinder
 {
@@ -25,10 +25,10 @@ class ViewFinder
     public function __construct(/**
      * The FileViewFinder instance.
      */
-    protected \Pollen\View\FileViewFinder $finder, /**
+    protected \Pollora\View\FileViewFinder $finder, /**
      * The Filesystem instance.
      */
-    protected \Pollen\Filesystem\Filesystem $files, $path = '')
+    protected \Pollora\Filesystem\Filesystem $files, $path = '')
     {
         $this->path = $path ? realpath($path) : get_theme_file_path();
     }
@@ -56,7 +56,7 @@ class ViewFinder
     /**
      * Return the FileViewFinder instance.
      */
-    public function getFinder(): \Pollen\View\FileViewFinder
+    public function getFinder(): \Pollora\View\FileViewFinder
     {
         return $this->finder;
     }
@@ -64,7 +64,7 @@ class ViewFinder
     /**
      * Return the Filesystem instance.
      */
-    public function getFilesystem(): \Pollen\Filesystem\Filesystem
+    public function getFilesystem(): \Pollora\Filesystem\Filesystem
     {
         return $this->files;
     }

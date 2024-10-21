@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\PostType;
+namespace Pollora\PostType;
 
-use Pollen\Entity\PostType as BasePostType;
-use Pollen\Entity\Traits\ArgumentTranslater as BaseArgumentTranslater;
-use Pollen\Support\ArgumentTranslater;
+use Pollora\Entity\PostType as BasePostType;
+use Pollora\Entity\Traits\ArgumentTranslater as BaseArgumentTranslater;
+use Pollora\Support\ArgumentTranslater;
 
 class PostType extends BasePostType
 {

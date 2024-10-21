@@ -8,10 +8,10 @@ declare(strict_types=1);
  * The TaxonomyFactory class is responsible for creating instances of the Taxonomy class.
  */
 
-namespace Pollen\Taxonomy;
+namespace Pollora\Taxonomy;
 
-use Pollen\Entity\TaxonomyException;
-use Pollen\Foundation\Application;
+use Pollora\Entity\TaxonomyException;
+use Pollora\Foundation\Application;
 
 class TaxonomyFactory
 {
@@ -28,7 +28,7 @@ class TaxonomyFactory
      *
      * @throws TaxonomyException If the taxonomy with the given slug already exists.
      */
-    public function make(string $slug, string|array $objectType, ?string $singular, ?string $plural): \Pollen\Taxonomy\Taxonomy
+    public function make(string $slug, string|array $objectType, ?string $singular, ?string $plural): \Pollora\Taxonomy\Taxonomy
     {
         $abstract = sprintf('wp.taxonomy.%s', $slug);
 

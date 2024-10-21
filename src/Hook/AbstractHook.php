@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Hook;
+namespace Pollora\Hook;
 
 use Illuminate\Support\Collection;
-use Pollen\Hook\Contracts\HookInterface;
+use Pollora\Hook\Contracts\HookInterface;
 
 abstract class AbstractHook implements HookInterface
 {

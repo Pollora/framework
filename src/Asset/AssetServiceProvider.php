@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Asset;
+namespace Pollora\Asset;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Asset\Vite;
-use Pollen\Support\Facades\Theme;
+use Pollora\Asset\Vite;
+use Pollora\Support\Facades\Theme;
 use Illuminate\Support\Facades\Vite as ViteFacade;
 
 class AssetServiceProvider extends ServiceProvider
@@ -27,11 +27,11 @@ class AssetServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('asset.container', fn($app): \Pollen\Asset\AssetContainerManager => new AssetContainerManager($app));
+        $this->app->singleton('asset.container', fn($app): \Pollora\Asset\AssetContainerManager => new AssetContainerManager($app));
 
-        $this->app->singleton('wp.vite', fn($app): \Pollen\Asset\Vite => new Vite($app));
+        $this->app->singleton('wp.vite', fn($app): \Pollora\Asset\Vite => new Vite($app));
 
-        $this->app->singleton('wp.asset', fn($app): \Pollen\Asset\AssetFactory => new AssetFactory($app));
+        $this->app->singleton('wp.asset', fn($app): \Pollora\Asset\AssetFactory => new AssetFactory($app));
     }
 
     /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Auth;
+namespace Pollora\Auth;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -18,10 +18,10 @@ class AuthServiceProvider extends ServiceProvider
 
     protected function registerWordPressAuthDriver(): void
     {
-        $this->app['auth']->extend('wp', fn ($app, $name, $config): \Pollen\Auth\WordPressGuard => $this->createWordPressGuard($config)
+        $this->app['auth']->extend('wp', fn ($app, $name, $config): \Pollora\Auth\WordPressGuard => $this->createWordPressGuard($config)
         );
 
-        $this->app['auth']->provider('wp', fn ($app, $config): \Pollen\Auth\WordPressUserProvider => new WordPressUserProvider
+        $this->app['auth']->provider('wp', fn ($app, $config): \Pollora\Auth\WordPressUserProvider => new WordPressUserProvider
         );
 
         $this->registerWordPressGate();

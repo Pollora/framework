@@ -7,10 +7,10 @@ declare(strict_types=1);
  * This class is responsible for registering AJAX actions and callbacks in WordPress.
  */
 
-namespace Pollen\Ajax;
+namespace Pollora\Ajax;
 
 use InvalidArgumentException;
-use Pollen\Support\Facades\Action;
+use Pollora\Support\Facades\Action;
 
 /**
  * Class Ajax

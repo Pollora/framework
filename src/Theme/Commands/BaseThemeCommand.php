@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme\Commands;
+namespace Pollora\Theme\Commands;
 
 use Illuminate\Config\Repository;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Pollen\Theme\ThemeMetadata;
+use Pollora\Theme\ThemeMetadata;
 
 abstract class BaseThemeCommand extends Command
 {

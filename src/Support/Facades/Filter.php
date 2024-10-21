@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support\Facades;
+namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollen\Hook\Hook;
+use Pollora\Hook\Hook;
 
 /**
  * @method static mixed apply($hook, $args = null)

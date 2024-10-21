@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Hook;
+namespace Pollora\Hook;
 
-use Pollen\Hook\Contracts\ActionInterface;
+use Pollora\Hook\Contracts\ActionInterface;
 
 class Action extends AbstractHook implements ActionInterface
 {

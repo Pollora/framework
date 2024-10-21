@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme\Commands;
+namespace Pollora\Theme\Commands;
 
 use Illuminate\Config\Repository;
 use Illuminate\Filesystem\Filesystem;

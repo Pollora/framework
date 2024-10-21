@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pollen\WordPress;
+namespace Pollora\WordPress;
 
-use Pollen\Support\Facades\Filter;
+use Pollora\Support\Facades\Filter;
 
 trait QueryTrait
 {

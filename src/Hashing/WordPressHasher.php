@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Hashing;
+namespace Pollora\Hashing;
 
 use Illuminate\Contracts\Hashing\Hasher as HasherContract;
 

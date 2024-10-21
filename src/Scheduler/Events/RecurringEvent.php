@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Scheduler\Events;
+namespace Pollora\Scheduler\Events;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;

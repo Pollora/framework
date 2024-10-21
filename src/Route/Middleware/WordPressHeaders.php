@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route\Middleware;
+namespace Pollora\Route\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class WordPressHeaders
 {
-    private const FRAMEWORK_NAME = 'Pollen';
+    private const FRAMEWORK_NAME = 'Pollora';
 
     private const FRAMEWORK_HEADER = 'X-Powered-By';
 

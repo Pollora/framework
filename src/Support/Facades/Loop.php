@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support\Facades;
+namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string previousPage(?string $label = null)
  * @method static string|array paginate(array $args = [])
  *
- * @see \Pollen\View\Loop
+ * @see \Pollora\View\Loop
  */
 class Loop extends Facade
 {

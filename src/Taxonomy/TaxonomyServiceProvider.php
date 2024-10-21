@@ -6,10 +6,10 @@ declare(strict_types=1);
  * Class PostTypeServiceProvider
  */
 
-namespace Pollen\Taxonomy;
+namespace Pollora\Taxonomy;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Support\Facades\Taxonomy;
+use Pollora\Support\Facades\Taxonomy;
 
 /**
  * Class PostTypeServiceProvider
@@ -20,7 +20,7 @@ class TaxonomyServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind('wp.taxonomy', fn($app): \Pollen\Taxonomy\TaxonomyFactory => new TaxonomyFactory($app));
+        $this->app->bind('wp.taxonomy', fn($app): \Pollora\Taxonomy\TaxonomyFactory => new TaxonomyFactory($app));
 
         $this->registerTaxonomies();
     }

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Lang;
-use Pollen\Support\RecursiveMenuIterator;
+use Pollora\Support\RecursiveMenuIterator;
 
 if (! function_exists('wp_mail')) {
     function wp_mail($to, $subject, $message, $headers = '', $attachments = []): bool

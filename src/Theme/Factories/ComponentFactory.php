@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme\Factories;
+namespace Pollora\Theme\Factories;
 
-use Pollen\Theme\Contracts\ThemeComponent;
+use Pollora\Theme\Contracts\ThemeComponent;
 
 class ComponentFactory
 {

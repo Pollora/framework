@@ -8,10 +8,10 @@ declare(strict_types=1);
  * This class is responsible for creating instances of the PostType class.
  */
 
-namespace Pollen\PostType;
+namespace Pollora\PostType;
 
-use Pollen\Entity\PostTypeException;
-use Pollen\Foundation\Application;
+use Pollora\Entity\PostTypeException;
+use Pollora\Foundation\Application;
 
 class PostTypeFactory
 {
@@ -29,7 +29,7 @@ class PostTypeFactory
      *
      * @throws PostTypeException if the post type with the given slug already exists.
      */
-    public function make(string $slug, ?string $singular, ?string $plural): \Pollen\PostType\PostType
+    public function make(string $slug, ?string $singular, ?string $plural): \Pollora\PostType\PostType
     {
         $abstract = sprintf('wp.posttype.%s', $slug);
 

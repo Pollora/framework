@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Gutenberg;
+namespace Pollora\Gutenberg;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Gutenberg\Helpers\PatternDataProcessor;
-use Pollen\Gutenberg\Helpers\PatternValidator;
-use Pollen\Gutenberg\Registrars\CategoryRegistrar;
-use Pollen\Gutenberg\Registrars\PatternRegistrar;
+use Pollora\Gutenberg\Helpers\PatternDataProcessor;
+use Pollora\Gutenberg\Helpers\PatternValidator;
+use Pollora\Gutenberg\Registrars\CategoryRegistrar;
+use Pollora\Gutenberg\Registrars\PatternRegistrar;
 
 class GutenbergServiceProvider extends ServiceProvider
 {

@@ -8,9 +8,9 @@ declare(strict_types=1);
  * Override the default service provider for the theme command.
  */
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
-use Pollen\Theme\Commands\MakeThemeCommand;
+use Pollora\Theme\Commands\MakeThemeCommand;
 
 class ThemeCommandProvider extends \Qirolab\Theme\ThemeServiceProvider
 {

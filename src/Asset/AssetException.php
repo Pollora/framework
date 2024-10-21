@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Asset;
+namespace Pollora\Asset;
 
 use Exception;
 

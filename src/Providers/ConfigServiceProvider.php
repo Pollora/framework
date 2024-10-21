@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Providers;
+namespace Pollora\Providers;
 
 use Illuminate\Support\ServiceProvider;
 

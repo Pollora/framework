@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Scheduler\Events;
+namespace Pollora\Scheduler\Events;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
-use Pollen\Scheduler\Contracts\EventInterface;
-use Pollen\Scheduler\Jobs\JobDispatcher;
+use Pollora\Scheduler\Contracts\EventInterface;
+use Pollora\Scheduler\Jobs\JobDispatcher;
 
 abstract class AbstractEvent implements EventInterface, ShouldQueue
 {

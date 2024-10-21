@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support;
+namespace Pollora\Support;
 
-use Pollen\Services\Translater;
+use Pollora\Services\Translater;
 
 /**
  * The ArgumentHelper class is a trait that provides methods to extract arguments from properties using getter methods.

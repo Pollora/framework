@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Permalink;
+namespace Pollora\Permalink;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Support\Facades\Action;
+use Pollora\Support\Facades\Action;
 
 /**
  * Class RewriteServiceProvider

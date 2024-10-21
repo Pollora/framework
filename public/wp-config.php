@@ -19,7 +19,7 @@ declare(strict_types=1);
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
 
-require __DIR__.'/../pollen/framework/src/helpers.php';
+require __DIR__.'/../pollora/framework/src/helpers.php';
 
 require __DIR__.'/../vendor/autoload.php';
 

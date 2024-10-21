@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Hook\Contracts;
+namespace Pollora\Hook\Contracts;
 
 interface HookInterface
 {

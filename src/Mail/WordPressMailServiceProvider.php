@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Mail;
+namespace Pollora\Mail;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -16,7 +16,7 @@ class WordPressMailServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.mail', fn($app): \Pollen\Mail\Mailer => new Mailer);
+        $this->app->singleton('wp.mail', fn($app): \Pollora\Mail\Mailer => new Mailer);
     }
 
     /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;

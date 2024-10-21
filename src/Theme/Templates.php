@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
-use Pollen\Support\Facades\Action;
-use Pollen\Theme\Contracts\ThemeComponent;
+use Pollora\Support\Facades\Action;
+use Pollora\Theme\Contracts\ThemeComponent;
 
 /**
  * Class Templates

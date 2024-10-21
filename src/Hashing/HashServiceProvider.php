@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Hashing;
+namespace Pollora\Hashing;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
@@ -18,7 +18,7 @@ class HashServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.hash', fn($app): \Pollen\Hashing\WordPressHasher => new WordPressHasher);
+        $this->app->singleton('wp.hash', fn($app): \Pollora\Hashing\WordPressHasher => new WordPressHasher);
 
         $this->app->alias('wp.hash', WordPressHasher::class);
     }

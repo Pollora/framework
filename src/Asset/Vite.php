@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Asset;
+namespace Pollora\Asset;
 
 use Illuminate\Foundation\ViteManifestNotFoundException;
 use Illuminate\Support\HtmlString;
-use Pollen\Foundation\Application;
+use Pollora\Foundation\Application;
 
 class Vite
 {
@@ -189,7 +189,7 @@ class Vite
 
     public function manifest(): array
     {
-        $path = $this->container instanceof \Pollen\Asset\AssetContainer ? $this->container->getManifestPath() : $this->manifestPath($this->buildDirectory);
+        $path = $this->container instanceof \Pollora\Asset\AssetContainer ? $this->container->getManifestPath() : $this->manifestPath($this->buildDirectory);
 
         if (! isset(static::$manifests[$path])) {
             if (! file_exists($path)) {

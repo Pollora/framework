@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support\Facades;
+namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Facade for {@link \Pollen\Query\TaxQuery}.
+ * Facade for {@link \Pollora\Query\TaxQuery}.
  *
- * @see \Pollen\Query\TaxQuery
+ * @see \Pollora\Query\TaxQuery
  *
- * @mixin \Pollen\Query\TaxQuery
+ * @mixin \Pollora\Query\TaxQuery
  */
 class TaxQuery extends Facade
 {

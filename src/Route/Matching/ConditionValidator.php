@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route\Matching;
+namespace Pollora\Route\Matching;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Matching\ValidatorInterface;

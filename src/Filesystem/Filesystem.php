@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Filesystem;
+namespace Pollora\Filesystem;
 
 use Illuminate\Filesystem\Filesystem as FilesystemBase;
 

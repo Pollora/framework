@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Admin;
+namespace Pollora\Admin;
 
 use Closure;
 use Illuminate\Contracts\Container\Container;

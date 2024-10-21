@@ -6,29 +6,29 @@ declare(strict_types=1);
  * Class Menus
  */
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
 use /**
  * The Translater service class.
  */
-Pollen\Services\Translater;
+Pollora\Services\Translater;
 use /**
  * Class Action
  *
  *
- * @method static \Pollen\Support\Actions\Action make($action)
+ * @method static \Pollora\Support\Actions\Action make($action)
  * @method static bool has($action)
- * @method static \Pollen\Support\Actions\Action|array|null get($action = null, $default = null)
- * @method static \Pollen\Support\Actions\Action|array|null require ($action = null, $default = null)
- * @method static \Pollen\Support\Actions\Action|null remove($action = null)
- * @method static \Pollen\Support\Actions\Action clear()
- * @method static \Pollen\Support\Actions\Action register(string $name, callable|null $callback = null)
- * @method static \Pollen\Support\Actions\Action boot($action = null, array $params = [])
- * @method static \Pollen\Support\Actions\Action listen(string $event, callable $callback, int $priority = 0)
- * @method static \Pollen\Support\Actions\Action trigger(string $event, array $params = [], \Closure|null $before = null, \Closure|null $after = null)
+ * @method static \Pollora\Support\Actions\Action|array|null get($action = null, $default = null)
+ * @method static \Pollora\Support\Actions\Action|array|null require ($action = null, $default = null)
+ * @method static \Pollora\Support\Actions\Action|null remove($action = null)
+ * @method static \Pollora\Support\Actions\Action clear()
+ * @method static \Pollora\Support\Actions\Action register(string $name, callable|null $callback = null)
+ * @method static \Pollora\Support\Actions\Action boot($action = null, array $params = [])
+ * @method static \Pollora\Support\Actions\Action listen(string $event, callable $callback, int $priority = 0)
+ * @method static \Pollora\Support\Actions\Action trigger(string $event, array $params = [], \Closure|null $before = null, \Closure|null $after = null)
  */
-Pollen\Support\Facades\Action;
-use Pollen\Theme\Contracts\ThemeComponent;
+Pollora\Support\Facades\Action;
+use Pollora\Theme\Contracts\ThemeComponent;
 
 /**
  * Class Menus

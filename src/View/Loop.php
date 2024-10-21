@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pollen\View;
+namespace Pollora\View;
 
-use Pollen\Support\Facades\Filter;
+use Pollora\Support\Facades\Filter;
 
 class Loop
 {

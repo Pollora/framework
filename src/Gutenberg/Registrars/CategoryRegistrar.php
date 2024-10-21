@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Gutenberg\Registrars;
+namespace Pollora\Gutenberg\Registrars;
 
 class CategoryRegistrar
 {

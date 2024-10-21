@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\View;
+namespace Pollora\View;
 
 use Illuminate\View\FileViewFinder as FileViewFinderBase;
 

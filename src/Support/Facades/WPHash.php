@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support\Facades;
+namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Facade for {@link \Pollen\Hashing\WordPressHasher}.
+ * Facade for {@link \Pollora\Hashing\WordPressHasher}.
  *
- * @see \Pollen\Hashing\WordPressHasher
+ * @see \Pollora\Hashing\WordPressHasher
  *
- * @mixin \Pollen\Hashing\WordPressHasher
+ * @mixin \Pollora\Hashing\WordPressHasher
  *
  * @author Jordan Doyle <jordan@doyle.wf>
  */

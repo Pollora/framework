@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Asset;
+namespace Pollora\Asset;
 
 use Illuminate\Support\Facades\Vite;
-use Pollen\Support\Facades\Action;
-use Pollen\Support\Facades\Filter;
+use Pollora\Support\Facades\Action;
+use Pollora\Support\Facades\Filter;
 
 class Asset
 {
@@ -16,7 +16,7 @@ class Asset
 
     protected array $dependencies = [];
 
-    protected ?\Pollen\Asset\Vite $vite = null;
+    protected ?\Pollora\Asset\Vite $vite = null;
 
     protected bool $useVite = false;
 
@@ -71,7 +71,7 @@ class Asset
 
     public function useVite(): self
     {
-        if (!$this->container instanceof \Pollen\Asset\AssetContainer) {
+        if (!$this->container instanceof \Pollora\Asset\AssetContainer) {
             throw new AssetException(
                 'Vite container has not been set.',
                 [

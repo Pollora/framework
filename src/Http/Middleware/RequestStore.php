@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Http\Middleware;
+namespace Pollora\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Container\Container;

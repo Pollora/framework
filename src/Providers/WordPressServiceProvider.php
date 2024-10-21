@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Providers;
+namespace Pollora\Providers;
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Pollen\WordPress\Bootstrap;
+use Pollora\WordPress\Bootstrap;
 
 class WordPressServiceProvider extends ServiceProvider
 {

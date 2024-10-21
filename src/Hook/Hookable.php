@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Hook;
+namespace Pollora\Hook;
 
 use Illuminate\Contracts\Container\Container;
-use Pollen\Hook\Contracts\HookableInterface;
+use Pollora\Hook\Contracts\HookableInterface;
 
 abstract class Hookable implements HookableInterface
 {

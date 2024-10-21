@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Scheduler\Events;
+namespace Pollora\Scheduler\Events;
 
 class SingleEvent extends AbstractEvent
 {

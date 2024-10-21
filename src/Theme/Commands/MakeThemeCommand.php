@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme\Commands;
+namespace Pollora\Theme\Commands;
 
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Pollen\Theme\ThemeMetadata;
+use Pollora\Theme\ThemeMetadata;
 
 use function Laravel\Prompts\text;
 
@@ -246,22 +246,22 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             ),
             'theme_author' => fn (): string => text(
                 label: 'What is the author of the new theme?',
-                default: 'Pollen',
+                default: 'Pollora',
                 validate: 'required'
             ),
             'theme_author_uri' => fn (): string => text(
                 label: 'What is the URL of the theme author?',
-                default: 'https://pollen.dev',
+                default: 'https://pollora.dev',
                 validate: 'required|url'
             ),
             'theme_description' => fn (): string => text(
                 label: 'What is the description of the new theme?',
-                default: 'A new theme using Pollen Framework',
+                default: 'A new theme using Pollora Framework',
                 validate: 'required'
             ),
             'theme_uri' => fn (): string => text(
                 label: 'What is the URL of the theme?',
-                default: 'https://pollen.dev',
+                default: 'https://pollora.dev',
                 validate: 'required|url'
             ),
             'theme_version' => fn (): string => text(

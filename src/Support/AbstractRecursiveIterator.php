@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support;
+namespace Pollora\Support;
 
 use Illuminate\Support\Collection;
 use RecursiveIterator;

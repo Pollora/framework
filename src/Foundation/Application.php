@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Foundation;
+namespace Pollora\Foundation;
 
 use Illuminate\Events\EventServiceProvider;
 use Illuminate\Log\LogServiceProvider;
-use Pollen\Route\RouteServiceProvider;
+use Pollora\Route\RouteServiceProvider;
 
 class Application extends \Illuminate\Foundation\Application
 {

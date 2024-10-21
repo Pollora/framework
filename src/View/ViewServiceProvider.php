@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\View;
+namespace Pollora\View;
 
 use Illuminate\View\Engines\CompilerEngine;
 use Illuminate\View\View;

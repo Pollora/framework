@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support;
+namespace Pollora\Support;
 
 use WP_Network;
 use WP_User;

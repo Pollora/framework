@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Auth;
+namespace Pollora\Auth;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
-use Pollen\Models\User;
+use Pollora\Models\User;
 use WP_Error;
 
 class WordPressUserProvider implements UserProvider

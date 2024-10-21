@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
-use Pollen\Services\Translater;
-use Pollen\Support\Facades\Action;
-use Pollen\Theme\Contracts\ThemeComponent;
+use Pollora\Services\Translater;
+use Pollora\Support\Facades\Action;
+use Pollora\Theme\Contracts\ThemeComponent;
 
 /**
  * Class Sidebar

@@ -6,10 +6,10 @@ declare(strict_types=1);
  * Class PostTypeServiceProvider
  */
 
-namespace Pollen\PostType;
+namespace Pollora\PostType;
 
 use Illuminate\Support\ServiceProvider;
-use Pollen\Support\Facades\PostType;
+use Pollora\Support\Facades\PostType;
 
 /**
  * Class PostTypeServiceProvider
@@ -20,7 +20,7 @@ class PostTypeServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind('wp.posttype', fn($app): \Pollen\PostType\PostTypeFactory => new PostTypeFactory($app));
+        $this->app->bind('wp.posttype', fn($app): \Pollora\PostType\PostTypeFactory => new PostTypeFactory($app));
         $this->registerPostTypes();
     }
 

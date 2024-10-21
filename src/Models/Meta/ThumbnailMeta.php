@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Models\Meta;
+namespace Pollora\Models\Meta;
 
 /**
  * Class ThumbnailMeta

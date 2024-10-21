@@ -2,32 +2,32 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Providers;
+namespace Pollora\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
-use Pollen\Admin\PageServiceProvider;
-use Pollen\Ajax\AjaxServiceProvider;
-use Pollen\Asset\AssetServiceProvider;
-use Pollen\Auth\AuthServiceProvider;
-use Pollen\Gutenberg\GutenbergServiceProvider;
-use Pollen\Hashing\HashServiceProvider;
-use Pollen\Hook\HookServiceProvider;
-use Pollen\Mail\WordPressMailServiceProvider;
-use Pollen\Permalink\RewriteServiceProvider;
-use Pollen\PostType\PostTypeServiceProvider;
-use Pollen\Scheduler\Jobs\JobDispatcher;
-use Pollen\Scheduler\SchedulerServiceProvider;
-use Pollen\Taxonomy\TaxonomyServiceProvider;
-use Pollen\Theme\ThemeServiceProvider;
-use Pollen\View\ViewServiceProvider;
+use Pollora\Admin\PageServiceProvider;
+use Pollora\Ajax\AjaxServiceProvider;
+use Pollora\Asset\AssetServiceProvider;
+use Pollora\Auth\AuthServiceProvider;
+use Pollora\Gutenberg\GutenbergServiceProvider;
+use Pollora\Hashing\HashServiceProvider;
+use Pollora\Hook\HookServiceProvider;
+use Pollora\Mail\WordPressMailServiceProvider;
+use Pollora\Permalink\RewriteServiceProvider;
+use Pollora\PostType\PostTypeServiceProvider;
+use Pollora\Scheduler\Jobs\JobDispatcher;
+use Pollora\Scheduler\SchedulerServiceProvider;
+use Pollora\Taxonomy\TaxonomyServiceProvider;
+use Pollora\Theme\ThemeServiceProvider;
+use Pollora\View\ViewServiceProvider;
 
 /**
  * Registers all the other service providers used by this package.
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class PollenServiceProvider extends ServiceProvider
+class PolloraServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
@@ -60,7 +60,7 @@ class PollenServiceProvider extends ServiceProvider
 
         // Hashing service provider
         $this->app->register(HashServiceProvider::class);
-        $this->app->singleton(JobDispatcher::class, fn($app): \Pollen\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class)));
+        $this->app->singleton(JobDispatcher::class, fn($app): \Pollora\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class)));
     }
 
     /**

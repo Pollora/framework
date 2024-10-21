@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route\Bindings;
+namespace Pollora\Route\Bindings;
 
 use WP_Post;
 

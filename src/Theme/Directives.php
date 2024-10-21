@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
 return [
     'usercan' => fn ($expression): string => "<?php if( User::current()->can({$expression}) ): ?>",

@@ -1,6 +1,6 @@
 <?php
 
-use Pollen\Tests;
+use Pollora\Tests;
 
 it('foo', function (): void {
     $example = new Example;

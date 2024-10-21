@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Gutenberg\Helpers;
+namespace Pollora\Gutenberg\Helpers;
 
 class PatternValidator
 {

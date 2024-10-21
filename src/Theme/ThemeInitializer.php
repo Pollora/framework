@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
 use Illuminate\Contracts\Foundation\Application;
-use Pollen\Support\Facades\Action;
-use Pollen\Support\Facades\Theme;
-use Pollen\Theme\Contracts\ThemeComponent;
-use Pollen\Support\Facades\Filter;
+use Pollora\Support\Facades\Action;
+use Pollora\Support\Facades\Theme;
+use Pollora\Theme\Contracts\ThemeComponent;
+use Pollora\Support\Facades\Filter;
 
 class ThemeInitializer implements ThemeComponent
 {

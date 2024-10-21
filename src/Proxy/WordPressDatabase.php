@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Proxy;
+namespace Pollora\Proxy;
 
 use Exception;
 use Illuminate\Database\Connection;

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Scheduler;
+namespace Pollora\Scheduler;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use Pollen\Scheduler\Contracts\SchedulerInterface;
-use Pollen\Support\Facades\Filter;
+use Pollora\Scheduler\Contracts\SchedulerInterface;
+use Pollora\Support\Facades\Filter;
 
 class SchedulerServiceProvider extends ServiceProvider
 {
@@ -58,7 +58,7 @@ class SchedulerServiceProvider extends ServiceProvider
         }
 
         $schedule = $this->app->make(Schedule::class);
-        \Pollen\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
+        \Pollora\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
     }
 
     protected function isOrchastraTest(): bool

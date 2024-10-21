@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Pollen\WordPress;
+namespace Pollora\WordPress;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\URL;
-use Pollen\Support\Facades\Action;
-use Pollen\Support\WordPress;
+use Pollora\Support\Facades\Action;
+use Pollora\Support\WordPress;
 
 class Bootstrap
 {

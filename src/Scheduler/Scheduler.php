@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Scheduler;
+namespace Pollora\Scheduler;
 
 use Illuminate\Support\Facades\DB;
-use Pollen\Scheduler\Contracts\SchedulerInterface;
-use Pollen\Scheduler\Events\AbstractEvent;
-use Pollen\Scheduler\Events\RecurringEvent;
-use Pollen\Scheduler\Events\SingleEvent;
+use Pollora\Scheduler\Contracts\SchedulerInterface;
+use Pollora\Scheduler\Events\AbstractEvent;
+use Pollora\Scheduler\Events\RecurringEvent;
+use Pollora\Scheduler\Events\SingleEvent;
 use WP_Error;
 
 class Scheduler implements SchedulerInterface

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Mail;
+namespace Pollora\Mail;
 
 use Illuminate\Mail\Message;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Mail;
-use Pollen\Support\Facades\Filter;
+use Pollora\Support\Facades\Filter;
 
 class Mailer
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route\Middleware;
+namespace Pollora\Route\Middleware;
 
 use Closure;
-use Pollen\Hook\Filter;
-use Pollen\Route\Route;
+use Pollora\Hook\Filter;
+use Pollora\Route\Route;
 
 class WordPressBodyClass
 {

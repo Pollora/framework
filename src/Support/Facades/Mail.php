@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Support\Facades;
+namespace Pollora\Support\Facades;
 
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Facade;
@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static ?SentMessage send(string|array $to, string $subject, string $message, string|array $headers = '', array $attachments = [])
  *
- * @see \Pollen\Mail\Mailer
+ * @see \Pollora\Mail\Mailer
  */
 class Mail extends Facade
 {

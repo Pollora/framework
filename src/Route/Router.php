@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route;
+namespace Pollora\Route;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Router as IlluminateRouter;
-use Pollen\Route\Bindings\NullableWpPost;
+use Pollora\Route\Bindings\NullableWpPost;
 
 class Router extends IlluminateRouter
 {
@@ -19,7 +19,7 @@ class Router extends IlluminateRouter
         $this->routes = new RouteCollection;
     }
 
-    public function newRoute($methods, $uri, $action): \Pollen\Route\Route
+    public function newRoute($methods, $uri, $action): \Pollora\Route\Route
     {
         $this->setConditionsIfEmpty();
 

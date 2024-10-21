@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Route\Middleware;
+namespace Pollora\Route\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;

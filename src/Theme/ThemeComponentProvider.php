@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Pollen\Theme;
+namespace Pollora\Theme;
 
 use Illuminate\Contracts\Foundation\Application;
-use Pollen\Theme\Contracts\ThemeComponent;
-use Pollen\Theme\Factories\ComponentFactory;
+use Pollora\Theme\Contracts\ThemeComponent;
+use Pollora\Theme\Factories\ComponentFactory;
 
 class ThemeComponentProvider
 {
     protected $components = [
-        \Pollen\Theme\ThemeInitializer::class,
-        \Pollen\Gutenberg\Pattern::class,
-        \Pollen\Theme\Menus::class,
-        \Pollen\Theme\Support::class,
-        \Pollen\Theme\Sidebar::class,
-        \Pollen\Theme\Templates::class,
-        \Pollen\Theme\ImageSize::class,
+        \Pollora\Theme\ThemeInitializer::class,
+        \Pollora\Gutenberg\Pattern::class,
+        \Pollora\Theme\Menus::class,
+        \Pollora\Theme\Support::class,
+        \Pollora\Theme\Sidebar::class,
+        \Pollora\Theme\Templates::class,
+        \Pollora\Theme\ImageSize::class,
     ];
 
     public function __construct(
@@ -28,7 +28,7 @@ class ThemeComponentProvider
     public function register(): void
     {
         foreach ($this->components as $component) {
-            $this->app->singleton($component, fn(): \Pollen\Theme\Contracts\ThemeComponent => $this->factory->make($component));
+            $this->app->singleton($component, fn(): \Pollora\Theme\Contracts\ThemeComponent => $this->factory->make($component));
 
             $instance = $this->app->make($component);
             if ($instance instanceof ThemeComponent) {
