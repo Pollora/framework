@@ -20,7 +20,7 @@ class TaxonomyServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind('wp.taxonomy', fn($app): \Pollora\Taxonomy\TaxonomyFactory => new TaxonomyFactory($app));
+        $this->app->bind('wp.taxonomy', fn ($app): \Pollora\Taxonomy\TaxonomyFactory => new TaxonomyFactory($app));
 
         $this->registerTaxonomies();
     }

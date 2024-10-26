@@ -12,9 +12,7 @@ class AssetContainerManager
 
     protected ?string $defaultContainer = null;
 
-    public function __construct(protected Application $app)
-    {
-    }
+    public function __construct(protected Application $app) {}
 
     public function addContainer(string $name, array $config): void
     {

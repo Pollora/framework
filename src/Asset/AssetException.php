@@ -21,9 +21,7 @@ class AssetException extends Exception
         protected array $context = [],
         int $code = 0,
         ?Exception $previous = null
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get the exception's context information.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Providers\Theme\%theme_namespace%\AssetServiceProvider;
+use App\Themes\%theme_namespace%\Providers\AssetServiceProvider;
 
 /*
 |--------------------------------------------------------------------------

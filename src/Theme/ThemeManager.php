@@ -14,8 +14,6 @@ namespace Pollora\Theme;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\View\ViewFinderInterface;
-use Illuminate\Support\Facades\Vite;
-
 
 class ThemeManager
 {
@@ -23,9 +21,7 @@ class ThemeManager
 
     protected array $parentThemes = [];
 
-    public function __construct(protected Container $app, protected ViewFinderInterface $viewFinder, protected Loader $localeLoader)
-    {
-    }
+    public function __construct(protected Container $app, protected ViewFinderInterface $viewFinder, protected Loader $localeLoader) {}
 
     public function load(string $themeName): void
     {
@@ -89,9 +85,10 @@ class ThemeManager
 
     public function active(): string|bool
     {
-        if (!function_exists('get_stylesheet')) {
+        if (! function_exists('get_stylesheet')) {
             return false;
         }
+
         return get_stylesheet();
     }
 

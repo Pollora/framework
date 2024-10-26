@@ -18,9 +18,7 @@ class Translater
          * The domain of the translation.
          */
         protected string $domain = 'wordpress'
-    )
-    {
-    }
+    ) {}
 
     /**
      * Translate method.

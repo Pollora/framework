@@ -150,6 +150,7 @@ class Ajax
         if ($this->getUserType() === self::BOTH_USERS) {
             return true;
         }
+
         return $this->getUserType() === self::LOGGED_USERS;
     }
 
@@ -163,6 +164,7 @@ class Ajax
         if ($this->getUserType() === self::BOTH_USERS) {
             return true;
         }
+
         return $this->getUserType() === self::GUEST_USERS;
     }
 }

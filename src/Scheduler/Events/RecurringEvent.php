@@ -101,8 +101,10 @@ class RecurringEvent extends AbstractEvent
                     }
                     if ($minutes % 60 == 0) {
                         $hours = $minutes / 60;
+
                         return "0 */{$hours} * * *";
                     }
+
                     return "*/{$minutes} * * * *";
                 }
 

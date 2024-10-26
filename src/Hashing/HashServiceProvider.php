@@ -18,7 +18,7 @@ class HashServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.hash', fn($app): \Pollora\Hashing\WordPressHasher => new WordPressHasher);
+        $this->app->singleton('wp.hash', fn ($app): \Pollora\Hashing\WordPressHasher => new WordPressHasher);
 
         $this->app->alias('wp.hash', WordPressHasher::class);
     }

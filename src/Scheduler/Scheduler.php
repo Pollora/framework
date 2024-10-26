@@ -304,7 +304,7 @@ class Scheduler implements SchedulerInterface
         return DB::table('wp_events')
             ->orderBy('timestamp', 'asc')
             ->get()
-            ->map(fn($job): object => $this->convertDbEventToWpEvent($job))
+            ->map(fn ($job): object => $this->convertDbEventToWpEvent($job))
             ->all();
     }
 

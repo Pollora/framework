@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Pollora\Theme;
 
 use Illuminate\Contracts\Foundation\Application;
+use Pollora\Asset\ViteManager;
 use Pollora\Support\Facades\Action;
+use Pollora\Support\Facades\Filter;
 use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Contracts\ThemeComponent;
-use Pollora\Support\Facades\Filter;
 
 class ThemeInitializer implements ThemeComponent
 {
@@ -46,7 +47,7 @@ class ThemeInitializer implements ThemeComponent
 
         $this->wp_theme = wp_get_theme();
 
-        $this->app->singleton('wp.theme', fn() => $this->wp_theme);
+        $this->app->singleton('wp.theme', fn () => $this->wp_theme);
     }
 
     private function registerThemeProvider(): void
@@ -87,7 +88,7 @@ class ThemeInitializer implements ThemeComponent
     protected function mergeConfigFrom($path, $key): void
     {
         $config = $this->app['config']->get($key, []);
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             return;
         }
         $this->app['config']->set($key, array_merge(require $path, $config));
@@ -96,15 +97,18 @@ class ThemeInitializer implements ThemeComponent
     protected function overrideThemeUri(): void
     {
         Filter::add('theme_file_uri', function ($uri): string {
-            $assetConfig = $this->app['asset.container']->get('theme')->getAssetDir();
+            $assetContainer = $this->app['asset.container']->get('theme');
+            $viteManager = new ViteManager($assetContainer);
+            $assetConfig = $assetContainer->getAssetDir();
             $rootDir = $assetConfig['root'];
             $relativePath = $this->getRelativePath($uri, $rootDir);
-            return app('wp.vite')->retrieveAsset($relativePath, '', 'theme');
+
+            return $viteManager->asset($rootDir.'/'.$relativePath);
         });
     }
 
     protected function getRelativePath(string $uri, string $rootDir): string
     {
-        return str_replace(get_stylesheet_directory_uri() . '/' . $rootDir . '/', '', $uri);
+        return str_replace(get_stylesheet_directory_uri().'/', '', $uri);
     }
 }

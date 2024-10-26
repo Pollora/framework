@@ -28,7 +28,7 @@ class ThemeComponentProvider
     public function register(): void
     {
         foreach ($this->components as $component) {
-            $this->app->singleton($component, fn(): \Pollora\Theme\Contracts\ThemeComponent => $this->factory->make($component));
+            $this->app->singleton($component, fn (): \Pollora\Theme\Contracts\ThemeComponent => $this->factory->make($component));
 
             $instance = $this->app->make($component);
             if ($instance instanceof ThemeComponent) {

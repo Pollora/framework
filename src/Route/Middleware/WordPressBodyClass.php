@@ -38,7 +38,7 @@ class WordPressBodyClass
 
     private function getRouteTokens(Route $route): array
     {
-        return array_filter(array_map(fn($token) => match ($token[0]) {
+        return array_filter(array_map(fn ($token) => match ($token[0]) {
             'variable' => $this->handleVariableToken($token, $route),
             'text' => sanitize_title($token[1]),
             default => false,

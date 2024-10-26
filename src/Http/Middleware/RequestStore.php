@@ -19,9 +19,7 @@ class RequestStore
          * The application container instance.
          */
         protected Container $app
-    )
-    {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.

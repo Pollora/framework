@@ -16,7 +16,7 @@ class Asset
 
     protected array $dependencies = [];
 
-    protected ?\Pollora\Asset\Vite $vite = null;
+    protected ?\Illuminate\Foundation\Vite $vite = null;
 
     protected bool $useVite = false;
 
@@ -36,19 +36,13 @@ class Asset
 
     protected ?AssetContainer $container = null;
 
+    protected ?ViteManager $viteManager = null;
+
     public function __construct(protected string $handle, string $path)
     {
         $this->path = str_replace(base_path('/'), '', $path);
         $this->type = $this->determineFileType($path);
-        $this->vite = app('wp.vite');
         $this->container = app('asset.container')->getDefault();
-    }
-
-    protected function initializeViteClient(string $path): void
-    {
-        $container = app('asset.container')->getDefault();
-        $this->vite->setContainer($container);
-        $this->vite->setClient($path);
     }
 
     public function container(string $containerName): self
@@ -71,22 +65,8 @@ class Asset
 
     public function useVite(): self
     {
-        if (!$this->container instanceof \Pollora\Asset\AssetContainer) {
-            throw new AssetException(
-                'Vite container has not been set.',
-                [
-                    'handle' => $this->handle,
-                    'path' => $this->path,
-                ]
-            );
-        }
         $this->useVite = true;
-        Vite::useHotFile($this->container->getHotFile());
-        $this->vite->setContainer($this->container);
-        $this->vite->setClient($this->path);
-        $this->path = Vite::isRunningHot()
-            ? $this->vite->retrieveHotAsset($this->path)
-            : $this->vite->lookupAssetsInManifest($this->path);
+        $this->viteManager = app(ViteManager::class);
 
         return $this;
     }
@@ -172,9 +152,16 @@ class Asset
     {
         $this->hooks = $this->hooks !== [] ? $this->hooks : ['wp_enqueue_scripts'];
 
+        if ($this->useVite) {
+            $this->configureViteAssets();
+        }
+
         foreach ($this->hooks as $hook) {
-            $this->maybeLoadViteClient($hook);
+            if ($this->needToLoadViteClient()) {
+                $this->loadViteClient($hook);
+            }
             Action::add($hook, $this->enqueueStyleOrScript(...), 99);
+
         }
     }
 
@@ -196,35 +183,44 @@ class Asset
         return $this;
     }
 
-    protected function maybeLoadViteClient(string $hook): void
+    protected function loadViteClient(string $hook): void
     {
-        if ($this->needToLoadViteClient($hook)) {
-            Action::add($hook, function () use ($hook): void {
-                echo $this->vite->viteClientHtml($hook)->toHtml();
-            }, 1);
-        }
+        Action::add($hook, function (): void {
+            if ($this->viteManager && $this->viteManager->isRunningHot()) {
+                echo $this->viteManager->getViteClientHtml();
+            }
+        }, 1);
     }
 
-    protected function needToLoadViteClient(string $hook): bool
+    public function configureViteAssets(): void
     {
-        return $this->useVite && Vite::isRunningHot() && ! $this->vite->loadedInHook($hook);
+        if (! $this->viteManager) {
+            throw new \RuntimeException('Vite manager not initialized. Call useVite() first.');
+        }
+
+        $asset = $this->viteManager->isRunningHot()
+            ? $this->viteManager->asset($this->path)
+            : $this->viteManager->getAssetUrls([$this->path]);
+        $this->path = $asset;
+    }
+
+    protected function needToLoadViteClient(): bool
+    {
+        return $this->useVite && $this->viteManager && $this->viteManager->isRunningHot();
     }
 
     protected function getAssetPaths(): array
     {
-        if ($this->useVite && ! Vite::isRunningHot()) {
+        if ($this->useVite && ! $this->viteManager->isRunningHot()) {
             return $this->path;
         }
 
-        $basePath = $this->container->getBasePath();
-        $fullPath = $basePath !== '' ? $basePath.'/'.ltrim($this->path, '/') : $this->path;
-
-        return [$this->type => [$fullPath]];
+        return [$this->type => [$this->path]];
     }
 
     protected function enqueueAsset(string $type, string $path): void
     {
-        $handle = $this->useVite && ! Vite::isRunningHot() ? $this->handle.'/'.sanitize_title(basename($path)) : $this->handle;
+        $handle = $this->useVite && ! $this->viteManager->isRunningHot() ? $this->handle.'/'.sanitize_title(basename($path)) : $this->handle;
         match ($type) {
             'css' => $this->enqueueStyle($path, $handle),
             'js' => $this->enqueueScript($path),
@@ -260,7 +256,7 @@ class Asset
 
     protected function addViteScriptAttributes(): void
     {
-        Filter::add('script_loader_tag', fn($tag, $handle, $src) => $handle === $this->handle
+        Filter::add('script_loader_tag', fn ($tag, $handle, $src) => $handle === $this->handle
             ? '<script type="module" crossorigin src="'.esc_url($src).'"></script>'
             : $tag, 10, 3);
     }

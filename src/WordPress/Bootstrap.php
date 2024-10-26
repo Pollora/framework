@@ -6,7 +6,6 @@ namespace Pollora\WordPress;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\URL;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\WordPress;
@@ -76,9 +75,9 @@ class Bootstrap
     public function rewriteNetworkUrl(string $url, string $path, string $scheme): string
     {
         $url = $scheme !== 'relative' ? set_url_scheme(
-            (is_secured() ? 'https://' : 'http://').(new WordPress())->site()->domain.(new WordPress())->site()->path,
+            (is_secured() ? 'https://' : 'http://').(new WordPress)->site()->domain.(new WordPress)->site()->path,
             $scheme
-        ) : (new WordPress())->site()->path;
+        ) : (new WordPress)->site()->path;
 
         if ($path !== '' && $path !== '0') {
             $url .= str_replace('public/', '', WP_PATH).ltrim($path, '/'); // @phpstan-ignore-line

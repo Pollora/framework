@@ -25,10 +25,10 @@ class ViewFinder
     public function __construct(/**
      * The FileViewFinder instance.
      */
-    protected \Pollora\View\FileViewFinder $finder, /**
+        protected \Pollora\View\FileViewFinder $finder, /**
      * The Filesystem instance.
      */
-    protected \Pollora\Filesystem\Filesystem $files, $path = '')
+        protected \Pollora\Filesystem\Filesystem $files, $path = '')
     {
         $this->path = $path ? realpath($path) : get_theme_file_path();
     }
@@ -45,11 +45,11 @@ class ViewFinder
         }
 
         return $this->getRelativeViewPaths()
-            ->flatMap(fn($viewPath) => collect($this->finder->getPossibleViewFilesFromPath($file))
+            ->flatMap(fn ($viewPath) => collect($this->finder->getPossibleViewFilesFromPath($file))
                 ->merge([$file])
-                ->map(fn($file): string => "{$viewPath}/{$file}"))
+                ->map(fn ($file): string => "{$viewPath}/{$file}"))
             ->unique()
-            ->map(fn($file): string => trim($file, '\\/'))
+            ->map(fn ($file): string => trim($file, '\\/'))
             ->toArray();
     }
 
@@ -77,6 +77,6 @@ class ViewFinder
     protected function getRelativeViewPaths()
     {
         return collect($this->finder->getPaths())
-            ->map(fn($viewsPath): string => $this->files->getRelativePath($this->path, $viewsPath));
+            ->map(fn ($viewsPath): string => $this->files->getRelativePath($this->path, $viewsPath));
     }
 }

@@ -26,16 +26,16 @@ class QueryServiceProvider extends ServiceProvider
     {
         $this->app->bind(\Corcel\Model\User::class, 'Pollora\Model\User');
 
-        $this->app->singleton('wp.query.post', fn(): \Pollora\Query\PostQuery => new PostQuery);
+        $this->app->singleton('wp.query.post', fn (): \Pollora\Query\PostQuery => new PostQuery);
 
-        $this->app->singleton('wp.query.taxonomy', fn(): \Pollora\Query\TaxQuery => new TaxQuery);
+        $this->app->singleton('wp.query.taxonomy', fn (): \Pollora\Query\TaxQuery => new TaxQuery);
 
-        $this->app->singleton('wp.query.meta', fn(): \Pollora\Query\MetaQuery => new MetaQuery);
+        $this->app->singleton('wp.query.meta', fn (): \Pollora\Query\MetaQuery => new MetaQuery);
 
-        $this->app->singleton('wp.query.date', fn(): \Pollora\Query\DateQuery => new DateQuery);
+        $this->app->singleton('wp.query.date', fn (): \Pollora\Query\DateQuery => new DateQuery);
 
-        $this->app->bind('wp.loop', fn(): \Pollora\View\Loop => new Loop);
+        $this->app->bind('wp.loop', fn (): \Pollora\View\Loop => new Loop);
 
-        $this->app->singleton(Post::class, fn() => Post::find(get_the_ID()));
+        $this->app->singleton(Post::class, fn () => Post::find(get_the_ID()));
     }
 }

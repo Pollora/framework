@@ -15,9 +15,7 @@ use Pollora\Foundation\Application;
 
 class PostTypeFactory
 {
-    public function __construct(protected Application $container)
-    {
-    }
+    public function __construct(protected Application $container) {}
 
     /**
      * Creates a new post type and registers it in the container.

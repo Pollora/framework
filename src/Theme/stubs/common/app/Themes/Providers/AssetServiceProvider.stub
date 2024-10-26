@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Providers\Theme\%theme_namespace%;
+namespace App\Themes\%theme_namespace%\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Support\Facades\Asset;
@@ -23,9 +23,6 @@ class AssetServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Asset::add('%theme_name%/style', Theme::path('css/app.css'))
-            ->toFrontend()
-            ->useVite();
         Asset::add('%theme_name%/script',Theme::path('js/app.js'))
             ->toFrontend()
             ->useVite();

@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Pollora\Hook;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Foundation\Application;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton('wp.hooks', fn(): array => $this->mergeHooksConfig());
+        $this->app->singleton('wp.hooks', fn (): array => $this->mergeHooksConfig());
         $this->app->singleton('wp.action', Action::class);
         $this->app->singleton('wp.filter', Filter::class);
     }
@@ -25,13 +24,14 @@ class HookServiceProvider extends ServiceProvider
     {
         $bootstrapHooks = require $this->app->bootstrapPath('hooks.php');
         $appConfigHooks = config('app.hooks', []);
+
         return array_merge($bootstrapHooks, $appConfigHooks);
     }
 
     protected function loadHooks(): void
     {
         $hooks = $this->app->make('wp.hooks');
-        collect($hooks)->each(fn($hook) => $this->registerHook($hook));
+        collect($hooks)->each(fn ($hook) => $this->registerHook($hook));
     }
 
     protected function registerHook(string $hookClass): void

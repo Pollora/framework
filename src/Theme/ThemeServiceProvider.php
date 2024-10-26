@@ -7,12 +7,11 @@ namespace Pollora\Theme;
 use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Commands\MakeThemeCommand;
 use Pollora\Theme\Commands\RemoveThemeCommand;
 use Pollora\Theme\Factories\ComponentFactory;
-use Pollora\Support\Facades\Theme;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -40,24 +39,24 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('theme', fn(Container $app): \Pollora\Theme\ThemeManager => new ThemeManager(
+        $this->app->singleton('theme', fn (Container $app): \Pollora\Theme\ThemeManager => new ThemeManager(
             $app,
             $app['view']->getFinder(),
             $app['translator']->getLoader()
         ));
 
-        $this->app->singleton('theme.generator', fn(Container $app): \Pollora\Theme\Commands\MakeThemeCommand => new MakeThemeCommand($app['config'], $app['files']));
+        $this->app->singleton('theme.generator', fn (Container $app): \Pollora\Theme\Commands\MakeThemeCommand => new MakeThemeCommand($app['config'], $app['files']));
 
-        $this->app->singleton('theme.remover', fn(Container $app): \Pollora\Theme\Commands\RemoveThemeCommand => new RemoveThemeCommand($app['config'], $app['files']));
+        $this->app->singleton('theme.remover', fn (Container $app): \Pollora\Theme\Commands\RemoveThemeCommand => new RemoveThemeCommand($app['config'], $app['files']));
 
         $this->commands([
             'theme.generator',
             'theme.remover',
         ]);
 
-        $this->app->singleton(ComponentFactory::class, fn($app): \Pollora\Theme\Factories\ComponentFactory => new ComponentFactory($app));
+        $this->app->singleton(ComponentFactory::class, fn ($app): \Pollora\Theme\Factories\ComponentFactory => new ComponentFactory($app));
 
-        $this->app->singleton(ThemeComponentProvider::class, fn($app): \Pollora\Theme\ThemeComponentProvider => new ThemeComponentProvider($app, $app->make(ComponentFactory::class)));
+        $this->app->singleton(ThemeComponentProvider::class, fn ($app): \Pollora\Theme\ThemeComponentProvider => new ThemeComponentProvider($app, $app->make(ComponentFactory::class)));
 
         $this->app->make(ThemeComponentProvider::class)->register();
     }
@@ -71,12 +70,12 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app['asset.container']->addContainer('theme', [
             'hot_file' => public_path("{$theme}.hot"),
             'build_directory' => "build/{$theme}",
-            'manifest_path' => public_path("build/{$theme}/manifest.json"),
+            'manifest_path' => 'manifest.json',
             'base_path' => '',
             'asset_dir' => array_merge(
                 $this->defaultAssetConfig,
                 config('theme.asset_dir', [])
-            )
+            ),
         ]);
 
         $this->app['asset.container']->setDefaultContainer('theme');
@@ -91,7 +90,6 @@ class ThemeServiceProvider extends ServiceProvider
                 Blade::directive($function, $directive);
             });
     }
-
 
     protected function publishConfigurations(): void
     {

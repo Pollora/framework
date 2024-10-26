@@ -15,7 +15,7 @@ use function Laravel\Prompts\text;
 
 class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput
 {
-    protected $signature = 'make:theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name}';
+    protected $signature = 'theme:make {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name}';
 
     protected $description = 'Generate theme structure with the ability to copy an existing folder and replace strings';
 
@@ -40,7 +40,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         $this->setupContainerFolders();
         $this->generateThemeStructure();
-        $this->generateViteAssets();
 
         if ($this->option('source')) {
             $this->copySourceFolder();
@@ -75,6 +74,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         if ($this->option('force')) {
             return true;
         }
+
         return $this->confirm("Are you sure you want to override \"{$name}\" theme folder?");
     }
 
@@ -93,14 +93,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected function generateThemeStructure(): void
     {
         $this->copyDirectory($this->getTemplatePath('common'), $this->getTheme()->getBasePath());
-    }
-
-    protected function generateViteAssets(): void
-    {
-        $assets = $this->containerFolder['assets'];
-        $this->makeFile("{$assets}/fonts/.gitkeep");
-        $this->makeFile("{$assets}/js/app.js", $this->fromTemplate('vite/js/app.js'));
-        $this->makeFile("{$assets}/js/bootstrap.js", $this->fromTemplate('vite/js/bootstrap.js'));
     }
 
     protected function copySourceFolder(): void
@@ -133,8 +125,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
 
             if (str_starts_with($relativePath, 'app/')) {
-                $themeNamespace = ucfirst($this->getTheme()->getName());
-                $relativePath = str_replace('app/', '', $relativePath);
                 $targetPath = $this->insertThemeNamespaceInPath($targetPath, $destination);
                 $targetDir = dirname($targetPath);
             }
@@ -165,7 +155,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         if (count($segments) > 1) {
             $themeNamespace = $this->getThemeNamespace();
 
-            return app_path($segments[0].'/Theme/'.$themeNamespace.'/'.$segments[1]);
+            return app_path($segments[0].'/'.$themeNamespace.'/'.$segments[1]);
         }
 
         return app_path($path);
@@ -284,7 +274,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected function getTemplatePath(string $templateName): string
     {
-        dd(realpath(__DIR__.'/../stubs/'.$templateName));
+        if (! realpath(__DIR__.'/../stubs/'.$templateName)) {
+            dd($templateName);
+        }
 
         return realpath(__DIR__.'/../stubs/'.$templateName);
     }

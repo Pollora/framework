@@ -11,6 +11,6 @@ class RouteServiceProvider extends RoutingServiceProvider
 {
     public function registerRouter(): void
     {
-        $this->app->singleton('router', fn(Application $app): \Pollora\Route\Router => new Router($app['events'], $app));
+        $this->app->singleton('router', fn (Application $app): \Pollora\Route\Router => new Router($app['events'], $app));
     }
 }

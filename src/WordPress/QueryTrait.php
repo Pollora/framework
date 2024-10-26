@@ -32,6 +32,7 @@ trait QueryTrait
         if ($this->isFeed()) {
             return true;
         }
+
         return (bool) $this->isTrackback();
     }
 

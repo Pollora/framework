@@ -13,9 +13,7 @@ abstract class Hookable implements HookableInterface
 
     public int $priority = 10;
 
-    public function __construct(protected Container $container)
-    {
-    }
+    public function __construct(protected Container $container) {}
 
     abstract public function register();
 }

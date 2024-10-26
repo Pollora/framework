@@ -60,7 +60,7 @@ class PolloraServiceProvider extends ServiceProvider
 
         // Hashing service provider
         $this->app->register(HashServiceProvider::class);
-        $this->app->singleton(JobDispatcher::class, fn($app): \Pollora\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class)));
+        $this->app->singleton(JobDispatcher::class, fn ($app): \Pollora\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class)));
     }
 
     /**
