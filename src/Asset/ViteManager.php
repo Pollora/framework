@@ -79,28 +79,27 @@ class ViteManager
             $buildDirectory = $viteManager->container()->getBuildDirectory();
             $manifest = $this->manifest($buildDirectory);
 
-            foreach ($entrypoints as $entrypoint) {
-                $chunk = $manifest[$entrypoint] ?? null;
-                if (! $chunk) {
-                    continue;
-                }
+            // Utiliser les collections pour collecter les assets
+            $assets = collect($entrypoints)
+                ->map(fn($entrypoint) => $manifest[$entrypoint] ?? null)
+                ->filter()
+                ->reduce(function ($assets, $chunk) use ($buildDirectory) {
+                    // Ajouter le fichier JavaScript principal
+                    $assets['js'][] = $this->assetPath("{$buildDirectory}/{$chunk['file']}");
 
-                // Ajouter l'URL du fichier JavaScript principal
-                $assets['js'][] = $this->assetPath("{$buildDirectory}/{$chunk['file']}");
+                    // Ajouter les fichiers CSS associés
+                    foreach ($chunk['css'] ?? [] as $css) {
+                        $assets['css'][] = $this->assetPath("{$buildDirectory}/{$css}");
+                    }
 
-                // Ajouter les URLs des fichiers CSS associés
-                foreach ($chunk['css'] ?? [] as $css) {
-                    $assets['css'][] = $this->assetPath("{$buildDirectory}/{$css}");
-                }
-            }
+                    return $assets;
+                }, ['js' => [], 'css' => []]);
 
             // Supprimer les doublons et retourner les assets triés par type
-            $assets['js'] = array_unique($assets['js']);
-            $assets['css'] = array_unique($assets['css']);
-
-            return $assets;
+            return collect($assets)->map(fn($paths) => array_unique($paths))->all();
         });
     }
+
 
     private function registerAssetTypesMacros(): void
     {
