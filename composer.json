@@ -69,7 +69,8 @@
                 "Theme": "Pollora\\Support\\Facades\\Theme",
                 "Asset": "Pollora\\Support\\Facades\\Asset"
             }
-        }
+        },
+        "class": "Pollora\\Composer\\Plugin"
     },
     "config": {
         "allow-plugins": {
