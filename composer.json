@@ -23,7 +23,7 @@
     ],
     "require": {
         "php": "^8.2.0",
-        "composer-plugin-api": "^2.0",
+        "pollora/helper-overrider": "dev-main",
         "illuminate/support": "^11.0",
         "illuminate/database": "^11.0",
         "illuminate/routing": "^11.0",
@@ -45,8 +45,6 @@
     },
     "minimum-stability": "dev",
     "extra": {
-        "class": "Pollora\\Composer\\HelperLoader",
-        "plugin-modifies-downloads": true,
         "patches": {
             "johnpbloch/wordpress-core": {
                 "Patch __ method in l10n to stop conflicting with Laravel": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/wordpress-core.patch"
