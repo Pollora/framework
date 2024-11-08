@@ -12,80 +12,90 @@ use Composer\Script\ScriptEvents;
 
 final class HelperLoader implements PluginInterface, EventSubscriberInterface
 {
-    private ?Composer $composer = null;
+    private Composer $composer;
+    private IOInterface $io;
 
     public function activate(Composer $composer, IOInterface $io): void
     {
         $this->composer = $composer;
+        $this->io = $io;
     }
 
-    public function deactivate(Composer $composer, IOInterface $io): void {}
-    public function uninstall(Composer $composer, IOInterface $io): void {}
+    public function deactivate(Composer $composer, IOInterface $io): void
+    {
+        // Nettoyage si nécessaire
+    }
+
+    public function uninstall(Composer $composer, IOInterface $io): void
+    {
+        // Nettoyage si nécessaire
+    }
 
     public static function getSubscribedEvents(): array
     {
-        return [ScriptEvents::PRE_AUTOLOAD_DUMP => 'load'];
+        return [
+            ScriptEvents::PRE_AUTOLOAD_DUMP => [
+                ['onPreAutoloadDump', 0]
+            ]
+        ];
     }
 
-    public function load(): bool
+    public function onPreAutoloadDump(): void
     {
-        if (! $this->composer || ! $this->shouldInject()) {
-            return false;
-        }
+        $this->io->write('<info>Pollora Helper Loader: Loading helpers...</info>');
 
-        $this->injectHelpers($this->getHelperFiles());
+        $autoloadFile = $this->getAutoloadPath();
 
-        return true;
-    }
-
-    private function shouldInject(): bool
-    {
-        return is_file($this->autoloadPath());
-    }
-
-    private function injectHelpers(array $helperFiles): void
-    {
-        if (empty($helperFiles)) {
+        if (! is_file($autoloadFile)) {
+            $this->io->write('<error>Autoload file not found</error>');
             return;
         }
 
-        $autoloadContent = file_get_contents($this->autoloadPath());
-        $injections = [];
+        $helpers = $this->getHelperFiles();
 
-        foreach ($helperFiles as $file) {
-            $injection = "require_once '{$file}';";
-            if (! str_contains($autoloadContent, $injection)) {
-                $injections[] = $injection;
-            }
+        if (empty($helpers)) {
+            $this->io->write('<comment>No helper files found in composer.json</comment>');
+            return;
         }
 
-        if (! empty($injections)) {
-            file_put_contents(
-                $this->autoloadPath(),
-                str_replace(
-                    '<?php',
-                    "<?php\n" . implode("\n", $injections),
-                    $autoloadContent
-                )
-            );
-        }
+        $this->injectHelpers($autoloadFile, $helpers);
+
+        $this->io->write('<info>Helper files injected successfully</info>');
     }
 
     private function getHelperFiles(): array
     {
-        $package = $this->composer->getPackage();
-        $autoload = $package->getAutoload();
-        $files = $autoload['files'] ?? [];
-
-        // Convertir les chemins relatifs en chemins absolus
-        return array_map(
-            fn(string $file): string => dirname($this->autoloadPath(), 2) . '/' . $file,
-            $files
-        );
+        $autoload = $this->composer->getPackage()->getAutoload();
+        return $autoload['files'] ?? [];
     }
 
-    private function autoloadPath(): string
+    private function getAutoloadPath(): string
     {
-        return dirname(__DIR__, 4) . '/autoload.php';
+        return $this->composer->getConfig()->get('vendor-dir') . '/autoload.php';
+    }
+
+    private function injectHelpers(string $autoloadFile, array $helpers): void
+    {
+        $content = file_get_contents($autoloadFile);
+        $requires = [];
+
+        foreach ($helpers as $helper) {
+            $absolutePath = $this->getAbsolutePath($helper);
+            if (! str_contains($content, $absolutePath)) {
+                $requires[] = sprintf("require_once '%s';", $absolutePath);
+            }
+        }
+
+        if (! empty($requires)) {
+            file_put_contents(
+                $autoloadFile,
+                str_replace('<?php', "<?php\n" . implode("\n", $requires), $content)
+            );
+        }
+    }
+
+    private function getAbsolutePath(string $helperPath): string
+    {
+        return dirname($this->getAutoloadPath(), 2) . '/' . $helperPath;
     }
 }

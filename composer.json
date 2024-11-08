@@ -45,6 +45,8 @@
     },
     "minimum-stability": "dev",
     "extra": {
+        "class": "Pollora\\Composer\\HelperLoader",
+        "plugin-modifies-downloads": true,
         "patches": {
             "johnpbloch/wordpress-core": {
                 "Patch __ method in l10n to stop conflicting with Laravel": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/wordpress-core.patch"
@@ -70,8 +72,7 @@
                 "Theme": "Pollora\\Support\\Facades\\Theme",
                 "Asset": "Pollora\\Support\\Facades\\Asset"
             }
-        },
-        "class": "Pollora\\Composer\\HelperLoader"
+        }
     },
     "config": {
         "allow-plugins": {
