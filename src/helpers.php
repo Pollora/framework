@@ -1,4 +1,6 @@
 <?php
+use Pollora\Support\RecursiveMenuIterator;
+
 if (! function_exists('menu')) {
     /**
      * Get a {@link RecursiveIteratorIterator} for a WordPress menu.
