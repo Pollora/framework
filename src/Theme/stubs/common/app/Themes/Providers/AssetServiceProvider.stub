@@ -23,7 +23,8 @@ class AssetServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Asset::add('%theme_name%/script',Theme::path('js/app.js'))
+        Asset::add('%theme_name%/script', 'asset/app.js')
+            ->container('theme')
             ->toFrontend()
             ->useVite();
     }
