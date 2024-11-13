@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-use Pollora\Support\RecursiveMenuIterator;
 use Illuminate\Support\Facades\Lang;
+use Pollora\Support\RecursiveMenuIterator;
 
-if (!function_exists('wp_mail')) {
+if (! function_exists('wp_mail')) {
     function wp_mail($to, $subject, $message, $headers = '', $attachments = []): bool
     {
         $result = app('wp.mail')->send($to, $subject, $message, $headers, $attachments);
@@ -13,7 +14,7 @@ if (!function_exists('wp_mail')) {
     }
 }
 
-if (!function_exists('mysqli_report')) {
+if (! function_exists('mysqli_report')) {
     /**
      * Report MySQL errors.
      */
@@ -23,18 +24,18 @@ if (!function_exists('mysqli_report')) {
     }
 }
 
-if (!function_exists('__')) {
+if (! function_exists('__')) {
     /**
      * Tries to get a translation from both Laravel and WordPress.
      *
-     * @param string $key key of the translation
-     * @param array|string $replace replacements for laravel or domain for wordpress
-     * @param string|null $locale locale for laravel, not used for wordpress
+     * @param  string  $key  key of the translation
+     * @param  array|string  $replace  replacements for laravel or domain for wordpress
+     * @param  string|null  $locale  locale for laravel, not used for wordpress
      * @return string
      */
     function __(string $key, array|string $replace = [], ?string $locale = null)
     {
-        if (($locale === null || $locale === '' || $locale === '0') && function_exists('get_locale')) {
+        if (($locale === null || $locale === '' || $locale === '0') && function_exists('get_locale') && function_exists('wp_cache_get')) {
             $locale = get_locale();
         }
         if (is_array($replace) && Lang::has($key, $locale)) {
@@ -42,7 +43,7 @@ if (!function_exists('__')) {
                 return trans($key, $replace, $locale);
             } catch (\Exception $e) {
                 // failed to get translation from Laravel
-                if (($replace !== []) || !empty($locale)) {
+                if (($replace !== []) || ! empty($locale)) {
                     // this doesn't look like something we can pass to WordPress, lets
                     // rethrow the exception
                     throw $e;
@@ -52,17 +53,16 @@ if (!function_exists('__')) {
 
         $key = str_replace('wordpress.', '', $key);
 
-        return translate($key, $replace === '' || $replace === '0' || $replace === [] ? 'default' : $replace);
+        return function_exists('translate') ? translate($key, $replace === '' || $replace === '0' || $replace === [] ? 'default' : $replace) : $key;
     }
 }
 
-if (!function_exists('is_secured')) {
+if (! function_exists('is_secured')) {
     function is_secured(): bool
     {
-        return str_contains((string)config('app.url'), 'https://');
+        return str_contains((string) config('app.url'), 'https://');
     }
 }
-
 
 if (! function_exists('menu')) {
     /**

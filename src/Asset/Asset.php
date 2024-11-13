@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Asset;
 
-use Illuminate\Support\Facades\Vite;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
 

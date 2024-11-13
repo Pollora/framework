@@ -21,6 +21,7 @@ use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\TaxonomyServiceProvider;
 use Pollora\Theme\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
+use Pollora\WordPress\WordPressServiceProvider;
 
 /**
  * Registers all the other service providers used by this package.

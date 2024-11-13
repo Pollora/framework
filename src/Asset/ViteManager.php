@@ -81,7 +81,7 @@ class ViteManager
 
             // Utiliser les collections pour collecter les assets
             $assets = collect($entrypoints)
-                ->map(fn($entrypoint) => $manifest[$entrypoint] ?? null)
+                ->map(fn ($entrypoint) => $manifest[$entrypoint] ?? null)
                 ->filter()
                 ->reduce(function ($assets, $chunk) use ($buildDirectory) {
                     // Ajouter le fichier JavaScript principal
@@ -96,10 +96,9 @@ class ViteManager
                 }, ['js' => [], 'css' => []]);
 
             // Supprimer les doublons et retourner les assets triés par type
-            return collect($assets)->map(fn($paths) => array_unique($paths))->all();
+            return collect($assets)->map(fn ($paths) => array_unique($paths))->all();
         });
     }
-
 
     private function registerAssetTypesMacros(): void
     {
