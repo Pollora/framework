@@ -55,7 +55,7 @@ class WordPressDatabase extends wpdb
     {
         $config = $this->eloquentConnection->getConfig();
 
-        $dbHost = (isset($config['host']) ? $config['host'] : 'localhost').(isset($config['port']) ? ':'.$config['port'] : '');
+        $dbHost = ($config['host'] ?? 'localhost').(isset($config['port']) ? ':'.$config['port'] : '');
         $dbName = $config['database'] ?? '';
         $dbUser = $config['username'] ?? '';
         $dbPassword = $config['password'] ?? '';

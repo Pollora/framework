@@ -39,12 +39,12 @@ class InstallationConfig
             adminEmail: text(
                 label: 'Admin email?',
                 required: 'Admin email is required',
-                validate: fn (string $value) => ! filter_var($value, FILTER_VALIDATE_EMAIL) ? 'Invalid email address' : null
+                validate: fn (string $value): ?string => filter_var($value, FILTER_VALIDATE_EMAIL) ? null : 'Invalid email address'
             ),
             adminPassword: password(
                 label: 'Admin password?',
                 required: 'Admin password is required',
-                validate: fn (string $value) => strlen($value) < 8 ? 'Password must be at least 8 characters' : null
+                validate: fn (string $value): ?string => strlen($value) < 8 ? 'Password must be at least 8 characters' : null
             ),
             locale: (new LanguageService)->promptForLanguage(),
             isPublic: confirm(

@@ -274,7 +274,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected function getTemplatePath(string $templateName): string
     {
-        if (! realpath(__DIR__.'/../stubs/'.$templateName)) {
+        if (in_array(realpath(__DIR__.'/../stubs/'.$templateName), ['', '0'], true) || realpath(__DIR__.'/../stubs/'.$templateName) === false) {
             dd($templateName);
         }
 

@@ -75,7 +75,8 @@
     "config": {
         "allow-plugins": {
             "cweagans/composer-patches": true,
-            "pestphp/pest-plugin": true
+            "pestphp/pest-plugin": true,
+            "pollora/helper-overrider": true
         }
     },
     "require-dev": {

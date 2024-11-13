@@ -43,7 +43,7 @@ class WordPressServiceProvider extends ServiceProvider
                 LaunchPadInstallCommand::class,
             ]);
         } else {
-            Action::add('wp_install', function () {
+            Action::add('wp_install', function (): void {
                 Artisan::call('migrate');
             });
         }

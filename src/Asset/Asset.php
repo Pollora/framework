@@ -193,7 +193,7 @@ class Asset
 
     public function configureViteAssets(): void
     {
-        if (! $this->viteManager) {
+        if (!$this->viteManager instanceof \Pollora\Asset\ViteManager) {
             throw new \RuntimeException('Vite manager not initialized. Call useVite() first.');
         }
 

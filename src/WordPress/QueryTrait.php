@@ -9,7 +9,7 @@ use Pollora\Support\Facades\Filter;
 
 trait QueryTrait
 {
-    public function isDatabaseConfigured()
+    public function isDatabaseConfigured(): bool
     {
         $config = DB::connection()->getConfig();
 
@@ -25,7 +25,7 @@ trait QueryTrait
 
         try {
             DB::connection()->getPdo();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
 
@@ -46,7 +46,7 @@ trait QueryTrait
                 ->where('option_name', 'siteurl')
                 ->exists();
 
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }

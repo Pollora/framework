@@ -53,7 +53,7 @@ class LocalEnvironmentDetector
      */
     public static function getConfig(): array
     {
-        foreach (self::$environments as $env => $settings) {
+        foreach (self::$environments as $settings) {
             if (is_callable($settings['detector'])) {
                 $isDetected = call_user_func($settings['detector']);
             } else {
@@ -71,7 +71,7 @@ class LocalEnvironmentDetector
     /**
      * Check if running in DDEV environment
      */
-    private static function isDdev(): bool
+    public static function isDdev(): bool
     {
         return getenv('IS_DDEV_PROJECT') === 'true';
     }
@@ -79,9 +79,9 @@ class LocalEnvironmentDetector
     /**
      * Check if running in Laradock environment
      */
-    private static function isLaradock(): bool
+    private function isLaradock(): bool
     {
-        return ! empty(getenv('LARADOCK_PHP_VERSION'));
+        return ! (in_array(getenv('LARADOCK_PHP_VERSION'), ['', '0'], true) || getenv('LARADOCK_PHP_VERSION') === [] || getenv('LARADOCK_PHP_VERSION') === false);
     }
 
     /**

@@ -13,8 +13,6 @@ class InstallationService
 {
     public function __construct(
         private readonly WordPressInstallLoaderService $installLoaderService,
-        private readonly LanguageService $languageService,
-        private readonly DatabaseService $databaseService,
     ) {}
 
     public function isInstalled(): bool

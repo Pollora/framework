@@ -65,7 +65,7 @@ class LaunchPadInstallCommand extends Command
         $this->displaySuccessMessage();
     }
 
-    public function runMigrations()
+    public function runMigrations(): void
     {
         info('Running migration.');
 

@@ -25,9 +25,7 @@ class DatabaseConnectionService
                 error("Database connection failed: {$e->getMessage()}");
 
                 if (! $this->shouldRetry()) {
-                    throw new DatabaseConnectionException(
-                        'Could not establish database connection. Please check your configuration.'
-                    );
+                    throw new DatabaseConnectionException('Could not establish database connection. Please check your configuration.', $e->getCode(), $e);
                 }
 
                 // Get new configuration
@@ -40,7 +38,7 @@ class DatabaseConnectionService
     {
         spin(
             message: 'Testing database connection...',
-            callback: fn () => new \PDO(
+            callback: fn (): \PDO => new \PDO(
                 sprintf(
                     'mysql:host=%s;port=%d;dbname=%s',
                     $config->host,

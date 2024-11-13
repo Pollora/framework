@@ -97,7 +97,7 @@ class WordPressInstallLoaderService
         $appUrl = Config::get('app.url');
 
         if (! defined('COOKIEHASH')) {
-            define('COOKIEHASH', md5($appUrl));
+            define('COOKIEHASH', md5((string) $appUrl));
         }
 
         $cookiePath = $this->getCookiePath($appUrl);
@@ -123,7 +123,7 @@ class WordPressInstallLoaderService
         $GLOBALS['wp_textdomain_registry']->init();
 
         // Configure permalink structure
-        Filter::add('pre_option_permalink_structure', fn () => '');
+        Filter::add('pre_option_permalink_structure', fn (): string => '');
 
         // Initialize rewrite component
         $GLOBALS['wp_rewrite'] = new \WP_Rewrite;

@@ -44,12 +44,12 @@ class EnvironmentFileHandler
     private function processLine(string $line, array $replacements): string
     {
         // Skip empty lines or comments that don't contain variable definitions
-        if (empty($line) || (str_starts_with(trim($line), '#') && ! preg_match('/^#\s*([^=]+)=/', $line))) {
+        if ($line === '' || $line === '0' || (str_starts_with(trim($line), '#') && in_array(preg_match('/^#\s*([^=]+)=/', $line), [0, false], true))) {
             return $line;
         }
 
         // Extract variable name, handling both commented and uncommented lines
-        if (! preg_match('/^#?\s*([^=]+)=(.*)$/', $line, $matches)) {
+        if (in_array(preg_match('/^#?\s*([^=]+)=(.*)$/', $line, $matches), [0, false], true)) {
             return $line;
         }
 

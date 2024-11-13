@@ -38,13 +38,13 @@ class LanguageService
             label: 'Select site language (type to search)',
             placeholder: 'Start typing language name...',
             options: function (string $value) use ($languages) {
-                if (empty($value)) {
+                if ($value === '' || $value === '0') {
                     return $languages;
                 }
 
                 // Search in both language codes and names
                 return collect($languages)
-                    ->filter(function ($name, $code) use ($value) {
+                    ->filter(function ($name, $code) use ($value): bool {
                         $searchValue = strtolower($value);
 
                         return str_contains(strtolower($code), $searchValue) ||
@@ -65,7 +65,7 @@ class LanguageService
         try {
             $response = spin(
                 message: 'Fetching available languages...',
-                callback: fn () => file_get_contents(self::API_URL)
+                callback: fn (): string|false => file_get_contents(self::API_URL)
             );
 
             if ($response === false) {
@@ -73,7 +73,7 @@ class LanguageService
             }
 
             return $this->parseLanguagesResponse($response);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             error('Could not fetch languages. Using default options.');
 
             return self::FALLBACK_LANGUAGES;

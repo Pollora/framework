@@ -47,7 +47,7 @@ class DatabaseConfig
             port: (int) text(
                 label: 'Database port?',
                 default: (string) $defaults->port,
-                validate: fn (string $value) => ! is_numeric($value) ? 'Port must be a number' : null
+                validate: fn (string $value): ?string => is_numeric($value) ? null : 'Port must be a number'
             ),
             name: text(
                 label: 'Database name?',
@@ -66,7 +66,7 @@ class DatabaseConfig
             siteUrl: text(
                 label: 'Site URL?',
                 default: $defaults->siteUrl,
-                validate: function (string $value) {
+                validate: function (string $value): ?string {
                     if (! filter_var($value, FILTER_VALIDATE_URL)) {
                         return 'Please enter a valid URL (e.g., https://pollora.ddev.site)';
                     }
