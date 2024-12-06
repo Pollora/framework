@@ -111,10 +111,8 @@ class ViteManager
                 ->map(fn ($entrypoint) => $manifest[$entrypoint] ?? null)
                 ->filter()
                 ->reduce(function (array $assets, $chunk) use ($buildDirectory) {
-                    // Ajouter le fichier JavaScript principal
                     $assets['js'][] = $this->assetPath("{$buildDirectory}/{$chunk['file']}");
 
-                    // Ajouter les fichiers CSS associés
                     foreach ($chunk['css'] ?? [] as $css) {
                         $assets['css'][] = $this->assetPath("{$buildDirectory}/{$css}");
                     }
