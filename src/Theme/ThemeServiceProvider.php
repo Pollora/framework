@@ -21,15 +21,6 @@ class ThemeServiceProvider extends ServiceProvider
     protected $wp_theme;
 
     protected $theme_root;
-
-    protected array $defaultAssetConfig = [
-        'root' => 'assets',
-        'images' => 'images',
-        'fonts' => 'fonts',
-        'css' => 'css',
-        'js' => 'js',
-    ];
-
     /**
      * Registers the theme.
      *
