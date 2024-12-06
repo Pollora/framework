@@ -72,10 +72,6 @@ class ThemeServiceProvider extends ServiceProvider
             'build_directory' => "build/{$theme}",
             'manifest_path' => 'manifest.json',
             'base_path' => '',
-            'asset_dir' => array_merge(
-                $this->defaultAssetConfig,
-                config('theme.asset_dir', [])
-            ),
         ]);
 
         $this->app['asset.container']->setDefaultContainer('theme');

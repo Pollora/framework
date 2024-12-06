@@ -70,8 +70,6 @@ class ViteManager
         ViteFacade::macro('getAssetUrls', function (array $entrypoints) use ($viteManager) {
             $buildDirectory = $viteManager->container()->getBuildDirectory();
             $manifest = $this->manifest($buildDirectory);
-
-            // Utiliser les collections pour collecter les assets
             $assets = collect($entrypoints)
                 ->map(fn ($entrypoint) => $manifest[$entrypoint] ?? null)
                 ->filter()
@@ -86,39 +84,7 @@ class ViteManager
 
                     return $assets;
                 }, ['js' => [], 'css' => []]);
-
-            // Supprimer les doublons et retourner les assets triés par type
             return collect($assets)->map(fn ($paths): array => array_unique($paths))->all();
         });
-    }
-
-    public function retrieveAsset(string $path, string $assetType): string
-    {
-        $this->validateAssetType($assetType);
-
-        $assetConfig = $this->container->getAssetDir();
-        $prefix = $this->buildAssetPrefix(
-            $assetConfig['root'],
-            $assetConfig[$assetType] ?? ''
-        );
-
-        return $this->asset($prefix.$path);
-    }
-
-    private function validateAssetType(string $assetType): void
-    {
-        if (! in_array($assetType, self::ASSET_TYPES, true)) {
-            throw new InvalidArgumentException(
-                sprintf('Invalid asset type: %s. Allowed types are: %s',
-                    $assetType,
-                    implode(', ', self::ASSET_TYPES)
-                )
-            );
-        }
-    }
-
-    private function buildAssetPrefix(string $rootDir, string $assetTypeDir): string
-    {
-        return $assetTypeDir !== '' && $assetTypeDir !== '0' ? "{$rootDir}/{$assetTypeDir}/" : "{$rootDir}/";
     }
 }
