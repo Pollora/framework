@@ -8,11 +8,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     @wphead
-
-    {{--
-        Vite::useBuildDirectory('public/build/default') // Customize the build directory...
-            ->withEntryPoints(['themes/default/assets/app.js'])
-    --}}
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -78,7 +73,7 @@
                 @yield('content')
 
                 <div class="max-w-[200px] my-20 mx-auto">
-                    <img src="{{ Vite::image('pollora.svg') }}">
+                    <img src="{{ Asset::url('assets/images/pollora.svg') }}">
                 </div>
             </div>
         </main>
