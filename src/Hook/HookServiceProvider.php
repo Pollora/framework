@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Hook;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
@@ -22,7 +23,8 @@ class HookServiceProvider extends ServiceProvider
 
     protected function mergeHooksConfig(): array
     {
-        $bootstrapHooks = require $this->app->bootstrapPath('hooks.php');
+        $hookFile = $this->app->bootstrapPath('hooks.php');
+        $bootstrapHooks = File::exists($hookFile) ? require $this->app->bootstrapPath('hooks.php') : [];
         $appConfigHooks = config('app.hooks', []);
 
         return array_merge($bootstrapHooks, $appConfigHooks);

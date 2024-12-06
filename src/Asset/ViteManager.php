@@ -59,7 +59,7 @@ class ViteManager
 
     private function getViteInstance(): Vite
     {
-        if (! $this->vite) {
+        if (!$this->vite instanceof \Illuminate\Foundation\Vite) {
             $this->initializeVite();
         }
 
@@ -81,9 +81,9 @@ class ViteManager
 
             // Utiliser les collections pour collecter les assets
             $assets = collect($entrypoints)
-                ->map(fn($entrypoint) => $manifest[$entrypoint] ?? null)
+                ->map(fn ($entrypoint) => $manifest[$entrypoint] ?? null)
                 ->filter()
-                ->reduce(function ($assets, $chunk) use ($buildDirectory) {
+                ->reduce(function (array $assets, $chunk) use ($buildDirectory) {
                     // Ajouter le fichier JavaScript principal
                     $assets['js'][] = $this->assetPath("{$buildDirectory}/{$chunk['file']}");
 
@@ -96,10 +96,9 @@ class ViteManager
                 }, ['js' => [], 'css' => []]);
 
             // Supprimer les doublons et retourner les assets triés par type
-            return collect($assets)->map(fn($paths) => array_unique($paths))->all();
+            return collect($assets)->map(fn ($paths): array => array_unique($paths))->all();
         });
     }
-
 
     private function registerAssetTypesMacros(): void
     {
@@ -111,9 +110,7 @@ class ViteManager
     private function registerAssetTypeMacro(string $macroName, string $assetType): void
     {
         $viteManager = $this;
-        ViteFacade::macro($macroName, function (string $path) use ($viteManager, $assetType) {
-            return $viteManager->retrieveAsset($path, $assetType);
-        });
+        ViteFacade::macro($macroName, fn(string $path): string => $viteManager->retrieveAsset($path, $assetType));
     }
 
     public function retrieveAsset(string $path, string $assetType): string
@@ -143,6 +140,6 @@ class ViteManager
 
     private function buildAssetPrefix(string $rootDir, string $assetTypeDir): string
     {
-        return $assetTypeDir ? "{$rootDir}/{$assetTypeDir}/" : "{$rootDir}/";
+        return $assetTypeDir !== '' && $assetTypeDir !== '0' ? "{$rootDir}/{$assetTypeDir}/" : "{$rootDir}/";
     }
 }

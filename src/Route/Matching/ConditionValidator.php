@@ -12,6 +12,8 @@ class ConditionValidator implements ValidatorInterface
 {
     public function matches(Route $route, Request $request): bool
     {
-        return call_user_func_array($route->getCondition(), $route->getConditionParameters());
+        $condition = $route->getCondition();
+
+        return function_exists($condition) && call_user_func_array($condition, $route->getConditionParameters());
     }
 }

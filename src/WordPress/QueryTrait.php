@@ -4,10 +4,53 @@ declare(strict_types=1);
 
 namespace Pollora\WordPress;
 
+use Illuminate\Support\Facades\DB;
 use Pollora\Support\Facades\Filter;
 
 trait QueryTrait
 {
+    public function isDatabaseConfigured(): bool
+    {
+        $config = DB::connection()->getConfig();
+
+        $dbSettingsFilled = $config['driver'] === 'mysql'
+            && isset($config['host'])
+            && isset($config['username'])
+            && isset($config['password'])
+            && isset($config['database']);
+
+        if (! $dbSettingsFilled) {
+            return false;
+        }
+
+        try {
+            DB::connection()->getPdo();
+        } catch (\Exception) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if WordPress is installed by verifying core tables exist and have content
+     */
+    private function isWordPressInstalled(): bool
+    {
+        if (function_exists('is_blog_installed')) {
+            return is_blog_installed();
+        }
+
+        try {
+            return DB::table('options')
+                ->where('option_name', 'siteurl')
+                ->exists();
+
+        } catch (\Exception) {
+            return false;
+        }
+    }
+
     protected function setupWordPressQuery(): void
     {
         wp();

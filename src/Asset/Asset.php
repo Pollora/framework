@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Asset;
 
-use Illuminate\Support\Facades\Vite;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
 
@@ -194,7 +193,7 @@ class Asset
 
     public function configureViteAssets(): void
     {
-        if (! $this->viteManager) {
+        if (!$this->viteManager instanceof \Pollora\Asset\ViteManager) {
             throw new \RuntimeException('Vite manager not initialized. Call useVite() first.');
         }
 

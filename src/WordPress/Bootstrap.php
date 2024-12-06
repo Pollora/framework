@@ -32,9 +32,12 @@ class Bootstrap
     {
         $this->db = DB::getConfig(null);
         $this->setDatabaseConstants();
-        $this->loadWordPressSettings();
 
-        if (! App::runningInConsole() && ! wp_installing()) {
+        if ($this->isDatabaseConfigured()) {
+            $this->loadWordPressSettings();
+        }
+
+        if (! App::runningInConsole() && $this->isWordPressInstalled()) {
             $this->setupWordPressQuery();
         }
 
@@ -51,6 +54,11 @@ class Bootstrap
     private function loadWordPressSettings(): void
     {
         $table_prefix = $this->db['prefix'];
+
+        if (app()->runningInConsole() && ! $this->isWordPressInstalled()) {
+            define('SHORTINIT', true);
+        }
+
         if (! (defined('WP_CLI') && WP_CLI) && ! $this->isOrchestraWorkbench()) {
             require_once ABSPATH.'wp-settings.php';
         }
