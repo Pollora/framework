@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Auth;
 
+use Illuminate\Auth\AuthManager;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,24 +13,22 @@ class AuthServiceProvider extends ServiceProvider
     public function register(): void
     {
         if ($this->app->bound('auth')) {
-            $this->registerWordPressAuthDriver();
+            $this->registerWordPressAuthDriver($this->app->make(AuthManager::class));
         }
     }
 
-    protected function registerWordPressAuthDriver(): void
+    protected function registerWordPressAuthDriver(AuthManager $auth): void
     {
-        $this->app['auth']->extend('wp', fn ($app, $name, $config): \Pollora\Auth\WordPressGuard => $this->createWordPressGuard($config)
-        );
+        $auth->extend('wp', fn ($app, $name, $config): WordPressGuard => $this->createWordPressGuard($auth, $config));
 
-        $this->app['auth']->provider('wp', fn ($app, $config): \Pollora\Auth\WordPressUserProvider => new WordPressUserProvider
-        );
+        $auth->provider('wp', fn ($app, $config): WordPressUserProvider => new WordPressUserProvider);
 
         $this->registerWordPressGate();
     }
 
-    protected function createWordPressGuard(array $config): WordPressGuard
+    protected function createWordPressGuard(AuthManager $auth, array $config): WordPressGuard
     {
-        $provider = $this->app['auth']->createUserProvider($config['provider'] ?? null);
+        $provider = $auth->createUserProvider($config['provider'] ?? null);
 
         return new WordPressGuard($provider);
     }
@@ -37,8 +36,7 @@ class AuthServiceProvider extends ServiceProvider
     protected function registerWordPressGate(): void
     {
         if (function_exists('user_can')) {
-            Gate::after(fn ($user, $ability, $result, $arguments) => user_can($user, $ability, ...$arguments)
-            );
+            Gate::after(fn ($user, $ability, $result, $arguments) => user_can($user, $ability, ...$arguments));
         }
     }
 }
