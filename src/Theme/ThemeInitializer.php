@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Theme;
 
 use Illuminate\Contracts\Foundation\Application;
-use Pollora\Asset\ViteManager;
 use Pollora\Support\Facades\Action;
+use Pollora\Support\Facades\Asset;
 use Pollora\Support\Facades\Filter;
 use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Contracts\ThemeComponent;
@@ -96,19 +96,15 @@ class ThemeInitializer implements ThemeComponent
 
     protected function overrideThemeUri(): void
     {
-        Filter::add('theme_file_uri', function ($uri): string {
-            $assetContainer = $this->app['asset.container']->get('theme');
-            $viteManager = new ViteManager($assetContainer);
-            $assetConfig = $assetContainer->getAssetDir();
-            $rootDir = $assetConfig['root'];
-            $relativePath = $this->getRelativePath($uri, $rootDir);
+        Filter::add('theme_file_uri', function ($path): string {
+            $relativePath = $this->getRelativePath($path);
 
-            return $viteManager->asset($rootDir.'/'.$relativePath);
+            return (string) Asset::url($relativePath)->from('theme');
         });
     }
 
-    protected function getRelativePath(string $uri, string $rootDir): string
+    protected function getRelativePath(string $fullPath): string
     {
-        return str_replace(get_stylesheet_directory_uri().'/', '', $uri);
+        return str_replace(get_stylesheet_directory_uri().'/', '', $fullPath);
     }
 }

@@ -10,13 +10,6 @@ use InvalidArgumentException;
 
 class ViteManager
 {
-    private const ASSET_TYPES = [
-        'image' => 'images',
-        'font' => 'fonts',
-        'css' => 'css',
-        'js' => 'js',
-    ];
-
     private ?Vite $vite = null;
 
     public function __construct(
@@ -59,7 +52,7 @@ class ViteManager
 
     private function getViteInstance(): Vite
     {
-        if (!$this->vite instanceof \Illuminate\Foundation\Vite) {
+        if (! $this->vite instanceof \Illuminate\Foundation\Vite) {
             $this->initializeVite();
         }
 
@@ -69,7 +62,6 @@ class ViteManager
     public function registerMacros(): void
     {
         $this->registerAssetUrlsMacro();
-        $this->registerAssetTypesMacros();
     }
 
     private function registerAssetUrlsMacro(): void
@@ -98,19 +90,6 @@ class ViteManager
             // Supprimer les doublons et retourner les assets triés par type
             return collect($assets)->map(fn ($paths): array => array_unique($paths))->all();
         });
-    }
-
-    private function registerAssetTypesMacros(): void
-    {
-        foreach (self::ASSET_TYPES as $macroName => $assetType) {
-            $this->registerAssetTypeMacro($macroName, $assetType);
-        }
-    }
-
-    private function registerAssetTypeMacro(string $macroName, string $assetType): void
-    {
-        $viteManager = $this;
-        ViteFacade::macro($macroName, fn(string $path): string => $viteManager->retrieveAsset($path, $assetType));
     }
 
     public function retrieveAsset(string $path, string $assetType): string

@@ -7,8 +7,8 @@ namespace Pollora\Asset;
 class AssetManager
 {
     public function __construct(
-        private AssetFactory $factory,
-        private AssetContainerManager $containerManager
+        private readonly AssetFactory $factory,
+        private readonly AssetContainerManager $containerManager
     ) {}
 
     public function add(string $handle, string $file): Asset

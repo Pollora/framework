@@ -10,4 +10,9 @@ class AssetFactory
     {
         return new Asset($handle, $file);
     }
+
+    public function url(string $handle): AssetFile
+    {
+        return new AssetFile($handle);
+    }
 }

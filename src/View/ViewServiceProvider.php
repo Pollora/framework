@@ -47,11 +47,11 @@ class ViewServiceProvider extends ViewServiceProviderBase
          *
          * @return string
          */
-        View::macro('makeLoader', function () use ($app): string {
+        View::macro('makeLoader', function (): string {
             $view = $this->getName();
             $path = $this->getPath();
             $id = md5($this->getCompiled());
-            $compiled_path = $app['config']['view.compiled'];
+            $compiled_path = app('config')['view.compiled'];
 
             $content = "<?= \\view('{$view}', \$data ?? get_defined_vars())->render(); ?>"
                 ."\n<?php /**PATH {$path} ENDPATH**/ ?>";
