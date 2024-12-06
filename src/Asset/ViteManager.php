@@ -42,12 +42,12 @@ class ViteManager
      *
      * @param array $entrypoints List of entry points to process
      * @return array Array of asset URLs grouped by type (js/css)
-     * @throws InvalidArgumentException When entrypoints array is empty
+     * @throws AssetException When entrypoints array is empty
      */
     public function getAssetUrls(array $entrypoints): array
     {
         if (empty($entrypoints)) {
-            throw new InvalidArgumentException('Entry points array cannot be empty.');
+            throw new AssetException('Entry points array cannot be empty.');
         }
         return $this->getViteInstance()->getAssetUrls($entrypoints);
     }
