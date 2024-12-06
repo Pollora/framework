@@ -7,16 +7,20 @@ namespace Pollora\Asset;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Foundation\Application;
 
+/**
+ * Service provider for registering asset-related services.
+ *
+ * This provider registers and bootstraps all asset management services,
+ * including container management, asset factory, and Vite integration.
+ */
 class AssetServiceProvider extends ServiceProvider
 {
-    protected array $defaultAssetConfig = [
-        'root' => 'assets',
-        'images' => 'images',
-        'fonts' => 'fonts',
-        'css' => 'css',
-        'js' => 'js',
-    ];
-
+    /**
+     * Register asset-related services in the container.
+     *
+     * Binds the asset container manager, asset factory, and Vite manager
+     * as singletons in the service container.
+     */
     public function register(): void
     {
         $this->app->singleton('asset.container', fn ($app): AssetContainerManager => new AssetContainerManager($app));
@@ -28,13 +32,23 @@ class AssetServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Bootstrap asset services.
+     *
+     * Performs any necessary initialization after all services are registered.
+     */
     public function boot(): void
     {
         $this->registerViteManager();
     }
 
+    /**
+     * Register Vite-specific functionality.
+     *
+     * Initializes Vite macros and other Vite-related features.
+     */
     protected function registerViteManager(): void
     {
-        $this->app[ViteManager::class]->registerMacros();
+        app(ViteManager::class)->registerMacros();
     }
 }
