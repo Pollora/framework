@@ -27,11 +27,11 @@ class AssetFactory
     /**
      * Creates a new AssetFile instance for URL generation.
      *
-     * @param string $handle Path to the asset file
+     * @param string $file Path to the asset file
      * @return AssetFile The created AssetFile instance
      */
-    public function url(string $handle): AssetFile
+    public function url(string $file): AssetFile
     {
-        return new AssetFile($handle);
+        return new AssetFile($file);
     }
 }
