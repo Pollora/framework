@@ -6,14 +6,34 @@ namespace Pollora\Asset;
 
 use Pollora\Foundation\Application;
 
+/**
+ * Represents a file asset and handles its URL generation.
+ *
+ * This class provides functionality to generate URLs for assets,
+ * with support for different asset containers and Vite integration.
+ *
+ * @implements \Stringable
+ */
 class AssetFile implements \Stringable
 {
+    /**
+     * The asset container identifier.
+     */
     protected string $assetContainer = 'theme';
 
-    protected Application $app;
-
+    /**
+     * Creates a new asset file instance.
+     *
+     * @param string $path The path to the asset file
+     */
     public function __construct(protected string $path) {}
 
+    /**
+     * Sets the asset container to use.
+     *
+     * @param string $assetContainer The container identifier
+     * @return static
+     */
     public function from(string $assetContainer): static
     {
         $this->assetContainer = $assetContainer;
@@ -21,13 +41,21 @@ class AssetFile implements \Stringable
         return $this;
     }
 
+    /**
+     * Converts the asset file to its URL string representation.
+     *
+     * This method is called when the object is used as a string.
+     * It generates the appropriate URL for the asset using the configured container.
+     *
+     * @return string The generated asset URL
+     */
     public function __toString(): string
     {
         Application::getInstance();
         $assetContainer = app('asset.container')->get($this->assetContainer);
 
         if ($assetContainer === null) {
-            return ''; // Retourne une chaîne vide si le conteneur n'existe pas
+            return '';
         }
 
         $viteManager = new ViteManager($assetContainer);
