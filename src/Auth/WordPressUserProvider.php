@@ -13,7 +13,8 @@ use WP_Error;
  * WordPress user provider for Laravel authentication.
  *
  * This class implements Laravel's UserProvider interface to integrate
- * WordPress authentication with Laravel's authentication system.
+ * WordPress user management with Laravel's authentication system.
+ * It handles user retrieval, credential validation, and token management.
  *
  * @implements UserProvider
  */
@@ -22,8 +23,8 @@ class WordPressUserProvider implements UserProvider
     /**
      * Retrieve a user by their unique identifier.
      *
-     * @param mixed $identifier
-     * @return Authenticatable|null
+     * @param mixed $identifier The user ID
+     * @return Authenticatable|null The user instance or null if not found
      */
     public function retrieveById($identifier): ?Authenticatable
     {
@@ -33,21 +34,24 @@ class WordPressUserProvider implements UserProvider
     /**
      * Retrieve a user by their unique identifier and "remember me" token.
      *
-     * @param mixed $identifier
-     * @param string $token
-     * @return Authenticatable|null
+     * Note: WordPress doesn't use remember tokens by default.
+     *
+     * @param mixed $identifier The user ID
+     * @param string $token The remember token
+     * @return Authenticatable|null Always returns null for WordPress
      */
     public function retrieveByToken($identifier, $token): ?Authenticatable
     {
-        // WordPress doesn't use remember tokens by default
         return null;
     }
 
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param Authenticatable $user
-     * @param string $token
+     * Note: WordPress doesn't use remember tokens by default.
+     *
+     * @param Authenticatable $user The user instance
+     * @param string $token The new remember token
      */
     public function updateRememberToken(Authenticatable $user, #[\SensitiveParameter] $token): void
     {
@@ -57,8 +61,8 @@ class WordPressUserProvider implements UserProvider
     /**
      * Retrieve a user by the given credentials.
      *
-     * @param array $credentials
-     * @return Authenticatable|null
+     * @param array<string, string> $credentials The user credentials
+     * @return Authenticatable|null The authenticated user or null
      */
     public function retrieveByCredentials(#[\SensitiveParameter] array $credentials): ?Authenticatable
     {
@@ -70,9 +74,9 @@ class WordPressUserProvider implements UserProvider
     /**
      * Validate a user against the given credentials.
      *
-     * @param Authenticatable $user
-     * @param array $credentials
-     * @return bool
+     * @param Authenticatable $user The user to validate
+     * @param array<string, string> $credentials The credentials to check
+     * @return bool True if credentials are valid
      */
     public function validateCredentials(Authenticatable $user, #[\SensitiveParameter] array $credentials): bool
     {
@@ -86,14 +90,15 @@ class WordPressUserProvider implements UserProvider
     /**
      * Rehash the user's password if required.
      *
-     * @param Authenticatable $user
-     * @param array $credentials
-     * @param bool $force
-     * @return bool
+     * Note: WordPress handles password rehashing automatically.
+     *
+     * @param Authenticatable $user The user instance
+     * @param array<string, string> $credentials The user credentials
+     * @param bool $force Force rehashing regardless of need
+     * @return bool Always returns false for WordPress
      */
     public function rehashPasswordIfRequired(Authenticatable $user, #[\SensitiveParameter] array $credentials, bool $force = false): bool
     {
-        // WordPress handles password rehashing automatically
         return false;
     }
 }

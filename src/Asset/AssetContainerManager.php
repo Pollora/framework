@@ -10,7 +10,7 @@ use Illuminate\Contracts\Foundation\Application;
  * Manages multiple asset containers in the application.
  *
  * This class handles the registration and retrieval of asset containers,
- * including management of the default container.
+ * including management of the default container and container configuration.
  */
 class AssetContainerManager
 {
@@ -23,13 +23,15 @@ class AssetContainerManager
 
     /**
      * The name of the default container.
+     *
+     * @var string|null
      */
     protected ?string $defaultContainer = null;
 
     /**
      * Creates a new asset container manager instance.
      *
-     * @param Application $app The application instance
+     * @param Application $app The application container instance
      */
     public function __construct(protected Application $app) {}
 

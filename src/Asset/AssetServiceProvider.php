@@ -18,8 +18,7 @@ class AssetServiceProvider extends ServiceProvider
     /**
      * Register asset-related services in the container.
      *
-     * Binds the asset container manager, asset factory, and Vite manager
-     * as singletons in the service container.
+     * @return void
      */
     public function register(): void
     {
@@ -35,7 +34,7 @@ class AssetServiceProvider extends ServiceProvider
     /**
      * Bootstrap asset services.
      *
-     * Performs any necessary initialization after all services are registered.
+     * @return void
      */
     public function boot(): void
     {
@@ -45,7 +44,7 @@ class AssetServiceProvider extends ServiceProvider
     /**
      * Register Vite-specific functionality.
      *
-     * Initializes Vite macros and other Vite-related features.
+     * @return void
      */
     protected function registerViteManager(): void
     {

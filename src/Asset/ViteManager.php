@@ -19,8 +19,18 @@ use InvalidArgumentException;
  */
 class ViteManager
 {
+    /**
+     * The Vite instance.
+     *
+     * @var Vite|null
+     */
     private ?Vite $vite = null;
 
+    /**
+     * Create a new ViteManager instance.
+     *
+     * @param AssetContainer $container The asset container to use
+     */
     public function __construct(
         private readonly AssetContainer $container
     ) {
