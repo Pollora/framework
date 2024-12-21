@@ -37,7 +37,10 @@ class Bootstrap
             $this->loadWordPressSettings();
         }
 
-        if (! App::runningInConsole() && $this->isWordPressInstalled()) {
+        if (app()->runningInConsole() && !$this->isWordPressInstalled()) {
+            define('WP_INSTALLING', true);
+        }
+        if (! app()->runningInConsole() && $this->isWordPressInstalled()) {
             $this->setupWordPressQuery();
         }
 
@@ -59,14 +62,14 @@ class Bootstrap
             define('SHORTINIT', true);
         }
 
-        if (! (defined('WP_CLI') && WP_CLI) && ! $this->isOrchestraWorkbench()) {
+        if (! app()->runningInWpCli() && ! $this->isOrchestraWorkbench()) {
             require_once ABSPATH.'wp-settings.php';
         }
     }
 
     private function setupActionHooks(): void
     {
-        if (defined('WP_CLI') && WP_CLI) {
+        if (app()->runningInWpCli()) {
             Action::add('init', $this->fixNetworkUrl(...), 1);
         } else {
             $this->fixNetworkUrl();
@@ -100,7 +103,7 @@ class Bootstrap
         $this->setWPConstants();
         $this->setLocationConstants();
 
-        if (App::runningInConsole()) {
+        if (app()->runningInConsole()) {
             $this->setConsoleServerVariables();
         }
     }
