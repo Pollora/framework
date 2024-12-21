@@ -7,30 +7,39 @@ namespace Pollora\Support;
 use Pollora\Services\Translater;
 
 /**
- * The ArgumentHelper class is a trait that provides methods to extract arguments from properties using getter methods.
+ * Trait providing translation functionality for WordPress arguments.
+ *
+ * This trait offers methods to translate arrays of arguments commonly used
+ * in WordPress, such as labels and names for post types and taxonomies.
  */
 trait ArgumentTranslater
 {
     /**
-     * Translate the arguments using the given entity and key to translate
+     * Translate the arguments using the given entity and keys.
      *
-     * @param  array  $args  The arguments to be translated (passed by reference)
-     * @param  string  $entity  The entity used for translation
-     * @param  array  $keyToTranslate  The keys to be translated (default: [
-     *                                 'label',
-     *                                 'labels.*',
-     *                                 'names.singular',
-     *                                 'names.plural',
-     *                                 ])
-     * @return array The translated arguments
+     * Translates specific keys within an array of arguments using a translation domain.
+     * Supports nested keys and wildcards for array traversal.
+     *
+     * @param array<string, mixed> $args The arguments to be translated (passed by reference)
+     * @param string $entity The translation domain/entity to use
+     * @param array<int, string> $keyToTranslate The keys to be translated (default: [
+     *                                           'label',
+     *                                           'labels.*',
+     *                                           'names.singular',
+     *                                           'names.plural',
+     *                                           ])
+     * @return array<string, mixed> The translated arguments
      */
-    protected function translateArguments(array $args, string $entity, array $keyToTranslate = [
-        'label',
-        'labels.*',
-        'names.singular',
-        'names.plural',
-    ]): array
-    {
+    protected function translateArguments(
+        array $args,
+        string $entity,
+        array $keyToTranslate = [
+            'label',
+            'labels.*',
+            'names.singular',
+            'names.plural',
+        ]
+    ): array {
         $translater = new Translater($args, $entity);
 
         return $translater->translate($keyToTranslate);

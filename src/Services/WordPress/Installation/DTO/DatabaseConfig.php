@@ -9,8 +9,25 @@ use Pollora\Services\WordPress\Installation\LocalEnvironmentDetector;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
+/**
+ * Data Transfer Object for database configuration.
+ *
+ * This class encapsulates database connection parameters and provides
+ * factory methods for creating configurations from environment variables
+ * or interactive prompts.
+ */
 class DatabaseConfig
 {
+    /**
+     * Create a new database configuration instance.
+     *
+     * @param string $host Database host address
+     * @param int $port Database port number
+     * @param string $name Database name
+     * @param string $username Database user
+     * @param string $password Database password
+     * @param string $siteUrl WordPress site URL
+     */
     public function __construct(
         public readonly string $host,
         public readonly int $port,
@@ -20,6 +37,12 @@ class DatabaseConfig
         public readonly string $siteUrl,
     ) {}
 
+    /**
+     * Create configuration from environment variables.
+     *
+     * @return self
+     * @throws \RuntimeException If required environment variables are missing
+     */
     public static function fromEnvironment(): self
     {
         $config = LocalEnvironmentDetector::getConfig();
@@ -34,6 +57,15 @@ class DatabaseConfig
         );
     }
 
+    /**
+     * Create configuration from interactive prompts.
+     *
+     * Prompts user for database configuration values with validation
+     * and default values from environment.
+     *
+     * @return self
+     * @throws \RuntimeException If user input validation fails
+     */
     public static function fromPrompts(): self
     {
         $defaults = self::fromEnvironment();

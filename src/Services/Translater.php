@@ -4,29 +4,41 @@ declare(strict_types=1);
 
 namespace Pollora\Services;
 
+/**
+ * Service for handling translations in WordPress.
+ *
+ * This class provides functionality to translate arrays of strings using WordPress's
+ * translation system. It supports nested arrays, wildcards, and domain-specific
+ * translations.
+ */
 class Translater
 {
     /**
      * Create a new translator instance.
+     *
+     * @param array<string, mixed> $items The items to be used in translations
+     * @param string $domain The translation domain (defaults to 'wordpress')
      */
     public function __construct(
-        /**
-         * The items to be used in translations.
-         */
         protected array $items = [],
-        /**
-         * The domain of the translation.
-         */
         protected string $domain = 'wordpress'
     ) {}
 
     /**
-     * Translate method.
+     * Translate an array of keys.
      *
-     * This method is used to translate an array of keys.
+     * Processes an array of keys for translation. Supports wildcards ('*')
+     * for translating all items in an array or specific nested paths.
      *
-     * @param  array  $keysToTranslate  The keys that need to be translated.
-     * @return array The translated array.
+     * @param array<int, string> $keysToTranslate The keys that need to be translated
+     * @return array<string, mixed> The translated array
+     *
+     * @example
+     * ```php
+     * $translator = new Translater(['title' => 'Hello', 'desc' => 'World']);
+     * $translated = $translator->translate(['*']); // Translates all items
+     * $translated = $translator->translate(['title']); // Translates only title
+     * ```
      */
     public function translate(array $keysToTranslate): array
     {
@@ -43,9 +55,10 @@ class Translater
     }
 
     /**
-     * Translate a key.
+     * Translate a specific key in the items array.
      *
-     * @param  string  $key  The key to translate.
+     * @param string $key The key to translate (supports dot notation for nested arrays)
+     * @return void
      */
     protected function translateKey(string $key): void
     {
@@ -59,10 +72,11 @@ class Translater
     }
 
     /**
-     * Translates the values of nested arrays by key recursively.
+     * Recursively translate nested array values by key.
      *
-     * @param  array  $keys  The array of keys to traverse.
-     * @param  array  $item  The item array to be modified.
+     * @param array<int, string> $keys The array of keys to traverse
+     * @param array<string, mixed> $item Reference to the item array being modified
+     * @return void
      */
     protected function recursiveTranslateByKey(array $keys, &$item): void
     {
@@ -89,9 +103,10 @@ class Translater
     }
 
     /**
-     * Recursively translates the given item.
+     * Recursively translate all values in an array.
      *
-     * @param  array  $item  The item to be translated.
+     * @param array<string, mixed> $item Reference to the item being translated
+     * @return void
      */
     protected function recursiveTranslate(&$item): void
     {
@@ -105,10 +120,10 @@ class Translater
     }
 
     /**
-     * Translates a given item using the specified domain.
+     * Translate a single string value using WordPress translation function.
      *
-     * @param  string  $value  The item to be translated.
-     * @return string The translated item.
+     * @param string $value The string to translate
+     * @return string The translated string
      */
     protected function translateItem(string $value): string
     {

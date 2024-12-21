@@ -7,10 +7,19 @@ namespace Pollora\Services\WordPress\Installation;
 use Illuminate\Support\Facades\Config;
 use Pollora\Support\Facades\Filter;
 
+/**
+ * Service for loading WordPress core files and initializing the environment.
+ *
+ * This service handles the bootstrapping process for WordPress installation,
+ * including loading core files, setting up globals, and initializing
+ * essential WordPress components.
+ */
 class WordPressInstallLoaderService
 {
     /**
-     * List of required WordPress core files
+     * List of required WordPress core files.
+     *
+     * @var array<int, string>
      */
     private const CORE_FILES = [
         '/l10n.php',
@@ -33,7 +42,9 @@ class WordPressInstallLoaderService
     ];
 
     /**
-     * List of required WordPress classes
+     * List of required WordPress classes.
+     *
+     * @var array<int, string>
      */
     private const CORE_CLASSES = [
         '/class-wp-rewrite.php',
@@ -50,6 +61,19 @@ class WordPressInstallLoaderService
         '/class-wp-block-parser.php',
     ];
 
+    /**
+     * Bootstrap the WordPress installation environment.
+     *
+     * Initializes all necessary components for WordPress installation:
+     * - Sets global variables
+     * - Loads core files and classes
+     * - Loads admin files
+     * - Defines constants
+     * - Initializes WordPress components
+     *
+     * @return void
+     * @throws \RuntimeException If essential WordPress files cannot be loaded
+     */
     public function bootstrap(): void
     {
         $this->setGlobals()
@@ -60,6 +84,11 @@ class WordPressInstallLoaderService
             ->initializeWordPress();
     }
 
+    /**
+     * Set global variables required for WordPress.
+     *
+     * @return self
+     */
     private function setGlobals(): self
     {
         $GLOBALS['locale'] = Config::get('app.locale', 'en_US');
@@ -67,6 +96,12 @@ class WordPressInstallLoaderService
         return $this;
     }
 
+    /**
+     * Load WordPress core functionality files.
+     *
+     * @return self
+     * @throws \RuntimeException If core files cannot be loaded
+     */
     private function loadCoreFiles(): self
     {
         foreach (self::CORE_FILES as $file) {
@@ -76,6 +111,12 @@ class WordPressInstallLoaderService
         return $this;
     }
 
+    /**
+     * Load WordPress core class files.
+     *
+     * @return self
+     * @throws \RuntimeException If class files cannot be loaded
+     */
     private function loadCoreClasses(): self
     {
         foreach (self::CORE_CLASSES as $file) {
@@ -85,6 +126,12 @@ class WordPressInstallLoaderService
         return $this;
     }
 
+    /**
+     * Load WordPress admin files required for installation.
+     *
+     * @return self
+     * @throws \RuntimeException If admin files cannot be loaded
+     */
     private function loadAdminFiles(): self
     {
         require_once ABSPATH.'wp-admin/includes/upgrade.php';
@@ -92,6 +139,11 @@ class WordPressInstallLoaderService
         return $this;
     }
 
+    /**
+     * Define WordPress constants required for installation.
+     *
+     * @return self
+     */
     private function defineConstants(): self
     {
         $appUrl = Config::get('app.url');
@@ -116,6 +168,13 @@ class WordPressInstallLoaderService
         return $this;
     }
 
+    /**
+     * Initialize WordPress components.
+     *
+     * Sets up text domain registry, permalink structure, and rewrite rules.
+     *
+     * @return self
+     */
     private function initializeWordPress(): self
     {
         // Initialize text domain registry
@@ -131,6 +190,12 @@ class WordPressInstallLoaderService
         return $this;
     }
 
+    /**
+     * Get cookie path from application URL.
+     *
+     * @param string $appUrl The application URL
+     * @return string The cookie path
+     */
     private function getCookiePath(string $appUrl): string
     {
         return preg_replace('|https?://[^/]+|i', '', $appUrl.'/');

@@ -8,20 +8,28 @@ use WP_Network;
 use WP_User;
 
 /**
- * Provides various base WordPress helper functionality in a nice
- * OO way.
+ * WordPress helper functionality in an object-oriented way.
+ *
+ * Provides a clean interface to common WordPress functions and features,
+ * with proper type hints and documentation.
  *
  * @author Jordan Doyle <jordan@doyle.wf>
  */
 class WordPress
 {
+    /**
+     * Default value for options when not found.
+     *
+     * @var bool
+     */
     private const DEFAULT_OPTION_VALUE = false;
 
     /**
      * Check if we are on a multisite, and optionally check the multisite we are on.
      *
-     * @param  null|int|array  $id  id (or ids) to check against the site, or null if you want to just check
-     *                              if we are actually on a multisite
+     * @param null|int|array<int> $id ID (or IDs) to check against the site, or null to just check
+     *                                if we are actually on a multisite
+     * @return bool True if on multisite and ID matches (if provided)
      */
     public function multisite(null|int|array $id = null): bool
     {
@@ -35,8 +43,9 @@ class WordPress
     /**
      * Get a WordPress option from the database.
      *
-     * @param  string  $name  name of the option to get
-     * @param  mixed  $default  value to return if we don't have a value for the option.
+     * @param string $name Name of the option to get
+     * @param mixed $default Value to return if option doesn't exist
+     * @return mixed The option value or default if not found
      */
     public function option(string $name, mixed $default = self::DEFAULT_OPTION_VALUE): mixed
     {
@@ -44,7 +53,9 @@ class WordPress
     }
 
     /**
-     * Get the current multisite id.
+     * Get the current multisite ID.
+     *
+     * @return int Current site ID
      */
     public function getSiteId(): int
     {
@@ -52,7 +63,9 @@ class WordPress
     }
 
     /**
-     * Get the current site that the user is currently browsing.
+     * Get the current site that the user is browsing.
+     *
+     * @return \WP_Network Current WordPress network/site object
      */
     public function site(): WP_Network
     {
@@ -60,7 +73,11 @@ class WordPress
     }
 
     /**
-     * Get the current WordPress version, includes WordPress' version.php if it has to.
+     * Get the current WordPress version.
+     *
+     * Includes WordPress' version.php if necessary.
+     *
+     * @return string WordPress version number
      */
     public function version(): string
     {
@@ -72,13 +89,10 @@ class WordPress
     }
 
     /**
-     * Get the current logged in user. Generally, you shouldn't be using this
-     * function and should instead be using <code>auth()->user()</code> from Laravel to get
-     * the current logged in WordPress user.
+     * Get the current logged in user.
      *
-     * Use of WP_User is deprecated, however this method will not be removed.
-     *
-     * @deprecated use <code>auth()->user()</code> instead.
+     * @deprecated Use auth()->user() instead
+     * @return \WP_User Current WordPress user object
      */
     public function currentUser(): WP_User
     {

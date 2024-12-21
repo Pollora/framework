@@ -7,16 +7,20 @@ namespace Pollora\Support\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Facade for {@link \Pollora\Query\MetaQuery}.
+ * Facade for WordPress Meta Query functionality.
  *
- * @see \Pollora\Query\MetaQuery
+ * Provides a fluent interface for building WordPress meta queries with
+ * improved type safety and query validation.
  *
  * @mixin \Pollora\Query\MetaQuery
+ * @see \Pollora\Query\MetaQuery
  */
 class MetaQuery extends Facade
 {
     /**
      * Get the registered name of the component.
+     *
+     * @return string
      */
     protected static function getFacadeAccessor(): string
     {

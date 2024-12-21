@@ -8,12 +8,19 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Class RecurringEvent
+ * Class for handling recurring WordPress cron events.
+ *
+ * Manages events that need to run on a schedule (hourly, daily, etc.)
+ * with database persistence and Laravel queue integration.
+ *
+ * @extends AbstractEvent
  */
 class RecurringEvent extends AbstractEvent
 {
     /**
-     * RecurringEvent constructor.
+     * Create a new recurring event instance.
+     *
+     * @param object|null $event WordPress event object
      */
     public function __construct(?object $event = null)
     {
@@ -25,8 +32,9 @@ class RecurringEvent extends AbstractEvent
     }
 
     /**
-     * Create a new job instance.
+     * Create and persist a new recurring job instance.
      *
+     * @param object $event WordPress event object
      * @return static
      */
     public static function createJob(object $event): self
@@ -38,9 +46,9 @@ class RecurringEvent extends AbstractEvent
     }
 
     /**
-     * Save the job to the database.
+     * Save the recurring job to the database.
      *
-     * @param  int|null  $jobId
+     * @param int|null $jobId Optional job ID
      */
     protected function saveToDatabase($jobId = null): void
     {
@@ -55,7 +63,9 @@ class RecurringEvent extends AbstractEvent
     }
 
     /**
-     * Schedule all events.
+     * Schedule all recurring events in the Laravel scheduler.
+     *
+     * @param Schedule $schedule Laravel schedule instance
      */
     public static function scheduleAllEvents(Schedule $schedule): void
     {
@@ -69,7 +79,11 @@ class RecurringEvent extends AbstractEvent
     }
 
     /**
-     * Get the cron expression for a schedule.
+     * Convert WordPress schedule to cron expression.
+     *
+     * @param string $schedule WordPress schedule name
+     * @param int|null $interval Custom interval in seconds
+     * @return string Cron expression
      */
     public static function getCronExpression(string $schedule, ?int $interval): string
     {
@@ -79,44 +93,51 @@ class RecurringEvent extends AbstractEvent
             $interval = $schedules[$schedule]['interval'];
         }
 
-        switch ($schedule) {
-            case 'minutly':
-                return '* * * * *';
-            case 'hourly':
-                return '0 * * * *';
-            case 'twicedaily':
-                return '0 */12 * * *';
-            case 'daily':
-                return '0 0 * * *';
-            case 'weekly':
-                return '0 0 * * 0';
-            default:
-                if ($interval) {
-                    $minutes = $interval / 60;
-                    if ($minutes < 60) {
-                        return "*/{$minutes} * * * *";
-                    }
-                    if ($minutes == 60) {
-                        return '0 * * * *';
-                    }
-                    if ($minutes % 60 == 0) {
-                        $hours = $minutes / 60;
-
-                        return "0 */{$hours} * * *";
-                    }
-
-                    return "*/{$minutes} * * * *";
-                }
-
-                return '0 0 * * *';
-        }
+        return match ($schedule) {
+            'minutly' => '* * * * *',
+            'hourly' => '0 * * * *',
+            'twicedaily' => '0 */12 * * *',
+            'daily' => '0 0 * * *',
+            'weekly' => '0 0 * * 0',
+            default => self::calculateCustomInterval($interval),
+        };
     }
 
     /**
-     * Handle the event.
+     * Handle the recurring event execution.
      */
     public function handle(): void
     {
         do_action_ref_array($this->hook, $this->args);
+    }
+
+    /**
+     * Calculate cron expression for custom interval.
+     *
+     * @param int|null $interval Interval in seconds
+     * @return string Cron expression
+     */
+    private static function calculateCustomInterval(?int $interval): string
+    {
+        if (!$interval) {
+            return '0 0 * * *';
+        }
+
+        $minutes = $interval / 60;
+        
+        if ($minutes < 60) {
+            return "*/{$minutes} * * * *";
+        }
+        
+        if ($minutes == 60) {
+            return '0 * * * *';
+        }
+        
+        if ($minutes % 60 == 0) {
+            $hours = $minutes / 60;
+            return "0 */{$hours} * * *";
+        }
+
+        return "*/{$minutes} * * * *";
     }
 }

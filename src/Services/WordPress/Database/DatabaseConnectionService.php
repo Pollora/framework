@@ -11,8 +11,23 @@ use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 
+/**
+ * Service for managing database connections in WordPress.
+ *
+ * This service handles database connection testing and configuration,
+ * with support for interactive credential prompts and error handling.
+ */
 class DatabaseConnectionService
 {
+    /**
+     * Ensure a valid database connection can be established.
+     *
+     * Tests the database connection and prompts for new credentials if needed.
+     *
+     * @param DatabaseConfig $config The database configuration to test
+     * @return DatabaseConfig The validated configuration (may be updated if retried)
+     * @throws DatabaseConnectionException When connection fails and user aborts retry
+     */
     public function ensureConnection(DatabaseConfig $config): DatabaseConfig
     {
         while (true) {
@@ -34,6 +49,13 @@ class DatabaseConnectionService
         }
     }
 
+    /**
+     * Test the database connection with given configuration.
+     *
+     * @param DatabaseConfig $config The database configuration to test
+     * @return void
+     * @throws \PDOException When connection fails
+     */
     private function testConnection(DatabaseConfig $config): void
     {
         spin(
@@ -55,6 +77,11 @@ class DatabaseConnectionService
         );
     }
 
+    /**
+     * Check if user wants to retry with different credentials.
+     *
+     * @return bool True if should retry, false otherwise
+     */
     private function shouldRetry(): bool
     {
         return confirm(
