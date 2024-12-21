@@ -24,14 +24,28 @@ use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
 
 /**
- * Registers all the other service providers used by this package.
+ * Main service provider for the Pollora framework.
+ *
+ * This provider is responsible for registering all core service providers
+ * that power the WordPress integration with Laravel. It handles the initialization
+ * of various components like views, authentication, post types, and more.
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
 class PolloraServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap any application services.
+     * Register any application services.
+     *
+     * Registers all core service providers including:
+     * - WordPress integration services
+     * - Theme and view handling
+     * - Authentication and hashing
+     * - Content type management (posts, taxonomies)
+     * - Asset and Gutenberg integration
+     * - Scheduling and job dispatching
+     *
+     * @return void
      */
     public function register(): void
     {
@@ -66,6 +80,11 @@ class PolloraServiceProvider extends ServiceProvider
 
     /**
      * Perform post-registration booting of services.
+     *
+     * Publishes necessary configuration files and assets to the public directory.
+     * This includes the WordPress configuration file that bridges Laravel and WordPress.
+     *
+     * @return void
      */
     public function boot(): void
     {

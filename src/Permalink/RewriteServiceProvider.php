@@ -11,9 +11,16 @@ use Pollora\Support\Facades\Action;
  * Class RewriteServiceProvider
  *
  * A service provider for managing WP URL rewrites.
+ * Handles permalink structure modifications and trailing slash removal.
  */
 class RewriteServiceProvider extends ServiceProvider
 {
+    /**
+     * Bootstrap the application services.
+     * Registers actions for permalink structure management.
+     *
+     * @return void
+     */
     public function boot(): void
     {
         // For remove the trailing slash.
@@ -21,7 +28,12 @@ class RewriteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Remove trailing slash from permalink structure
+     * Remove trailing slash from permalink structure.
+     * Updates the WordPress permalink structure option by removing any trailing slashes.
+     *
+     * @param string|bool $oldPermalinkStructure The previous permalink structure
+     * @param string|bool $permalinkStructure The new permalink structure to be sanitized
+     * @return void
      */
     protected function removeTrailingSlash(string|bool $oldPermalinkStructure, string|bool $permalinkStructure): void
     {

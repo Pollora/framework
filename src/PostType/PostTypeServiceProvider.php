@@ -12,12 +12,22 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Support\Facades\PostType;
 
 /**
- * Class PostTypeServiceProvider
+ * Service provider for registering custom post types.
  *
- * A service provider for registering custom post types.
+ * This provider handles the registration of custom post types in WordPress,
+ * integrating them with Laravel's service container and allowing for
+ * configuration-based post type registration.
  */
 class PostTypeServiceProvider extends ServiceProvider
 {
+    /**
+     * Register post type services.
+     *
+     * Binds the PostTypeFactory to the service container for creating
+     * new post type instances.
+     *
+     * @return void
+     */
     public function register(): void
     {
         $this->app->bind('wp.posttype', fn ($app): \Pollora\PostType\PostTypeFactory => new PostTypeFactory($app));
@@ -25,7 +35,24 @@ class PostTypeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register all the site's custom post types
+     * Register all configured custom post types.
+     *
+     * Reads post type configurations from the config file and registers
+     * each post type with WordPress using the PostType facade.
+     *
+     * @return void
+     *
+     * @example Configuration format:
+     * [
+     *     'book' => [
+     *         'names' => [
+     *             'singular' => 'Book',
+     *             'plural' => 'Books',
+     *             'slug' => 'books'
+     *         ],
+     *         // Additional WordPress post type arguments...
+     *     ]
+     * ]
      */
     public function registerPostTypes(): void
     {

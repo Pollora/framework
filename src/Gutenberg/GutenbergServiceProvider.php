@@ -10,8 +10,22 @@ use Pollora\Gutenberg\Helpers\PatternValidator;
 use Pollora\Gutenberg\Registrars\CategoryRegistrar;
 use Pollora\Gutenberg\Registrars\PatternRegistrar;
 
+/**
+ * Service provider for Gutenberg block pattern functionality.
+ * 
+ * Manages the registration of block pattern services and their dependencies
+ * within the Laravel application container.
+ */
 class GutenbergServiceProvider extends ServiceProvider
 {
+    /**
+     * Register Gutenberg-related services in the application.
+     * 
+     * Binds pattern registrars and helpers as singletons in the container
+     * and configures dependency injection for the PatternRegistrar.
+     *
+     * @return void
+     */
     public function register(): void
     {
         $this->app->singleton(CategoryRegistrar::class);

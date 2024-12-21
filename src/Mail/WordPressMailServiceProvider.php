@@ -7,12 +7,19 @@ namespace Pollora\Mail;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Override WordPress' wp_mail function to use the Laravel mailer.
+ * Class WordPressMailServiceProvider
+ * 
+ * Service provider that overrides WordPress' wp_mail function to use the Laravel mailer.
+ * Provides integration between WordPress mailing system and Laravel's mail functionality.
  */
 class WordPressMailServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
+     * 
+     * Binds the Mailer instance as a singleton in the application container.
+     *
+     * @return void
      */
     public function register(): void
     {
@@ -21,6 +28,11 @@ class WordPressMailServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
+     * 
+     * Defines the wp_mail function if it doesn't exist, providing Laravel-powered
+     * mail functionality while maintaining WordPress compatibility.
+     *
+     * @return void
      */
     public function boot(): void
     {
