@@ -10,8 +10,17 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Scheduler\Contracts\SchedulerInterface;
 use Pollora\Support\Facades\Filter;
 
+/**
+ * Service provider for WordPress cron scheduler functionality.
+ *
+ * Registers and bootstraps the scheduler services, including filters
+ * and recurring event scheduling.
+ */
 class SchedulerServiceProvider extends ServiceProvider
 {
+    /**
+     * Register scheduler services.
+     */
     public function register(): void
     {
         $this->app->singleton(SchedulerInterface::class, Scheduler::class);
@@ -21,6 +30,9 @@ class SchedulerServiceProvider extends ServiceProvider
         $this->registerFilters($scheduler);
     }
 
+    /**
+     * Bootstrap scheduler services.
+     */
     public function boot(): void
     {
         $this->app->booted(function (): void {
@@ -28,6 +40,11 @@ class SchedulerServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Register WordPress filters for the scheduler.
+     *
+     * @param SchedulerInterface $scheduler Scheduler instance
+     */
     protected function registerFilters(SchedulerInterface $scheduler): void
     {
         if ($this->isOrchastraTest()) {
@@ -51,6 +68,9 @@ class SchedulerServiceProvider extends ServiceProvider
         }
     }
 
+    /**
+     * Schedule all recurring events.
+     */
     protected function scheduleRecurringEvents(): void
     {
         if ($this->isOrchastraTest() || defined('WP_CLI')) {
@@ -61,6 +81,11 @@ class SchedulerServiceProvider extends ServiceProvider
         \Pollora\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
     }
 
+    /**
+     * Check if running in Orchestra test environment.
+     *
+     * @return bool True if in Orchestra test environment
+     */
     protected function isOrchastraTest(): bool
     {
         $db = DB::getConfig(null);

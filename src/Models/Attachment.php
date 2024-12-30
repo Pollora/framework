@@ -113,9 +113,12 @@ class Attachment extends \Corcel\Model\Attachment
         }
 
         // WordPress stores this as a serialized array
-        $unserialized = @unserialize($metaValue);
+        $unserialized = is_string($metaValue) ? unserialize($metaValue) : null;
+        if (!is_array($unserialized)) {
+            return [];
+        }
 
-        return is_array($unserialized) ? $unserialized : [];
+        return $unserialized;
     }
 
     /**

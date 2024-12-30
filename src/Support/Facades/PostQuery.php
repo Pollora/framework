@@ -7,16 +7,20 @@ namespace Pollora\Support\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Facade for {@link \Pollora\Query\PostQuery}.
+ * Facade for WordPress Post Query functionality.
  *
- * @see \Pollora\Query\PostQuery
+ * Provides a fluent interface for building WordPress post queries with
+ * improved type safety and modern PHP syntax.
  *
  * @mixin \Pollora\Query\PostQuery
+ * @see \Pollora\Query\PostQuery
  */
 class PostQuery extends Facade
 {
     /**
      * Get the registered name of the component.
+     *
+     * @return string
      */
     protected static function getFacadeAccessor(): string
     {

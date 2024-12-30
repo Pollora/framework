@@ -10,19 +10,41 @@ use Illuminate\Support\Facades\DB;
 use wpdb;
 
 /**
- * Replace WordPress' database calls to Laravel's database connection to hold a single database connection
+ * WordPress database proxy that integrates with Laravel's database connection.
+ *
+ * This class extends WordPress' native database class (wpdb) to redirect
+ * database operations through Laravel's connection, ensuring a single
+ * shared database connection between WordPress and Laravel.
  */
 class WordPressDatabase extends wpdb
 {
+    /**
+     * Laravel's database connection instance.
+     *
+     * @var Connection
+     */
     protected Connection $eloquentConnection;
 
+    /**
+     * Database connection handler.
+     *
+     * @var mixed PDO instance from Laravel's connection
+     */
     public $dbh;
 
     /**
+     * Query start time for performance monitoring.
+     *
      * @var float
      */
     public $time_start;
 
+    /**
+     * Create a new WordPress database proxy instance.
+     *
+     * Initializes the Laravel database connection and configures
+     * WordPress database settings accordingly.
+     */
     public function __construct()
     {
         $this->eloquentConnection = DB::connection();
@@ -33,7 +55,12 @@ class WordPressDatabase extends wpdb
     }
 
     /**
-     * Verify if the current configuration is compatible with WordPress
+     * Verify if the current configuration is compatible with WordPress.
+     *
+     * Checks if all required database configuration parameters are present
+     * and if the driver is MySQL (required by WordPress).
+     *
+     * @return bool True if configuration is valid for WordPress
      */
     public function hasValidConfiguration(): bool
     {
@@ -47,9 +74,12 @@ class WordPressDatabase extends wpdb
     }
 
     /**
-     * Extract database configuration from Eloquent connection
+     * Extract database configuration from Eloquent connection.
      *
-     * @return array{0: string, 1: string, 2: string, 3: string}
+     * Retrieves and formats database connection parameters from Laravel's
+     * configuration in a format compatible with WordPress.
+     *
+     * @return array{0: string, 1: string, 2: string, 3: string} Array of [username, password, database, host]
      */
     protected function extractConfig(): array
     {
@@ -64,7 +94,15 @@ class WordPressDatabase extends wpdb
     }
 
     /**
-     * Connect to MySQL using mysqli
+     * Connect to MySQL using mysqli.
+     *
+     * Overrides WordPress' mysqli connection to use Laravel's PDO connection instead.
+     *
+     * @param string $host Database host
+     * @param string|null $port Database port
+     * @param string|null $socket Database socket
+     * @param int|null $client_flags Client connection flags
+     * @return void
      */
     public function mysqli_real_connect(
         string $host,
@@ -76,9 +114,14 @@ class WordPressDatabase extends wpdb
     }
 
     /**
-     * Prevent usage of deprecated mysql_connect
+     * Prevent usage of deprecated mysql_connect.
      *
-     * @throws Exception
+     * Blocks attempts to use the old mysql_connect method which is no longer supported.
+     *
+     * @param bool $new_link Whether to force a new connection
+     * @param int $client_flags Client connection flags
+     * @throws Exception Always throws to prevent usage
+     * @return never
      */
     public function mysql_connect($new_link = false, $client_flags = 0): never
     {

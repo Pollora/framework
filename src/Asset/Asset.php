@@ -6,6 +6,7 @@ namespace Pollora\Asset;
 
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -18,71 +19,99 @@ class Asset
 {
     /**
      * The path or array of paths to the asset file(s).
+     *
+     * @var string|array<string>
      */
     protected string|array $path;
 
     /**
      * The type of asset ('css' or 'js').
+     *
+     * @var string
      */
     protected string $type;
 
     /**
      * Array of asset handles that this asset depends on.
+     *
+     * @var array<string>
      */
     protected array $dependencies = [];
 
     /**
      * The Vite instance for asset compilation.
+     *
+     * @var \Illuminate\Foundation\Vite|null
      */
     protected ?\Illuminate\Foundation\Vite $vite = null;
 
     /**
      * Whether to use Vite.js for asset handling.
+     *
+     * @var bool
      */
     protected bool $useVite = false;
 
     /**
      * The version string for cache busting.
+     *
+     * @var string|null
      */
     protected ?string $version = null;
 
     /**
      * The media query for stylesheet (e.g., 'all', 'print', 'screen').
+     *
+     * @var string
      */
     protected string $media = 'all';
 
     /**
      * Whether to load the script in the footer.
+     *
+     * @var bool
      */
     protected bool $loadInFooter = false;
 
     /**
      * The loading strategy for scripts (e.g., 'defer', 'async').
+     *
+     * @var string|null
      */
     protected ?string $loadStrategy = null;
 
     /**
      * The content to be added inline with the asset.
+     *
+     * @var string|null
      */
     protected ?string $inlineContent = null;
 
     /**
      * The position for inline content ('before' or 'after').
+     *
+     * @var string|null
      */
     protected ?string $inlinePosition = null;
 
     /**
      * Array of WordPress hooks where the asset should be enqueued.
+     *
+     * @var array<string>
      */
     protected array $hooks = [];
 
     /**
      * The asset container instance.
+     *
+     * @var AssetContainer|null
      */
     protected ?AssetContainer $container = null;
 
     /**
      * The Vite manager instance.
+     *
+     * @var ViteManager|null
      */
     protected ?ViteManager $viteManager = null;
 
@@ -208,8 +237,11 @@ class Asset
 
     /**
      * Enqueues the asset in WordPress frontend.
+     * 
+     * Registers the asset to be loaded on the public-facing side of the site
+     * using the 'wp_enqueue_scripts' hook.
      *
-     * @return self
+     * @return self Returns the current instance for method chaining
      */
     public function toFrontend(): self
     {
@@ -218,8 +250,11 @@ class Asset
 
     /**
      * Enqueues the asset in WordPress admin area.
+     * 
+     * Registers the asset to be loaded in the WordPress administration panel
+     * using the 'admin_enqueue_scripts' hook.
      *
-     * @return self
+     * @return self Returns the current instance for method chaining
      */
     public function toBackend(): self
     {
@@ -228,8 +263,11 @@ class Asset
 
     /**
      * Enqueues the asset on the login screen.
+     * 
+     * Registers the asset to be loaded on the WordPress login page
+     * using the 'login_enqueue_scripts' hook.
      *
-     * @return self
+     * @return self Returns the current instance for method chaining
      */
     public function toLoginScreen(): self
     {
@@ -238,8 +276,11 @@ class Asset
 
     /**
      * Enqueues the asset in the customizer preview.
+     * 
+     * Registers the asset to be loaded in the WordPress theme customizer preview
+     * using the 'customize_preview_init' hook.
      *
-     * @return self
+     * @return self Returns the current instance for method chaining
      */
     public function toCustomizer(): self
     {
@@ -248,8 +289,11 @@ class Asset
 
     /**
      * Enqueues the asset in the block editor.
+     * 
+     * Registers the asset to be loaded in the Gutenberg block editor
+     * using the 'enqueue_block_editor_assets' hook.
      *
-     * @return self
+     * @return self Returns the current instance for method chaining
      */
     public function toEditor(): self
     {
@@ -293,18 +337,25 @@ class Asset
      */
     public function __destruct()
     {
-        $this->hooks = $this->hooks !== [] ? $this->hooks : ['wp_enqueue_scripts'];
+        try {
+            $this->hooks = $this->hooks !== [] ? $this->hooks : ['wp_enqueue_scripts'];
 
-        if ($this->useVite) {
-            $this->configureViteAssets();
-        }
-
-        foreach ($this->hooks as $hook) {
-            if ($this->needToLoadViteClient()) {
-                $this->loadViteClient($hook);
+            if ($this->useVite) {
+                $this->configureViteAssets();
             }
-            Action::add($hook, $this->enqueueStyleOrScript(...), 99);
 
+            foreach ($this->hooks as $hook) {
+                if ($this->needToLoadViteClient()) {
+                    $this->loadViteClient($hook);
+                }
+                Action::add($hook, $this->enqueueStyleOrScript(...), 99);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error in Asset destructor', [
+                'error' => $e->getMessage(),
+                'hooks' => $this->hooks,
+                'path' => $this->path ?? null
+            ]);
         }
     }
 

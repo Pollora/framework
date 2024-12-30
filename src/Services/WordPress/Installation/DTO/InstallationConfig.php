@@ -10,8 +10,25 @@ use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
+/**
+ * Data Transfer Object for WordPress installation configuration.
+ *
+ * This class encapsulates WordPress site configuration parameters and provides
+ * factory methods for creating configurations from interactive prompts.
+ */
 class InstallationConfig
 {
+    /**
+     * Create a new installation configuration instance.
+     *
+     * @param string $title Site title
+     * @param string $description Site description
+     * @param string $adminUser Admin username
+     * @param string $adminEmail Admin email address
+     * @param string $adminPassword Admin password
+     * @param string $locale Site language locale
+     * @param bool $isPublic Whether site should be indexed by search engines
+     */
     public function __construct(
         public readonly string $title,
         public readonly string $description,
@@ -22,6 +39,19 @@ class InstallationConfig
         public readonly bool $isPublic,
     ) {}
 
+    /**
+     * Create configuration from interactive prompts.
+     *
+     * Prompts user for WordPress installation settings with validation.
+     * Includes:
+     * - Site information (title, description)
+     * - Admin account details
+     * - Language preferences
+     * - Search engine visibility
+     *
+     * @return self
+     * @throws \RuntimeException If user input validation fails
+     */
     public static function fromPrompts(): self
     {
         return new self(

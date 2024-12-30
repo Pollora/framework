@@ -28,6 +28,8 @@ class WordPressGuard implements StatefulGuard
 
     /**
      * The last attempted user authentication.
+     *
+     * @var User|null
      */
     private ?User $lastAttempted = null;
 
@@ -54,7 +56,7 @@ class WordPressGuard implements StatefulGuard
     /**
      * Validate user credentials without logging them in.
      *
-     * @param array $credentials User credentials (username and password)
+     * @param array<string, string> $credentials User credentials (username and password)
      * @return bool True if credentials are valid
      */
     public function validate(array $credentials = []): bool
@@ -68,7 +70,7 @@ class WordPressGuard implements StatefulGuard
     /**
      * Attempt to authenticate a user and log them in.
      *
-     * @param array $credentials User credentials
+     * @param array<string, string> $credentials User credentials
      * @param bool $remember Whether to "remember" the user
      * @return bool True if authentication successful
      */

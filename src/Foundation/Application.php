@@ -8,12 +8,19 @@ use Illuminate\Events\EventServiceProvider;
 use Illuminate\Log\LogServiceProvider;
 use Pollora\Route\RouteServiceProvider;
 
+/**
+ * Custom Laravel Application class for WordPress integration.
+ *
+ * Extends Laravel's base Application class to provide WordPress-specific
+ * service provider registration and configuration.
+ */
 class Application extends \Illuminate\Foundation\Application
 {
     /**
-     * Register the base service providers for the application.
+     * Register the basic service providers.
      *
-     * This method ensures that essential Laravel services (Events, Logging, Routing) are available.
+     * Registers core service providers required for WordPress integration,
+     * including events, logging, and routing functionality.
      *
      * @return void
      */

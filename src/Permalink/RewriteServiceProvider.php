@@ -6,29 +6,48 @@ namespace Pollora\Permalink;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Support\Facades\Action;
+use Pollora\Support\Facades\Filter;
+use Illuminate\Support\Facades\URL;
+use Pollora\Support\URL as PolloraURL;
 
-/**
- * Class RewriteServiceProvider
- *
- * A service provider for managing WP URL rewrites.
- */
 class RewriteServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    public function register(): void
     {
-        // For remove the trailing slash.
-        Action::add('permalink_structure_changed', fn ($oldPermalinkStructure, $new_permalink_structure) => $this->removeTrailingSlash($oldPermalinkStructure, $new_permalink_structure), 90);
+        $this->registerUrlMacro()
+            ->registerPermalinkManager()
+            ->registerFilters();
     }
 
-    /**
-     * Remove trailing slash from permalink structure
-     */
-    protected function removeTrailingSlash(string|bool $oldPermalinkStructure, string|bool $permalinkStructure): void
+    protected function registerUrlMacro(): self
     {
-        if ($oldPermalinkStructure === '' || $oldPermalinkStructure === '0' || $oldPermalinkStructure === false) {
-            return;
-        }
+        URL::macro('removeTrailingSlash', fn(?string $url) => 
+            app(PolloraUrl::class)->removeTrailingSlash($url)
+        );
 
-        update_option('permalink_structure', rtrim($permalinkStructure, '/'));
+        return $this;
+    }
+
+    protected function registerPermalinkManager(): self
+    {
+        $this->app->singleton(PermalinkManager::class);
+        return $this;
+    }
+
+    protected function registerFilters(): self
+    {
+        Filter::add('redirect_canonical', fn($canonicalUrl) =>
+            app(PermalinkManager::class)->handleCanonicalRedirect($canonicalUrl)
+        );
+        return $this;
+    }
+
+    public function boot(): void
+    {
+        Action::add(
+            'permalink_structure_changed',
+            fn($old, $new) => app(PermalinkManager::class)->updateStructure($new),
+            90
+        );
     }
 }

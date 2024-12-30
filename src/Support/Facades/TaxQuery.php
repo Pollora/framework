@@ -7,16 +7,20 @@ namespace Pollora\Support\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Facade for {@link \Pollora\Query\TaxQuery}.
+ * Facade for WordPress Taxonomy Query functionality.
  *
- * @see \Pollora\Query\TaxQuery
+ * Provides a fluent interface for building WordPress taxonomy queries with
+ * improved type safety and query validation.
  *
  * @mixin \Pollora\Query\TaxQuery
+ * @see \Pollora\Query\TaxQuery
  */
 class TaxQuery extends Facade
 {
     /**
      * Get the registered name of the component.
+     *
+     * @return string
      */
     protected static function getFacadeAccessor(): string
     {

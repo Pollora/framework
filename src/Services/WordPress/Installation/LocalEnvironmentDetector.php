@@ -6,10 +6,18 @@ namespace Pollora\Services\WordPress\Installation;
 
 use Illuminate\Support\Arr;
 
+/**
+ * Service for detecting and configuring local development environments.
+ *
+ * This service provides automatic detection and configuration for common
+ * local development environments like DDEV and Laradock.
+ */
 class LocalEnvironmentDetector
 {
     /**
-     * Default configuration
+     * Default configuration values.
+     *
+     * @var array<string, string>
      */
     private const DEFAULT_CONFIG = [
         'siteUrl' => 'http://localhost',
@@ -49,7 +57,14 @@ class LocalEnvironmentDetector
     ];
 
     /**
-     * Get environment configuration based on detection
+     * Get configuration for the detected environment.
+     *
+     * Detects the current development environment and returns appropriate
+     * configuration values. Falls back to default configuration if no
+     * environment is detected.
+     *
+     * @return array<string, string> Environment configuration with following keys:
+     *                               siteUrl, dbHost, dbPort, dbName, dbUser, dbPassword
      */
     public static function getConfig(): array
     {
@@ -69,7 +84,9 @@ class LocalEnvironmentDetector
     }
 
     /**
-     * Check if running in DDEV environment
+     * Check if running in DDEV environment.
+     *
+     * @return bool True if DDEV environment is detected
      */
     public static function isDdev(): bool
     {
@@ -77,9 +94,11 @@ class LocalEnvironmentDetector
     }
 
     /**
-     * Check if running in Laradock environment
+     * Check if running in Laradock environment.
+     *
+     * @return bool True if Laradock environment is detected
      */
-    private function isLaradock(): bool
+    private static function isLaradock(): bool
     {
         return ! (in_array(getenv('LARADOCK_PHP_VERSION'), ['', '0'], true) || getenv('LARADOCK_PHP_VERSION') === [] || getenv('LARADOCK_PHP_VERSION') === false);
     }
@@ -99,13 +118,21 @@ class LocalEnvironmentDetector
     }
 
     /**
-     * Add a custom environment configuration
+     * Add a custom environment configuration.
+     *
+     * Registers a new environment type with its detection logic and configuration.
+     *
+     * @param string $name Environment identifier
+     * @param callable $detector Function that returns bool indicating if environment is active
+     * @param array<string, mixed> $config Environment-specific configuration values
+     * @return void
      */
     public static function addEnvironment(
         string $name,
         callable $detector,
         array $config
-    ): void {
+    ): void
+    {
         self::$environments[$name] = [
             'detector' => $detector,
             'config' => $config,
@@ -113,7 +140,11 @@ class LocalEnvironmentDetector
     }
 
     /**
-     * Get current environment name
+     * Get the name of the current environment.
+     *
+     * Attempts to detect the current environment from registered environments.
+     *
+     * @return string|null Environment identifier if detected, null otherwise
      */
     public static function getCurrentEnvironment(): ?string
     {

@@ -8,12 +8,25 @@ use function Laravel\Prompts\error;
 use function Laravel\Prompts\search;
 use function Laravel\Prompts\spin;
 
+/**
+ * Service for managing WordPress language selection and installation.
+ *
+ * This service handles fetching available WordPress translations from the official API
+ * and provides an interactive language selection interface.
+ */
 class LanguageService
 {
+    /**
+     * WordPress translations API endpoint.
+     *
+     * @var string
+     */
     private const API_URL = 'https://api.wordpress.org/translations/core/1.0/';
 
     /**
-     * Default fallback languages if API fails
+     * Default fallback languages if API fails.
+     *
+     * @var array<string, string>
      */
     private const FALLBACK_LANGUAGES = [
         'en_US' => 'English (United States)',
@@ -28,7 +41,13 @@ class LanguageService
     ];
 
     /**
-     * Prompt user to select a language
+     * Prompt user to select a WordPress language.
+     *
+     * Provides an interactive search interface for selecting the site language,
+     * with fallback to default languages if API is unavailable.
+     *
+     * @return string The selected language code (e.g., 'en_US', 'fr_FR')
+     * @throws \RuntimeException If language fetch fails and no fallback is available
      */
     public function promptForLanguage(): string
     {
@@ -58,7 +77,10 @@ class LanguageService
     }
 
     /**
-     * Get available WordPress languages
+     * Fetch available WordPress languages from API.
+     *
+     * @return array<string, string> Associative array of language codes and names
+     * @throws \RuntimeException If API request fails
      */
     private function getAvailableLanguages(): array
     {
@@ -81,11 +103,18 @@ class LanguageService
     }
 
     /**
-     * Parse the API response and format languages
+     * Parse the WordPress translations API response.
+     *
+     * @param string $response Raw JSON response from WordPress API
+     * @return array<string, string> Formatted array of language codes and names
+     * @throws \RuntimeException If response parsing fails
      */
     private function parseLanguagesResponse(string $response): array
     {
         $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException('Invalid JSON response from WordPress API');
+        }
 
         if (! isset($data['translations'])) {
             return self::FALLBACK_LANGUAGES;

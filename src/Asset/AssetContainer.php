@@ -14,21 +14,29 @@ class AssetContainer
 {
     /**
      * The base path for assets in this container.
+     *
+     * @var string
      */
     public $basePath;
 
     /**
      * The path to the hot reload file used by Vite.
+     *
+     * @var string
      */
     protected string $hotFile;
 
     /**
      * The directory where built assets are stored.
+     *
+     * @var string
      */
     protected string $buildDirectory;
 
     /**
      * The path to the Vite manifest file.
+     *
+     * @var string
      */
     protected string $manifestPath;
 
