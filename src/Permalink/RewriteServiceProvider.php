@@ -8,7 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
 use Illuminate\Support\Facades\URL;
-use Pollora\Support\URL as PolloraURL;
+use Pollora\Support\Uri;
 
 class RewriteServiceProvider extends ServiceProvider
 {
@@ -21,8 +21,8 @@ class RewriteServiceProvider extends ServiceProvider
 
     protected function registerUrlMacro(): self
     {
-        URL::macro('removeTrailingSlash', fn(?string $url) => 
-            app(PolloraUrl::class)->removeTrailingSlash($url)
+        URL::macro('removeTrailingSlash', fn(?string $url) =>
+            app(Uri::class)->removeTrailingSlash($url)
         );
 
         return $this;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Support;
 
-class URL
+class Uri
 {
     public function removeTrailingSlash(?string $url): ?string
     {
@@ -28,7 +28,7 @@ class URL
         $query = isset($parts['query']) ? "?{$parts['query']}" : '';
         $fragment = isset($parts['fragment']) ? "#{$parts['fragment']}" : '';
 
-        return $scheme 
+        return $scheme
             ? "{$scheme}://{$host}{$port}{$path}{$query}{$fragment}"
             : "{$host}{$port}{$path}{$query}{$fragment}";
     }
