@@ -11,6 +11,7 @@ namespace Pollora\Ajax;
 
 use InvalidArgumentException;
 use Pollora\Support\Facades\Action;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Ajax
@@ -120,7 +121,14 @@ class Ajax
      */
     public function __destruct()
     {
-        $this->registerAjaxForUserType();
+        try {
+            $this->registerAjaxForUserType();
+        } catch (\Throwable $e) {
+            Log::error('Error in Ajax destructor', [
+                'error' => $e->getMessage(),
+                'action' => $this->action
+            ]);
+        }
     }
 
     /**

@@ -112,6 +112,9 @@ class LanguageService
     private function parseLanguagesResponse(string $response): array
     {
         $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException('Invalid JSON response from WordPress API');
+        }
 
         if (! isset($data['translations'])) {
             return self::FALLBACK_LANGUAGES;

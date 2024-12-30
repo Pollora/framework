@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\WordPress;
+use Illuminate\Support\Str;
 
 class Bootstrap
 {
@@ -91,7 +92,14 @@ class Bootstrap
         ) : (new WordPress)->site()->path;
 
         if ($path !== '' && $path !== '0') {
-            $url .= str_replace('public/', '', WP_PATH).ltrim($path, '/'); // @phpstan-ignore-line
+            $url .= strtr(WP_PATH, ['public/' => '']).ltrim(
+                Str::of($path)
+                    ->replaceMatches('/[^a-zA-Z0-9\-\_\/\.]/', '')
+                    ->toString(),
+                '/'
+            );
+
+            dd($url);
         }
 
         return $url;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Asset;
 
 use Pollora\Foundation\Application;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Represents a file asset and handles its URL generation.
@@ -51,15 +52,24 @@ class AssetFile implements \Stringable
      */
     public function __toString(): string
     {
-        Application::getInstance();
-        $assetContainer = app('asset.container')->get($this->assetContainer);
+        try {
+            Application::getInstance();
+            $assetContainer = app('asset.container')->get($this->assetContainer);
 
-        if ($assetContainer === null) {
+            if ($assetContainer === null) {
+                return '';
+            }
+
+            $viteManager = new ViteManager($assetContainer);
+            $result = $viteManager->asset($this->path);
+            
+            return is_string($result) ? $result : '';
+        } catch (\Throwable $e) {
+            Log::error('Error in AssetFile::__toString', [
+                'error' => $e->getMessage(),
+                'path' => $this->path
+            ]);
             return '';
         }
-
-        $viteManager = new ViteManager($assetContainer);
-
-        return $viteManager->asset($this->path) ?? '';
     }
 }

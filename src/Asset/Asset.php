@@ -6,6 +6,7 @@ namespace Pollora\Asset;
 
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -336,17 +337,25 @@ class Asset
      */
     public function __destruct()
     {
-        $this->hooks = $this->hooks !== [] ? $this->hooks : ['wp_enqueue_scripts'];
+        try {
+            $this->hooks = $this->hooks !== [] ? $this->hooks : ['wp_enqueue_scripts'];
 
-        if ($this->useVite) {
-            $this->configureViteAssets();
-        }
-
-        foreach ($this->hooks as $hook) {
-            if ($this->needToLoadViteClient()) {
-                $this->loadViteClient($hook);
+            if ($this->useVite) {
+                $this->configureViteAssets();
             }
-            Action::add($hook, $this->enqueueStyleOrScript(...), 99);
+
+            foreach ($this->hooks as $hook) {
+                if ($this->needToLoadViteClient()) {
+                    $this->loadViteClient($hook);
+                }
+                Action::add($hook, $this->enqueueStyleOrScript(...), 99);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error in Asset destructor', [
+                'error' => $e->getMessage(),
+                'hooks' => $this->hooks,
+                'path' => $this->path ?? null
+            ]);
         }
     }
 
