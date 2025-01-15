@@ -8,16 +8,19 @@ use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Commands\MakeThemeCommand;
 use Pollora\Theme\Commands\RemoveThemeCommand;
 use Pollora\Theme\Factories\ComponentFactory;
+use Pollora\Foundation\Support\IncludesFiles;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
  */
 class ThemeServiceProvider extends ServiceProvider
 {
+    use IncludesFiles;
     protected $wp_theme;
 
     protected $theme_root;
@@ -50,24 +53,28 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(ThemeComponentProvider::class, fn ($app): \Pollora\Theme\ThemeComponentProvider => new ThemeComponentProvider($app, $app->make(ComponentFactory::class)));
 
         $this->app->make(ThemeComponentProvider::class)->register();
+
+        Action::add('after_setup_theme', [$this, 'bootTheme']);
     }
 
     /**
      * Perform post-registration booting of services.
      */
-    public function boot(): void
+    public function bootTheme(): void
     {
-        $theme = Theme::active();
+        $theme = Theme::instance();
+        $theme->includes([$theme->theme()->getThemeIncDir()]);
+        $currentTheme = $theme->active();
+
         $this->app['asset.container']->addContainer('theme', [
-            'hot_file' => public_path("{$theme}.hot"),
-            'build_directory' => "build/{$theme}",
+            'hot_file' => public_path("{$currentTheme}.hot"),
+            'build_directory' => "build/{$currentTheme}",
             'manifest_path' => 'manifest.json',
             'base_path' => '',
         ]);
 
         $this->app['asset.container']->setDefaultContainer('theme');
-
-        $this->publishConfigurations();
+        
         $this->loadConfigurations();
 
         $this->app->make(ThemeComponentProvider::class)->boot();
@@ -76,13 +83,6 @@ class ThemeServiceProvider extends ServiceProvider
             ->each(function ($directive, $function): void {
                 Blade::directive($function, $directive);
             });
-    }
-
-    protected function publishConfigurations(): void
-    {
-        $this->publishes([
-            __DIR__.'/config/theme.php' => config_path('theme.php'),
-        ], 'pollora-theme-config');
     }
 
     protected function loadConfigurations(): void

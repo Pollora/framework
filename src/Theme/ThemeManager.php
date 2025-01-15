@@ -14,14 +14,22 @@ namespace Pollora\Theme;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\View\ViewFinderInterface;
+use Pollora\Foundation\Support\IncludesFiles;
+use Illuminate\Support\Str;
 
 class ThemeManager
 {
+    use IncludesFiles;
     protected array $config;
 
     protected array $parentThemes = [];
+    protected ?ThemeMetadata $theme = null;
 
     public function __construct(protected Container $app, protected ViewFinderInterface $viewFinder, protected Loader $localeLoader) {}
+
+    public function instance(): ThemeManager {
+        return $this;
+    }
 
     public function load(string $themeName): void
     {
@@ -30,7 +38,7 @@ class ThemeManager
         }
 
         $baseTheme = new ThemeMetadata($themeName, $this->getThemesPath());
-
+        $this->theme = $baseTheme;
         $currentTheme = $baseTheme;
 
         while (true) {
@@ -49,6 +57,7 @@ class ThemeManager
             }
 
             $currentTheme = new ThemeMetadata($parentThemeName, $this->getThemesPath());
+            $this->parentThemes[] = $currentTheme;
         }
 
         $this->localeLoader->addNamespace($themeName, $baseTheme->getLanguagePath());
@@ -76,6 +85,7 @@ class ThemeManager
 
             return file_exists($themeInfo->getConfigPath());
         });
+
     }
 
     protected function getThemesPath(): string
@@ -102,5 +112,30 @@ class ThemeManager
         $theme = $this->active();
 
         return $this->getThemesPath().'/'.$theme.'/'.ltrim($path, '/');
+    }
+
+    public function getThemeAppPath(string $themeName, string $path = ''): string
+    {
+        $themeNamespace = Str::studly($themeName);
+        $path = trim($path, '/');
+
+        if ($path !== '') {
+            $segments = explode('/', $path, 2);
+            if (count($segments) > 1) {
+                return app_path($segments[0].'/'.$themeNamespace.'/'.$segments[1]);
+            }
+        }
+
+        return app_path($path);
+    }
+
+    public function theme(): ?ThemeMetadata
+    {
+        return $this->theme;
+    }
+
+    public function getParentThemes(): array
+    {
+        return $this->parentThemes;
     }
 }

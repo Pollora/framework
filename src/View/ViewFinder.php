@@ -68,21 +68,21 @@ class ViewFinder
     {
         $allowedPaths = [
             $this->path,
-            ...array_filter($this->finder->getPaths(), fn($path) => 
+            ...array_filter($this->finder->getPaths(), fn($path) =>
                 str_starts_with(realpath($path), realpath($this->path))
             )
         ];
 
         return new class($this->files, $allowedPaths) extends \Pollora\Filesystem\Filesystem {
             private array $allowedPaths;
-            
-            public function __construct($files, array $allowedPaths) 
+
+            public function __construct($files, array $allowedPaths)
             {
                 parent::__construct();
                 $this->allowedPaths = array_map('realpath', $allowedPaths);
             }
-            
-            public function isPathAllowed(string $path): bool 
+
+            public function isPathAllowed(string $path): bool
             {
                 $realPath = realpath($path);
                 return $realPath && array_reduce(

@@ -20,6 +20,7 @@ class ThemeInitializer implements ThemeComponent
     public function __construct(protected Application $app)
     {
         $this->themeRoot = config('theme.base_path');
+        Filter::add('stylesheet_directory', [$this, 'overrideStylesheetDirectory'], 90, 3);
     }
 
     public function register(): void
@@ -31,7 +32,18 @@ class ThemeInitializer implements ThemeComponent
             $this->initializeTheme();
         }, 1);
 
+        //Filter::add('stylesheet_directory_uri', [$this, 'overrideStylesheetDirectoryUri'], 90, 3);
         $this->overrideThemeUri();
+    }
+
+    public function overrideStylesheetDirectoryUri(string $stylesheet_dir_uri, string $stylesheet, string $theme_root_uri): string
+    {
+        dd($stylesheet);
+    }
+
+    public function overrideStylesheetDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
+    {
+        return str_replace($themeRootUri, config('theme.base_path'), $stylesheetDirUri);
     }
 
     private function initializeTheme(): void

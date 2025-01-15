@@ -15,6 +15,7 @@ use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
+use Pollora\Plugins\WooCommerce\WooCommerceProvider;
 use Pollora\PostType\PostTypeServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
@@ -65,6 +66,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
+        $this->app->register(WooCommerceProvider::class);
 
         if (config('wordpress.use_laravel_scheduler')) {
             $this->app->register(SchedulerServiceProvider::class);

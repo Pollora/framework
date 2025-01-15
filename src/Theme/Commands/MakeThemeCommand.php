@@ -21,6 +21,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected $textExtensions = ['php', 'js', 'css', 'html', 'htm', 'xml', 'txt', 'md', 'json', 'yaml', 'yml', 'svg', 'twig', 'blade.php', 'stub'];
 
+    protected ThemeMetadata $theme;
     protected array $containerFolder;
 
     public function __construct(Repository $config, Filesystem $files)
@@ -30,22 +31,20 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     public function handle(): int
     {
-        if (! $this->validateThemeName()) {
+        $this->theme = $this->makeTheme($this->argument('name'));
+
+        if (! $this->validateThemeName() || ! $this->canGenerateTheme()) {
             return self::FAILURE;
         }
 
-        if (! $this->canGenerateTheme()) {
-            return self::FAILURE;
-        }
-
-        $this->setupContainerFolders();
-        $this->generateThemeStructure();
+        $this->setupContainerFolders()
+             ->generateThemeStructure();
 
         if ($this->option('source')) {
             $this->copySourceFolder();
         }
 
-        $this->info("Theme \"{$this->getTheme()->getName()}\" created successfully.");
+        $this->info("Theme \"{$this->theme->getName()}\" created successfully.");
 
         return self::SUCCESS;
     }
@@ -68,7 +67,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return true;
         }
 
-        $name = $this->getTheme()->getName();
+        $name = $this->theme->getName();
 
         $this->error("Theme \"{$name}\" already exists.");
         if ($this->option('force')) {
@@ -78,7 +77,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         return $this->confirm("Are you sure you want to override \"{$name}\" theme folder?");
     }
 
-    protected function setupContainerFolders(): void
+    protected function setupContainerFolders(): self
     {
         $dirMapping = $this->config->get('theme.structure', []);
         $this->containerFolder = [
@@ -88,11 +87,13 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             'partial' => $dirMapping['partials'] ?? 'views/partials',
             'view' => $dirMapping['views'] ?? 'views',
         ];
+
+        return $this;
     }
 
     protected function generateThemeStructure(): void
     {
-        $this->copyDirectory($this->getTemplatePath('common'), $this->getTheme()->getBasePath());
+        $this->copyDirectory($this->getTemplatePath('common'), $this->theme->getBasePath());
     }
 
     protected function copySourceFolder(): void
@@ -104,7 +105,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return;
         }
 
-        $destinationPath = $this->getTheme()->getBasePath();
+        $destinationPath = $this->theme->getBasePath();
         $this->info("Copying contents from {$sourcePath} to {$destinationPath}");
         $this->copyDirectory($sourcePath, $destinationPath);
         $this->info('Source folder contents copied successfully.');
@@ -116,54 +117,60 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             File::makeDirectory($destination, 0755, true);
         }
 
-        $items = File::allFiles($source);
-
-        foreach ($items as $item) {
-            $relativePath = $item->getRelativePath();
-            $targetDir = $destination.($relativePath ? '/'.$relativePath : '');
-            $targetPath = $targetDir.'/'.$item->getFilename();
-            $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
-
-            if (str_starts_with($relativePath, 'app/')) {
-                $targetPath = $this->insertThemeNamespaceInPath($targetPath, $destination);
-                $targetDir = dirname($targetPath);
-            }
-
-            if (! File::isDirectory($targetDir)) {
-                File::makeDirectory($targetDir, 0755, true);
-            }
-
-            if ($item->isDir()) {
-                $this->copyDirectory($item->getRealPath(), $targetPath);
-            } else {
-                if (File::exists($targetPath) && ! $this->option('force') && ! $this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")) {
-                    continue;
-                }
-                $this->copyFileWithReplacements($item->getRealPath(), $targetPath);
-            }
+        foreach (File::allFiles($source) as $item) {
+            $this->processFile($item, $destination);
         }
     }
 
-    protected function insertThemeNamespaceInPath(string $path, string $themeLocacation): string
+    protected function processFile($item, string $destination): void
     {
+        $relativePath = $item->getRelativePath();
+        $targetInfo = $this->getTargetPathInfo($item, $destination, $relativePath);
 
-        $path = str_replace([$themeLocacation, 'app/'], '', $path);
-        $path = trim($path, '/');
+        $this->ensureDirectoryExists($targetInfo['dir']);
 
-        $segments = explode('/', $path, 2);
-
-        if (count($segments) > 1) {
-            $themeNamespace = $this->getThemeNamespace();
-
-            return app_path($segments[0].'/'.$themeNamespace.'/'.$segments[1]);
+        if ($item->isDir()) {
+            $this->copyDirectory($item->getRealPath(), $targetInfo['path']);
+        } else {
+            $this->handleFileCopy($item, $targetInfo['path']);
         }
-
-        return app_path($path);
     }
 
-    protected function getThemeNamespace(): string
+    protected function getTargetPathInfo($item, string $destination, string $relativePath): array
     {
-        return Str::studly($this->getTheme()->getName());
+        $targetDir = $destination . ($relativePath ? '/' . $relativePath : '');
+        $targetPath = $targetDir . '/' . $item->getFilename();
+        $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
+
+        if (str_starts_with($relativePath, 'app/')) {
+            $relativePath = str_replace('app/Themes/', '', $relativePath);
+            $targetDir = $this->theme->getThemeAppDir($relativePath);
+            $targetPath = $targetDir . DIRECTORY_SEPARATOR . basename($targetPath);
+        }
+
+        return [
+            'dir' => $targetDir,
+            'path' => $targetPath
+        ];
+    }
+
+    protected function handleFileCopy($item, string $targetPath): void
+    {
+        if (File::exists($targetPath) && 
+            !$this->option('force') && 
+            !$this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")
+        ) {
+            return;
+        }
+
+        $this->copyFileWithReplacements($item->getRealPath(), $targetPath);
+    }
+
+    protected function ensureDirectoryExists(string $directory): void
+    {
+        if (! File::isDirectory($directory)) {
+            File::makeDirectory($directory, 0755, true);
+        }
     }
 
     protected function copyFileWithReplacements($sourcePath, $destinationPath): void
@@ -216,13 +223,13 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected function getReplacements(): array
     {
         return [
-            '%theme_name%' => $this->getTheme()->getName(),
+            '%theme_name%' => $this->theme->getName(),
             '%theme_author%' => $this->argument('theme_author'),
             '%theme_author_uri%' => $this->argument('theme_author_uri'),
             '%theme_uri%' => $this->argument('theme_uri'),
             '%theme_description%' => $this->argument('theme_description'),
             '%theme_version%' => $this->argument('theme_version'),
-            '%theme_namespace%' => $this->getThemeNamespace(),
+            '%theme_namespace%' => $this->theme->getThemeNamespace(),
         ];
     }
 
@@ -274,10 +281,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected function getTemplatePath(string $templateName): string
     {
-        if (in_array(realpath(__DIR__.'/../stubs/'.$templateName), ['', '0'], true) || realpath(__DIR__.'/../stubs/'.$templateName) === false) {
-            dd($templateName);
-        }
-
         return realpath(__DIR__.'/../stubs/'.$templateName);
     }
 
