@@ -9,13 +9,33 @@ use Illuminate\Support\Str;
 
 class ThemeMetadata
 {
-    protected string $name;
-
     protected array $config = [];
+    protected string $name;
 
     public function __construct(string $name, protected string $basePath)
     {
         $this->name = Str::snake(strtolower($name));
+        $this->appPath = $this->getThemeAppDir();
+    }
+
+    public function getThemeNamespace(): string
+    {
+        return Str::studly($this->getName());
+    }
+
+    public function getThemeAppDir(string $subDirectory = ''): string
+    {
+        return rtrim(app_path('Themes' . DIRECTORY_SEPARATOR . $this->getThemeNamespace()) . DIRECTORY_SEPARATOR . $subDirectory, DIRECTORY_SEPARATOR);
+    }
+
+    public function getThemeIncDir(): string
+    {
+        return $this->getThemeAppDir('inc');
+    }
+
+    public function getThemeAppFile(string $file): string
+    {
+        return $this->getThemeAppDir() . DIRECTORY_SEPARATOR . $file;
     }
 
     public function getName(): string

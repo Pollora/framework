@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
- * 
+ *
  * This class provides a fluent interface for managing assets, supporting both traditional
  * WordPress enqueuing and Vite.js integration. It handles various asset loading scenarios
  * including dependencies, versioning, and conditional loading.
@@ -237,7 +237,7 @@ class Asset
 
     /**
      * Enqueues the asset in WordPress frontend.
-     * 
+     *
      * Registers the asset to be loaded on the public-facing side of the site
      * using the 'wp_enqueue_scripts' hook.
      *
@@ -250,7 +250,7 @@ class Asset
 
     /**
      * Enqueues the asset in WordPress admin area.
-     * 
+     *
      * Registers the asset to be loaded in the WordPress administration panel
      * using the 'admin_enqueue_scripts' hook.
      *
@@ -263,7 +263,7 @@ class Asset
 
     /**
      * Enqueues the asset on the login screen.
-     * 
+     *
      * Registers the asset to be loaded on the WordPress login page
      * using the 'login_enqueue_scripts' hook.
      *
@@ -276,7 +276,7 @@ class Asset
 
     /**
      * Enqueues the asset in the customizer preview.
-     * 
+     *
      * Registers the asset to be loaded in the WordPress theme customizer preview
      * using the 'customize_preview_init' hook.
      *
@@ -289,7 +289,7 @@ class Asset
 
     /**
      * Enqueues the asset in the block editor.
-     * 
+     *
      * Registers the asset to be loaded in the Gutenberg block editor
      * using the 'enqueue_block_editor_assets' hook.
      *

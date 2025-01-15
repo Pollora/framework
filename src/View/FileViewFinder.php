@@ -48,7 +48,7 @@ class FileViewFinder extends FileViewFinderBase
 
         $view = ltrim($view, '/\\');
 
-        if ($namespace !== 0 && ($namespace !== '' && $namespace !== '0')) {
+        if ($namespace !== null && $namespace !== 0 && ($namespace !== '' && $namespace !== '0')) {
             return "{$namespace}::$view";
         }
 

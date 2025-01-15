@@ -9,7 +9,7 @@ use Pollora\Hook\Contracts\HookInterface;
 
 /**
  * Abstract base class for WordPress hooks implementation.
- * 
+ *
  * Provides common functionality for managing WordPress hooks (actions and filters)
  * with a fluent interface for adding, removing, and checking hook existence.
  */
@@ -39,7 +39,7 @@ abstract class AbstractHook implements HookInterface
      * @param int         $acceptedArgs Optional. Number of arguments the callback accepts (default: 2)
      * @return self
      */
-    public function add(string|array $hooks, callable $callback, int $priority = 10, int $acceptedArgs = 2): self
+    public function add(string|array $hooks, callable|string $callback, int $priority = 10, int $acceptedArgs = 2): self
     {
         foreach ((array) $hooks as $hook) {
             $this->addHookEvent($hook, $callback, $priority, $acceptedArgs);
@@ -56,7 +56,7 @@ abstract class AbstractHook implements HookInterface
      * @param int          $priority Optional. Priority of the hook to remove
      * @return self
      */
-    public function remove(string $hook, ?callable $callback = null, int $priority = 10): self
+    public function remove(string $hook, callable|string|null $callback = null, int $priority = 10): self
     {
         if ($callback === null) {
             $this->hooks->forget($hook);
@@ -87,7 +87,7 @@ abstract class AbstractHook implements HookInterface
      * @param int      $acceptedArgs Number of arguments the callback accepts
      * @return void
      */
-    protected function addHookEvent(string $hook, callable $callback, int $priority, int $acceptedArgs): void
+    protected function addHookEvent(string $hook, callable|string $callback, int $priority, int $acceptedArgs): void
     {
         $this->hooks->put($hook, [$callback, $priority, $acceptedArgs]);
         add_filter($hook, $callback, $priority, $acceptedArgs);
@@ -101,7 +101,7 @@ abstract class AbstractHook implements HookInterface
      * @param int      $priority The priority of the hook
      * @return void
      */
-    protected function removeHookEvent(string $hook, callable $callback, int $priority): void
+    protected function removeHookEvent(string $hook, callable|string $callback, int $priority): void
     {
         remove_filter($hook, $callback, $priority);
         $this->hooks->forget($hook);
