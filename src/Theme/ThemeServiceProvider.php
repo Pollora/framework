@@ -7,6 +7,7 @@ namespace Pollora\Theme;
 use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Theme;
@@ -63,7 +64,13 @@ class ThemeServiceProvider extends ServiceProvider
     public function bootTheme(): void
     {
         $theme = Theme::instance();
-        $theme->includes([$theme->theme()->getThemeIncDir()]);
+
+        $themeInclude = $theme->theme()->getThemeIncDir();
+
+        if (File::exists($themeInclude) && File::isDirectory($themeInclude)) {
+            $theme->includes([$theme->theme()->getThemeIncDir()]);
+        }
+
         $currentTheme = $theme->active();
 
         $this->app['asset.container']->addContainer('theme', [
@@ -74,7 +81,6 @@ class ThemeServiceProvider extends ServiceProvider
         ]);
 
         $this->app['asset.container']->setDefaultContainer('theme');
-        
         $this->loadConfigurations();
 
         $this->app->make(ThemeComponentProvider::class)->boot();
