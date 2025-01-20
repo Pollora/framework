@@ -65,6 +65,10 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $theme = Theme::instance();
 
+        if (!$theme->theme()) {
+            return;
+        }
+        
         $themeInclude = $theme->theme()->getThemeIncDir();
 
         if (File::exists($themeInclude) && File::isDirectory($themeInclude)) {
@@ -81,7 +85,7 @@ class ThemeServiceProvider extends ServiceProvider
         ]);
 
         $this->app['asset.container']->setDefaultContainer('theme');
-        
+
         $this->loadConfigurations();
 
         $this->app->make(ThemeComponentProvider::class)->boot();
