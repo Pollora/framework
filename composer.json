@@ -38,7 +38,10 @@
     "autoload": {
         "psr-4": {
             "Pollora\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "minimum-stability": "dev",
     "extra": {
