@@ -81,6 +81,7 @@ class ThemeServiceProvider extends ServiceProvider
         ]);
 
         $this->app['asset.container']->setDefaultContainer('theme');
+        
         $this->loadConfigurations();
 
         $this->app->make(ThemeComponentProvider::class)->boot();

@@ -22,11 +22,15 @@ class AssetServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+
         $this->app->singleton('asset.container', fn ($app): AssetContainerManager => new AssetContainerManager($app));
+
+        $this->app['asset.container']->addContainer('root', []);
+        $this->app['asset.container']->setDefaultContainer('root');
+
         $this->app->singleton('wp.asset', fn ($app): AssetFactory => new AssetFactory($app));
         $this->app->singleton(ViteManager::class, function (Application $app): \Pollora\Asset\ViteManager {
             $defaultContainer = app('asset.container')->getDefault();
-
             return new ViteManager($defaultContainer);
         });
     }

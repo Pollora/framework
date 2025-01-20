@@ -1,0 +1,20 @@
+<?php
+
+namespace {{ namespace }};
+
+use Pollora\Hook\Hookable;
+
+class {{ class }} extends Hookable
+{
+    public $hook = '{{ hook }}';
+
+    public int $priority = {{ priority }};
+
+    /**
+     * Extend WordPress.
+     */
+    public function register()
+    {
+        // Code is executed on the "{{ hook }}" WordPress action only.
+    }
+}

@@ -1,6 +1,6 @@
 <?php
 
-namespace Pollora\Hooks\Commands;
+namespace Pollora\Hook\Commands;
 
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\ServiceProvider;
@@ -69,15 +69,20 @@ class HookMakeCommand extends GeneratorCommand
         $bootstrapPath = $this->laravel->basePath('bootstrap/hooks.php');
         
         $content = file_get_contents($bootstrapPath);
-        $hooks = array_filter(explode("\n", $content));
         
-        // Find the return statement
-        $returnIndex = array_search('return [', $hooks);
-        if ($returnIndex !== false) {
-            // Insert the new hook class after the return [
-            array_splice($hooks, $returnIndex + 1, 0, "    \\{$hookClass}::class,");
-            file_put_contents($bootstrapPath, implode("\n", $hooks));
+        // Vérifier si le fichier est vide ou ne contient que la structure de base
+        if (empty($content) || preg_match('/return\s*\[\s*\];/', $content)) {
+            $content = "<?php\ndeclare(strict_types=1);\n\nreturn [\n    \\{$hookClass}::class,\n];\n";
+        } else {
+            // Insérer la nouvelle classe avant le dernier crochet
+            $content = preg_replace(
+                '/(\];)$/',
+                "    \\{$hookClass}::class,\n$1",
+                $content
+            );
         }
+        
+        file_put_contents($bootstrapPath, $content);
 
         return $result;
     }

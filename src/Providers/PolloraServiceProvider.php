@@ -59,12 +59,8 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(RewriteServiceProvider::class);
         $this->app->register(PageServiceProvider::class);
         $this->app->register(ThemeServiceProvider::class);
-        
-        if (!app()->runningInConsole() && !app()->runningInWpCli()) {
-            $this->app->register(AssetServiceProvider::class);
-            $this->app->register(AjaxServiceProvider::class);
-        }
-        
+        $this->app->register(AssetServiceProvider::class);
+        $this->app->register(AjaxServiceProvider::class);
         $this->app->register(TaxonomyServiceProvider::class);
         $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(ConfigServiceProvider::class);

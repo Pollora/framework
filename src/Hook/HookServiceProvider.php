@@ -6,11 +6,11 @@ namespace Pollora\Hook;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Hooks\Commands\HookMakeCommand;
+use Pollora\Hook\Commands\HookMakeCommand;
 
 /**
  * Service provider for WordPress hook functionality.
- * 
+ *
  * Manages the registration and bootstrapping of WordPress hooks system,
  * including actions and filters, within the Laravel application context.
  */
@@ -18,7 +18,7 @@ class HookServiceProvider extends ServiceProvider
 {
     /**
      * Register hook-related services in the application.
-     * 
+     *
      * Binds hook configurations and hook implementations as singletons
      * in the application container.
      *
@@ -39,7 +39,7 @@ class HookServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap hook services.
-     * 
+     *
      * Loads and registers all configured hooks after the application has booted.
      *
      * @return void
@@ -51,7 +51,7 @@ class HookServiceProvider extends ServiceProvider
 
     /**
      * Merge hook configurations from multiple sources.
-     * 
+     *
      * Combines hooks defined in the bootstrap file and application config,
      * with bootstrap hooks taking precedence.
      *
@@ -68,7 +68,7 @@ class HookServiceProvider extends ServiceProvider
 
     /**
      * Load all configured hooks.
-     * 
+     *
      * Retrieves hooks from the container and registers each one individually.
      *
      * @return void
@@ -81,7 +81,7 @@ class HookServiceProvider extends ServiceProvider
 
     /**
      * Register an individual hook class.
-     * 
+     *
      * Creates an instance of the hook class and registers its 'register' method
      * as a WordPress action if the method exists.
      *
