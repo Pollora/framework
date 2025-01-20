@@ -6,6 +6,7 @@ namespace Pollora\Hook;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Hooks\Commands\HookMakeCommand;
 
 /**
  * Service provider for WordPress hook functionality.
@@ -28,6 +29,12 @@ class HookServiceProvider extends ServiceProvider
         $this->app->singleton('wp.hooks', fn (): array => $this->mergeHooksConfig());
         $this->app->singleton('wp.action', Action::class);
         $this->app->singleton('wp.filter', Filter::class);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                HookMakeCommand::class,
+            ]);
+        }
     }
 
     /**
