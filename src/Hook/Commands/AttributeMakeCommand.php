@@ -1,0 +1,162 @@
+<?php
+
+namespace Pollora\Hook\Commands;
+
+use Illuminate\Console\GeneratorCommand;
+use Symfony\Component\Console\Input\InputOption;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
+
+abstract class AttributeMakeCommand extends GeneratorCommand
+{
+    protected $type;
+
+    use HookBootstrap;
+
+    protected function getStub()
+    {
+        $type = strtolower($this->type);
+        return $this->resolveStubPath("/stubs/hook-attribute.stub");
+    }
+
+    protected function resolveStubPath($stub)
+    {
+        $customPath = config('stubs.path', base_path('stubs')) . $stub;
+        return file_exists($customPath) ? $customPath : __DIR__ . $stub;
+    }
+
+    protected function getDefaultNamespace($rootNamespace)
+    {
+        return $rootNamespace . '\\Hooks';
+    }
+
+    protected function buildClass($name)
+    {
+        $stub = parent::buildClass($name);
+
+        return $this->makeReplacements($stub);
+    }
+
+    protected function getOptions()
+    {
+        return [
+            ['force', 'f', InputOption::VALUE_NONE, 'Create the class even if the hook already exists'],
+            ['hook', null, InputOption::VALUE_OPTIONAL, 'The WordPress hook to use', 'init'],
+            ['priority', null, InputOption::VALUE_OPTIONAL, 'The hook priority', 10],
+        ];
+    }
+
+    public function handle()
+    {
+        $this->validateOptions();
+
+        $path = $this->getSourceFilePath();
+        $className = $this->getNameInput();
+
+        if ($this->alreadyExists($path)) {
+            $this->updateExistingFile($path);
+            $this->components->info(sprintf('%s [%s] updated successfully.', $this->type, $path));
+            return;
+        }
+
+        $result = parent::handle();
+
+        if ($result === false) {
+            return $result;
+        }
+
+        $this->addHookToBootstrap($this->qualifyClass($className));
+
+        return $result;
+    }
+
+    protected function validateOptions()
+    {
+        $priority = $this->option('priority');
+        if (!is_numeric($priority) || $priority < 0) {
+            $this->error('The priority must be a non-negative number.');
+            exit;
+        }
+    }
+
+    protected function updateExistingFile($path)
+    {
+        $stub = $this->getUpdateStub();
+
+        $hook = $this->getDefaultOption('hook');
+        $hookMethodName = 'handle' . Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
+
+        $existingContent = File::get($path);
+
+        // Check if the necessary attribute is already imported
+        $type = $this->type;
+        $attributeNamespace = "Pollora\\Attributes\\{$type}";
+        $escapedNamespace = preg_quote($attributeNamespace, '/');
+        if (!preg_match("/use {$escapedNamespace};/", $existingContent)) {
+            // Find the last "use" statement and add the necessary attribute import
+            $lastUsePosition = strrpos($existingContent, "use ");
+            $useStatements = substr($existingContent, 0, $lastUsePosition);
+            $remainingContent = substr($existingContent, $lastUsePosition);
+            $existingContent = $useStatements . "use {$attributeNamespace};\n" . $remainingContent;
+        }
+
+
+        $content = $this->makeReplacements(File::get($stub));
+
+        if (preg_match("/public function {$hookMethodName}\(/", $existingContent)) {
+            $this->error("The method '{$hookMethodName}' already exists in the file '{$path}'.");
+            exit;
+        }
+
+        $lastClosingBracePosition = strrpos($existingContent, '}');
+
+
+        $newContent = substr($existingContent, 0, $lastClosingBracePosition) . "\n" . $content . "\n" . substr($existingContent, $lastClosingBracePosition);
+
+        File::put($path, $newContent);
+    }
+
+    public function makeReplacements(string $stub)
+    {
+        $hook = $this->getDefaultOption('hook');
+        $priority = $this->getDefaultOption('priority');
+        $hookMethodName = 'handle' . Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
+        $type = $this->type;
+
+        $returnType = $type === 'Action' ? ': void' : '';
+        $arg = $type === 'Filter' ? '$arg' : '';
+        $return = $type === 'Filter' ? "\n". '        return $arg;' : '';
+
+        return str_replace(
+            ['{{ type }}', '{{ hook }}', '{{ priority }}', '{{ hookMethodName }}',
+                '{{ arg }}', '{{ returnType }}', '{{ return }}'],
+            [$type, $hook, $priority, $hookMethodName, $arg, $returnType, $return],
+            $stub
+        );
+    }
+
+    protected function getUpdateStub()
+    {
+        return $this->resolveStubPath('/stubs/hook-attribute-update.stub');
+    }
+
+    protected function getSourceFilePath()
+    {
+        return app_path('Hooks/' . $this->getNameInput() . '.php');
+    }
+
+    protected function alreadyExists($path)
+    {
+        return File::exists($path);
+    }
+
+    protected function getDefaultOption($key)
+    {
+        $defaults = [
+            'hook' => 'init',
+            'priority' => 10,
+        ];
+
+        return $this->option($key) ?? $defaults[$key];
+    }
+}

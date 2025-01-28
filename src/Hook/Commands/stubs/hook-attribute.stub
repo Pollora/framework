@@ -1,0 +1,14 @@
+<?php
+
+namespace {{ namespace }};
+
+use Pollora\Attributes\{{ type }};
+
+class {{ class }}
+{
+    #[{{ type }}('{{ hook }}', priority: {{ priority }})]
+    public function {{ hookMethodName }}({{ arg }}){{ returnType }}
+    {
+        // Code is executed on the "{{ hook }}" WordPress action only.{{ return }}
+    }
+}

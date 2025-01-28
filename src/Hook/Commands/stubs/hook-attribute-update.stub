@@ -1,0 +1,5 @@
+    #[{{ type }}('{{ hook }}', priority: {{ priority }})]
+    public function {{ hookMethodName }}({{ arg }}){{ returnType }}
+    {
+        // Code is executed on the "{{ hook }}" WordPress {{ type }} only.{{ return }}
+    }

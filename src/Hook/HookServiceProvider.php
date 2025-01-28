@@ -7,6 +7,8 @@ namespace Pollora\Hook;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Commands\HookMakeCommand;
+use Pollora\Hook\Commands\ActionMakeCommand;
+use Pollora\Hook\Commands\FilterMakeCommand;
 
 /**
  * Service provider for WordPress hook functionality.
@@ -33,6 +35,8 @@ class HookServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 HookMakeCommand::class,
+                ActionMakeCommand::class,
+                FilterMakeCommand::class,
             ]);
         }
     }
@@ -99,5 +103,7 @@ class HookServiceProvider extends ServiceProvider
                 $hook->priority ?? 10
             );
         }
+
+        HookRegistrar::registerHooks($hook);
     }
 }
