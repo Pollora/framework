@@ -26,6 +26,10 @@ class Templates implements ThemeComponent
      */
     public function registerTemplates($pageTemplates, $wp_themes, $post): array
     {
+        if (!$post) {
+            return $pageTemplates;
+        }
+        
         $themePageTemplates = $this->getThemePageTemplates($post->post_type);
 
         return array_merge($pageTemplates, $themePageTemplates);
