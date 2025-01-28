@@ -7,29 +7,62 @@ use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 
+/**
+ * Class AttributeMakeCommand
+ *
+ * Abstract class for creating and updating hook attributes.
+ */
 abstract class AttributeMakeCommand extends GeneratorCommand
 {
+    /**
+     * The type of the attribute.
+     *
+     * @var string
+     */
     protected $type;
 
     use HookBootstrap;
 
+    /**
+     * Get the stub file for the generator.
+     *
+     * @return string
+     */
     protected function getStub()
     {
         $type = strtolower($this->type);
         return $this->resolveStubPath("/stubs/hook-attribute.stub");
     }
 
+    /**
+     * Resolve the fully-qualified path to the stub.
+     *
+     * @param string $stub
+     * @return string
+     */
     protected function resolveStubPath($stub)
     {
         $customPath = config('stubs.path', base_path('stubs')) . $stub;
         return file_exists($customPath) ? $customPath : __DIR__ . $stub;
     }
 
+    /**
+     * Get the default namespace for the class.
+     *
+     * @param string $rootNamespace
+     * @return string
+     */
     protected function getDefaultNamespace($rootNamespace)
     {
         return $rootNamespace . '\\Hooks';
     }
 
+    /**
+     * Build the class with the given name.
+     *
+     * @param string $name
+     * @return string
+     */
     protected function buildClass($name)
     {
         $stub = parent::buildClass($name);
@@ -37,6 +70,11 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         return $this->makeReplacements($stub);
     }
 
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
     protected function getOptions()
     {
         return [
@@ -46,6 +84,11 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         ];
     }
 
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
     public function handle()
     {
         $this->validateOptions();
@@ -70,6 +113,11 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         return $result;
     }
 
+    /**
+     * Validate the command options.
+     *
+     * @return void
+     */
     protected function validateOptions()
     {
         $priority = $this->option('priority');
@@ -79,6 +127,12 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         }
     }
 
+    /**
+     * Update an existing file with new content.
+     *
+     * @param string $path
+     * @return void
+     */
     protected function updateExistingFile($path)
     {
         $stub = $this->getUpdateStub();
@@ -116,6 +170,12 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         File::put($path, $newContent);
     }
 
+    /**
+     * Make replacements in the stub.
+     *
+     * @param string $stub
+     * @return string
+     */
     public function makeReplacements(string $stub)
     {
         $hook = $this->getDefaultOption('hook');
@@ -135,21 +195,43 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         );
     }
 
+    /**
+     * Get the update stub file path.
+     *
+     * @return string
+     */
     protected function getUpdateStub()
     {
         return $this->resolveStubPath('/stubs/hook-attribute-update.stub');
     }
 
+    /**
+     * Get the source file path for the generated class.
+     *
+     * @return string
+     */
     protected function getSourceFilePath()
     {
         return app_path('Hooks/' . $this->getNameInput() . '.php');
     }
 
+    /**
+     * Determine if the file already exists.
+     *
+     * @param string $path
+     * @return bool
+     */
     protected function alreadyExists($path)
     {
         return File::exists($path);
     }
 
+    /**
+     * Get the default option value.
+     *
+     * @param string $key
+     * @return mixed
+     */
     protected function getDefaultOption($key)
     {
         $defaults = [

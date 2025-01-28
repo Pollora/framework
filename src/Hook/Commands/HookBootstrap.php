@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\File;
 trait HookBootstrap
 {
     /**
-     * Ajoute une classe hookable à bootstrap/hooks.php.
+     * Adds a hookable class to bootstrap/hooks.php.
      *
-     * @param string $hookClass Nom complet de la classe à ajouter (avec namespace).
+     * @param string $hookClass Fully qualified name of the class to add (with namespace).
      * @return void
      */
     protected function addHookToBootstrap(string $hookClass): void
@@ -17,25 +17,25 @@ trait HookBootstrap
         $bootstrapPath = base_path('bootstrap/hooks.php');
 
         try {
-            // Charger le contenu existant ou générer une structure de base
+            // Load existing content or generate a basic structure
             $content = File::exists($bootstrapPath)
                 ? File::get($bootstrapPath)
                 : "<?php\ndeclare(strict_types=1);\n\nreturn [\n];\n";
 
-            // Vérifier si la classe est déjà enregistrée
+            // Check if the class is already registered
             if (strpos($content, "\\{$hookClass}::class") !== false) {
                 $this->warn("The class \\{$hookClass} is already registered in hooks.php.");
                 return;
             }
 
-            // Ajouter la classe avant le dernier crochet fermant
+            // Add the class before the last closing bracket
             $content = preg_replace(
                 '/(\\];)$/',
                 "    \\{$hookClass}::class,\n$1",
                 $content
             );
 
-            // Écrire le contenu mis à jour
+            // Write the updated content
             File::put($bootstrapPath, $content);
         } catch (\Exception $e) {
             $this->error('Failed to update hooks.php: ' . $e->getMessage());
