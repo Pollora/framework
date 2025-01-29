@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Commands\HookMakeCommand;
 use Pollora\Hook\Commands\ActionMakeCommand;
 use Pollora\Hook\Commands\FilterMakeCommand;
+use Pollora\Attributes\Attributable;
 
 /**
  * Service provider for WordPress hook functionality.
@@ -103,7 +104,5 @@ class HookServiceProvider extends ServiceProvider
                 $hook->priority ?? 10
             );
         }
-
-        HookRegistrar::registerHooks($hook);
     }
 }

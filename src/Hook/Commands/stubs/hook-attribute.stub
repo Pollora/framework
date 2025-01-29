@@ -2,9 +2,10 @@
 
 namespace {{ namespace }};
 
+use Pollora\Attributes\Attributable;
 use Pollora\Attributes\{{ type }};
 
-class {{ class }}
+class {{ class }} implements Attributable
 {
     #[{{ type }}('{{ hook }}', priority: {{ priority }})]
     public function {{ hookMethodName }}({{ arg }}){{ returnType }}
