@@ -12,6 +12,7 @@ use Pollora\Asset\AssetServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\Gutenberg\GutenbergServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
+use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Hook\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
@@ -51,6 +52,7 @@ class PolloraServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Generic service providers
+        $this->app->register(AttributesServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
         $this->app->register(GutenbergServiceProvider::class);
         $this->app->register(WordPressMailServiceProvider::class);
