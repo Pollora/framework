@@ -53,10 +53,10 @@ class AssetContainerManager
      * @return AssetContainer The requested container
      * @throws \InvalidArgumentException When container is not found
      */
-    public function get(string $name): AssetContainer
+    public function get(string $name): ?AssetContainer
     {
         if (! isset($this->containers[$name])) {
-            throw new \InvalidArgumentException("Asset container [{$name}] not found.");
+            return null;
         }
 
         return $this->containers[$name];
