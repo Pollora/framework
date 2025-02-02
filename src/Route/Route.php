@@ -49,8 +49,8 @@ class Route extends IlluminateRoute
     /**
      * Determine if the route matches the given request.
      *
-     * @param Request $request The HTTP request to match against
-     * @param bool $includingMethod Whether to include HTTP method validation
+     * @param  Request  $request  The HTTP request to match against
+     * @param  bool  $includingMethod  Whether to include HTTP method validation
      * @return bool True if the route matches the request, false otherwise
      */
     public function matches(Request $request, $includingMethod = true): bool
@@ -77,7 +77,7 @@ class Route extends IlluminateRoute
     /**
      * Set WordPress conditions for the route.
      *
-     * @param array<string, string|array> $conditions Mapping of condition signatures to their routes
+     * @param  array<string, string|array>  $conditions  Mapping of condition signatures to their routes
      * @return self Returns the current instance for method chaining
      */
     public function setConditions(array $conditions = []): self
@@ -134,7 +134,7 @@ class Route extends IlluminateRoute
     /**
      * Parse a condition string to get its signature.
      *
-     * @param string $condition The condition string to parse
+     * @param  string  $condition  The condition string to parse
      * @return string The matching condition signature or empty string if not found
      */
     protected function parseCondition(string $condition): string
@@ -152,7 +152,7 @@ class Route extends IlluminateRoute
     /**
      * Parse condition parameters from route action.
      *
-     * @param array<string, mixed> $action The route action array
+     * @param  array<string, mixed>  $action  The route action array
      * @return array<mixed> Extracted condition parameters
      */
     protected function parseConditionParams(array $action): array
@@ -171,7 +171,7 @@ class Route extends IlluminateRoute
      *
      * Validates the route against all registered WordPress validators.
      *
-     * @param Request $request The request to validate against
+     * @param  Request  $request  The request to validate against
      * @return bool True if all WordPress conditions match, false otherwise
      */
     private function matchesWordPressConditions(Request $request): bool
@@ -190,8 +190,8 @@ class Route extends IlluminateRoute
      *
      * Validates the route against standard Laravel route validators.
      *
-     * @param Request $request The request to validate against
-     * @param bool $includingMethod Whether to include HTTP method validation
+     * @param  Request  $request  The request to validate against
+     * @param  bool  $includingMethod  Whether to include HTTP method validation
      * @return bool True if all Laravel validators match, false otherwise
      */
     private function matchesIlluminateValidators(Request $request, bool $includingMethod): bool

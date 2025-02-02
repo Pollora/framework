@@ -16,7 +16,7 @@ class SingleEvent extends AbstractEvent
 {
     /**
      * Handle the single event execution.
-     * 
+     *
      * Executes the WordPress action and then removes the event
      * from the database.
      */

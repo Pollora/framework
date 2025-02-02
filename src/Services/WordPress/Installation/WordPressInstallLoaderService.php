@@ -71,7 +71,6 @@ class WordPressInstallLoaderService
      * - Defines constants
      * - Initializes WordPress components
      *
-     * @return void
      * @throws \RuntimeException If essential WordPress files cannot be loaded
      */
     public function bootstrap(): void
@@ -86,8 +85,6 @@ class WordPressInstallLoaderService
 
     /**
      * Set global variables required for WordPress.
-     *
-     * @return self
      */
     private function setGlobals(): self
     {
@@ -99,7 +96,6 @@ class WordPressInstallLoaderService
     /**
      * Load WordPress core functionality files.
      *
-     * @return self
      * @throws \RuntimeException If core files cannot be loaded
      */
     private function loadCoreFiles(): self
@@ -114,7 +110,6 @@ class WordPressInstallLoaderService
     /**
      * Load WordPress core class files.
      *
-     * @return self
      * @throws \RuntimeException If class files cannot be loaded
      */
     private function loadCoreClasses(): self
@@ -129,7 +124,6 @@ class WordPressInstallLoaderService
     /**
      * Load WordPress admin files required for installation.
      *
-     * @return self
      * @throws \RuntimeException If admin files cannot be loaded
      */
     private function loadAdminFiles(): self
@@ -141,8 +135,6 @@ class WordPressInstallLoaderService
 
     /**
      * Define WordPress constants required for installation.
-     *
-     * @return self
      */
     private function defineConstants(): self
     {
@@ -172,8 +164,6 @@ class WordPressInstallLoaderService
      * Initialize WordPress components.
      *
      * Sets up text domain registry, permalink structure, and rewrite rules.
-     *
-     * @return self
      */
     private function initializeWordPress(): self
     {
@@ -193,7 +183,7 @@ class WordPressInstallLoaderService
     /**
      * Get cookie path from application URL.
      *
-     * @param string $appUrl The application URL
+     * @param  string  $appUrl  The application URL
      * @return string The cookie path
      */
     private function getCookiePath(string $appUrl): string

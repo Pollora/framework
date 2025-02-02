@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Pollora\Permalink;
+
 use Illuminate\Routing\UrlGenerator;
 
 /**
@@ -17,9 +18,9 @@ class PermalinkManager
     /**
      * Updates the permalink structure after sanitization.
      *
-     * @param string|bool $permalinkStructure The new permalink structure to apply
+     * @param  string|bool  $permalinkStructure  The new permalink structure to apply
+     *
      * @throws \InvalidArgumentException If the structure is invalid
-     * @return void
      */
     public function updateStructure(string|bool $permalinkStructure): void
     {
@@ -31,18 +32,18 @@ class PermalinkManager
     /**
      * Checks if the provided permalink structure is valid.
      *
-     * @param mixed $structure The structure to validate
+     * @param  mixed  $structure  The structure to validate
      * @return bool True if the structure is valid, false otherwise
      */
     protected function isValidPermalinkStructure(mixed $structure): bool
     {
-        return !in_array($structure, ['', '0', false], true);
+        return ! in_array($structure, ['', '0', false], true);
     }
 
     /**
      * Cleans the permalink structure by removing trailing slashes.
      *
-     * @param string|bool $structure The structure to clean
+     * @param  string|bool  $structure  The structure to clean
      * @return string The cleaned structure
      */
     protected function sanitizeStructure(string|bool $structure): string
@@ -53,7 +54,7 @@ class PermalinkManager
     /**
      * Handles canonical URL redirections.
      *
-     * @param string|null $canonicalUrl The canonical URL to process
+     * @param  string|null  $canonicalUrl  The canonical URL to process
      * @return string|null The processed canonical URL
      */
     public function handleCanonicalRedirect(?string $canonicalUrl): ?string

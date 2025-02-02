@@ -15,7 +15,7 @@ interface JobDispatcherInterface
     /**
      * Dispatch a job to the queue.
      *
-     * @param mixed $job The job to dispatch
+     * @param  mixed  $job  The job to dispatch
      * @return int The dispatched job ID
      */
     public function dispatch($job): int;

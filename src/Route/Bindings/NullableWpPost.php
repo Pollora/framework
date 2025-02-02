@@ -18,29 +18,29 @@ class NullableWpPost
     /**
      * Create a new nullable WordPress post instance.
      *
-     * @param int|null $ID Post ID (null represents no post)
-     * @param int $post_author Author user ID
-     * @param string $post_date Local post creation date
-     * @param string $post_date_gmt GMT post creation date
-     * @param string $content Post content
-     * @param string $post_title Post title
-     * @param string $post_excerpt Post excerpt
-     * @param string $post_status Post status (draft, publish, etc.)
-     * @param string $comment_status Comment status (open, closed)
-     * @param string $ping_status Ping/trackback status
-     * @param string $post_password Password to view post
-     * @param string $post_name Post slug
-     * @param string $to_ping URLs to ping
-     * @param string $pinged URLs already pinged
-     * @param string $post_modified Local modification date
-     * @param string $post_modified_gmt GMT modification date
-     * @param string $post_content_filtered Filtered post content
-     * @param int $post_parent Parent post ID
-     * @param string $guid Global unique identifier
-     * @param int $menu_order Menu order for hierarchical post types
-     * @param string $post_type Post type (post, page, etc.)
-     * @param string $post_mime_type MIME type for attachments
-     * @param int $comment_count Number of comments
+     * @param  int|null  $ID  Post ID (null represents no post)
+     * @param  int  $post_author  Author user ID
+     * @param  string  $post_date  Local post creation date
+     * @param  string  $post_date_gmt  GMT post creation date
+     * @param  string  $content  Post content
+     * @param  string  $post_title  Post title
+     * @param  string  $post_excerpt  Post excerpt
+     * @param  string  $post_status  Post status (draft, publish, etc.)
+     * @param  string  $comment_status  Comment status (open, closed)
+     * @param  string  $ping_status  Ping/trackback status
+     * @param  string  $post_password  Password to view post
+     * @param  string  $post_name  Post slug
+     * @param  string  $to_ping  URLs to ping
+     * @param  string  $pinged  URLs already pinged
+     * @param  string  $post_modified  Local modification date
+     * @param  string  $post_modified_gmt  GMT modification date
+     * @param  string  $post_content_filtered  Filtered post content
+     * @param  int  $post_parent  Parent post ID
+     * @param  string  $guid  Global unique identifier
+     * @param  int  $menu_order  Menu order for hierarchical post types
+     * @param  string  $post_type  Post type (post, page, etc.)
+     * @param  string  $post_mime_type  MIME type for attachments
+     * @param  int  $comment_count  Number of comments
      */
     public function __construct(
         public ?int $ID = null,

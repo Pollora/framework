@@ -22,7 +22,7 @@ class WooCommerceView
         $this->fileFinder = $this->getFileFinder();
         $this->viewFinder = new ViewFinder(
             $this->fileFinder,
-            new Filesystem(),
+            new Filesystem,
             get_stylesheet_directory()
         );
     }

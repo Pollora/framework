@@ -6,7 +6,7 @@ namespace Pollora\Hook\Contracts;
 
 /**
  * Interface for WordPress Action hooks.
- * 
+ *
  * Defines the contract for executing WordPress actions.
  */
 interface ActionInterface extends HookInterface
@@ -14,9 +14,8 @@ interface ActionInterface extends HookInterface
     /**
      * Execute a WordPress action hook.
      *
-     * @param string $hook The action hook name
-     * @param mixed  ...$args Additional arguments
-     * @return self
+     * @param  string  $hook  The action hook name
+     * @param  mixed  ...$args  Additional arguments
      */
     public function do(string $hook, ...$args): self;
 }

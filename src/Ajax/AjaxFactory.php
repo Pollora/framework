@@ -22,8 +22,8 @@ class AjaxFactory
      * The callback will be resolved through Laravel's service container, enabling
      * dependency injection.
      *
-     * @param string $action The WordPress AJAX action name to listen for
-     * @param callable|string $callback The callback to handle the AJAX request
+     * @param  string  $action  The WordPress AJAX action name to listen for
+     * @param  callable|string  $callback  The callback to handle the AJAX request
      * @return \Pollora\Ajax\Ajax Returns an Ajax instance for method chaining
      *
      * @example

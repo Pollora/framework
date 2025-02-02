@@ -19,14 +19,14 @@ class JobDispatcher implements JobDispatcherInterface
     /**
      * Create a new job dispatcher instance.
      *
-     * @param \Illuminate\Contracts\Bus\Dispatcher $dispatcher Laravel job dispatcher
+     * @param  \Illuminate\Contracts\Bus\Dispatcher  $dispatcher  Laravel job dispatcher
      */
     public function __construct(protected \Illuminate\Contracts\Bus\Dispatcher $dispatcher) {}
 
     /**
      * Dispatch a job to the queue.
      *
-     * @param mixed $job The job to dispatch
+     * @param  mixed  $job  The job to dispatch
      * @return int The dispatched job ID
      */
     public function dispatch($job): int

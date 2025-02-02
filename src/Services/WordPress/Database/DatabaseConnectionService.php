@@ -24,8 +24,9 @@ class DatabaseConnectionService
      *
      * Tests the database connection and prompts for new credentials if needed.
      *
-     * @param DatabaseConfig $config The database configuration to test
+     * @param  DatabaseConfig  $config  The database configuration to test
      * @return DatabaseConfig The validated configuration (may be updated if retried)
+     *
      * @throws DatabaseConnectionException When connection fails and user aborts retry
      */
     public function ensureConnection(DatabaseConfig $config): DatabaseConfig
@@ -52,8 +53,8 @@ class DatabaseConnectionService
     /**
      * Test the database connection with given configuration.
      *
-     * @param DatabaseConfig $config The database configuration to test
-     * @return void
+     * @param  DatabaseConfig  $config  The database configuration to test
+     *
      * @throws \PDOException When connection fails
      */
     private function testConnection(DatabaseConfig $config): void

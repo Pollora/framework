@@ -122,17 +122,15 @@ class LocalEnvironmentDetector
      *
      * Registers a new environment type with its detection logic and configuration.
      *
-     * @param string $name Environment identifier
-     * @param callable $detector Function that returns bool indicating if environment is active
-     * @param array<string, mixed> $config Environment-specific configuration values
-     * @return void
+     * @param  string  $name  Environment identifier
+     * @param  callable  $detector  Function that returns bool indicating if environment is active
+     * @param  array<string, mixed>  $config  Environment-specific configuration values
      */
     public static function addEnvironment(
         string $name,
         callable $detector,
         array $config
-    ): void
-    {
+    ): void {
         self::$environments[$name] = [
             'detector' => $detector,
             'config' => $config,

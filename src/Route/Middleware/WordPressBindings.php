@@ -18,7 +18,7 @@ class WordPressBindings
     /**
      * Create a new WordPress bindings middleware instance.
      *
-     * @param Router $router The router instance
+     * @param  Router  $router  The router instance
      */
     public function __construct(private readonly Router $router) {}
 
@@ -27,8 +27,8 @@ class WordPressBindings
      *
      * Adds WordPress bindings to routes that have WordPress conditions.
      *
-     * @param mixed $request The incoming request
-     * @param Closure $next The next middleware handler
+     * @param  mixed  $request  The incoming request
+     * @param  Closure  $next  The next middleware handler
      * @return mixed The response
      */
     public function handle($request, Closure $next)

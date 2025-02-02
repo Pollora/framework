@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 namespace Pollora\Ajax;
 
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Pollora\Support\Facades\Action;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class Ajax
@@ -126,7 +126,7 @@ class Ajax
         } catch (\Throwable $e) {
             Log::error('Error in Ajax destructor', [
                 'error' => $e->getMessage(),
-                'action' => $this->action
+                'action' => $this->action,
             ]);
         }
     }

@@ -6,7 +6,7 @@ namespace Pollora\Gutenberg\Registrars;
 
 /**
  * Registrar for block pattern categories.
- * 
+ *
  * Handles the registration of custom block pattern categories
  * defined in the theme configuration.
  */
@@ -14,11 +14,9 @@ class CategoryRegistrar
 {
     /**
      * Register configured block pattern categories.
-     * 
+     *
      * Reads categories from theme configuration and registers them
      * with WordPress.
-     *
-     * @return void
      */
     public function register(): void
     {

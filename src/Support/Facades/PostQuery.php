@@ -13,14 +13,13 @@ use Illuminate\Support\Facades\Facade;
  * improved type safety and modern PHP syntax.
  *
  * @mixin \Pollora\Query\PostQuery
+ *
  * @see \Pollora\Query\PostQuery
  */
 class PostQuery extends Facade
 {
     /**
      * Get the registered name of the component.
-     *
-     * @return string
      */
     protected static function getFacadeAccessor(): string
     {

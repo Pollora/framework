@@ -53,7 +53,7 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
     /**
      * Create a new event instance.
      *
-     * @param object|null $event WordPress event object
+     * @param  object|null  $event  WordPress event object
      */
     public function __construct(?object $event = null)
     {
@@ -91,8 +91,7 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
     /**
      * Create and persist a new job instance.
      *
-     * @param object $event WordPress event object
-     * @return self
+     * @param  object  $event  WordPress event object
      */
     public static function createJob(object $event): self
     {
@@ -107,7 +106,7 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
     /**
      * Save the event to the database.
      *
-     * @param int $jobId The queue job ID
+     * @param  int  $jobId  The queue job ID
      */
     protected function saveToDatabase($jobId)
     {

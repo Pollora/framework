@@ -36,8 +36,6 @@ class QueryServiceProvider extends ServiceProvider
      * - Date query singleton
      * - WordPress loop binding
      * - Current post binding
-     *
-     * @return void
      */
     public function register(): void
     {

@@ -15,7 +15,7 @@ interface EventInterface
     /**
      * Create a new event instance.
      *
-     * @param object|null $event WordPress event object
+     * @param  object|null  $event  WordPress event object
      */
     public function __construct(?object $event = null);
 
@@ -48,7 +48,7 @@ interface EventInterface
     /**
      * Create a new job from a WordPress event.
      *
-     * @param object $event WordPress event object
+     * @param  object  $event  WordPress event object
      * @return self New event instance
      */
     public static function createJob(object $event): self;

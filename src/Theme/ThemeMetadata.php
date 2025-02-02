@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 class ThemeMetadata
 {
     protected array $config = [];
+
     protected string $name;
 
     public function __construct(string $name, protected string $basePath)
@@ -25,7 +26,7 @@ class ThemeMetadata
 
     public function getThemeAppDir(string $subDirectory = ''): string
     {
-        return rtrim(app_path('Themes' . DIRECTORY_SEPARATOR . $this->getThemeNamespace()) . DIRECTORY_SEPARATOR . $subDirectory, DIRECTORY_SEPARATOR);
+        return rtrim(app_path('Themes'.DIRECTORY_SEPARATOR.$this->getThemeNamespace()).DIRECTORY_SEPARATOR.$subDirectory, DIRECTORY_SEPARATOR);
     }
 
     public function getThemeIncDir(): string
@@ -35,7 +36,7 @@ class ThemeMetadata
 
     public function getThemeAppFile(string $file): string
     {
-        return $this->getThemeAppDir() . DIRECTORY_SEPARATOR . $file;
+        return $this->getThemeAppDir().DIRECTORY_SEPARATOR.$file;
     }
 
     public function getName(): string

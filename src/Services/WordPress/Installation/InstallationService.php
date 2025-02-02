@@ -20,7 +20,7 @@ class InstallationService
     /**
      * Create a new installation service instance.
      *
-     * @param WordPressInstallLoaderService $installLoaderService Service for loading WordPress core files
+     * @param  WordPressInstallLoaderService  $installLoaderService  Service for loading WordPress core files
      */
     public function __construct(
         private readonly WordPressInstallLoaderService $installLoaderService,
@@ -32,6 +32,7 @@ class InstallationService
      * Verifies the presence of essential WordPress options in the database.
      *
      * @return bool True if WordPress is installed, false otherwise
+     *
      * @throws \Exception When database connection fails
      */
     public function isInstalled(): bool
@@ -52,9 +53,9 @@ class InstallationService
      * This includes setting up the database, creating admin user, and configuring
      * initial site settings.
      *
-     * @param InstallationConfig $config Configuration object containing installation parameters
+     * @param  InstallationConfig  $config  Configuration object containing installation parameters
+     *
      * @throws WordPressInstallationException If installation fails or configuration is invalid
-     * @return void
      */
     public function install(InstallationConfig $config): void
     {
@@ -86,9 +87,9 @@ class InstallationService
      * Sets up additional options like site description and privacy settings
      * after the core installation is complete.
      *
-     * @param InstallationConfig $config Configuration object containing site settings
+     * @param  InstallationConfig  $config  Configuration object containing site settings
+     *
      * @throws WordPressInstallationException If upload directory setup fails
-     * @return void
      */
     private function configureInstallation(InstallationConfig $config): void
     {

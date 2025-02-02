@@ -12,7 +12,7 @@ use Pollora\Theme\Contracts\ThemeComponent;
 
 /**
  * Main class for handling Gutenberg block patterns.
- * 
+ *
  * Coordinates the registration of block patterns and their categories
  * by integrating with WordPress initialization process.
  */
@@ -20,24 +20,20 @@ class Pattern implements ThemeComponent
 {
     /**
      * The category registrar instance.
-     *
-     * @var CategoryRegistrar
      */
     protected CategoryRegistrar $categoryRegistrar;
 
     /**
      * The pattern registrar instance.
-     *
-     * @var PatternRegistrar
      */
     protected PatternRegistrar $patternRegistrar;
 
     /**
      * Create a new Pattern instance.
-     * 
+     *
      * Initializes registrars using the application container.
      *
-     * @param Application $container The application container instance
+     * @param  Application  $container  The application container instance
      */
     public function __construct(Application $container)
     {
@@ -47,11 +43,9 @@ class Pattern implements ThemeComponent
 
     /**
      * Register pattern functionality with WordPress.
-     * 
+     *
      * Hooks into WordPress 'init' action to register patterns and categories,
      * but skips registration during WordPress installation.
-     *
-     * @return void
      */
     public function register(): void
     {

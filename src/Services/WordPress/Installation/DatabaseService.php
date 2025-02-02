@@ -20,8 +20,8 @@ class DatabaseService
     /**
      * Create a new database service instance.
      *
-     * @param DatabaseConnectionService $connectionService Service for testing connections
-     * @param EnvironmentFileHandler $envHandler Handler for .env file updates
+     * @param  DatabaseConnectionService  $connectionService  Service for testing connections
+     * @param  EnvironmentFileHandler  $envHandler  Handler for .env file updates
      */
     public function __construct(
         private readonly DatabaseConnectionService $connectionService,
@@ -50,7 +50,7 @@ class DatabaseService
      * Tests the connection and updates the environment file with the
      * provided configuration.
      *
-     * @param DatabaseConfig $config The database configuration
+     * @param  DatabaseConfig  $config  The database configuration
      */
     public function configure(DatabaseConfig $config): void
     {

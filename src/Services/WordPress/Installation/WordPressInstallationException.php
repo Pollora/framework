@@ -17,8 +17,7 @@ class WordPressInstallationException extends \RuntimeException
     /**
      * Create exception from WordPress error object.
      *
-     * @param \WP_Error $error The WordPress error object
-     * @return self
+     * @param  \WP_Error  $error  The WordPress error object
      */
     public static function fromWpError(\WP_Error $error): self
     {

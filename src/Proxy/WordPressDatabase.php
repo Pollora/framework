@@ -20,8 +20,6 @@ class WordPressDatabase extends wpdb
 {
     /**
      * Laravel's database connection instance.
-     *
-     * @var Connection
      */
     protected Connection $eloquentConnection;
 
@@ -98,11 +96,10 @@ class WordPressDatabase extends wpdb
      *
      * Overrides WordPress' mysqli connection to use Laravel's PDO connection instead.
      *
-     * @param string $host Database host
-     * @param string|null $port Database port
-     * @param string|null $socket Database socket
-     * @param int|null $client_flags Client connection flags
-     * @return void
+     * @param  string  $host  Database host
+     * @param  string|null  $port  Database port
+     * @param  string|null  $socket  Database socket
+     * @param  int|null  $client_flags  Client connection flags
      */
     public function mysqli_real_connect(
         string $host,
@@ -118,10 +115,10 @@ class WordPressDatabase extends wpdb
      *
      * Blocks attempts to use the old mysql_connect method which is no longer supported.
      *
-     * @param bool $new_link Whether to force a new connection
-     * @param int $client_flags Client connection flags
+     * @param  bool  $new_link  Whether to force a new connection
+     * @param  int  $client_flags  Client connection flags
+     *
      * @throws Exception Always throws to prevent usage
-     * @return never
      */
     public function mysql_connect($new_link = false, $client_flags = 0): never
     {

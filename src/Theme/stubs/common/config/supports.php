@@ -60,7 +60,7 @@ return [
     // Starter Content
     // @see https://make.wordpress.org/core/2016/11/30/starter-content-for-themes-in-4-7/
     /* ----------------------------------------------------------------------------------------------- */
-    //'starter-content' => [],
+    // 'starter-content' => [],
 
     /* ----------------------------------------------------------------------------------------------- */
     // Custom Background

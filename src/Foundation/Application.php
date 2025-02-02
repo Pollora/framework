@@ -21,8 +21,6 @@ class Application extends \Illuminate\Foundation\Application
      *
      * Registers core service providers required for WordPress integration,
      * including events, logging, and routing functionality.
-     *
-     * @return void
      */
     public function registerBaseServiceProviders(): void
     {

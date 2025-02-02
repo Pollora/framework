@@ -12,7 +12,7 @@ use Pollora\Gutenberg\Helpers\PatternValidator;
 
 /**
  * Registrar for block patterns.
- * 
+ *
  * Handles the discovery and registration of block patterns from theme directories,
  * including processing of pattern data and validation.
  */
@@ -31,8 +31,8 @@ class PatternRegistrar
     /**
      * Create a new pattern registrar instance.
      *
-     * @param PatternDataProcessor $dataProcessor For processing pattern metadata
-     * @param PatternValidator $validator For validating pattern data
+     * @param  PatternDataProcessor  $dataProcessor  For processing pattern metadata
+     * @param  PatternValidator  $validator  For validating pattern data
      */
     public function __construct(
         protected PatternDataProcessor $dataProcessor,
@@ -41,8 +41,6 @@ class PatternRegistrar
 
     /**
      * Register all valid patterns from active themes.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -79,9 +77,8 @@ class PatternRegistrar
     /**
      * Register an individual pattern from a file.
      *
-     * @param string $file Path to the pattern file
-     * @param \WP_Theme $theme Theme instance the pattern belongs to
-     * @return void
+     * @param  string  $file  Path to the pattern file
+     * @param  \WP_Theme  $theme  Theme instance the pattern belongs to
      */
     protected function registerPattern(string $file, \WP_Theme $theme): void
     {
@@ -107,7 +104,7 @@ class PatternRegistrar
     /**
      * Get rendered content of a pattern.
      *
-     * @param string $file Path to the pattern file
+     * @param  string  $file  Path to the pattern file
      * @return string|null Rendered pattern content or null if view doesn't exist
      */
     protected function getPatternContent(string $file): ?string

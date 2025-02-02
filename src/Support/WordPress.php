@@ -27,8 +27,8 @@ class WordPress
     /**
      * Check if we are on a multisite, and optionally check the multisite we are on.
      *
-     * @param null|int|array<int> $id ID (or IDs) to check against the site, or null to just check
-     *                                if we are actually on a multisite
+     * @param  null|int|array<int>  $id  ID (or IDs) to check against the site, or null to just check
+     *                                   if we are actually on a multisite
      * @return bool True if on multisite and ID matches (if provided)
      */
     public function multisite(null|int|array $id = null): bool
@@ -43,8 +43,8 @@ class WordPress
     /**
      * Get a WordPress option from the database.
      *
-     * @param string $name Name of the option to get
-     * @param mixed $default Value to return if option doesn't exist
+     * @param  string  $name  Name of the option to get
+     * @param  mixed  $default  Value to return if option doesn't exist
      * @return mixed The option value or default if not found
      */
     public function option(string $name, mixed $default = self::DEFAULT_OPTION_VALUE): mixed
@@ -92,6 +92,7 @@ class WordPress
      * Get the current logged in user.
      *
      * @deprecated Use auth()->user() instead
+     *
      * @return \WP_User Current WordPress user object
      */
     public function currentUser(): WP_User

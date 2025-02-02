@@ -23,8 +23,8 @@ class Filesystem extends FilesystemBase
      * Converts all directory separators to a consistent format, replacing
      * multiple consecutive separators with a single one.
      *
-     * @param string $path The file path to normalize
-     * @param string $separator The directory separator to use (defaults to '/')
+     * @param  string  $path  The file path to normalize
+     * @param  string  $separator  The directory separator to use (defaults to '/')
      * @return string The normalized path
      *
      * @example
@@ -46,10 +46,11 @@ class Filesystem extends FilesystemBase
      *
      * @copyright Fabien Potencier
      * @license   MIT
+     *
      * @link      https://github.com/symfony/routing/blob/v4.1.1/Generator/UrlGenerator.php#L280-L329
      *
-     * @param string $basePath The base directory path
-     * @param string $targetPath The target file/directory path
+     * @param  string  $basePath  The base directory path
+     * @param  string  $targetPath  The target file/directory path
      * @return string The relative path from base to target
      *
      * @example
@@ -93,7 +94,7 @@ class Filesystem extends FilesystemBase
      * Ensures that a path is properly formatted as a relative path by adding
      * './' prefix when necessary.
      *
-     * @param string $path The path to process
+     * @param  string  $path  The path to process
      * @return string The ensured relative path
      *
      * @example

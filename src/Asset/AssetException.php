@@ -8,7 +8,7 @@ use Exception;
 
 /**
  * Custom exception class for asset-related errors.
- * 
+ *
  * Provides additional context information for asset processing errors
  * to help with debugging and error handling.
  */
@@ -17,10 +17,10 @@ class AssetException extends Exception
     /**
      * Create a new AssetException instance.
      *
-     * @param string          $message  The exception message
-     * @param array<string, mixed> $context  Additional context data
-     * @param int            $code     The exception code
-     * @param Exception|null $previous The previous throwable
+     * @param  string  $message  The exception message
+     * @param  array<string, mixed>  $context  Additional context data
+     * @param  int  $code  The exception code
+     * @param  Exception|null  $previous  The previous throwable
      */
     public function __construct(
         string $message = '',

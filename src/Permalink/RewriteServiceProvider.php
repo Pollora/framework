@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Pollora\Permalink;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
-use Illuminate\Support\Facades\URL;
 use Pollora\Support\Uri;
 
 /**
@@ -21,8 +21,6 @@ class RewriteServiceProvider extends ServiceProvider
 {
     /**
      * Register URL rewrite related services.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -33,13 +31,10 @@ class RewriteServiceProvider extends ServiceProvider
 
     /**
      * Register the removeTrailingSlash macro on the URL generator.
-     *
-     * @return self
      */
     protected function registerUrlMacro(): self
     {
-        URL::macro('removeTrailingSlash', fn(?string $url) =>
-            app(Uri::class)->removeTrailingSlash($url)
+        URL::macro('removeTrailingSlash', fn (?string $url) => app(Uri::class)->removeTrailingSlash($url)
         );
 
         return $this;
@@ -47,38 +42,33 @@ class RewriteServiceProvider extends ServiceProvider
 
     /**
      * Register the permalink manager as a singleton.
-     *
-     * @return self
      */
     protected function registerPermalinkManager(): self
     {
         $this->app->singleton(PermalinkManager::class);
+
         return $this;
     }
 
     /**
      * Register necessary WordPress filters.
-     *
-     * @return self
      */
     protected function registerFilters(): self
     {
-        Filter::add('redirect_canonical', fn($canonicalUrl) =>
-            app(PermalinkManager::class)->handleCanonicalRedirect($canonicalUrl)
+        Filter::add('redirect_canonical', fn ($canonicalUrl) => app(PermalinkManager::class)->handleCanonicalRedirect($canonicalUrl)
         );
+
         return $this;
     }
 
     /**
      * Bootstrap services and register WordPress hooks.
-     *
-     * @return void
      */
     public function boot(): void
     {
         Action::add(
             'permalink_structure_changed',
-            fn($old, $new) => app(PermalinkManager::class)->updateStructure($new),
+            fn ($old, $new) => app(PermalinkManager::class)->updateStructure($new),
             90
         );
     }

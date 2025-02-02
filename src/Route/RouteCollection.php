@@ -20,7 +20,7 @@ class RouteCollection extends IlluminateRouteCollection
      * Extends the base collection functionality to handle WordPress condition parameters
      * when building the route key.
      *
-     * @param Route $route The route instance to add to collections
+     * @param  Route  $route  The route instance to add to collections
      * @return void
      */
     protected function addToCollections($route)
@@ -41,7 +41,7 @@ class RouteCollection extends IlluminateRouteCollection
      * - The route's URI
      * - Serialized condition parameters (if present)
      *
-     * @param Route $route The route instance to build the identifier for
+     * @param  Route  $route  The route instance to build the identifier for
      * @return string The unique route identifier
      */
     private function buildDomainAndUri($route): string

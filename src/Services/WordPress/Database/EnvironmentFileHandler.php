@@ -20,8 +20,8 @@ class EnvironmentFileHandler
      * Updates or adds environment variables while preserving file structure
      * and comments. Creates new .env file from .env.example if needed.
      *
-     * @param array<string, string> $replacements Key-value pairs of environment variables to update
-     * @return void
+     * @param  array<string, string>  $replacements  Key-value pairs of environment variables to update
+     *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException When neither .env nor .env.example exists
      */
     public function updateEnvFile(array $replacements): void
@@ -38,8 +38,8 @@ class EnvironmentFileHandler
     /**
      * Process environment file content and replace values.
      *
-     * @param string $content The current content of the .env file
-     * @param array<string, string> $replacements Key-value pairs to update
+     * @param  string  $content  The current content of the .env file
+     * @param  array<string, string>  $replacements  Key-value pairs to update
      * @return string The processed content
      */
     private function processEnvContent(string $content, array $replacements): string
@@ -58,8 +58,8 @@ class EnvironmentFileHandler
     /**
      * Process a single line of the environment file.
      *
-     * @param string $line The line to process
-     * @param array<string, string> $replacements Key-value pairs to update
+     * @param  string  $line  The line to process
+     * @param  array<string, string>  $replacements  Key-value pairs to update
      * @return string The processed line
      */
     private function processLine(string $line, array $replacements): string

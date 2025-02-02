@@ -22,9 +22,8 @@ trait IncludesFiles
      * matching the specified pattern. Files are included in alphabetical order
      * to ensure consistent loading sequence.
      *
-     * @param string|array $path Single directory path or array of paths to search
-     * @param string $pattern File pattern to match (defaults to '*.php')
-     * @return void
+     * @param  string|array  $path  Single directory path or array of paths to search
+     * @param  string  $pattern  File pattern to match (defaults to '*.php')
      *
      * @example
      * ```php

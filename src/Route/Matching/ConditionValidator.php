@@ -23,8 +23,8 @@ class ConditionValidator implements ValidatorInterface
      * 1. The condition function exists in WordPress
      * 2. The condition function returns true when called with the route parameters
      *
-     * @param Route $route The route to validate
-     * @param Request $request The current HTTP request
+     * @param  Route  $route  The route to validate
+     * @param  Request  $request  The current HTTP request
      * @return bool True if the WordPress condition is met, false otherwise
      *
      * @example

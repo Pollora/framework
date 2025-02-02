@@ -23,23 +23,21 @@ class AssetContainerManager
 
     /**
      * The name of the default container.
-     *
-     * @var string|null
      */
     protected ?string $defaultContainer = null;
 
     /**
      * Creates a new asset container manager instance.
      *
-     * @param Application $app The application container instance
+     * @param  Application  $app  The application container instance
      */
     public function __construct(protected Application $app) {}
 
     /**
      * Adds a new asset container.
      *
-     * @param string $name The unique identifier for the container
-     * @param array $config Configuration options for the container
+     * @param  string  $name  The unique identifier for the container
+     * @param  array  $config  Configuration options for the container
      */
     public function addContainer(string $name, array $config): void
     {
@@ -49,8 +47,9 @@ class AssetContainerManager
     /**
      * Gets an asset container by name.
      *
-     * @param string $name The container identifier
+     * @param  string  $name  The container identifier
      * @return AssetContainer The requested container
+     *
      * @throws \InvalidArgumentException When container is not found
      */
     public function get(string $name): ?AssetContainer
@@ -65,7 +64,7 @@ class AssetContainerManager
     /**
      * Sets the default asset container.
      *
-     * @param string $name The container identifier to set as default
+     * @param  string  $name  The container identifier to set as default
      */
     public function setDefaultContainer(string $name): void
     {
@@ -76,6 +75,7 @@ class AssetContainerManager
      * Gets the default asset container.
      *
      * @return AssetContainer The default container
+     *
      * @throws \RuntimeException When no default container is set
      */
     public function getDefault(): AssetContainer

@@ -6,7 +6,6 @@ namespace Pollora\Asset;
 
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Vite as ViteFacade;
-use InvalidArgumentException;
 
 /**
  * Manages Vite integration for asset handling in the application.
@@ -21,15 +20,13 @@ class ViteManager
 {
     /**
      * The Vite instance.
-     *
-     * @var Vite|null
      */
     private ?Vite $vite = null;
 
     /**
      * Create a new ViteManager instance.
      *
-     * @param AssetContainer $container The asset container to use
+     * @param  AssetContainer  $container  The asset container to use
      */
     public function __construct(
         private readonly AssetContainer $container
@@ -39,8 +36,6 @@ class ViteManager
 
     /**
      * Returns the asset container instance.
-     *
-     * @return AssetContainer
      */
     public function container(): AssetContainer
     {
@@ -50,8 +45,9 @@ class ViteManager
     /**
      * Gets the URLs for the specified entry points.
      *
-     * @param array $entrypoints List of entry points to process
+     * @param  array  $entrypoints  List of entry points to process
      * @return array Array of asset URLs grouped by type (js/css)
+     *
      * @throws AssetException When entrypoints array is empty
      */
     public function getAssetUrls(array $entrypoints): array
@@ -59,14 +55,16 @@ class ViteManager
         if (empty($entrypoints)) {
             throw new AssetException('Entry points array cannot be empty.');
         }
+
         return $this->getViteInstance()->getAssetUrls($entrypoints);
     }
 
     /**
      * Gets the URL for a specific asset path.
+     *
      * @TODO rework with the Asset facade
      *
-     * @param string $path The asset path
+     * @param  string  $path  The asset path
      * @return string The complete asset URL
      */
     public function asset(string $path): string
@@ -129,6 +127,7 @@ class ViteManager
 
                     return $assets;
                 }, ['js' => [], 'css' => []]);
+
             return collect($assets)->map(fn ($paths): array => array_unique($paths))->all();
         });
     }

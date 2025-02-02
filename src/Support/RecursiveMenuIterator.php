@@ -20,7 +20,7 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
     /**
      * Create a new RecursiveMenuIterator instance.
      *
-     * @param string|Collection $menu Menu name or collection of menu items
+     * @param  string|Collection  $menu  Menu name or collection of menu items
      */
     public function __construct(string|Collection $menu)
     {
@@ -30,7 +30,7 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
     /**
      * Initialize menu items from string name or collection.
      *
-     * @param string|Collection $menu Menu name or collection
+     * @param  string|Collection  $menu  Menu name or collection
      * @return Collection Collection of menu items
      */
     private function initializeItems(string|Collection $menu): Collection
@@ -45,7 +45,7 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
     /**
      * Get WordPress menu items by menu name.
      *
-     * @param string $menuName Name of the menu in WordPress
+     * @param  string  $menuName  Name of the menu in WordPress
      * @return Collection Collection of menu items
      */
     private function getWordPressMenuItems(string $menuName): Collection
@@ -67,8 +67,7 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
     /**
      * Build menu tree by assigning children to parent items.
      *
-     * @param Collection $items Collection of menu items
-     * @return void
+     * @param  Collection  $items  Collection of menu items
      */
     private function buildMenuTree(Collection $items): void
     {

@@ -25,8 +25,6 @@ class PostTypeServiceProvider extends ServiceProvider
      *
      * Binds the PostTypeFactory to the service container for creating
      * new post type instances.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -40,7 +38,6 @@ class PostTypeServiceProvider extends ServiceProvider
      * Reads post type configurations from the config file and registers
      * each post type with WordPress using the PostType facade.
      *
-     * @return void
      *
      * @example Configuration format:
      * [

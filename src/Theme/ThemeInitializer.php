@@ -32,7 +32,7 @@ class ThemeInitializer implements ThemeComponent
             $this->initializeTheme();
         }, 1);
 
-        //Filter::add('stylesheet_directory_uri', [$this, 'overrideStylesheetDirectoryUri'], 90, 3);
+        // Filter::add('stylesheet_directory_uri', [$this, 'overrideStylesheetDirectoryUri'], 90, 3);
         $this->overrideThemeUri();
     }
 

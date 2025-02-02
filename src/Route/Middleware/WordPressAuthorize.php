@@ -23,10 +23,10 @@ class WordPressAuthorize
      * Verifies if the current WordPress user has the specified capability.
      * Throws a 404 exception if the user is not authorized.
      *
-     * @param Request $request The incoming request
-     * @param Closure $next The next middleware handler
-     * @param string $capability The WordPress capability to check (defaults to 'edit_posts')
-     * @return Response
+     * @param  Request  $request  The incoming request
+     * @param  Closure  $next  The next middleware handler
+     * @param  string  $capability  The WordPress capability to check (defaults to 'edit_posts')
+     *
      * @throws HttpException When user is not authorized (404)
      */
     public function handle(Request $request, Closure $next, string $capability = 'edit_posts'): Response
@@ -43,7 +43,7 @@ class WordPressAuthorize
      *
      * Verifies that the user is both logged in and has the required capability.
      *
-     * @param string $capability The WordPress capability to check
+     * @param  string  $capability  The WordPress capability to check
      * @return bool True if user is authorized, false otherwise
      */
     private function isUserAuthorized(string $capability): bool

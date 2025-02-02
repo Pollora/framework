@@ -21,13 +21,13 @@ class InstallationConfig
     /**
      * Create a new installation configuration instance.
      *
-     * @param string $title Site title
-     * @param string $description Site description
-     * @param string $adminUser Admin username
-     * @param string $adminEmail Admin email address
-     * @param string $adminPassword Admin password
-     * @param string $locale Site language locale
-     * @param bool $isPublic Whether site should be indexed by search engines
+     * @param  string  $title  Site title
+     * @param  string  $description  Site description
+     * @param  string  $adminUser  Admin username
+     * @param  string  $adminEmail  Admin email address
+     * @param  string  $adminPassword  Admin password
+     * @param  string  $locale  Site language locale
+     * @param  bool  $isPublic  Whether site should be indexed by search engines
      */
     public function __construct(
         public readonly string $title,
@@ -49,7 +49,6 @@ class InstallationConfig
      * - Language preferences
      * - Search engine visibility
      *
-     * @return self
      * @throws \RuntimeException If user input validation fails
      */
     public static function fromPrompts(): self

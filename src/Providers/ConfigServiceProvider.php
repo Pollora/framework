@@ -29,7 +29,6 @@ class ConfigServiceProvider extends ServiceProvider
      * - post-types.php: Custom post type definitions
      * - taxonomies.php: Custom taxonomy definitions
      *
-     * @return void
      *
      * @example
      * // To publish these configurations, run:

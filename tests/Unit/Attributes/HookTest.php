@@ -1,13 +1,13 @@
 <?php
 
-use Pollora\Attributes\Action;
-use Pollora\Support\Facades\Action as ActionFacade;
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Facade;
-use Pollora\Attributes\AttributeProcessor;
+use Pollora\Attributes\Action;
 use Pollora\Attributes\Attributable;
+use Pollora\Attributes\AttributeProcessor;
 use Pollora\Attributes\Filter;
 use Pollora\Support\Facades\Filter as FilterFacade;
-
 
 it('registers an action hook', function () {
     // Créer le mock avec les bons arguments attendus
@@ -29,7 +29,7 @@ it('registers an action hook', function () {
     Facade::clearResolvedInstances();
     Facade::setFacadeApplication(['wp.action' => $mock]);
 
-    $testClass = new TestClass();
+    $testClass = new TestClass;
     AttributeProcessor::process($testClass);
 });
 
@@ -71,7 +71,7 @@ it('registers a filter hook and modifies value', function () {
     Facade::clearResolvedInstances();
     Facade::setFacadeApplication(['wp.filter' => $mock]);
 
-    $testClass = new TestFilterClass();
+    $testClass = new TestFilterClass;
     AttributeProcessor::process($testClass);
 });
 
@@ -91,7 +91,7 @@ it('executes filter and returns modified value', function () {
     Facade::clearResolvedInstances();
     Facade::setFacadeApplication(['wp.filter' => $mock]);
 
-    $testClass = new TestFilterClass();
+    $testClass = new TestFilterClass;
     AttributeProcessor::process($testClass);
 
     // Tester l'application du filtre
@@ -104,7 +104,7 @@ class TestFilterClass implements Attributable
     #[Filter('test_filter')]
     public function filterMethod(string $value): string
     {
-        return 'modified ' . $value;
+        return 'modified '.$value;
     }
 }
 

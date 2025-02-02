@@ -20,7 +20,7 @@ class RecurringEvent extends AbstractEvent
     /**
      * Create a new recurring event instance.
      *
-     * @param object|null $event WordPress event object
+     * @param  object|null  $event  WordPress event object
      */
     public function __construct(?object $event = null)
     {
@@ -34,7 +34,7 @@ class RecurringEvent extends AbstractEvent
     /**
      * Create and persist a new recurring job instance.
      *
-     * @param object $event WordPress event object
+     * @param  object  $event  WordPress event object
      * @return static
      */
     public static function createJob(object $event): self
@@ -48,7 +48,7 @@ class RecurringEvent extends AbstractEvent
     /**
      * Save the recurring job to the database.
      *
-     * @param int|null $jobId Optional job ID
+     * @param  int|null  $jobId  Optional job ID
      */
     protected function saveToDatabase($jobId = null): void
     {
@@ -65,7 +65,7 @@ class RecurringEvent extends AbstractEvent
     /**
      * Schedule all recurring events in the Laravel scheduler.
      *
-     * @param Schedule $schedule Laravel schedule instance
+     * @param  Schedule  $schedule  Laravel schedule instance
      */
     public static function scheduleAllEvents(Schedule $schedule): void
     {
@@ -81,8 +81,8 @@ class RecurringEvent extends AbstractEvent
     /**
      * Convert WordPress schedule to cron expression.
      *
-     * @param string $schedule WordPress schedule name
-     * @param int|null $interval Custom interval in seconds
+     * @param  string  $schedule  WordPress schedule name
+     * @param  int|null  $interval  Custom interval in seconds
      * @return string Cron expression
      */
     public static function getCronExpression(string $schedule, ?int $interval): string
@@ -114,27 +114,28 @@ class RecurringEvent extends AbstractEvent
     /**
      * Calculate cron expression for custom interval.
      *
-     * @param int|null $interval Interval in seconds
+     * @param  int|null  $interval  Interval in seconds
      * @return string Cron expression
      */
     private static function calculateCustomInterval(?int $interval): string
     {
-        if (!$interval) {
+        if (! $interval) {
             return '0 0 * * *';
         }
 
         $minutes = $interval / 60;
-        
+
         if ($minutes < 60) {
             return "*/{$minutes} * * * *";
         }
-        
+
         if ($minutes == 60) {
             return '0 * * * *';
         }
-        
+
         if ($minutes % 60 == 0) {
             $hours = $minutes / 60;
+
             return "0 */{$hours} * * *";
         }
 

@@ -20,8 +20,6 @@ class RouteServiceProvider extends RoutingServiceProvider
      *
      * Binds a singleton instance of the WordPress-compatible Router
      * to the application container.
-     *
-     * @return void
      */
     public function registerRouter(): void
     {

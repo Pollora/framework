@@ -6,7 +6,7 @@ namespace Pollora\Gutenberg\Helpers;
 
 /**
  * Helper class for processing block pattern data.
- * 
+ *
  * Handles the extraction and processing of pattern metadata from files,
  * including internationalization and data type conversion.
  */
@@ -32,7 +32,7 @@ class PatternDataProcessor
     /**
      * Extract pattern data from a file.
      *
-     * @param string $file Path to the pattern file
+     * @param  string  $file  Path to the pattern file
      * @return array<string, string|null> Extracted pattern data
      */
     public function getPatternData(string $file): array
@@ -42,11 +42,11 @@ class PatternDataProcessor
 
     /**
      * Process pattern data for registration.
-     * 
+     *
      * Converts data types, handles internationalization, and filters empty values.
      *
-     * @param array<string, mixed> $patternData Raw pattern data
-     * @param \WP_Theme $theme Current theme instance
+     * @param  array<string, mixed>  $patternData  Raw pattern data
+     * @param  \WP_Theme  $theme  Current theme instance
      * @return array<string, mixed> Processed pattern data
      */
     public function process(array $patternData, \WP_Theme $theme): array

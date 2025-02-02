@@ -19,22 +19,18 @@ abstract class AbstractRecursiveIterator implements RecursiveIterator
 {
     /**
      * Current position in the iterator.
-     *
-     * @var int
      */
     protected int $current = 0;
 
     /**
      * Collection of items to iterate over.
-     *
-     * @var \Illuminate\Support\Collection
      */
     protected Collection $items;
 
     /**
      * Create a new recursive iterator instance.
      *
-     * @param Collection|array $items Items to iterate over
+     * @param  Collection|array  $items  Items to iterate over
      */
     public function __construct(Collection|array $items)
     {
@@ -53,8 +49,6 @@ abstract class AbstractRecursiveIterator implements RecursiveIterator
 
     /**
      * Move to the next item.
-     *
-     * @return void
      */
     public function next(): void
     {
@@ -83,8 +77,6 @@ abstract class AbstractRecursiveIterator implements RecursiveIterator
 
     /**
      * Reset the iterator to the beginning.
-     *
-     * @return void
      */
     public function rewind(): void
     {

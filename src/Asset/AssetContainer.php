@@ -21,30 +21,24 @@ class AssetContainer
 
     /**
      * The path to the hot reload file used by Vite.
-     *
-     * @var string
      */
     protected string $hotFile;
 
     /**
      * The directory where built assets are stored.
-     *
-     * @var string
      */
     protected string $buildDirectory;
 
     /**
      * The path to the Vite manifest file.
-     *
-     * @var string
      */
     protected string $manifestPath;
 
     /**
      * Creates a new asset container instance.
      *
-     * @param string $name The unique identifier for this container
-     * @param array $config Configuration options for the container
+     * @param  string  $name  The unique identifier for this container
+     * @param  array  $config  Configuration options for the container
      */
     public function __construct(protected string $name, array $config = [])
     {

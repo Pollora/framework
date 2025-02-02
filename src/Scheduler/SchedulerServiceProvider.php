@@ -43,7 +43,7 @@ class SchedulerServiceProvider extends ServiceProvider
     /**
      * Register WordPress filters for the scheduler.
      *
-     * @param SchedulerInterface $scheduler Scheduler instance
+     * @param  SchedulerInterface  $scheduler  Scheduler instance
      */
     protected function registerFilters(SchedulerInterface $scheduler): void
     {

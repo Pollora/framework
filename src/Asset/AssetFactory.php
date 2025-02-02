@@ -15,8 +15,8 @@ class AssetFactory
     /**
      * Creates a new Asset instance.
      *
-     * @param string $handle Unique identifier for the asset
-     * @param string $file   Path to the asset file
+     * @param  string  $handle  Unique identifier for the asset
+     * @param  string  $file  Path to the asset file
      * @return Asset The created Asset instance
      */
     public function add(string $handle, string $file): Asset
@@ -27,7 +27,7 @@ class AssetFactory
     /**
      * Creates a new AssetFile instance for URL generation.
      *
-     * @param string $file Path to the asset file
+     * @param  string  $file  Path to the asset file
      * @return AssetFile The created AssetFile instance
      */
     public function url(string $file): AssetFile

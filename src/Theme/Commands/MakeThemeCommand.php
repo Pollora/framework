@@ -8,7 +8,6 @@ use Illuminate\Config\Repository;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use Pollora\Theme\ThemeMetadata;
 
 use function Laravel\Prompts\text;
@@ -22,6 +21,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected $textExtensions = ['php', 'js', 'css', 'html', 'htm', 'xml', 'txt', 'md', 'json', 'yaml', 'yml', 'svg', 'twig', 'blade.php', 'stub'];
 
     protected ThemeMetadata $theme;
+
     protected array $containerFolder;
 
     public function __construct(Repository $config, Filesystem $files)
@@ -38,7 +38,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
 
         $this->setupContainerFolders()
-             ->generateThemeStructure();
+            ->generateThemeStructure();
 
         if ($this->option('source')) {
             $this->copySourceFolder();
@@ -138,27 +138,27 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected function getTargetPathInfo($item, string $destination, string $relativePath): array
     {
-        $targetDir = $destination . ($relativePath ? '/' . $relativePath : '');
-        $targetPath = $targetDir . '/' . $item->getFilename();
+        $targetDir = $destination.($relativePath ? '/'.$relativePath : '');
+        $targetPath = $targetDir.'/'.$item->getFilename();
         $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
 
         if (str_starts_with($relativePath, 'app/')) {
             $relativePath = str_replace('app/Themes/', '', $relativePath);
             $targetDir = $this->theme->getThemeAppDir($relativePath);
-            $targetPath = $targetDir . DIRECTORY_SEPARATOR . basename($targetPath);
+            $targetPath = $targetDir.DIRECTORY_SEPARATOR.basename($targetPath);
         }
 
         return [
             'dir' => $targetDir,
-            'path' => $targetPath
+            'path' => $targetPath,
         ];
     }
 
     protected function handleFileCopy($item, string $targetPath): void
     {
-        if (File::exists($targetPath) && 
-            !$this->option('force') && 
-            !$this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")
+        if (File::exists($targetPath) &&
+            ! $this->option('force') &&
+            ! $this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")
         ) {
             return;
         }

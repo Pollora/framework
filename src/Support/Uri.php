@@ -16,7 +16,7 @@ class Uri
     /**
      * Removes the trailing slash from a URL if present.
      *
-     * @param string|null $url The URL to process
+     * @param  string|null  $url  The URL to process
      * @return string|null The URL without trailing slash or null if input is null
      */
     public function removeTrailingSlash(?string $url): ?string
@@ -35,7 +35,7 @@ class Uri
     /**
      * Rebuilds a URL from its components.
      *
-     * @param array $parts The URL components (scheme, host, port, path, query, fragment)
+     * @param  array  $parts  The URL components (scheme, host, port, path, query, fragment)
      * @return string The rebuilt URL
      */
     protected function buildUrl(array $parts): string

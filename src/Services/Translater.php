@@ -16,8 +16,8 @@ class Translater
     /**
      * Create a new translator instance.
      *
-     * @param array<string, mixed> $items The items to be used in translations
-     * @param string $domain The translation domain (defaults to 'wordpress')
+     * @param  array<string, mixed>  $items  The items to be used in translations
+     * @param  string  $domain  The translation domain (defaults to 'wordpress')
      */
     public function __construct(
         protected array $items = [],
@@ -30,7 +30,7 @@ class Translater
      * Processes an array of keys for translation. Supports wildcards ('*')
      * for translating all items in an array or specific nested paths.
      *
-     * @param array<int, string> $keysToTranslate The keys that need to be translated
+     * @param  array<int, string>  $keysToTranslate  The keys that need to be translated
      * @return array<string, mixed> The translated array
      *
      * @example
@@ -57,8 +57,7 @@ class Translater
     /**
      * Translate a specific key in the items array.
      *
-     * @param string $key The key to translate (supports dot notation for nested arrays)
-     * @return void
+     * @param  string  $key  The key to translate (supports dot notation for nested arrays)
      */
     protected function translateKey(string $key): void
     {
@@ -74,9 +73,8 @@ class Translater
     /**
      * Recursively translate nested array values by key.
      *
-     * @param array<int, string> $keys The array of keys to traverse
-     * @param array<string, mixed> $item Reference to the item array being modified
-     * @return void
+     * @param  array<int, string>  $keys  The array of keys to traverse
+     * @param  array<string, mixed>  $item  Reference to the item array being modified
      */
     protected function recursiveTranslateByKey(array $keys, &$item): void
     {
@@ -105,8 +103,7 @@ class Translater
     /**
      * Recursively translate all values in an array.
      *
-     * @param array<string, mixed> $item Reference to the item being translated
-     * @return void
+     * @param  array<string, mixed>  $item  Reference to the item being translated
      */
     protected function recursiveTranslate(&$item): void
     {
@@ -122,7 +119,7 @@ class Translater
     /**
      * Translate a single string value using WordPress translation function.
      *
-     * @param string $value The string to translate
+     * @param  string  $value  The string to translate
      * @return string The translated string
      */
     protected function translateItem(string $value): string

@@ -9,10 +9,10 @@ use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollora\Admin\PageServiceProvider;
 use Pollora\Ajax\AjaxServiceProvider;
 use Pollora\Asset\AssetServiceProvider;
+use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\Gutenberg\GutenbergServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
-use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Hook\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
@@ -46,8 +46,6 @@ class PolloraServiceProvider extends ServiceProvider
      * - Content type management (posts, taxonomies)
      * - Asset and Gutenberg integration
      * - Scheduling and job dispatching
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -87,8 +85,6 @@ class PolloraServiceProvider extends ServiceProvider
      *
      * Publishes necessary configuration files and assets to the public directory.
      * This includes the WordPress configuration file that bridges Laravel and WordPress.
-     *
-     * @return void
      */
     public function boot(): void
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Hook\Commands;
 
 use Illuminate\Support\Facades\File;
@@ -9,8 +11,7 @@ trait HookBootstrap
     /**
      * Adds a hookable class to bootstrap/hooks.php.
      *
-     * @param string $hookClass Fully qualified name of the class to add (with namespace).
-     * @return void
+     * @param  string  $hookClass  Fully qualified name of the class to add (with namespace).
      */
     protected function addHookToBootstrap(string $hookClass): void
     {
@@ -25,6 +26,7 @@ trait HookBootstrap
             // Check if the class is already registered
             if (strpos($content, "\\{$hookClass}::class") !== false) {
                 $this->warn("The class \\{$hookClass} is already registered in hooks.php.");
+
                 return;
             }
 
@@ -38,7 +40,7 @@ trait HookBootstrap
             // Write the updated content
             File::put($bootstrapPath, $content);
         } catch (\Exception $e) {
-            $this->error('Failed to update hooks.php: ' . $e->getMessage());
+            $this->error('Failed to update hooks.php: '.$e->getMessage());
         }
     }
 }

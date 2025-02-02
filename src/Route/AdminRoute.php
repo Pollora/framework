@@ -20,8 +20,8 @@ class AdminRoute
     /**
      * Create a new admin route instance.
      *
-     * @param Request $request The current HTTP request instance used for route binding
-     * @param IlluminateRouter $router Laravel router instance for route registration
+     * @param  Request  $request  The current HTTP request instance used for route binding
+     * @param  IlluminateRouter  $router  Laravel router instance for route registration
      */
     public function __construct(
         private readonly Request $request,
@@ -48,10 +48,10 @@ class AdminRoute
     {
         // Get WordPress installation directory from config
         $wordpressUri = trim((string) config('app.wp.dir', 'cms'), '\/');
-        
+
         // Create catch-all route for wp-admin
         $route = $this->router->any(
-            "$wordpressUri/wp-admin/{any?}", 
+            "$wordpressUri/wp-admin/{any?}",
             fn (): \Illuminate\Http\Response => new Response
         );
 

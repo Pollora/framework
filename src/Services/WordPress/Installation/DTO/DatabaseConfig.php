@@ -21,12 +21,12 @@ class DatabaseConfig
     /**
      * Create a new database configuration instance.
      *
-     * @param string $host Database host address
-     * @param int $port Database port number
-     * @param string $name Database name
-     * @param string $username Database user
-     * @param string $password Database password
-     * @param string $siteUrl WordPress site URL
+     * @param  string  $host  Database host address
+     * @param  int  $port  Database port number
+     * @param  string  $name  Database name
+     * @param  string  $username  Database user
+     * @param  string  $password  Database password
+     * @param  string  $siteUrl  WordPress site URL
      */
     public function __construct(
         public readonly string $host,
@@ -40,7 +40,6 @@ class DatabaseConfig
     /**
      * Create configuration from environment variables.
      *
-     * @return self
      * @throws \RuntimeException If required environment variables are missing
      */
     public static function fromEnvironment(): self
@@ -63,7 +62,6 @@ class DatabaseConfig
      * Prompts user for database configuration values with validation
      * and default values from environment.
      *
-     * @return self
      * @throws \RuntimeException If user input validation fails
      */
     public static function fromPrompts(): self

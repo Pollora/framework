@@ -9,12 +9,12 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Commands\MakeThemeCommand;
 use Pollora\Theme\Commands\RemoveThemeCommand;
 use Pollora\Theme\Factories\ComponentFactory;
-use Pollora\Foundation\Support\IncludesFiles;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -22,9 +22,11 @@ use Pollora\Foundation\Support\IncludesFiles;
 class ThemeServiceProvider extends ServiceProvider
 {
     use IncludesFiles;
+
     protected $wp_theme;
 
     protected $theme_root;
+
     /**
      * Registers the theme.
      *
@@ -65,10 +67,10 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $theme = Theme::instance();
 
-        if (!$theme->theme()) {
+        if (! $theme->theme()) {
             return;
         }
-        
+
         $themeInclude = $theme->theme()->getThemeIncDir();
 
         if (File::exists($themeInclude) && File::isDirectory($themeInclude)) {

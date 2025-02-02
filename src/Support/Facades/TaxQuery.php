@@ -13,14 +13,13 @@ use Illuminate\Support\Facades\Facade;
  * improved type safety and query validation.
  *
  * @mixin \Pollora\Query\TaxQuery
+ *
  * @see \Pollora\Query\TaxQuery
  */
 class TaxQuery extends Facade
 {
     /**
      * Get the registered name of the component.
-     *
-     * @return string
      */
     protected static function getFacadeAccessor(): string
     {

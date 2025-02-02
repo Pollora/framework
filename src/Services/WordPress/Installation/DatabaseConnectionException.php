@@ -17,8 +17,7 @@ class DatabaseConnectionException extends \RuntimeException
     /**
      * Create exception from PDO error message.
      *
-     * @param string $message The PDO error message
-     * @return self
+     * @param  string  $message  The PDO error message
      */
     public static function fromPdoError(string $message): self
     {

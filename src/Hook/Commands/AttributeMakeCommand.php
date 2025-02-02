@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Hook\Commands;
 
 use Illuminate\Console\GeneratorCommand;
-use Symfony\Component\Console\Input\InputOption;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Class AttributeMakeCommand
@@ -31,36 +33,38 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     protected function getStub()
     {
         $type = strtolower($this->type);
-        return $this->resolveStubPath("/stubs/hook-attribute.stub");
+
+        return $this->resolveStubPath('/stubs/hook-attribute.stub');
     }
 
     /**
      * Resolve the fully-qualified path to the stub.
      *
-     * @param string $stub
+     * @param  string  $stub
      * @return string
      */
     protected function resolveStubPath($stub)
     {
-        $customPath = config('stubs.path', base_path('stubs')) . $stub;
-        return file_exists($customPath) ? $customPath : __DIR__ . $stub;
+        $customPath = config('stubs.path', base_path('stubs')).$stub;
+
+        return file_exists($customPath) ? $customPath : __DIR__.$stub;
     }
 
     /**
      * Get the default namespace for the class.
      *
-     * @param string $rootNamespace
+     * @param  string  $rootNamespace
      * @return string
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace . '\\Hooks';
+        return $rootNamespace.'\\Hooks';
     }
 
     /**
      * Build the class with the given name.
      *
-     * @param string $name
+     * @param  string  $name
      * @return string
      */
     protected function buildClass($name)
@@ -99,6 +103,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         if ($this->alreadyExists($path)) {
             $this->updateExistingFile($path);
             $this->components->info(sprintf('%s [%s] updated successfully.', $this->type, $path));
+
             return;
         }
 
@@ -121,7 +126,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     protected function validateOptions()
     {
         $priority = $this->option('priority');
-        if (!is_numeric($priority) || $priority < 0) {
+        if (! is_numeric($priority) || $priority < 0) {
             $this->error('The priority must be a non-negative number.');
             exit;
         }
@@ -130,7 +135,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     /**
      * Update an existing file with new content.
      *
-     * @param string $path
+     * @param  string  $path
      * @return void
      */
     protected function updateExistingFile($path)
@@ -138,7 +143,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         $stub = $this->getUpdateStub();
 
         $hook = $this->getDefaultOption('hook');
-        $hookMethodName = 'handle' . Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
+        $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
 
         $existingContent = File::get($path);
 
@@ -146,14 +151,13 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         $type = $this->type;
         $attributeNamespace = "Pollora\\Attributes\\{$type}";
         $escapedNamespace = preg_quote($attributeNamespace, '/');
-        if (!preg_match("/use {$escapedNamespace};/", $existingContent)) {
+        if (! preg_match("/use {$escapedNamespace};/", $existingContent)) {
             // Find the last "use" statement and add the necessary attribute import
-            $lastUsePosition = strrpos($existingContent, "use ");
+            $lastUsePosition = strrpos($existingContent, 'use ');
             $useStatements = substr($existingContent, 0, $lastUsePosition);
             $remainingContent = substr($existingContent, $lastUsePosition);
-            $existingContent = $useStatements . "use {$attributeNamespace};\n" . $remainingContent;
+            $existingContent = $useStatements."use {$attributeNamespace};\n".$remainingContent;
         }
-
 
         $content = $this->makeReplacements(File::get($stub));
 
@@ -164,8 +168,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
         $lastClosingBracePosition = strrpos($existingContent, '}');
 
-
-        $newContent = substr($existingContent, 0, $lastClosingBracePosition) . "\n" . $content . "\n" . substr($existingContent, $lastClosingBracePosition);
+        $newContent = substr($existingContent, 0, $lastClosingBracePosition)."\n".$content."\n".substr($existingContent, $lastClosingBracePosition);
 
         File::put($path, $newContent);
     }
@@ -173,19 +176,18 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     /**
      * Make replacements in the stub.
      *
-     * @param string $stub
      * @return string
      */
     public function makeReplacements(string $stub)
     {
         $hook = $this->getDefaultOption('hook');
         $priority = $this->getDefaultOption('priority');
-        $hookMethodName = 'handle' . Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
+        $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
         $type = $this->type;
 
         $returnType = $type === 'Action' ? ': void' : '';
         $arg = $type === 'Filter' ? '$arg' : '';
-        $return = $type === 'Filter' ? "\n". '        return $arg;' : '';
+        $return = $type === 'Filter' ? "\n".'        return $arg;' : '';
 
         return str_replace(
             ['{{ type }}', '{{ hook }}', '{{ priority }}', '{{ hookMethodName }}',
@@ -212,13 +214,13 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected function getSourceFilePath()
     {
-        return app_path('Hooks/' . $this->getNameInput() . '.php');
+        return app_path('Hooks/'.$this->getNameInput().'.php');
     }
 
     /**
      * Determine if the file already exists.
      *
-     * @param string $path
+     * @param  string  $path
      * @return bool
      */
     protected function alreadyExists($path)
@@ -229,7 +231,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     /**
      * Get the default option value.
      *
-     * @param string $key
+     * @param  string  $key
      * @return mixed
      */
     protected function getDefaultOption($key)

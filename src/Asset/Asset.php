@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Asset;
 
+use Illuminate\Support\Facades\Log;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -26,8 +26,6 @@ class Asset
 
     /**
      * The type of asset ('css' or 'js').
-     *
-     * @var string
      */
     protected string $type;
 
@@ -40,57 +38,41 @@ class Asset
 
     /**
      * The Vite instance for asset compilation.
-     *
-     * @var \Illuminate\Foundation\Vite|null
      */
     protected ?\Illuminate\Foundation\Vite $vite = null;
 
     /**
      * Whether to use Vite.js for asset handling.
-     *
-     * @var bool
      */
     protected bool $useVite = false;
 
     /**
      * The version string for cache busting.
-     *
-     * @var string|null
      */
     protected ?string $version = null;
 
     /**
      * The media query for stylesheet (e.g., 'all', 'print', 'screen').
-     *
-     * @var string
      */
     protected string $media = 'all';
 
     /**
      * Whether to load the script in the footer.
-     *
-     * @var bool
      */
     protected bool $loadInFooter = false;
 
     /**
      * The loading strategy for scripts (e.g., 'defer', 'async').
-     *
-     * @var string|null
      */
     protected ?string $loadStrategy = null;
 
     /**
      * The content to be added inline with the asset.
-     *
-     * @var string|null
      */
     protected ?string $inlineContent = null;
 
     /**
      * The position for inline content ('before' or 'after').
-     *
-     * @var string|null
      */
     protected ?string $inlinePosition = null;
 
@@ -103,23 +85,19 @@ class Asset
 
     /**
      * The asset container instance.
-     *
-     * @var AssetContainer|null
      */
     protected ?AssetContainer $container = null;
 
     /**
      * The Vite manager instance.
-     *
-     * @var ViteManager|null
      */
     protected ?ViteManager $viteManager = null;
 
     /**
      * Creates a new asset instance.
      *
-     * @param string $handle Unique identifier for the asset
-     * @param string $path Path to the asset file
+     * @param  string  $handle  Unique identifier for the asset
+     * @param  string  $path  Path to the asset file
      */
     public function __construct(protected string $handle, string $path)
     {
@@ -131,8 +109,7 @@ class Asset
     /**
      * Sets the asset container.
      *
-     * @param string $containerName Name of the container
-     * @return self
+     * @param  string  $containerName  Name of the container
      */
     public function container(string $containerName): self
     {
@@ -148,8 +125,7 @@ class Asset
     /**
      * Sets asset dependencies.
      *
-     * @param array $dependencies Array of dependency handles
-     * @return self
+     * @param  array  $dependencies  Array of dependency handles
      */
     public function dependencies(array $dependencies): self
     {
@@ -160,8 +136,6 @@ class Asset
 
     /**
      * Enables Vite.js integration for this asset.
-     *
-     * @return self
      */
     public function useVite(): self
     {
@@ -174,8 +148,7 @@ class Asset
     /**
      * Sets the asset version.
      *
-     * @param string $version Version string
-     * @return self
+     * @param  string  $version  Version string
      */
     public function version(string $version): self
     {
@@ -187,8 +160,7 @@ class Asset
     /**
      * Sets the media type for stylesheets.
      *
-     * @param string $media Media query string
-     * @return self
+     * @param  string  $media  Media query string
      */
     public function media(string $media): self
     {
@@ -199,8 +171,6 @@ class Asset
 
     /**
      * Sets script to load in footer.
-     *
-     * @return self
      */
     public function loadInFooter(): self
     {
@@ -212,8 +182,7 @@ class Asset
     /**
      * Sets the loading strategy for scripts.
      *
-     * @param string $strategy Loading strategy (e.g., 'defer', 'async')
-     * @return self
+     * @param  string  $strategy  Loading strategy (e.g., 'defer', 'async')
      */
     public function loadStrategy(string $strategy): self
     {
@@ -225,8 +194,7 @@ class Asset
     /**
      * Sets the asset type manually.
      *
-     * @param string $type The asset type ('css' or 'js')
-     * @return self
+     * @param  string  $type  The asset type ('css' or 'js')
      */
     public function setType(string $type): self
     {
@@ -303,9 +271,8 @@ class Asset
     /**
      * Localizes a JavaScript file with data.
      *
-     * @param string $objectName JavaScript object name
-     * @param array $data Data to localize
-     * @return self
+     * @param  string  $objectName  JavaScript object name
+     * @param  array  $data  Data to localize
      */
     public function localize(string $objectName, array $data): self
     {
@@ -319,9 +286,8 @@ class Asset
     /**
      * Adds inline content to the asset.
      *
-     * @param string $content Inline CSS/JS content
-     * @param string $position Position ('before' or 'after')
-     * @return self
+     * @param  string  $content  Inline CSS/JS content
+     * @param  string  $position  Position ('before' or 'after')
      */
     public function inline(string $content, string $position = 'after'): self
     {
@@ -354,7 +320,7 @@ class Asset
             Log::error('Error in Asset destructor', [
                 'error' => $e->getMessage(),
                 'hooks' => $this->hooks,
-                'path' => $this->path ?? null
+                'path' => $this->path ?? null,
             ]);
         }
     }
@@ -376,8 +342,7 @@ class Asset
     /**
      * Adds a WordPress hook for asset enqueuing.
      *
-     * @param string $hook WordPress hook name
-     * @return self
+     * @param  string  $hook  WordPress hook name
      */
     protected function addHook(string $hook): self
     {
@@ -389,7 +354,7 @@ class Asset
     /**
      * Loads the Vite client script when in development mode.
      *
-     * @param string $hook WordPress hook to attach the client script
+     * @param  string  $hook  WordPress hook to attach the client script
      */
     protected function loadViteClient(string $hook): void
     {
@@ -444,8 +409,9 @@ class Asset
     /**
      * Enqueues an individual asset based on its type.
      *
-     * @param string $type Asset type (css or js)
-     * @param string $path Asset path
+     * @param  string  $type  Asset type (css or js)
+     * @param  string  $path  Asset path
+     *
      * @throws \InvalidArgumentException When asset type is not supported
      */
     protected function enqueueAsset(string $type, string $path): void
@@ -461,7 +427,7 @@ class Asset
     /**
      * Enqueues a JavaScript file with WordPress.
      *
-     * @param string $path Path to the JavaScript file
+     * @param  string  $path  Path to the JavaScript file
      */
     protected function enqueueScript(string $path): void
     {
@@ -483,8 +449,8 @@ class Asset
     /**
      * Enqueues a CSS file with WordPress.
      *
-     * @param string $path Path to the CSS file
-     * @param string $handle Unique identifier for the stylesheet
+     * @param  string  $path  Path to the CSS file
+     * @param  string  $handle  Unique identifier for the stylesheet
      */
     protected function enqueueStyle(string $path, string $handle): void
     {
@@ -508,7 +474,7 @@ class Asset
     /**
      * Ensures a full URL is used for the asset path.
      *
-     * @param string $path Asset path
+     * @param  string  $path  Asset path
      * @return string Full URL to the asset
      */
     protected function forceFullUrl(string $path): string
@@ -526,8 +492,9 @@ class Asset
     /**
      * Determines the file type from the path extension.
      *
-     * @param string $path File path
+     * @param  string  $path  File path
      * @return string File type (css or js)
+     *
      * @throws \InvalidArgumentException When file type is not supported
      */
     protected function determineFileType(string $path): string

@@ -7,9 +7,9 @@ namespace Pollora\WordPress;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\WordPress;
-use Illuminate\Support\Str;
 
 class Bootstrap
 {
@@ -38,7 +38,7 @@ class Bootstrap
             $this->loadWordPressSettings();
         }
 
-        if (app()->runningInConsole() && !$this->isWordPressInstalled()) {
+        if (app()->runningInConsole() && ! $this->isWordPressInstalled()) {
             define('WP_INSTALLING', true);
         }
         if (! app()->runningInConsole() && $this->isWordPressInstalled()) {

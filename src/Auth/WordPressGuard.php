@@ -20,6 +20,7 @@ use WP_Error;
  * authentication features.
  *
  * @implements StatefulGuard
+ *
  * @uses GuardHelpers
  */
 class WordPressGuard implements StatefulGuard
@@ -28,8 +29,6 @@ class WordPressGuard implements StatefulGuard
 
     /**
      * The last attempted user authentication.
-     *
-     * @var User|null
      */
     private ?User $lastAttempted = null;
 
@@ -56,7 +55,7 @@ class WordPressGuard implements StatefulGuard
     /**
      * Validate user credentials without logging them in.
      *
-     * @param array<string, string> $credentials User credentials (username and password)
+     * @param  array<string, string>  $credentials  User credentials (username and password)
      * @return bool True if credentials are valid
      */
     public function validate(array $credentials = []): bool
@@ -70,8 +69,8 @@ class WordPressGuard implements StatefulGuard
     /**
      * Attempt to authenticate a user and log them in.
      *
-     * @param array<string, string> $credentials User credentials
-     * @param bool $remember Whether to "remember" the user
+     * @param  array<string, string>  $credentials  User credentials
+     * @param  bool  $remember  Whether to "remember" the user
      * @return bool True if authentication successful
      */
     public function attempt(array $credentials = [], $remember = false): bool
@@ -93,7 +92,7 @@ class WordPressGuard implements StatefulGuard
     /**
      * Attempt to authenticate a user once without logging them in.
      *
-     * @param array $credentials User credentials
+     * @param  array  $credentials  User credentials
      * @return bool True if authentication successful
      */
     public function once(array $credentials = []): bool
@@ -110,8 +109,8 @@ class WordPressGuard implements StatefulGuard
     /**
      * Log a user in.
      *
-     * @param Authenticatable $user The user to log in
-     * @param bool $remember Whether to "remember" the user
+     * @param  Authenticatable  $user  The user to log in
+     * @param  bool  $remember  Whether to "remember" the user
      */
     public function login(Authenticatable $user, $remember = false): void
     {
@@ -126,8 +125,8 @@ class WordPressGuard implements StatefulGuard
     /**
      * Log a user in by their ID.
      *
-     * @param mixed $id User ID
-     * @param bool $remember Whether to "remember" the user
+     * @param  mixed  $id  User ID
+     * @param  bool  $remember  Whether to "remember" the user
      * @return Authenticatable|null The logged in user or null
      */
     public function loginUsingId($id, $remember = false): ?Authenticatable
@@ -144,7 +143,7 @@ class WordPressGuard implements StatefulGuard
     /**
      * Log a user in once by their ID without starting a session.
      *
-     * @param mixed $id User ID
+     * @param  mixed  $id  User ID
      * @return bool True if successful
      */
     public function onceUsingId($id): bool
@@ -181,8 +180,7 @@ class WordPressGuard implements StatefulGuard
     /**
      * Set the current user.
      *
-     * @param Authenticatable $user The user to set
-     * @return static
+     * @param  Authenticatable  $user  The user to set
      */
     public function setUser(Authenticatable $user): static
     {

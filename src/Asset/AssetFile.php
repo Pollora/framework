@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Asset;
 
-use Pollora\Foundation\Application;
 use Illuminate\Support\Facades\Log;
+use Pollora\Foundation\Application;
 
 /**
  * Represents a file asset and handles its URL generation.
@@ -25,15 +25,14 @@ class AssetFile implements \Stringable
     /**
      * Creates a new asset file instance.
      *
-     * @param string $path The path to the asset file
+     * @param  string  $path  The path to the asset file
      */
     public function __construct(protected string $path) {}
 
     /**
      * Sets the asset container to use.
      *
-     * @param string $assetContainer The container identifier
-     * @return static
+     * @param  string  $assetContainer  The container identifier
      */
     public function from(string $assetContainer): static
     {
@@ -62,13 +61,14 @@ class AssetFile implements \Stringable
 
             $viteManager = new ViteManager($assetContainer);
             $result = $viteManager->asset($this->path);
-            
+
             return is_string($result) ? $result : '';
         } catch (\Throwable $e) {
             Log::error('Error in AssetFile::__toString', [
                 'error' => $e->getMessage(),
-                'path' => $this->path
+                'path' => $this->path,
             ]);
+
             return '';
         }
     }

@@ -11,7 +11,7 @@ use Pollora\Support\Facades\Filter;
 
 /**
  * Class Mailer
- * 
+ *
  * Handles email sending functionality using Laravel's mail system.
  * Provides WordPress-compatible mail sending interface with support for attachments.
  */
@@ -19,16 +19,15 @@ class Mailer
 {
     /**
      * Send an email message.
-     * 
+     *
      * Applies WordPress filters and handles email sending through Laravel's mail system.
      * Wraps any potential errors to ensure graceful failure.
      *
-     * @param string|array $to          The recipient email address(es)
-     * @param string      $subject     The email subject
-     * @param string      $message     The email message content (HTML supported)
-     * @param string|array $headers    Optional. Additional headers
-     * @param array       $attachments Optional. Files to attach to the email
-     * 
+     * @param  string|array  $to  The recipient email address(es)
+     * @param  string  $subject  The email subject
+     * @param  string  $message  The email message content (HTML supported)
+     * @param  string|array  $headers  Optional. Additional headers
+     * @param  array  $attachments  Optional. Files to attach to the email
      * @return SentMessage|null Returns SentMessage on success, null on failure
      */
     public function send(
@@ -55,14 +54,12 @@ class Mailer
 
     /**
      * Add attachments to the email message.
-     * 
+     *
      * Processes and attaches files to the email message.
      * Handles both array and string input formats for attachments.
      *
-     * @param Message     $mail        The email message instance
-     * @param array|string $attachments List of file paths to attach
-     * 
-     * @return void
+     * @param  Message  $mail  The email message instance
+     * @param  array|string  $attachments  List of file paths to attach
      */
     private function addAttachments(Message $mail, array|string $attachments): void
     {

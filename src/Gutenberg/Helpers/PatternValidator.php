@@ -6,7 +6,7 @@ namespace Pollora\Gutenberg\Helpers;
 
 /**
  * Helper class for validating block patterns.
- * 
+ *
  * Ensures patterns meet the required criteria before registration
  * and handles error logging for invalid patterns.
  */
@@ -15,8 +15,8 @@ class PatternValidator
     /**
      * Validate a pattern's data and registration status.
      *
-     * @param array<string, mixed> $patternData Pattern data to validate
-     * @param string $file Path to the pattern file
+     * @param  array<string, mixed>  $patternData  Pattern data to validate
+     * @param  string  $file  Path to the pattern file
      * @return bool Whether the pattern is valid and can be registered
      */
     public function isValid(array $patternData, string $file): bool
@@ -33,7 +33,7 @@ class PatternValidator
     /**
      * Check if pattern has required fields.
      *
-     * @param array<string, mixed> $patternData Pattern data to check
+     * @param  array<string, mixed>  $patternData  Pattern data to check
      * @return bool Whether the pattern has all required fields
      */
     private function isValidPattern(array $patternData): bool
@@ -44,7 +44,7 @@ class PatternValidator
     /**
      * Check if pattern is already registered.
      *
-     * @param string $slug Pattern slug to check
+     * @param  string  $slug  Pattern slug to check
      * @return bool Whether the pattern is already registered
      */
     private function isPatternRegistered(string $slug): bool
@@ -55,9 +55,8 @@ class PatternValidator
     /**
      * Log pattern validation errors.
      *
-     * @param string $file Path to the pattern file
-     * @param array<string, mixed> $patternData Pattern data that failed validation
-     * @return void
+     * @param  string  $file  Path to the pattern file
+     * @param  array<string, mixed>  $patternData  Pattern data that failed validation
      */
     protected function logPatternError(string $file, array $patternData): void
     {

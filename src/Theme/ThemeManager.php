@@ -13,21 +13,24 @@ namespace Pollora\Theme;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Translation\Loader;
+use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Foundation\Support\IncludesFiles;
-use Illuminate\Support\Str;
 
 class ThemeManager
 {
     use IncludesFiles;
+
     protected array $config;
 
     protected array $parentThemes = [];
+
     protected ?ThemeMetadata $theme = null;
 
     public function __construct(protected Container $app, protected ViewFinderInterface $viewFinder, protected Loader $localeLoader) {}
 
-    public function instance(): ThemeManager {
+    public function instance(): ThemeManager
+    {
         return $this;
     }
 

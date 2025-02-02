@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Facade;
  * with proper type hints and modern PHP syntax.
  *
  * @mixin \Pollora\Hashing\WordPressHasher
+ *
  * @see \Pollora\Hashing\WordPressHasher
  *
  * @author Jordan Doyle <jordan@doyle.wf>
@@ -21,8 +22,6 @@ class WPHash extends Facade
 {
     /**
      * Get the registered name of the component.
-     *
-     * @return string
      */
     protected static function getFacadeAccessor(): string
     {

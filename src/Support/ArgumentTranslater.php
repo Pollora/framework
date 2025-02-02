@@ -20,14 +20,14 @@ trait ArgumentTranslater
      * Translates specific keys within an array of arguments using a translation domain.
      * Supports nested keys and wildcards for array traversal.
      *
-     * @param array<string, mixed> $args The arguments to be translated (passed by reference)
-     * @param string $entity The translation domain/entity to use
-     * @param array<int, string> $keyToTranslate The keys to be translated (default: [
-     *                                           'label',
-     *                                           'labels.*',
-     *                                           'names.singular',
-     *                                           'names.plural',
-     *                                           ])
+     * @param  array<string, mixed>  $args  The arguments to be translated (passed by reference)
+     * @param  string  $entity  The translation domain/entity to use
+     * @param  array<int, string>  $keyToTranslate  The keys to be translated (default: [
+     *                                              'label',
+     *                                              'labels.*',
+     *                                              'names.singular',
+     *                                              'names.plural',
+     *                                              ])
      * @return array<string, mixed> The translated arguments
      */
     protected function translateArguments(

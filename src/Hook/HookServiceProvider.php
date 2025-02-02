@@ -6,10 +6,9 @@ namespace Pollora\Hook;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Hook\Commands\HookMakeCommand;
 use Pollora\Hook\Commands\ActionMakeCommand;
 use Pollora\Hook\Commands\FilterMakeCommand;
-use Pollora\Attributes\Attributable;
+use Pollora\Hook\Commands\HookMakeCommand;
 
 /**
  * Service provider for WordPress hook functionality.
@@ -24,8 +23,6 @@ class HookServiceProvider extends ServiceProvider
      *
      * Binds hook configurations and hook implementations as singletons
      * in the application container.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -46,8 +43,6 @@ class HookServiceProvider extends ServiceProvider
      * Bootstrap hook services.
      *
      * Loads and registers all configured hooks after the application has booted.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -75,8 +70,6 @@ class HookServiceProvider extends ServiceProvider
      * Load all configured hooks.
      *
      * Retrieves hooks from the container and registers each one individually.
-     *
-     * @return void
      */
     protected function loadHooks(): void
     {
@@ -90,8 +83,7 @@ class HookServiceProvider extends ServiceProvider
      * Creates an instance of the hook class and registers its 'register' method
      * as a WordPress action if the method exists.
      *
-     * @param string $hookClass The fully qualified class name of the hook to register
-     * @return void
+     * @param  string  $hookClass  The fully qualified class name of the hook to register
      */
     protected function registerHook(string $hookClass): void
     {

@@ -9,8 +9,6 @@ declare(strict_types=1);
  * - Register theme navigation menus
  * - Customize menu elements (links, items, submenus) through attributes
  * - Apply conditional styling based on menu depth and order
- *
- * @package Pollora\Theme
  */
 
 namespace Pollora\Theme;
@@ -18,7 +16,7 @@ namespace Pollora\Theme;
 use /**
  * The Translater service class.
  */
-    Pollora\Services\Translater;
+Pollora\Services\Translater;
 use /**
  * Class Action
  *
@@ -34,7 +32,7 @@ use /**
  * @method static \Pollora\Support\Actions\Action listen(string $event, callable $callback, int $priority = 0)
  * @method static \Pollora\Support\Actions\Action trigger(string $event, array $params = [], \Closure|null $before = null, \Closure|null $after = null)
  */
-    Pollora\Support\Facades\Action;
+Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
 use Pollora\Theme\Contracts\ThemeComponent;
 
@@ -53,7 +51,7 @@ class Menus implements ThemeComponent
     protected const ELEMENT_TYPES = [
         'link' => 'a',
         'item' => 'li',
-        'submenu' => 'submenu'
+        'submenu' => 'submenu',
     ];
 
     /**
@@ -62,7 +60,7 @@ class Menus implements ThemeComponent
      * @var array<string, string>
      */
     protected array $defaultAttributes = [
-        'class' => ''
+        'class' => '',
     ];
 
     /**
@@ -82,7 +80,7 @@ class Menus implements ThemeComponent
      */
     public function registerMenus(): void
     {
-        $menus = (array)config('theme.menus');
+        $menus = (array) config('theme.menus');
         $translater = new Translater($menus, 'menus');
         $menus = $translater->translate(['*']);
 
@@ -92,10 +90,10 @@ class Menus implements ThemeComponent
     /**
      * Customizes attributes for menu link elements.
      *
-     * @param array $attributes Current link attributes
-     * @param \WP_Post $item Menu item object
-     * @param object $args Menu arguments object
-     * @param int $depth Current menu item depth
+     * @param  array  $attributes  Current link attributes
+     * @param  \WP_Post  $item  Menu item object
+     * @param  object  $args  Menu arguments object
+     * @param  int  $depth  Current menu item depth
      * @return array Modified attributes
      */
     public function handleLinkAttributes($attributes, $item, $args, $depth): array
@@ -112,10 +110,10 @@ class Menus implements ThemeComponent
     /**
      * Customizes attributes for menu list item elements.
      *
-     * @param array $attributes Current item attributes
-     * @param \WP_Post $item Menu item object
-     * @param object $args Menu arguments object
-     * @param int $depth Current menu item depth
+     * @param  array  $attributes  Current item attributes
+     * @param  \WP_Post  $item  Menu item object
+     * @param  object  $args  Menu arguments object
+     * @param  int  $depth  Current menu item depth
      * @return array Modified attributes
      */
     public function handleItemAttributes($attributes, $item, $args, $depth): array
@@ -132,9 +130,9 @@ class Menus implements ThemeComponent
     /**
      * Customizes attributes for submenu container elements.
      *
-     * @param array $attributes Current submenu attributes
-     * @param object $args Menu arguments object
-     * @param int $depth Current menu depth
+     * @param  array  $attributes  Current submenu attributes
+     * @param  object  $args  Menu arguments object
+     * @param  int  $depth  Current menu depth
      * @return array Modified attributes
      */
     public function handleSubmenuAttributes($attributes, $args, $depth): array
@@ -150,11 +148,11 @@ class Menus implements ThemeComponent
     /**
      * Processes and modifies attributes for any menu element based on configuration rules.
      *
-     * @param string $elementType Type of menu element (link, item, or submenu)
-     * @param array $attributes Current element attributes
-     * @param object $args Menu arguments object
-     * @param int $depth Current depth in menu hierarchy
-     * @param int $order Menu item order (-1 for submenus)
+     * @param  string  $elementType  Type of menu element (link, item, or submenu)
+     * @param  array  $attributes  Current element attributes
+     * @param  object  $args  Menu arguments object
+     * @param  int  $depth  Current depth in menu hierarchy
+     * @param  int  $order  Menu item order (-1 for submenus)
      * @return array Modified attributes
      */
     protected function processElementAttributes(
@@ -184,33 +182,34 @@ class Menus implements ThemeComponent
     /**
      * Retrieves element-specific configuration from menu arguments.
      *
-     * @param string $elementType Type of menu element
-     * @param object $args Menu arguments object
+     * @param  string  $elementType  Type of menu element
+     * @param  object  $args  Menu arguments object
      * @return array|null Configuration array or null if not found
      */
     protected function getElementConfig(string $elementType, object $args): ?array
     {
         $elementTypes = array_flip(self::ELEMENT_TYPES);
-        if (!isset($elementTypes[$elementType])) {
+        if (! isset($elementTypes[$elementType])) {
             return null;
         }
 
-        $configKey = $elementTypes[$elementType] . '_config';
-        return property_exists($args, $configKey) ? (array)$args->{$configKey} : null;
+        $configKey = $elementTypes[$elementType].'_config';
+
+        return property_exists($args, $configKey) ? (array) $args->{$configKey} : null;
     }
 
     /**
      * Determines if a configuration rule should be applied based on depth and order criteria.
      *
-     * @param array $rule Configuration rule to evaluate
-     * @param int $depth Current depth in menu hierarchy
-     * @param int $order Menu item order
+     * @param  array  $rule  Configuration rule to evaluate
+     * @param  int  $depth  Current depth in menu hierarchy
+     * @param  int  $order  Menu item order
      * @return bool True if rule should be applied
      */
     protected function shouldApplyRule(array $rule, int $depth, int $order): bool
     {
         // Check if depth matches
-        if (!isset($rule['depth']) || $rule['depth'] !== $depth) {
+        if (! isset($rule['depth']) || $rule['depth'] !== $depth) {
             return false;
         }
 
@@ -225,8 +224,8 @@ class Menus implements ThemeComponent
     /**
      * Applies a configuration rule to modify element attributes.
      *
-     * @param array $attributes Current element attributes
-     * @param array $rule Configuration rule to apply
+     * @param  array  $attributes  Current element attributes
+     * @param  array  $rule  Configuration rule to apply
      * @return array Modified attributes
      */
     protected function applyRule(array $attributes, array $rule): array

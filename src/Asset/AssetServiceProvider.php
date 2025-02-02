@@ -17,8 +17,6 @@ class AssetServiceProvider extends ServiceProvider
 {
     /**
      * Register asset-related services in the container.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -31,14 +29,13 @@ class AssetServiceProvider extends ServiceProvider
         $this->app->singleton('wp.asset', fn ($app): AssetFactory => new AssetFactory($app));
         $this->app->singleton(ViteManager::class, function (Application $app): \Pollora\Asset\ViteManager {
             $defaultContainer = app('asset.container')->getDefault();
+
             return new ViteManager($defaultContainer);
         });
     }
 
     /**
      * Bootstrap asset services.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -47,8 +44,6 @@ class AssetServiceProvider extends ServiceProvider
 
     /**
      * Register Vite-specific functionality.
-     *
-     * @return void
      */
     protected function registerViteManager(): void
     {

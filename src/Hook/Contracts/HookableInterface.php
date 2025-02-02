@@ -6,7 +6,7 @@ namespace Pollora\Hook\Contracts;
 
 /**
  * Interface for components that can be hooked into WordPress.
- * 
+ *
  * Defines the contract for classes that need to register WordPress hooks.
  */
 interface HookableInterface

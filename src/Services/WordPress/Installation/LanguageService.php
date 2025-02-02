@@ -47,6 +47,7 @@ class LanguageService
      * with fallback to default languages if API is unavailable.
      *
      * @return string The selected language code (e.g., 'en_US', 'fr_FR')
+     *
      * @throws \RuntimeException If language fetch fails and no fallback is available
      */
     public function promptForLanguage(): string
@@ -80,6 +81,7 @@ class LanguageService
      * Fetch available WordPress languages from API.
      *
      * @return array<string, string> Associative array of language codes and names
+     *
      * @throws \RuntimeException If API request fails
      */
     private function getAvailableLanguages(): array
@@ -105,8 +107,9 @@ class LanguageService
     /**
      * Parse the WordPress translations API response.
      *
-     * @param string $response Raw JSON response from WordPress API
+     * @param  string  $response  Raw JSON response from WordPress API
      * @return array<string, string> Formatted array of language codes and names
+     *
      * @throws \RuntimeException If response parsing fails
      */
     private function parseLanguagesResponse(string $response): array
