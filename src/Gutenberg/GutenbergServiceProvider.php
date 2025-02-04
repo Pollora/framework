@@ -7,7 +7,8 @@ namespace Pollora\Gutenberg;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Gutenberg\Helpers\PatternDataProcessor;
 use Pollora\Gutenberg\Helpers\PatternValidator;
-use Pollora\Gutenberg\Registrars\CategoryRegistrar;
+use Pollora\Gutenberg\Registrars\PatternCategoryRegistrar;
+use Pollora\Gutenberg\Registrars\BlockCategoryRegistrar;
 use Pollora\Gutenberg\Registrars\PatternRegistrar;
 
 /**
@@ -26,7 +27,8 @@ class GutenbergServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(CategoryRegistrar::class);
+        $this->app->singleton(PatternCategoryRegistrar::class);
+        $this->app->singleton(BlockCategoryRegistrar::class);
         $this->app->singleton(PatternRegistrar::class);
         $this->app->singleton(PatternDataProcessor::class);
         $this->app->singleton(PatternValidator::class);

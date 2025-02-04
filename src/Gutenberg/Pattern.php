@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Gutenberg;
 
 use Illuminate\Contracts\Foundation\Application;
-use Pollora\Gutenberg\Registrars\CategoryRegistrar;
+use Pollora\Gutenberg\Registrars\BlockCategoryRegistrar;
+use Pollora\Gutenberg\Registrars\PatternCategoryRegistrar;
 use Pollora\Gutenberg\Registrars\PatternRegistrar;
 use Pollora\Support\Facades\Action;
 use Pollora\Theme\Contracts\ThemeComponent;
@@ -21,7 +22,12 @@ class Pattern implements ThemeComponent
     /**
      * The category registrar instance.
      */
-    protected CategoryRegistrar $categoryRegistrar;
+    protected PatternCategoryRegistrar $patternCategoryRegistrar;
+
+    /**
+     * The pattern registrar instance.
+     */
+    protected BlockCategoryRegistrar $blockCategoryRegistrar;
 
     /**
      * The pattern registrar instance.
@@ -37,8 +43,9 @@ class Pattern implements ThemeComponent
      */
     public function __construct(Application $container)
     {
-        $this->categoryRegistrar = $container->make(CategoryRegistrar::class);
+        $this->patternCategoryRegistrar = $container->make(PatternCategoryRegistrar::class);
         $this->patternRegistrar = $container->make(PatternRegistrar::class);
+        $this->blockCategoryRegistrar = $container->make(BlockCategoryRegistrar::class);
     }
 
     /**
@@ -53,7 +60,8 @@ class Pattern implements ThemeComponent
             if (wp_installing()) {
                 return;
             }
-            $this->categoryRegistrar->register();
+            $this->patternCategoryRegistrar->register();
+            $this->blockCategoryRegistrar->register();
             $this->patternRegistrar->register();
         });
     }

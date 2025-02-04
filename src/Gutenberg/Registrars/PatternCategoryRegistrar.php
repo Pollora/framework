@@ -10,7 +10,7 @@ namespace Pollora\Gutenberg\Registrars;
  * Handles the registration of custom block pattern categories
  * defined in the theme configuration.
  */
-class CategoryRegistrar
+class PatternCategoryRegistrar
 {
     /**
      * Register configured block pattern categories.
