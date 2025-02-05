@@ -54,11 +54,41 @@ class PermalinkManager
     /**
      * Handles canonical URL redirections.
      *
-     * @param  string|null  $canonicalUrl  The canonical URL to process
-     * @return string|null The processed canonical URL
+     * If the canonical URL corresponds to the homepage with a GET parameter,
+     * the URL is returned as-is to avoid issues when removing the trailing slash.
+     *
+     * @param string|null $canonicalUrl The canonical URL to process.
+     *
+     * @return string|null The processed canonical URL.
      */
     public function handleCanonicalRedirect(?string $canonicalUrl): ?string
     {
+        if (null === $canonicalUrl) {
+            return null;
+        }
+
+        $homeUrl = home_url();
+        $canonicalParts = parse_url($canonicalUrl);
+        $homeParts = parse_url($homeUrl);
+
+        // Ensure both URLs are on the same domain.
+        if (
+            isset($canonicalParts['host'], $homeParts['host']) &&
+            $canonicalParts['host'] === $homeParts['host']
+        ) {
+            // Normalize paths with a default value of "/".
+            $canonicalPath = $canonicalParts['path'] ?? '/';
+            $homePath      = $homeParts['path'] ?? '/';
+
+            // Compare paths without considering the trailing slash.
+            if (rtrim($canonicalPath, '/') === rtrim($homePath, '/')) {
+                // If a GET parameter is present, return the original URL.
+                if (!empty($canonicalParts['query'])) {
+                    return $canonicalUrl;
+                }
+            }
+        }
+
         return app(UrlGenerator::class)->removeTrailingSlash($canonicalUrl);
     }
 }
