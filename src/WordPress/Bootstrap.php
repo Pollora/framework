@@ -93,13 +93,11 @@ class Bootstrap
 
         if ($path !== '' && $path !== '0') {
             $url .= strtr(WP_PATH, ['public/' => '']).ltrim(
-                Str::of($path)
-                    ->replaceMatches('/[^a-zA-Z0-9\-\_\/\.]/', '')
-                    ->toString(),
-                '/'
-            );
-
-            dd($url);
+                    Str::of($path)
+                        ->replaceMatches('/[^a-zA-Z0-9\-\_\/\.]/', '')
+                        ->toString(),
+                    '/'
+                );
         }
 
         return $url;
@@ -131,19 +129,26 @@ class Bootstrap
 
     private function setDatabaseConstants(): void
     {
+        // Mapping of WordPress database constants to configuration keys
         $constants = [
-            'DB_NAME' => 'database',
-            'DB_USER' => 'username',
+            'DB_NAME'     => 'database',
+            'DB_USER'     => 'username',
             'DB_PASSWORD' => 'password',
-            'DB_HOST' => 'host',
-            'DB_CHARSET' => 'charset',
-            'DB_COLLATE' => 'collation',
-            'DB_PREFIX' => 'prefix',
+            // For DB_HOST, we will append the port if provided
+            'DB_HOST'     => 'host',
+            'DB_CHARSET'  => 'charset',
+            'DB_COLLATE'  => 'collation',
+            'DB_PREFIX'   => 'prefix',
         ];
 
         foreach ($constants as $constant => $key) {
             if (! defined($constant) && isset($this->db[$key])) {
-                define($constant, $this->db[$key]);
+                // If setting DB_HOST and a port is provided, concatenate host and port
+                if ($constant === 'DB_HOST' && isset($this->db['port']) && $this->db['port']) {
+                    define($constant, $this->db[$key] . ':' . $this->db['port']);
+                } else {
+                    define($constant, $this->db[$key]);
+                }
             }
         }
     }
