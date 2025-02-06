@@ -54,7 +54,10 @@ trait QueryTrait
     protected function setupWordPressQuery(): void
     {
         wp();
-        do_action('template_redirect');
+
+        if (wp_using_themes()) {
+            do_action('template_redirect');
+        }
 
         if ($this->shouldExitEarly()) {
             exit;
