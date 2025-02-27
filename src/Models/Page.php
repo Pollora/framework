@@ -7,4 +7,4 @@ namespace Pollora\Models;
 /**
  * Class Page
  */
-class Page extends \Corcel\Model\Page {}
+class Page extends \Pollora\Colt\Model\Page {}

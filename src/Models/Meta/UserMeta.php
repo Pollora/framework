@@ -7,4 +7,4 @@ namespace Pollora\Models\Meta;
 /**
  * Class UserMeta
  */
-class UserMeta extends \Corcel\Model\Meta\UserMeta {}
+class UserMeta extends \Pollora\Colt\Model\Meta\UserMeta {}

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Models;
 
-use Corcel\Model;
+use Pollora\Colt\Model;
 
 /**
  * Class TermRelationship.

@@ -40,7 +40,7 @@ class QueryServiceProvider extends ServiceProvider
     public function register(): void
     {
         // User model binding
-        $this->app->bind(\Corcel\Model\User::class, 'Pollora\Model\User');
+        $this->app->bind(\Pollora\Colt\Model\User::class, 'Pollora\Model\User');
 
         // Query singletons
         $this->app->singleton('wp.query.post', fn (): PostQuery => new PostQuery);

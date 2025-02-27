@@ -7,4 +7,4 @@ namespace Pollora\Models;
 /**
  * Tag class.
  */
-class Tag extends \Corcel\Model\Tag {}
+class Tag extends \Pollora\Colt\Model\Tag {}

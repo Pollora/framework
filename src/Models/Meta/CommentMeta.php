@@ -7,4 +7,4 @@ namespace Pollora\Models\Meta;
 /**
  * Class CommentMeta
  */
-class CommentMeta extends \Corcel\Model\Meta\CommentMeta {}
+class CommentMeta extends \Pollora\Colt\Model\Meta\CommentMeta {}

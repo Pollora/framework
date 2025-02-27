@@ -41,7 +41,7 @@ namespace Pollora\Models;
  * @method static \Illuminate\Database\Eloquent\Builder type($type)
  * @method static \Illuminate\Database\Eloquent\Builder taxonomy($taxonomy, $term)
  */
-class Post extends \Corcel\Model\Post
+class Post extends \Pollora\Colt\Model\Post
 {
     /**
      * Convert the Post instance to a WP_Post object.

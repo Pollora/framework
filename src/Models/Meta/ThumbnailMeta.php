@@ -7,4 +7,4 @@ namespace Pollora\Models\Meta;
 /**
  * Class ThumbnailMeta
  */
-class ThumbnailMeta extends \Corcel\Model\Meta\ThumbnailMeta {}
+class ThumbnailMeta extends \Pollora\Colt\Model\Meta\ThumbnailMeta {}

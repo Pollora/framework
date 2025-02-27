@@ -22,7 +22,7 @@ use Watson\Rememberable\Rememberable;
  * @property int $user_status
  * @property string $display_name
  */
-class User extends \Corcel\Model\User implements AuthenticatableContract
+class User extends \Pollora\Colt\Model\User implements AuthenticatableContract
 {
     use Authenticatable, Rememberable;
 

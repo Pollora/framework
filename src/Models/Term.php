@@ -7,4 +7,4 @@ namespace Pollora\Models;
 /**
  * Class Term.
  */
-class Term extends \Corcel\Model\Term {}
+class Term extends \Pollora\Colt\Model\Term {}

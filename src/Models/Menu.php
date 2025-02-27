@@ -7,4 +7,4 @@ namespace Pollora\Models;
 /**
  * Class Menu
  */
-class Menu extends \Corcel\Model\Menu {}
+class Menu extends \Pollora\Colt\Model\Menu {}

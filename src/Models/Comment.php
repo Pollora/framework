@@ -7,4 +7,4 @@ namespace Pollora\Models;
 /**
  * Class Comment
  */
-class Comment extends \Corcel\Model\Comment {}
+class Comment extends \Pollora\Colt\Model\Comment {}

@@ -7,4 +7,4 @@ namespace Pollora\Models\Meta;
 /**
  * Class Meta
  */
-abstract class Meta extends \Corcel\Model\Meta\Meta {}
+abstract class Meta extends \Pollora\Colt\Model\Meta\Meta {}

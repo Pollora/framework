@@ -7,4 +7,4 @@ namespace Pollora\Models;
 /**
  * Option class.
  */
-class Option extends \Corcel\Model\Option {}
+class Option extends \Pollora\Colt\Model\Option {}

@@ -7,4 +7,4 @@ namespace Pollora\Models;
 /**
  * Class Taxonomy
  */
-class Taxonomy extends \Corcel\Model\Taxonomy {}
+class Taxonomy extends \Pollora\Colt\Model\Taxonomy {}

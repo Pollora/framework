@@ -7,4 +7,4 @@ namespace Pollora\Models;
 /**
  * Class CustomLink
  */
-class CustomLink extends \Corcel\Model\CustomLink {}
+class CustomLink extends \Pollora\Colt\Model\CustomLink {}

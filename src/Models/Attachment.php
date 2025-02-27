@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Models;
 
-use Corcel\Model\Collection\MetaCollection;
+use Pollora\Colt\Model\Collection\MetaCollection;
 use Illuminate\Support\Arr;
 
 /**
@@ -42,7 +42,7 @@ use Illuminate\Support\Arr;
  * @property string|null $alt
  * @property MetaCollection $meta
  */
-class Attachment extends \Corcel\Model\Attachment
+class Attachment extends \Pollora\Colt\Model\Attachment
 {
     /**
      * Get a specific metadata value.
