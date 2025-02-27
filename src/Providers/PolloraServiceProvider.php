@@ -23,6 +23,7 @@ use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\TaxonomyServiceProvider;
 use Pollora\Theme\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
+use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
 
 /**
@@ -50,6 +51,7 @@ class PolloraServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Generic service providers
+        $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
         $this->app->register(GutenbergServiceProvider::class);

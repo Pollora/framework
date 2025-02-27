@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Pollora\Support\Facades\Action;
+use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
 
 class Bootstrap
@@ -106,7 +107,6 @@ class Bootstrap
     private function setConfig(): void
     {
         $this->defineWordPressConstants();
-        $this->setWPConstants();
         $this->setLocationConstants();
 
         if (app()->runningInConsole()) {
@@ -116,10 +116,18 @@ class Bootstrap
 
     private function defineWordPressConstants(): void
     {
-        define('WP_DEBUG', config('app.debug'));
-        define('WP_DEBUG_DISPLAY', WP_DEBUG);
-        define('WP_DEFAULT_THEME', 'default');
-        define('DISALLOW_FILE_MODS', true);
+        // Define default constants
+        Constant::queue('DISALLOW_FILE_MODS', true);
+        Constant::queue('WP_DEBUG', config('app.debug'));
+        Constant::queue('WP_DEBUG_DISPLAY', defined('WP_DEBUG') ? WP_DEBUG : config('app.debug'));
+        Constant::queue('WP_DEFAULT_THEME', 'default');
+
+        foreach ((array) config('wordpress') as $key => $value) {
+            $key = strtoupper($key);
+            Constant::queue($key, $value);
+        }
+
+        Constant::apply();
     }
 
     public function fixNetworkUrl(): void
@@ -149,16 +157,6 @@ class Bootstrap
                 } else {
                     define($constant, $this->db[$key]);
                 }
-            }
-        }
-    }
-
-    private function setWPConstants(): void
-    {
-        foreach ((array) config('wordpress.constants') as $key => $value) {
-            $key = strtoupper($key);
-            if (! defined($key)) {
-                define($key, $value);
             }
         }
     }
