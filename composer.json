@@ -24,9 +24,9 @@
     "require": {
         "php": "^8.2.0",
         "pollora/helper-overrider": "dev-main",
-        "illuminate/support": "^11.0",
-        "illuminate/database": "^11.0",
-        "illuminate/routing": "^11.0",
+        "illuminate/support": "^12.0",
+        "illuminate/database": "^12.0",
+        "illuminate/routing": "^12.0",
         "pollora/entity": "dev-main",
         "watson/rememberable": "^6.1",
         "cweagans/composer-patches": "^1.7",
