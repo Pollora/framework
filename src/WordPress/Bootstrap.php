@@ -25,11 +25,6 @@ class Bootstrap
         $this->ensureAddFilterExists();
     }
 
-    public function isOrchestraWorkbench(): bool
-    {
-        return str_contains(App::basePath(), '/orchestra/');
-    }
-
     public function boot(): void
     {
         $this->db = DB::getConfig(null);
@@ -64,7 +59,7 @@ class Bootstrap
             define('SHORTINIT', true);
         }
 
-        if (! app()->runningInWpCli() && ! $this->isOrchestraWorkbench()) {
+        if (!app()->runningInWpCli()) {
             require_once ABSPATH.'wp-settings.php';
         }
     }
@@ -117,10 +112,17 @@ class Bootstrap
     private function defineWordPressConstants(): void
     {
         // Define default constants
+        Constant::queue('WP_AUTO_UPDATE_CORE', false);
         Constant::queue('DISALLOW_FILE_MODS', true);
+        Constant::queue('DISALLOW_FILE_EDIT', true);
+        Constant::queue('DISABLE_WP_CRON', true);
+        Constant::queue('WP_POST_REVISIONS', 5);
+
         Constant::queue('WP_DEBUG', config('app.debug'));
-        Constant::queue('WP_DEBUG_DISPLAY', defined('WP_DEBUG') ? WP_DEBUG : config('app.debug'));
+        Constant::queue('WP_DEBUG_DISPLAY', config('app.debug'));
         Constant::queue('WP_DEFAULT_THEME', 'default');
+
+        Constant::queue('JETPACK_DEV_DEBUG', config('app.debug'));
 
         foreach ((array) config('wordpress') as $key => $value) {
             $key = strtoupper($key);
@@ -150,33 +152,42 @@ class Bootstrap
         ];
 
         foreach ($constants as $constant => $key) {
-            if (! defined($constant) && isset($this->db[$key])) {
-                // If setting DB_HOST and a port is provided, concatenate host and port
-                if ($constant === 'DB_HOST' && isset($this->db['port']) && $this->db['port']) {
-                    define($constant, $this->db[$key] . ':' . $this->db['port']);
-                } else {
-                    define($constant, $this->db[$key]);
-                }
+            if (!isset($this->db[$key])) {
+                continue;
+            }
+
+            // If setting DB_HOST and a port is provided, concatenate host and port
+            if ($constant === 'DB_HOST' && isset($this->db['port']) && $this->db['port']) {
+                Constant::queue($constant, $this->db[$key] . ':' . $this->db['port']);
+            } else {
+                Constant::queue($constant, $this->db[$key]);
             }
         }
+
+        Constant::apply();
     }
 
     private function setLocationConstants(): void
     {
-        define('WP_PATH', 'public/cms/');
+// Define base paths first to avoid undefined constants
+        $wpPath = 'public/cms/';
+        $basePath = App::basePath() . DIRECTORY_SEPARATOR;
+        $contentPath = 'public/content';
 
-        if (! defined('ABSPATH')) {
-            if ($this->isOrchestraWorkbench()) { // if Orchestra Platform
-                define('ABSPATH', __DIR__.'/../../../../../'.WP_PATH);
-            } else {
-                define('ABSPATH', App::basePath().DIRECTORY_SEPARATOR.WP_PATH);
-            }
+        // Queue constants
+        Constant::queue('WP_PATH', $wpPath);
+
+        if (!defined('ABSPATH')) {
+            Constant::queue('ABSPATH', $basePath . $wpPath);
         }
+        
+        Constant::queue('WP_SITEURL', url(str_replace('public/', '', $wpPath)));
+        Constant::queue('WP_HOME', url('/'));
+        Constant::queue('WP_CONTENT_DIR', $basePath . $contentPath);
+        Constant::queue('WP_CONTENT_URL', url('content'));
 
-        define('WP_SITEURL', url(str_replace('public/', '', WP_PATH)));
-        define('WP_HOME', url('/'));
-        define('WP_CONTENT_DIR', App::basePath().DIRECTORY_SEPARATOR.'public/content');
-        define('WP_CONTENT_URL', url('content'));
+        // Apply constants once all are queued
+        Constant::apply();
     }
 
     private function setConsoleServerVariables(): void

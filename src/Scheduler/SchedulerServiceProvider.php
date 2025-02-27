@@ -47,10 +47,6 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     protected function registerFilters(SchedulerInterface $scheduler): void
     {
-        if ($this->isOrchastraTest()) {
-            return;
-        }
-
         $filters = [
             'pre_update_option_cron' => 'preUpdateOptionCron',
             'pre_option_cron' => 'preOptionCron',
@@ -79,17 +75,5 @@ class SchedulerServiceProvider extends ServiceProvider
 
         $schedule = $this->app->make(Schedule::class);
         \Pollora\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
-    }
-
-    /**
-     * Check if running in Orchestra test environment.
-     *
-     * @return bool True if in Orchestra test environment
-     */
-    protected function isOrchastraTest(): bool
-    {
-        $db = DB::getConfig(null);
-
-        return str_contains((string) $db['database'], '/orchestra/');
     }
 }
