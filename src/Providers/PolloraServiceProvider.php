@@ -18,6 +18,7 @@ use Pollora\Hook\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
 use Pollora\Plugins\WooCommerce\WooCommerceProvider;
+use Pollora\Plugins\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\PostTypeServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
@@ -54,7 +55,7 @@ class PolloraServiceProvider extends ServiceProvider
         Application::macro('runningInWpCli', function () {
             return defined('WP_CLI');
         });
-        
+
         // Generic service providers
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
@@ -74,6 +75,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
         $this->app->register(WooCommerceProvider::class);
+        $this->app->register(WpRocketServiceProvider::class);
 
         if (config('wordpress.use_laravel_scheduler')) {
             $this->app->register(SchedulerServiceProvider::class);

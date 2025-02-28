@@ -83,7 +83,7 @@ class Router extends IlluminateRouter
     {
         $config = $this->container->make('config');
         $this->conditions = array_merge(
-            $config->get('app.conditions', []),
+            $config->get('wordpress.conditions', []),
             $conditions
         );
     }

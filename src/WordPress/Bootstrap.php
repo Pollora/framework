@@ -53,6 +53,40 @@ class Bootstrap
 
     private function loadWordPressSettings(): void
     {
+        /**
+         * Version information for the current WordPress release.
+         *
+         * These can't be directly globalized in version.php. When updating,
+         * include version.php from another installation and don't override
+         * these values if already set.
+         *
+         * @global string $wp_version             The WordPress version string.
+         * @global int    $wp_db_version          WordPress database version.
+         * @global string $tinymce_version        TinyMCE version.
+         * @global string $required_php_version   The required PHP version string.
+         * @global string $required_mysql_version The required MySQL version string.
+         * @global string $wp_local_package       Locale code of the package.
+         */
+        global $wp_version;
+        global $wp_db_version;
+        global $tinymce_version;
+        global $required_php_version;
+        global $required_mysql_version;
+        global $wp_local_package;
+
+        /**
+         * WordPress Hooks and Actions.
+         *
+         * @global WP_Hook[] $wp_filter          Storage for all hooks registered with WordPress.
+         * @global int[]     $wp_actions         Stores the number of times each action has been triggered.
+         * @global int[]     $wp_filters         Stores the number of times each filter has been applied.
+         * @global string[]  $wp_current_filter  Stack of current filters being executed.
+         */
+        global $wp_filter;
+        global $wp_actions;
+        global $wp_filters;
+        global $wp_current_filter;
+
         $table_prefix = $this->db['prefix'];
 
         if (app()->runningInConsole() && ! $this->isWordPressInstalled()) {
@@ -124,7 +158,7 @@ class Bootstrap
 
         Constant::queue('JETPACK_DEV_DEBUG', config('app.debug'));
 
-        foreach ((array) config('wordpress') as $key => $value) {
+        foreach ((array) config('wordpress.constants', []) as $key => $value) {
             $key = strtoupper($key);
             Constant::queue($key, $value);
         }
@@ -180,7 +214,7 @@ class Bootstrap
         if (!defined('ABSPATH')) {
             Constant::queue('ABSPATH', $basePath . $wpPath);
         }
-        
+
         Constant::queue('WP_SITEURL', url(str_replace('public/', '', $wpPath)));
         Constant::queue('WP_HOME', url('/'));
         Constant::queue('WP_CONTENT_DIR', $basePath . $contentPath);
