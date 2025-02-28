@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Providers;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollora\Admin\PageServiceProvider;
@@ -50,6 +51,10 @@ class PolloraServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        Application::macro('runningInWpCli', function () {
+            return defined('WP_CLI');
+        });
+        
         // Generic service providers
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);

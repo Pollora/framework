@@ -28,17 +28,4 @@ class Application extends \Illuminate\Foundation\Application
         $this->register(new LogServiceProvider($this));
         $this->register(new RouteServiceProvider($this));
     }
-
-    /**
-     * Determine if the application is running in the WP-CLI environment.
-     *
-     * This checks whether the WP_CLI constant is defined and evaluates to true,
-     * indicating that the application is being executed within the WordPress CLI.
-     *
-     * @return bool True if running in WP-CLI, false otherwise.
-     */
-    public function runningInWpCli(): bool
-    {
-        return defined('WP_CLI') && WP_CLI;
-    }
 }
