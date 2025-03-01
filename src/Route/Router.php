@@ -141,9 +141,9 @@ class Router extends IlluminateRouter
      * and registers it in the container.
      *
      * @param  \Illuminate\Http\Request  $request  Current request instance
-     * @return AdminRoute Configured admin route
+     * @return \Illuminate\Routing\Route Configured admin route
      */
-    private function createAdminRoute($request): AdminRoute
+    private function createAdminRoute($request): \Illuminate\Routing\Route
     {
         $route = (new AdminRoute($request, $this))->get();
         $this->current = $route;

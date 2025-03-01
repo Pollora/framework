@@ -6,7 +6,7 @@ namespace Pollora\Route;
 
 use Illuminate\Routing\RoutingServiceProvider as BaseRoutingServiceProvider;
 use Illuminate\Support\Facades\Route;
-use Pollora\Foundation\Application;
+use Illuminate\Foundation\Application;
 
 /**
  * Service provider for WordPress-specific routing functionality.

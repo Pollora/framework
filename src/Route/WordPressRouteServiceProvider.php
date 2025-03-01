@@ -10,19 +10,19 @@ use Illuminate\Support\ServiceProvider;
 /**
  * Service provider for WordPress-specific routing functionalities.
  *
- * This provider declares the 'wordpress' macro, allowing the definition of
- * WordPress-specific routes within Laravel's routing system.
- *
- * @author Olivier Gorzalka <olivier@amphibee.fr>
+ * This provider extends Laravel's routing system with WordPress-specific
+ * functionality without replacing the core routing components.
  */
-class RouteServiceProvider extends ServiceProvider
+class WordPressRouteServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
     public function register(): void
     {
-        // No services to register
+        $this->app->extend('router', function ($router, $app) {
+            return new Router($app['events'], $app);
+        });
     }
 
     /**

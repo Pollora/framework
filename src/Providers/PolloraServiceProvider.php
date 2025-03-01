@@ -21,6 +21,7 @@ use Pollora\Plugins\WooCommerce\WooCommerceProvider;
 use Pollora\Plugins\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\PostTypeServiceProvider;
 use Pollora\Route\RouteServiceProvider;
+use Pollora\Route\WordPressRouteServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\TaxonomyServiceProvider;
@@ -54,11 +55,10 @@ class PolloraServiceProvider extends ServiceProvider
     public function register(): void
     {
         Application::macro('runningInWpCli', function () {
-            return defined('WP_CLI') && WP_CLI;
+            return defined('\WP_CLI') && \WP_CLI;
         });
 
         // Generic service providers
-        $this->app->register(RouteServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);

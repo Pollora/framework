@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Pollora\PostType;
 
 use Pollora\Entity\PostTypeException;
-use Pollora\Foundation\Application;
+use Illuminate\Foundation\Application;
 
 class PostTypeFactory
 {
