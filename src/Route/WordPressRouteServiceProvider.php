@@ -6,6 +6,9 @@ namespace Pollora\Route;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Route\Middleware\WordPressBindings;
+use Pollora\Route\Middleware\WordPressBodyClass;
+use Pollora\Route\Middleware\WordPressHeaders;
 
 /**
  * Service provider for WordPress-specific routing functionalities.
@@ -31,14 +34,23 @@ class WordPressRouteServiceProvider extends ServiceProvider
      * Declares the 'wordpress' macro, enabling the definition of routes specific
      * to various WordPress content types (single, page, archive, etc.).
      * This macro functions similarly to the `any()` method but incorporates
-     * WordPress-specific logic.
+     * WordPress-specific logic and automatically applies WordPress middleware.
      *
      * @return void
      */
     public function boot(): void
     {
         Route::macro('wordpress', function ($uri, $action = null, array $parameters = []) {
-            return Route::addRoute(Router::$verbs, $uri, $action);
+            $route = Route::addRoute(Router::$verbs, $uri, $action);
+
+            // Ajouter automatiquement les middlewares WordPress
+            $route->middleware([
+                WordPressBindings::class,
+                WordPressHeaders::class,
+                WordPressBodyClass::class,
+            ]);
+
+            return $route;
         });
     }
 }
