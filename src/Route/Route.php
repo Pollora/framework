@@ -47,6 +47,13 @@ class Route extends IlluminateRoute
     protected ?array $wordpressValidators = null;
 
     /**
+     * Flag indicating if this route was created using the wordpress macro.
+     *
+     * @var bool True if created with Route::wordpress(), false otherwise
+     */
+    protected bool $isWordPressRoute = false;
+
+    /**
      * Determine if the route matches the given request.
      *
      * @param  Request  $request  The HTTP request to match against
@@ -57,7 +64,8 @@ class Route extends IlluminateRoute
     {
         $this->compileRoute();
 
-        if ($this->hasCondition()) {
+        // Only process WordPress conditions if this is a WordPress route
+        if ($this->isWordPressRoute && $this->hasCondition()) {
             return $this->matchesWordPressConditions($request);
         }
 
@@ -83,10 +91,43 @@ class Route extends IlluminateRoute
     public function setConditions(array $conditions = []): self
     {
         $this->conditions = $conditions;
-        $this->condition = $this->parseCondition($this->uri());
-        $this->conditionParams = $this->parseConditionParams($this->getAction());
+        
+        // Only parse conditions if this is a WordPress route
+        if ($this->isWordPressRoute) {
+            $this->condition = $this->parseCondition($this->uri());
+            $this->conditionParams = $this->parseConditionParams($this->getAction());
+        }
 
         return $this;
+    }
+
+    /**
+     * Mark this route as a WordPress route.
+     *
+     * @param  bool  $isWordPressRoute  Whether this is a WordPress route
+     * @return self Returns the current instance for method chaining
+     */
+    public function setIsWordPressRoute(bool $isWordPressRoute = true): self
+    {
+        $this->isWordPressRoute = $isWordPressRoute;
+        
+        // If we're setting this as a WordPress route, reparse the conditions
+        if ($isWordPressRoute && !empty($this->conditions)) {
+            $this->condition = $this->parseCondition($this->uri());
+            $this->conditionParams = $this->parseConditionParams($this->getAction());
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Check if this route was created using the wordpress macro.
+     *
+     * @return bool True if this is a WordPress route, false otherwise
+     */
+    public function isWordPressRoute(): bool
+    {
+        return $this->isWordPressRoute;
     }
 
     /**

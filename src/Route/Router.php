@@ -69,7 +69,15 @@ class Router extends IlluminateRouter
             return $this->createAdminRoute($request);
         }
 
-        return parent::findRoute($request);
+        $route = parent::findRoute($request);
+        
+        // Si la route trouvée est une route WordPress et a une condition,
+        // ajouter les liaisons WordPress
+        if ($route instanceof Route && $route->isWordPressRoute() && $route->hasCondition()) {
+            $this->addWordPressBindings($route);
+        }
+        
+        return $route;
     }
 
     /**
@@ -92,12 +100,18 @@ class Router extends IlluminateRouter
      * Add WordPress-specific bindings to a route.
      *
      * Binds current WordPress post and query objects to the route parameters.
+     * Only applies to routes created with Route::wordpress().
      *
      * @param  Route  $route  Route to add bindings to
      * @return Route Route with WordPress bindings
      */
     public function addWordPressBindings($route)
     {
+        // Ne pas ajouter de liaisons si ce n'est pas une route WordPress
+        if (!($route instanceof Route) || !$route->isWordPressRoute()) {
+            return $route;
+        }
+        
         global $post, $wp_query;
 
         $bindings = [

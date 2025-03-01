@@ -42,6 +42,8 @@ class WordPressRouteServiceProvider extends ServiceProvider
     {
         Route::macro('wordpress', function ($uri, $action = null, array $parameters = []) {
             $route = Route::addRoute(Router::$verbs, $uri, $action);
+            
+            $route->setIsWordPressRoute(true);
 
             // Ajouter automatiquement les middlewares WordPress
             $route->middleware([
