@@ -20,6 +20,7 @@ use Pollora\Permalink\RewriteServiceProvider;
 use Pollora\Plugins\WooCommerce\WooCommerceProvider;
 use Pollora\Plugins\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\PostTypeServiceProvider;
+use Pollora\Route\RouteServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\TaxonomyServiceProvider;
@@ -27,7 +28,6 @@ use Pollora\Theme\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
-
 /**
  * Main service provider for the Pollora framework.
  *
@@ -49,14 +49,16 @@ class PolloraServiceProvider extends ServiceProvider
      * - Content type management (posts, taxonomies)
      * - Asset and Gutenberg integration
      * - Scheduling and job dispatching
+     * - ...
      */
     public function register(): void
     {
         Application::macro('runningInWpCli', function () {
-            return defined('WP_CLI');
+            return defined('WP_CLI') && WP_CLI;
         });
 
         // Generic service providers
+        $this->app->register(RouteServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
@@ -80,13 +82,13 @@ class PolloraServiceProvider extends ServiceProvider
         if (config('wordpress.use_laravel_scheduler')) {
             $this->app->register(SchedulerServiceProvider::class);
         }
+        $this->app->singleton(JobDispatcher::class, fn ($app): \Pollora\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class)));
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);
 
         // Hashing service provider
         $this->app->register(HashServiceProvider::class);
-        $this->app->singleton(JobDispatcher::class, fn ($app): \Pollora\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class)));
     }
 
     /**

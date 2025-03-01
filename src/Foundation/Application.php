@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Foundation;
 
 use Illuminate\Events\EventServiceProvider;
-use Illuminate\Log\Context\ContextServiceProvider;
 use Illuminate\Log\LogServiceProvider;
-use Pollora\Route\RouteServiceProvider;
+use Pollora\Route\RoutingServiceProvider;
 
 /**
  * Custom Laravel Application class for WordPress integration.
@@ -27,7 +26,6 @@ class Application extends \Illuminate\Foundation\Application
     {
         $this->register(new EventServiceProvider($this));
         $this->register(new LogServiceProvider($this));
-        $this->register(new ContextServiceProvider($this));
-        $this->register(new RouteServiceProvider($this));
+        $this->register(new RoutingServiceProvider($this));
     }
 }
