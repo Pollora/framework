@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\InstallationService;
+use Pollora\Services\WordPress\Installation\LanguageService;
 use Pollora\Services\WordPress\Installation\WordPressInstallLoaderService;
 use Pollora\Support\Facades\Action;
 use Pollora\WordPress\Commands\LaunchPadInstallCommand;
@@ -18,8 +19,15 @@ class WordPressServiceProvider extends ServiceProvider
 {
     protected Bootstrap $bootstrap;
 
+    /**
+     * Register services.
+     */
     public function register(): void
     {
+        $this->mergeConfigFrom(
+            __DIR__ . '/../../config/wordpress.php', 'wordpress'
+        );
+
         $this->app->singleton(Bootstrap::class);
         $this->bootstrap = $this->app->make(Bootstrap::class);
         $this->bootstrap->register();
@@ -29,6 +37,9 @@ class WordPressServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressInstallLoaderService::class);
     }
 
+    /**
+     * Bootstrap services.
+     */
     public function boot(): void
     {
         if (is_secured()) {
@@ -38,6 +49,10 @@ class WordPressServiceProvider extends ServiceProvider
         $this->bootstrap->boot();
 
         if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__ . '/../../config/wordpress.php' => config_path('wordpress.php'),
+            ], 'pollora-wordpress-config');
+
             $this->commands([
                 LaunchPadSetupCommand::class,
                 LaunchPadInstallCommand::class,
