@@ -51,7 +51,7 @@ class WordPressServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../../config/wordpress.php' => config_path('wordpress.php'),
-            ], 'pollora-wordpress-config');
+            ], 'wp-config');
 
             $this->commands([
                 LaunchPadSetupCommand::class,
