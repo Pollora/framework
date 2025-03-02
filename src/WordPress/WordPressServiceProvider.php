@@ -42,9 +42,8 @@ class WordPressServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (is_secured()) {
-            URL::forceScheme('https');
-        }
+
+        $this->handleHttpsProtocol();
 
         $this->bootstrap->boot();
 
@@ -63,4 +62,37 @@ class WordPressServiceProvider extends ServiceProvider
             });
         }
     }
+
+    /**
+     * Force HTTPS protocol handling for WordPress requests.
+     *
+     * @return void
+     */
+    private function handleHttpsProtocol(): void
+    {
+        if (is_secured()) {
+            URL::forceScheme('https');
+        }
+
+        $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $_SERVER['X_FORWARDED_PROTO'] ?? null;
+
+        if ($forwardedProto) {
+            $this->setHttpsBasedOnProxy($forwardedProto);
+        }
+    }
+
+    /**
+     * Determines whether HTTPS should be forced based on proxy headers.
+     *
+     * @param string $forwardedProtocols
+     * @return void
+     */
+    private function setHttpsBasedOnProxy(string $forwardedProtocols): void
+    {
+        $protocols = array_map('trim', explode(',', $forwardedProtocols));
+
+        // Check if the last protocol is HTTPS
+        $_SERVER["HTTPS"] = end($protocols) === 'https' ? 'on' : 'off';
+    }
+
 }
