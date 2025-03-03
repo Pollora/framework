@@ -31,7 +31,7 @@ class ConstantManager
     public function queue(string $key, mixed $value): void
     {
         if ($this->isDefined($key)) {
-            throw new ConstantAlreadyDefinedException("Constant '$key' is already defined.");
+            return;
         }
 
         $this->constants->put($key, $value);
