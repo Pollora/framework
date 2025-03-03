@@ -45,43 +45,44 @@ class WordPressRouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Route::macro('wordpress', function (string $condition, ...$args) {
+        // Add the wpMatch macro for specific HTTP verbs
+        Route::macro('wpMatch', function (array|string $methods, string $condition, ...$args) {
             if (empty($args)) {
-                throw new \InvalidArgumentException('The wordpress route requires at least a condition and a callback.');
+                throw new \InvalidArgumentException('The wp route requires at least a condition and a callback.');
             }
-            
+
             // First argument is the condition
             $uri = $condition;
-            
+
             // Last argument is always the callback
             $action = $args[count($args) - 1];
-            
-            // Create the route
-            $route = Route::addRoute(Router::$verbs, $uri, $action);
+
+            // Create the route with specific HTTP methods
+            $route = Route::addRoute($methods, $uri, $action);
             $route->setIsWordPressRoute(true);
-            
+
             // Extract condition parameters (all arguments except the last one)
             $conditionParams = [];
             if (count($args) > 1) {
                 $conditionParams = array_slice($args, 0, count($args) - 1);
             }
-            
+
             // Set condition parameters
             $route->setConditionParameters($conditionParams);
-            
+
             // Add WordPress middleware
             $route->middleware([
                 WordPressBindings::class,
                 WordPressHeaders::class,
                 WordPressBodyClass::class,
             ]);
-            
+
             return $route;
         });
-        
-        // Add a shortcut 'wp' for the 'wordpress' macro
+
+        // Add the wp macro as a shortcut for all HTTP verbs
         Route::macro('wp', function (string $condition, ...$args) {
-            return Route::wordpress($condition, ...$args);
+            return Route::wpMatch(Router::$verbs, $condition, ...$args);
         });
     }
 }
