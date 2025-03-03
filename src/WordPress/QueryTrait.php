@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\WordPress;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Pollora\Support\Facades\Filter;
 
 trait QueryTrait
@@ -46,15 +47,21 @@ trait QueryTrait
         if (function_exists('is_blog_installed')) {
             return is_blog_installed();
         }
+        
+        if (!$this->isDatabaseConfigured()) {
+            return false;
+        }
 
         // Fallback to direct database check
         try {
-            return DB::table('options')
+            return Schema::hasTable('options') && DB::table('options')
                 ->where('option_name', 'siteurl')
                 ->exists();
-        } catch (Exception) {
+        } catch (Exception $e) {
             return false;
         }
+
+        return false;
     }
 
     /**
