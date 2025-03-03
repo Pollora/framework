@@ -36,7 +36,7 @@ abstract class AbstractHook implements HookInterface
      * @param  int  $priority  Optional. Priority of the hook (default: 10)
      * @param  int  $acceptedArgs  Optional. Number of arguments the callback accepts (default: 2)
      */
-    public function add(string|array $hooks, callable|string $callback, int $priority = 10, int $acceptedArgs = 2): self
+    public function add(string|array $hooks, callable|string|array $callback, int $priority = 10, int $acceptedArgs = 2): self
     {
         foreach ((array) $hooks as $hook) {
             $this->addHookEvent($hook, $callback, $priority, $acceptedArgs);
@@ -52,7 +52,7 @@ abstract class AbstractHook implements HookInterface
      * @param  callable|null  $callback  Optional. Specific callback to remove
      * @param  int  $priority  Optional. Priority of the hook to remove
      */
-    public function remove(string $hook, callable|string|null $callback = null, int $priority = 10): self
+    public function remove(string $hook, callable|string|array|null $callback = null, int $priority = 10): self
     {
         if ($callback === null) {
             $this->hooks->forget($hook);
@@ -82,7 +82,7 @@ abstract class AbstractHook implements HookInterface
      * @param  int  $priority  The priority of the hook
      * @param  int  $acceptedArgs  Number of arguments the callback accepts
      */
-    protected function addHookEvent(string $hook, callable|string $callback, int $priority, int $acceptedArgs): void
+    protected function addHookEvent(string $hook, callable|string|array $callback, int $priority, int $acceptedArgs): void
     {
         $this->hooks->put($hook, [$callback, $priority, $acceptedArgs]);
         add_filter($hook, $callback, $priority, $acceptedArgs);
@@ -95,7 +95,7 @@ abstract class AbstractHook implements HookInterface
      * @param  callable  $callback  The callback function
      * @param  int  $priority  The priority of the hook
      */
-    protected function removeHookEvent(string $hook, callable|string $callback, int $priority): void
+    protected function removeHookEvent(string $hook, callable|string|array $callback, int $priority): void
     {
         remove_filter($hook, $callback, $priority);
         $this->hooks->forget($hook);
