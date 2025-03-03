@@ -70,13 +70,13 @@ class Router extends IlluminateRouter
         }
 
         $route = parent::findRoute($request);
-        
+
         // Si la route trouvée est une route WordPress et a une condition,
         // ajouter les liaisons WordPress
         if ($route instanceof Route && $route->isWordPressRoute() && $route->hasCondition()) {
             $this->addWordPressBindings($route);
         }
-        
+
         return $route;
     }
 
@@ -85,13 +85,12 @@ class Router extends IlluminateRouter
      *
      * Merges provided conditions with those from configuration.
      *
-     * @param  array<string, mixed>  $conditions  Additional conditions to set
+     * @param array<string, mixed> $conditions Additional conditions to set
      */
     public function setConditions(array $conditions = []): void
     {
-        $config = $this->container->make('config');
         $this->conditions = array_merge(
-            $config->get('wordpress.conditions', []),
+            $this->container->make('config')->get('wordpress.conditions', []),
             $conditions
         );
     }
@@ -111,7 +110,7 @@ class Router extends IlluminateRouter
         if (!($route instanceof Route) || !$route->isWordPressRoute()) {
             return $route;
         }
-        
+
         global $post, $wp_query;
 
         $bindings = [

@@ -91,7 +91,7 @@ class Route extends IlluminateRoute
     public function setConditions(array $conditions = []): self
     {
         $this->conditions = $conditions;
-        
+
         // Only parse conditions if this is a WordPress route
         if ($this->isWordPressRoute) {
             $this->condition = $this->parseCondition($this->uri());
@@ -109,12 +109,12 @@ class Route extends IlluminateRoute
     public function setIsWordPressRoute(bool $isWordPressRoute = true): self
     {
         $this->isWordPressRoute = $isWordPressRoute;
-        
+
         // If we're setting this as a WordPress route, parse the condition
         if ($isWordPressRoute && !empty($this->conditions)) {
             $this->condition = $this->parseCondition($this->uri());
         }
-        
+
         return $this;
     }
 
@@ -167,7 +167,7 @@ class Route extends IlluminateRoute
     public function setConditionParameters(array $parameters = []): self
     {
         $this->conditionParams = $parameters;
-        
+
         return $this;
     }
 
@@ -198,7 +198,7 @@ class Route extends IlluminateRoute
             }
         }
 
-        return '';
+        return $condition;
     }
 
     /**
@@ -218,29 +218,29 @@ class Route extends IlluminateRoute
 
         // Get all numeric keys from the action array
         $numericKeys = array_filter(array_keys($action), 'is_numeric');
-        
+
         // If there are no numeric keys, return empty array
         if (empty($numericKeys)) {
             return [];
         }
-        
+
         // Sort the keys to ensure they're in order
         sort($numericKeys);
-        
+
         // Get all parameters except the first (condition) and the last (callback)
         $paramKeys = array_slice($numericKeys, 1, count($numericKeys) - 2);
-        
+
         // If there are no parameters, return empty array
         if (empty($paramKeys)) {
             return [];
         }
-        
+
         // Extract the parameters
         $params = [];
         foreach ($paramKeys as $key) {
             $params[] = $action[$key];
         }
-        
+
         return $params;
     }
 
