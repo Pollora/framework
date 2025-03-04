@@ -9,7 +9,8 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Route\Middleware\WordPressBindings;
 use Pollora\Route\Middleware\WordPressBodyClass;
 use Pollora\Route\Middleware\WordPressHeaders;
-
+use Pollora\Http\Controllers\FrontendController;
+use Pollora\Route\Middleware\WordPressShutdown;
 /**
  * Service provider for WordPress-specific routing functionalities.
  *
@@ -18,6 +19,14 @@ use Pollora\Route\Middleware\WordPressHeaders;
  */
 class WordPressRouteServiceProvider extends ServiceProvider
 {
+    /**
+     * The priority level of the service provider.
+     * A lower priority means it will be loaded later.
+     *
+     * @var int
+     */
+    public $priority = -99;
+
     /**
      * Register any application services.
      */
@@ -75,6 +84,7 @@ class WordPressRouteServiceProvider extends ServiceProvider
                 WordPressBindings::class,
                 WordPressHeaders::class,
                 WordPressBodyClass::class,
+                WordPressShutdown::class,
             ]);
 
             return $route;
@@ -84,5 +94,27 @@ class WordPressRouteServiceProvider extends ServiceProvider
         Route::macro('wp', function (string $condition, ...$args) {
             return Route::wpMatch(Router::$verbs, $condition, ...$args);
         });
+
+        $this->app->booted(function () {
+            $this->bootFallbackRoute();
+        });
+    }
+
+    /**
+     * Register the WordPress fallback route after all other routes.
+     *
+     * @return void
+     */
+    protected function bootFallbackRoute(): void
+    {
+        // Add a catch-all route for WordPress templates
+        Route::any('{any}', [FrontendController::class, 'handle'])
+            ->where('any', '.*')
+            ->middleware([
+                WordPressBindings::class,
+                WordPressHeaders::class,
+                WordPressBodyClass::class,
+                WordPressShutdown::class,
+            ]);
     }
 }

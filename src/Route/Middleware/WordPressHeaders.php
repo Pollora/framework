@@ -38,7 +38,7 @@ class WordPressHeaders
      * @param  Closure  $next  The next middleware handler
      * @return mixed The response
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): SymfonyResponse
     {
         $response = $next($request);
 
