@@ -13,6 +13,8 @@ class ThemeMetadata
 
     protected string $name;
 
+    protected string $appPath;
+
     public function __construct(string $name, protected string $basePath)
     {
         $this->name = Str::snake(strtolower($name));
