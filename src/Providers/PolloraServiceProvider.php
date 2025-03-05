@@ -20,8 +20,6 @@ use Pollora\Permalink\RewriteServiceProvider;
 use Pollora\Plugins\WooCommerce\WooCommerceProvider;
 use Pollora\Plugins\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\PostTypeServiceProvider;
-use Pollora\Route\RouteServiceProvider;
-use Pollora\Route\WordPressRouteServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\TaxonomyServiceProvider;
@@ -29,6 +27,7 @@ use Pollora\Theme\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
+use Pollora\Events\WordPress\WordPressEventServiceProvider;
 /**
  * Main service provider for the Pollora framework.
  *
@@ -78,6 +77,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(SageDirectivesServiceProvider::class);
         $this->app->register(WooCommerceProvider::class);
         $this->app->register(WpRocketServiceProvider::class);
+        $this->app->register(WordPressEventServiceProvider::class);
 
         if (config('wordpress.use_laravel_scheduler')) {
             $this->app->register(SchedulerServiceProvider::class);
