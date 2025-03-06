@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Hook;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Pollora\Hook\Contracts\HookInterface;
 use ReflectionException;
 use ReflectionMethod;
@@ -260,15 +261,18 @@ abstract class AbstractHook implements HookInterface
             // Resolve the instance with dependency injection
             $instance = app($className);
 
+            $hook = preg_replace('/[^a-zA-Z0-9_]+/', '_', $hook);
+            $hookMethod = lcfirst(Str::studly($hook));
+
             // If the method exists, return the callable
-            if (method_exists($instance, $hook)) {
+            if (method_exists($instance, $hookMethod)) {
                 return [
-                    'callable' => [$instance, $hook],
-                    'args' => $acceptedArgs ?? $this->detectArguments([$instance, $hook]),
+                    'callable' => [$instance, $hookMethod],
+                    'args' => $acceptedArgs ?? $this->detectArguments([$instance, $hookMethod]),
                 ];
             }
 
-            throw new \RuntimeException("Method '{$hook}' not found in class '{$className}'.");
+            throw new \RuntimeException("Method '{$hookMethod}' not found in class '{$className}'.");
         } catch (\Exception $e) {
             throw new \RuntimeException("Failed to resolve '{$className}': ".$e->getMessage());
         }
