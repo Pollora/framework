@@ -13,6 +13,4 @@ namespace Pollora\Events\WordPress\Blog;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class BlogMarkedAsMature extends BlogEvent
-{
-} 
+class BlogMarkedAsMature extends BlogEvent {}

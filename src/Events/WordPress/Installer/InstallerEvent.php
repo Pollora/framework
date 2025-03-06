@@ -17,14 +17,13 @@ abstract class InstallerEvent
     /**
      * Constructor.
      *
-     * @param string $name Name of the item (plugin, theme, etc.)
-     * @param string|null $version Version of the item
-     * @param string|null $slug Slug of the item
+     * @param  string  $name  Name of the item (plugin, theme, etc.)
+     * @param  string|null  $version  Version of the item
+     * @param  string|null  $slug  Slug of the item
      */
     public function __construct(
         public readonly string $name,
         public readonly ?string $version = null,
         public readonly ?string $slug = null
-    ) {
-    }
-} 
+    ) {}
+}

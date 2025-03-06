@@ -21,6 +21,5 @@ abstract class MenuEvent
      */
     public function __construct(
         public readonly WP_Term $menu
-    ) {
-    }
-} 
+    ) {}
+}

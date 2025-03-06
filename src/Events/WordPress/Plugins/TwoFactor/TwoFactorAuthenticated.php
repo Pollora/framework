@@ -25,4 +25,4 @@ class TwoFactorAuthenticated extends TwoFactorEvent
     ) {
         parent::__construct($user);
     }
-} 
+}

@@ -17,11 +17,11 @@ class PluginUpdated extends PluginEvent
     /**
      * Constructor.
      *
-     * @param string $name Plugin name
-     * @param string|null $version New plugin version
-     * @param string|null $slug Plugin slug
-     * @param bool $networkWide Whether the plugin is network activated
-     * @param string|null $oldVersion Previous plugin version
+     * @param  string  $name  Plugin name
+     * @param  string|null  $version  New plugin version
+     * @param  string|null  $slug  Plugin slug
+     * @param  bool  $networkWide  Whether the plugin is network activated
+     * @param  string|null  $oldVersion  Previous plugin version
      */
     public function __construct(
         string $name,
@@ -32,4 +32,4 @@ class PluginUpdated extends PluginEvent
     ) {
         parent::__construct($name, $version, $slug, $networkWide);
     }
-} 
+}

@@ -18,15 +18,11 @@ class Bootstrap
 
     /**
      * Database configuration array.
-     *
-     * @var array
      */
     private array $db;
 
     /**
      * Register Bootstrap configurations.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -37,8 +33,6 @@ class Bootstrap
 
     /**
      * Boot WordPress and set up configurations.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -61,8 +55,6 @@ class Bootstrap
 
     /**
      * Ensure the WordPress add_filter function is available.
-     *
-     * @return void
      */
     private function ensureAddFilterExists(): void
     {
@@ -73,8 +65,6 @@ class Bootstrap
 
     /**
      * Load WordPress settings and initialize core global variables.
-     *
-     * @return void
      */
     private function loadWordPressSettings(): void
     {
@@ -118,15 +108,13 @@ class Bootstrap
             define('SHORTINIT', true);
         }
 
-        if (!app()->runningInWpCli()) {
+        if (! app()->runningInWpCli()) {
             require_once ABSPATH.'wp-settings.php';
         }
     }
 
     /**
      * Set up necessary WordPress action hooks.
-     *
-     * @return void
      */
     private function setupActionHooks(): void
     {
@@ -139,8 +127,6 @@ class Bootstrap
 
     /**
      * Force HTTPS scheme if the site is secured.
-     *
-     * @return void
      */
     private function maybeForceUrlScheme(): void
     {
@@ -152,10 +138,9 @@ class Bootstrap
     /**
      * Rewrite network URL based on the given parameters.
      *
-     * @param string $url    The original URL.
-     * @param string $path   The requested path.
-     * @param string $scheme The scheme (http, https, or relative).
-     *
+     * @param  string  $url  The original URL.
+     * @param  string  $path  The requested path.
+     * @param  string  $scheme  The scheme (http, https, or relative).
      * @return string The rewritten URL.
      */
     public function rewriteNetworkUrl(string $url, string $path, string $scheme): string
@@ -167,11 +152,11 @@ class Bootstrap
 
         if ($path !== '' && $path !== '0') {
             $url .= strtr(WP_PATH, ['public/' => '']).ltrim(
-                    Str::of($path)
-                        ->replaceMatches('/[^a-zA-Z0-9\-\_\/\.]/', '')
-                        ->toString(),
-                    '/'
-                );
+                Str::of($path)
+                    ->replaceMatches('/[^a-zA-Z0-9\-\_\/\.]/', '')
+                    ->toString(),
+                '/'
+            );
         }
 
         return $url;
@@ -179,8 +164,6 @@ class Bootstrap
 
     /**
      * Set the WordPress configuration constants.
-     *
-     * @return void
      */
     private function setConfig(): void
     {
@@ -194,13 +177,11 @@ class Bootstrap
 
     /**
      * Define WordPress constants.
-     *
-     * @return void
      */
     private function defineWordPressConstants(): void
     {
         // Define default constants
-        Constant::queue( 'WP_USE_THEMES', !app()->runningInConsole() && !str_starts_with(request()->server('REQUEST_URI'), '/cms/') );
+        Constant::queue('WP_USE_THEMES', ! app()->runningInConsole() && ! str_starts_with(request()->server('REQUEST_URI'), '/cms/'));
 
         Constant::queue('WP_AUTO_UPDATE_CORE', false);
         Constant::queue('DISALLOW_FILE_MODS', true);
@@ -224,8 +205,6 @@ class Bootstrap
 
     /**
      * Fix network URL settings.
-     *
-     * @return void
      */
     public function fixNetworkUrl(): void
     {
@@ -234,31 +213,29 @@ class Bootstrap
 
     /**
      * Set WordPress database constants based on Laravel configuration.
-     *
-     * @return void
      */
     private function setDatabaseConstants(): void
     {
         // Mapping of WordPress database constants to configuration keys
         $constants = [
-            'DB_NAME'     => 'database',
-            'DB_USER'     => 'username',
+            'DB_NAME' => 'database',
+            'DB_USER' => 'username',
             'DB_PASSWORD' => 'password',
             // For DB_HOST, we will append the port if provided
-            'DB_HOST'     => 'host',
-            'DB_CHARSET'  => 'charset',
-            'DB_COLLATE'  => 'collation',
-            'DB_PREFIX'   => 'prefix',
+            'DB_HOST' => 'host',
+            'DB_CHARSET' => 'charset',
+            'DB_COLLATE' => 'collation',
+            'DB_PREFIX' => 'prefix',
         ];
 
         foreach ($constants as $constant => $key) {
-            if (!isset($this->db[$key])) {
+            if (! isset($this->db[$key])) {
                 continue;
             }
 
             // If setting DB_HOST and a port is provided, concatenate host and port
             if ($constant === 'DB_HOST' && isset($this->db['port']) && $this->db['port']) {
-                Constant::queue($constant, $this->db[$key] . ':' . $this->db['port']);
+                Constant::queue($constant, $this->db[$key].':'.$this->db['port']);
             } else {
                 Constant::queue($constant, $this->db[$key]);
             }
@@ -271,19 +248,19 @@ class Bootstrap
     {
         // Define base paths first to avoid undefined constants
         $wpPath = 'public/cms/';
-        $basePath = App::basePath() . DIRECTORY_SEPARATOR;
+        $basePath = App::basePath().DIRECTORY_SEPARATOR;
         $contentPath = 'public/content';
 
         // Queue constants
         Constant::queue('WP_PATH', $wpPath);
 
-        if (!defined('ABSPATH')) {
-            Constant::queue('ABSPATH', $basePath . $wpPath);
+        if (! defined('ABSPATH')) {
+            Constant::queue('ABSPATH', $basePath.$wpPath);
         }
 
         Constant::queue('WP_SITEURL', url(str_replace('public/', '', $wpPath)));
         Constant::queue('WP_HOME', url('/'));
-        Constant::queue('WP_CONTENT_DIR', $basePath . $contentPath);
+        Constant::queue('WP_CONTENT_DIR', $basePath.$contentPath);
         Constant::queue('WP_CONTENT_URL', url('content'));
 
         // Apply constants once all are queued

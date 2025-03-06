@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Post;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class PostDeleted extends PostEvent
-{
-} 
+class PostDeleted extends PostEvent {}

@@ -11,6 +11,4 @@ namespace Pollora\Events\WordPress\Plugins\YoastSeo;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-abstract class YoastSeoEvent
-{
-} 
+abstract class YoastSeoEvent {}

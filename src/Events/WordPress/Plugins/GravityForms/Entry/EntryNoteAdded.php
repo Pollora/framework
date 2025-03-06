@@ -17,12 +17,12 @@ class EntryNoteAdded extends EntryEvent
     /**
      * Constructor.
      *
-     * @param int $noteId The note ID
-     * @param array $entry The entry data
-     * @param int $userId The user ID who added the note
-     * @param string $userName The username who added the note
-     * @param string $note The note content
-     * @param string $noteType The note type
+     * @param  int  $noteId  The note ID
+     * @param  array  $entry  The entry data
+     * @param  int  $userId  The user ID who added the note
+     * @param  string  $userName  The username who added the note
+     * @param  string  $note  The note content
+     * @param  string  $noteType  The note type
      */
     public function __construct(
         public readonly int $noteId,
@@ -34,4 +34,4 @@ class EntryNoteAdded extends EntryEvent
     ) {
         parent::__construct($entry);
     }
-} 
+}

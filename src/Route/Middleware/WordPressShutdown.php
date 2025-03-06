@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Route\Middleware;
 
 use Closure;
@@ -16,16 +18,14 @@ class WordPressShutdown
 {
     /**
      * Content types that should be processed.
-     *
-     * @var array
      */
     protected static array $validContentTypes = ['text/html', 'text/html; charset=UTF-8'];
 
     /**
      * Handle an incoming request and process WordPress shutdown actions.
      *
-     * @param Request $request The incoming HTTP request.
-     * @param Closure $next The next middleware in the pipeline.
+     * @param  Request  $request  The incoming HTTP request.
+     * @param  Closure  $next  The next middleware in the pipeline.
      * @return Response The processed response.
      */
     public function handle(Request $request, Closure $next): Response
@@ -33,7 +33,7 @@ class WordPressShutdown
         $response = $next($request);
 
         // Early return if WordPress shutdown hook doesn't exist
-        if (!function_exists('shutdown_action_hook')) {
+        if (! function_exists('shutdown_action_hook')) {
             return $response;
         }
 
@@ -41,7 +41,7 @@ class WordPressShutdown
         $contentType = $response->headers->get('Content-Type', '');
 
         // Quick lookup for valid content types
-        if (!$this->isHtmlResponse($contentType)) {
+        if (! $this->isHtmlResponse($contentType)) {
             return $response;
         }
 
@@ -67,9 +67,6 @@ class WordPressShutdown
 
     /**
      * Check if the response is HTML.
-     *
-     * @param string $contentType
-     * @return bool
      */
     protected function isHtmlResponse(string $contentType): bool
     {

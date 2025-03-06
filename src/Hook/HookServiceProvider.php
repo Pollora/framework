@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Pollora\Hook;
 
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Commands\ActionMakeCommand;
 use Pollora\Hook\Commands\FilterMakeCommand;
-use Pollora\Hook\Commands\HookMakeCommand;
+use Pollora\Hook\Contracts\Hooks;
+use Spatie\StructureDiscoverer\Discover;
 
 /**
  * Service provider for WordPress hook functionality.
@@ -32,7 +32,6 @@ class HookServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                HookMakeCommand::class,
                 ActionMakeCommand::class,
                 FilterMakeCommand::class,
             ]);
@@ -59,9 +58,8 @@ class HookServiceProvider extends ServiceProvider
      */
     protected function mergeHooksConfig(): array
     {
-        $hookFile = $this->app->bootstrapPath('hooks.php');
-        $bootstrapHooks = File::exists($hookFile) ? require $this->app->bootstrapPath('hooks.php') : [];
-        $appConfigHooks = config('app.hooks', []);
+        $bootstrapHooks = Discover::in(app_path('Hooks'))->implementing(Hooks::class)->classes()->get();
+        $appConfigHooks = config('hooks', []);
 
         return array_merge($bootstrapHooks, $appConfigHooks);
     }

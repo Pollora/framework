@@ -44,14 +44,14 @@ class UserEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle user registration.
      *
-     * @param int $user_id User ID
+     * @param  int  $user_id  User ID
      */
     public function handleUserRegister(int $user_id): void
     {
         $user = get_user_by('id', $user_id);
         $creator = wp_get_current_user();
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -64,8 +64,8 @@ class UserEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle profile update.
      *
-     * @param int     $user_id User ID
-     * @param WP_User $user    User object
+     * @param  int  $user_id  User ID
+     * @param  WP_User  $user  User object
      */
     public function handleProfileUpdate(int $user_id, WP_User $user): void
     {
@@ -75,7 +75,7 @@ class UserEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle password reset.
      *
-     * @param WP_User $user User object
+     * @param  WP_User  $user  User object
      */
     public function handlePasswordReset(WP_User $user): void
     {
@@ -85,7 +85,7 @@ class UserEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle password reset request.
      *
-     * @param string $user_login Username or email
+     * @param  string  $user_login  Username or email
      */
     public function handleRetrievePassword(string $user_login): void
     {
@@ -93,7 +93,7 @@ class UserEventDispatcher extends AbstractEventDispatcher
             ? get_user_by('email', $user_login)
             : get_user_by('login', $user_login);
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -103,16 +103,16 @@ class UserEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle user login.
      *
-     * @param string $cookie    Auth cookie
-     * @param int    $expire    Cookie expiration
-     * @param int    $expiration Cookie expiration timestamp
-     * @param int    $user_id   User ID
+     * @param  string  $cookie  Auth cookie
+     * @param  int  $expire  Cookie expiration
+     * @param  int  $expiration  Cookie expiration timestamp
+     * @param  int  $user_id  User ID
      */
     public function handleSetLoggedInCookie(string $cookie, int $expire, int $expiration, int $user_id): void
     {
         $user = get_user_by('id', $user_id);
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -126,7 +126,7 @@ class UserEventDispatcher extends AbstractEventDispatcher
     {
         $user = wp_get_current_user();
 
-        if (!$user->exists()) {
+        if (! $user->exists()) {
             return;
         }
 
@@ -136,13 +136,13 @@ class UserEventDispatcher extends AbstractEventDispatcher
     /**
      * Store user before deletion.
      *
-     * @param int $user_id User ID
+     * @param  int  $user_id  User ID
      */
     public function handleDeleteUser(int $user_id): void
     {
         $user = get_user_by('id', $user_id);
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -152,11 +152,11 @@ class UserEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle user deletion.
      *
-     * @param int $user_id User ID
+     * @param  int  $user_id  User ID
      */
     public function handleDeletedUser(int $user_id): void
     {
-        if (!isset($this->usersToDelete[$user_id])) {
+        if (! isset($this->usersToDelete[$user_id])) {
             return;
         }
 
@@ -174,9 +174,9 @@ class UserEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle role change.
      *
-     * @param int         $user_id   User ID
-     * @param string|null $role      New role
-     * @param array       $old_roles Previous roles
+     * @param  int  $user_id  User ID
+     * @param  string|null  $role  New role
+     * @param  array  $old_roles  Previous roles
      */
     public function handleSetUserRole(int $user_id, ?string $role, array $old_roles): void
     {
@@ -186,10 +186,10 @@ class UserEventDispatcher extends AbstractEventDispatcher
 
         $user = get_user_by('id', $user_id);
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
         $this->dispatch(UserRoleChanged::class, [$user, $old_roles, $role]);
     }
-} 
+}

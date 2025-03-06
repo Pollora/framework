@@ -19,8 +19,8 @@ abstract class ConfirmationEvent extends GravityFormsEvent
     /**
      * Constructor.
      *
-     * @param array $confirmation The confirmation data
-     * @param array $form The form data
+     * @param  array  $confirmation  The confirmation data
+     * @param  array  $form  The form data
      */
     public function __construct(
         public readonly array $confirmation,
@@ -28,4 +28,4 @@ abstract class ConfirmationEvent extends GravityFormsEvent
     ) {
         parent::__construct($form);
     }
-} 
+}

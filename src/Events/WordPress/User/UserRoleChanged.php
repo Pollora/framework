@@ -26,4 +26,4 @@ class UserRoleChanged extends UserEvent
     ) {
         parent::__construct($user);
     }
-} 
+}

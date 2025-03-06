@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Plugins\GravityForms\Notification;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class NotificationCreated extends NotificationEvent
-{
-} 
+class NotificationCreated extends NotificationEvent {}

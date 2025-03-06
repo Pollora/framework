@@ -25,4 +25,4 @@ class TermUpdated extends TaxonomyEvent
     ) {
         parent::__construct($term);
     }
-} 
+}

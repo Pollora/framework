@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Events\WordPress\Media;
 
 use Pollora\Events\WordPress\AbstractEventDispatcher;
-use WP_Post;
 
 /**
  * Event dispatcher for WordPress media-related events.
@@ -33,13 +32,13 @@ class MediaEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle media attachment creation.
      *
-     * @param int $post_id Attachment post ID
+     * @param  int  $post_id  Attachment post ID
      */
     public function handleAddAttachment(int $post_id): void
     {
         $attachment = get_post($post_id);
 
-        if (!$attachment || $attachment->post_type !== 'attachment') {
+        if (! $attachment || $attachment->post_type !== 'attachment') {
             return;
         }
 
@@ -49,13 +48,13 @@ class MediaEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle media attachment update.
      *
-     * @param int $post_id Attachment post ID
+     * @param  int  $post_id  Attachment post ID
      */
     public function handleEditAttachment(int $post_id): void
     {
         $attachment = get_post($post_id);
 
-        if (!$attachment || $attachment->post_type !== 'attachment') {
+        if (! $attachment || $attachment->post_type !== 'attachment') {
             return;
         }
 
@@ -65,13 +64,13 @@ class MediaEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle media attachment deletion.
      *
-     * @param int $post_id Attachment post ID
+     * @param  int  $post_id  Attachment post ID
      */
     public function handleDeleteAttachment(int $post_id): void
     {
         $attachment = get_post($post_id);
 
-        if (!$attachment || $attachment->post_type !== 'attachment') {
+        if (! $attachment || $attachment->post_type !== 'attachment') {
             return;
         }
 
@@ -81,20 +80,20 @@ class MediaEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle image editing.
      *
-     * @param string $dummy      Unused parameter
-     * @param string $filename   The edited image filename
-     * @param string $image      Unused parameter
-     * @param string $mime_type  Unused parameter
-     * @param int    $post_id    Attachment post ID
+     * @param  string  $dummy  Unused parameter
+     * @param  string  $filename  The edited image filename
+     * @param  string  $image  Unused parameter
+     * @param  string  $mime_type  Unused parameter
+     * @param  int  $post_id  Attachment post ID
      */
     public function handleImageEdit(string $dummy, string $filename, string $image, string $mime_type, int $post_id): void
     {
         $attachment = get_post($post_id);
 
-        if (!$attachment || $attachment->post_type !== 'attachment') {
+        if (! $attachment || $attachment->post_type !== 'attachment') {
             return;
         }
 
         $this->dispatch(MediaEdited::class, [$attachment, $filename]);
     }
-} 
+}

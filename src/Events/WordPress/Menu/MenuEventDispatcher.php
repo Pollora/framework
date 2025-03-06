@@ -38,7 +38,7 @@ class MenuEventDispatcher extends AbstractEventDispatcher
     public function handleWpCreateNavMenu(int $menu_id): void
     {
         $menu = get_term($menu_id, 'nav_menu');
-        if (!$menu instanceof WP_Term) {
+        if (! $menu instanceof WP_Term) {
             return;
         }
 
@@ -52,7 +52,7 @@ class MenuEventDispatcher extends AbstractEventDispatcher
     {
         $menu = get_term($menu_id, 'nav_menu');
 
-        if (!$menu instanceof WP_Term) {
+        if (! $menu instanceof WP_Term) {
             return;
         }
 
@@ -72,7 +72,7 @@ class MenuEventDispatcher extends AbstractEventDispatcher
      */
     public function handleUpdateOption(string $option, mixed $oldValue, mixed $value): void
     {
-        if (!str_starts_with($option, 'theme_mods_')) {
+        if (! str_starts_with($option, 'theme_mods_')) {
             return;
         }
 

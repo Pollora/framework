@@ -25,7 +25,7 @@ class WordPressServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../../config/wordpress.php', 'wordpress'
+            __DIR__.'/../../config/wordpress.php', 'wordpress'
         );
 
         $this->app->singleton(Bootstrap::class);
@@ -49,7 +49,7 @@ class WordPressServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../../config/wordpress.php' => config_path('wordpress.php'),
+                __DIR__.'/../../config/wordpress.php' => config_path('wordpress.php'),
             ], 'wp-config');
 
             $this->commands([
@@ -65,8 +65,6 @@ class WordPressServiceProvider extends ServiceProvider
 
     /**
      * Force HTTPS protocol handling for WordPress requests.
-     *
-     * @return void
      */
     private function handleHttpsProtocol(): void
     {
@@ -83,16 +81,12 @@ class WordPressServiceProvider extends ServiceProvider
 
     /**
      * Determines whether HTTPS should be forced based on proxy headers.
-     *
-     * @param string $forwardedProtocols
-     * @return void
      */
     private function setHttpsBasedOnProxy(string $forwardedProtocols): void
     {
         $protocols = array_map('trim', explode(',', $forwardedProtocols));
 
         // Check if the last protocol is HTTPS
-        $_SERVER["HTTPS"] = end($protocols) === 'https' ? 'on' : 'off';
+        $_SERVER['HTTPS'] = end($protocols) === 'https' ? 'on' : 'off';
     }
-
 }

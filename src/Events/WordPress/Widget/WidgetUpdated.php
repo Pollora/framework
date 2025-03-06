@@ -17,12 +17,12 @@ class WidgetUpdated extends WidgetEvent
     /**
      * Constructor.
      *
-     * @param string      $widgetId    The ID of the widget
-     * @param array       $oldInstance The previous widget settings
-     * @param array       $newInstance The updated widget settings
-     * @param string|null $widgetName  The name/type of the widget
-     * @param string|null $widgetTitle The title given to the widget instance
-     * @param string|null $sidebarId   The ID of the sidebar containing the widget
+     * @param  string  $widgetId  The ID of the widget
+     * @param  array  $oldInstance  The previous widget settings
+     * @param  array  $newInstance  The updated widget settings
+     * @param  string|null  $widgetName  The name/type of the widget
+     * @param  string|null  $widgetTitle  The title given to the widget instance
+     * @param  string|null  $sidebarId  The ID of the sidebar containing the widget
      */
     public function __construct(
         string $widgetId,
@@ -34,4 +34,4 @@ class WidgetUpdated extends WidgetEvent
     ) {
         parent::__construct($widgetId, $widgetName, $widgetTitle, $sidebarId);
     }
-} 
+}

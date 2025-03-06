@@ -21,6 +21,5 @@ abstract class BlogEvent
      */
     public function __construct(
         public readonly WP_Site $site
-    ) {
-    }
-} 
+    ) {}
+}

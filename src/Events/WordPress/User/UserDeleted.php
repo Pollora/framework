@@ -25,4 +25,4 @@ class UserDeleted extends UserEvent
     ) {
         parent::__construct($user);
     }
-} 
+}

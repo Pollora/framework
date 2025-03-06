@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Hook;
 
-use Pollora\Hook\Contracts\ActionInterface;
+use Pollora\Hook\Contracts\Action as ActionInterface;
 
 /**
  * WordPress Action Hook implementation.

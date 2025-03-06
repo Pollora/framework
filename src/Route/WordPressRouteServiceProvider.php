@@ -6,11 +6,12 @@ namespace Pollora\Route;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Http\Controllers\FrontendController;
 use Pollora\Route\Middleware\WordPressBindings;
 use Pollora\Route\Middleware\WordPressBodyClass;
 use Pollora\Route\Middleware\WordPressHeaders;
-use Pollora\Http\Controllers\FrontendController;
 use Pollora\Route\Middleware\WordPressShutdown;
+
 /**
  * Service provider for WordPress-specific routing functionalities.
  *
@@ -49,8 +50,6 @@ class WordPressRouteServiceProvider extends ServiceProvider
      * - First argument: WordPress condition (e.g., 'single', 'page')
      * - Last argument: Callback function or controller action
      * - Middle arguments (optional): Parameters for the WordPress condition
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -102,8 +101,6 @@ class WordPressRouteServiceProvider extends ServiceProvider
 
     /**
      * Register the WordPress fallback route after all other routes.
-     *
-     * @return void
      */
     protected function bootFallbackRoute(): void
     {

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Route;
 
-use Illuminate\Routing\RoutingServiceProvider as BaseRoutingServiceProvider;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
+use Illuminate\Routing\RoutingServiceProvider as BaseRoutingServiceProvider;
 
 /**
  * Service provider for WordPress-specific routing functionality.

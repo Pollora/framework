@@ -12,6 +12,7 @@ use Pollora\Ajax\AjaxServiceProvider;
 use Pollora\Asset\AssetServiceProvider;
 use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
+use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Gutenberg\GutenbergServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\HookServiceProvider;
@@ -27,7 +28,7 @@ use Pollora\Theme\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
-use Pollora\Events\WordPress\WordPressEventServiceProvider;
+
 /**
  * Main service provider for the Pollora framework.
  *

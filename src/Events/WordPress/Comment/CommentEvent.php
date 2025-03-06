@@ -19,6 +19,5 @@ abstract class CommentEvent
      */
     public function __construct(
         public readonly \WP_Comment $comment
-    ) {
-    }
-} 
+    ) {}
+}

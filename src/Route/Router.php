@@ -85,7 +85,7 @@ class Router extends IlluminateRouter
      *
      * Merges provided conditions with those from configuration.
      *
-     * @param array<string, mixed> $conditions Additional conditions to set
+     * @param  array<string, mixed>  $conditions  Additional conditions to set
      */
     public function setConditions(array $conditions = []): void
     {
@@ -107,7 +107,7 @@ class Router extends IlluminateRouter
     public function addWordPressBindings($route)
     {
         // Ne pas ajouter de liaisons si ce n'est pas une route WordPress
-        if (!($route instanceof Route) || !$route->isWordPressRoute()) {
+        if (! ($route instanceof Route) || ! $route->isWordPressRoute()) {
             return $route;
         }
 

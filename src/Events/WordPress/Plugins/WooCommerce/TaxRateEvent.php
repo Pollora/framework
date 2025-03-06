@@ -17,12 +17,11 @@ abstract class TaxRateEvent extends WooCommerceEvent
     /**
      * Constructor.
      *
-     * @param int $taxRateId The ID of the tax rate
-     * @param array<string, mixed> $taxRate The tax rate data
+     * @param  int  $taxRateId  The ID of the tax rate
+     * @param  array<string, mixed>  $taxRate  The tax rate data
      */
     public function __construct(
         public readonly int $taxRateId,
         public readonly array $taxRate
-    ) {
-    }
-} 
+    ) {}
+}

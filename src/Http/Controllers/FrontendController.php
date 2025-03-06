@@ -26,7 +26,7 @@ class FrontendController extends Controller
 
         foreach ($views as $view) {
             if (View::exists($view)) {
-               return view($view);
+                return view($view);
             }
         }
 
@@ -34,5 +34,4 @@ class FrontendController extends Controller
         $wp_query->set_404();
         abort(404);
     }
-
 }

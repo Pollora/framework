@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Asset;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Represents a file asset and handles its URL generation.

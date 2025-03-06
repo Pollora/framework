@@ -19,8 +19,8 @@ abstract class NotificationEvent extends GravityFormsEvent
     /**
      * Constructor.
      *
-     * @param array $notification The notification data
-     * @param array $form The form data
+     * @param  array  $notification  The notification data
+     * @param  array  $form  The form data
      */
     public function __construct(
         public readonly array $notification,
@@ -28,4 +28,4 @@ abstract class NotificationEvent extends GravityFormsEvent
     ) {
         parent::__construct($form);
     }
-} 
+}

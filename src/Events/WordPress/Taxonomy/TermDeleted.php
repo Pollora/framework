@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Taxonomy;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class TermDeleted extends TaxonomyEvent
-{
-} 
+class TermDeleted extends TaxonomyEvent {}

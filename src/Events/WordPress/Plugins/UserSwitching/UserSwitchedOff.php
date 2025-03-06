@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Plugins\UserSwitching;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class UserSwitchedOff extends UserSwitchingEvent
-{
-} 
+class UserSwitchedOff extends UserSwitchingEvent {}

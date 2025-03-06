@@ -6,7 +6,6 @@ namespace Pollora\WordPress;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Pollora\Support\Facades\Filter;
 
 trait QueryTrait
 {
@@ -47,8 +46,8 @@ trait QueryTrait
         if (function_exists('is_blog_installed')) {
             return is_blog_installed();
         }
-        
-        if (!$this->isDatabaseConfigured()) {
+
+        if (! $this->isDatabaseConfigured()) {
             return false;
         }
 
@@ -66,8 +65,6 @@ trait QueryTrait
 
     /**
      * Run the WordPress bootstrap process and load the default template loader.
-     *
-     * @return void
      */
     protected function runWp(): void
     {
@@ -76,6 +73,6 @@ trait QueryTrait
         }
 
         wp();
-        require_once ABSPATH . WPINC . '/template-loader.php';
+        require_once ABSPATH.WPINC.'/template-loader.php';
     }
 }

@@ -17,16 +17,15 @@ abstract class WidgetEvent
     /**
      * Constructor.
      *
-     * @param string      $widgetId    The ID of the widget
-     * @param string|null $widgetName  The name/type of the widget (e.g., "Archives", "Categories")
-     * @param string|null $widgetTitle The title given to the widget instance
-     * @param string|null $sidebarId   The ID of the sidebar containing the widget
+     * @param  string  $widgetId  The ID of the widget
+     * @param  string|null  $widgetName  The name/type of the widget (e.g., "Archives", "Categories")
+     * @param  string|null  $widgetTitle  The title given to the widget instance
+     * @param  string|null  $sidebarId  The ID of the sidebar containing the widget
      */
     public function __construct(
         public readonly string $widgetId,
         public readonly ?string $widgetName = null,
         public readonly ?string $widgetTitle = null,
         public readonly ?string $sidebarId = null
-    ) {
-    }
-} 
+    ) {}
+}

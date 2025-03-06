@@ -26,4 +26,4 @@ class BlogVisibilityUpdated extends BlogEvent
     ) {
         parent::__construct($site);
     }
-} 
+}

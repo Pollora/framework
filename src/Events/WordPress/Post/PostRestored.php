@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Post;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class PostRestored extends PostEvent
-{
-} 
+class PostRestored extends PostEvent {}

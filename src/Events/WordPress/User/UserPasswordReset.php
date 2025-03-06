@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\User;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class UserPasswordReset extends UserEvent
-{
-} 
+class UserPasswordReset extends UserEvent {}

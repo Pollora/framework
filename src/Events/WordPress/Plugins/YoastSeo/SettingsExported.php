@@ -16,10 +16,9 @@ class SettingsExported extends YoastSeoEvent
     /**
      * Constructor.
      *
-     * @param bool $includeTaxonomyMeta Whether taxonomy meta was included in the export
+     * @param  bool  $includeTaxonomyMeta  Whether taxonomy meta was included in the export
      */
     public function __construct(
         public readonly bool $includeTaxonomyMeta
-    ) {
-    }
-} 
+    ) {}
+}

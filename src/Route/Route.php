@@ -7,7 +7,6 @@ namespace Pollora\Route;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Route as IlluminateRoute;
-use Illuminate\Support\Arr;
 use Pollora\Route\Matching\ConditionValidator;
 
 /**
@@ -111,7 +110,7 @@ class Route extends IlluminateRoute
         $this->isWordPressRoute = $isWordPressRoute;
 
         // If we're setting this as a WordPress route, parse the condition
-        if ($isWordPressRoute && !empty($this->conditions)) {
+        if ($isWordPressRoute && ! empty($this->conditions)) {
             $this->condition = $this->parseCondition($this->uri());
         }
 

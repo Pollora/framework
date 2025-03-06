@@ -10,8 +10,8 @@ declare(strict_types=1);
 
 namespace Pollora\Taxonomy;
 
-use Pollora\Entity\TaxonomyException;
 use Illuminate\Foundation\Application;
+use Pollora\Entity\TaxonomyException;
 
 class TaxonomyFactory
 {

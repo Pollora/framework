@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Asset;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\ServiceProvider;
 
 /**
  * Service provider for registering asset-related services.

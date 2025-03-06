@@ -19,10 +19,10 @@ abstract class PluginEvent extends InstallerEvent
     /**
      * Constructor.
      *
-     * @param string $name Plugin name
-     * @param string|null $version Plugin version
-     * @param string|null $slug Plugin slug
-     * @param bool $networkWide Whether the plugin is network activated
+     * @param  string  $name  Plugin name
+     * @param  string|null  $version  Plugin version
+     * @param  string|null  $slug  Plugin slug
+     * @param  bool  $networkWide  Whether the plugin is network activated
      */
     public function __construct(
         string $name,
@@ -32,4 +32,4 @@ abstract class PluginEvent extends InstallerEvent
     ) {
         parent::__construct($name, $version, $slug);
     }
-} 
+}
