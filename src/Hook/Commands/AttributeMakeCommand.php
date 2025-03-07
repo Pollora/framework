@@ -54,7 +54,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\\Hooks';
+        return $rootNamespace.'\\Cms\\Hooks';
     }
 
     /**

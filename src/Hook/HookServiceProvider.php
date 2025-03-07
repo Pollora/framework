@@ -58,7 +58,7 @@ class HookServiceProvider extends ServiceProvider
      */
     protected function mergeHooksConfig(): array
     {
-        $bootstrapHooks = Discover::in(app_path('Hooks'))->implementing(Hooks::class)->classes()->get();
+        $bootstrapHooks = Discover::in(app_path('Cms/Hooks'))->implementing(Hooks::class)->classes()->get();
         $appConfigHooks = config('hooks', []);
 
         return array_merge($bootstrapHooks, $appConfigHooks);
