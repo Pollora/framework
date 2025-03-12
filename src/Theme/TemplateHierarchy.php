@@ -7,7 +7,7 @@ namespace Pollora\Theme;
 /**
  * Class TemplateHierarchy
  *
- * Récupère la hiérarchie des templates WordPress avant le chargement de la page.
+ * Retrieves the WordPress template hierarchy before page loading.
  */
 class TemplateHierarchy
 {
@@ -90,31 +90,79 @@ class TemplateHierarchy
      */
     private function computeHierarchy()
     {
-        $templateTypes = $this->templateTypes();
-
-        foreach ($templateTypes as $type => $conditional) {
-            if (function_exists($conditional) && call_user_func($conditional)) {
+        // Get the WordPress template hierarchy order
+        $hierarchyOrder = self::getHierarchyOrder();
+        
+        // Create a temporary array to store templates by condition
+        $templatesByCondition = [];
+        
+        // Check each condition in the hierarchy order
+        foreach ($hierarchyOrder as $condition) {
+            // Ignore the index fallback
+            if ($condition === '__return_true') {
+                continue;
+            }
+            
+            // Check if the condition is satisfied
+            if (function_exists($condition) && call_user_func($condition)) {
+                // Convert the condition name to template type
+                $type = $this->conditionToType($condition);
+                
+                // Get templates for this type
                 $templates = $this->templateForType($type);
-
-                if (! empty($templates)) {
-                    // Add templates with .blade.php extension first
-                    $this->addBladeTemplateVariants($templates);
-
-                    // Then add regular templates
-                    foreach ($templates as $template) {
-                        $this->templateHierarchy[] = $template;
-                    }
-
-                    // Add block template variants if using a block theme
-                    if (wp_is_block_theme()) {
-                        $this->addBlockTemplateVariants($templates);
-                    }
+                
+                if (!empty($templates)) {
+                    $templatesByCondition[$condition] = $templates;
                 }
             }
         }
-
-        // Make sure hierarchy is unique
+        
+        // Add templates in hierarchy order
+        foreach ($hierarchyOrder as $condition) {
+            if (isset($templatesByCondition[$condition])) {
+                $templates = $templatesByCondition[$condition];
+                
+                // Add Blade template variants first
+                $this->addBladeTemplateVariants($templates);
+                
+                // Then add regular templates
+                foreach ($templates as $template) {
+                    $this->templateHierarchy[] = $template;
+                }
+                
+                // Add block template variants if using a block theme
+                if (wp_is_block_theme()) {
+                    $this->addBlockTemplateVariants($templates);
+                }
+            }
+        }
+        
+        // Always check index as fallback
+        $templates = $this->templateForType('index');
+        if (!empty($templates)) {
+            $this->addBladeTemplateVariants($templates);
+            foreach ($templates as $template) {
+                $this->templateHierarchy[] = $template;
+            }
+            if (wp_is_block_theme()) {
+                $this->addBlockTemplateVariants($templates);
+            }
+        }
+        
+        // Ensure the hierarchy is unique
         $this->templateHierarchy = array_unique($this->templateHierarchy);
+    }
+
+    /**
+     * Convert a WordPress condition function name to a template type.
+     *
+     * @param string $condition The condition function name (e.g., 'is_page')
+     * @return string The corresponding template type (e.g., 'page')
+     */
+    private function conditionToType(string $condition): string
+    {
+        $types = array_flip($this->templateTypes());
+        return $types[$condition] ?? str_replace('is_', '', $condition);
     }
 
     /**
@@ -443,6 +491,37 @@ class TemplateHierarchy
             'search' => 'is_search',
             'embed' => 'is_embed',
             'index' => '__return_true',
+        ];
+    }
+
+    /**
+     * Get the WordPress template hierarchy order from most specific to least specific
+     *
+     * This method returns the order of template types from most specific to least specific,
+     * which can be used to determine which template should take precedence when multiple
+     * templates match the current request.
+     *
+     * @return array Array of conditional function names in order of specificity
+     */
+    public static function getHierarchyOrder(): array
+    {
+        return [
+            'is_404',
+            'is_search',
+            'is_front_page',
+            'is_home',
+            'is_post_type_archive',
+            'is_tax',
+            'is_attachment',
+            'is_single',
+            'is_page',
+            'is_singular',
+            'is_category',
+            'is_tag',
+            'is_author',
+            'is_date',
+            'is_archive',
+            '__return_true', // index fallback
         ];
     }
 }
