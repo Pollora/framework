@@ -34,6 +34,7 @@ class Router extends IlluminateRouter
     public function __construct(Dispatcher $events, ?Container $container = null)
     {
         parent::__construct($events, $container);
+
         $this->routes = new RouteCollection;
     }
 
@@ -59,7 +60,8 @@ class Router extends IlluminateRouter
      * Find the route matching a given request.
      *
      * Handles special case for WordPress admin requests by creating
-     * a dedicated admin route.
+     * a dedicated admin route. Also handles special WordPress request types
+     * like robots.txt, favicon, feeds, and trackbacks.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Routing\Route
@@ -69,6 +71,19 @@ class Router extends IlluminateRouter
         // Handle WordPress admin requests
         if ($this->isWordPressAdminRequest()) {
             return $this->createAdminRoute($request);
+        }
+
+        // Handle special WordPress request types (robots, favicon, feed, trackback)
+        if ($this->isSpecialWordPressRequest()) {
+            // First check if there's an explicit route defined for this special request
+            $specialRoute = $this->findSpecialWordPressRoute();
+            if ($specialRoute !== null) {
+                return $specialRoute;
+            }
+            
+            // If no explicit route is defined, create a special route that will
+            // delegate to WordPress's built-in handlers
+            return $this->createSpecialWordPressRoute($request);
         }
 
         try {
@@ -126,9 +141,125 @@ class Router extends IlluminateRouter
             
             return $laravelRoute;
         } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
-            // If no route is found, let the FrontendController handle the request
+            // If no route is found, create a fallback route that will
+            // delegate to the FrontendController
+            return $this->createFallbackRoute($request);
+        }
+    }
+
+    /**
+     * Check if the current request is a special WordPress request type.
+     *
+     * Special request types include robots.txt, favicon, feeds, and trackbacks.
+     *
+     * @return bool True if this is a special WordPress request, false otherwise
+     */
+    private function isSpecialWordPressRequest(): bool
+    {
+        return function_exists('is_robots') && is_robots()
+            || function_exists('is_favicon') && is_favicon()
+            || function_exists('is_feed') && is_feed()
+            || function_exists('is_trackback') && is_trackback();
+    }
+
+    /**
+     * Find a route explicitly defined for special WordPress request types.
+     *
+     * @return \Pollora\Route\Route|null The matching route or null if none found
+     */
+    private function findSpecialWordPressRoute(): ?Route
+    {
+        $specialCondition = null;
+        
+        if (function_exists('is_robots') && is_robots()) {
+            $specialCondition = 'is_robots';
+        } elseif (function_exists('is_favicon') && is_favicon()) {
+            $specialCondition = 'is_favicon';
+        } elseif (function_exists('is_feed') && is_feed()) {
+            $specialCondition = 'is_feed';
+        } elseif (function_exists('is_trackback') && is_trackback()) {
+            $specialCondition = 'is_trackback';
+        }
+        
+        if ($specialCondition === null) {
             return null;
         }
+        
+        // Look for a route with this specific condition
+        foreach ($this->routes->getRoutes() as $route) {
+            if ($route instanceof Route 
+                && $route->isWordPressRoute() 
+                && $route->getCondition() === $specialCondition) {
+                return $route;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Create a special route for WordPress special request types.
+     *
+     * This route will delegate to WordPress's built-in handlers for
+     * robots.txt, favicon, feeds, and trackbacks.
+     *
+     * @param  \Illuminate\Http\Request  $request  Current request instance
+     * @return \Illuminate\Routing\Route Special WordPress route
+     */
+    private function createSpecialWordPressRoute($request): \Illuminate\Routing\Route
+    {
+        // Determine which special handler to use
+        $handler = function () {
+            if (function_exists('is_robots') && is_robots()) {
+                do_action('do_robots');
+                exit;
+            } elseif (function_exists('is_favicon') && is_favicon()) {
+                do_action('do_favicon');
+                exit;
+            } elseif (function_exists('is_feed') && is_feed()) {
+                do_feed();
+                exit;
+            } elseif (function_exists('is_trackback') && is_trackback()) {
+                require_once ABSPATH . 'wp-trackback.php';
+                exit;
+            }
+            
+            // Fallback to 404 if none of the special handlers match
+            abort(404);
+        };
+        
+        // Create a route with the special handler
+        $route = $this->newRoute(['GET', 'HEAD'], $request->path(), $handler);
+        $route->setIsWordPressRoute(true);
+        
+        // Set the current route
+        $this->current = $route;
+        $this->container->instance(Route::class, $route);
+        
+        return $route;
+    }
+
+    /**
+     * Create a fallback route for requests that don't match any defined routes.
+     *
+     * This route will delegate to the FrontendController to handle the request
+     * using WordPress's template hierarchy.
+     *
+     * @param  \Illuminate\Http\Request  $request  Current request instance
+     * @return \Illuminate\Routing\Route Fallback route
+     */
+    private function createFallbackRoute($request): \Illuminate\Routing\Route
+    {
+        // Create a route that delegates to the FrontendController
+        $route = $this->newRoute(['GET', 'HEAD'], $request->path(), [
+            'uses' => 'Pollora\Http\Controllers\FrontendController@handle',
+        ]);
+        
+        // Set the current route
+        $this->current = $route;
+        $this->container->instance(Route::class, $route);
+        
+        return $route;
     }
 
     /**

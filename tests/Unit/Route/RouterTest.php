@@ -290,7 +290,7 @@ class RouterTest extends TestCase
     }
 
     /**
-     * Test that the Router correctly handles the case where no route is found.
+     * Test that the Router correctly creates a fallback route when no route is found.
      *
      * @return void
      */
@@ -304,7 +304,11 @@ class RouterTest extends TestCase
         $method->setAccessible(true);
         $foundRoute = $method->invoke($this->router, $request);
         
-        // Verify that null is returned
-        expect($foundRoute)->toBeNull();
+        // Verify that a fallback route is returned
+        expect($foundRoute)->toBeInstanceOf(Route::class);
+        
+        // Verify that the fallback route uses the FrontendController
+        $action = $foundRoute->getAction();
+        expect($action['uses'])->toBe('Pollora\Http\Controllers\FrontendController@handle');
     }
 } 
