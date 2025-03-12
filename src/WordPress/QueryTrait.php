@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\WordPress;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -69,10 +70,26 @@ trait QueryTrait
     protected function runWp(): void
     {
         if (! function_exists('wp')) {
-            throw new Exception('The WordPress core functions are not available. Ensure WordPress is loaded.');
+            throw new \RuntimeException('The WordPress core functions are not available. Ensure WordPress is loaded.');
         }
 
         wp();
-        require_once ABSPATH.WPINC.'/template-loader.php';
+        
+        // Vérifier les conditions qui provoquent des retours anticipés dans template-loader.php
+        if (is_robots()) {
+            do_action('do_robots');
+            return;
+        } elseif (is_favicon()) {
+            do_action('do_favicon');
+            return;
+        } elseif (is_feed()) {
+            do_feed();
+            return;
+        } elseif (is_trackback()) {
+            require_once ABSPATH . 'wp-trackback.php';
+            return;
+        }
+        
+        require_once ABSPATH . WPINC . '/template-loader.php';
     }
 }

@@ -49,7 +49,6 @@ class Bootstrap
         if (! app()->runningInConsole() && $this->isWordPressInstalled()) {
             $this->runWp();
         }
-
         $this->setupActionHooks();
     }
 
@@ -151,7 +150,7 @@ class Bootstrap
         ) : (new WordPress)->site()->path;
 
         if ($path !== '' && $path !== '0') {
-            $url .= strtr(WP_PATH, ['public/' => '']).ltrim(
+            $url .= strtr('public/cms/', ['public/' => '']).ltrim(
                 Str::of($path)
                     ->replaceMatches('/[^a-zA-Z0-9\-\_\/\.]/', '')
                     ->toString(),
