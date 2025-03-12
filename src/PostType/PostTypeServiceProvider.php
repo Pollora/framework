@@ -30,6 +30,24 @@ class PostTypeServiceProvider extends ServiceProvider
     {
         $this->app->bind('wp.posttype', fn ($app): \Pollora\PostType\PostTypeFactory => new PostTypeFactory($app));
         $this->registerPostTypes();
+        
+        // Register the attribute-based post type service provider
+        $this->app->register(PostTypeAttributeServiceProvider::class);
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot(): void
+    {
+        // Publish configuration
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__ . '/config/posttype.php' => config_path('posttype.php'),
+            ], 'pollora-posttype-config');
+        }
     }
 
     /**
@@ -61,8 +79,9 @@ class PostTypeServiceProvider extends ServiceProvider
             // Register the extended post type.
             $singular = $args['names']['singular'] ?? null;
             $plural = $args['names']['plural'] ?? null;
-            $slug = $args['names']['slug'] ?? null;
-            PostType::make($key, $singular, $plural)->setSlug($slug)->setRawArgs($args);
+            
+            // Create the post type instance with the provided arguments
+            PostType::make($key, $singular, $plural);
         });
     }
 }

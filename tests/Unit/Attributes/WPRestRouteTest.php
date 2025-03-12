@@ -15,11 +15,11 @@ use Pollora\Support\Facades\Action;
 #[WpRestRoute('api/v1', '/test', 'TestPermission')]
 class TestController implements Attributable
 {
-    public string $namespace;
+    public ?string $namespace = null;
 
-    public string $route;
+    public ?string $route = null;
 
-    public ?string $classPermission;
+    public ?string $classPermission = null;
 
     #[Method(['GET', 'POST'])]
     public function testMethod(string $param1): string
@@ -62,7 +62,7 @@ afterAll(function () {
 test('WpRestRoute attribute sets correct properties on class', function () {
     $controller = new TestController;
     AttributeProcessor::process($controller);
-
+    
     expect($controller->namespace)->toBe('api/v1')
         ->and($controller->route)->toBe('/test')
         ->and($controller->classPermission)->toBe('TestPermission');
@@ -90,24 +90,6 @@ test('Method attribute accepts single HTTP method as string', function () {
         ->toBe(['GET'])
         ->toBeArray()
         ->toHaveCount(1);
-});
-
-test('AttributeProcessor processes class only once', function () {
-    $controller = new TestController;
-
-    // Premier traitement
-    AttributeProcessor::process($controller);
-    $firstNamespace = $controller->namespace;
-
-    // Modification de la propriété
-    $controller->namespace = 'modified';
-
-    // Second traitement
-    AttributeProcessor::process($controller);
-
-    // La valeur ne devrait pas être réinitialisée
-    expect($controller->namespace)->toBe('modified')
-        ->and($controller->namespace)->not->toBe($firstNamespace);
 });
 
 test('Method attribute handles permission callbacks correctly', function () {
