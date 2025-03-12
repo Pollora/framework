@@ -7,6 +7,7 @@ namespace Pollora\Events\WordPress\Installer;
 use Pollora\Events\WordPress\AbstractEventDispatcher;
 use Pollora\Events\WordPress\Installer\Plugin\PluginActivated;
 use Pollora\Events\WordPress\Installer\Plugin\PluginDeactivated;
+use Pollora\Events\WordPress\Installer\Plugin\PluginDeleted;
 use Pollora\Events\WordPress\Installer\Plugin\PluginInstalled;
 use Pollora\Events\WordPress\Installer\Plugin\PluginUpdated;
 use Pollora\Events\WordPress\Installer\Theme\ThemeActivated;
@@ -37,6 +38,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         'switch_theme',
         'delete_site_transient_update_themes',
         'pre_option_uninstall_plugins',
+        'pre_set_site_transient_update_plugins',
     ];
 
     /**
@@ -56,7 +58,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
 
         if ($action === 'install') {
             if ($type === 'plugin') {
-                $path = $upgrader->plugin_info();
+                $path = isset($upgrader->skin->result['destination_name']) ? $upgrader->skin->result['destination_name'] : null;
                 if (! $path) {
                     return;
                 }
@@ -68,7 +70,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
                     'slug' => $upgrader->result['destination_name'],
                 ]);
             } else {
-                $slug = $upgrader->theme_info();
+                $slug = isset($upgrader->skin->result['destination_name']) ? $upgrader->skin->result['destination_name'] : null;
                 if (! $slug) {
                     return;
                 }
@@ -197,6 +199,70 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
             'oldVersion' => $wp_version,
             'autoUpdated' => ($pagenow !== 'update-core.php'),
         ]);
+    }
+
+    /**
+     * Handle plugin uninstallation.
+     *
+     * @return bool
+     */
+    public function handlePreOptionUninstallPlugins(): bool
+    {
+        // Check if we're in a plugin deletion context
+        if (
+            'delete-selected' !== filter_input(INPUT_GET, 'action')
+            &&
+            'delete-selected' !== filter_input(INPUT_POST, 'action2')
+        ) {
+            return false;
+        }
+
+        // Determine the input type (GET or POST)
+        $type = isset($_POST['action2']) ? INPUT_POST : INPUT_GET;
+
+        // Get the plugins that are being deleted
+        $plugins = filter_input($type, 'checked', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+        $_plugins = $this->getPlugins();
+
+        $pluginsToDelete = [];
+
+        foreach ((array) $plugins as $plugin) {
+            $pluginsToDelete[$plugin] = $_plugins[$plugin];
+        }
+
+        // Store the plugins to delete for later use
+        update_option('pollora_plugins_to_delete', $pluginsToDelete);
+
+        return false;
+    }
+
+    /**
+     * Handle plugin deletion confirmation.
+     *
+     * @param  mixed  $value  Unused
+     * @return mixed
+     */
+    public function handlePreSetSiteTransientUpdatePlugins($value)
+    {
+        $pluginsToDelete = get_option('pollora_plugins_to_delete');
+        if (! filter_input(INPUT_POST, 'verify-delete') || ! $pluginsToDelete) {
+            return $value;
+        }
+
+        foreach ($pluginsToDelete as $plugin => $data) {
+            $name = $data['Name'];
+            $networkWide = isset($data['Network']) && $data['Network'];
+
+            $this->dispatch(PluginDeleted::class, [
+                'name' => $name,
+                'slug' => $plugin,
+                'networkWide' => $networkWide,
+            ]);
+        }
+
+        delete_option('pollora_plugins_to_delete');
+
+        return $value;
     }
 
     /**
