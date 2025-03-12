@@ -79,12 +79,12 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Store user meta before update.
      *
-     * @param  int  $metaId  Meta ID
+     * @param  array|int  $metaIds  Array of metadata entry IDs or single ID
      * @param  int  $userId  User ID
      * @param  string  $metaKey  Meta key
      * @param  mixed  $metaValue  Meta value
      */
-    public function handleUpdateUserMeta(int $metaId, int $userId, string $metaKey, mixed $metaValue): void
+    public function handleUpdateUserMeta($metaIds, int $userId, string $metaKey, mixed $metaValue): void
     {
         if (! $this->isTwoFactorMeta($metaKey)) {
             return;
@@ -96,12 +96,12 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle user meta updates.
      *
-     * @param  int  $metaId  Meta ID
+     * @param  array|int  $metaIds  Array of metadata entry IDs or single ID
      * @param  int  $userId  User ID
      * @param  string  $metaKey  Meta key
      * @param  mixed  $metaValue  Meta value
      */
-    public function handleUpdatedUserMeta(int $metaId, int $userId, string $metaKey, mixed $metaValue): void
+    public function handleUpdatedUserMeta($metaIds, int $userId, string $metaKey, mixed $metaValue): void
     {
         if (! $this->isTwoFactorMeta($metaKey)) {
             return;
@@ -121,12 +121,12 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle new user meta.
      *
-     * @param  int  $metaId  Meta ID
+     * @param  array|int  $metaIds  Array of metadata entry IDs or single ID
      * @param  int  $userId  User ID
      * @param  string  $metaKey  Meta key
      * @param  mixed  $metaValue  Meta value
      */
-    public function handleAddedUserMeta(int $metaId, int $userId, string $metaKey, mixed $metaValue): void
+    public function handleAddedUserMeta($metaIds, int $userId, string $metaKey, mixed $metaValue): void
     {
         if (! $this->isTwoFactorMeta($metaKey)) {
             return;
