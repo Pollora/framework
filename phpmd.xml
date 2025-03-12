@@ -13,4 +13,10 @@
             <directory suffix=".php">./tests</directory>
         </testsuite>
     </testsuites>
+    <phpunit>
+    <php>
+        <ini name="log_errors" value="On" ></ini>
+        <ini name="display_errors" value="On"></ini>
+        <ini name="error_log" value="/tmp/error.log"></ini>
+    </php>
 </phpunit>

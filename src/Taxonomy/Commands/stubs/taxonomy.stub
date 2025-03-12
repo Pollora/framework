@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DummyNamespace;
+
+use Pollora\Taxonomy\AbstractTaxonomy;
+use Pollora\Attributes\Taxonomy\ShowTagcloud;
+use Pollora\Attributes\Taxonomy\ShowInQuickEdit;
+use Pollora\Attributes\Taxonomy\ShowAdminColumn;
+use Pollora\Attributes\Taxonomy\Hierarchical;
+use Pollora\Attributes\Taxonomy\ShowInRest;
+use Pollora\Attributes\Taxonomy\ObjectType;
+
+/**
+ * DummyName taxonomy.
+ *
+ * This class defines the DummyName custom taxonomy using PHP attributes
+ * for WordPress registration.
+ */
+#[ShowTagcloud]
+#[ShowInQuickEdit]
+#[ShowAdminColumn]
+#[Hierarchical]
+#[ShowInRest]
+#[ObjectType('DummyPostType')]
+class DummyClass extends AbstractTaxonomy
+{
+} 

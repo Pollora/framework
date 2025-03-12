@@ -5,6 +5,14 @@ declare(strict_types=1);
 namespace Pollora\Events\WordPress\Installer;
 
 use Pollora\Events\WordPress\AbstractEventDispatcher;
+use Pollora\Events\WordPress\Installer\Plugin\PluginActivated;
+use Pollora\Events\WordPress\Installer\Plugin\PluginDeactivated;
+use Pollora\Events\WordPress\Installer\Plugin\PluginInstalled;
+use Pollora\Events\WordPress\Installer\Plugin\PluginUpdated;
+use Pollora\Events\WordPress\Installer\Theme\ThemeActivated;
+use Pollora\Events\WordPress\Installer\Theme\ThemeDeleted;
+use Pollora\Events\WordPress\Installer\Theme\ThemeInstalled;
+use Pollora\Events\WordPress\Installer\Theme\ThemeUpdated;
 use WP_Upgrader;
 
 /**
@@ -29,8 +37,6 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         'switch_theme',
         'delete_site_transient_update_themes',
         'pre_option_uninstall_plugins',
-        'pre_set_site_transient_update_plugins',
-        '_core_updated_successfully',
     ];
 
     /**
