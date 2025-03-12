@@ -33,12 +33,12 @@ class YoastSeoEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle post meta addition for Yoast SEO.
      *
-     * @param  int  $meta_id  ID of the metadata entry
+     * @param  array|int  $meta_ids  Array of metadata entry IDs or single ID
      * @param  int  $object_id  ID of the object the metadata is for
      * @param  string  $meta_key  Metadata key
      * @param  mixed  $meta_value  Metadata value
      */
-    public function handleAddedPostMeta(int $meta_id, int $object_id, string $meta_key, mixed $meta_value): void
+    public function handleAddedPostMeta($meta_ids, int $object_id, string $meta_key, mixed $meta_value): void
     {
         if (! $this->isYoastSeoMeta($meta_key)) {
             return;
@@ -50,12 +50,12 @@ class YoastSeoEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle post meta update for Yoast SEO.
      *
-     * @param  int  $meta_id  ID of the metadata entry
+     * @param  array|int  $meta_ids  Array of metadata entry IDs or single ID
      * @param  int  $object_id  ID of the object the metadata is for
      * @param  string  $meta_key  Metadata key
      * @param  mixed  $meta_value  Metadata value
      */
-    public function handleUpdatedPostMeta(int $meta_id, int $object_id, string $meta_key, mixed $meta_value): void
+    public function handleUpdatedPostMeta($meta_ids, int $object_id, string $meta_key, mixed $meta_value): void
     {
         if (! $this->isYoastSeoMeta($meta_key)) {
             return;
@@ -67,12 +67,12 @@ class YoastSeoEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle post meta deletion for Yoast SEO.
      *
-     * @param  int  $meta_id  ID of the metadata entry
+     * @param  array|int  $meta_ids  Array of metadata entry IDs or single ID
      * @param  int  $object_id  ID of the object the metadata is for
      * @param  string  $meta_key  Metadata key
      * @param  mixed  $meta_value  Metadata value
      */
-    public function handleDeletedPostMeta(int $meta_id, int $object_id, string $meta_key, mixed $meta_value): void
+    public function handleDeletedPostMeta($meta_ids, int $object_id, string $meta_key, mixed $meta_value): void
     {
         if (! $this->isYoastSeoMeta($meta_key)) {
             return;
