@@ -17,9 +17,9 @@ class WidgetReordered extends WidgetEvent
     /**
      * Constructor.
      *
-     * @param string $sidebarId    The ID of the sidebar where widgets were reordered
-     * @param array  $oldOrder     The previous order of widget IDs
-     * @param array  $newOrder     The new order of widget IDs
+     * @param  string  $sidebarId  The ID of the sidebar where widgets were reordered
+     * @param  array  $oldOrder  The previous order of widget IDs
+     * @param  array  $newOrder  The new order of widget IDs
      */
     public function __construct(
         string $sidebarId,
@@ -28,4 +28,4 @@ class WidgetReordered extends WidgetEvent
     ) {
         parent::__construct('', null, null, $sidebarId);
     }
-} 
+}

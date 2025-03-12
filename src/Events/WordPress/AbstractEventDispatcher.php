@@ -6,7 +6,6 @@ namespace Pollora\Events\WordPress;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Str;
-use Pollora\Support\Facades\Action;
 
 /**
  * Abstract base class for WordPress event dispatchers.
@@ -44,15 +43,15 @@ abstract class AbstractEventDispatcher
     public function registerEvents(): void
     {
         foreach ($this->actions as $action) {
-            add_action($action, [$this, 'handle' . Str::studly($action)], 10, 5);
+            add_action($action, [$this, 'handle'.Str::studly($action)], 10, 5);
         }
     }
 
     /**
      * Dispatch a Laravel event.
      *
-     * @param string $event The event class name
-     * @param array<mixed> $payload The event payload
+     * @param  string  $event  The event class name
+     * @param  array<mixed>  $payload  The event payload
      */
     protected function dispatch(string $event, array $payload = []): void
     {

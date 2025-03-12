@@ -24,4 +24,4 @@ class CommentStatusChanged extends CommentEvent
     ) {
         parent::__construct($comment);
     }
-} 
+}

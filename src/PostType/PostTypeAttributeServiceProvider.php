@@ -8,7 +8,6 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\PostType\Commands\PostTypeMakeCommand;
 use Pollora\PostType\Contracts\PostType;
-use Pollora\Support\Facades\Action;
 use Spatie\StructureDiscoverer\Discover;
 
 /**
@@ -21,8 +20,6 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -38,8 +35,6 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
      * Bootstrap services.
      *
      * Discovers and registers all post types defined using PHP attributes.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -51,16 +46,15 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
      *
      * Discovers all classes implementing the PostType interface, processes their
      * attributes, and registers them with WordPress.
-     *
-     * @return void
      */
     protected function registerPostTypes(): void
     {
         // Check if the directory exists before attempting to discover classes
         $directory = app_path('Cms/PostTypes');
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             // Create the directory if it doesn't exist
             mkdir($directory, 0755, true);
+
             return; // Return early as there are no classes to discover yet
         }
 
@@ -71,7 +65,7 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
             ->get();
 
         // Register each post type with WordPress
-        if (!empty($postTypeClasses)) {
+        if (! empty($postTypeClasses)) {
             foreach ($postTypeClasses as $postTypeClass) {
                 $this->registerPostType($postTypeClass);
             }
@@ -84,9 +78,7 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
      * Creates an instance of the post type class, processes its attributes,
      * and registers it with WordPress using register_post_type().
      *
-     * @param string $postTypeClass The fully qualified class name of the post type
-     *
-     * @return void
+     * @param  string  $postTypeClass  The fully qualified class name of the post type
      */
     protected function registerPostType(string $postTypeClass): void
     {

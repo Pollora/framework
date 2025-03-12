@@ -29,8 +29,8 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle changes to the sidebars_widgets option.
      *
-     * @param array $oldWidgets Previous widget configuration
-     * @param array $newWidgets New widget configuration
+     * @param  array  $oldWidgets  Previous widget configuration
+     * @param  array  $newWidgets  New widget configuration
      */
     public function handleUpdateOptionSidebarsWidgets(array $oldWidgets, array $newWidgets): void
     {
@@ -45,14 +45,14 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle widget option updates.
      *
-     * @param string $optionName Name of the updated option
-     * @param mixed  $oldValue   Previous option value
-     * @param mixed  $newValue   New option value
+     * @param  string  $optionName  Name of the updated option
+     * @param  mixed  $oldValue  Previous option value
+     * @param  mixed  $newValue  New option value
      */
     public function handleUpdatedOption(string $optionName, mixed $oldValue, mixed $newValue): void
     {
         // Only process widget options
-        if (!str_starts_with($optionName, 'widget_')) {
+        if (! str_starts_with($optionName, 'widget_')) {
             return;
         }
 
@@ -63,18 +63,18 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     /**
      * Process changes in widget configurations.
      *
-     * @param array $oldWidgets Previous widget configuration
-     * @param array $newWidgets New widget configuration
+     * @param  array  $oldWidgets  Previous widget configuration
+     * @param  array  $newWidgets  New widget configuration
      */
     protected function handleWidgetChanges(array $oldWidgets, array $newWidgets): void
     {
         foreach ($newWidgets as $sidebarId => $newSidebarWidgets) {
-            if (!is_array($newSidebarWidgets)) {
+            if (! is_array($newSidebarWidgets)) {
                 continue;
             }
 
             $oldSidebarWidgets = $oldWidgets[$sidebarId] ?? [];
-            if (!is_array($oldSidebarWidgets)) {
+            if (! is_array($oldSidebarWidgets)) {
                 $oldSidebarWidgets = [];
             }
 
@@ -82,6 +82,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
             if (count($newSidebarWidgets) === count($oldSidebarWidgets) &&
                 array_diff($newSidebarWidgets, $oldSidebarWidgets)) {
                 $this->dispatch(WidgetReordered::class, [$sidebarId, $oldSidebarWidgets, $newSidebarWidgets]);
+
                 continue;
             }
 
@@ -92,7 +93,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
                     $widgetId,
                     $this->getWidgetName($widgetId),
                     $this->getWidgetTitle($widgetId),
-                    $sidebarId
+                    $sidebarId,
                 ]);
             }
 
@@ -103,7 +104,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
                     $widgetId,
                     $this->getWidgetName($widgetId),
                     $this->getWidgetTitle($widgetId),
-                    $sidebarId
+                    $sidebarId,
                 ]);
             }
         }
@@ -115,29 +116,29 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     /**
      * Process widget instance updates.
      *
-     * @param string $widgetBase Widget base ID
-     * @param mixed  $oldValue   Previous widget settings
-     * @param mixed  $newValue   New widget settings
+     * @param  string  $widgetBase  Widget base ID
+     * @param  mixed  $oldValue  Previous widget settings
+     * @param  mixed  $newValue  New widget settings
      */
     protected function handleWidgetInstanceUpdates(string $widgetBase, mixed $oldValue, mixed $newValue): void
     {
-        if (!is_array($oldValue) || !is_array($newValue)) {
+        if (! is_array($oldValue) || ! is_array($newValue)) {
             return;
         }
 
         foreach ($newValue as $instanceId => $instance) {
-            if (!isset($oldValue[$instanceId])) {
+            if (! isset($oldValue[$instanceId])) {
                 continue;
             }
 
-            $widgetId = $widgetBase . '-' . $instanceId;
+            $widgetId = $widgetBase.'-'.$instanceId;
             $this->dispatch(WidgetUpdated::class, [
                 $widgetId,
                 $oldValue[$instanceId],
                 $instance,
                 $this->getWidgetName($widgetId),
                 $this->getWidgetTitle($widgetId),
-                $this->getWidgetSidebarId($widgetId)
+                $this->getWidgetSidebarId($widgetId),
             ]);
         }
     }
@@ -145,8 +146,8 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle widgets that have been moved between sidebars.
      *
-     * @param array $oldWidgets Previous widget configuration
-     * @param array $newWidgets New widget configuration
+     * @param  array  $oldWidgets  Previous widget configuration
+     * @param  array  $newWidgets  New widget configuration
      */
     protected function handleMovedWidgets(array $oldWidgets, array $newWidgets): void
     {
@@ -160,7 +161,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
                     $oldLocations[$widgetId],
                     $newSidebarId,
                     $this->getWidgetName($widgetId),
-                    $this->getWidgetTitle($widgetId)
+                    $this->getWidgetTitle($widgetId),
                 ]);
             }
         }
@@ -169,34 +170,35 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     /**
      * Get a mapping of widget IDs to their sidebar locations.
      *
-     * @param array $widgets Widget configuration
+     * @param  array  $widgets  Widget configuration
      * @return array<string, string> Map of widget IDs to sidebar IDs
      */
     protected function getWidgetLocations(array $widgets): array
     {
         $locations = [];
         foreach ($widgets as $sidebarId => $sidebarWidgets) {
-            if (!is_array($sidebarWidgets)) {
+            if (! is_array($sidebarWidgets)) {
                 continue;
             }
             foreach ($sidebarWidgets as $widgetId) {
                 $locations[$widgetId] = $sidebarId;
             }
         }
+
         return $locations;
     }
 
     /**
      * Get the name/type of a widget.
      *
-     * @param string $widgetId Widget ID
+     * @param  string  $widgetId  Widget ID
      * @return string|null Widget name or null if not found
      */
     protected function getWidgetName(string $widgetId): ?string
     {
         global $wp_widget_factory;
-        
-        if (!preg_match('/^(.+)-(\d+)$/', $widgetId, $matches)) {
+
+        if (! preg_match('/^(.+)-(\d+)$/', $widgetId, $matches)) {
             return null;
         }
 
@@ -213,18 +215,18 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     /**
      * Get the title of a widget instance.
      *
-     * @param string $widgetId Widget ID
+     * @param  string  $widgetId  Widget ID
      * @return string|null Widget title or null if not found
      */
     protected function getWidgetTitle(string $widgetId): ?string
     {
-        if (!preg_match('/^(.+)-(\d+)$/', $widgetId, $matches)) {
+        if (! preg_match('/^(.+)-(\d+)$/', $widgetId, $matches)) {
             return null;
         }
 
         $widgetBase = $matches[1];
         $instanceId = (int) $matches[2];
-        $instances = get_option('widget_' . $widgetBase);
+        $instances = get_option('widget_'.$widgetBase);
 
         return $instances[$instanceId]['title'] ?? null;
     }
@@ -232,7 +234,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     /**
      * Get the sidebar ID containing a widget.
      *
-     * @param string $widgetId Widget ID
+     * @param  string  $widgetId  Widget ID
      * @return string|null Sidebar ID or null if not found
      */
     protected function getWidgetSidebarId(string $widgetId): ?string
@@ -243,6 +245,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
                 return $sidebarId;
             }
         }
+
         return null;
     }
-} 
+}

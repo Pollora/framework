@@ -59,10 +59,12 @@ use ReflectionMethod;
 #[ShowInRest]
 #[Hierarchical]
 #[ObjectType(['post', 'page'])]
-class TestTaxonomy implements Taxonomy, Attributable
+class TestTaxonomy implements Attributable, Taxonomy
 {
     public array $attributeArgs = [];
+
     protected string $slug = 'test-taxonomy';
+
     protected array $objectType = ['post'];
 
     public function getSlug(): string
@@ -207,14 +209,14 @@ test('AllowHierarchy attribute sets allow_hierarchy parameter', function () {
 
 test('MetaBoxCb attribute sets meta_box_cb parameter', function () {
     $taxonomy = new TestTaxonomy;
-    
+
     // Réinitialiser attributeArgs pour éviter les interférences
     $taxonomy->attributeArgs = [];
-    
+
     // Récupérer les méthodes avec l'attribut MetaBoxCb
     $reflectionClass = new ReflectionClass($taxonomy);
     $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
-    
+
     foreach ($methods as $method) {
         $attributes = $method->getAttributes(MetaBoxCb::class);
         foreach ($attributes as $attribute) {
@@ -222,7 +224,7 @@ test('MetaBoxCb attribute sets meta_box_cb parameter', function () {
             $attributeInstance->handle($taxonomy, $method, $attributeInstance);
         }
     }
-    
+
     expect($taxonomy->attributeArgs['meta_box_cb'])->toBeArray()
         ->toHaveCount(2)
         ->toHaveKey(0)
@@ -234,14 +236,14 @@ test('MetaBoxCb attribute sets meta_box_cb parameter', function () {
 
 test('MetaBoxSanitizeCb attribute sets meta_box_sanitize_cb parameter', function () {
     $taxonomy = new TestTaxonomy;
-    
+
     // Réinitialiser attributeArgs pour éviter les interférences
     $taxonomy->attributeArgs = [];
-    
+
     // Récupérer les méthodes avec l'attribut MetaBoxSanitizeCb
     $reflectionClass = new ReflectionClass($taxonomy);
     $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
-    
+
     foreach ($methods as $method) {
         $attributes = $method->getAttributes(MetaBoxSanitizeCb::class);
         foreach ($attributes as $attribute) {
@@ -249,7 +251,7 @@ test('MetaBoxSanitizeCb attribute sets meta_box_sanitize_cb parameter', function
             $attributeInstance->handle($taxonomy, $method, $attributeInstance);
         }
     }
-    
+
     expect($taxonomy->attributeArgs['meta_box_sanitize_cb'])->toBeArray()
         ->toHaveCount(2)
         ->toHaveKey(0)
@@ -261,14 +263,14 @@ test('MetaBoxSanitizeCb attribute sets meta_box_sanitize_cb parameter', function
 
 test('UpdateCountCallback attribute sets update_count_callback parameter', function () {
     $taxonomy = new TestTaxonomy;
-    
+
     // Réinitialiser attributeArgs pour éviter les interférences
     $taxonomy->attributeArgs = [];
-    
+
     // Récupérer les méthodes avec l'attribut UpdateCountCallback
     $reflectionClass = new ReflectionClass($taxonomy);
     $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
-    
+
     foreach ($methods as $method) {
         $attributes = $method->getAttributes(UpdateCountCallback::class);
         foreach ($attributes as $attribute) {
@@ -276,7 +278,7 @@ test('UpdateCountCallback attribute sets update_count_callback parameter', funct
             $attributeInstance->handle($taxonomy, $method, $attributeInstance);
         }
     }
-    
+
     expect($taxonomy->attributeArgs['update_count_callback'])->toBeArray()
         ->toHaveCount(2)
         ->toHaveKey(0)
@@ -411,4 +413,4 @@ test('getArgs method merges attribute args with withArgs and labels', function (
     expect($args['labels'])->toBeArray()
         ->toHaveKey('name')
         ->toHaveKey('singular_name');
-}); 
+});

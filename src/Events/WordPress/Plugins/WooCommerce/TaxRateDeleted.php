@@ -18,6 +18,5 @@ class TaxRateDeleted extends WooCommerceEvent
      */
     public function __construct(
         public readonly int $taxRateId
-    ) {
-    }
-} 
+    ) {}
+}

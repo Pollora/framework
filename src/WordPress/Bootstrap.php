@@ -93,7 +93,7 @@ class Bootstrap
             define('SHORTINIT', true);
         }
 
-        if (!app()->runningInWpCli()) {
+        if (! app()->runningInWpCli()) {
             require_once ABSPATH.'wp-settings.php';
         }
     }
@@ -123,11 +123,11 @@ class Bootstrap
 
         if ($path !== '' && $path !== '0') {
             $url .= strtr(WP_PATH, ['public/' => '']).ltrim(
-                    Str::of($path)
-                        ->replaceMatches('/[^a-zA-Z0-9\-\_\/\.]/', '')
-                        ->toString(),
-                    '/'
-                );
+                Str::of($path)
+                    ->replaceMatches('/[^a-zA-Z0-9\-\_\/\.]/', '')
+                    ->toString(),
+                '/'
+            );
         }
 
         return $url;
@@ -175,24 +175,24 @@ class Bootstrap
     {
         // Mapping of WordPress database constants to configuration keys
         $constants = [
-            'DB_NAME'     => 'database',
-            'DB_USER'     => 'username',
+            'DB_NAME' => 'database',
+            'DB_USER' => 'username',
             'DB_PASSWORD' => 'password',
             // For DB_HOST, we will append the port if provided
-            'DB_HOST'     => 'host',
-            'DB_CHARSET'  => 'charset',
-            'DB_COLLATE'  => 'collation',
-            'DB_PREFIX'   => 'prefix',
+            'DB_HOST' => 'host',
+            'DB_CHARSET' => 'charset',
+            'DB_COLLATE' => 'collation',
+            'DB_PREFIX' => 'prefix',
         ];
 
         foreach ($constants as $constant => $key) {
-            if (!isset($this->db[$key])) {
+            if (! isset($this->db[$key])) {
                 continue;
             }
 
             // If setting DB_HOST and a port is provided, concatenate host and port
             if ($constant === 'DB_HOST' && isset($this->db['port']) && $this->db['port']) {
-                Constant::queue($constant, $this->db[$key] . ':' . $this->db['port']);
+                Constant::queue($constant, $this->db[$key].':'.$this->db['port']);
             } else {
                 Constant::queue($constant, $this->db[$key]);
             }
@@ -203,21 +203,21 @@ class Bootstrap
 
     private function setLocationConstants(): void
     {
-// Define base paths first to avoid undefined constants
+        // Define base paths first to avoid undefined constants
         $wpPath = 'public/cms/';
-        $basePath = App::basePath() . DIRECTORY_SEPARATOR;
+        $basePath = App::basePath().DIRECTORY_SEPARATOR;
         $contentPath = 'public/content';
 
         // Queue constants
         Constant::queue('WP_PATH', $wpPath);
 
-        if (!defined('ABSPATH')) {
-            Constant::queue('ABSPATH', $basePath . $wpPath);
+        if (! defined('ABSPATH')) {
+            Constant::queue('ABSPATH', $basePath.$wpPath);
         }
 
         Constant::queue('WP_SITEURL', url(str_replace('public/', '', $wpPath)));
         Constant::queue('WP_HOME', url('/'));
-        Constant::queue('WP_CONTENT_DIR', $basePath . $contentPath);
+        Constant::queue('WP_CONTENT_DIR', $basePath.$contentPath);
         Constant::queue('WP_CONTENT_URL', url('content'));
 
         // Apply constants once all are queued

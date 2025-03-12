@@ -25,7 +25,7 @@ class WordPressServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../../config/wordpress.php', 'wordpress'
+            __DIR__.'/../../config/wordpress.php', 'wordpress'
         );
 
         $this->app->singleton(Bootstrap::class);
@@ -50,7 +50,7 @@ class WordPressServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../../config/wordpress.php' => config_path('wordpress.php'),
+                __DIR__.'/../../config/wordpress.php' => config_path('wordpress.php'),
             ], 'wp-config');
 
             $this->commands([

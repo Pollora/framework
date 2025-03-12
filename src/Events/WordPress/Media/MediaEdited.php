@@ -25,4 +25,4 @@ class MediaEdited extends MediaEvent
     ) {
         parent::__construct($attachment);
     }
-} 
+}

@@ -62,7 +62,7 @@ afterAll(function () {
 test('WpRestRoute attribute sets correct properties on class', function () {
     $controller = new TestController;
     AttributeProcessor::process($controller);
-    
+
     expect($controller->namespace)->toBe('api/v1')
         ->and($controller->route)->toBe('/test')
         ->and($controller->classPermission)->toBe('TestPermission');

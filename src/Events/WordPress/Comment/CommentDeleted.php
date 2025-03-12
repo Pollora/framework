@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Comment;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class CommentDeleted extends CommentEvent
-{
-} 
+class CommentDeleted extends CommentEvent {}

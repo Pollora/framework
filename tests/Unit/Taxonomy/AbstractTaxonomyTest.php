@@ -11,9 +11,10 @@ use ReflectionProperty;
 
 class AbstractTaxonomyTest extends TestCase
 {
-    public function testSlugIsGeneratedFromClassName(): void
+    public function test_slug_is_generated_from_class_name(): void
     {
-        $taxonomy = new class extends AbstractTaxonomy {
+        $taxonomy = new class extends AbstractTaxonomy
+        {
             public function getName(): string
             {
                 return parent::getName();
@@ -36,9 +37,10 @@ class AbstractTaxonomyTest extends TestCase
         $this->assertEquals($expectedSlug, $taxonomy->getSlug());
     }
 
-    public function testNameIsGeneratedFromClassName(): void
+    public function test_name_is_generated_from_class_name(): void
     {
-        $taxonomy = new class extends AbstractTaxonomy {
+        $taxonomy = new class extends AbstractTaxonomy
+        {
             public function getName(): string
             {
                 return parent::getName();
@@ -63,9 +65,10 @@ class AbstractTaxonomyTest extends TestCase
         $this->assertEquals($expectedName, $taxonomy->getName());
     }
 
-    public function testPluralNameIsGeneratedFromClassName(): void
+    public function test_plural_name_is_generated_from_class_name(): void
     {
-        $taxonomy = new class extends AbstractTaxonomy {
+        $taxonomy = new class extends AbstractTaxonomy
+        {
             public function getName(): string
             {
                 return parent::getName();
@@ -90,9 +93,10 @@ class AbstractTaxonomyTest extends TestCase
         $this->assertEquals($expectedPluralName, $taxonomy->getPluralName());
     }
 
-    public function testComplexClassNameIsProperlyHumanized(): void
+    public function test_complex_class_name_is_properly_humanized(): void
     {
-        $taxonomy = new class extends AbstractTaxonomy {
+        $taxonomy = new class extends AbstractTaxonomy
+        {
             protected ?string $slug = null;
 
             public function getName(): string
@@ -151,9 +155,10 @@ class AbstractTaxonomyTest extends TestCase
         }
     }
 
-    public function testGetObjectTypeReturnsObjectTypeAttribute(): void
+    public function test_get_object_type_returns_object_type_attribute(): void
     {
-        $taxonomy = new class extends AbstractTaxonomy {
+        $taxonomy = new class extends AbstractTaxonomy
+        {
             public function getName(): string
             {
                 return parent::getName();
@@ -171,13 +176,14 @@ class AbstractTaxonomyTest extends TestCase
         };
 
         $taxonomy->attributeArgs['object_type'] = ['post', 'page', 'product'];
-        
+
         $this->assertEquals(['post', 'page', 'product'], $taxonomy->getObjectType());
     }
 
-    public function testGetObjectTypeReturnsPropertyValueWhenAttributeNotSet(): void
+    public function test_get_object_type_returns_property_value_when_attribute_not_set(): void
     {
-        $taxonomy = new class extends AbstractTaxonomy {
+        $taxonomy = new class extends AbstractTaxonomy
+        {
             public function getName(): string
             {
                 return parent::getName();
@@ -197,7 +203,7 @@ class AbstractTaxonomyTest extends TestCase
         $reflectionProperty = new ReflectionProperty($taxonomy, 'objectType');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($taxonomy, ['custom_post_type']);
-        
+
         $this->assertEquals(['custom_post_type'], $taxonomy->getObjectType());
     }
-} 
+}

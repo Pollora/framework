@@ -21,6 +21,5 @@ abstract class UserSwitchingEvent
      */
     public function __construct(
         public readonly WP_User $user
-    ) {
-    }
-} 
+    ) {}
+}

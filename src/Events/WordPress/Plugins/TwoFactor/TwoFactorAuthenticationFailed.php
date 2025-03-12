@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Events\WordPress\Plugins\TwoFactor;
 
-use WP_Error;
 use WP_User;
 
 /**
@@ -27,4 +26,4 @@ class TwoFactorAuthenticationFailed extends TwoFactorEvent
     ) {
         parent::__construct($user);
     }
-} 
+}

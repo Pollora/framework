@@ -15,12 +15,10 @@ use Pollora\PostType\Contracts\PostType;
  * Implements the PostType interface and provides default implementations
  * for common methods.
  */
-abstract class AbstractPostType implements PostType, Attributable
+abstract class AbstractPostType implements Attributable, PostType
 {
     /**
      * The post type slug.
-     *
-     * @var string|null
      */
     protected ?string $slug = null;
 
@@ -43,11 +41,11 @@ abstract class AbstractPostType implements PostType, Attributable
         if ($this->slug === null) {
             // Get the class name without namespace
             $className = class_basename($this);
-            
+
             // Convert to kebab-case
             return Str::kebab($className);
         }
-        
+
         return $this->slug;
     }
 
@@ -56,20 +54,18 @@ abstract class AbstractPostType implements PostType, Attributable
      *
      * This method can be overridden to provide a custom name.
      * By default, it generates a human-readable name from the class name.
-     *
-     * @return string
      */
     public function getName(): string
     {
         // Get the class name without namespace
         $className = class_basename($this);
-        
+
         // Convert to snake_case first
         $snakeCase = Str::snake($className);
-        
+
         // Then humanize it (convert snake_case to words with spaces and capitalize first letter)
         $humanized = ucfirst(str_replace('_', ' ', $snakeCase));
-        
+
         // Ensure it's singular
         return Str::singular($humanized);
     }
@@ -79,8 +75,6 @@ abstract class AbstractPostType implements PostType, Attributable
      *
      * This method can be overridden to provide a custom plural name.
      * By default, it pluralizes the singular name.
-     *
-     * @return string
      */
     public function getPluralName(): string
     {
@@ -112,25 +106,25 @@ abstract class AbstractPostType implements PostType, Attributable
     {
         $name = $this->getName();
         $pluralName = $this->getPluralName();
-        
+
         // Convert to lowercase for labels where the name is not in first position
         $lowerName = strtolower($name);
         $lowerPluralName = strtolower($pluralName);
-        
+
         return [
             'name' => $pluralName,
             'singular_name' => $name,
             'menu_name' => $pluralName,
-            'all_items' => __('All ' . $lowerPluralName, 'textdomain'),
+            'all_items' => __('All '.$lowerPluralName, 'textdomain'),
             'add_new' => __('Add New', 'textdomain'),
-            'add_new_item' => __('Add New ' . $lowerName, 'textdomain'),
-            'edit_item' => __('Edit ' . $lowerName, 'textdomain'),
-            'new_item' => __('New ' . $lowerName, 'textdomain'),
-            'view_item' => __('View ' . $lowerName, 'textdomain'),
-            'search_items' => __('Search ' . $lowerPluralName, 'textdomain'),
-            'not_found' => __('No ' . $lowerPluralName . ' found', 'textdomain'),
-            'not_found_in_trash' => __('No ' . $lowerPluralName . ' found in trash', 'textdomain'),
-            'parent_item_colon' => __('Parent ' . $lowerName . ':', 'textdomain'),
+            'add_new_item' => __('Add New '.$lowerName, 'textdomain'),
+            'edit_item' => __('Edit '.$lowerName, 'textdomain'),
+            'new_item' => __('New '.$lowerName, 'textdomain'),
+            'view_item' => __('View '.$lowerName, 'textdomain'),
+            'search_items' => __('Search '.$lowerPluralName, 'textdomain'),
+            'not_found' => __('No '.$lowerPluralName.' found', 'textdomain'),
+            'not_found_in_trash' => __('No '.$lowerPluralName.' found in trash', 'textdomain'),
+            'parent_item_colon' => __('Parent '.$lowerName.':', 'textdomain'),
         ];
     }
 
@@ -151,7 +145,6 @@ abstract class AbstractPostType implements PostType, Attributable
                 'labels' => $this->getLabels(),
             ]
         );
-
 
         return $args;
     }

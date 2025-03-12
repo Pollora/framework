@@ -7,8 +7,8 @@ namespace Pollora\Gutenberg;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Gutenberg\Helpers\PatternDataProcessor;
 use Pollora\Gutenberg\Helpers\PatternValidator;
-use Pollora\Gutenberg\Registrars\PatternCategoryRegistrar;
 use Pollora\Gutenberg\Registrars\BlockCategoryRegistrar;
+use Pollora\Gutenberg\Registrars\PatternCategoryRegistrar;
 use Pollora\Gutenberg\Registrars\PatternRegistrar;
 
 /**

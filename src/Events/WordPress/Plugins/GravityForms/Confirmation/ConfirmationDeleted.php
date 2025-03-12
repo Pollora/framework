@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Plugins\GravityForms\Confirmation;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class ConfirmationDeleted extends ConfirmationEvent
-{
-} 
+class ConfirmationDeleted extends ConfirmationEvent {}

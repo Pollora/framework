@@ -25,4 +25,4 @@ class UserSwitchedTo extends UserSwitchingEvent
     ) {
         parent::__construct($user);
     }
-} 
+}

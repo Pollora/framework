@@ -13,7 +13,7 @@ use Pollora\Taxonomy\Contracts\Taxonomy;
  *
  * This class provides a foundation for creating custom taxonomies using attributes.
  */
-abstract class AbstractTaxonomy implements Taxonomy, Attributable
+abstract class AbstractTaxonomy implements Attributable, Taxonomy
 {
     /**
      * Arguments set by attributes.
@@ -24,8 +24,6 @@ abstract class AbstractTaxonomy implements Taxonomy, Attributable
 
     /**
      * The taxonomy slug.
-     *
-     * @var string|null
      */
     protected ?string $slug = null;
 
@@ -40,19 +38,17 @@ abstract class AbstractTaxonomy implements Taxonomy, Attributable
      * Get the slug for the taxonomy.
      *
      * If the slug is not explicitly set, it will be generated from the class name.
-     *
-     * @return string
      */
     public function getSlug(): string
     {
         if ($this->slug === null) {
             // Get the class name without namespace
             $className = class_basename($this);
-            
+
             // Convert to kebab-case
             return Str::kebab($className);
         }
-        
+
         return $this->slug;
     }
 
@@ -61,20 +57,18 @@ abstract class AbstractTaxonomy implements Taxonomy, Attributable
      *
      * This method can be overridden to provide a custom name.
      * By default, it generates a human-readable name from the class name.
-     *
-     * @return string
      */
     public function getName(): string
     {
         // Get the class name without namespace
         $className = class_basename($this);
-        
+
         // Convert to snake_case first
         $snakeCase = Str::snake($className);
-        
+
         // Then humanize it (convert snake_case to words with spaces and capitalize first letter)
         $humanized = ucfirst(str_replace('_', ' ', $snakeCase));
-        
+
         // Ensure it's singular
         return Str::singular($humanized);
     }
@@ -84,8 +78,6 @@ abstract class AbstractTaxonomy implements Taxonomy, Attributable
      *
      * This method can be overridden to provide a custom plural name.
      * By default, it pluralizes the singular name.
-     *
-     * @return string
      */
     public function getPluralName(): string
     {
@@ -103,7 +95,7 @@ abstract class AbstractTaxonomy implements Taxonomy, Attributable
         if (isset($this->attributeArgs['object_type'])) {
             return $this->attributeArgs['object_type'];
         }
-        
+
         // Sinon, utiliser la propriété objectType
         return $this->objectType;
     }
@@ -132,29 +124,29 @@ abstract class AbstractTaxonomy implements Taxonomy, Attributable
     {
         $name = $this->getName();
         $pluralName = $this->getPluralName();
-        
+
         // Convert to lowercase for labels where the name is not in first position
         $lowerName = strtolower($name);
         $lowerPluralName = strtolower($pluralName);
-        
+
         return [
             'name' => $pluralName,
             'singular_name' => $name,
             'menu_name' => $pluralName,
-            'all_items' => __('All ' . $lowerPluralName, 'textdomain'),
-            'edit_item' => __('Edit ' . $lowerName, 'textdomain'),
-            'view_item' => __('View ' . $lowerName, 'textdomain'),
-            'update_item' => __('Update ' . $lowerName, 'textdomain'),
-            'add_new_item' => __('Add New ' . $lowerName, 'textdomain'),
-            'new_item_name' => __('New ' . $lowerName . ' Name', 'textdomain'),
-            'search_items' => __('Search ' . $lowerPluralName, 'textdomain'),
-            'popular_items' => __('Popular ' . $lowerPluralName, 'textdomain'),
-            'separate_items_with_commas' => __('Separate ' . $lowerPluralName . ' with commas', 'textdomain'),
-            'add_or_remove_items' => __('Add or remove ' . $lowerPluralName, 'textdomain'),
-            'choose_from_most_used' => __('Choose from the most used ' . $lowerPluralName, 'textdomain'),
-            'not_found' => __('No ' . $lowerPluralName . ' found', 'textdomain'),
-            'parent_item' => __('Parent ' . $lowerName, 'textdomain'),
-            'parent_item_colon' => __('Parent ' . $lowerName . ':', 'textdomain'),
+            'all_items' => __('All '.$lowerPluralName, 'textdomain'),
+            'edit_item' => __('Edit '.$lowerName, 'textdomain'),
+            'view_item' => __('View '.$lowerName, 'textdomain'),
+            'update_item' => __('Update '.$lowerName, 'textdomain'),
+            'add_new_item' => __('Add New '.$lowerName, 'textdomain'),
+            'new_item_name' => __('New '.$lowerName.' Name', 'textdomain'),
+            'search_items' => __('Search '.$lowerPluralName, 'textdomain'),
+            'popular_items' => __('Popular '.$lowerPluralName, 'textdomain'),
+            'separate_items_with_commas' => __('Separate '.$lowerPluralName.' with commas', 'textdomain'),
+            'add_or_remove_items' => __('Add or remove '.$lowerPluralName, 'textdomain'),
+            'choose_from_most_used' => __('Choose from the most used '.$lowerPluralName, 'textdomain'),
+            'not_found' => __('No '.$lowerPluralName.' found', 'textdomain'),
+            'parent_item' => __('Parent '.$lowerName, 'textdomain'),
+            'parent_item_colon' => __('Parent '.$lowerName.':', 'textdomain'),
         ];
     }
 
@@ -173,4 +165,4 @@ abstract class AbstractTaxonomy implements Taxonomy, Attributable
             ]
         );
     }
-} 
+}

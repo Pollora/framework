@@ -17,9 +17,9 @@ class EntryStatusUpdated extends EntryEvent
     /**
      * Constructor.
      *
-     * @param array $entry The entry data
-     * @param string $status The new status
-     * @param string $previousStatus The previous status
+     * @param  array  $entry  The entry data
+     * @param  string  $status  The new status
+     * @param  string  $previousStatus  The previous status
      */
     public function __construct(
         array $entry,
@@ -28,4 +28,4 @@ class EntryStatusUpdated extends EntryEvent
     ) {
         parent::__construct($entry);
     }
-} 
+}

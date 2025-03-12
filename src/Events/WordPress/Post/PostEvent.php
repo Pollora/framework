@@ -21,6 +21,5 @@ abstract class PostEvent
      */
     public function __construct(
         public readonly WP_Post $post
-    ) {
-    }
-} 
+    ) {}
+}

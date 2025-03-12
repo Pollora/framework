@@ -41,9 +41,9 @@ class OptionEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle option update.
      *
-     * @param string $option Option name
-     * @param mixed $oldValue Old option value
-     * @param mixed $value New option value
+     * @param  string  $option  Option name
+     * @param  mixed  $oldValue  Old option value
+     * @param  mixed  $value  New option value
      */
     public function handleUpdatedOption(string $option, mixed $oldValue, mixed $value): void
     {
@@ -63,8 +63,7 @@ class OptionEventDispatcher extends AbstractEventDispatcher
     /**
      * Check if an option should be ignored.
      *
-     * @param string $option Option name to check
-     * @return bool
+     * @param  string  $option  Option name to check
      */
     protected function shouldIgnoreOption(string $option): bool
     {
@@ -76,4 +75,4 @@ class OptionEventDispatcher extends AbstractEventDispatcher
 
         return false;
     }
-} 
+}

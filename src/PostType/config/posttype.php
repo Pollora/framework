@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -23,4 +25,4 @@ return [
     |
     */
     'provider' => Pollora\PostType\PostTypeAttributeServiceProvider::class,
-]; 
+];

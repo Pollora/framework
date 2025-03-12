@@ -38,8 +38,6 @@ class PostTypeMakeCommand extends GeneratorCommand
 
     /**
      * Get the stub file for the generator.
-     *
-     * @return string
      */
     protected function getStub(): string
     {
@@ -50,7 +48,6 @@ class PostTypeMakeCommand extends GeneratorCommand
      * Get the default namespace for the class.
      *
      * @param  string  $rootNamespace
-     * @return string
      */
     protected function getDefaultNamespace($rootNamespace): string
     {
@@ -68,7 +65,7 @@ class PostTypeMakeCommand extends GeneratorCommand
     {
         // Create the directory if it doesn't exist
         $directory = app_path('Cms/PostTypes');
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
             $this->components->info(sprintf('Directory [%s] created successfully.', $directory));
         }
@@ -78,8 +75,6 @@ class PostTypeMakeCommand extends GeneratorCommand
 
     /**
      * Get the console command arguments.
-     *
-     * @return array
      */
     protected function getArguments(): array
     {
@@ -93,14 +88,13 @@ class PostTypeMakeCommand extends GeneratorCommand
      *
      * @param  string  $stub
      * @param  string  $name
-     * @return string
      */
     protected function replaceClass($stub, $name): string
     {
         $stub = parent::replaceClass($stub, $name);
 
         $className = class_basename($name);
-        
+
         // Replace placeholders in the stub
         $stub = str_replace('DummySlug', $this->getSlugFromClassName($className), $stub);
         $stub = str_replace('DummyName', $this->getNameFromClassName($className), $stub);
@@ -111,9 +105,6 @@ class PostTypeMakeCommand extends GeneratorCommand
 
     /**
      * Get the slug from the class name.
-     *
-     * @param  string  $className
-     * @return string
      */
     protected function getSlugFromClassName(string $className): string
     {
@@ -122,9 +113,6 @@ class PostTypeMakeCommand extends GeneratorCommand
 
     /**
      * Get the singular name from the class name.
-     *
-     * @param  string  $className
-     * @return string
      */
     protected function getNameFromClassName(string $className): string
     {
@@ -133,19 +121,16 @@ class PostTypeMakeCommand extends GeneratorCommand
 
     /**
      * Get the plural name from the class name.
-     *
-     * @param  string  $className
-     * @return string
      */
     protected function getPluralNameFromClassName(string $className): string
     {
         $name = $this->getNameFromClassName($className);
-        
+
         // Simple pluralization (not comprehensive)
         if (substr($name, -1) === 'y') {
-            return substr($name, 0, -1) . 'ies';
+            return substr($name, 0, -1).'ies';
         }
-        
-        return $name . 's';
+
+        return $name.'s';
     }
-} 
+}

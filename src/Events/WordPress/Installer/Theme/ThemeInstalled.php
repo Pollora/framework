@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Installer\Theme;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class ThemeInstalled extends ThemeEvent
-{
-} 
+class ThemeInstalled extends ThemeEvent {}

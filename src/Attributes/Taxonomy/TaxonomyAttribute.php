@@ -51,4 +51,4 @@ abstract class TaxonomyAttribute implements HandlesAttributes
      * @param  Taxonomy  $taxonomy  The taxonomy instance to configure
      */
     abstract protected function configure(Taxonomy $taxonomy): void;
-} 
+}

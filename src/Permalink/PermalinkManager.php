@@ -57,13 +57,12 @@ class PermalinkManager
      * If the canonical URL corresponds to the homepage with a GET parameter,
      * the URL is returned as-is to avoid issues when removing the trailing slash.
      *
-     * @param string|null $canonicalUrl The canonical URL to process.
-     *
+     * @param  string|null  $canonicalUrl  The canonical URL to process.
      * @return string|null The processed canonical URL.
      */
     public function handleCanonicalRedirect(?string $canonicalUrl): ?string
     {
-        if (null === $canonicalUrl) {
+        if ($canonicalUrl === null) {
             return null;
         }
 
@@ -78,12 +77,12 @@ class PermalinkManager
         ) {
             // Normalize paths with a default value of "/".
             $canonicalPath = $canonicalParts['path'] ?? '/';
-            $homePath      = $homeParts['path'] ?? '/';
+            $homePath = $homeParts['path'] ?? '/';
 
             // Compare paths without considering the trailing slash.
             if (rtrim($canonicalPath, '/') === rtrim($homePath, '/')) {
                 // If a GET parameter is present, return the original URL.
-                if (!empty($canonicalParts['query'])) {
+                if (! empty($canonicalParts['query'])) {
                     return $canonicalUrl;
                 }
             }

@@ -23,6 +23,5 @@ class OrderStatusChanged extends WooCommerceEvent
         public readonly WC_Order $order,
         public readonly string $oldStatus,
         public readonly string $newStatus
-    ) {
-    }
-} 
+    ) {}
+}

@@ -17,12 +17,11 @@ abstract class AttributeEvent extends WooCommerceEvent
     /**
      * Constructor.
      *
-     * @param int $attributeId The ID of the attribute
-     * @param array<string, mixed> $attribute The attribute data
+     * @param  int  $attributeId  The ID of the attribute
+     * @param  array<string, mixed>  $attribute  The attribute data
      */
     public function __construct(
         public readonly int $attributeId,
         public readonly array $attribute
-    ) {
-    }
-} 
+    ) {}
+}

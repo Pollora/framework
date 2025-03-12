@@ -11,6 +11,4 @@ namespace Pollora\Events\WordPress\Plugins\WooCommerce;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class TaxRateUpdated extends TaxRateEvent
-{
-} 
+class TaxRateUpdated extends TaxRateEvent {}

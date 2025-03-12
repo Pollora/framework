@@ -24,9 +24,6 @@ class ConstantManager
 
     /**
      * Queue a constant for definition
-     *
-     * @param string $key
-     * @param mixed $value
      */
     public function queue(string $key, mixed $value): void
     {
@@ -39,13 +36,10 @@ class ConstantManager
 
     /**
      * Retrieve a queued constant
-     *
-     * @param string $key
-     * @return mixed
      */
     public function get(string $key): mixed
     {
-        if (!$this->constants->has($key)) {
+        if (! $this->constants->has($key)) {
             throw new UndefinedConstantException("Constant '$key' has not been queued.");
         }
 
@@ -65,9 +59,6 @@ class ConstantManager
 
     /**
      * Check if a constant is already defined
-     *
-     * @param string $key
-     * @return bool
      */
     protected function isDefined(string $key): bool
     {

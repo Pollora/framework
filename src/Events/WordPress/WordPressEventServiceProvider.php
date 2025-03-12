@@ -6,19 +6,19 @@ namespace Pollora\Events\WordPress;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Events\WordPress\Blog\BlogEventDispatcher;
+use Pollora\Events\WordPress\Comment\CommentEventDispatcher;
+use Pollora\Events\WordPress\Installer\InstallerEventDispatcher;
 use Pollora\Events\WordPress\Media\MediaEventDispatcher;
+use Pollora\Events\WordPress\Menu\MenuEventDispatcher;
+use Pollora\Events\WordPress\Option\OptionEventDispatcher;
+use Pollora\Events\WordPress\Plugins\TwoFactor\TwoFactorEventDispatcher;
+use Pollora\Events\WordPress\Plugins\UserSwitching\UserSwitchingEventDispatcher;
+use Pollora\Events\WordPress\Plugins\WooCommerce\WooCommerceEventDispatcher;
+use Pollora\Events\WordPress\Plugins\YoastSeo\YoastSeoEventDispatcher;
 use Pollora\Events\WordPress\Post\PostEventDispatcher;
 use Pollora\Events\WordPress\Taxonomy\TaxonomyEventDispatcher;
 use Pollora\Events\WordPress\User\UserEventDispatcher;
-use Pollora\Events\WordPress\Menu\MenuEventDispatcher;
 use Pollora\Events\WordPress\Widget\WidgetEventDispatcher;
-use Pollora\Events\WordPress\Option\OptionEventDispatcher;
-use Pollora\Events\WordPress\Comment\CommentEventDispatcher;
-use Pollora\Events\WordPress\Installer\InstallerEventDispatcher;
-use Pollora\Events\WordPress\Plugins\WooCommerce\WooCommerceEventDispatcher;
-use Pollora\Events\WordPress\Plugins\YoastSeo\YoastSeoEventDispatcher;
-use Pollora\Events\WordPress\Plugins\TwoFactor\TwoFactorEventDispatcher;
-use Pollora\Events\WordPress\Plugins\UserSwitching\UserSwitchingEventDispatcher;
 
 /**
  * Service provider responsible for registering WordPress event dispatchers.

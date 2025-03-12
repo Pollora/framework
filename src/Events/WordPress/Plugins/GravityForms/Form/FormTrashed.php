@@ -13,6 +13,4 @@ use Pollora\Events\WordPress\Plugins\GravityForms\GravityFormsEvent;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class FormTrashed extends GravityFormsEvent
-{
-} 
+class FormTrashed extends GravityFormsEvent {}

@@ -10,9 +10,10 @@ use Pollora\PostType\AbstractPostType;
 
 class AbstractPostTypeTest extends TestCase
 {
-    public function testSlugIsGeneratedFromClassName(): void
+    public function test_slug_is_generated_from_class_name(): void
     {
-        $postType = new class extends AbstractPostType {
+        $postType = new class extends AbstractPostType
+        {
             public function getName(): string
             {
                 return parent::getName();
@@ -35,9 +36,10 @@ class AbstractPostTypeTest extends TestCase
         $this->assertEquals($expectedSlug, $postType->getSlug());
     }
 
-    public function testNameIsGeneratedFromClassName(): void
+    public function test_name_is_generated_from_class_name(): void
     {
-        $postType = new class extends AbstractPostType {
+        $postType = new class extends AbstractPostType
+        {
             public function getName(): string
             {
                 return parent::getName();
@@ -62,9 +64,10 @@ class AbstractPostTypeTest extends TestCase
         $this->assertEquals($expectedName, $postType->getName());
     }
 
-    public function testPluralNameIsGeneratedFromClassName(): void
+    public function test_plural_name_is_generated_from_class_name(): void
     {
-        $postType = new class extends AbstractPostType {
+        $postType = new class extends AbstractPostType
+        {
             public function getName(): string
             {
                 return parent::getName();
@@ -89,7 +92,7 @@ class AbstractPostTypeTest extends TestCase
         $this->assertEquals($expectedPluralName, $postType->getPluralName());
     }
 
-    public function testComplexClassNameIsProperlyHumanized(): void
+    public function test_complex_class_name_is_properly_humanized(): void
     {
         // Test with different class names
         $testCases = [
@@ -130,4 +133,4 @@ class AbstractPostTypeTest extends TestCase
             $this->assertEquals($expected['plural'], $pluralName);
         }
     }
-} 
+}

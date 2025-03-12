@@ -41,4 +41,4 @@ interface PostType extends Attributable
      * @return array<string, mixed> Additional arguments
      */
     public function withArgs(): array;
-} 
+}

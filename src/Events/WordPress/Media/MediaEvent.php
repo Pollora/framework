@@ -21,6 +21,5 @@ abstract class MediaEvent
      */
     public function __construct(
         public readonly WP_Post $attachment
-    ) {
-    }
-} 
+    ) {}
+}

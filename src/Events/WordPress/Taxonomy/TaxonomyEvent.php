@@ -21,6 +21,5 @@ abstract class TaxonomyEvent
      */
     public function __construct(
         public readonly WP_Term $term
-    ) {
-    }
-} 
+    ) {}
+}

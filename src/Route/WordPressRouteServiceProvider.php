@@ -40,8 +40,6 @@ class WordPressRouteServiceProvider extends ServiceProvider
      * - First argument: WordPress condition (e.g., 'single', 'page')
      * - Last argument: Callback function or controller action
      * - Middle arguments (optional): Parameters for the WordPress condition
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -49,36 +47,36 @@ class WordPressRouteServiceProvider extends ServiceProvider
             if (empty($args)) {
                 throw new \InvalidArgumentException('The wordpress route requires at least a condition and a callback.');
             }
-            
+
             // First argument is the condition
             $uri = $condition;
-            
+
             // Last argument is always the callback
             $action = $args[count($args) - 1];
-            
+
             // Create the route
             $route = Route::addRoute(Router::$verbs, $uri, $action);
             $route->setIsWordPressRoute(true);
-            
+
             // Extract condition parameters (all arguments except the last one)
             $conditionParams = [];
             if (count($args) > 1) {
                 $conditionParams = array_slice($args, 0, count($args) - 1);
             }
-            
+
             // Set condition parameters
             $route->setConditionParameters($conditionParams);
-            
+
             // Add WordPress middleware
             $route->middleware([
                 WordPressBindings::class,
                 WordPressHeaders::class,
                 WordPressBodyClass::class,
             ]);
-            
+
             return $route;
         });
-        
+
         // Add a shortcut 'wp' for the 'wordpress' macro
         Route::macro('wp', function (string $condition, ...$args) {
             return Route::wordpress($condition, ...$args);

@@ -11,6 +11,4 @@ namespace Pollora\Events\WordPress\Post;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class PostTrashed extends PostEvent
-{
-} 
+class PostTrashed extends PostEvent {}

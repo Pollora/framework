@@ -8,7 +8,6 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Taxonomy\Commands\TaxonomyMakeCommand;
 use Pollora\Taxonomy\Contracts\Taxonomy;
-use Pollora\Support\Facades\Action;
 use Spatie\StructureDiscoverer\Discover;
 
 /**
@@ -21,8 +20,6 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -38,8 +35,6 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
      * Bootstrap services.
      *
      * Discovers and registers all taxonomies defined using PHP attributes.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -51,16 +46,15 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
      *
      * Discovers all classes implementing the Taxonomy interface, processes their
      * attributes, and registers them with WordPress.
-     *
-     * @return void
      */
     protected function registerTaxonomies(): void
     {
         // Check if the directory exists before attempting to discover classes
         $directory = app_path('Cms/Taxonomies');
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             // Create the directory if it doesn't exist
             mkdir($directory, 0755, true);
+
             return; // Return early as there are no classes to discover yet
         }
 
@@ -71,7 +65,7 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
             ->get();
 
         // Register each taxonomy with WordPress
-        if (!empty($taxonomyClasses)) {
+        if (! empty($taxonomyClasses)) {
             foreach ($taxonomyClasses as $taxonomyClass) {
                 $this->registerTaxonomy($taxonomyClass);
             }
@@ -84,9 +78,7 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
      * Creates an instance of the taxonomy class, processes its attributes,
      * and registers it with WordPress using register_taxonomy().
      *
-     * @param string $taxonomyClass The fully qualified class name of the taxonomy
-     *
-     * @return void
+     * @param  string  $taxonomyClass  The fully qualified class name of the taxonomy
      */
     protected function registerTaxonomy(string $taxonomyClass): void
     {
@@ -104,4 +96,4 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
             );
         }
     }
-} 
+}
