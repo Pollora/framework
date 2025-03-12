@@ -9,7 +9,7 @@ namespace Pollora\Hook\Contracts;
  *
  * Defines the contract for applying WordPress filters.
  */
-interface FilterInterface extends HookInterface
+interface Filter extends HookInterface
 {
     /**
      * Apply a WordPress filter hook.

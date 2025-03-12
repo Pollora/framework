@@ -23,8 +23,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected $type;
 
-    use HookBootstrap;
-
     /**
      * Get the stub file for the generator.
      *
@@ -32,8 +30,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        $type = strtolower($this->type);
-
         return $this->resolveStubPath('/stubs/hook-attribute.stub');
     }
 
@@ -58,7 +54,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\\Hooks';
+        return $rootNamespace.'\\Cms\\Hooks';
     }
 
     /**
@@ -107,15 +103,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
             return;
         }
 
-        $result = parent::handle();
-
-        if ($result === false) {
-            return $result;
-        }
-
-        $this->addHookToBootstrap($this->qualifyClass($className));
-
-        return $result;
+        return parent::handle();
     }
 
     /**
@@ -147,17 +135,8 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
         $existingContent = File::get($path);
 
-        // Check if the necessary attribute is already imported
-        $type = $this->type;
-        $attributeNamespace = "Pollora\\Attributes\\{$type}";
-        $escapedNamespace = preg_quote($attributeNamespace, '/');
-        if (! preg_match("/use {$escapedNamespace};/", $existingContent)) {
-            // Find the last "use" statement and add the necessary attribute import
-            $lastUsePosition = strrpos($existingContent, 'use ');
-            $useStatements = substr($existingContent, 0, $lastUsePosition);
-            $remainingContent = substr($existingContent, $lastUsePosition);
-            $existingContent = $useStatements."use {$attributeNamespace};\n".$remainingContent;
-        }
+        // Ensure all required attribute imports are present
+        $existingContent = $this->ensureAttributeImports($existingContent);
 
         $content = $this->makeReplacements(File::get($stub));
 
@@ -168,9 +147,39 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
         $lastClosingBracePosition = strrpos($existingContent, '}');
 
-        $newContent = substr($existingContent, 0, $lastClosingBracePosition)."\n".$content."\n".substr($existingContent, $lastClosingBracePosition);
+        $newContent = substr($existingContent, 0, $lastClosingBracePosition)."\n".$content.substr($existingContent, $lastClosingBracePosition);
 
         File::put($path, $newContent);
+    }
+
+    /**
+     * Ensure all required attribute imports are present in the file content.
+     *
+     * This method checks for the presence of all necessary attribute imports
+     * and adds them if they are missing. It maintains the existing imports
+     * while adding any new ones that are required.
+     */
+    protected function ensureAttributeImports(string $content): string
+    {
+        $requiredImports = [
+            'Pollora\Attributes\Action',
+            'Pollora\Attributes\Filter',
+        ];
+
+        foreach ($requiredImports as $import) {
+            $escapedImport = preg_quote($import, '/');
+            if (! preg_match("/use {$escapedImport};/", $content)) {
+                // Find the last "use" statement
+                $lastUsePosition = strrpos($content, 'use ');
+                if ($lastUsePosition !== false) {
+                    $useStatements = substr($content, 0, $lastUsePosition);
+                    $remainingContent = substr($content, $lastUsePosition);
+                    $content = $useStatements."use {$import};\n".$remainingContent;
+                }
+            }
+        }
+
+        return $content;
     }
 
     /**
@@ -183,16 +192,16 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         $hook = $this->getDefaultOption('hook');
         $priority = $this->getDefaultOption('priority');
         $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
-        $type = $this->type;
+        $hookType = $this->type;
 
-        $returnType = $type === 'Action' ? ': void' : '';
-        $arg = $type === 'Filter' ? '$arg' : '';
-        $return = $type === 'Filter' ? "\n".'        return $arg;' : '';
+        $returnType = $hookType === 'Action' ? ': void' : '';
+        $arg = $hookType === 'Filter' ? '$arg' : '';
+        $return = $hookType === 'Filter' ? "\n".'        return $arg;' : '';
 
         return str_replace(
-            ['{{ type }}', '{{ hook }}', '{{ priority }}', '{{ hookMethodName }}',
+            ['{{ hookType }}', '{{ hook }}', '{{ priority }}', '{{ hookMethodName }}',
                 '{{ arg }}', '{{ returnType }}', '{{ return }}'],
-            [$type, $hook, $priority, $hookMethodName, $arg, $returnType, $return],
+            [$hookType, $hook, ", priority:{$priority}", $hookMethodName, $arg, $returnType, $return],
             $stub
         );
     }

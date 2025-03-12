@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\WordPress\Config;
 
 use Illuminate\Support\Collection;
-use Pollora\WordPress\Exceptions\ConstantAlreadyDefinedException;
 use Pollora\WordPress\Exceptions\UndefinedConstantException;
 
 class ConstantManager
@@ -28,7 +27,7 @@ class ConstantManager
     public function queue(string $key, mixed $value): void
     {
         if ($this->isDefined($key)) {
-            throw new ConstantAlreadyDefinedException("Constant '$key' is already defined.");
+            return;
         }
 
         $this->constants->put($key, $value);

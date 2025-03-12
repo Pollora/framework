@@ -6,9 +6,11 @@ namespace Pollora\Route;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Http\Controllers\FrontendController;
 use Pollora\Route\Middleware\WordPressBindings;
 use Pollora\Route\Middleware\WordPressBodyClass;
 use Pollora\Route\Middleware\WordPressHeaders;
+use Pollora\Route\Middleware\WordPressShutdown;
 
 /**
  * Service provider for WordPress-specific routing functionalities.
@@ -18,6 +20,14 @@ use Pollora\Route\Middleware\WordPressHeaders;
  */
 class WordPressRouteServiceProvider extends ServiceProvider
 {
+    /**
+     * The priority level of the service provider.
+     * A lower priority means it will be loaded later.
+     *
+     * @var int
+     */
+    public $priority = -99;
+
     /**
      * Register any application services.
      */
@@ -43,9 +53,10 @@ class WordPressRouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Route::macro('wordpress', function (string $condition, ...$args) {
+        // Add the wpMatch macro for specific HTTP verbs
+        Route::macro('wpMatch', function (array|string $methods, string $condition, ...$args) {
             if (empty($args)) {
-                throw new \InvalidArgumentException('The wordpress route requires at least a condition and a callback.');
+                throw new \InvalidArgumentException('The wp route requires at least a condition and a callback.');
             }
 
             // First argument is the condition
@@ -54,8 +65,8 @@ class WordPressRouteServiceProvider extends ServiceProvider
             // Last argument is always the callback
             $action = $args[count($args) - 1];
 
-            // Create the route
-            $route = Route::addRoute(Router::$verbs, $uri, $action);
+            // Create the route with specific HTTP methods
+            $route = Route::addRoute($methods, $uri, $action);
             $route->setIsWordPressRoute(true);
 
             // Extract condition parameters (all arguments except the last one)
@@ -72,14 +83,35 @@ class WordPressRouteServiceProvider extends ServiceProvider
                 WordPressBindings::class,
                 WordPressHeaders::class,
                 WordPressBodyClass::class,
+                WordPressShutdown::class,
             ]);
 
             return $route;
         });
 
-        // Add a shortcut 'wp' for the 'wordpress' macro
+        // Add the wp macro as a shortcut for all HTTP verbs
         Route::macro('wp', function (string $condition, ...$args) {
-            return Route::wordpress($condition, ...$args);
+            return Route::wpMatch(Router::$verbs, $condition, ...$args);
         });
+
+        $this->app->booted(function () {
+            $this->bootFallbackRoute();
+        });
+    }
+
+    /**
+     * Register the WordPress fallback route after all other routes.
+     */
+    protected function bootFallbackRoute(): void
+    {
+        // Add a catch-all route for WordPress templates
+        Route::any('{any}', [FrontendController::class, 'handle'])
+            ->where('any', '.*')
+            ->middleware([
+                WordPressBindings::class,
+                WordPressHeaders::class,
+                WordPressBodyClass::class,
+                WordPressShutdown::class,
+            ]);
     }
 }

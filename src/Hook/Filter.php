@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Hook;
 
-use Pollora\Hook\Contracts\FilterInterface;
+use Pollora\Hook\Contracts\Filter as FilterInterface;
 
 /**
  * WordPress Filter Hook implementation.

@@ -9,7 +9,7 @@ namespace Pollora\Hook\Contracts;
  *
  * Defines the contract for executing WordPress actions.
  */
-interface ActionInterface extends HookInterface
+interface Action extends HookInterface
 {
     /**
      * Execute a WordPress action hook.

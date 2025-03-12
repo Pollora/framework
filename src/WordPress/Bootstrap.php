@@ -16,8 +16,14 @@ class Bootstrap
 {
     use QueryTrait;
 
+    /**
+     * Database configuration array.
+     */
     private array $db;
 
+    /**
+     * Register Bootstrap configurations.
+     */
     public function register(): void
     {
         $this->maybeForceUrlScheme();
@@ -25,6 +31,9 @@ class Bootstrap
         $this->ensureAddFilterExists();
     }
 
+    /**
+     * Boot WordPress and set up configurations.
+     */
     public function boot(): void
     {
         $this->db = DB::getConfig(null);
@@ -38,12 +47,15 @@ class Bootstrap
             define('WP_INSTALLING', true);
         }
         if (! app()->runningInConsole() && $this->isWordPressInstalled()) {
-            $this->setupWordPressQuery();
+            $this->runWp();
         }
 
         $this->setupActionHooks();
     }
 
+    /**
+     * Ensure the WordPress add_filter function is available.
+     */
     private function ensureAddFilterExists(): void
     {
         if (! function_exists('add_filter')) {
@@ -51,6 +63,9 @@ class Bootstrap
         }
     }
 
+    /**
+     * Load WordPress settings and initialize core global variables.
+     */
     private function loadWordPressSettings(): void
     {
         /**
@@ -98,6 +113,9 @@ class Bootstrap
         }
     }
 
+    /**
+     * Set up necessary WordPress action hooks.
+     */
     private function setupActionHooks(): void
     {
         if (app()->runningInWpCli()) {
@@ -107,6 +125,9 @@ class Bootstrap
         }
     }
 
+    /**
+     * Force HTTPS scheme if the site is secured.
+     */
     private function maybeForceUrlScheme(): void
     {
         if (is_secured()) {
@@ -114,6 +135,14 @@ class Bootstrap
         }
     }
 
+    /**
+     * Rewrite network URL based on the given parameters.
+     *
+     * @param  string  $url  The original URL.
+     * @param  string  $path  The requested path.
+     * @param  string  $scheme  The scheme (http, https, or relative).
+     * @return string The rewritten URL.
+     */
     public function rewriteNetworkUrl(string $url, string $path, string $scheme): string
     {
         $url = $scheme !== 'relative' ? set_url_scheme(
@@ -133,6 +162,9 @@ class Bootstrap
         return $url;
     }
 
+    /**
+     * Set the WordPress configuration constants.
+     */
     private function setConfig(): void
     {
         $this->defineWordPressConstants();
@@ -143,9 +175,14 @@ class Bootstrap
         }
     }
 
+    /**
+     * Define WordPress constants.
+     */
     private function defineWordPressConstants(): void
     {
         // Define default constants
+        Constant::queue('WP_USE_THEMES', ! app()->runningInConsole() && ! str_starts_with(request()->server('REQUEST_URI'), '/cms/'));
+
         Constant::queue('WP_AUTO_UPDATE_CORE', false);
         Constant::queue('DISALLOW_FILE_MODS', true);
         Constant::queue('DISALLOW_FILE_EDIT', true);
@@ -166,11 +203,17 @@ class Bootstrap
         Constant::apply();
     }
 
+    /**
+     * Fix network URL settings.
+     */
     public function fixNetworkUrl(): void
     {
         Action::add('network_site_url', $this->rewriteNetworkUrl(...), 10, 3);
     }
 
+    /**
+     * Set WordPress database constants based on Laravel configuration.
+     */
     private function setDatabaseConstants(): void
     {
         // Mapping of WordPress database constants to configuration keys

@@ -197,7 +197,7 @@ class Route extends IlluminateRoute
             }
         }
 
-        return '';
+        return $condition;
     }
 
     /**

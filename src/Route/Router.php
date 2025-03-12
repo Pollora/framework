@@ -89,9 +89,8 @@ class Router extends IlluminateRouter
      */
     public function setConditions(array $conditions = []): void
     {
-        $config = $this->container->make('config');
         $this->conditions = array_merge(
-            $config->get('wordpress.conditions', []),
+            $this->container->make('config')->get('wordpress.conditions', []),
             $conditions
         );
     }
