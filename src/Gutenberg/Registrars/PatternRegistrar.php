@@ -53,8 +53,15 @@ class PatternRegistrar
                 continue;
             }
 
-            collect(File::glob($dirpath.'*'.self::PATTERN_FILE_EXTENSION))
-                ->each(fn ($file) => $this->registerPattern($file, $theme));
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dirpath, \RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->isFile() && $file->getExtension() === 'php') {
+                    $this->registerPattern($file->getPathname(), $theme);
+                }
+            }
         }
     }
 
@@ -68,10 +75,9 @@ class PatternRegistrar
         $stylesheet = get_stylesheet();
         $template = get_template();
 
-        return collect([$stylesheet, $template])
-            ->unique()
-            ->map(fn ($theme) => wp_get_theme($theme))
-            ->all();
+        return $stylesheet === $template
+            ? [wp_get_theme($stylesheet)]
+            : [wp_get_theme($stylesheet), wp_get_theme($template)];
     }
 
     /**
