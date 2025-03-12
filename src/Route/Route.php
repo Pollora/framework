@@ -53,6 +53,47 @@ class Route extends IlluminateRoute
     protected bool $isWordPressRoute = false;
 
     /**
+     * Initialize the parameters array if it doesn't exist yet.
+     * This prevents "Route is not bound" errors when accessing parameters.
+     *
+     * @return array The initialized parameters array
+     */
+    protected function initializeParameters(): array
+    {
+        if (!isset($this->parameters)) {
+            $this->parameters = [];
+        }
+        
+        return $this->parameters;
+    }
+
+    /**
+     * Set a parameter to the given value.
+     *
+     * @param  string  $name
+     * @param  string|object|null  $value
+     * @return void
+     */
+    public function setParameter($name, $value)
+    {
+        // Initialize parameters if they don't exist yet
+        $this->initializeParameters();
+        
+        $this->parameters[$name] = $value;
+    }
+
+    /**
+     * Get the key / value list of parameters for the route.
+     *
+     * @return array
+     */
+    public function parameters()
+    {
+        // Initialize parameters if they don't exist yet
+        return $this->initializeParameters();
+    }
+
+    /**
      * Determine if the route matches the given request.
      *
      * @param  Request  $request  The HTTP request to match against

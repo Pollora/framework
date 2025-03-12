@@ -8,6 +8,7 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Router as IlluminateRouter;
 use Pollora\Route\Bindings\NullableWpPost;
+use Pollora\Route\Route;
 
 /**
  * Extended Router that provides WordPress-specific routing functionality.
@@ -61,23 +62,73 @@ class Router extends IlluminateRouter
      * a dedicated admin route.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return Route|AdminRoute
+     * @return \Illuminate\Routing\Route
      */
     protected function findRoute($request)
     {
+        // Handle WordPress admin requests
         if ($this->isWordPressAdminRequest()) {
             return $this->createAdminRoute($request);
         }
 
-        $route = parent::findRoute($request);
-
-        // Si la route trouvée est une route WordPress et a une condition,
-        // ajouter les liaisons WordPress
-        if ($route instanceof Route && $route->isWordPressRoute() && $route->hasCondition()) {
-            $this->addWordPressBindings($route);
+        try {
+            // First try to find a standard Laravel route
+            $laravelRoute = parent::findRoute($request);
+            
+            // If it's a WordPress route, check if there's a more specific route
+            if ($laravelRoute instanceof Route && $laravelRoute->isWordPressRoute()) {
+                // Get all WordPress routes
+                $wpRoutes = [];
+                foreach ($this->routes->getRoutes() as $route) {
+                    if ($route instanceof Route && $route->isWordPressRoute()) {
+                        $wpRoutes[] = $route;
+                    }
+                }
+                
+                // Check which WordPress routes match the current request
+                $matchingRoutes = [];
+                foreach ($wpRoutes as $route) {
+                    $condition = $route->getCondition();
+                    if (function_exists($condition)) {
+                        // Directly check if the WordPress condition is satisfied
+                        $params = $route->getConditionParameters();
+                        if (call_user_func_array($condition, $params)) {
+                            $matchingRoutes[$condition] = $route;
+                        }
+                    }
+                }
+                
+                // If routes match, find the most specific one
+                if (!empty($matchingRoutes)) {
+                    // Get the WordPress template hierarchy order
+                    $hierarchyOrder = \Pollora\Theme\TemplateHierarchy::getHierarchyOrder();
+                    
+                    // Go through the hierarchy order to find the most specific route
+                    foreach ($hierarchyOrder as $condition) {
+                        if (isset($matchingRoutes[$condition])) {
+                            $route = $matchingRoutes[$condition];
+                            
+                            // Initialize parameters if needed
+                            if (!isset($route->parameters)) {
+                                $route->parameters = [];
+                            }
+                            
+                            // Add WordPress bindings
+                            global $post, $wp_query;
+                            $route->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
+                            $route->parameters['wp_query'] = $wp_query;
+                            
+                            return $route;
+                        }
+                    }
+                }
+            }
+            
+            return $laravelRoute;
+        } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
+            // If no route is found, let the FrontendController handle the request
+            return null;
         }
-
-        return $route;
     }
 
     /**
@@ -106,21 +157,21 @@ class Router extends IlluminateRouter
      */
     public function addWordPressBindings($route)
     {
-        // Ne pas ajouter de liaisons si ce n'est pas une route WordPress
+        // Don't add bindings if it's not a WordPress route
         if (! ($route instanceof Route) || ! $route->isWordPressRoute()) {
             return $route;
         }
 
         global $post, $wp_query;
 
-        $bindings = [
-            'post' => $post ?? (new NullableWpPost)->toWpPost(),
-            'wp_query' => $wp_query,
-        ];
-
-        foreach ($bindings as $key => $value) {
-            $route->setParameter($key, $value);
+        // Initialize parameters if needed
+        if (!isset($route->parameters)) {
+            $route->parameters = [];
         }
+
+        // Directly add WordPress bindings to parameters
+        $route->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
+        $route->parameters['wp_query'] = $wp_query;
 
         return $route;
     }

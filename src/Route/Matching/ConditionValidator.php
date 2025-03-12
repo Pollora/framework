@@ -9,10 +9,10 @@ use Illuminate\Routing\Matching\ValidatorInterface;
 use Illuminate\Routing\Route;
 
 /**
- * Validator for WordPress-specific route conditions.
+ * WordPress condition validator for routes.
  *
- * This validator implements Laravel's ValidatorInterface to check if a route
- * matches based on WordPress conditional functions (like is_single(), is_page(), etc.).
+ * This validator checks if a route matches based on WordPress conditional functions
+ * such as is_page(), is_single(), etc.
  */
 class ConditionValidator implements ValidatorInterface
 {
@@ -33,8 +33,21 @@ class ConditionValidator implements ValidatorInterface
      */
     public function matches(Route $route, Request $request): bool
     {
+        // Get the WordPress condition from the route
         $condition = $route->getCondition();
-
-        return function_exists($condition) && call_user_func_array($condition, $route->getConditionParameters());
+        
+        // Check if the condition function exists
+        if (!function_exists($condition)) {
+            return false;
+        }
+        
+        // Get the parameters for the condition
+        $parameters = $route->getConditionParameters();
+        
+        // Call the WordPress condition function with the parameters
+        $result = call_user_func_array($condition, $parameters);
+        
+        // Convert the result to a boolean
+        return (bool) $result;
     }
 }

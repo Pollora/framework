@@ -8,8 +8,22 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Trait providing WordPress query functionality.
+ * 
+ * This trait contains methods for interacting with WordPress core,
+ * checking database configuration, and handling WordPress requests.
+ */
 trait QueryTrait
 {
+    /**
+     * Check if the database is properly configured.
+     *
+     * Verifies that the database connection settings are valid
+     * and that a connection can be established.
+     *
+     * @return bool True if database is configured, false otherwise
+     */
     public function isDatabaseConfigured(): bool
     {
         $config = DB::connection()->getConfig();
@@ -33,9 +47,6 @@ trait QueryTrait
         return true;
     }
 
-    /**
-     * Check if WordPress is installed by verifying core tables exist and have content
-     */
     /**
      * Check if WordPress is installed by verifying the presence of core database tables and required content.
      *
@@ -66,6 +77,12 @@ trait QueryTrait
 
     /**
      * Run the WordPress bootstrap process and load the default template loader.
+     * 
+     * This method initializes WordPress and handles special request types
+     * like robots.txt, favicon, feeds, and trackbacks.
+     *
+     * @return void
+     * @throws \RuntimeException If WordPress core functions are not available
      */
     protected function runWp(): void
     {
@@ -73,9 +90,10 @@ trait QueryTrait
             throw new \RuntimeException('The WordPress core functions are not available. Ensure WordPress is loaded.');
         }
 
+        // Initialize WordPress for the current request
         wp();
         
-        // Vérifier les conditions qui provoquent des retours anticipés dans template-loader.php
+        // Handle special request types
         if (is_robots()) {
             do_action('do_robots');
             return;
@@ -90,6 +108,7 @@ trait QueryTrait
             return;
         }
         
+        // Load the default WordPress template loader
         require_once ABSPATH . WPINC . '/template-loader.php';
     }
 }

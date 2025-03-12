@@ -22,15 +22,17 @@ class FrontendController extends Controller
     {
         global $wp_query;
 
+        // Obtenir la hiérarchie des templates pour la requête actuelle
         $views = TemplateHierarchy::instance()->hierarchy();
-
+        
+        // Vérifier si des vues existent pour chaque template dans la hiérarchie
         foreach ($views as $view) {
             if (View::exists($view)) {
                 return view($view);
             }
         }
 
-        // If no template is found, return a 404 view
+        // Si aucun template n'est trouvé, retourner une vue 404
         $wp_query->set_404();
         abort(404);
     }
