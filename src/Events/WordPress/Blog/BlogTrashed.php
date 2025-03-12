@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Blog;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class BlogTrashed extends BlogEvent
-{
-} 
+class BlogTrashed extends BlogEvent {}

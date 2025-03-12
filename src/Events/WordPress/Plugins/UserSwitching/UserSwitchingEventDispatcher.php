@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Events\WordPress\Plugins\UserSwitching;
 
 use Pollora\Events\WordPress\AbstractEventDispatcher;
-use WP_User;
 
 /**
  * Event dispatcher for User Switching plugin events.
@@ -32,7 +31,7 @@ class UserSwitchingEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle user switch event.
      *
-     * @param  int  $userId     The ID of the user being switched to
+     * @param  int  $userId  The ID of the user being switched to
      * @param  int  $oldUserId  The ID of the user being switched from
      */
     public function handleSwitchToUser(int $userId, int $oldUserId): void
@@ -40,7 +39,7 @@ class UserSwitchingEventDispatcher extends AbstractEventDispatcher
         $user = get_user_by('id', $userId);
         $oldUser = get_user_by('id', $oldUserId);
 
-        if (!$user || !$oldUser) {
+        if (! $user || ! $oldUser) {
             return;
         }
 
@@ -50,7 +49,7 @@ class UserSwitchingEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle user switch back event.
      *
-     * @param  int  $userId     The ID of the user being switched back to
+     * @param  int  $userId  The ID of the user being switched back to
      * @param  int|false  $oldUserId  The ID of the user being switched from, or false if switching back after being switched off
      */
     public function handleSwitchBackUser(int $userId, int|false $oldUserId): void
@@ -58,7 +57,7 @@ class UserSwitchingEventDispatcher extends AbstractEventDispatcher
         $user = get_user_by('id', $userId);
         $oldUser = $oldUserId ? get_user_by('id', $oldUserId) : null;
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -74,10 +73,10 @@ class UserSwitchingEventDispatcher extends AbstractEventDispatcher
     {
         $oldUser = get_user_by('id', $oldUserId);
 
-        if (!$oldUser) {
+        if (! $oldUser) {
             return;
         }
 
         $this->dispatch(UserSwitchedOff::class, [$oldUser]);
     }
-} 
+}

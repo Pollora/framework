@@ -26,8 +26,8 @@ class ThemeMetadata
     /**
      * ThemeMetadata constructor.
      *
-     * @param string $name The original theme name.
-     * @param string $basePath The base path where the theme is stored.
+     * @param  string  $name  The original theme name.
+     * @param  string  $basePath  The base path where the theme is stored.
      */
     public function __construct(string $name, protected string $basePath)
     {
@@ -48,7 +48,7 @@ class ThemeMetadata
     /**
      * Get the theme's application directory.
      *
-     * @param string $subDirectory (Optional) A subdirectory within the theme's app directory.
+     * @param  string  $subDirectory  (Optional) A subdirectory within the theme's app directory.
      * @return string The full path to the theme's app directory.
      */
     public function getThemeAppDir(string $subDirectory = ''): string
@@ -69,7 +69,7 @@ class ThemeMetadata
     /**
      * Get the full path to a theme application file.
      *
-     * @param string $file The file name.
+     * @param  string  $file  The file name.
      * @return string The full file path.
      */
     public function getThemeAppFile(string $file): string
@@ -120,7 +120,7 @@ class ThemeMetadata
     /**
      * Get the path for a specific item within the theme.
      *
-     * @param string|array|null $pathParts A single path segment or an array of segments.
+     * @param  string|array|null  $pathParts  A single path segment or an array of segments.
      * @return string The resolved full path.
      */
     public function getPathForItem(string|array|null $pathParts = null): string
@@ -143,8 +143,6 @@ class ThemeMetadata
 
     /**
      * Load the theme configuration from the config file.
-     *
-     * @return void
      */
     public function loadConfiguration(): void
     {
@@ -154,7 +152,7 @@ class ThemeMetadata
     /**
      * Safely load the configuration file if it exists.
      *
-     * @param string $path The file path to load.
+     * @param  string  $path  The file path to load.
      * @return array The configuration data.
      */
     protected function safeLoadConfig(string $path): array

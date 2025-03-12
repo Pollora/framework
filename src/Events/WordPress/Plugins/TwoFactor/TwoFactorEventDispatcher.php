@@ -41,31 +41,31 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle successful Two Factor authentication.
      *
-     * @param WP_User $user     Authenticated user
-     * @param ?object $provider The Two Factor provider used
+     * @param  WP_User  $user  Authenticated user
+     * @param  ?object  $provider  The Two Factor provider used
      */
     public function handleTwoFactorUserAuthenticated(WP_User $user, ?object $provider = null): void
     {
         $providerKey = $provider ? $provider->get_key() : 'unknown';
-        
+
         $this->dispatch(TwoFactorAuthenticated::class, [$user, $providerKey]);
     }
 
     /**
      * Handle failed login attempts with Two Factor errors.
      *
-     * @param string   $userLogin Username or email
-     * @param WP_Error $error     Error object
+     * @param  string  $userLogin  Username or email
+     * @param  WP_Error  $error  Error object
      */
     public function handleWpLoginFailed(string $userLogin, WP_Error $error): void
     {
-        if (!str_starts_with($error->get_error_code(), 'two_factor_')) {
+        if (! str_starts_with($error->get_error_code(), 'two_factor_')) {
             return;
         }
 
         $user = get_user_by('login', $userLogin) ?: (is_email($userLogin) ? get_user_by('email', $userLogin) : null);
-        
-        if (!$user) {
+
+        if (! $user) {
             return;
         }
 
@@ -79,14 +79,14 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Store user meta before update.
      *
-     * @param int    $metaId    Meta ID
-     * @param int    $userId    User ID
-     * @param string $metaKey   Meta key
-     * @param mixed  $metaValue Meta value
+     * @param  int  $metaId  Meta ID
+     * @param  int  $userId  User ID
+     * @param  string  $metaKey  Meta key
+     * @param  mixed  $metaValue  Meta value
      */
     public function handleUpdateUserMeta(int $metaId, int $userId, string $metaKey, mixed $metaValue): void
     {
-        if (!$this->isTwoFactorMeta($metaKey)) {
+        if (! $this->isTwoFactorMeta($metaKey)) {
             return;
         }
 
@@ -96,19 +96,19 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle user meta updates.
      *
-     * @param int    $metaId    Meta ID
-     * @param int    $userId    User ID
-     * @param string $metaKey   Meta key
-     * @param mixed  $metaValue Meta value
+     * @param  int  $metaId  Meta ID
+     * @param  int  $userId  User ID
+     * @param  string  $metaKey  Meta key
+     * @param  mixed  $metaValue  Meta value
      */
     public function handleUpdatedUserMeta(int $metaId, int $userId, string $metaKey, mixed $metaValue): void
     {
-        if (!$this->isTwoFactorMeta($metaKey)) {
+        if (! $this->isTwoFactorMeta($metaKey)) {
             return;
         }
 
         $user = get_user_by('ID', $userId);
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -121,19 +121,19 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle new user meta.
      *
-     * @param int    $metaId    Meta ID
-     * @param int    $userId    User ID
-     * @param string $metaKey   Meta key
-     * @param mixed  $metaValue Meta value
+     * @param  int  $metaId  Meta ID
+     * @param  int  $userId  User ID
+     * @param  string  $metaKey  Meta key
+     * @param  mixed  $metaValue  Meta value
      */
     public function handleAddedUserMeta(int $metaId, int $userId, string $metaKey, mixed $metaValue): void
     {
-        if (!$this->isTwoFactorMeta($metaKey)) {
+        if (! $this->isTwoFactorMeta($metaKey)) {
             return;
         }
 
         $user = get_user_by('ID', $userId);
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -143,10 +143,10 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle Two Factor meta changes.
      *
-     * @param WP_User $user      User object
-     * @param string  $metaKey   Meta key
-     * @param mixed   $oldValue  Old value
-     * @param mixed   $newValue  New value
+     * @param  WP_User  $user  User object
+     * @param  string  $metaKey  Meta key
+     * @param  mixed  $oldValue  Old value
+     * @param  mixed  $newValue  New value
      */
     protected function handleTwoFactorMetaChange(WP_User $user, string $metaKey, mixed $oldValue, mixed $newValue): void
     {
@@ -157,7 +157,7 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
             default => null,
         };
 
-        if (!$action) {
+        if (! $action) {
             return;
         }
 
@@ -201,7 +201,7 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
     /**
      * Check if meta key is related to Two Factor.
      *
-     * @param string $metaKey Meta key to check
+     * @param  string  $metaKey  Meta key to check
      */
     protected function isTwoFactorMeta(string $metaKey): bool
     {
@@ -211,4 +211,4 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
             '_two_factor_enabled_providers',
         ], true);
     }
-} 
+}

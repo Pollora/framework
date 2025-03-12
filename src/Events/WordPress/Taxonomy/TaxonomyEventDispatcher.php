@@ -37,9 +37,9 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle term creation.
      *
-     * @param int $termId Term ID
-     * @param int $ttId Term taxonomy ID
-     * @param string $taxonomy Taxonomy name
+     * @param  int  $termId  Term ID
+     * @param  int  $ttId  Term taxonomy ID
+     * @param  string  $taxonomy  Taxonomy name
      */
     public function handleCreatedTerm(int $termId, int $ttId, string $taxonomy): void
     {
@@ -48,7 +48,7 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
         }
 
         $term = get_term($termId, $taxonomy);
-        if (!$term || is_wp_error($term)) {
+        if (! $term || is_wp_error($term)) {
             return;
         }
 
@@ -58,10 +58,10 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle term deletion.
      *
-     * @param int $termId Term ID
-     * @param int $ttId Term taxonomy ID
-     * @param string $taxonomy Taxonomy name
-     * @param WP_Term $deletedTerm Deleted term object
+     * @param  int  $termId  Term ID
+     * @param  int  $ttId  Term taxonomy ID
+     * @param  string  $taxonomy  Taxonomy name
+     * @param  WP_Term  $deletedTerm  Deleted term object
      */
     public function handleDeleteTerm(int $termId, int $ttId, string $taxonomy, WP_Term $deletedTerm): void
     {
@@ -75,14 +75,14 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
     /**
      * Cache term before update.
      *
-     * @param int $termId Term ID
-     * @param int $ttId Term taxonomy ID
-     * @param string $taxonomy Taxonomy name
+     * @param  int  $termId  Term ID
+     * @param  int  $ttId  Term taxonomy ID
+     * @param  string  $taxonomy  Taxonomy name
      */
     public function handleEditTerm(int $termId, int $ttId, string $taxonomy): void
     {
         $term = get_term($termId, $taxonomy);
-        if (!$term || is_wp_error($term)) {
+        if (! $term || is_wp_error($term)) {
             return;
         }
 
@@ -92,9 +92,9 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle term update.
      *
-     * @param int $termId Term ID
-     * @param int $ttId Term taxonomy ID
-     * @param string $taxonomy Taxonomy name
+     * @param  int  $termId  Term ID
+     * @param  int  $ttId  Term taxonomy ID
+     * @param  string  $taxonomy  Taxonomy name
      */
     public function handleEditedTerm(int $termId, int $ttId, string $taxonomy): void
     {
@@ -103,13 +103,13 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
         }
 
         $term = get_term($termId, $taxonomy);
-        if (!$term || is_wp_error($term)) {
+        if (! $term || is_wp_error($term)) {
             return;
         }
 
         $this->dispatch(TermUpdated::class, [
             $term,
-            $this->cachedTermBeforeUpdate
+            $this->cachedTermBeforeUpdate,
         ]);
 
         $this->cachedTermBeforeUpdate = null;

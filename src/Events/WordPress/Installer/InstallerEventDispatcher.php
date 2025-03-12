@@ -36,12 +36,12 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle plugin/theme installation or update completion.
      *
-     * @param WP_Upgrader $upgrader Upgrader instance
-     * @param array $extra Extra data about the upgrade
+     * @param  WP_Upgrader  $upgrader  Upgrader instance
+     * @param  array  $extra  Extra data about the upgrade
      */
     public function handleUpgraderProcessComplete(WP_Upgrader $upgrader, array $extra): void
     {
-        if (!isset($extra['type']) || !in_array($extra['type'], ['plugin', 'theme'])) {
+        if (! isset($extra['type']) || ! in_array($extra['type'], ['plugin', 'theme'])) {
             return;
         }
 
@@ -51,19 +51,19 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         if ($action === 'install') {
             if ($type === 'plugin') {
                 $path = $upgrader->plugin_info();
-                if (!$path) {
+                if (! $path) {
                     return;
                 }
 
-                $data = get_plugin_data($upgrader->skin->result['local_destination'] . '/' . $path);
+                $data = get_plugin_data($upgrader->skin->result['local_destination'].'/'.$path);
                 $this->dispatch(PluginInstalled::class, [
                     'name' => $data['Name'],
                     'version' => $data['Version'],
-                    'slug' => $upgrader->result['destination_name']
+                    'slug' => $upgrader->result['destination_name'],
                 ]);
             } else {
                 $slug = $upgrader->theme_info();
-                if (!$slug) {
+                if (! $slug) {
                     return;
                 }
 
@@ -72,7 +72,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
                 $this->dispatch(ThemeInstalled::class, [
                     'name' => $theme->name,
                     'version' => $theme->version,
-                    'slug' => $slug
+                    'slug' => $slug,
                 ]);
             }
         } elseif ($action === 'update') {
@@ -81,12 +81,12 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
                 $_plugins = $this->getPlugins();
 
                 foreach ($slugs as $slug) {
-                    $plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/' . $slug);
+                    $plugin_data = get_plugin_data(WP_PLUGIN_DIR.'/'.$slug);
                     $this->dispatch(PluginUpdated::class, [
                         'name' => $plugin_data['Name'],
                         'version' => $plugin_data['Version'],
                         'oldVersion' => $_plugins[$slug]['Version'],
-                        'slug' => $slug
+                        'slug' => $slug,
                     ]);
                 }
             } else {
@@ -94,14 +94,14 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
 
                 foreach ($slugs as $slug) {
                     $theme = wp_get_theme($slug);
-                    $stylesheet = $theme['Stylesheet Dir'] . '/style.css';
+                    $stylesheet = $theme['Stylesheet Dir'].'/style.css';
                     $theme_data = get_file_data($stylesheet, ['Version' => 'Version']);
-                    
+
                     $this->dispatch(ThemeUpdated::class, [
                         'name' => $theme['Name'],
                         'version' => $theme_data['Version'],
                         'oldVersion' => $theme['Version'],
-                        'slug' => $slug
+                        'slug' => $slug,
                     ]);
                 }
             }
@@ -111,8 +111,8 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle plugin activation.
      *
-     * @param string $slug Plugin slug
-     * @param bool $networkWide Whether the plugin was activated network wide
+     * @param  string  $slug  Plugin slug
+     * @param  bool  $networkWide  Whether the plugin was activated network wide
      */
     public function handleActivatePlugin(string $slug, bool $networkWide): void
     {
@@ -120,15 +120,15 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         $this->dispatch(PluginActivated::class, [
             'name' => $_plugins[$slug]['Name'],
             'slug' => $slug,
-            'networkWide' => $networkWide
+            'networkWide' => $networkWide,
         ]);
     }
 
     /**
      * Handle plugin deactivation.
      *
-     * @param string $slug Plugin slug
-     * @param bool $networkWide Whether the plugin was deactivated network wide
+     * @param  string  $slug  Plugin slug
+     * @param  bool  $networkWide  Whether the plugin was deactivated network wide
      */
     public function handleDeactivatePlugin(string $slug, bool $networkWide): void
     {
@@ -136,20 +136,20 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         $this->dispatch(PluginDeactivated::class, [
             'name' => $_plugins[$slug]['Name'],
             'slug' => $slug,
-            'networkWide' => $networkWide
+            'networkWide' => $networkWide,
         ]);
     }
 
     /**
      * Handle theme activation.
      *
-     * @param string $name Theme name
-     * @param string $theme Theme object
+     * @param  string  $name  Theme name
+     * @param  string  $theme  Theme object
      */
     public function handleSwitchTheme(string $name, string $theme): void
     {
         $this->dispatch(ThemeActivated::class, [
-            'name' => $name
+            'name' => $name,
         ]);
     }
 
@@ -162,7 +162,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         $deleteThemeCall = null;
 
         foreach ($backtrace as $call) {
-            if (isset($call['function']) && 'delete_theme' === $call['function']) {
+            if (isset($call['function']) && $call['function'] === 'delete_theme') {
                 $deleteThemeCall = $call;
                 break;
             }
@@ -173,14 +173,14 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         }
 
         $this->dispatch(ThemeDeleted::class, [
-            'name' => $deleteThemeCall['args'][0]
+            'name' => $deleteThemeCall['args'][0],
         ]);
     }
 
     /**
      * Handle WordPress core update.
      *
-     * @param string $newVersion New WordPress version
+     * @param  string  $newVersion  New WordPress version
      */
     public function handleCoreUpdatedSuccessfully(string $newVersion): void
     {
@@ -189,7 +189,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         $this->dispatch(WordPressUpdated::class, [
             'newVersion' => $newVersion,
             'oldVersion' => $wp_version,
-            'autoUpdated' => ('update-core.php' !== $pagenow)
+            'autoUpdated' => ($pagenow !== 'update-core.php'),
         ]);
     }
 
@@ -200,10 +200,10 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
      */
     protected function getPlugins(): array
     {
-        if (!function_exists('get_plugins')) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        if (! function_exists('get_plugins')) {
+            require_once ABSPATH.'wp-admin/includes/plugin.php';
         }
 
         return get_plugins();
     }
-} 
+}

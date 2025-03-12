@@ -11,6 +11,4 @@ namespace Pollora\Events\WordPress\Plugins\YoastSeo;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class MetaDeleted extends MetaEvent
-{
-} 
+class MetaDeleted extends MetaEvent {}

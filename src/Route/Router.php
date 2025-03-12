@@ -70,13 +70,13 @@ class Router extends IlluminateRouter
         }
 
         $route = parent::findRoute($request);
-        
+
         // Si la route trouvée est une route WordPress et a une condition,
         // ajouter les liaisons WordPress
         if ($route instanceof Route && $route->isWordPressRoute() && $route->hasCondition()) {
             $this->addWordPressBindings($route);
         }
-        
+
         return $route;
     }
 
@@ -108,10 +108,10 @@ class Router extends IlluminateRouter
     public function addWordPressBindings($route)
     {
         // Ne pas ajouter de liaisons si ce n'est pas une route WordPress
-        if (!($route instanceof Route) || !$route->isWordPressRoute()) {
+        if (! ($route instanceof Route) || ! $route->isWordPressRoute()) {
             return $route;
         }
-        
+
         global $post, $wp_query;
 
         $bindings = [

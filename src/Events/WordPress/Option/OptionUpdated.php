@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Option;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class OptionUpdated extends OptionEvent
-{
-} 
+class OptionUpdated extends OptionEvent {}

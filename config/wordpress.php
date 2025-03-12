@@ -55,7 +55,7 @@ return [
     'secure_auth_salt' => env('SECURE_AUTH_SALT'),
     'logged_in_salt' => env('LOGGED_IN_SALT'),
     'nonce_salt' => env('NONCE_SALT'),
-    
+
     // WordPress multisite configuration
     'wp_allow_multisite' => env('WP_ALLOW_MULTISITE'),
     'multisite' => env('MULTISITE'),
@@ -64,7 +64,7 @@ return [
     'path_current_site' => env('PATH_CURRENT_SITE'),
     'site_id_current_site' => env('SITE_ID_CURRENT_SITE'),
     'blog_id_current_site' => env('BLOG_ID_CURRENT_SITE'),
-    
+
     // Database caching
     'caching' => env('DB_CACHE'),
 ];

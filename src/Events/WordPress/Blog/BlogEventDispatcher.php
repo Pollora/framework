@@ -39,8 +39,8 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog creation.
      *
-     * @param WP_Site $new_site New site object
-     * @param array $args Arguments for the initialization
+     * @param  WP_Site  $new_site  New site object
+     * @param  array  $args  Arguments for the initialization
      */
     public function handleWpInitializeSite(WP_Site $new_site, array $args): void
     {
@@ -50,7 +50,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog deletion.
      *
-     * @param WP_Site $old_site Deleted site object
+     * @param  WP_Site  $old_site  Deleted site object
      */
     public function handleWpDeleteSite(WP_Site $old_site): void
     {
@@ -60,7 +60,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog archiving.
      *
-     * @param int $blog_id Blog ID
+     * @param  int  $blog_id  Blog ID
      */
     public function handleArchiveBlog(int $blog_id): void
     {
@@ -72,7 +72,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog unarchiving.
      *
-     * @param int $blog_id Blog ID
+     * @param  int  $blog_id  Blog ID
      */
     public function handleUnarchiveBlog(int $blog_id): void
     {
@@ -84,7 +84,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog marked as spam.
      *
-     * @param int $blog_id Blog ID
+     * @param  int  $blog_id  Blog ID
      */
     public function handleMakeSpamBlog(int $blog_id): void
     {
@@ -96,7 +96,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog marked as not spam.
      *
-     * @param int $blog_id Blog ID
+     * @param  int  $blog_id  Blog ID
      */
     public function handleMakeHamBlog(int $blog_id): void
     {
@@ -108,7 +108,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog marked as mature.
      *
-     * @param int $blog_id Blog ID
+     * @param  int  $blog_id  Blog ID
      */
     public function handleMatureBlog(int $blog_id): void
     {
@@ -120,7 +120,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog marked as not mature.
      *
-     * @param int $blog_id Blog ID
+     * @param  int  $blog_id  Blog ID
      */
     public function handleUnmatureBlog(int $blog_id): void
     {
@@ -132,7 +132,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog marked as deleted.
      *
-     * @param int $blog_id Blog ID
+     * @param  int  $blog_id  Blog ID
      */
     public function handleMakeDeleteBlog(int $blog_id): void
     {
@@ -144,7 +144,7 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog restored from trash.
      *
-     * @param int $blog_id Blog ID
+     * @param  int  $blog_id  Blog ID
      */
     public function handleMakeUndeleteBlog(int $blog_id): void
     {
@@ -156,8 +156,8 @@ class BlogEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle blog visibility update.
      *
-     * @param int $blog_id Blog ID
-     * @param string $value New visibility value
+     * @param  int  $blog_id  Blog ID
+     * @param  string  $value  New visibility value
      */
     public function handleUpdateBlogPublic(int $blog_id, string $value): void
     {
@@ -165,4 +165,4 @@ class BlogEventDispatcher extends AbstractEventDispatcher
             $this->dispatch(BlogVisibilityUpdated::class, [$site, $value]);
         }
     }
-} 
+}

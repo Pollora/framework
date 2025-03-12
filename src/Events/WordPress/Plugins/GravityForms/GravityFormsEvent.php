@@ -17,10 +17,9 @@ abstract class GravityFormsEvent
     /**
      * Constructor.
      *
-     * @param array $form The Gravity Forms form data
+     * @param  array  $form  The Gravity Forms form data
      */
     public function __construct(
         public readonly array $form
-    ) {
-    }
-} 
+    ) {}
+}

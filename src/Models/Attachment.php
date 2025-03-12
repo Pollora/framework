@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Models;
 
-use Pollora\Colt\Model\Collection\MetaCollection;
 use Illuminate\Support\Arr;
+use Pollora\Colt\Model\Collection\MetaCollection;
 
 /**
  * Class Attachment

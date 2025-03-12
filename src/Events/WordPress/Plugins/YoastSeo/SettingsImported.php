@@ -17,12 +17,11 @@ class SettingsImported extends YoastSeoEvent
     /**
      * Constructor.
      *
-     * @param string $source Name of the source plugin
-     * @param bool $deleteOldData Whether old data was deleted during import
+     * @param  string  $source  Name of the source plugin
+     * @param  bool  $deleteOldData  Whether old data was deleted during import
      */
     public function __construct(
         public readonly string $source,
         public readonly bool $deleteOldData
-    ) {
-    }
-} 
+    ) {}
+}

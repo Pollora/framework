@@ -63,8 +63,8 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle form save event.
      *
-     * @param array $form Form data
-     * @param bool $is_new Whether this is a new form
+     * @param  array  $form  Form data
+     * @param  bool  $is_new  Whether this is a new form
      */
     public function handleGformAfterSaveForm(array $form, bool $is_new): void
     {
@@ -78,9 +78,9 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle form confirmation save event.
      *
-     * @param array $confirmation Confirmation data
-     * @param array $form Form data
-     * @param bool $is_new Whether this is a new confirmation
+     * @param  array  $confirmation  Confirmation data
+     * @param  array  $form  Form data
+     * @param  bool  $is_new  Whether this is a new confirmation
      */
     public function handleGformPreConfirmationSave(array $confirmation, array $form, bool $is_new = true): void
     {
@@ -94,9 +94,9 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle form notification save event.
      *
-     * @param array $notification Notification data
-     * @param array $form Form data
-     * @param bool $is_new Whether this is a new notification
+     * @param  array  $notification  Notification data
+     * @param  array  $form  Form data
+     * @param  bool  $is_new  Whether this is a new notification
      */
     public function handleGformPreNotificationSave(array $notification, array $form, bool $is_new = true): void
     {
@@ -110,8 +110,8 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle notification deletion event.
      *
-     * @param array $notification Notification data
-     * @param array $form Form data
+     * @param  array  $notification  Notification data
+     * @param  array  $form  Form data
      */
     public function handleGformPreNotificationDeleted(array $notification, array $form): void
     {
@@ -121,8 +121,8 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle confirmation deletion event.
      *
-     * @param array $confirmation Confirmation data
-     * @param array $form Form data
+     * @param  array  $confirmation  Confirmation data
+     * @param  array  $form  Form data
      */
     public function handleGformPreConfirmationDeleted(array $confirmation, array $form): void
     {
@@ -132,7 +132,7 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle form deletion event.
      *
-     * @param int $form_id Form ID
+     * @param  int  $form_id  Form ID
      */
     public function handleGformBeforeDeleteForm(int $form_id): void
     {
@@ -145,7 +145,7 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle form trash event.
      *
-     * @param int $form_id Form ID
+     * @param  int  $form_id  Form ID
      */
     public function handleGformPostFormTrashed(int $form_id): void
     {
@@ -158,7 +158,7 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle form restore event.
      *
-     * @param int $form_id Form ID
+     * @param  int  $form_id  Form ID
      */
     public function handleGformPostFormRestored(int $form_id): void
     {
@@ -171,7 +171,7 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle form entry deletion event.
      *
-     * @param int $lead_id Entry ID
+     * @param  int  $lead_id  Entry ID
      */
     public function handleGformDeleteLead(int $lead_id): void
     {
@@ -184,12 +184,12 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle entry note addition event.
      *
-     * @param int $note_id Note ID
-     * @param int $lead_id Entry ID
-     * @param int $user_id User ID
-     * @param string $user_name User name
-     * @param string $note Note content
-     * @param string $note_type Note type
+     * @param  int  $note_id  Note ID
+     * @param  int  $lead_id  Entry ID
+     * @param  int  $user_id  User ID
+     * @param  string  $user_name  User name
+     * @param  string  $note  Note content
+     * @param  string  $note_type  Note type
      */
     public function handleGformPostNoteAdded(
         int $note_id,
@@ -207,7 +207,7 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
                 $user_id,
                 $user_name,
                 $note,
-                $note_type
+                $note_type,
             ]);
         }
     }
@@ -215,9 +215,9 @@ class GravityFormsEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle entry status update event.
      *
-     * @param int $lead_id Entry ID
-     * @param string $status New status
-     * @param string $prev Previous status
+     * @param  int  $lead_id  Entry ID
+     * @param  string  $status  New status
+     * @param  string  $prev  Previous status
      */
     public function handleGformUpdateStatus(int $lead_id, string $status, string $prev = ''): void
     {

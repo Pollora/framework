@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Comment;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class CommentCreated extends CommentEvent
-{
-} 
+class CommentCreated extends CommentEvent {}

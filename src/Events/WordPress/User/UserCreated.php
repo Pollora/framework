@@ -25,4 +25,4 @@ class UserCreated extends UserEvent
     ) {
         parent::__construct($user);
     }
-} 
+}

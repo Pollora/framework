@@ -14,6 +14,4 @@ use Pollora\Events\WordPress\Installer\InstallerEvent;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-abstract class ThemeEvent extends InstallerEvent
-{
-} 
+abstract class ThemeEvent extends InstallerEvent {}

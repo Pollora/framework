@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Installer\Plugin;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class PluginDeactivated extends PluginEvent
-{
-} 
+class PluginDeactivated extends PluginEvent {}

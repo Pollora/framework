@@ -10,8 +10,8 @@ declare(strict_types=1);
 
 namespace Pollora\PostType;
 
-use Pollora\Entity\PostTypeException;
 use Illuminate\Foundation\Application;
+use Pollora\Entity\PostTypeException;
 
 class PostTypeFactory
 {

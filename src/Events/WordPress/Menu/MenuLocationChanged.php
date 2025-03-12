@@ -17,9 +17,9 @@ use WP_Term;
 class MenuLocationChanged extends MenuEvent
 {
     /**
-     * @param WP_Term $menu The menu that was changed
-     * @param string $location The theme location identifier
-     * @param bool $assigned Whether the menu was assigned (true) or unassigned (false)
+     * @param  WP_Term  $menu  The menu that was changed
+     * @param  string  $location  The theme location identifier
+     * @param  bool  $assigned  Whether the menu was assigned (true) or unassigned (false)
      */
     public function __construct(
         WP_Term $menu,
@@ -44,4 +44,4 @@ class MenuLocationChanged extends MenuEvent
     {
         return $this->assigned;
     }
-} 
+}

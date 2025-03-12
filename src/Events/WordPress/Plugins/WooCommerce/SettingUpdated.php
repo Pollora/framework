@@ -16,14 +16,13 @@ class SettingUpdated extends WooCommerceEvent
     /**
      * Constructor.
      *
-     * @param string $optionName The name of the option
-     * @param mixed $oldValue The previous value
-     * @param mixed $newValue The new value
+     * @param  string  $optionName  The name of the option
+     * @param  mixed  $oldValue  The previous value
+     * @param  mixed  $newValue  The new value
      */
     public function __construct(
         public readonly string $optionName,
         public readonly mixed $oldValue,
         public readonly mixed $newValue
-    ) {
-    }
-} 
+    ) {}
+}

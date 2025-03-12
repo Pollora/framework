@@ -36,8 +36,8 @@ class CommentEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle new comment creation.
      *
-     * @param int $commentId The ID of the new comment
-     * @param WP_Comment $comment The comment object
+     * @param  int  $commentId  The ID of the new comment
+     * @param  WP_Comment  $comment  The comment object
      */
     public function handleWpInsertComment(int $commentId, WP_Comment $comment): void
     {
@@ -51,13 +51,13 @@ class CommentEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle comment editing.
      *
-     * @param int $commentId The ID of the edited comment
+     * @param  int  $commentId  The ID of the edited comment
      */
     public function handleEditComment(int $commentId): void
     {
         $comment = get_comment($commentId);
 
-        if (!$comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
+        if (! $comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
             return;
         }
 
@@ -67,9 +67,9 @@ class CommentEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle comment status transitions.
      *
-     * @param string $newStatus New comment status
-     * @param string $oldStatus Old comment status
-     * @param WP_Comment $comment The comment object
+     * @param  string  $newStatus  New comment status
+     * @param  string  $oldStatus  Old comment status
+     * @param  WP_Comment  $comment  The comment object
      */
     public function handleTransitionCommentStatus(string $newStatus, string $oldStatus, WP_Comment $comment): void
     {
@@ -83,13 +83,13 @@ class CommentEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle comment trashing.
      *
-     * @param int $commentId The ID of the trashed comment
+     * @param  int  $commentId  The ID of the trashed comment
      */
     public function handleTrashComment(int $commentId): void
     {
         $comment = get_comment($commentId);
 
-        if (!$comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
+        if (! $comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
             return;
         }
 
@@ -99,13 +99,13 @@ class CommentEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle comment restoration from trash.
      *
-     * @param int $commentId The ID of the restored comment
+     * @param  int  $commentId  The ID of the restored comment
      */
     public function handleUntrashComment(int $commentId): void
     {
         $comment = get_comment($commentId);
 
-        if (!$comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
+        if (! $comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
             return;
         }
 
@@ -115,13 +115,13 @@ class CommentEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle comment marked as spam.
      *
-     * @param int $commentId The ID of the spammed comment
+     * @param  int  $commentId  The ID of the spammed comment
      */
     public function handleSpamComment(int $commentId): void
     {
         $comment = get_comment($commentId);
 
-        if (!$comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
+        if (! $comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
             return;
         }
 
@@ -131,13 +131,13 @@ class CommentEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle comment unmarked as spam.
      *
-     * @param int $commentId The ID of the unspammed comment
+     * @param  int  $commentId  The ID of the unspammed comment
      */
     public function handleUnspamComment(int $commentId): void
     {
         $comment = get_comment($commentId);
 
-        if (!$comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
+        if (! $comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
             return;
         }
 
@@ -147,16 +147,16 @@ class CommentEventDispatcher extends AbstractEventDispatcher
     /**
      * Handle comment permanent deletion.
      *
-     * @param int $commentId The ID of the deleted comment
+     * @param  int  $commentId  The ID of the deleted comment
      */
     public function handleDeleteComment(int $commentId): void
     {
         $comment = get_comment($commentId);
 
-        if (!$comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
+        if (! $comment || in_array($comment->comment_type, ['pingback', 'trackback'])) {
             return;
         }
 
         $this->dispatch(CommentDeleted::class, [$comment]);
     }
-} 
+}

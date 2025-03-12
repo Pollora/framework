@@ -17,10 +17,10 @@ class ThemeUpdated extends ThemeEvent
     /**
      * Constructor.
      *
-     * @param string $name Theme name
-     * @param string|null $version New theme version
-     * @param string|null $slug Theme slug
-     * @param string|null $oldVersion Previous theme version
+     * @param  string  $name  Theme name
+     * @param  string|null  $version  New theme version
+     * @param  string|null  $slug  Theme slug
+     * @param  string|null  $oldVersion  Previous theme version
      */
     public function __construct(
         string $name,
@@ -30,4 +30,4 @@ class ThemeUpdated extends ThemeEvent
     ) {
         parent::__construct($name, $version, $slug);
     }
-} 
+}

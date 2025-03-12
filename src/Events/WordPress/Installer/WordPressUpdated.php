@@ -17,14 +17,13 @@ class WordPressUpdated
     /**
      * Constructor.
      *
-     * @param string $newVersion New WordPress version
-     * @param string $oldVersion Previous WordPress version
-     * @param bool $autoUpdated Whether the update was automatic
+     * @param  string  $newVersion  New WordPress version
+     * @param  string  $oldVersion  Previous WordPress version
+     * @param  bool  $autoUpdated  Whether the update was automatic
      */
     public function __construct(
         public readonly string $newVersion,
         public readonly string $oldVersion,
         public readonly bool $autoUpdated
-    ) {
-    }
-} 
+    ) {}
+}

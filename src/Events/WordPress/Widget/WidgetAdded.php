@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Widget;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class WidgetAdded extends WidgetEvent
-{
-} 
+class WidgetAdded extends WidgetEvent {}

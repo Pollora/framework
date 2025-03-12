@@ -21,6 +21,5 @@ abstract class OptionEvent
         public readonly string $optionName,
         public readonly mixed $oldValue,
         public readonly mixed $newValue
-    ) {
-    }
-} 
+    ) {}
+}

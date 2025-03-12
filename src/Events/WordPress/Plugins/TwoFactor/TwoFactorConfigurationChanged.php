@@ -28,4 +28,4 @@ class TwoFactorConfigurationChanged extends TwoFactorEvent
     ) {
         parent::__construct($user);
     }
-} 
+}

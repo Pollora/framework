@@ -19,6 +19,5 @@ class AttributeDeleted extends WooCommerceEvent
     public function __construct(
         public readonly int $attributeId,
         public readonly string $attributeName
-    ) {
-    }
-} 
+    ) {}
+}

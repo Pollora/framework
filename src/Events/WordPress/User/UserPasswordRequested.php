@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\User;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class UserPasswordRequested extends UserEvent
-{
-} 
+class UserPasswordRequested extends UserEvent {}

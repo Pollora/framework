@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Media;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class MediaCreated extends MediaEvent
-{
-} 
+class MediaCreated extends MediaEvent {}

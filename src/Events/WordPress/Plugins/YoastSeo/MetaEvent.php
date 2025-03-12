@@ -17,14 +17,13 @@ abstract class MetaEvent extends YoastSeoEvent
     /**
      * Constructor.
      *
-     * @param int $objectId ID of the object the metadata is for
-     * @param string $metaKey Metadata key
-     * @param mixed $metaValue Metadata value
+     * @param  int  $objectId  ID of the object the metadata is for
+     * @param  string  $metaKey  Metadata key
+     * @param  mixed  $metaValue  Metadata value
      */
     public function __construct(
         public readonly int $objectId,
         public readonly string $metaKey,
         public readonly mixed $metaValue
-    ) {
-    }
-} 
+    ) {}
+}

@@ -17,10 +17,9 @@ abstract class EntryEvent
     /**
      * Constructor.
      *
-     * @param array $entry The entry data
+     * @param  array  $entry  The entry data
      */
     public function __construct(
         public readonly array $entry
-    ) {
-    }
-} 
+    ) {}
+}

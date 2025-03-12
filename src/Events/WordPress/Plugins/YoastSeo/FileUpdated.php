@@ -17,10 +17,9 @@ class FileUpdated extends YoastSeoEvent
     /**
      * Constructor.
      *
-     * @param string $action The action performed ('create_robots', 'update_robots', or 'update_htaccess')
+     * @param  string  $action  The action performed ('create_robots', 'update_robots', or 'update_htaccess')
      */
     public function __construct(
         public readonly string $action
-    ) {
-    }
-} 
+    ) {}
+}

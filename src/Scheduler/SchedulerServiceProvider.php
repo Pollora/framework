@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Scheduler;
 
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Scheduler\Contracts\SchedulerInterface;
 use Pollora\Support\Facades\Filter;

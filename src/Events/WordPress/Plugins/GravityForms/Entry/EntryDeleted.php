@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Plugins\GravityForms\Entry;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class EntryDeleted extends EntryEvent
-{
-} 
+class EntryDeleted extends EntryEvent {}

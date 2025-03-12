@@ -12,6 +12,4 @@ namespace Pollora\Events\WordPress\Menu;
  *
  * @author Olivier Gorzalka <olivier@amphibee.fr>
  */
-class MenuDeleted extends MenuEvent
-{
-} 
+class MenuDeleted extends MenuEvent {}

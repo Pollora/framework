@@ -25,4 +25,4 @@ class BlogCreated extends BlogEvent
     ) {
         parent::__construct($site);
     }
-} 
+}
