@@ -241,8 +241,6 @@ abstract class AbstractHook implements HookInterface
                 'args' => $acceptedArgs ?? $this->detectArguments($callback),
             ];
         }
-
-        throw new \InvalidArgumentException("Invalid callback provided for hook '{$hook}'.");
     }
 
     /**
