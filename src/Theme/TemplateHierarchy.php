@@ -14,36 +14,53 @@ class TemplateHierarchy
     /**
      * Store the template hierarchy
      *
-     * @var array
+     * @var string[]
      */
-    private $templateHierarchy = [];
+    private array $templateHierarchy = [];
+
+    /**
+     * Whether the template hierarchy has been finalized
+     */
+    private bool $hierarchyFinalized = false;
 
     /**
      * Cache for the queried object
-     *
-     * @var object|null
      */
-    private $queriedObject = null;
+    private ?object $queriedObject = null;
+
+    /**
+     * Cache for WordPress conditions
+     *
+     * @var array|null
+     */
+    private static ?array $cachedConditions = null;
 
     /**
      * Singleton instance
-     *
-     * @var self
      */
-    private static $instance = null;
+    private static ?self $instance = null;
 
     /**
      * Get singleton instance
-     *
-     * @return self
      */
-    public static function instance()
+    public static function instance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self;
-        }
+        return self::$instance ??= new self;
+    }
 
-        return self::$instance;
+    /**
+     * Register a custom template handler
+     *
+     * @param string $type Template type identifier
+     * @param callable $callback Function that returns an array of template files
+     * @return void
+     */
+    public function registerTemplateHandler(string $type, callable $callback): void
+    {
+        add_filter("pollora_template_hierarchy/{$type}_templates", function($templates) use ($callback) {
+            $customTemplates = call_user_func($callback, $this->queriedObject());
+            return array_merge($customTemplates, $templates);
+        }, 10, 1);
     }
 
     /**
@@ -51,113 +68,128 @@ class TemplateHierarchy
      */
     private function __construct()
     {
-        // Empty constructor
+        // Hook into template_include to detect custom templates from plugins
+        add_filter('template_include', [$this, 'captureTemplateInclude'], PHP_INT_MAX - 10);
+    }
+
+    /**
+     * Capture the template being included by WordPress
+     *
+     * @param string $template The template being included
+     * @return string The unchanged template path
+     */
+    public function captureTemplateInclude(string $template): string
+    {
+        // Add the final template to the beginning of our hierarchy
+        // This ensures plugin templates take precedence
+        if (!empty($template)) {
+            array_unshift($this->templateHierarchy, $template);
+            $this->templateHierarchy = array_unique($this->templateHierarchy);
+        }
+
+        return $template;
     }
 
     /**
      * Get the queried object (with caching)
-     *
-     * @return object|null
      */
-    private function queriedObject()
+    private function queriedObject(): ?object
     {
-        if ($this->queriedObject === null) {
-            $this->queriedObject = get_queried_object();
-        }
-
-        return $this->queriedObject;
+        return $this->queriedObject ??= get_queried_object();
     }
 
     /**
      * Get the template hierarchy for the current request
      *
-     * @return array The template hierarchy
+     * @param bool $refresh Force recomputing the hierarchy even if already calculated
+     * @return string[] The template hierarchy
      */
-    public function hierarchy()
+    public function hierarchy(bool $refresh = false): array
     {
-        // Only compute hierarchy if not already done
-        if (empty($this->templateHierarchy)) {
+        // Only compute hierarchy if not already done or if refresh is requested
+        if ($refresh || empty($this->templateHierarchy) || !$this->hierarchyFinalized) {
             $this->computeHierarchy();
         }
 
-        return $this->templateHierarchy;
+        // Allow other plugins to filter the final hierarchy
+        return apply_filters('pollora/template_hierarchy/hierarchy', $this->templateHierarchy);
     }
 
     /**
      * Generate template hierarchy based on current request
-     *
-     * @return void
      */
-    private function computeHierarchy()
+    private function computeHierarchy(): void
     {
         // Get the WordPress template hierarchy order
         $hierarchyOrder = self::getHierarchyOrder();
-        
+
         // Create a temporary array to store templates by condition
         $templatesByCondition = [];
-        
-        // Check each condition in the hierarchy order
+
+        // Check each condition in the hierarchy order and collect templates
         foreach ($hierarchyOrder as $condition) {
-            // Ignore the index fallback
+            // Skip the fallback condition
             if ($condition === '__return_true') {
                 continue;
             }
-            
-            // Check if the condition is satisfied
-            if (function_exists($condition) && call_user_func($condition)) {
-                // Convert the condition name to template type
+
+            if ($this->isConditionSatisfied($condition)) {
                 $type = $this->conditionToType($condition);
-                
-                // Get templates for this type
-                $templates = $this->templateForType($type);
-                
+                $templates = $this->getTemplatesForType($type);
+
                 if (!empty($templates)) {
                     $templatesByCondition[$condition] = $templates;
                 }
             }
         }
-        
-        // Add templates in hierarchy order
+
+        // Process collected templates in hierarchy order
         foreach ($hierarchyOrder as $condition) {
             if (isset($templatesByCondition[$condition])) {
-                $templates = $templatesByCondition[$condition];
-                
-                // Add Blade template variants first
-                $this->addBladeTemplateVariants($templates);
-                
-                // Then add regular templates
-                foreach ($templates as $template) {
-                    $this->templateHierarchy[] = $template;
-                }
-                
-                // Add block template variants if using a block theme
-                if (wp_is_block_theme()) {
-                    $this->addBlockTemplateVariants($templates);
-                }
+                $this->addTemplatesToHierarchy($templatesByCondition[$condition]);
             }
         }
-        
+
         // Always check index as fallback
-        $templates = $this->templateForType('index');
-        if (!empty($templates)) {
-            $this->addBladeTemplateVariants($templates);
-            foreach ($templates as $template) {
-                $this->templateHierarchy[] = $template;
-            }
-            if (wp_is_block_theme()) {
-                $this->addBlockTemplateVariants($templates);
-            }
-        }
-        
+        $this->addTemplatesToHierarchy($this->getTemplatesForType('index'));
+
         // Ensure the hierarchy is unique
         $this->templateHierarchy = array_unique($this->templateHierarchy);
     }
 
     /**
-     * Convert a WordPress condition function name to a template type.
+     * Check if a condition function is satisfied
+     */
+    private function isConditionSatisfied(string $condition): bool
+    {
+        return function_exists($condition) && call_user_func($condition);
+    }
+
+    /**
+     * Add templates to the hierarchy with their variants
      *
-     * @param string $condition The condition function name (e.g., 'is_page')
-     * @return string The corresponding template type (e.g., 'page')
+     * @param string[] $templates
+     */
+    private function addTemplatesToHierarchy(array $templates): void
+    {
+        if (empty($templates)) {
+            return;
+        }
+
+        // Add Blade template variants first
+        $this->addBladeTemplateVariants($templates);
+
+        // Then add regular templates
+        array_push($this->templateHierarchy, ...$templates);
+
+        // Add block template variants if using a block theme
+        if (wp_is_block_theme()) {
+            $this->addBlockTemplateVariants($templates);
+        }
+    }
+
+    /**
+     * Convert a WordPress condition function name to a template type.
      */
     private function conditionToType(string $condition): string
     {
@@ -168,10 +200,9 @@ class TemplateHierarchy
     /**
      * Add Blade template variants to the hierarchy
      *
-     * @param  array  $templates  Regular PHP templates
-     * @return void
+     * @param  string[]  $templates  Regular PHP templates
      */
-    private function addBladeTemplateVariants($templates)
+    private function addBladeTemplateVariants(array $templates): void
     {
         foreach ($templates as $template) {
             if (str_ends_with($template, '.php')) {
@@ -184,24 +215,23 @@ class TemplateHierarchy
     /**
      * Add block template variants to the hierarchy
      *
-     * @param  array  $templates  Regular PHP templates
-     * @return void
+     * @param  string[]  $templates  Regular PHP templates
      */
-    private function addBlockTemplateVariants($templates)
+    private function addBlockTemplateVariants(array $templates): void
     {
-        if (! function_exists('get_block_theme_folders')) {
+        if (!function_exists('get_block_theme_folders')) {
             return;
         }
 
         $blockFolders = get_block_theme_folders();
+        $wpTemplatePath = $blockFolders['wp_template'] . '/';
 
         foreach ($templates as $template) {
             if (str_ends_with($template, '.php')) {
-                $htmlTemplate = $blockFolders['wp_template'].'/'.str_replace('.php', '.html', $template);
-                $this->templateHierarchy[] = $htmlTemplate;
+                $this->templateHierarchy[] = $wpTemplatePath . str_replace('.php', '.html', $template);
             } else {
                 // Block theme custom template (no suffix)
-                $this->templateHierarchy[] = $blockFolders['wp_template'].'/'.$template.'.html';
+                $this->templateHierarchy[] = $wpTemplatePath . $template . '.html';
             }
         }
     }
@@ -210,111 +240,67 @@ class TemplateHierarchy
      * Get templates for a specific template type
      *
      * @param  string  $type  Template type
-     * @return array Array of templates
+     * @return string[] Array of templates
      */
-    private function templateForType($type)
+    private function getTemplatesForType(string $type): array
     {
-        $templates = [];
+        $templates = match($type) {
+            'single' => $this->singleTemplates(),
+            'page' => $this->pageTemplates(),
+            'category' => $this->categoryTemplates(),
+            'tag' => $this->tagTemplates(),
+            'taxonomy' => $this->taxonomyTemplates(),
+            'archive' => $this->archiveTemplates(),
+            'author' => $this->authorTemplates(),
+            'date' => $this->dateTemplates(),
+            'home' => ['home.php', 'index.php'],
+            'front_page' => ['front-page.php'],
+            'singular' => ['singular.php'],
+            '404' => ['404.php'],
+            'search' => ['search.php'],
+            'embed' => ['embed.php'],
+            'index' => ['index.php'],
+            default => [],
+        };
 
-        switch ($type) {
-            case 'single':
-                $templates = $this->singleTemplates();
-                break;
-
-            case 'page':
-                $templates = $this->pageTemplates();
-                break;
-
-            case 'category':
-                $templates = $this->categoryTemplates();
-                break;
-
-            case 'tag':
-                $templates = $this->tagTemplates();
-                break;
-
-            case 'taxonomy':
-                $templates = $this->taxonomyTemplates();
-                break;
-
-            case 'archive':
-                $templates = $this->archiveTemplates();
-                break;
-
-            case 'author':
-                $templates = $this->authorTemplates();
-                break;
-
-            case 'date':
-                $templates = $this->dateTemplates();
-                break;
-
-            case 'home':
-                $templates = ['home.php', 'index.php'];
-                break;
-
-            case 'front_page':
-                $templates = ['front-page.php'];
-                break;
-
-            case 'singular':
-                $templates = ['singular.php'];
-                break;
-
-            case '404':
-                $templates = ['404.php'];
-                break;
-
-            case 'search':
-                $templates = ['search.php'];
-                break;
-
-            case 'embed':
-                $templates = ['embed.php'];
-                break;
-
-            case 'index':
-                $templates = ['index.php'];
-                break;
-        }
-
-        return $templates;
+        // Allow plugins to filter templates for each type
+        return apply_filters("pollora/template_hierarchy/{$type}_templates", $templates, $this->queriedObject());
     }
 
     /**
      * Get single post templates
      *
-     * @return array
+     * @return string[]
      */
-    private function singleTemplates()
+    private function singleTemplates(): array
     {
-        $templates = [];
         $post = $this->queriedObject();
 
-        if (! $post) {
+        if (!$post) {
             return ['single.php'];
         }
 
-        $templates[] = "single-{$post->post_type}-{$post->post_name}.php";
-        $templates[] = "single-{$post->post_type}.php";
-        $templates[] = 'single.php';
-
-        return $templates;
+        return [
+            "single-{$post->post_type}-{$post->post_name}.php",
+            "single-{$post->post_type}.php",
+            'single.php',
+        ];
     }
 
     /**
      * Get page templates
      *
-     * @return array
+     * @return string[]
      */
-    private function pageTemplates()
+    private function pageTemplates(): array
     {
-        $templates = [];
         $page = $this->queriedObject();
 
-        if (! $page) {
+        if (!$page) {
             return ['page.php'];
         }
+
+        $templates = [];
 
         $template = get_page_template_slug($page->ID);
         if ($template) {
@@ -337,80 +323,77 @@ class TemplateHierarchy
     /**
      * Get category templates
      *
-     * @return array
+     * @return string[]
      */
-    private function categoryTemplates()
+    private function categoryTemplates(): array
     {
-        $templates = [];
         $category = $this->queriedObject();
 
-        if (! $category) {
+        if (!$category) {
             return ['category.php', 'archive.php'];
         }
 
-        $templates[] = "category-{$category->slug}.php";
-        $templates[] = "category-{$category->term_id}.php";
-        $templates[] = 'category.php';
-        $templates[] = 'archive.php';
-
-        return $templates;
+        return [
+            "category-{$category->slug}.php",
+            "category-{$category->term_id}.php",
+            'category.php',
+            'archive.php',
+        ];
     }
 
     /**
      * Get tag templates
      *
-     * @return array
+     * @return string[]
      */
-    private function tagTemplates()
+    private function tagTemplates(): array
     {
-        $templates = [];
         $tag = $this->queriedObject();
 
-        if (! $tag) {
+        if (!$tag) {
             return ['tag.php', 'archive.php'];
         }
 
-        $templates[] = "tag-{$tag->slug}.php";
-        $templates[] = "tag-{$tag->term_id}.php";
-        $templates[] = 'tag.php';
-        $templates[] = 'archive.php';
-
-        return $templates;
+        return [
+            "tag-{$tag->slug}.php",
+            "tag-{$tag->term_id}.php",
+            'tag.php',
+            'archive.php',
+        ];
     }
 
     /**
      * Get taxonomy templates
      *
-     * @return array
+     * @return string[]
      */
-    private function taxonomyTemplates()
+    private function taxonomyTemplates(): array
     {
-        $templates = [];
         $term = $this->queriedObject();
 
-        if (! $term || ! isset($term->taxonomy)) {
+        if (!$term || !isset($term->taxonomy)) {
             return ['taxonomy.php', 'archive.php'];
         }
 
         $taxonomy = $term->taxonomy;
 
-        $templates[] = "taxonomy-$taxonomy-{$term->slug}.php";
-        $templates[] = "taxonomy-$taxonomy.php";
-        $templates[] = 'taxonomy.php';
-        $templates[] = 'archive.php';
-
-        return $templates;
+        return [
+            "taxonomy-$taxonomy-{$term->slug}.php",
+            "taxonomy-$taxonomy.php",
+            'taxonomy.php',
+            'archive.php',
+        ];
     }
 
     /**
      * Get archive templates
      *
-     * @return array
+     * @return string[]
      */
-    private function archiveTemplates()
+    private function archiveTemplates(): array
     {
-        $templates = [];
         $postType = get_query_var('post_type');
+        $templates = [];
 
         if ($postType) {
             $templates[] = "archive-{$postType}.php";
@@ -424,31 +407,30 @@ class TemplateHierarchy
     /**
      * Get author templates
      *
-     * @return array
+     * @return string[]
      */
-    private function authorTemplates()
+    private function authorTemplates(): array
     {
-        $templates = [];
         $author = $this->queriedObject();
 
-        if (! $author) {
+        if (!$author) {
             return ['author.php', 'archive.php'];
         }
 
-        $templates[] = "author-{$author->user_nicename}.php";
-        $templates[] = "author-{$author->ID}.php";
-        $templates[] = 'author.php';
-        $templates[] = 'archive.php';
-
-        return $templates;
+        return [
+            "author-{$author->user_nicename}.php",
+            "author-{$author->ID}.php",
+            'author.php',
+            'archive.php',
+        ];
     }
 
     /**
      * Get date templates
      *
-     * @return array
+     * @return string[]
      */
-    private function dateTemplates()
+    private function dateTemplates(): array
     {
         $templates = [];
 
@@ -469,59 +451,73 @@ class TemplateHierarchy
     }
 
     /**
-     * Get template types and their conditional functions
+     * Get WordPress conditions from config with plugin extensions
      *
-     * @return array Template types with their conditional functions
+     * @return array The conditions from config with any plugin additions
      */
-    private function templateTypes()
+    private function getConditions(): array
     {
-        return [
-            'single' => 'is_single',
-            'page' => 'is_page',
-            'singular' => 'is_singular',
-            'category' => 'is_category',
-            'tag' => 'is_tag',
-            'taxonomy' => 'is_tax',
-            'author' => 'is_author',
-            'date' => 'is_date',
-            'archive' => 'is_post_type_archive',
-            'home' => 'is_home',
-            'front_page' => 'is_front_page',
-            '404' => 'is_404',
-            'search' => 'is_search',
-            'embed' => 'is_embed',
-            'index' => '__return_true',
-        ];
+        // Use cached conditions if available
+        if (self::$cachedConditions !== null) {
+            return self::$cachedConditions;
+        }
+
+        // Retrieve the WordPress conditions from the Laravel config
+        $conditions = config('wordpress.conditions', []);
+
+        // Allow plugins to register additional conditions
+        $conditions = apply_filters('pollora/template_hierarchy/conditions', $conditions);
+
+        // Cache the result
+        self::$cachedConditions = $conditions;
+
+        return $conditions;
+    }
+
+    /**
+     * Get template types and their conditional functions from config
+     *
+     * @return array<string, string> Template types with their conditional functions
+     */
+    private function templateTypes(): array
+    {
+        $conditions = $this->getConditions();
+        $templateTypes = [];
+
+        foreach ($conditions as $condition => $value) {
+            // If the value is an array, take the first element
+            if (is_array($value)) {
+                $value = reset($value);
+            }
+
+            // Swap key and value
+            $templateTypes[$value] = $condition;
+        }
+
+        // Add a fallback for the index template
+        $templateTypes['index'] = '__return_true';
+
+        return $templateTypes;
     }
 
     /**
      * Get the WordPress template hierarchy order from most specific to least specific
      *
-     * This method returns the order of template types from most specific to least specific,
-     * which can be used to determine which template should take precedence when multiple
-     * templates match the current request.
-     *
-     * @return array Array of conditional function names in order of specificity
+     * @return string[] Array of conditional function names in order of specificity
      */
     public static function getHierarchyOrder(): array
     {
-        return [
-            'is_404',
-            'is_search',
-            'is_front_page',
-            'is_home',
-            'is_post_type_archive',
-            'is_tax',
-            'is_attachment',
-            'is_single',
-            'is_page',
-            'is_singular',
-            'is_category',
-            'is_tag',
-            'is_author',
-            'is_date',
-            'is_archive',
-            '__return_true', // index fallback
-        ];
+        // Use the singleton instance to get conditions
+        $instance = self::instance();
+        $conditions = $instance->getConditions();
+
+        $hierarchyOrder = array_keys($conditions);
+
+        // Allow plugins to modify the hierarchy order
+        $hierarchyOrder = apply_filters('pollora/template_hierarchy/order', $hierarchyOrder);
+
+        $hierarchyOrder[] = '__return_true';
+
+        return $hierarchyOrder;
     }
 }
