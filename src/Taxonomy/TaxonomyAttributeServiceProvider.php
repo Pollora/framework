@@ -52,9 +52,6 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
         // Check if the directory exists before attempting to discover classes
         $directory = app_path('Cms/Taxonomies');
         if (! is_dir($directory)) {
-            // Create the directory if it doesn't exist
-            mkdir($directory, 0755, true);
-
             return; // Return early as there are no classes to discover yet
         }
 
