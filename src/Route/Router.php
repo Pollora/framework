@@ -80,7 +80,7 @@ class Router extends IlluminateRouter
             if ($specialRoute !== null) {
                 return $specialRoute;
             }
-            
+
             // If no explicit route is defined, create a special route that will
             // delegate to WordPress's built-in handlers
             return $this->createSpecialWordPressRoute($request);
@@ -89,7 +89,7 @@ class Router extends IlluminateRouter
         try {
             // First try to find a standard Laravel route
             $laravelRoute = parent::findRoute($request);
-            
+
             // If it's a WordPress route, check if there's a more specific route
             if ($laravelRoute instanceof Route && $laravelRoute->isWordPressRoute()) {
                 // Get all WordPress routes
@@ -99,7 +99,7 @@ class Router extends IlluminateRouter
                         $wpRoutes[] = $route;
                     }
                 }
-                
+
                 // Check which WordPress routes match the current request
                 $matchingRoutes = [];
                 foreach ($wpRoutes as $route) {
@@ -112,33 +112,32 @@ class Router extends IlluminateRouter
                         }
                     }
                 }
-                
+
                 // If routes match, find the most specific one
                 if (!empty($matchingRoutes)) {
                     // Get the WordPress template hierarchy order
                     $hierarchyOrder = \Pollora\Theme\TemplateHierarchy::getHierarchyOrder();
-                    
                     // Go through the hierarchy order to find the most specific route
                     foreach ($hierarchyOrder as $condition) {
                         if (isset($matchingRoutes[$condition])) {
                             $route = $matchingRoutes[$condition];
-                            
+
                             // Initialize parameters if needed
                             if (!isset($route->parameters)) {
                                 $route->parameters = [];
                             }
-                            
+
                             // Add WordPress bindings
                             global $post, $wp_query;
                             $route->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
                             $route->parameters['wp_query'] = $wp_query;
-                            
+
                             return $route;
                         }
                     }
                 }
             }
-            
+
             return $laravelRoute;
         } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
             // If no route is found, create a fallback route that will
@@ -170,7 +169,7 @@ class Router extends IlluminateRouter
     private function findSpecialWordPressRoute(): ?Route
     {
         $specialCondition = null;
-        
+
         if (function_exists('is_robots') && is_robots()) {
             $specialCondition = 'is_robots';
         } elseif (function_exists('is_favicon') && is_favicon()) {
@@ -180,20 +179,20 @@ class Router extends IlluminateRouter
         } elseif (function_exists('is_trackback') && is_trackback()) {
             $specialCondition = 'is_trackback';
         }
-        
+
         if ($specialCondition === null) {
             return null;
         }
-        
+
         // Look for a route with this specific condition
         foreach ($this->routes->getRoutes() as $route) {
-            if ($route instanceof Route 
-                && $route->isWordPressRoute() 
+            if ($route instanceof Route
+                && $route->isWordPressRoute()
                 && $route->getCondition() === $specialCondition) {
                 return $route;
             }
         }
-        
+
         return null;
     }
 
@@ -223,19 +222,19 @@ class Router extends IlluminateRouter
                 require_once ABSPATH . 'wp-trackback.php';
                 exit;
             }
-            
+
             // Fallback to 404 if none of the special handlers match
             abort(404);
         };
-        
+
         // Create a route with the special handler
         $route = $this->newRoute(['GET', 'HEAD'], $request->path(), $handler);
         $route->setIsWordPressRoute(true);
-        
+
         // Set the current route
         $this->current = $route;
         $this->container->instance(Route::class, $route);
-        
+
         return $route;
     }
 
@@ -254,11 +253,11 @@ class Router extends IlluminateRouter
         $route = $this->newRoute(['GET', 'HEAD'], $request->path(), [
             'uses' => 'Pollora\Http\Controllers\FrontendController@handle',
         ]);
-        
+
         // Set the current route
         $this->current = $route;
         $this->container->instance(Route::class, $route);
-        
+
         return $route;
     }
 

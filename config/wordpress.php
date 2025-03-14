@@ -34,16 +34,20 @@ return [
         'is_tax' => 'tax',
         'is_time' => 'time',
         'is_year' => 'year',
+    ],
 
-        // WooCommerce conditions
-        'is_shop' => 'shop',
-        'is_product' => 'product',
-        'is_cart' => 'cart',
-        'is_checkout' => 'checkout',
-        'is_account_page' => 'account',
-        'is_product_category' => 'product_category',
-        'is_product_tag' => 'product_tag',
-        'is_wc_endpoint_url' => 'wc_endpoint',
+    'plugin_conditions' => [
+        'woocommerce' => [
+            // WooCommerce conditions
+            'is_shop' => 'shop',
+            'is_product' => 'product',
+            'is_cart' => 'cart',
+            'is_checkout' => 'checkout',
+            'is_account_page' => 'account',
+            'is_product_category' => 'product_category',
+            'is_product_tag' => 'product_tag',
+            'is_wc_endpoint_url' => 'wc_endpoint',
+        ]
     ],
 
     // WordPress authentication keys and salts

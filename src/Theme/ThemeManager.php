@@ -27,7 +27,7 @@ class ThemeManager
 
     protected ?ThemeMetadata $theme = null;
 
-    public function __construct(protected Container $app, protected ViewFinderInterface $viewFinder, protected Loader $localeLoader) {}
+    public function __construct(protected Container $app, protected ViewFinderInterface $viewFinder, protected ?Loader $localeLoader) {}
 
     public function instance(): ThemeManager
     {
@@ -63,7 +63,9 @@ class ThemeManager
             $this->parentThemes[] = $currentTheme;
         }
 
-        $this->localeLoader->addNamespace($themeName, $baseTheme->getLanguagePath());
+        if ($this->localeLoader !== null) {
+            $this->localeLoader->addNamespace($themeName, $baseTheme->getLanguagePath());
+        }
     }
 
     protected function registerThemeDirectories(ThemeMetadata $theme): void

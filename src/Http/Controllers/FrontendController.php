@@ -24,7 +24,7 @@ class FrontendController extends Controller
 
         // Obtenir la hiérarchie des templates pour la requête actuelle
         $views = TemplateHierarchy::instance()->hierarchy();
-        
+
         // Vérifier si des vues existent pour chaque template dans la hiérarchie
         foreach ($views as $view) {
             if (View::exists($view)) {
