@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Config\Repository;
 use Mockery;
@@ -83,7 +85,7 @@ function setupTemplateHierarchyTest()
     Container::setInstance($container);
 
     // Create a real container for the actual TemplateHierarchy instance if needed
-    $realContainer = new Container();
+    $realContainer = new Container;
     $realContainer->instance('config', $config);
 
     return [
@@ -110,7 +112,7 @@ function setupWordPressMocksForTemplateHierarchy($conditions = [])
     // Setup apply_filters mock
     WP::$wpFunctions->shouldReceive('apply_filters')
         ->withAnyArgs()
-        ->andReturnUsing(function($tag, $value) {
+        ->andReturnUsing(function ($tag, $value) {
             return $value;
         });
 
@@ -252,7 +254,7 @@ test('expected page templates match WordPress conventions', function () {
         'template-custom.php',    // From template attribute
         'page-test-page.php',     // From post slug
         'page-123.php',           // From post ID
-        'page.php'                // Default template
+        'page.php',                // Default template
     ];
 
     // Verify the order is correct
@@ -270,7 +272,7 @@ test('expected archive templates match WordPress conventions', function () {
 
     $archiveTemplates = [
         'archive-page.php',       // Post type specific archive
-        'archive.php'             // Default archive template
+        'archive.php',             // Default archive template
     ];
 
     // Verify the order is correct
@@ -293,7 +295,7 @@ test('template include is captured and prepended to hierarchy', function () {
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
     // Create container
-    $container = new Container();
+    $container = new Container;
 
     // Create a real TemplateHierarchy instance
     $templateHierarchy = new TemplateHierarchy($config, $container);
@@ -336,7 +338,7 @@ test('blade template variants are correctly generated', function () {
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
     // Create container
-    $container = new Container();
+    $container = new Container;
 
     // Create a real instance for testing
     $templateHierarchy = new TemplateHierarchy($config, $container);
@@ -353,7 +355,7 @@ test('blade template variants are correctly generated', function () {
     $templates = [
         'page.php',
         'page-test.php',
-        'subdir/custom-template.php'
+        'subdir/custom-template.php',
     ];
 
     // Call the method
@@ -390,13 +392,13 @@ test('template handlers can be registered', function () {
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
     // Create container
-    $container = new \Illuminate\Container\Container();
+    $container = new \Illuminate\Container\Container;
 
     // Create an instance of TemplateHierarchy
     $templateHierarchy = new \Pollora\Theme\TemplateHierarchy($config, $container);
 
     // Create a handler callback
-    $handlerCallback = function($obj) {
+    $handlerCallback = function ($obj) {
         return ['custom-template.php'];
     };
 
@@ -417,20 +419,29 @@ test('condition satisfaction detection works with different WordPress functions'
         ->andReturn(true);
 
     // Define is_page and is_archive functions for this test
-    if (!function_exists('is_page')) {
-        function is_page() { return true; }
+    if (! function_exists('is_page')) {
+        function is_page()
+        {
+            return true;
+        }
     } else {
         WP::$wpFunctions->shouldReceive('is_page')->andReturn(true);
     }
 
-    if (!function_exists('is_archive')) {
-        function is_archive() { return false; }
+    if (! function_exists('is_archive')) {
+        function is_archive()
+        {
+            return false;
+        }
     } else {
         WP::$wpFunctions->shouldReceive('is_archive')->andReturn(false);
     }
 
-    if (!function_exists('nonexistent_condition')) {
-        function nonexistent_condition() { return true; }
+    if (! function_exists('nonexistent_condition')) {
+        function nonexistent_condition()
+        {
+            return true;
+        }
     }
 
     // Create config mock
@@ -438,7 +449,7 @@ test('condition satisfaction detection works with different WordPress functions'
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
     // Create container
-    $container = new Container();
+    $container = new Container;
 
     // Create a real instance for testing
     $templateHierarchy = new TemplateHierarchy($config, $container);

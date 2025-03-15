@@ -13,4 +13,4 @@ class PluginDeleted extends PluginEvent
      * Whether the plugin was deleted network wide.
      */
     public readonly bool $networkWide;
-} 
+}

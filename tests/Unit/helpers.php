@@ -13,13 +13,13 @@ class WP
 function setupWordPressMocks()
 {
     // Initialize WP::$wpFunctions if not already set
-    if (!isset(WP::$wpFunctions) || !WP::$wpFunctions) {
+    if (! isset(WP::$wpFunctions) || ! WP::$wpFunctions) {
         WP::$wpFunctions = Mockery::mock('stdClass');
     }
 
     // Mock WordPress hook functions with specific handlers for common filters
     WP::$wpFunctions->shouldReceive('add_filter')
-        ->withArgs(function($hook, $callback, $priority = 10, $accepted_args = 1) {
+        ->withArgs(function ($hook, $callback, $priority = 10, $accepted_args = 1) {
             // Allow any template_include filter to be registered
             if ($hook === 'template_include') {
                 return true;
@@ -38,7 +38,7 @@ function setupWordPressMocks()
 
     WP::$wpFunctions->shouldReceive('apply_filters')
         ->withAnyArgs()
-        ->andReturnUsing(function($tag, $value) {
+        ->andReturnUsing(function ($tag, $value) {
             return $value;
         })
         ->byDefault();
@@ -95,29 +95,31 @@ function setupWordPressMocks()
 
     WP::$wpFunctions->shouldReceive('get_queried_object')
         ->withAnyArgs()
-        ->andReturnUsing(function() {
-            $obj = new stdClass();
-            $obj->post_type = "page";
-            $obj->post_name = "test-page";
+        ->andReturnUsing(function () {
+            $obj = new stdClass;
+            $obj->post_type = 'page';
+            $obj->post_name = 'test-page';
             $obj->ID = 123;
+
             return $obj;
         })
         ->byDefault();
 
     WP::$wpFunctions->shouldReceive('get_post')
         ->withAnyArgs()
-        ->andReturnUsing(function() {
-            $post = new stdClass();
-            $post->post_name = "parent-page";
+        ->andReturnUsing(function () {
+            $post = new stdClass;
+            $post->post_name = 'parent-page';
             $post->post_parent = 0;
+
             return $post;
         })
         ->byDefault();
 
     WP::$wpFunctions->shouldReceive('get_query_var')
         ->withAnyArgs()
-        ->andReturnUsing(function($var) {
-            return $var === "post_type" ? "page" : "";
+        ->andReturnUsing(function ($var) {
+            return $var === 'post_type' ? 'page' : '';
         })
         ->byDefault();
 }
@@ -128,7 +130,7 @@ function setupWordPressMocks()
 function setWordPressConditions(array $conditions = [])
 {
     // Make sure WP::$wpFunctions is initialized
-    if (!isset(WP::$wpFunctions) || !WP::$wpFunctions) {
+    if (! isset(WP::$wpFunctions) || ! WP::$wpFunctions) {
         setupWordPressMocks();
     }
 
@@ -275,63 +277,78 @@ if (! function_exists('wp_schedule_event')) {
  * WordPress conditional functions
  */
 if (! function_exists('is_page')) {
-    function is_page() {
+    function is_page()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_page() : true;
     }
 }
 
 if (! function_exists('is_singular')) {
-    function is_singular() {
+    function is_singular()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_singular() : true;
     }
 }
 
 if (! function_exists('is_archive')) {
-    function is_archive() {
+    function is_archive()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_archive() : false;
     }
 }
 
 if (! function_exists('is_404')) {
-    function is_404() {
+    function is_404()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_404() : false;
     }
 }
 
 if (! function_exists('is_search')) {
-    function is_search() {
+    function is_search()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_search() : false;
     }
 }
 
 if (! function_exists('is_category')) {
-    function is_category() {
+    function is_category()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_category() : false;
     }
 }
 
 if (! function_exists('is_tag')) {
-    function is_tag() {
+    function is_tag()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_tag() : false;
     }
 }
 
 if (! function_exists('is_tax')) {
-    function is_tax() {
+    function is_tax()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_tax() : false;
     }
 }
 
 if (! function_exists('wp_is_block_theme')) {
-    function wp_is_block_theme() {
+    function wp_is_block_theme()
+    {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_is_block_theme() : false;
     }
 }
 
 if (! function_exists('__return_true')) {
-    function __return_true() { return true; }
+    function __return_true()
+    {
+        return true;
+    }
 }
 
 if (! function_exists('__return_false')) {
-    function __return_false() { return false; }
+    function __return_false()
+    {
+        return false;
+    }
 }

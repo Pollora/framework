@@ -15,7 +15,6 @@ use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Commands\MakeThemeCommand;
 use Pollora\Theme\Commands\RemoveThemeCommand;
 use Pollora\Theme\Factories\ComponentFactory;
-use Pollora\Theme\TemplateHierarchy;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.

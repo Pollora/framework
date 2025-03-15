@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Http\Request;
 use Mockery;
 use Pollora\Route\Matching\ConditionValidator;
@@ -11,13 +13,13 @@ use Pollora\Route\Route;
 function setupConditionValidatorTest()
 {
     // Create the validator instance
-    $validator = new ConditionValidator();
+    $validator = new ConditionValidator;
 
     // Mock WordPress functions
     mockWordPressFunctionsForValidator();
 
     return [
-        'validator' => $validator
+        'validator' => $validator,
     ];
 }
 
@@ -26,31 +28,31 @@ function setupConditionValidatorTest()
  */
 function mockWordPressFunctionsForValidator(): void
 {
-    if (!function_exists('test_condition_with_params')) {
+    if (! function_exists('test_condition_with_params')) {
         eval('namespace { function test_condition_with_params($param1, $param2) { return $param1 === "value1" && $param2 === "value2"; } }');
     }
 
-    if (!function_exists('test_condition_no_params')) {
+    if (! function_exists('test_condition_no_params')) {
         eval('namespace { function test_condition_no_params() { return true; } }');
     }
 
-    if (!function_exists('test_condition_no_params_false')) {
+    if (! function_exists('test_condition_no_params_false')) {
         eval('namespace { function test_condition_no_params_false() { return false; } }');
     }
 
-    if (!function_exists('test_condition_return_int')) {
+    if (! function_exists('test_condition_return_int')) {
         eval('namespace { function test_condition_return_int() { return 1; } }');
     }
 
-    if (!function_exists('test_condition_return_string')) {
+    if (! function_exists('test_condition_return_string')) {
         eval('namespace { function test_condition_return_string() { return "string"; } }');
     }
 
-    if (!function_exists('test_condition_return_empty_string')) {
+    if (! function_exists('test_condition_return_empty_string')) {
         eval('namespace { function test_condition_return_empty_string() { return ""; } }');
     }
 
-    if (!function_exists('test_condition_return_zero')) {
+    if (! function_exists('test_condition_return_zero')) {
         eval('namespace { function test_condition_return_zero() { return 0; } }');
     }
 }

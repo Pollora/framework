@@ -29,7 +29,7 @@ class WooCommerceProvider extends ServiceProvider
     {
         $wp_view = $this->app['wp_view'];
 
-        //add_filter('template_include', [$wp_view, 'templateInclude'], 11);
+        // add_filter('template_include', [$wp_view, 'templateInclude'], 11);
         add_filter('woocommerce_locate_template', [$wp_view, 'template']);
         add_filter('wc_get_template_part', [$wp_view, 'template']);
         add_filter('comments_template', [$wp_view, 'reviewsTemplate'], 11);

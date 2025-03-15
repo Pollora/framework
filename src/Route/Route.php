@@ -60,10 +60,10 @@ class Route extends IlluminateRoute
      */
     protected function initializeParameters(): array
     {
-        if (!isset($this->parameters)) {
+        if (! isset($this->parameters)) {
             $this->parameters = [];
         }
-        
+
         return $this->parameters;
     }
 
@@ -78,7 +78,7 @@ class Route extends IlluminateRoute
     {
         // Initialize parameters if they don't exist yet
         $this->initializeParameters();
-        
+
         $this->parameters[$name] = $value;
     }
 

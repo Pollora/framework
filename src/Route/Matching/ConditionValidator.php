@@ -35,18 +35,18 @@ class ConditionValidator implements ValidatorInterface
     {
         // Get the WordPress condition from the route
         $condition = $route->getCondition();
-        
+
         // Check if the condition function exists
-        if (!function_exists($condition)) {
+        if (! function_exists($condition)) {
             return false;
         }
-        
+
         // Get the parameters for the condition
         $parameters = $route->getConditionParameters();
-        
+
         // Call the WordPress condition function with the parameters
         $result = call_user_func_array($condition, $parameters);
-        
+
         // Convert the result to a boolean
         return (bool) $result;
     }

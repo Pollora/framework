@@ -203,16 +203,14 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
 
     /**
      * Handle plugin uninstallation.
-     *
-     * @return bool
      */
     public function handlePreOptionUninstallPlugins(): bool
     {
         // Check if we're in a plugin deletion context
         if (
-            'delete-selected' !== filter_input(INPUT_GET, 'action')
+            filter_input(INPUT_GET, 'action') !== 'delete-selected'
             &&
-            'delete-selected' !== filter_input(INPUT_POST, 'action2')
+            filter_input(INPUT_POST, 'action2') !== 'delete-selected'
         ) {
             return false;
         }

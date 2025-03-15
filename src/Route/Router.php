@@ -8,7 +8,6 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Router as IlluminateRouter;
 use Pollora\Route\Bindings\NullableWpPost;
-use Pollora\Route\Route;
 
 /**
  * Extended Router that provides WordPress-specific routing functionality.
@@ -114,7 +113,7 @@ class Router extends IlluminateRouter
                 }
 
                 // If routes match, find the most specific one
-                if (!empty($matchingRoutes)) {
+                if (! empty($matchingRoutes)) {
                     // Get the WordPress template hierarchy order from the container
                     $templateHierarchy = $this->container->make(\Pollora\Theme\TemplateHierarchy::class);
                     $hierarchyOrder = $templateHierarchy->getHierarchyOrder();
@@ -125,7 +124,7 @@ class Router extends IlluminateRouter
                             $route = $matchingRoutes[$condition];
 
                             // Initialize parameters if needed
-                            if (!isset($route->parameters)) {
+                            if (! isset($route->parameters)) {
                                 $route->parameters = [];
                             }
 
@@ -221,7 +220,7 @@ class Router extends IlluminateRouter
                 do_feed();
                 exit;
             } elseif (function_exists('is_trackback') && is_trackback()) {
-                require_once ABSPATH . 'wp-trackback.php';
+                require_once ABSPATH.'wp-trackback.php';
                 exit;
             }
 
@@ -297,7 +296,7 @@ class Router extends IlluminateRouter
         global $post, $wp_query;
 
         // Initialize parameters if needed
-        if (!isset($route->parameters)) {
+        if (! isset($route->parameters)) {
             $route->parameters = [];
         }
 

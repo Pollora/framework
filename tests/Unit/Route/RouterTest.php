@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
@@ -21,8 +23,9 @@ function setupRouterTest()
     $events->shouldReceive('dispatch')->andReturn(null);
 
     // Create container
-    $container = new Container();
-    $container->instance('config', new class {
+    $container = new Container;
+    $container->instance('config', new class
+    {
         public function get($key, $default = null)
         {
             return $default;
@@ -57,7 +60,7 @@ function setupRouterTest()
  */
 function mockWordPressClasses(): void
 {
-    if (!class_exists('WP_Post')) {
+    if (! class_exists('WP_Post')) {
         eval('namespace { class WP_Post { public function __construct($post = null) {} } }');
     }
 }
@@ -110,7 +113,7 @@ test('router finds WordPress route', function () {
     setWordPressConditions([
         'is_page' => true,
         'is_singular' => true,
-        'is_archive' => false
+        'is_archive' => false,
     ]);
 
     // Create a request
@@ -159,7 +162,7 @@ test('router finds most specific WordPress route with page first', function () {
     setWordPressConditions([
         'is_page' => true,
         'is_singular' => true,
-        'is_archive' => true
+        'is_archive' => true,
     ]);
 
     // Create a request
@@ -215,7 +218,7 @@ test('router finds most specific WordPress route with archive first', function (
     setWordPressConditions([
         'is_page' => false,
         'is_singular' => false,
-        'is_archive' => true
+        'is_archive' => true,
     ]);
 
     // Create a request

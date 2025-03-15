@@ -34,15 +34,11 @@ class TemplateHierarchy
 
     /**
      * Cache for WordPress conditions
-     *
-     * @var array|null
      */
     private static ?array $cachedConditions = null;
 
     /**
      * Cache for plugin conditions
-     *
-     * @var array|null
      */
     private static ?array $cachedPluginConditions = null;
 
@@ -74,14 +70,14 @@ class TemplateHierarchy
     /**
      * Register a custom template handler
      *
-     * @param string $type Template type identifier
-     * @param callable $callback Function that returns an array of template files
-     * @return void
+     * @param  string  $type  Template type identifier
+     * @param  callable  $callback  Function that returns an array of template files
      */
     public function registerTemplateHandler(string $type, callable $callback): void
     {
-        add_filter("pollora/template_hierarchy/{$type}_templates", function($templates) use ($callback) {
+        add_filter("pollora/template_hierarchy/{$type}_templates", function ($templates) use ($callback) {
             $customTemplates = call_user_func($callback, $this->queriedObject());
+
             return array_merge($customTemplates, $templates);
         }, 10, 1);
     }
@@ -102,14 +98,14 @@ class TemplateHierarchy
     /**
      * Capture the template being included by WordPress
      *
-     * @param string $template The template being included
+     * @param  string  $template  The template being included
      * @return string The unchanged template path
      */
     public function captureTemplateInclude(string $template): string
     {
         // Add the final template to the beginning of our hierarchy
         // This ensures plugin templates take precedence
-        if (!empty($template)) {
+        if (! empty($template)) {
             array_unshift($this->templateHierarchy, $template);
             $this->templateHierarchy = array_unique($this->templateHierarchy);
         }
@@ -128,13 +124,13 @@ class TemplateHierarchy
     /**
      * Get the template hierarchy for the current request
      *
-     * @param bool $refresh Force recomputing the hierarchy even if already calculated
+     * @param  bool  $refresh  Force recomputing the hierarchy even if already calculated
      * @return string[] The template hierarchy
      */
     public function hierarchy(bool $refresh = false): array
     {
         // Only compute hierarchy if not already done or if refresh is requested
-        if ($refresh || empty($this->templateHierarchy) || !$this->hierarchyFinalized) {
+        if ($refresh || empty($this->templateHierarchy) || ! $this->hierarchyFinalized) {
             $this->computeHierarchy();
         }
 
@@ -176,7 +172,7 @@ class TemplateHierarchy
     private function collectWooCommerceTemplates(): bool
     {
         // Early bail if WooCommerce is not active
-        if (!function_exists('is_woocommerce')) {
+        if (! function_exists('is_woocommerce')) {
             return false;
         }
 
@@ -194,17 +190,17 @@ class TemplateHierarchy
                 // Try parent category templates if available
                 if (isset($term->parent) && $term->parent) {
                     $parent = get_term($term->parent, 'product_cat');
-                    if ($parent && !is_wp_error($parent)) {
+                    if ($parent && ! is_wp_error($parent)) {
                         $templates[] = "woocommerce/taxonomy-product_cat-{$parent->slug}.php";
                     }
                 }
             }
 
             // Generic category template
-            $templates[] = "woocommerce/taxonomy-product_cat.php";
+            $templates[] = 'woocommerce/taxonomy-product_cat.php';
 
             // Fall back to product archive
-            $templates[] = "woocommerce/archive-product.php";
+            $templates[] = 'woocommerce/archive-product.php';
         }
         // Product Tag Archives
         elseif (function_exists('is_product_tag') && is_product_tag()) {
@@ -214,11 +210,11 @@ class TemplateHierarchy
                 $templates[] = "woocommerce/taxonomy-product_tag-{$term->slug}.php";
             }
 
-            $templates[] = "woocommerce/taxonomy-product_tag.php";
-            $templates[] = "woocommerce/archive-product.php";
+            $templates[] = 'woocommerce/taxonomy-product_tag.php';
+            $templates[] = 'woocommerce/archive-product.php';
         }
         // Other Product Taxonomy Archives
-        elseif (function_exists('is_product_taxonomy') && is_product_taxonomy() && !is_product_category() && !is_product_tag()) {
+        elseif (function_exists('is_product_taxonomy') && is_product_taxonomy() && ! is_product_category() && ! is_product_tag()) {
             $term = $this->queriedObject();
 
             if ($term && isset($term->taxonomy) && isset($term->slug)) {
@@ -227,7 +223,7 @@ class TemplateHierarchy
                 $templates[] = "woocommerce/taxonomy-{$taxonomy}.php";
             }
 
-            $templates[] = "woocommerce/archive-product.php";
+            $templates[] = 'woocommerce/archive-product.php';
         }
         // Shop Page (Products Archive)
         elseif (function_exists('is_shop') && is_shop()) {
@@ -246,7 +242,7 @@ class TemplateHierarchy
                 }
             }
 
-            $templates[] = "woocommerce/archive-product.php";
+            $templates[] = 'woocommerce/archive-product.php';
         }
         // Single Product Pages
         elseif (function_exists('is_product') && is_product()) {
@@ -272,14 +268,14 @@ class TemplateHierarchy
                 }
 
                 // Standard WooCommerce product template
-                $templates[] = "woocommerce/single-product.php";
+                $templates[] = 'woocommerce/single-product.php';
             } else {
-                $templates[] = "woocommerce/single-product.php";
+                $templates[] = 'woocommerce/single-product.php';
             }
         }
         // Cart Page
         elseif (function_exists('is_cart') && is_cart()) {
-            $templates[] = "woocommerce/cart.php";
+            $templates[] = 'woocommerce/cart.php';
         }
         // Checkout Page
         elseif (function_exists('is_checkout') && is_checkout()) {
@@ -293,11 +289,11 @@ class TemplateHierarchy
 
             // Thank you page
             if (is_wc_endpoint_url('order-received')) {
-                $templates[] = "woocommerce/checkout-thankyou.php";
+                $templates[] = 'woocommerce/checkout-thankyou.php';
             }
 
             // Standard checkout
-            $templates[] = "woocommerce/checkout.php";
+            $templates[] = 'woocommerce/checkout.php';
         }
         // Account Pages
         elseif (function_exists('is_account_page') && is_account_page()) {
@@ -310,16 +306,16 @@ class TemplateHierarchy
             }
 
             // Login form
-            if (!is_user_logged_in()) {
-                $templates[] = "woocommerce/myaccount-login.php";
+            if (! is_user_logged_in()) {
+                $templates[] = 'woocommerce/myaccount-login.php';
             }
 
             // Standard account
-            $templates[] = "woocommerce/myaccount.php";
+            $templates[] = 'woocommerce/myaccount.php';
         }
 
         // Add templates to hierarchy if any were found
-        if (!empty($templates)) {
+        if (! empty($templates)) {
             $this->addTemplatesToHierarchy($templates);
         }
 
@@ -347,31 +343,31 @@ class TemplateHierarchy
 
         // WooCommerce special cases - ensure appropriate WordPress templates are added
         if (function_exists('is_woocommerce') && is_woocommerce()) {
-            if (is_product() && !in_array('is_single', $satisfiedConditions)) {
+            if (is_product() && ! in_array('is_single', $satisfiedConditions)) {
                 $satisfiedConditions[] = 'is_single';
                 $satisfiedConditions[] = 'is_singular';
             }
 
-            if (is_shop() && !in_array('is_post_type_archive', $satisfiedConditions)) {
+            if (is_shop() && ! in_array('is_post_type_archive', $satisfiedConditions)) {
                 $satisfiedConditions[] = 'is_post_type_archive';
                 $satisfiedConditions[] = 'is_archive';
             }
 
-            if (is_product_category() && !in_array('is_tax', $satisfiedConditions)) {
+            if (is_product_category() && ! in_array('is_tax', $satisfiedConditions)) {
                 $satisfiedConditions[] = 'is_tax';
                 $satisfiedConditions[] = 'is_archive';
                 // Add category as well for better fallbacks
                 $satisfiedConditions[] = 'is_category';
             }
 
-            if (is_product_tag() && !in_array('is_tax', $satisfiedConditions)) {
+            if (is_product_tag() && ! in_array('is_tax', $satisfiedConditions)) {
                 $satisfiedConditions[] = 'is_tax';
                 $satisfiedConditions[] = 'is_archive';
                 // Add tag as well for better fallbacks
                 $satisfiedConditions[] = 'is_tag';
             }
 
-            if ((is_cart() || is_checkout() || is_account_page()) && !in_array('is_page', $satisfiedConditions)) {
+            if ((is_cart() || is_checkout() || is_account_page()) && ! in_array('is_page', $satisfiedConditions)) {
                 $satisfiedConditions[] = 'is_page';
                 $satisfiedConditions[] = 'is_singular';
             }
@@ -382,7 +378,7 @@ class TemplateHierarchy
             $type = $this->conditionToType($tag);
             $templates = $this->getTemplatesForType($type);
 
-            if (!empty($templates)) {
+            if (! empty($templates)) {
                 $this->addTemplatesToHierarchy($templates);
             }
         }
@@ -397,23 +393,23 @@ class TemplateHierarchy
     {
         // This matches the $tag_templates array in template-loader.php
         return [
-            'is_embed'             => 'get_embed_template',
-            'is_404'               => 'get_404_template',
-            'is_search'            => 'get_search_template',
-            'is_front_page'        => 'get_front_page_template',
-            'is_home'              => 'get_home_template',
-            'is_privacy_policy'    => 'get_privacy_policy_template',
+            'is_embed' => 'get_embed_template',
+            'is_404' => 'get_404_template',
+            'is_search' => 'get_search_template',
+            'is_front_page' => 'get_front_page_template',
+            'is_home' => 'get_home_template',
+            'is_privacy_policy' => 'get_privacy_policy_template',
             'is_post_type_archive' => 'get_post_type_archive_template',
-            'is_tax'               => 'get_taxonomy_template',
-            'is_attachment'        => 'get_attachment_template',
-            'is_single'            => 'get_single_template',
-            'is_page'              => 'get_page_template',
-            'is_singular'          => 'get_singular_template',
-            'is_category'          => 'get_category_template',
-            'is_tag'               => 'get_tag_template',
-            'is_author'            => 'get_author_template',
-            'is_date'              => 'get_date_template',
-            'is_archive'           => 'get_archive_template',
+            'is_tax' => 'get_taxonomy_template',
+            'is_attachment' => 'get_attachment_template',
+            'is_single' => 'get_single_template',
+            'is_page' => 'get_page_template',
+            'is_singular' => 'get_singular_template',
+            'is_category' => 'get_category_template',
+            'is_tag' => 'get_tag_template',
+            'is_author' => 'get_author_template',
+            'is_date' => 'get_date_template',
+            'is_archive' => 'get_archive_template',
         ];
     }
 
@@ -439,7 +435,7 @@ class TemplateHierarchy
                 $type = $this->conditionToType($condition);
                 $templates = $this->getTemplatesForType($type);
 
-                if (!empty($templates)) {
+                if (! empty($templates)) {
                     $templatesByCondition[$condition] = $templates;
                 }
             }
@@ -456,8 +452,8 @@ class TemplateHierarchy
     /**
      * Get templates for a plugin-specific template type
      *
-     * @param string $type Template type
-     * @param string $pluginName Plugin name
+     * @param  string  $type  Template type
+     * @param  string  $pluginName  Plugin name
      * @return string[] Array of templates
      */
     private function getPluginTemplatesForType(string $type, string $pluginName): array
@@ -502,7 +498,7 @@ class TemplateHierarchy
     /**
      * Get templates specific to WooCommerce
      *
-     * @param string $type Template type
+     * @param  string  $type  Template type
      * @return string[] Array of templates
      */
     private function getWooCommerceTemplates(string $type): array
@@ -526,7 +522,7 @@ class TemplateHierarchy
                     }
 
                     // Add standard WooCommerce product template
-                    $templates[] = "woocommerce/single-product.php";
+                    $templates[] = 'woocommerce/single-product.php';
 
                     // Check if there's a custom template assigned in WooCommerce product data
                     $wc_template = get_post_meta($queriedObject->ID, '_wp_page_template', true);
@@ -534,7 +530,7 @@ class TemplateHierarchy
                         array_unshift($templates, $wc_template);
                     }
                 } else {
-                    $templates[] = "woocommerce/single-product.php";
+                    $templates[] = 'woocommerce/single-product.php';
                 }
                 break;
 
@@ -543,7 +539,7 @@ class TemplateHierarchy
                     // Try parent category templates if available
                     if (isset($queriedObject->parent) && $queriedObject->parent) {
                         $parent = get_term($queriedObject->parent, 'product_cat');
-                        if ($parent && !is_wp_error($parent)) {
+                        if ($parent && ! is_wp_error($parent)) {
                             $templates[] = "woocommerce/taxonomy-product_cat-{$parent->slug}.php";
                         }
                     }
@@ -553,10 +549,10 @@ class TemplateHierarchy
                 }
 
                 // Generic category template
-                $templates[] = "woocommerce/taxonomy-product_cat.php";
+                $templates[] = 'woocommerce/taxonomy-product_cat.php';
 
                 // Fall back to product archive
-                $templates[] = "woocommerce/archive-product.php";
+                $templates[] = 'woocommerce/archive-product.php';
                 break;
 
             case 'product_tag':
@@ -565,10 +561,10 @@ class TemplateHierarchy
                 }
 
                 // Generic tag template
-                $templates[] = "woocommerce/taxonomy-product_tag.php";
+                $templates[] = 'woocommerce/taxonomy-product_tag.php';
 
                 // Fall back to product archive
-                $templates[] = "woocommerce/archive-product.php";
+                $templates[] = 'woocommerce/archive-product.php';
                 break;
 
             case 'shop':
@@ -588,11 +584,11 @@ class TemplateHierarchy
                 }
 
                 // Standard shop template
-                $templates[] = "woocommerce/archive-product.php";
+                $templates[] = 'woocommerce/archive-product.php';
                 break;
 
             case 'cart':
-                $templates[] = "woocommerce/cart.php";
+                $templates[] = 'woocommerce/cart.php';
                 break;
 
             case 'checkout':
@@ -605,7 +601,7 @@ class TemplateHierarchy
                 }
 
                 // Standard checkout
-                $templates[] = "woocommerce/checkout.php";
+                $templates[] = 'woocommerce/checkout.php';
                 break;
 
             case 'account':
@@ -618,7 +614,7 @@ class TemplateHierarchy
                 }
 
                 // Standard account
-                $templates[] = "woocommerce/myaccount.php";
+                $templates[] = 'woocommerce/myaccount.php';
                 break;
 
             case 'wc_endpoint':
@@ -631,16 +627,16 @@ class TemplateHierarchy
                         // If it's a checkout or account endpoint, add specific fallbacks
                         if (is_checkout()) {
                             $templates[] = "woocommerce/checkout-{$endpoint}.php";
-                            $templates[] = "woocommerce/checkout.php";
+                            $templates[] = 'woocommerce/checkout.php';
                         } elseif (is_account_page()) {
                             $templates[] = "woocommerce/myaccount-{$endpoint}.php";
-                            $templates[] = "woocommerce/myaccount.php";
+                            $templates[] = 'woocommerce/myaccount.php';
                         }
                     }
                 }
 
                 // Generic endpoint template
-                $templates[] = "woocommerce/endpoint.php";
+                $templates[] = 'woocommerce/endpoint.php';
                 break;
 
             default:
@@ -663,7 +659,7 @@ class TemplateHierarchy
     /**
      * Add templates to the hierarchy with their variants
      *
-     * @param string[] $templates
+     * @param  string[]  $templates
      */
     private function addTemplatesToHierarchy(array $templates): void
     {
@@ -689,6 +685,7 @@ class TemplateHierarchy
     private function conditionToType(string $condition): string
     {
         $types = array_flip($this->templateTypes());
+
         return $types[$condition] ?? str_replace('is_', '', $condition);
     }
 
@@ -714,19 +711,19 @@ class TemplateHierarchy
      */
     private function addBlockTemplateVariants(array $templates): void
     {
-        if (!function_exists('get_block_theme_folders')) {
+        if (! function_exists('get_block_theme_folders')) {
             return;
         }
 
         $blockFolders = get_block_theme_folders();
-        $wpTemplatePath = $blockFolders['wp_template'] . '/';
+        $wpTemplatePath = $blockFolders['wp_template'].'/';
 
         foreach ($templates as $template) {
             if (str_ends_with($template, '.php')) {
-                $this->templateHierarchy[] = $wpTemplatePath . str_replace('.php', '.html', $template);
+                $this->templateHierarchy[] = $wpTemplatePath.str_replace('.php', '.html', $template);
             } else {
                 // Block theme custom template (no suffix)
-                $this->templateHierarchy[] = $wpTemplatePath . $template . '.html';
+                $this->templateHierarchy[] = $wpTemplatePath.$template.'.html';
             }
         }
     }
@@ -739,7 +736,7 @@ class TemplateHierarchy
      */
     private function getTemplatesForType(string $type): array
     {
-        $templates = match($type) {
+        $templates = match ($type) {
             'single' => $this->singleTemplates(),
             'page' => $this->pageTemplates(),
             'category' => $this->categoryTemplates(),
@@ -771,7 +768,7 @@ class TemplateHierarchy
     {
         $post = $this->queriedObject();
 
-        if (!$post) {
+        if (! $post) {
             return ['single.php'];
         }
 
@@ -791,7 +788,7 @@ class TemplateHierarchy
     {
         $page = $this->queriedObject();
 
-        if (!$page) {
+        if (! $page) {
             return ['page.php'];
         }
 
@@ -824,7 +821,7 @@ class TemplateHierarchy
     {
         $category = $this->queriedObject();
 
-        if (!$category) {
+        if (! $category) {
             return ['category.php', 'archive.php'];
         }
 
@@ -845,7 +842,7 @@ class TemplateHierarchy
     {
         $tag = $this->queriedObject();
 
-        if (!$tag) {
+        if (! $tag) {
             return ['tag.php', 'archive.php'];
         }
 
@@ -866,7 +863,7 @@ class TemplateHierarchy
     {
         $term = $this->queriedObject();
 
-        if (!$term || !isset($term->taxonomy)) {
+        if (! $term || ! isset($term->taxonomy)) {
             return ['taxonomy.php', 'archive.php'];
         }
 
@@ -908,7 +905,7 @@ class TemplateHierarchy
     {
         $author = $this->queriedObject();
 
-        if (!$author) {
+        if (! $author) {
             return ['author.php', 'archive.php'];
         }
 

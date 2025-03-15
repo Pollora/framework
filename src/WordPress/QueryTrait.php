@@ -81,7 +81,6 @@ trait QueryTrait
      * This method initializes WordPress and handles special request types
      * like robots.txt, favicon, feeds, and trackbacks.
      *
-     * @return void
      * @throws \RuntimeException If WordPress core functions are not available
      */
     protected function runWp(): void
@@ -96,19 +95,23 @@ trait QueryTrait
         // Handle special request types
         if (is_robots()) {
             do_action('do_robots');
+
             return;
         } elseif (is_favicon()) {
             do_action('do_favicon');
+
             return;
         } elseif (is_feed()) {
             do_feed();
+
             return;
         } elseif (is_trackback()) {
-            require_once ABSPATH . 'wp-trackback.php';
+            require_once ABSPATH.'wp-trackback.php';
+
             return;
         }
 
         // Load the default WordPress template loader
-        require_once ABSPATH . WPINC . '/template-loader.php';
+        require_once ABSPATH.WPINC.'/template-loader.php';
     }
 }

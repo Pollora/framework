@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Http\Request;
 use Mockery;
 use Pollora\Route\Matching\ConditionValidator;
@@ -21,7 +23,7 @@ function setupRouteTest()
  */
 function mockWordPressFunctionsForRoute(): void
 {
-    if (!function_exists('test_condition')) {
+    if (! function_exists('test_condition')) {
         eval('namespace { function test_condition($param = null) { return $param === 123; } }');
     }
 }
