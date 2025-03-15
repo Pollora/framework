@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Theme;
 
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\Container;
+
 /**
  * Class TemplateHierarchy
  *
@@ -44,16 +47,28 @@ class TemplateHierarchy
     private static ?array $cachedPluginConditions = null;
 
     /**
-     * Singleton instance
+     * The configuration repository
      */
-    private static ?self $instance = null;
+    private Repository $config;
 
     /**
-     * Get singleton instance
+     * The container instance
      */
-    public static function instance(): self
+    private Container $container;
+
+    /**
+     * Create a new TemplateHierarchy instance.
+     */
+    public function __construct(Repository $config, Container $container)
     {
-        return self::$instance ??= new self;
+        $this->config = $config;
+        $this->container = $container;
+
+        // Hook into template_include at a high priority to capture the final template
+        add_filter('template_include', [$this, 'captureTemplateInclude'], PHP_INT_MAX - 10);
+
+        // Add early hook to compute hierarchy during template_redirect
+        add_action('template_redirect', [$this, 'computeHierarchyEarly'], 0);
     }
 
     /**
@@ -69,20 +84,6 @@ class TemplateHierarchy
             $customTemplates = call_user_func($callback, $this->queriedObject());
             return array_merge($customTemplates, $templates);
         }, 10, 1);
-    }
-
-    /**
-     * Private constructor to enforce singleton pattern
-     */
-    private function __construct()
-    {
-        // Hook into template_include at a high priority to capture the final template
-        // This filter is applied after WordPress has determined the template to use
-        add_filter('template_include', [$this, 'captureTemplateInclude'], PHP_INT_MAX - 10);
-
-        // Add early hook to compute hierarchy during template_redirect
-        // This happens before WordPress starts looking for templates
-        add_action('template_redirect', [$this, 'computeHierarchyEarly'], 0);
     }
 
     /**
@@ -951,21 +952,11 @@ class TemplateHierarchy
      */
     private function getConditions(): array
     {
-        // Use cached conditions if available
-        if (self::$cachedConditions !== null) {
-            return self::$cachedConditions;
-        }
-
         // Retrieve the WordPress conditions from the Laravel config
-        $conditions = config('wordpress.conditions', []);
+        $conditions = $this->config->get('wordpress.conditions', []);
 
         // Allow plugins to register additional conditions
-        $conditions = apply_filters('pollora/template_hierarchy/conditions', $conditions);
-
-        // Cache the result
-        self::$cachedConditions = $conditions;
-
-        return $conditions;
+        return apply_filters('pollora/template_hierarchy/conditions', $conditions);
     }
 
     /**
@@ -975,21 +966,11 @@ class TemplateHierarchy
      */
     private function getPluginConditions(): array
     {
-        // Use cached plugin conditions if available
-        if (self::$cachedPluginConditions !== null) {
-            return self::$cachedPluginConditions;
-        }
-
         // Retrieve the plugin conditions from the Laravel config
-        $pluginConditions = config('wordpress.plugin_conditions', []);
+        $pluginConditions = $this->config->get('wordpress.plugin_conditions', []);
 
         // Allow plugins to register additional plugin conditions
-        $pluginConditions = apply_filters('pollora/template_hierarchy/plugin_conditions', $pluginConditions);
-
-        // Cache the result
-        self::$cachedPluginConditions = $pluginConditions;
-
-        return $pluginConditions;
+        return apply_filters('pollora/template_hierarchy/plugin_conditions', $pluginConditions);
     }
 
     /**
@@ -1023,12 +1004,10 @@ class TemplateHierarchy
      *
      * @return string[] Array of conditional function names in order of specificity
      */
-    public static function getHierarchyOrder(): array
+    public function getHierarchyOrder(): array
     {
-        // Use the singleton instance to get conditions
-        $instance = self::instance();
-        $conditions = $instance->getConditions();
-
+        // Get conditions from config
+        $conditions = $this->getConditions();
         $hierarchyOrder = array_keys($conditions);
 
         // Allow plugins to modify the hierarchy order

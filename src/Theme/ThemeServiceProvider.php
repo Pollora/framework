@@ -15,6 +15,7 @@ use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Commands\MakeThemeCommand;
 use Pollora\Theme\Commands\RemoveThemeCommand;
 use Pollora\Theme\Factories\ComponentFactory;
+use Pollora\Theme\TemplateHierarchy;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -54,6 +55,13 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(ComponentFactory::class, fn ($app): \Pollora\Theme\Factories\ComponentFactory => new ComponentFactory($app));
 
         $this->app->singleton(ThemeComponentProvider::class, fn ($app): \Pollora\Theme\ThemeComponentProvider => new ThemeComponentProvider($app, $app->make(ComponentFactory::class)));
+
+        $this->app->singleton(TemplateHierarchy::class, function ($app) {
+            return new TemplateHierarchy(
+                $app['config'],
+                $app
+            );
+        });
 
         $this->app->make(ThemeComponentProvider::class)->register();
 

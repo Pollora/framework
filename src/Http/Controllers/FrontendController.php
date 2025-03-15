@@ -11,6 +11,19 @@ use Pollora\Theme\TemplateHierarchy;
 class FrontendController extends Controller
 {
     /**
+     * The template hierarchy instance
+     */
+    private TemplateHierarchy $templateHierarchy;
+
+    /**
+     * Create a new FrontendController instance.
+     */
+    public function __construct(TemplateHierarchy $templateHierarchy)
+    {
+        $this->templateHierarchy = $templateHierarchy;
+    }
+
+    /**
      * Handle the automatic view assignment for WordPress templates.
      *
      * This method will automatically determine the appropriate view
@@ -23,7 +36,7 @@ class FrontendController extends Controller
         global $wp_query;
 
         // Obtenir la hiérarchie des templates pour la requête actuelle
-        $views = TemplateHierarchy::instance()->hierarchy();
+        $views = $this->templateHierarchy->hierarchy();
 
         // Vérifier si des vues existent pour chaque template dans la hiérarchie
         foreach ($views as $view) {

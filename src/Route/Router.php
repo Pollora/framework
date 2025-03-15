@@ -115,8 +115,10 @@ class Router extends IlluminateRouter
 
                 // If routes match, find the most specific one
                 if (!empty($matchingRoutes)) {
-                    // Get the WordPress template hierarchy order
-                    $hierarchyOrder = \Pollora\Theme\TemplateHierarchy::getHierarchyOrder();
+                    // Get the WordPress template hierarchy order from the container
+                    $templateHierarchy = $this->container->make(\Pollora\Theme\TemplateHierarchy::class);
+                    $hierarchyOrder = $templateHierarchy->getHierarchyOrder();
+
                     // Go through the hierarchy order to find the most specific route
                     foreach ($hierarchyOrder as $condition) {
                         if (isset($matchingRoutes[$condition])) {

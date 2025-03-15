@@ -1,136 +1,100 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Unit\PostType;
-
 use Illuminate\Support\Str;
-use PHPUnit\Framework\TestCase;
 use Pollora\PostType\AbstractPostType;
 
-class AbstractPostTypeTest extends TestCase
+/**
+ * Create a test post type class that extends AbstractPostType
+ */
+function createTestPostType()
 {
-    public function test_slug_is_generated_from_class_name(): void
+    return new class extends AbstractPostType
     {
-        $postType = new class extends AbstractPostType
+        public function getName(): string
         {
-            public function getName(): string
-            {
-                return parent::getName();
-            }
+            return parent::getName();
+        }
 
-            public function getPluralName(): string
-            {
-                return parent::getPluralName();
-            }
-
-            public function getLabels(): array
-            {
-                return [];
-            }
-        };
-
-        $className = class_basename($postType);
-        $expectedSlug = Str::kebab($className);
-
-        $this->assertEquals($expectedSlug, $postType->getSlug());
-    }
-
-    public function test_name_is_generated_from_class_name(): void
-    {
-        $postType = new class extends AbstractPostType
+        public function getPluralName(): string
         {
-            public function getName(): string
-            {
-                return parent::getName();
-            }
+            return parent::getPluralName();
+        }
 
-            public function getPluralName(): string
-            {
-                return parent::getPluralName();
-            }
-
-            public function getLabels(): array
-            {
-                return [];
-            }
-        };
-
-        $className = class_basename($postType);
-        $snakeCase = Str::snake($className);
-        $expectedName = ucfirst(str_replace('_', ' ', $snakeCase));
-        $expectedName = Str::singular($expectedName);
-
-        $this->assertEquals($expectedName, $postType->getName());
-    }
-
-    public function test_plural_name_is_generated_from_class_name(): void
-    {
-        $postType = new class extends AbstractPostType
+        public function getLabels(): array
         {
-            public function getName(): string
-            {
-                return parent::getName();
-            }
+            return [];
+        }
+    };
+}
 
-            public function getPluralName(): string
-            {
-                return parent::getPluralName();
-            }
+test('slug is generated from class name', function () {
+    $postType = createTestPostType();
 
-            public function getLabels(): array
-            {
-                return [];
-            }
-        };
+    $className = class_basename($postType);
+    $expectedSlug = Str::kebab($className);
 
-        $className = class_basename($postType);
+    expect($postType->getSlug())->toBe($expectedSlug);
+});
+
+test('name is generated from class name', function () {
+    $postType = createTestPostType();
+
+    $className = class_basename($postType);
+    $snakeCase = Str::snake($className);
+    $expectedName = ucfirst(str_replace('_', ' ', $snakeCase));
+    $expectedName = Str::singular($expectedName);
+
+    expect($postType->getName())->toBe($expectedName);
+});
+
+test('plural name is generated from class name', function () {
+    $postType = createTestPostType();
+
+    $className = class_basename($postType);
+    $snakeCase = Str::snake($className);
+    $humanized = ucfirst(str_replace('_', ' ', $snakeCase));
+    $expectedPluralName = Str::plural($humanized);
+
+    expect($postType->getPluralName())->toBe($expectedPluralName);
+});
+
+test('complex class names are properly humanized', function () {
+    // Test with different class names
+    $testCases = [
+        'ProductCategory' => [
+            'slug' => 'product-category',
+            'name' => 'Product category',
+            'plural' => 'Product categories',
+        ],
+        'BlogPost' => [
+            'slug' => 'blog-post',
+            'name' => 'Blog post',
+            'plural' => 'Blog posts',
+        ],
+        'FAQ' => [
+            'slug' => 'f-a-q',
+            'name' => 'F a q',
+            'plural' => 'F a qs',
+        ],
+        'TeamMember' => [
+            'slug' => 'team-member',
+            'name' => 'Team member',
+            'plural' => 'Team members',
+        ],
+    ];
+
+    foreach ($testCases as $className => $expected) {
+        // Test slug generation
+        expect(Str::kebab($className))->toBe($expected['slug']);
+
+        // Test name generation
         $snakeCase = Str::snake($className);
         $humanized = ucfirst(str_replace('_', ' ', $snakeCase));
-        $expectedPluralName = Str::plural($humanized);
+        $singularName = Str::singular($humanized);
+        expect($singularName)->toBe($expected['name']);
 
-        $this->assertEquals($expectedPluralName, $postType->getPluralName());
+        // Test plural name generation
+        $pluralName = Str::plural($singularName);
+        expect($pluralName)->toBe($expected['plural']);
     }
-
-    public function test_complex_class_name_is_properly_humanized(): void
-    {
-        // Test with different class names
-        $testCases = [
-            'ProductCategory' => [
-                'slug' => 'product-category',
-                'name' => 'Product category',
-                'plural' => 'Product categories',
-            ],
-            'BlogPost' => [
-                'slug' => 'blog-post',
-                'name' => 'Blog post',
-                'plural' => 'Blog posts',
-            ],
-            'FAQ' => [
-                'slug' => 'f-a-q',
-                'name' => 'F a q',
-                'plural' => 'F a qs',
-            ],
-            'TeamMember' => [
-                'slug' => 'team-member',
-                'name' => 'Team member',
-                'plural' => 'Team members',
-            ],
-        ];
-
-        foreach ($testCases as $className => $expected) {
-            // Test slug generation
-            $this->assertEquals($expected['slug'], Str::kebab($className));
-
-            // Test name generation
-            $snakeCase = Str::snake($className);
-            $humanized = ucfirst(str_replace('_', ' ', $snakeCase));
-            $singularName = Str::singular($humanized);
-            $this->assertEquals($expected['name'], $singularName);
-
-            // Test plural name generation
-            $pluralName = Str::plural($singularName);
-            $this->assertEquals($expected['plural'], $pluralName);
-        }
-    }
-}
+});
