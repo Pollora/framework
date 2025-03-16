@@ -12,20 +12,18 @@ class WooCommerceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->app->singleton('wp_view', WooCommerceView::class);
-        Action::add('plugins_loaded', function () {
+        Action::add('plugins_loaded', function (): void {
             if (defined('WC_ABSPATH')) {
                 $this->bindFilters();
             }
         });
     }
 
-    public function bindFilters()
+    public function bindFilters(): void
     {
         $wp_view = $this->app['wp_view'];
 

@@ -29,9 +29,9 @@ abstract class PostTypeAttribute implements HandlesAttributes
      * on a class. It validates that the class implements the PostType interface
      * and then calls the configure method.
      *
-     * @param  Attributable  $instance  The instance being processed
-     * @param  ReflectionClass  $context  The reflection class of the instance
-     * @param  self  $attribute  The attribute instance
+     * @param Attributable $instance The instance being processed
+     * @param ReflectionClass|ReflectionMethod $context The reflection class of the instance
+     * @param object $attribute The attribute instance
      */
     public function handle(Attributable $instance, ReflectionClass|ReflectionMethod $context, object $attribute): void
     {

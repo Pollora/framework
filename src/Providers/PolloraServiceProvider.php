@@ -56,9 +56,7 @@ class PolloraServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        Application::macro('runningInWpCli', function () {
-            return defined('\WP_CLI') && \WP_CLI;
-        });
+        Application::macro('runningInWpCli', fn(): bool => defined('\WP_CLI') && \WP_CLI);
 
         // Generic service providers
         $this->app->register(ConstantServiceProvider::class);

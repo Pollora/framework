@@ -24,7 +24,7 @@ class AjaxFactory
      *
      * @param  string  $action  The WordPress AJAX action name to listen for
      * @param  callable|string  $callback  The callback to handle the AJAX request
-     * @return \Pollora\Ajax\Ajax Returns an Ajax instance for method chaining
+     * @return Ajax Returns an Ajax instance for method chaining
      *
      * @example
      * ```php
@@ -37,7 +37,7 @@ class AjaxFactory
      * $ajax->listen('my_action', 'AjaxController@handleAction');
      * ```
      */
-    public function listen(string $action, callable|string $callback): \Pollora\Ajax\Ajax
+    public function listen(string $action, callable|string $callback): Ajax
     {
         return new Ajax($action, $callback);
     }

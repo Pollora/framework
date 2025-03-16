@@ -27,6 +27,6 @@ class Action extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'wp.action';
+        return \Pollora\Hook\Action::class;
     }
 }

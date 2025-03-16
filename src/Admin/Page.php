@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
  * by adding custom menu pages and subpages. It integrates Laravel's dependency
  * injection and routing system with WordPress admin pages.
  */
-class Page
+readonly class Page
 {
     /**
      * Creates a new Page instance.
@@ -24,7 +24,7 @@ class Page
      * @param  Container  $container  Laravel's service container for dependency injection
      */
     public function __construct(
-        private readonly Container $container
+        private Container $container
     ) {}
 
     /**

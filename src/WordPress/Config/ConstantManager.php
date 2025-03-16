@@ -50,7 +50,7 @@ class ConstantManager
      */
     public function apply(): void
     {
-        $this->constants->each(fn ($value, $key) => define($key, $value));
+        $this->constants->each(fn ($value, $key): bool => define($key, $value));
 
         // Clear the queue after application
         $this->constants = collect();

@@ -60,7 +60,7 @@ class Route extends IlluminateRoute
      */
     protected function initializeParameters(): array
     {
-        if (! isset($this->parameters)) {
+        if ($this->parameters === null) {
             $this->parameters = [];
         }
 
@@ -72,9 +72,8 @@ class Route extends IlluminateRoute
      *
      * @param  string  $name
      * @param  string|object|null  $value
-     * @return void
      */
-    public function setParameter($name, $value)
+    public function setParameter($name, $value): void
     {
         // Initialize parameters if they don't exist yet
         $this->initializeParameters();
@@ -84,10 +83,8 @@ class Route extends IlluminateRoute
 
     /**
      * Get the key / value list of parameters for the route.
-     *
-     * @return array
      */
-    public function parameters()
+    public function parameters(): array
     {
         // Initialize parameters if they don't exist yet
         return $this->initializeParameters();
@@ -151,7 +148,7 @@ class Route extends IlluminateRoute
         $this->isWordPressRoute = $isWordPressRoute;
 
         // If we're setting this as a WordPress route, parse the condition
-        if ($isWordPressRoute && ! empty($this->conditions)) {
+        if ($isWordPressRoute && $this->conditions !== []) {
             $this->condition = $this->parseCondition($this->uri());
         }
 
@@ -260,7 +257,7 @@ class Route extends IlluminateRoute
         $numericKeys = array_filter(array_keys($action), 'is_numeric');
 
         // If there are no numeric keys, return empty array
-        if (empty($numericKeys)) {
+        if ($numericKeys === []) {
             return [];
         }
 
@@ -271,7 +268,7 @@ class Route extends IlluminateRoute
         $paramKeys = array_slice($numericKeys, 1, count($numericKeys) - 2);
 
         // If there are no parameters, return empty array
-        if (empty($paramKeys)) {
+        if ($paramKeys === []) {
             return [];
         }
 

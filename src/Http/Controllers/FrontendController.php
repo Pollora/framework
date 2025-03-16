@@ -11,16 +11,15 @@ use Pollora\Theme\TemplateHierarchy;
 class FrontendController extends Controller
 {
     /**
-     * The template hierarchy instance
-     */
-    private TemplateHierarchy $templateHierarchy;
-
-    /**
      * Create a new FrontendController instance.
      */
-    public function __construct(TemplateHierarchy $templateHierarchy)
+    public function __construct(
+        /**
+         * The template hierarchy instance
+         */
+        private readonly TemplateHierarchy $templateHierarchy
+    )
     {
-        $this->templateHierarchy = $templateHierarchy;
     }
 
     /**
@@ -48,5 +47,6 @@ class FrontendController extends Controller
         // Si aucun template n'est trouvé, retourner une vue 404
         $wp_query->set_404();
         abort(404);
+        return null;
     }
 }

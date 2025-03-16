@@ -26,9 +26,8 @@ class HookServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.hooks', fn (): array => $this->mergeHooksConfig());
-        $this->app->singleton('wp.action', Action::class);
-        $this->app->singleton('wp.filter', Filter::class);
+        $this->app->singleton(Action::class, Action::class);
+        $this->app->singleton(Filter::class, Filter::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -49,29 +48,17 @@ class HookServiceProvider extends ServiceProvider
     }
 
     /**
-     * Merge hook configurations from multiple sources.
-     *
-     * Combines hooks defined in the bootstrap file and application config,
-     * with bootstrap hooks taking precedence.
-     *
-     * @return array The merged hook configuration array
-     */
-    protected function mergeHooksConfig(): array
-    {
-        $bootstrapHooks = Discover::in(app_path('Cms/Hooks'))->implementing(Hooks::class)->classes()->get();
-        $appConfigHooks = config('hooks', []);
-
-        return array_merge($bootstrapHooks, $appConfigHooks);
-    }
-
-    /**
      * Load all configured hooks.
      *
      * Retrieves hooks from the container and registers each one individually.
      */
     protected function loadHooks(): void
     {
-        $hooks = $this->app->make('wp.hooks');
+        $hooks = Discover::in(app_path('Cms/Hooks'))
+            ->implementing(Hooks::class)
+            ->classes()
+            ->get();
+
         collect($hooks)->each(fn ($hook) => $this->registerHook($hook));
     }
 
@@ -85,14 +72,6 @@ class HookServiceProvider extends ServiceProvider
      */
     protected function registerHook(string $hookClass): void
     {
-        $hook = $this->app->make($hookClass);
-
-        if (method_exists($hook, 'register')) {
-            $this->app->make('wp.action')->add(
-                $hook->hook ?? [],
-                [$hook, 'register'],
-                $hook->priority ?? 10
-            );
-        }
+        app()->make($hookClass);
     }
 }

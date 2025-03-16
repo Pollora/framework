@@ -13,6 +13,7 @@ namespace Pollora\Theme;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Translation\Loader;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Foundation\Support\IncludesFiles;
@@ -27,7 +28,7 @@ class ThemeManager
 
     protected ?ThemeMetadata $theme = null;
 
-    public function __construct(protected Container $app, protected ViewFinderInterface $viewFinder, protected ?Loader $localeLoader) {}
+    public function __construct(protected Application $app, protected ViewFinderInterface $viewFinder, protected ?Loader $localeLoader) {}
 
     public function instance(): ThemeManager
     {
@@ -63,7 +64,7 @@ class ThemeManager
             $this->parentThemes[] = $currentTheme;
         }
 
-        if ($this->localeLoader !== null) {
+        if ($this->localeLoader instanceof \Illuminate\Contracts\Translation\Loader) {
             $this->localeLoader->addNamespace($themeName, $baseTheme->getLanguagePath());
         }
     }

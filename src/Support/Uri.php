@@ -21,12 +21,12 @@ class Uri
      */
     public function removeTrailingSlash(?string $url): ?string
     {
-        if (empty($url)) {
+        if ($url === null || $url === '' || $url === '0') {
             return $url;
         }
 
         $urlParts = parse_url($url);
-        $urlParts['path'] = $urlParts['path'] ?? '';
+        $urlParts['path'] ??= '';
         $urlParts['path'] = rtrim($urlParts['path'], '/');
 
         return $this->buildUrl($urlParts);

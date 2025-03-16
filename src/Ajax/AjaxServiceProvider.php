@@ -27,6 +27,6 @@ class AjaxServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.ajax', fn ($app): \Pollora\Ajax\AjaxFactory => new AjaxFactory);
+        $this->app->singleton('wp.ajax', fn ($app): AjaxFactory => new AjaxFactory);
     }
 }

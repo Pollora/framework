@@ -62,10 +62,8 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
             ->get();
 
         // Register each post type with WordPress
-        if (! empty($postTypeClasses)) {
-            foreach ($postTypeClasses as $postTypeClass) {
-                $this->registerPostType($postTypeClass);
-            }
+        foreach ($postTypeClasses as $postTypeClass) {
+            $this->registerPostType($postTypeClass);
         }
     }
 

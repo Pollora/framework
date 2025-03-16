@@ -80,11 +80,9 @@ class PermalinkManager
             $homePath = $homeParts['path'] ?? '/';
 
             // Compare paths without considering the trailing slash.
-            if (rtrim($canonicalPath, '/') === rtrim($homePath, '/')) {
-                // If a GET parameter is present, return the original URL.
-                if (! empty($canonicalParts['query'])) {
-                    return $canonicalUrl;
-                }
+            // If a GET parameter is present, return the original URL.
+            if (rtrim($canonicalPath, '/') === rtrim($homePath, '/') && ! empty($canonicalParts['query'])) {
+                return $canonicalUrl;
             }
         }
 

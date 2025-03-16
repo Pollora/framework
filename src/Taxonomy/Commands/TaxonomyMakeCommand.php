@@ -114,9 +114,8 @@ class TaxonomyMakeCommand extends GeneratorCommand
         $stub = str_replace('DummySlug', $this->getSlugFromClassName($className), $stub);
         $stub = str_replace('DummyName', $this->getNameFromClassName($className), $stub);
         $stub = str_replace('DummyPluralName', $this->getPluralNameFromClassName($className), $stub);
-        $stub = str_replace("['DummyPostType']", $objectTypes, $stub);
 
-        return $stub;
+        return str_replace("['DummyPostType']", $objectTypes, $stub);
     }
 
     /**
@@ -146,9 +145,7 @@ class TaxonomyMakeCommand extends GeneratorCommand
             return "['".$items[0]."']";
         }
 
-        $formattedItems = array_map(function ($item) {
-            return "'".$item."'";
-        }, $items);
+        $formattedItems = array_map(fn(string $item): string => "'".$item."'", $items);
 
         return '['.implode(', ', $formattedItems).']';
     }
@@ -158,7 +155,7 @@ class TaxonomyMakeCommand extends GeneratorCommand
      */
     protected function getSlugFromClassName(string $className): string
     {
-        return strtolower(preg_replace('/[A-Z]/', '-$0', lcfirst($className)));
+        return strtolower((string) preg_replace('/[A-Z]/', '-$0', lcfirst($className)));
     }
 
     /**
@@ -166,7 +163,7 @@ class TaxonomyMakeCommand extends GeneratorCommand
      */
     protected function getNameFromClassName(string $className): string
     {
-        return ucfirst(strtolower(preg_replace('/[A-Z]/', ' $0', lcfirst($className))));
+        return ucfirst(strtolower((string) preg_replace('/[A-Z]/', ' $0', lcfirst($className))));
     }
 
     /**
@@ -177,7 +174,7 @@ class TaxonomyMakeCommand extends GeneratorCommand
         $name = $this->getNameFromClassName($className);
 
         // Simple pluralization (not comprehensive)
-        if (substr($name, -1) === 'y') {
+        if (str_ends_with($name, 'y')) {
             return substr($name, 0, -1).'ies';
         }
 

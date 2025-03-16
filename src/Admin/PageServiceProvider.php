@@ -27,7 +27,7 @@ class PageServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             'wp.admin.page',
-            fn ($app): \Pollora\Admin\PageFactory => new PageFactory(new Page($app))
+            fn ($app): PageFactory => new PageFactory(new Page($app))
         );
     }
 }

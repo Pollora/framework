@@ -18,11 +18,6 @@ use Illuminate\Support\Str;
 abstract class AbstractEventDispatcher
 {
     /**
-     * The event dispatcher instance.
-     */
-    protected Dispatcher $events;
-
-    /**
      * Array of WordPress actions to listen to.
      *
      * @var array<string>
@@ -32,9 +27,13 @@ abstract class AbstractEventDispatcher
     /**
      * Constructor.
      */
-    public function __construct(Dispatcher $events)
+    public function __construct(
+        /**
+         * The event dispatcher instance.
+         */
+        protected Dispatcher $events
+    )
     {
-        $this->events = $events;
     }
 
     /**

@@ -62,10 +62,8 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
             ->get();
 
         // Register each taxonomy with WordPress
-        if (! empty($taxonomyClasses)) {
-            foreach ($taxonomyClasses as $taxonomyClass) {
-                $this->registerTaxonomy($taxonomyClass);
-            }
+        foreach ($taxonomyClasses as $taxonomyClass) {
+            $this->registerTaxonomy($taxonomyClass);
         }
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Asset;
 
+use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Log;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
@@ -39,7 +40,7 @@ class Asset
     /**
      * The Vite instance for asset compilation.
      */
-    protected ?\Illuminate\Foundation\Vite $vite = null;
+    protected ?Vite $vite = null;
 
     /**
      * Whether to use Vite.js for asset handling.
@@ -103,7 +104,7 @@ class Asset
     {
         $this->path = str_replace(base_path('/'), '', $path);
         $this->type = $this->determineFileType($path);
-        $this->container = app('asset.container')->getDefault();
+        $this->container = app(AssetContainerManager::class)->getDefault();
     }
 
     /**
@@ -113,7 +114,7 @@ class Asset
      */
     public function container(string $containerName): self
     {
-        $this->container = app('asset.container')->get($containerName);
+        $this->container = app(AssetContainerManager::class)->get($containerName);
         if ($this->useVite) {
             $this->vite->setContainer($this->container);
             $this->vite->setClient($this->path);

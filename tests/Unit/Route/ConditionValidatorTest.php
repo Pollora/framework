@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Http\Request;
-use Mockery;
+use Mockery as m;
 use Pollora\Route\Matching\ConditionValidator;
 use Pollora\Route\Route;
 
@@ -61,7 +61,7 @@ function mockWordPressFunctionsForValidator(): void
  * Clean up after each test
  */
 afterEach(function () {
-    Mockery::close();
+    m::close();
 });
 
 /**
@@ -72,7 +72,7 @@ test('validator returns false if condition function does not exist', function ()
     $validator = $setup['validator'];
 
     // Create a mock of the route
-    $route = Mockery::mock(Route::class);
+    $route = m::mock(Route::class);
     $route->shouldReceive('getCondition')->andReturn('nonexistent_function');
 
     // Create a request
@@ -90,7 +90,7 @@ test('validator calls condition function with correct parameters', function () {
     $validator = $setup['validator'];
 
     // Create a mock of the route
-    $route = Mockery::mock(Route::class);
+    $route = m::mock(Route::class);
     $route->shouldReceive('getCondition')->andReturn('test_condition_with_params');
     $route->shouldReceive('getConditionParameters')->andReturn(['value1', 'value2']);
 
@@ -101,7 +101,7 @@ test('validator calls condition function with correct parameters', function () {
     expect($validator->matches($route, $request))->toBeTrue();
 
     // Modify the parameters to make the condition return false
-    $route = Mockery::mock(Route::class);
+    $route = m::mock(Route::class);
     $route->shouldReceive('getCondition')->andReturn('test_condition_with_params');
     $route->shouldReceive('getConditionParameters')->andReturn(['wrong', 'value2']);
 
@@ -117,7 +117,7 @@ test('validator handles conditions without parameters', function () {
     $validator = $setup['validator'];
 
     // Create a mock of the route
-    $route = Mockery::mock(Route::class);
+    $route = m::mock(Route::class);
     $route->shouldReceive('getCondition')->andReturn('test_condition_no_params');
     $route->shouldReceive('getConditionParameters')->andReturn([]);
 
@@ -128,7 +128,7 @@ test('validator handles conditions without parameters', function () {
     expect($validator->matches($route, $request))->toBeTrue();
 
     // Modify the route to use the function that returns false
-    $route = Mockery::mock(Route::class);
+    $route = m::mock(Route::class);
     $route->shouldReceive('getCondition')->andReturn('test_condition_no_params_false');
     $route->shouldReceive('getConditionParameters')->andReturn([]);
 
@@ -155,7 +155,7 @@ test('validator converts various result types to boolean', function () {
     ];
 
     foreach ($conditions as $condition => $expected) {
-        $route = Mockery::mock(Route::class);
+        $route = m::mock(Route::class);
         $route->shouldReceive('getCondition')->andReturn($condition);
         $route->shouldReceive('getConditionParameters')->andReturn([]);
 

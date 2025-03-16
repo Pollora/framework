@@ -23,8 +23,6 @@ class ViewServiceProvider extends ViewServiceProviderBase
      */
     public function registerMacros(): void
     {
-        $app = $this->app;
-
         /**
          * Get the compiled path of the view
          *

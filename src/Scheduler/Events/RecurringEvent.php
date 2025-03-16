@@ -73,7 +73,7 @@ class RecurringEvent extends AbstractEvent
 
         foreach ($events as $event) {
             $schedule->call(function () use ($event): void {
-                do_action_ref_array($event->hook, json_decode($event->args, true));
+                do_action_ref_array($event->hook, json_decode((string) $event->args, true));
             })->cron(self::getCronExpression($event->schedule, $event->interval));
         }
     }
@@ -119,7 +119,7 @@ class RecurringEvent extends AbstractEvent
      */
     private static function calculateCustomInterval(?int $interval): string
     {
-        if (! $interval) {
+        if ($interval === null || $interval === 0) {
             return '0 0 * * *';
         }
 

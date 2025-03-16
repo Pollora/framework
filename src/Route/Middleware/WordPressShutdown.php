@@ -76,6 +76,6 @@ class WordPressShutdown
         }
 
         // Fallback to strpos for partial matches
-        return strpos($contentType, 'text/html') !== false;
+        return str_contains($contentType, 'text/html');
     }
 }

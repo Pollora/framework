@@ -24,6 +24,6 @@ class Asset extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'wp.asset';
+        return AssetBuilder\AssetFactory::class;
     }
 }

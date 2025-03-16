@@ -20,7 +20,7 @@ class ThemeInitializer implements ThemeComponent
     public function __construct(protected Application $app)
     {
         $this->themeRoot = config('theme.base_path');
-        Filter::add('stylesheet_directory', [$this, 'overrideStylesheetDirectory'], 90, 3);
+        Filter::add('stylesheet_directory', $this->overrideStylesheetDirectory(...), 90, 3);
     }
 
     public function register(): void

@@ -6,8 +6,11 @@ namespace Pollora\Route;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router as IlluminateRouter;
 use Pollora\Route\Bindings\NullableWpPost;
+use Pollora\Theme\TemplateHierarchy;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Extended Router that provides WordPress-specific routing functionality.
@@ -62,7 +65,7 @@ class Router extends IlluminateRouter
      * a dedicated admin route. Also handles special WordPress request types
      * like robots.txt, favicon, feeds, and trackbacks.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return \Illuminate\Routing\Route
      */
     protected function findRoute($request)
@@ -76,7 +79,7 @@ class Router extends IlluminateRouter
         if ($this->isSpecialWordPressRequest()) {
             // First check if there's an explicit route defined for this special request
             $specialRoute = $this->findSpecialWordPressRoute();
-            if ($specialRoute !== null) {
+            if ($specialRoute instanceof \Pollora\Route\Route) {
                 return $specialRoute;
             }
 
@@ -113,9 +116,9 @@ class Router extends IlluminateRouter
                 }
 
                 // If routes match, find the most specific one
-                if (! empty($matchingRoutes)) {
+                if ($matchingRoutes !== []) {
                     // Get the WordPress template hierarchy order from the container
-                    $templateHierarchy = $this->container->make(\Pollora\Theme\TemplateHierarchy::class);
+                    $templateHierarchy = $this->container->make(TemplateHierarchy::class);
                     $hierarchyOrder = $templateHierarchy->getHierarchyOrder();
 
                     // Go through the hierarchy order to find the most specific route
@@ -124,7 +127,7 @@ class Router extends IlluminateRouter
                             $route = $matchingRoutes[$condition];
 
                             // Initialize parameters if needed
-                            if (! isset($route->parameters)) {
+                            if ($route->parameters === null) {
                                 $route->parameters = [];
                             }
 
@@ -140,7 +143,7 @@ class Router extends IlluminateRouter
             }
 
             return $laravelRoute;
-        } catch (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e) {
+        } catch (NotFoundHttpException) {
             // If no route is found, create a fallback route that will
             // delegate to the FrontendController
             return $this->createFallbackRoute($request);
@@ -156,10 +159,10 @@ class Router extends IlluminateRouter
      */
     private function isSpecialWordPressRequest(): bool
     {
-        return function_exists('is_robots') && is_robots()
-            || function_exists('is_favicon') && is_favicon()
-            || function_exists('is_feed') && is_feed()
-            || function_exists('is_trackback') && is_trackback();
+        return (function_exists('is_robots') && is_robots())
+            || (function_exists('is_favicon') && is_favicon())
+            || (function_exists('is_feed') && is_feed())
+            || (function_exists('is_trackback') && is_trackback());
     }
 
     /**
@@ -203,23 +206,26 @@ class Router extends IlluminateRouter
      * This route will delegate to WordPress's built-in handlers for
      * robots.txt, favicon, feeds, and trackbacks.
      *
-     * @param  \Illuminate\Http\Request  $request  Current request instance
+     * @param  Request  $request  Current request instance
      * @return \Illuminate\Routing\Route Special WordPress route
      */
-    private function createSpecialWordPressRoute($request): \Illuminate\Routing\Route
+    private function createSpecialWordPressRoute(Request $request): \Illuminate\Routing\Route
     {
         // Determine which special handler to use
-        $handler = function () {
+        $handler = function (): void {
             if (function_exists('is_robots') && is_robots()) {
                 do_action('do_robots');
                 exit;
-            } elseif (function_exists('is_favicon') && is_favicon()) {
+            }
+            if (function_exists('is_favicon') && is_favicon()) {
                 do_action('do_favicon');
                 exit;
-            } elseif (function_exists('is_feed') && is_feed()) {
+            }
+            if (function_exists('is_feed') && is_feed()) {
                 do_feed();
                 exit;
-            } elseif (function_exists('is_trackback') && is_trackback()) {
+            }
+            if (function_exists('is_trackback') && is_trackback()) {
                 require_once ABSPATH.'wp-trackback.php';
                 exit;
             }
@@ -245,10 +251,10 @@ class Router extends IlluminateRouter
      * This route will delegate to the FrontendController to handle the request
      * using WordPress's template hierarchy.
      *
-     * @param  \Illuminate\Http\Request  $request  Current request instance
+     * @param  Request  $request  Current request instance
      * @return \Illuminate\Routing\Route Fallback route
      */
-    private function createFallbackRoute($request): \Illuminate\Routing\Route
+    private function createFallbackRoute(Request $request): \Illuminate\Routing\Route
     {
         // Create a route that delegates to the FrontendController
         $route = $this->newRoute(['GET', 'HEAD'], $request->path(), [
@@ -286,7 +292,7 @@ class Router extends IlluminateRouter
      * @param  Route  $route  Route to add bindings to
      * @return Route Route with WordPress bindings
      */
-    public function addWordPressBindings($route)
+    public function addWordPressBindings(Route $route): Route
     {
         // Don't add bindings if it's not a WordPress route
         if (! ($route instanceof Route) || ! $route->isWordPressRoute()) {
@@ -296,7 +302,7 @@ class Router extends IlluminateRouter
         global $post, $wp_query;
 
         // Initialize parameters if needed
-        if (! isset($route->parameters)) {
+        if ($route->parameters === null) {
             $route->parameters = [];
         }
 
@@ -318,6 +324,7 @@ class Router extends IlluminateRouter
     }
 
     /**
+     * @TODO implement exception handling for WordPress Admin specific routes
      * Determine if the current request is for the WordPress admin area.
      *
      * @return bool True if request is for wp-admin, false otherwise
@@ -325,7 +332,6 @@ class Router extends IlluminateRouter
     private function isWordPressAdminRequest(): bool
     {
         $app = $this->container['app'] ?? null;
-
         return $app && method_exists($app, 'isWordPressAdmin') && $app->isWordPressAdmin();
     }
 
@@ -335,7 +341,7 @@ class Router extends IlluminateRouter
      * Sets up a route specifically for handling WordPress admin requests
      * and registers it in the container.
      *
-     * @param  \Illuminate\Http\Request  $request  Current request instance
+     * @param  Request  $request  Current request instance
      * @return \Illuminate\Routing\Route Configured admin route
      */
     private function createAdminRoute($request): \Illuminate\Routing\Route

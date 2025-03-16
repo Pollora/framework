@@ -43,7 +43,7 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
      */
     public function handleCreatedTerm(int $termId, int $ttId, string $taxonomy): void
     {
-        if (in_array($taxonomy, ['nav_menu'])) {
+        if ($taxonomy === 'nav_menu') {
             return;
         }
 
@@ -65,7 +65,7 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
      */
     public function handleDeleteTerm(int $termId, int $ttId, string $taxonomy, WP_Term $deletedTerm): void
     {
-        if (in_array($taxonomy, ['nav_menu'])) {
+        if ($taxonomy === 'nav_menu') {
             return;
         }
 
@@ -98,7 +98,7 @@ class TaxonomyEventDispatcher extends AbstractEventDispatcher
      */
     public function handleEditedTerm(int $termId, int $ttId, string $taxonomy): void
     {
-        if (in_array($taxonomy, ['nav_menu'])) {
+        if ($taxonomy === 'nav_menu') {
             return;
         }
 

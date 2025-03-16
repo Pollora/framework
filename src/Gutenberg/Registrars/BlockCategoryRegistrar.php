@@ -22,16 +22,12 @@ class BlockCategoryRegistrar
     {
         $configuredCategories = collect(config('theme.gutenberg.categories.blocks'));
 
-        add_filter('block_categories_all', function ($categories) use ($configuredCategories) {
-            return array_merge(
-                $categories,
-                $configuredCategories->map(function ($args, $slug) {
-                    return [
-                        'slug' => $slug,
-                        'title' => $args['label'] ?? $args['title'] ?? '',
-                    ];
-                })->values()->all()
-            );
-        });
+        add_filter('block_categories_all', fn($categories): array => array_merge(
+            $categories,
+            $configuredCategories->map(fn($args, $slug): array => [
+                'slug' => $slug,
+                'title' => $args['label'] ?? $args['title'] ?? '',
+            ])->values()->all()
+        ));
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Asset;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,18 +18,19 @@ class AssetServiceProvider extends ServiceProvider
 {
     /**
      * Register asset-related services in the container.
+     * @throws BindingResolutionException
      */
     public function register(): void
     {
+        $this->app->singleton(AssetContainerManager::class, fn ($app): AssetContainerManager => new AssetContainerManager($app));
 
-        $this->app->singleton('asset.container', fn ($app): AssetContainerManager => new AssetContainerManager($app));
+        $this->app->make(AssetContainerManager::class)->addContainer('root', []);
+        $this->app->make(AssetContainerManager::class)->setDefaultContainer('root');
 
-        $this->app['asset.container']->addContainer('root', []);
-        $this->app['asset.container']->setDefaultContainer('root');
+        $this->app->singleton(AssetFactory::class, fn ($app): AssetFactory => new AssetFactory($app));
 
-        $this->app->singleton('wp.asset', fn ($app): AssetFactory => new AssetFactory($app));
-        $this->app->singleton(ViteManager::class, function (Application $app): \Pollora\Asset\ViteManager {
-            $defaultContainer = app('asset.container')->getDefault();
+        $this->app->singleton(ViteManager::class, function (Application $app): ViteManager {
+            $defaultContainer = $app->make(AssetContainerManager::class)->getDefault();
 
             return new ViteManager($defaultContainer);
         });
@@ -44,9 +46,10 @@ class AssetServiceProvider extends ServiceProvider
 
     /**
      * Register Vite-specific functionality.
+     * @throws BindingResolutionException
      */
     protected function registerViteManager(): void
     {
-        app(ViteManager::class)->registerMacros();
+        $this->app->make(ViteManager::class)->registerMacros();
     }
 }

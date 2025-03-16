@@ -91,13 +91,8 @@ abstract class AbstractTaxonomy implements Attributable, Taxonomy
      */
     public function getObjectType(): array|string
     {
-        // Si l'attribut ObjectType a été défini, l'utiliser en priorité
-        if (isset($this->attributeArgs['object_type'])) {
-            return $this->attributeArgs['object_type'];
-        }
-
         // Sinon, utiliser la propriété objectType
-        return $this->objectType;
+        return $this->attributeArgs['object_type'] ?? $this->objectType;
     }
 
     /**

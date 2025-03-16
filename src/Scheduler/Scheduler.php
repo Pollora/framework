@@ -155,7 +155,7 @@ class Scheduler implements SchedulerInterface
             $count = $events->count();
 
             foreach ($events as $event) {
-                $this->deleteAssociatedJob($event->hook, $event->timestamp, json_decode($event->args, true));
+                $this->deleteAssociatedJob($event->hook, $event->timestamp, json_decode((string) $event->args, true));
             }
 
             $query->delete();

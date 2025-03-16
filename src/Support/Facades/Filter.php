@@ -27,6 +27,6 @@ class Filter extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'wp.filter';
+        return \Pollora\Hook\Filter::class;
     }
 }

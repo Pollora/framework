@@ -69,9 +69,9 @@ class Menus implements ThemeComponent
     public function register(): void
     {
         Action::add('after_setup_theme', $this->registerMenus(...), 1);
-        Filter::add('nav_menu_link_attributes', [$this, 'handleLinkAttributes'], 10, 4);
-        Filter::add('nav_menu_item_attributes', [$this, 'handleItemAttributes'], 10, 4);
-        Filter::add('nav_menu_submenu_attributes', [$this, 'handleSubmenuAttributes'], 10, 3);
+        Filter::add('nav_menu_link_attributes', $this->handleLinkAttributes(...), 10, 4);
+        Filter::add('nav_menu_item_attributes', $this->handleItemAttributes(...), 10, 4);
+        Filter::add('nav_menu_submenu_attributes', $this->handleSubmenuAttributes(...), 10, 3);
     }
 
     /**
@@ -96,7 +96,7 @@ class Menus implements ThemeComponent
      * @param  int  $depth  Current menu item depth
      * @return array Modified attributes
      */
-    public function handleLinkAttributes($attributes, $item, $args, $depth): array
+    public function handleLinkAttributes(array $attributes, $item, object $args, int $depth): array
     {
         return $this->processElementAttributes(
             self::ELEMENT_TYPES['link'],
@@ -116,7 +116,7 @@ class Menus implements ThemeComponent
      * @param  int  $depth  Current menu item depth
      * @return array Modified attributes
      */
-    public function handleItemAttributes($attributes, $item, $args, $depth): array
+    public function handleItemAttributes(array $attributes, $item, object $args, int $depth): array
     {
         return $this->processElementAttributes(
             self::ELEMENT_TYPES['item'],
@@ -135,7 +135,7 @@ class Menus implements ThemeComponent
      * @param  int  $depth  Current menu depth
      * @return array Modified attributes
      */
-    public function handleSubmenuAttributes($attributes, $args, $depth): array
+    public function handleSubmenuAttributes(array $attributes, object $args, int $depth): array
     {
         return $this->processElementAttributes(
             self::ELEMENT_TYPES['submenu'],
@@ -167,7 +167,7 @@ class Menus implements ThemeComponent
         // Get element configuration from args
         $config = $this->getElementConfig($elementType, $args);
 
-        if ($config) {
+        if ($config !== null && $config !== []) {
             // Process each configuration rule
             foreach ($config as $rule) {
                 if ($this->shouldApplyRule($rule, $depth, $order)) {
@@ -232,14 +232,14 @@ class Menus implements ThemeComponent
     {
         // Handle classes
         if (isset($rule['class'])) {
-            $newClasses = is_array($rule['class']) ? $rule['class'] : explode(' ', $rule['class']);
+            $newClasses = is_array($rule['class']) ? $rule['class'] : explode(' ', (string) $rule['class']);
             $currentClasses = isset($attributes['class']) ? explode(' ', $attributes['class']) : [];
             $attributes['class'] = implode(' ', array_merge($currentClasses, $newClasses));
         }
 
         // Handle other attributes
         if (isset($rule['attrs'])) {
-            $attributes = array_merge($attributes, $rule['attrs']);
+            return array_merge($attributes, $rule['attrs']);
         }
 
         return $attributes;

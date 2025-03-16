@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Pollora\Theme;
 
 use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Asset\AssetContainerManager;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Theme;
@@ -36,35 +38,45 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('theme', fn (Container $app): \Pollora\Theme\ThemeManager => new ThemeManager(
-            $app,
-            $app['view']->getFinder(),
-            $app['translator']->getLoader()
-        ));
+        $this->app->singleton('theme', function (Application $app): ThemeManager {
+            return new ThemeManager(
+                $app,
+                $app->make('view')->getFinder(),
+                $app->make('translator')->getLoader()
+            );
+        });
 
-        $this->app->singleton('theme.generator', fn (Container $app): \Pollora\Theme\Commands\MakeThemeCommand => new MakeThemeCommand($app['config'], $app['files']));
+        $this->app->singleton('theme.generator', function (Application $app): MakeThemeCommand {
+            return new MakeThemeCommand($app->make('config'), $app->make('files'));
+        });
 
-        $this->app->singleton('theme.remover', fn (Container $app): \Pollora\Theme\Commands\RemoveThemeCommand => new RemoveThemeCommand($app['config'], $app['files']));
+        $this->app->singleton('theme.remover', function (Application $app): RemoveThemeCommand {
+            return new RemoveThemeCommand($app->make('config'), $app->make('files'));
+        });
 
         $this->commands([
             'theme.generator',
             'theme.remover',
         ]);
 
-        $this->app->singleton(ComponentFactory::class, fn ($app): \Pollora\Theme\Factories\ComponentFactory => new ComponentFactory($app));
+        $this->app->singleton(ComponentFactory::class, function (Application $app): ComponentFactory {
+            return new ComponentFactory($app);
+        });
 
-        $this->app->singleton(ThemeComponentProvider::class, fn ($app): \Pollora\Theme\ThemeComponentProvider => new ThemeComponentProvider($app, $app->make(ComponentFactory::class)));
+        $this->app->singleton(ThemeComponentProvider::class, function (Application $app): ThemeComponentProvider {
+            return new ThemeComponentProvider($app, $app->make(ComponentFactory::class));
+        });
 
-        $this->app->singleton(TemplateHierarchy::class, function ($app) {
+        $this->app->singleton(TemplateHierarchy::class, function (Application $app): TemplateHierarchy {
             return new TemplateHierarchy(
-                $app['config'],
+                $app->make('config'),
                 $app
             );
         });
 
         $this->app->make(ThemeComponentProvider::class)->register();
 
-        Action::add('after_setup_theme', [$this, 'bootTheme']);
+        Action::add('after_setup_theme', $this->bootTheme(...));
     }
 
     /**
@@ -86,14 +98,14 @@ class ThemeServiceProvider extends ServiceProvider
 
         $currentTheme = $theme->active();
 
-        $this->app['asset.container']->addContainer('theme', [
+        $this->app->make(AssetContainerManager::class)->addContainer('theme', [
             'hot_file' => public_path("{$currentTheme}.hot"),
             'build_directory' => "build/{$currentTheme}",
             'manifest_path' => 'manifest.json',
             'base_path' => '',
         ]);
 
-        $this->app['asset.container']->setDefaultContainer('theme');
+        $this->app->make(AssetContainerManager::class)->setDefaultContainer('theme');
 
         $this->loadConfigurations();
 
@@ -118,7 +130,7 @@ class ThemeServiceProvider extends ServiceProvider
         return collect(['Directives'])
             ->flatMap(function ($directive) {
                 if (file_exists($directives = __DIR__.'/'.$directive.'.php')) {
-                    return require_once $directives;
+                    return require $directives;
                 }
             });
     }
@@ -150,7 +162,7 @@ class ThemeServiceProvider extends ServiceProvider
      * @param  string  $path  The path to the theme configuration file.
      * @param  string  $key  The configuration key to use for the merged settings.
      */
-    public function registerThemeConfig($path, $key): void
+    public function registerThemeConfig(string $path, string $key): void
     {
         $this->mergeConfigFrom($path, $key);
     }

@@ -51,7 +51,7 @@ class WooCommerceView
             return $template;
         }
 
-        return $this->locateThemeTemplate($template) ?: $template;
+        return in_array($this->locateThemeTemplate($template), ['', '0'], true) ? $template : $this->locateThemeTemplate($template);
     }
 
     /**

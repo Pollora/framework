@@ -137,7 +137,7 @@ class YoastSeoEventDispatcher extends AbstractEventDispatcher
             $action = 'update_htaccess';
         }
 
-        if ($action) {
+        if ($action !== '' && $action !== '0') {
             $this->dispatch(FileUpdated::class, [$action]);
         }
     }

@@ -127,7 +127,7 @@ class WordPressGuard implements StatefulGuard
      *
      * @param  mixed  $id  User ID
      * @param  bool  $remember  Whether to "remember" the user
-     * @return Authenticatable|null The logged in user or null
+     * @return Authenticatable|null The logged-in user or null
      */
     public function loginUsingId($id, $remember = false): ?Authenticatable
     {

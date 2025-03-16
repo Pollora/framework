@@ -11,14 +11,14 @@ namespace Pollora\Admin;
  * and subpages, making it easier to configure and manage admin menus
  * in a Laravel-like way.
  */
-class PageFactory
+readonly class PageFactory
 {
     /**
      * Creates a new PageFactory instance.
      *
      * @param  Page  $page  The Page instance used to create admin pages
      */
-    public function __construct(private readonly Page $page) {}
+    public function __construct(private Page $page) {}
 
     /**
      * Add a top-level menu page to the WordPress admin panel.

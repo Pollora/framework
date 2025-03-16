@@ -25,17 +25,17 @@ class Ajax
      *
      * @var string
      */
-    const BOTH_USERS = 'both';
+    public const BOTH_USERS = 'both';
 
     /**
      * Represents the user role for logged users.
      */
-    const LOGGED_USERS = 'logged';
+    public const LOGGED_USERS = 'logged';
 
     /**
      * Represents the user role for guest users.
      */
-    const GUEST_USERS = 'guest';
+    public const GUEST_USERS = 'guest';
 
     /**
      * User types by default (both).
@@ -54,13 +54,13 @@ class Ajax
         /**
          * @var string $action The current action being performed. Can be null if no specific action is set.
          */
-        private $action,
+        private string $action,
         /**
          * Represents a callback function that can be executed.
          *
-         * @var callable|string $callback The callback function to be executed.
+         * @var mixed $callback The callback function to be executed.
          */
-        private $callback
+        private readonly mixed $callback
     ) {
         if (empty($this->action) || empty($this->callback)) {
             throw new InvalidArgumentException('Action and callback must be provided.');

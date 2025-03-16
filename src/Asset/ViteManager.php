@@ -52,7 +52,7 @@ class ViteManager
      */
     public function getAssetUrls(array $entrypoints): array
     {
-        if (empty($entrypoints)) {
+        if ($entrypoints === []) {
             throw new AssetException('Entry points array cannot be empty.');
         }
 
@@ -92,11 +92,13 @@ class ViteManager
         return ViteFacade::toHtml();
     }
 
-    private function initializeVite(): void
+    private function initializeVite(): Vite
     {
         $this->vite = ViteFacade::useHotFile($this->container->getHotFile())
             ->useBuildDirectory($this->container->getBuildDirectory())
             ->useManifestFilename($this->container->getManifestPath());
+
+        return $this->vite;
     }
 
     private function getViteInstance(): Vite

@@ -198,7 +198,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
     {
         global $wp_widget_factory;
 
-        if (! preg_match('/^(.+)-(\d+)$/', $widgetId, $matches)) {
+        if (in_array(preg_match('/^(.+)-(\d+)$/', $widgetId, $matches), [0, false], true)) {
             return null;
         }
 
@@ -220,7 +220,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
      */
     protected function getWidgetTitle(string $widgetId): ?string
     {
-        if (! preg_match('/^(.+)-(\d+)$/', $widgetId, $matches)) {
+        if (in_array(preg_match('/^(.+)-(\d+)$/', $widgetId, $matches), [0, false], true)) {
             return null;
         }
 

@@ -77,7 +77,7 @@ class AuthServiceProvider extends ServiceProvider
     protected function registerWordPressGate(): void
     {
         if (function_exists('user_can')) {
-            Gate::after(fn ($user, $ability, $result, $arguments) => user_can($user, $ability, ...$arguments));
+            Gate::after(static fn ($user, $ability, $result, $arguments) => user_can($user, $ability, ...$arguments));
         }
     }
 }

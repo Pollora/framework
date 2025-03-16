@@ -12,12 +12,13 @@ namespace Pollora\Asset;
  */
 class AssetContainer
 {
+    public array $assetDir;
     /**
      * The base path for assets in this container.
      *
      * @var string
      */
-    public $basePath;
+    public string $basePath;
 
     /**
      * The path to the hot reload file used by Vite.
@@ -40,7 +41,7 @@ class AssetContainer
      * @param  string  $name  The unique identifier for this container
      * @param  array  $config  Configuration options for the container
      */
-    public function __construct(protected string $name, array $config = [])
+    public function __construct(protected string $name, protected array $config = [])
     {
         $this->hotFile = $config['hot_file'] ?? public_path("{$this->name}.hot");
         $this->buildDirectory = $config['build_directory'] ?? "build/{$this->name}";

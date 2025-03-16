@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Route;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Http\Controllers\FrontendController;
@@ -33,9 +34,7 @@ class WordPressRouteServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->extend('router', function ($router, $app) {
-            return new Router($app['events'], $app);
-        });
+        $this->app->extend('router', fn ($router, Application $app): Router => new Router($app->make('events'), $app));
     }
 
     /**
@@ -55,7 +54,7 @@ class WordPressRouteServiceProvider extends ServiceProvider
     {
         // Add the wpMatch macro for specific HTTP verbs
         Route::macro('wpMatch', function (array|string $methods, string $condition, ...$args) {
-            if (empty($args)) {
+            if ($args === []) {
                 throw new \InvalidArgumentException('The wp route requires at least a condition and a callback.');
             }
 
@@ -90,11 +89,9 @@ class WordPressRouteServiceProvider extends ServiceProvider
         });
 
         // Add the wp macro as a shortcut for all HTTP verbs
-        Route::macro('wp', function (string $condition, ...$args) {
-            return Route::wpMatch(Router::$verbs, $condition, ...$args);
-        });
+        Route::macro('wp', fn (string $condition, ...$args) => Route::wpMatch(Router::$verbs, $condition, ...$args));
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             $this->bootFallbackRoute();
         });
     }

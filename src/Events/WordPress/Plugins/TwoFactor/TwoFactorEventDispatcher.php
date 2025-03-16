@@ -157,7 +157,7 @@ class TwoFactorEventDispatcher extends AbstractEventDispatcher
             default => null,
         };
 
-        if (! $action) {
+        if ($action === null) {
             return;
         }
 

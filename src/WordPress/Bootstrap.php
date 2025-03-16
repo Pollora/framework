@@ -180,7 +180,7 @@ class Bootstrap
     private function defineWordPressConstants(): void
     {
         // Define default constants
-        Constant::queue('WP_USE_THEMES', ! app()->runningInConsole() && ! str_starts_with(request()->server('REQUEST_URI'), '/cms/'));
+        Constant::queue('WP_USE_THEMES', ! app()->runningInConsole() && ! str_starts_with((string) request()->server('REQUEST_URI'), '/cms/'));
 
         Constant::queue('WP_AUTO_UPDATE_CORE', false);
         Constant::queue('DISALLOW_FILE_MODS', true);

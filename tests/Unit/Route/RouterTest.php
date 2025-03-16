@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
-use Mockery;
+use Mockery as m;
 use Pollora\Route\Route;
 use Pollora\Route\Router;
 use Pollora\Theme\TemplateHierarchy;
@@ -19,7 +19,7 @@ function setupRouterTest()
     setupWordPressMocks();
 
     // Set up the event dispatcher mock
-    $events = Mockery::mock(Dispatcher::class);
+    $events = m::mock(Dispatcher::class);
     $events->shouldReceive('dispatch')->andReturn(null);
 
     // Create container
@@ -33,7 +33,7 @@ function setupRouterTest()
     });
 
     // Create and configure the TemplateHierarchy mock
-    $templateHierarchy = Mockery::mock(TemplateHierarchy::class);
+    $templateHierarchy = m::mock(TemplateHierarchy::class);
 
     // Register the mock in the container
     $container->instance(TemplateHierarchy::class, $templateHierarchy);
@@ -71,7 +71,7 @@ function mockWordPressClasses(): void
 afterEach(function () {
     Container::setInstance(null);
     WP::$wpFunctions = null;
-    Mockery::close();
+    m::close();
 });
 
 /**

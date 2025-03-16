@@ -46,7 +46,7 @@ beforeAll(function () {
         ->andReturnNull();
 
     // Enregistrer le mock dans le container avec la clé correcte
-    $app->instance('wp.action', $mock);
+    $app->instance(\Pollora\Hook\Action::class, $mock);
 
     // S'assurer que la façade est réinitialisée
     Action::clearResolvedInstances();

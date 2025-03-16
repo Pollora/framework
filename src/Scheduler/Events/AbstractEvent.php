@@ -23,6 +23,7 @@ use Pollora\Scheduler\Jobs\JobDispatcher;
  */
 abstract class AbstractEvent implements EventInterface, ShouldQueue
 {
+    public $job;
     use Dispatchable, InteractsWithQueue, SerializesModels;
 
     /**

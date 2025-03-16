@@ -68,11 +68,9 @@ trait QueryTrait
             return Schema::hasTable('options') && DB::table('options')
                 ->where('option_name', 'siteurl')
                 ->exists();
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
-
-        return false;
     }
 
     /**
@@ -91,23 +89,23 @@ trait QueryTrait
 
         // Initialize WordPress for the current request
         wp();
-
         // Handle special request types
         if (is_robots()) {
             do_action('do_robots');
-
             return;
-        } elseif (is_favicon()) {
+        }
+        if (is_favicon()) {
             do_action('do_favicon');
-
             return;
-        } elseif (is_feed()) {
+        }
+        if (is_feed()) {
             do_feed();
-
             return;
-        } elseif (is_trackback()) {
-            require_once ABSPATH.'wp-trackback.php';
+        }
 
+        // Handle special request types
+        if (is_trackback()) {
+            require_once ABSPATH.'wp-trackback.php';
             return;
         }
 

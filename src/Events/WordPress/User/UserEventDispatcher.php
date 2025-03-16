@@ -180,7 +180,7 @@ class UserEventDispatcher extends AbstractEventDispatcher
      */
     public function handleSetUserRole(int $user_id, ?string $role, array $old_roles): void
     {
-        if (empty($old_roles)) {
+        if ($old_roles === []) {
             return;
         }
 

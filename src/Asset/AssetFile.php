@@ -6,6 +6,7 @@ namespace Pollora\Asset;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Log;
+use Stringable;
 
 /**
  * Represents a file asset and handles its URL generation.
@@ -13,9 +14,9 @@ use Illuminate\Support\Facades\Log;
  * This class provides functionality to generate URLs for assets,
  * with support for different asset containers and Vite integration.
  *
- * @implements \Stringable
+ * @implements Stringable
  */
-class AssetFile implements \Stringable
+class AssetFile implements Stringable
 {
     /**
      * The asset container identifier.
@@ -53,16 +54,14 @@ class AssetFile implements \Stringable
     {
         try {
             Application::getInstance();
-            $assetContainer = app('asset.container')->get($this->assetContainer);
+            $assetContainer = app(AssetContainerManager::class)->get($this->assetContainer);
 
             if ($assetContainer === null) {
                 return '';
             }
 
             $viteManager = new ViteManager($assetContainer);
-            $result = $viteManager->asset($this->path);
-
-            return is_string($result) ? $result : '';
+            return $viteManager->asset($this->path);
         } catch (\Throwable $e) {
             Log::error('Error in AssetFile::__toString', [
                 'error' => $e->getMessage(),

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Http\Request;
-use Mockery;
+use Mockery as m;
 use Pollora\Route\Matching\ConditionValidator;
 use Pollora\Route\Route;
 
@@ -32,7 +32,7 @@ function mockWordPressFunctionsForRoute(): void
  * Clean up after each test
  */
 afterEach(function () {
-    Mockery::close();
+    m::close();
 });
 
 /**
@@ -148,7 +148,7 @@ test('route uses WordPress validators for matching', function () {
     setupRouteTest();
 
     // Create a mock of the condition validator
-    $validator = Mockery::mock(ConditionValidator::class);
+    $validator = m::mock(ConditionValidator::class);
 
     // Create a WordPress route
     $route = new Route(['GET'], 'is_page', function () {

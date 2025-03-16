@@ -10,9 +10,7 @@ class ConstantServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton('constant.manager', function () {
-            return new ConstantManager;
-        });
+        $this->app->singleton('constant.manager', fn(): \Pollora\WordPress\Config\ConstantManager => new ConstantManager);
     }
 
     public function boot(): void

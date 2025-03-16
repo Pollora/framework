@@ -138,14 +138,12 @@ abstract class AbstractPostType implements Attributable, PostType
      */
     public function getArgs(): array
     {
-        $args = array_merge(
+        return array_merge(
             $this->attributeArgs,
             $this->withArgs(),
             [
                 'labels' => $this->getLabels(),
             ]
         );
-
-        return $args;
     }
 }

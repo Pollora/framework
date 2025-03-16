@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Asset;
 
 use Illuminate\Contracts\Foundation\Application;
+use RuntimeException;
 
 /**
  * Manages multiple asset containers in the application.
@@ -48,9 +49,7 @@ class AssetContainerManager
      * Gets an asset container by name.
      *
      * @param  string  $name  The container identifier
-     * @return AssetContainer The requested container
-     *
-     * @throws \InvalidArgumentException When container is not found
+     * @return AssetContainer|null The requested container
      */
     public function get(string $name): ?AssetContainer
     {
@@ -76,12 +75,12 @@ class AssetContainerManager
      *
      * @return AssetContainer The default container
      *
-     * @throws \RuntimeException When no default container is set
+     * @throws RuntimeException When no default container is set
      */
     public function getDefault(): AssetContainer
     {
         if ($this->defaultContainer === null || $this->defaultContainer === '' || $this->defaultContainer === '0') {
-            throw new \RuntimeException('No default asset container has been set.');
+            throw new RuntimeException('No default asset container has been set.');
         }
 
         return $this->get($this->defaultContainer);

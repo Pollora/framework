@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Config\Repository;
-use Mockery;
+use Mockery as m;
 use Pollora\Theme\TemplateHierarchy;
 
 /**
@@ -36,9 +36,9 @@ function setupTemplateHierarchyTest()
     setupWordPressMocks();
 
     // Create the config mock
-    $config = Mockery::mock(Repository::class);
+    $config = m::mock(Repository::class);
     $config->shouldReceive('get')
-        ->with('wordpress.conditions', Mockery::any())
+        ->with('wordpress.conditions', m::any())
         ->andReturn([
             'is_404' => '404',
             'is_search' => 'search',
@@ -59,7 +59,7 @@ function setupTemplateHierarchyTest()
 
     // Mock for plugin conditions if needed
     $config->shouldReceive('get')
-        ->with('wordpress.plugin_conditions', Mockery::any())
+        ->with('wordpress.plugin_conditions', m::any())
         ->andReturn([
             'is_woocommerce' => 'woocommerce',
             'is_product' => 'product',
@@ -67,18 +67,18 @@ function setupTemplateHierarchyTest()
         ]);
 
     // Create the TemplateHierarchy mock for certain tests
-    $templateHierarchy = Mockery::mock(TemplateHierarchy::class);
+    $templateHierarchy = m::mock(TemplateHierarchy::class);
 
     // Configure the templateHierarchy mock to return our hierarchy order
     $templateHierarchy->shouldReceive('getHierarchyOrder')
         ->andReturn($hierarchyOrder);
 
     // Mock the Laravel container for app() helper
-    $container = Mockery::mock(Container::class);
+    $container = m::mock(Container::class);
 
     // Configure the container to return our TemplateHierarchy mock when requested
     $container->shouldReceive('make')
-        ->with(TemplateHierarchy::class, Mockery::any())
+        ->with(TemplateHierarchy::class, m::any())
         ->andReturn($templateHierarchy);
 
     // Set the mocked container as the singleton instance
@@ -102,7 +102,7 @@ function setupTemplateHierarchyTest()
  */
 function setupWordPressMocksForTemplateHierarchy($conditions = [])
 {
-    WP::$wpFunctions = Mockery::mock('stdClass');
+    WP::$wpFunctions = m::mock('stdClass');
 
     // Setup add_filter mock - accepting ANY arguments with withAnyArgs()
     WP::$wpFunctions->shouldReceive('add_filter')
@@ -165,7 +165,7 @@ function assertHierarchyOrder(array $hierarchyOrder, string $firstCondition, str
 afterEach(function () {
     Container::setInstance(null);
     WP::$wpFunctions = null;
-    Mockery::close();
+    m::close();
 });
 
 /**
@@ -285,13 +285,13 @@ test('expected archive templates match WordPress conventions', function () {
  */
 test('template include is captured and prepended to hierarchy', function () {
     // Setup specific mock for this test to handle the template_include hook
-    WP::$wpFunctions = Mockery::mock('stdClass');
+    WP::$wpFunctions = m::mock('stdClass');
     WP::$wpFunctions->shouldReceive('add_filter')
         ->withAnyArgs()
         ->andReturn(true);
 
     // Create configuration mock
-    $config = Mockery::mock(Repository::class);
+    $config = m::mock(Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
     // Create container
@@ -328,13 +328,13 @@ test('template include is captured and prepended to hierarchy', function () {
  */
 test('blade template variants are correctly generated', function () {
     // Setup specific mock for this test
-    WP::$wpFunctions = Mockery::mock('stdClass');
+    WP::$wpFunctions = m::mock('stdClass');
     WP::$wpFunctions->shouldReceive('add_filter')
         ->withAnyArgs()
         ->andReturn(true);
 
     // Create config mock
-    $config = Mockery::mock(Repository::class);
+    $config = m::mock(Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
     // Create container
@@ -383,12 +383,12 @@ test('template handlers can be registered', function () {
 
     // Add specific expectation for our custom filter
     WP::$wpFunctions->shouldReceive('add_filter')
-        ->with('pollora/template_hierarchy/custom_type_templates', Mockery::type('Closure'), 10, 1)
+        ->with('pollora/template_hierarchy/custom_type_templates', m::type('Closure'), 10, 1)
         ->once()
         ->andReturn(true);
 
     // Create config mock
-    $config = Mockery::mock(\Illuminate\Contracts\Config\Repository::class);
+    $config = m::mock(\Illuminate\Contracts\Config\Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
     // Create container
@@ -413,7 +413,7 @@ test('template handlers can be registered', function () {
  */
 test('condition satisfaction detection works with different WordPress functions', function () {
     // Create a mock that won't interfere with template_include
-    WP::$wpFunctions = Mockery::mock('stdClass');
+    WP::$wpFunctions = m::mock('stdClass');
     WP::$wpFunctions->shouldReceive('add_filter')
         ->withAnyArgs()
         ->andReturn(true);
@@ -445,7 +445,7 @@ test('condition satisfaction detection works with different WordPress functions'
     }
 
     // Create config mock
-    $config = Mockery::mock(Repository::class);
+    $config = m::mock(Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
     // Create container

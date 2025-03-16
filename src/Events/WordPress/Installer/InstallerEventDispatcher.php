@@ -58,7 +58,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
 
         if ($action === 'install') {
             if ($type === 'plugin') {
-                $path = isset($upgrader->skin->result['destination_name']) ? $upgrader->skin->result['destination_name'] : null;
+                $path = $upgrader->skin->result['destination_name'] ?? null;
                 if (! $path) {
                     return;
                 }
@@ -70,7 +70,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
                     'slug' => $upgrader->result['destination_name'],
                 ]);
             } else {
-                $slug = isset($upgrader->skin->result['destination_name']) ? $upgrader->skin->result['destination_name'] : null;
+                $slug = $upgrader->skin->result['destination_name'] ?? null;
                 if (! $slug) {
                     return;
                 }
@@ -176,7 +176,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
             }
         }
 
-        if (empty($deleteThemeCall)) {
+        if ($deleteThemeCall === null || $deleteThemeCall === []) {
             return;
         }
 

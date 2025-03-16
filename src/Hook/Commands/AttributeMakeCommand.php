@@ -36,10 +36,9 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     /**
      * Resolve the fully-qualified path to the stub.
      *
-     * @param  string  $stub
      * @return string
      */
-    protected function resolveStubPath($stub)
+    protected function resolveStubPath(string $stub)
     {
         $customPath = config('stubs.path', base_path('stubs')).$stub;
 
@@ -94,13 +93,13 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         $this->validateOptions();
 
         $path = $this->getSourceFilePath();
-        $className = $this->getNameInput();
+        $this->getNameInput();
 
         if ($this->alreadyExists($path)) {
             $this->updateExistingFile($path);
             $this->components->info(sprintf('%s [%s] updated successfully.', $this->type, $path));
 
-            return;
+            return null;
         }
 
         return parent::handle();
@@ -131,7 +130,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         $stub = $this->getUpdateStub();
 
         $hook = $this->getDefaultOption('hook');
-        $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
+        $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', (string) $hook));
 
         $existingContent = File::get($path);
 
@@ -162,13 +161,13 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     protected function ensureAttributeImports(string $content): string
     {
         $requiredImports = [
-            'Pollora\Attributes\Action',
-            'Pollora\Attributes\Filter',
+            \Pollora\Attributes\Action::class,
+            \Pollora\Attributes\Filter::class,
         ];
 
         foreach ($requiredImports as $import) {
             $escapedImport = preg_quote($import, '/');
-            if (! preg_match("/use {$escapedImport};/", $content)) {
+            if (in_array(preg_match("/use {$escapedImport};/", $content), [0, false], true)) {
                 // Find the last "use" statement
                 $lastUsePosition = strrpos($content, 'use ');
                 if ($lastUsePosition !== false) {
@@ -191,7 +190,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     {
         $hook = $this->getDefaultOption('hook');
         $priority = $this->getDefaultOption('priority');
-        $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', $hook));
+        $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', (string) $hook));
         $hookType = $this->type;
 
         $returnType = $hookType === 'Action' ? ': void' : '';

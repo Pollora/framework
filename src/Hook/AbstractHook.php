@@ -84,37 +84,29 @@ abstract class AbstractHook implements HookInterface
         // If $callback is null, retrieve the callback from our registered hooks
         if ($callback === null) {
             $hookData = $this->getCallbacks($hook);
-
             // If no hook exists with this name, return false
-            if (empty($hookData)) {
+            if ($hookData === null || $hookData === []) {
                 return false;
             }
-
             // Get the first hook data (Themosis style)
             $firstHook = reset($hookData);
-
             // Extract callback details
             $callback = $firstHook['callback'];
             $priority = $firstHook['priority'];
-
             // Remove from our collection
             $this->hooks->forget($hook);
-        } else {
+        } elseif ($this->hooks->has($hook)) {
             // Remove the specific hook with the corresponding callback and priority
-            if ($this->hooks->has($hook)) {
-                $hookCallbacks = $this->hooks->get($hook);
-
-                // Find and remove the matching callback using our improved comparison function
-                $filteredCallbacks = $hookCallbacks->reject(
-                    fn (array $item): bool => $item['priority'] === $priority && $this->compareCallbacks($item['callback'], $callback)
-                )->values();
-
-                // Update or remove the hook entry
-                if ($filteredCallbacks->isEmpty()) {
-                    $this->hooks->forget($hook);
-                } else {
-                    $this->hooks->put($hook, $filteredCallbacks);
-                }
+            $hookCallbacks = $this->hooks->get($hook);
+            // Find and remove the matching callback using our improved comparison function
+            $filteredCallbacks = $hookCallbacks->reject(
+                fn (array $item): bool => $item['priority'] === $priority && $this->compareCallbacks($item['callback'], $callback)
+            )->values();
+            // Update or remove the hook entry
+            if ($filteredCallbacks->isEmpty()) {
+                $this->hooks->forget($hook);
+            } else {
+                $this->hooks->put($hook, $filteredCallbacks);
             }
         }
 
@@ -165,7 +157,7 @@ abstract class AbstractHook implements HookInterface
             // Compare objects/classes
             if (is_object($regObject) && is_string($reqObject)) {
                 // Case where the registered callback has an object but the request has a class
-                return $regObject instanceof $reqObject || get_class($regObject) === $reqObject;
+                return $regObject instanceof $reqObject || $regObject::class === $reqObject;
             }
 
             if (is_string($regObject) && is_string($reqObject)) {
@@ -175,7 +167,7 @@ abstract class AbstractHook implements HookInterface
 
             if (is_object($regObject) && is_object($reqObject)) {
                 // Case where both are objects
-                return get_class($regObject) === get_class($reqObject);
+                return $regObject::class === $reqObject::class;
             }
         }
 
@@ -206,7 +198,7 @@ abstract class AbstractHook implements HookInterface
         $hookCallbacks = $this->hooks->get($hook);
 
         // Filter by callback and priority if specified
-        return $hookCallbacks->contains(function ($item) use ($callback, $priority) {
+        return $hookCallbacks->contains(function (array $item) use ($callback, $priority): bool {
             // If priority is specified and doesn't match, return false
             if ($priority !== null && $item['priority'] !== $priority) {
                 return false;
@@ -272,7 +264,7 @@ abstract class AbstractHook implements HookInterface
 
             throw new \RuntimeException("Method '{$hookMethod}' not found in class '{$className}'.");
         } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to resolve '{$className}': ".$e->getMessage());
+            throw new \RuntimeException("Failed to resolve '{$className}': ".$e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -310,7 +302,7 @@ abstract class AbstractHook implements HookInterface
 
             return $paramCount;
         } catch (ReflectionException $e) {
-            throw new \RuntimeException('Failed to analyze callable: '.$e->getMessage());
+            throw new \RuntimeException('Failed to analyze callable: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -327,7 +319,7 @@ abstract class AbstractHook implements HookInterface
             $method = $callback[1];
 
             if (is_object($object)) {
-                return get_class($object).'::'.$method.'@'.spl_object_id($object);
+                return $object::class.'::'.$method.'@'.spl_object_id($object);
             }
 
             return $object.'::'.$method;
@@ -409,11 +401,6 @@ abstract class AbstractHook implements HookInterface
         // If hookCallbacks is a Collection, convert it to array with all registered callbacks
         if ($hookCallbacks instanceof Collection) {
             return $hookCallbacks->toArray();
-        }
-
-        // Legacy support (in case the structure is still in old format)
-        if (is_array($hookCallbacks) && ! isset($hookCallbacks['callback'])) {
-            return [$hookCallbacks];
         }
 
         // Single callback case

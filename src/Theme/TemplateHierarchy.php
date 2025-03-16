@@ -43,28 +43,18 @@ class TemplateHierarchy
     private static ?array $cachedPluginConditions = null;
 
     /**
-     * The configuration repository
-     */
-    private Repository $config;
-
-    /**
-     * The container instance
-     */
-    private Container $container;
-
-    /**
      * Create a new TemplateHierarchy instance.
      */
-    public function __construct(Repository $config, Container $container)
+    public function __construct(/**
+     * The configuration repository
+     */
+    private readonly Repository $config)
     {
-        $this->config = $config;
-        $this->container = $container;
-
         // Hook into template_include at a high priority to capture the final template
-        add_filter('template_include', [$this, 'captureTemplateInclude'], PHP_INT_MAX - 10);
+        add_filter('template_include', $this->captureTemplateInclude(...), PHP_INT_MAX - 10);
 
         // Add early hook to compute hierarchy during template_redirect
-        add_action('template_redirect', [$this, 'computeHierarchyEarly'], 0);
+        add_action('template_redirect', $this->computeHierarchyEarly(...), 0);
     }
 
     /**
@@ -75,7 +65,7 @@ class TemplateHierarchy
      */
     public function registerTemplateHandler(string $type, callable $callback): void
     {
-        add_filter("pollora/template_hierarchy/{$type}_templates", function ($templates) use ($callback) {
+        add_filter("pollora/template_hierarchy/{$type}_templates", function ($templates) use ($callback): array {
             $customTemplates = call_user_func($callback, $this->queriedObject());
 
             return array_merge($customTemplates, $templates);
@@ -90,7 +80,7 @@ class TemplateHierarchy
     public function computeHierarchyEarly(): void
     {
         // Compute the hierarchy if not already done
-        if (empty($this->templateHierarchy)) {
+        if ($this->templateHierarchy === []) {
             $this->computeHierarchy();
         }
     }
@@ -105,7 +95,7 @@ class TemplateHierarchy
     {
         // Add the final template to the beginning of our hierarchy
         // This ensures plugin templates take precedence
-        if (! empty($template)) {
+        if ($template !== '' && $template !== '0') {
             array_unshift($this->templateHierarchy, $template);
             $this->templateHierarchy = array_unique($this->templateHierarchy);
         }
@@ -130,7 +120,7 @@ class TemplateHierarchy
     public function hierarchy(bool $refresh = false): array
     {
         // Only compute hierarchy if not already done or if refresh is requested
-        if ($refresh || empty($this->templateHierarchy) || ! $this->hierarchyFinalized) {
+        if ($refresh || $this->templateHierarchy === [] || ! $this->hierarchyFinalized) {
             $this->computeHierarchy();
         }
 
@@ -147,13 +137,13 @@ class TemplateHierarchy
         $this->templateHierarchy = [];
 
         // Collect all active WooCommerce templates first
-        $wooCommerceTemplatesAdded = $this->collectWooCommerceTemplates();
+        $this->collectWooCommerceTemplates();
 
         // Now collect all WordPress templates that apply to the current request
         $this->collectWordPressTemplates();
 
         // Always check index as fallback if no template was found
-        if (empty($this->templateHierarchy)) {
+        if ($this->templateHierarchy === []) {
             $this->addTemplatesToHierarchy($this->getTemplatesForType('index'));
         }
 
@@ -315,7 +305,7 @@ class TemplateHierarchy
         }
 
         // Add templates to hierarchy if any were found
-        if (! empty($templates)) {
+        if ($templates !== []) {
             $this->addTemplatesToHierarchy($templates);
         }
 
@@ -335,7 +325,7 @@ class TemplateHierarchy
         $satisfiedConditions = [];
 
         // First, identify all conditions that are satisfied (don't break early)
-        foreach ($tagTemplates as $tag => $templateGetter) {
+        foreach (array_keys($tagTemplates) as $tag) {
             if ($this->isConditionSatisfied($tag)) {
                 $satisfiedConditions[] = $tag;
             }
@@ -378,7 +368,7 @@ class TemplateHierarchy
             $type = $this->conditionToType($tag);
             $templates = $this->getTemplatesForType($type);
 
-            if (! empty($templates)) {
+            if ($templates !== []) {
                 $this->addTemplatesToHierarchy($templates);
             }
         }
@@ -414,241 +404,6 @@ class TemplateHierarchy
     }
 
     /**
-     * Compute hierarchy based on WordPress core conditions
-     */
-    private function computeWordPressHierarchy(): void
-    {
-        // Get the WordPress template hierarchy order
-        $hierarchyOrder = self::getHierarchyOrder();
-
-        // Create a temporary array to store templates by condition
-        $templatesByCondition = [];
-
-        // Check each condition in the hierarchy order and collect templates
-        foreach ($hierarchyOrder as $condition) {
-            // Skip the fallback condition
-            if ($condition === '__return_true') {
-                continue;
-            }
-
-            if ($this->isConditionSatisfied($condition)) {
-                $type = $this->conditionToType($condition);
-                $templates = $this->getTemplatesForType($type);
-
-                if (! empty($templates)) {
-                    $templatesByCondition[$condition] = $templates;
-                }
-            }
-        }
-
-        // Process collected templates in hierarchy order
-        foreach ($hierarchyOrder as $condition) {
-            if (isset($templatesByCondition[$condition])) {
-                $this->addTemplatesToHierarchy($templatesByCondition[$condition]);
-            }
-        }
-    }
-
-    /**
-     * Get templates for a plugin-specific template type
-     *
-     * @param  string  $type  Template type
-     * @param  string  $pluginName  Plugin name
-     * @return string[] Array of templates
-     */
-    private function getPluginTemplatesForType(string $type, string $pluginName): array
-    {
-        // Default templates (will be overridden by specific types)
-        $templates = [];
-
-        // Base plugin directory where templates are stored (lowercase)
-        $pluginDir = strtolower($pluginName);
-
-        // Handle specific plugin types
-        if ($pluginName === 'woocommerce') {
-            $templates = $this->getWooCommerceTemplates($type);
-        } else {
-            // Generic plugin template pattern
-            // Add base template for the type
-            $templates[] = "{$pluginDir}/{$type}.php";
-
-            // Use the queried object to add more specific templates
-            $queriedObject = $this->queriedObject();
-            if ($queriedObject) {
-                // If it's a post type
-                if (isset($queriedObject->post_type)) {
-                    $templates[] = "{$pluginDir}/{$type}-{$queriedObject->post_type}.php";
-                    if (isset($queriedObject->post_name)) {
-                        $templates[] = "{$pluginDir}/{$type}-{$queriedObject->post_type}-{$queriedObject->post_name}.php";
-                    }
-                }
-
-                // If it's a taxonomy term
-                if (isset($queriedObject->taxonomy) && isset($queriedObject->slug)) {
-                    $templates[] = "{$pluginDir}/{$type}-{$queriedObject->taxonomy}.php";
-                    $templates[] = "{$pluginDir}/{$type}-{$queriedObject->taxonomy}-{$queriedObject->slug}.php";
-                }
-            }
-        }
-
-        // Allow plugins to filter their own templates
-        return apply_filters("pollora/template_hierarchy/{$pluginDir}/{$type}_templates", $templates, $this->queriedObject());
-    }
-
-    /**
-     * Get templates specific to WooCommerce
-     *
-     * @param  string  $type  Template type
-     * @return string[] Array of templates
-     */
-    private function getWooCommerceTemplates(string $type): array
-    {
-        $templates = [];
-        $queriedObject = $this->queriedObject();
-
-        switch ($type) {
-            case 'product':
-                if ($queriedObject) {
-                    $productType = function_exists('wc_get_product') ? wc_get_product($queriedObject->ID) : null;
-
-                    if ($productType && method_exists($productType, 'get_type')) {
-                        $productSubtype = $productType->get_type();
-
-                        // Add template specific to product slug
-                        $templates[] = "woocommerce/single-product-{$queriedObject->post_name}.php";
-
-                        // Add template specific to product type (simple, variable, etc)
-                        $templates[] = "woocommerce/single-product-{$productSubtype}.php";
-                    }
-
-                    // Add standard WooCommerce product template
-                    $templates[] = 'woocommerce/single-product.php';
-
-                    // Check if there's a custom template assigned in WooCommerce product data
-                    $wc_template = get_post_meta($queriedObject->ID, '_wp_page_template', true);
-                    if ($wc_template && $wc_template !== 'default') {
-                        array_unshift($templates, $wc_template);
-                    }
-                } else {
-                    $templates[] = 'woocommerce/single-product.php';
-                }
-                break;
-
-            case 'product_category':
-                if ($queriedObject && isset($queriedObject->slug)) {
-                    // Try parent category templates if available
-                    if (isset($queriedObject->parent) && $queriedObject->parent) {
-                        $parent = get_term($queriedObject->parent, 'product_cat');
-                        if ($parent && ! is_wp_error($parent)) {
-                            $templates[] = "woocommerce/taxonomy-product_cat-{$parent->slug}.php";
-                        }
-                    }
-
-                    // Current category template
-                    $templates[] = "woocommerce/taxonomy-product_cat-{$queriedObject->slug}.php";
-                }
-
-                // Generic category template
-                $templates[] = 'woocommerce/taxonomy-product_cat.php';
-
-                // Fall back to product archive
-                $templates[] = 'woocommerce/archive-product.php';
-                break;
-
-            case 'product_tag':
-                if ($queriedObject && isset($queriedObject->slug)) {
-                    $templates[] = "woocommerce/taxonomy-product_tag-{$queriedObject->slug}.php";
-                }
-
-                // Generic tag template
-                $templates[] = 'woocommerce/taxonomy-product_tag.php';
-
-                // Fall back to product archive
-                $templates[] = 'woocommerce/archive-product.php';
-                break;
-
-            case 'shop':
-                // Shop page might have a custom template
-                $shopPageId = function_exists('wc_get_page_id') ? wc_get_page_id('shop') : 0;
-                if ($shopPageId > 0) {
-                    $shop_template = get_post_meta($shopPageId, '_wp_page_template', true);
-                    if ($shop_template && $shop_template !== 'default') {
-                        $templates[] = $shop_template;
-                    }
-
-                    // Try page-{slug}.php
-                    $shop_page = get_post($shopPageId);
-                    if ($shop_page) {
-                        $templates[] = "page-{$shop_page->post_name}.php";
-                    }
-                }
-
-                // Standard shop template
-                $templates[] = 'woocommerce/archive-product.php';
-                break;
-
-            case 'cart':
-                $templates[] = 'woocommerce/cart.php';
-                break;
-
-            case 'checkout':
-                // Check if we're on a specific checkout endpoint
-                if (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url()) {
-                    $endpoint = WC()->query->get_current_endpoint();
-                    if ($endpoint) {
-                        $templates[] = "woocommerce/checkout-{$endpoint}.php";
-                    }
-                }
-
-                // Standard checkout
-                $templates[] = 'woocommerce/checkout.php';
-                break;
-
-            case 'account':
-                // Check if we're on a specific account endpoint
-                if (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url()) {
-                    $endpoint = WC()->query->get_current_endpoint();
-                    if ($endpoint) {
-                        $templates[] = "woocommerce/myaccount-{$endpoint}.php";
-                    }
-                }
-
-                // Standard account
-                $templates[] = 'woocommerce/myaccount.php';
-                break;
-
-            case 'wc_endpoint':
-                // Handle WooCommerce endpoints
-                if (function_exists('WC') && isset(WC()->query)) {
-                    $endpoint = WC()->query->get_current_endpoint();
-                    if ($endpoint) {
-                        $templates[] = "woocommerce/endpoint-{$endpoint}.php";
-
-                        // If it's a checkout or account endpoint, add specific fallbacks
-                        if (is_checkout()) {
-                            $templates[] = "woocommerce/checkout-{$endpoint}.php";
-                            $templates[] = 'woocommerce/checkout.php';
-                        } elseif (is_account_page()) {
-                            $templates[] = "woocommerce/myaccount-{$endpoint}.php";
-                            $templates[] = 'woocommerce/myaccount.php';
-                        }
-                    }
-                }
-
-                // Generic endpoint template
-                $templates[] = 'woocommerce/endpoint.php';
-                break;
-
-            default:
-                // Generic WooCommerce template
-                $templates[] = "woocommerce/{$type}.php";
-                break;
-        }
-
-        return $templates;
-    }
-
-    /**
      * Check if a condition function is satisfied
      */
     private function isConditionSatisfied(string $condition): bool
@@ -663,7 +418,7 @@ class TemplateHierarchy
      */
     private function addTemplatesToHierarchy(array $templates): void
     {
-        if (empty($templates)) {
+        if ($templates === []) {
             return;
         }
 
@@ -954,20 +709,6 @@ class TemplateHierarchy
 
         // Allow plugins to register additional conditions
         return apply_filters('pollora/template_hierarchy/conditions', $conditions);
-    }
-
-    /**
-     * Get plugin conditions from config
-     *
-     * @return array Plugin conditions from config
-     */
-    private function getPluginConditions(): array
-    {
-        // Retrieve the plugin conditions from the Laravel config
-        $pluginConditions = $this->config->get('wordpress.plugin_conditions', []);
-
-        // Allow plugins to register additional plugin conditions
-        return apply_filters('pollora/template_hierarchy/plugin_conditions', $pluginConditions);
     }
 
     /**

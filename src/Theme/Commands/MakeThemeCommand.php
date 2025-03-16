@@ -138,14 +138,14 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     protected function getTargetPathInfo($item, string $destination, string $relativePath): array
     {
-        $targetDir = $destination.($relativePath ? '/'.$relativePath : '');
+        $targetDir = $destination.($relativePath !== '' && $relativePath !== '0' ? '/'.$relativePath : '');
         $targetPath = $targetDir.'/'.$item->getFilename();
         $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
 
         if (str_starts_with($relativePath, 'app/')) {
             $relativePath = str_replace('app/Themes/', '', $relativePath);
             $targetDir = $this->theme->getThemeAppDir($relativePath);
-            $targetPath = $targetDir.DIRECTORY_SEPARATOR.basename($targetPath);
+            $targetPath = $targetDir.DIRECTORY_SEPARATOR.basename((string) $targetPath);
         }
 
         return [

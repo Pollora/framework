@@ -98,9 +98,8 @@ class PostTypeMakeCommand extends GeneratorCommand
         // Replace placeholders in the stub
         $stub = str_replace('DummySlug', $this->getSlugFromClassName($className), $stub);
         $stub = str_replace('DummyName', $this->getNameFromClassName($className), $stub);
-        $stub = str_replace('DummyPluralName', $this->getPluralNameFromClassName($className), $stub);
 
-        return $stub;
+        return str_replace('DummyPluralName', $this->getPluralNameFromClassName($className), $stub);
     }
 
     /**
@@ -108,7 +107,7 @@ class PostTypeMakeCommand extends GeneratorCommand
      */
     protected function getSlugFromClassName(string $className): string
     {
-        return strtolower(preg_replace('/[A-Z]/', '-$0', lcfirst($className)));
+        return strtolower((string) preg_replace('/[A-Z]/', '-$0', lcfirst($className)));
     }
 
     /**
@@ -116,7 +115,7 @@ class PostTypeMakeCommand extends GeneratorCommand
      */
     protected function getNameFromClassName(string $className): string
     {
-        return ucfirst(strtolower(preg_replace('/[A-Z]/', ' $0', lcfirst($className))));
+        return ucfirst(strtolower((string) preg_replace('/[A-Z]/', ' $0', lcfirst($className))));
     }
 
     /**
@@ -127,7 +126,7 @@ class PostTypeMakeCommand extends GeneratorCommand
         $name = $this->getNameFromClassName($className);
 
         // Simple pluralization (not comprehensive)
-        if (substr($name, -1) === 'y') {
+        if (str_ends_with($name, 'y')) {
             return substr($name, 0, -1).'ies';
         }
 
