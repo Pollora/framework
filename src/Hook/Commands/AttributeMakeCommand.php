@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Pollora\Hook\Commands;
 
 use Illuminate\Console\GeneratorCommand;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Pollora\Attributes\Action;
+use Pollora\Attributes\Filter;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
@@ -28,7 +31,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function getStub()
+    protected function getStub(): string
     {
         return $this->resolveStubPath('/stubs/hook-attribute.stub');
     }
@@ -38,7 +41,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function resolveStubPath(string $stub)
+    protected function resolveStubPath(string $stub): string
     {
         $customPath = config('stubs.path', base_path('stubs')).$stub;
 
@@ -51,7 +54,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      * @param  string  $rootNamespace
      * @return string
      */
-    protected function getDefaultNamespace($rootNamespace)
+    protected function getDefaultNamespace($rootNamespace): string
     {
         return $rootNamespace.'\\Cms\\Hooks';
     }
@@ -62,7 +65,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      * @param  string  $name
      * @return string
      */
-    protected function buildClass($name)
+    protected function buildClass($name): string
     {
         $stub = parent::buildClass($name);
 
@@ -74,7 +77,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      *
      * @return array
      */
-    protected function getOptions()
+    protected function getOptions(): array
     {
         return [
             ['force', 'f', InputOption::VALUE_NONE, 'Create the class even if the hook already exists'],
@@ -86,9 +89,10 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return bool|null
+     * @throws FileNotFoundException
      */
-    public function handle()
+    public function handle(): ?bool
     {
         $this->validateOptions();
 
@@ -110,7 +114,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      *
      * @return void
      */
-    protected function validateOptions()
+    protected function validateOptions(): void
     {
         $priority = $this->option('priority');
         if (! is_numeric($priority) || $priority < 0) {
@@ -122,10 +126,10 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     /**
      * Update an existing file with new content.
      *
-     * @param  string  $path
+     * @param string $path
      * @return void
      */
-    protected function updateExistingFile($path)
+    protected function updateExistingFile(string $path): void
     {
         $stub = $this->getUpdateStub();
 
@@ -161,8 +165,8 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     protected function ensureAttributeImports(string $content): string
     {
         $requiredImports = [
-            \Pollora\Attributes\Action::class,
-            \Pollora\Attributes\Filter::class,
+            Action::class,
+            Filter::class,
         ];
 
         foreach ($requiredImports as $import) {
@@ -186,7 +190,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    public function makeReplacements(string $stub)
+    public function makeReplacements(string $stub): string
     {
         $hook = $this->getDefaultOption('hook');
         $priority = $this->getDefaultOption('priority');
@@ -210,7 +214,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function getUpdateStub()
+    protected function getUpdateStub(): string
     {
         return $this->resolveStubPath('/stubs/hook-attribute-update.stub');
     }
@@ -220,29 +224,29 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function getSourceFilePath()
+    protected function getSourceFilePath(): string
     {
-        return app_path('Hooks/'.$this->getNameInput().'.php');
+        return app_path('Cms/Hooks/'.$this->getNameInput().'.php');
     }
 
     /**
      * Determine if the file already exists.
      *
-     * @param  string  $path
+     * @param  string  $rawName
      * @return bool
      */
-    protected function alreadyExists($path)
+    protected function alreadyExists($rawName): bool
     {
-        return File::exists($path);
+        return File::exists($rawName);
     }
 
     /**
      * Get the default option value.
      *
-     * @param  string  $key
+     * @param string $key
      * @return mixed
      */
-    protected function getDefaultOption($key)
+    protected function getDefaultOption(string $key): mixed
     {
         $defaults = [
             'hook' => 'init',

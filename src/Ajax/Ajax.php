@@ -54,13 +54,13 @@ class Ajax
         /**
          * @var string $action The current action being performed. Can be null if no specific action is set.
          */
-        private string $action,
+        private readonly string $action,
         /**
          * Represents a callback function that can be executed.
          *
          * @var mixed $callback The callback function to be executed.
          */
-        private readonly mixed $callback
+        private readonly mixed  $callback
     ) {
         if (empty($this->action) || empty($this->callback)) {
             throw new InvalidArgumentException('Action and callback must be provided.');

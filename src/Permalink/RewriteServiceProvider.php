@@ -34,8 +34,7 @@ class RewriteServiceProvider extends ServiceProvider
      */
     protected function registerUrlMacro(): self
     {
-        URL::macro('removeTrailingSlash', fn (?string $url) => app(Uri::class)->removeTrailingSlash($url)
-        );
+        URL::macro('removeTrailingSlash', static fn (?string $url) => app(Uri::class)->removeTrailingSlash($url));
 
         return $this;
     }
@@ -55,8 +54,7 @@ class RewriteServiceProvider extends ServiceProvider
      */
     protected function registerFilters(): self
     {
-        Filter::add('redirect_canonical', fn ($canonicalUrl) => app(PermalinkManager::class)->handleCanonicalRedirect($canonicalUrl)
-        );
+        Filter::add('redirect_canonical', static fn ($canonicalUrl) => app(PermalinkManager::class)->handleCanonicalRedirect($canonicalUrl));
 
         return $this;
     }
@@ -68,7 +66,7 @@ class RewriteServiceProvider extends ServiceProvider
     {
         Action::add(
             'permalink_structure_changed',
-            fn ($old, $new) => app(PermalinkManager::class)->updateStructure($new),
+            static fn (string $old, string $new) => app(PermalinkManager::class)->updateStructure($new),
             90
         );
     }

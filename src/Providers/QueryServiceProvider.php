@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Colt\Model\User as BaseUser;
 use Pollora\Models\Post;
+use Pollora\Models\User;
 use Pollora\Query\DateQuery;
 use Pollora\Query\MetaQuery;
 use Pollora\Query\PostQuery;
@@ -40,7 +42,7 @@ class QueryServiceProvider extends ServiceProvider
     public function register(): void
     {
         // User model binding
-        $this->app->bind(\Pollora\Colt\Model\User::class, 'Pollora\Model\User');
+        $this->app->bind(BaseUser::class, User::class);
 
         // Query singletons
         $this->app->singleton('wp.query.post', fn (): PostQuery => new PostQuery);

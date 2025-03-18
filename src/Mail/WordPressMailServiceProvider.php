@@ -33,7 +33,7 @@ class WordPressMailServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (! function_exists('wp_mail')) {
-            $this->app->bind('wp_mail', fn ($app): \Closure => function ($to, $subject, $message, $headers = '', $attachments = []) use ($app): bool {
+            $this->app->bind('wp_mail', fn ($app): \Closure => static function ($to, $subject, $message, $headers = '', $attachments = []) use ($app): bool {
                 $result = $app->make(Mailer::class)->send($to, $subject, $message, $headers, $attachments);
 
                 return $result !== null;

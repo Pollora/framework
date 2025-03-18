@@ -22,22 +22,19 @@ class AssetServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(AssetContainerManager::class, fn ($app): AssetContainerManager => new AssetContainerManager($app));
+        $this->app->singleton(AssetContainerManager::class, fn ($app) => new AssetContainerManager($app));
+        $this->app->singleton(AssetFactory::class, fn ($app) => new AssetFactory($app));
 
-        $this->app->make(AssetContainerManager::class)->addContainer('root', []);
-        $this->app->make(AssetContainerManager::class)->setDefaultContainer('root');
+        $containerManager = $this->app->make(AssetContainerManager::class);
+        $containerManager->addContainer('root', []);
+        $containerManager->setDefaultContainer('root');
 
-        $this->app->singleton(AssetFactory::class, fn ($app): AssetFactory => new AssetFactory($app));
-
-        $this->app->singleton(ViteManager::class, function (Application $app): ViteManager {
-            $defaultContainer = $app->make(AssetContainerManager::class)->getDefault();
-
-            return new ViteManager($defaultContainer);
-        });
+        $this->app->singleton(ViteManager::class, fn (Application $app) => new ViteManager($containerManager->getDefault()));
     }
 
     /**
      * Bootstrap asset services.
+     * @throws BindingResolutionException
      */
     public function boot(): void
     {

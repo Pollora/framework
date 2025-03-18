@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\PostType\Commands;
 
 use Illuminate\Console\GeneratorCommand;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Symfony\Component\Console\Input\InputArgument;
 
 /**
@@ -59,14 +60,16 @@ class PostTypeMakeCommand extends GeneratorCommand
      *
      * @return bool|null
      *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws FileNotFoundException
      */
-    public function handle()
+    public function handle(): ?bool
     {
         // Create the directory if it doesn't exist
         $directory = app_path('Cms/PostTypes');
         if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
+            if (! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $directory));
+            }
             $this->components->info(sprintf('Directory [%s] created successfully.', $directory));
         }
 
@@ -96,10 +99,10 @@ class PostTypeMakeCommand extends GeneratorCommand
         $className = class_basename($name);
 
         // Replace placeholders in the stub
-        $stub = str_replace('DummySlug', $this->getSlugFromClassName($className), $stub);
-        $stub = str_replace('DummyName', $this->getNameFromClassName($className), $stub);
-
-        return str_replace('DummyPluralName', $this->getPluralNameFromClassName($className), $stub);
+        return str_replace(
+            ['DummySlug', 'DummyName', 'DummyPluralName'],
+            [$this->getSlugFromClassName($className), $this->getNameFromClassName($className), $this->getPluralNameFromClassName($className)],
+            $stub);
     }
 
     /**

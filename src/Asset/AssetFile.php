@@ -60,8 +60,7 @@ class AssetFile implements Stringable
                 return '';
             }
 
-            $viteManager = new ViteManager($assetContainer);
-            return $viteManager->asset($this->path);
+            return (new ViteManager($assetContainer))->asset($this->path);
         } catch (\Throwable $e) {
             Log::error('Error in AssetFile::__toString', [
                 'error' => $e->getMessage(),

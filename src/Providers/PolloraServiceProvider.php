@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Providers;
 
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
@@ -56,7 +57,7 @@ class PolloraServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        Application::macro('runningInWpCli', fn(): bool => defined('\WP_CLI') && \WP_CLI);
+        Application::macro('runningInWpCli', fn (): bool => defined('\WP_CLI') && \WP_CLI);
 
         // Generic service providers
         $this->app->register(ConstantServiceProvider::class);
@@ -82,10 +83,10 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(WpRocketServiceProvider::class);
         $this->app->register(WordPressEventServiceProvider::class);
 
-        if (config('wordpress.use_laravel_scheduler')) {
+        if (config('wordpress.use_laravel_scheduler', false)) {
             $this->app->register(SchedulerServiceProvider::class);
         }
-        $this->app->singleton(JobDispatcher::class, fn ($app): \Pollora\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(\Illuminate\Contracts\Bus\Dispatcher::class)));
+        $this->app->singleton(JobDispatcher::class, fn ($app): \Pollora\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(Dispatcher::class)));
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);

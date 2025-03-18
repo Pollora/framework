@@ -22,9 +22,9 @@ class BlockCategoryRegistrar
     {
         $configuredCategories = collect(config('theme.gutenberg.categories.blocks'));
 
-        add_filter('block_categories_all', fn($categories): array => array_merge(
+        add_filter('block_categories_all', fn (array $categories): array => array_merge(
             $categories,
-            $configuredCategories->map(fn($args, $slug): array => [
+            $configuredCategories->map(fn (array $args, string $slug): array => [
                 'slug' => $slug,
                 'title' => $args['label'] ?? $args['title'] ?? '',
             ])->values()->all()

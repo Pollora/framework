@@ -51,11 +51,11 @@ class PatternDataProcessor
      */
     public function process(array $patternData, \WP_Theme $theme): array
     {
-        $arrayProperties = ['categories', 'keywords', 'blockTypes', 'postTypes'];
 
         return collect($patternData)
-            ->map(function ($value, $key) use ($arrayProperties, $theme) {
-                if (in_array($key, $arrayProperties)) {
+            ->map(function ($value, $key) use ($theme) {
+                $arrayProperties = ['categories', 'keywords', 'blockTypes', 'postTypes'];
+                if (in_array($key, $arrayProperties, true)) {
                     return $value ? explode(',', $value) : null;
                 }
                 if ($key === 'viewportWidth') {

@@ -30,9 +30,6 @@ class WooCommerceView
     /**
      * Get the theme file finder
      *
-     *
-     * @throws \Illuminate\Container\EntryNotFoundException
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     protected function getFileFinder(): FileViewFinder
     {

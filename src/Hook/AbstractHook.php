@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Hook;
 
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Pollora\Hook\Contracts\HookInterface;
@@ -59,7 +60,7 @@ abstract class AbstractHook implements HookInterface
      * @param  int  $priority  Optional. Priority of the hook (default: 10)
      * @param  int|null  $acceptedArgs  Optional. Number of arguments the callback accepts (default: auto-detected)
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function add(string|array $hooks, callable|string|array $callback, int $priority = 10, ?int $acceptedArgs = null): self
     {
@@ -88,11 +89,11 @@ abstract class AbstractHook implements HookInterface
             if ($hookData === null || $hookData === []) {
                 return false;
             }
-            // Get the first hook data (Themosis style)
+            // Get the first hook data
             $firstHook = reset($hookData);
             // Extract callback details
             $callback = $firstHook['callback'];
-            $priority = $firstHook['priority'];
+            $priority = (int) $firstHook['priority'];
             // Remove from our collection
             $this->hooks->forget($hook);
         } elseif ($this->hooks->has($hook)) {
@@ -195,10 +196,8 @@ abstract class AbstractHook implements HookInterface
         }
 
         // Get all callbacks for this hook
-        $hookCallbacks = $this->hooks->get($hook);
-
         // Filter by callback and priority if specified
-        return $hookCallbacks->contains(function (array $item) use ($callback, $priority): bool {
+        return $this->hooks->get($hook)->contains(function (array $item) use ($callback, $priority): bool {
             // If priority is specified and doesn't match, return false
             if ($priority !== null && $item['priority'] !== $priority) {
                 return false;
@@ -263,7 +262,7 @@ abstract class AbstractHook implements HookInterface
             }
 
             throw new \RuntimeException("Method '{$hookMethod}' not found in class '{$className}'.");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new \RuntimeException("Failed to resolve '{$className}': ".$e->getMessage(), $e->getCode(), $e);
         }
     }

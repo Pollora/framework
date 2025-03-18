@@ -8,6 +8,8 @@ use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Log;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -114,10 +116,23 @@ class Asset
      */
     public function container(string $containerName): self
     {
-        $this->container = app(AssetContainerManager::class)->get($containerName);
-        if ($this->useVite) {
-            $this->vite->setContainer($this->container);
-            $this->vite->setClient($this->path);
+        try {
+            $this->container = app(AssetContainerManager::class)->get($containerName);
+
+            if ($this->useVite) {
+                $this->vite->setContainer($this->container);
+                $this->vite->setClient($this->path);
+            }
+        } catch (NotFoundExceptionInterface $e) {
+            Log::error("Asset container '{$containerName}' not found.");
+
+            return $this;
+
+        } catch (ContainerExceptionInterface $e) {
+            Log::error("Container exception: {$e->getMessage()}");
+
+            return $this;
+
         }
 
         return $this;
@@ -335,7 +350,7 @@ class Asset
 
         foreach ($paths as $type => $pathList) {
             foreach ($pathList as $path) {
-                $this->enqueueAsset($type, $this->forceFullUrl($path));
+                $this->enqueueAsset((string) $type, $this->forceFullUrl($path));
             }
         }
     }

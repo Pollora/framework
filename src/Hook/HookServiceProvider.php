@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Hook;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\Application;
 use Pollora\Hook\Commands\ActionMakeCommand;
 use Pollora\Hook\Commands\FilterMakeCommand;
 use Pollora\Hook\Contracts\Hooks;
@@ -18,6 +19,13 @@ use Spatie\StructureDiscoverer\Discover;
  */
 class HookServiceProvider extends ServiceProvider
 {
+    /**
+     * Application instance.
+     *
+     * @var Application
+     */
+    protected $app;
+
     /**
      * Register hook-related services in the application.
      *
@@ -42,8 +50,10 @@ class HookServiceProvider extends ServiceProvider
      *
      * Loads and registers all configured hooks after the application has booted.
      */
-    public function boot(): void
+    public function boot(Application $app): void
     {
+        $this->app = $app;
+
         $this->loadHooks();
     }
 
@@ -72,6 +82,6 @@ class HookServiceProvider extends ServiceProvider
      */
     protected function registerHook(string $hookClass): void
     {
-        app()->make($hookClass);
+        $this->app->make($hookClass);
     }
 }

@@ -35,7 +35,7 @@ class Filesystem extends FilesystemBase
      */
     public function normalizePath(string $path, string $separator = '/'): string
     {
-        return preg_replace('#/+#', $separator, strtr($path, '\\', '/')) ?? $path;
+        return preg_replace('#/+#', $separator, str_replace('\\', '/', $path)) ?? $path;
     }
 
     /**

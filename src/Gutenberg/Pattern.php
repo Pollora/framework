@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Gutenberg;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\Application;
 use Pollora\Gutenberg\Registrars\BlockCategoryRegistrar;
 use Pollora\Gutenberg\Registrars\PatternCategoryRegistrar;
@@ -40,6 +41,8 @@ class Pattern implements ThemeComponent
      * Initializes registrars using the application container.
      *
      * @param  Application  $container  The application container instance
+     *
+     * @throws BindingResolutionException
      */
     public function __construct(Application $container)
     {

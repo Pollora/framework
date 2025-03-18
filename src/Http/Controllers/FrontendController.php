@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\View as ViewFacade;
+use Illuminate\View\View;
 use Pollora\Theme\TemplateHierarchy;
 
 class FrontendController extends Controller
@@ -18,9 +19,7 @@ class FrontendController extends Controller
          * The template hierarchy instance
          */
         private readonly TemplateHierarchy $templateHierarchy
-    )
-    {
-    }
+    ) {}
 
     /**
      * Handle the automatic view assignment for WordPress templates.
@@ -28,9 +27,9 @@ class FrontendController extends Controller
      * This method will automatically determine the appropriate view
      * based on WordPress conditional tags and template hierarchy.
      *
-     * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
+     * @return View
      */
-    public function handle()
+    public function handle(): ?View
     {
         global $wp_query;
 
@@ -39,7 +38,7 @@ class FrontendController extends Controller
 
         // Vérifier si des vues existent pour chaque template dans la hiérarchie
         foreach ($views as $view) {
-            if (View::exists($view)) {
+            if (ViewFacade::exists($view)) {
                 return view($view);
             }
         }
@@ -47,6 +46,5 @@ class FrontendController extends Controller
         // Si aucun template n'est trouvé, retourner une vue 404
         $wp_query->set_404();
         abort(404);
-        return null;
     }
 }

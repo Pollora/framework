@@ -15,7 +15,7 @@ class WooCommerceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp_view', WooCommerceView::class);
+        $this->app->singleton(WooCommerceView::class, WooCommerceView::class);
         Action::add('plugins_loaded', function (): void {
             if (defined('WC_ABSPATH')) {
                 $this->bindFilters();
@@ -25,7 +25,7 @@ class WooCommerceProvider extends ServiceProvider
 
     public function bindFilters(): void
     {
-        $wp_view = $this->app['wp_view'];
+        $wp_view = $this->app->make(WooCommerceView::class);
 
         // add_filter('template_include', [$wp_view, 'templateInclude'], 11);
         add_filter('woocommerce_locate_template', [$wp_view, 'template']);

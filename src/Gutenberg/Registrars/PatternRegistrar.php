@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Gutenberg\Registrars;
 
+use FilesystemIterator;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
@@ -54,7 +55,7 @@ class PatternRegistrar
             }
 
             $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($dirpath, \RecursiveDirectoryIterator::SKIP_DOTS)
+                new \RecursiveDirectoryIterator($dirpath, FilesystemIterator::SKIP_DOTS)
             );
 
             foreach ($iterator as $file) {

@@ -15,6 +15,13 @@ use Exception;
 class AssetException extends Exception
 {
     /**
+     * Additional context data for debugging.
+     *
+     * @var array<string, mixed>
+     */
+    protected array $context;
+
+    /**
      * Create a new AssetException instance.
      *
      * @param  string  $message  The exception message
@@ -24,10 +31,13 @@ class AssetException extends Exception
      */
     public function __construct(
         string $message = '',
-        protected array $context = [],
+        array $context = [],
         int $code = 0,
         ?Exception $previous = null
-    ) {}
+    ) {
+        parent::__construct($message, $code, $previous);
+        $this->context = $context;
+    }
 
     /**
      * Get the exception's context information.

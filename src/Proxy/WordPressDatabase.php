@@ -7,6 +7,7 @@ namespace Pollora\Proxy;
 use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use wpdb;
 
 /**
@@ -64,11 +65,7 @@ class WordPressDatabase extends wpdb
     {
         $config = $this->eloquentConnection->getConfig();
 
-        return $config['driver'] === 'mysql'
-            && isset($config['host'])
-            && isset($config['username'])
-            && isset($config['password'])
-            && isset($config['database']);
+        return isset($config['host'], $config['username'], $config['password'], $config['database']) && $config['driver'] === 'mysql';
     }
 
     /**
@@ -118,11 +115,11 @@ class WordPressDatabase extends wpdb
      * @param  bool  $new_link  Whether to force a new connection
      * @param  int  $client_flags  Client connection flags
      *
-     * @throws Exception Always throws to prevent usage
+     * @throws RuntimeException Always throws to prevent usage
      */
-    public function mysql_connect($new_link = false, $client_flags = 0): never
+    public function mysql_connect(bool $new_link = false, int $client_flags = 0): never
     {
-        throw new Exception(
+        throw new RuntimeException(
             'Using mysql_connect is deprecated and not supported. Please use mysqli_real_connect.'
         );
     }

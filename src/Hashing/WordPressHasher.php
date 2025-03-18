@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Hashing;
 
 use Illuminate\Contracts\Hashing\Hasher as HasherContract;
+use RuntimeException;
 
 /**
  * Gives an interface to hash WordPress passwords from
@@ -33,11 +34,10 @@ class WordPressHasher implements HasherContract
      * Hash the given value.
      *
      * @param  string  $value
-     * @return string
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function make($value, array $options = [])
+    public function make(#[\SensitiveParameter] $value, array $options = []): string
     {
         return wp_hash_password($value);
     }
@@ -47,9 +47,8 @@ class WordPressHasher implements HasherContract
      *
      * @param  string  $value
      * @param  string  $hashedValue
-     * @return bool
      */
-    public function check($value, $hashedValue, array $options = [])
+    public function check(#[\SensitiveParameter] $value, $hashedValue, array $options = []): bool
     {
         return wp_check_password($value, $hashedValue, $options['user_id'] ?? '');
     }

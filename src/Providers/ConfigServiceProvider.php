@@ -37,9 +37,9 @@ class ConfigServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            realpath(__DIR__.'/../../config/wordpress.php') => config_path('wordpress.php'),
-            realpath(__DIR__.'/../../config/posttypes.php') => config_path('post-types.php'),
-            realpath(__DIR__.'/../../config/taxonomies.php') => config_path('taxonomies.php'),
+            dirname(__DIR__, 2).'/config/wordpress.php' => config_path('wordpress.php'),
+            dirname(__DIR__, 2).'/config/posttypes.php' => config_path('post-types.php'),
+            dirname(__DIR__, 2).'/config/taxonomies.php' => config_path('taxonomies.php'),
         ]);
     }
 }

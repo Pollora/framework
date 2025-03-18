@@ -28,7 +28,7 @@ class PostTypeServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind('wp.posttype', fn ($app): \Pollora\PostType\PostTypeFactory => new PostTypeFactory($app));
+        $this->app->bind('wp.posttype', fn ($app): PostTypeFactory => new PostTypeFactory($app));
         $this->registerPostTypes();
 
         // Register the attribute-based post type service provider
