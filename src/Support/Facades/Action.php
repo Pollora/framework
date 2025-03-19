@@ -8,17 +8,20 @@ use Illuminate\Support\Facades\Facade;
 use Pollora\Hook\Hook;
 
 /**
- * Facade for WordPress Action Hooks.
+ * Class Action
  *
- * Provides a fluent interface for working with WordPress action hooks,
- * including adding, removing, and executing actions.
+ * Facade for the Action class, providing convenient static access.
  *
- * @method static mixed do(string $hook, mixed $args = null) Execute an action hook
- * @method static Hook add(string|array $hooks, \Closure|string|array $callback, int $priority = 10, int $accepted_args = 3) Add an action hook
- * @method static bool exists(string $hook) Check if an action exists
- * @method static Hook|false remove(string $hook, \Closure|string $callback, int $priority = 10) Remove an action hook
+ * @method static void add(string $hook, callable|string|array $callback, int $priority = 10, ?int $acceptedArgs = null)
+ * @method static void remove(string $hook, callable|string|array $callback, int $priority = 10)
+ * @method static bool exists(string $hook, callable|string|array $callback = null, int $priority = null)
+ * @method static void do(string $hook, ...$args)
+ * @method static void doArray(string $hook, array $args = [])
+ * @method static void doOnce(string $hook, ...$args)
+ * @method static array getCallbacks(string $hook, ?int $priority = null)
  *
- * @see \Pollora\Hook\Hook
+ * @see \Pollora\Hook\Action
+ * @package Pollora\Hook\Facades
  */
 class Action extends Facade
 {

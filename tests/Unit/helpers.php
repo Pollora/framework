@@ -43,6 +43,45 @@ function setupWordPressMocks()
         })
         ->byDefault();
 
+    // Mock for remove_filter and remove_action
+    WP::$wpFunctions->shouldReceive('remove_filter')
+        ->withAnyArgs()
+        ->andReturn(true)
+        ->byDefault();
+
+    // Mock for do_action
+    WP::$wpFunctions->shouldReceive('do_action')
+        ->withAnyArgs()
+        ->andReturnUsing(function ($tag, ...$args) {
+            return null; // do_action ne renvoie rien
+        })
+        ->byDefault();
+
+    // Mock for do_action_array
+    WP::$wpFunctions->shouldReceive('do_action_array')
+        ->withAnyArgs()
+        ->andReturnUsing(function ($tag, $args = []) {
+            return null; // do_action_array ne renvoie rien
+        })
+        ->byDefault();
+
+    // Mock for do_action_once
+    WP::$wpFunctions->shouldReceive('do_action_once')
+        ->withAnyArgs()
+        ->andReturnUsing(function ($tag, ...$args) {
+            return null; // do_action_once ne renvoie rien
+        })
+        ->byDefault();
+
+    // Mock for apply_filters_array
+    WP::$wpFunctions->shouldReceive('apply_filters_array')
+        ->withAnyArgs()
+        ->andReturnUsing(function ($tag, $args = []) {
+            // Renvoie le premier argument (la valeur) par défaut
+            return isset($args[0]) ? $args[0] : null;
+        })
+        ->byDefault();
+
     // Default WordPress conditional functions behavior
     WP::$wpFunctions->shouldReceive('is_page')
         ->byDefault()
@@ -225,6 +264,48 @@ if (! function_exists('apply_filters')) {
     function apply_filters($tag, $value, ...$args)
     {
         return WP::$wpFunctions->apply_filters($tag, $value, ...$args);
+    }
+}
+
+if (! function_exists('remove_filter')) {
+    function remove_filter($tag, $function_to_remove, $priority = 10)
+    {
+        return WP::$wpFunctions->remove_filter($tag, $function_to_remove, $priority);
+    }
+}
+
+if (! function_exists('remove_action')) {
+    function remove_action($tag, $function_to_remove, $priority = 10)
+    {
+        return WP::$wpFunctions->remove_filter($tag, $function_to_remove, $priority);
+    }
+}
+
+if (! function_exists('do_action')) {
+    function do_action($tag, ...$args)
+    {
+        return WP::$wpFunctions->do_action($tag, ...$args);
+    }
+}
+
+if (! function_exists('do_action_array')) {
+    function do_action_array($tag, $args = [])
+    {
+        return WP::$wpFunctions->do_action_array($tag, $args);
+    }
+}
+
+if (! function_exists('do_action_once')) {
+    function do_action_once($tag, ...$args)
+    {
+        return WP::$wpFunctions->do_action_once($tag, ...$args);
+    }
+}
+
+if (! function_exists('apply_filters_array')) {
+    function apply_filters_array($tag, $args = [])
+    {
+        return WP::$wpFunctions->apply_filters_array($tag, $args);
     }
 }
 

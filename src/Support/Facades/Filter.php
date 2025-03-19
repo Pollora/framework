@@ -8,17 +8,19 @@ use Illuminate\Support\Facades\Facade;
 use Pollora\Hook\Hook;
 
 /**
- * Facade for WordPress Filter Hooks.
+ * Class Filter
  *
- * Provides a fluent interface for working with WordPress filter hooks,
- * including adding, removing, and applying filters.
+ * Facade for the Filter class, providing convenient static access.
  *
- * @method static mixed apply(string $hook, mixed $args = null) Apply a filter hook
- * @method static Hook add(string|array $hooks, \Closure|string|array $callback, int $priority = 10, int $accepted_args = 3) Add a filter hook
- * @method static bool exists(string $hook) Check if a filter exists
- * @method static Hook|false remove(string $hook, \Closure|string $callback, int $priority = 10) Remove a filter hook
+ * @method static void add(string $hook, callable|string|array $callback, int $priority = 10, ?int $acceptedArgs = null)
+ * @method static void remove(string $hook, callable|string|array $callback, int $priority = 10)
+ * @method static bool exists(string $hook, callable|string|array $callback = null, int $priority = null)
+ * @method static mixed apply(string $hook, $value, ...$args)
+ * @method static mixed applyArray(string $hook, $value, array $args = [])
+ * @method static array getCallbacks(string $hook, ?int $priority = null)
  *
- * @see \Pollora\Hook\Hook
+ * @see \Pollora\Hook\Filter
+ * @package Pollora\Hook\Facades
  */
 class Filter extends Facade
 {
