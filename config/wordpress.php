@@ -10,30 +10,41 @@ return [
      * These conditions are used by Route::wordpress() and Route::wp() methods.
      */
     'conditions' => [
-        // Core WordPress conditions
+        // Error and special pages
         'is_404' => '404',
-        'is_archive' => 'archive',
-        'is_attachment' => 'attachment',
-        'is_author' => 'author',
-        'is_category' => ['category', 'cat'],
-        'is_date' => 'date',
-        'is_day' => 'day',
+        'is_search' => 'search',
+        'is_paged' => 'paged',
+
+        // Homepage and blog index
         'is_front_page' => ['/', 'front'],
         'is_home' => ['home', 'blog'],
-        'is_month' => 'month',
+
+        // Specific template
         'is_page_template' => 'template',
-        'is_page' => 'page',
-        'is_paged' => 'paged',
-        'is_post_type_archive' => ['post-type-archive', 'postTypeArchive'],
-        'is_search' => 'search',
-        'is_single' => 'single',
+
+        // Custom post type hierarchy
         'is_singular' => 'singular',
-        'is_sticky' => 'sticky',
-        'is_subpage' => ['subpage', 'subpageof'],
+        'is_single' => 'single',
+        'is_attachment' => 'attachment',
+        'is_post_type_archive' => ['post-type-archive', 'postTypeArchive'],
+        'is_archive' => 'archive',
+
+        // Taxonomies
+        'is_category' => ['category', 'cat'],
         'is_tag' => 'tag',
         'is_tax' => 'tax',
-        'is_time' => 'time',
+
+        // Time hierarchy
+        'is_date' => 'date',
         'is_year' => 'year',
+        'is_month' => 'month',
+        'is_day' => 'day',
+        'is_time' => 'time',
+
+        // Others conditions
+        'is_author' => 'author',
+        'is_sticky' => 'sticky',
+        'is_subpage' => ['subpage', 'subpageof'],
     ],
 
     'plugin_conditions' => [
@@ -47,7 +58,7 @@ return [
             'is_product_category' => 'product_category',
             'is_product_tag' => 'product_tag',
             'is_wc_endpoint_url' => 'wc_endpoint',
-        ],
+        ]
     ],
 
     // WordPress authentication keys and salts
