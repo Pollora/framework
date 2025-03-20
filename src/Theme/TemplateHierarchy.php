@@ -441,7 +441,7 @@ class TemplateHierarchy
     {
         $types = array_flip($this->templateTypes());
 
-        return $types[$condition] ?? str_replace('is_', '', $condition);
+        return isset($types[$condition]) ? (string) $types[$condition] : str_replace('is_', '', $condition);
     }
 
     /**
