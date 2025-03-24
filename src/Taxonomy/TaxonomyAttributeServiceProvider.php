@@ -6,15 +6,14 @@ namespace Pollora\Taxonomy;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
+use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Taxonomy\Commands\TaxonomyMakeCommand;
-use Pollora\Taxonomy\Contracts\Taxonomy;
-use Spatie\StructureDiscoverer\Discover;
 
 /**
  * Service provider for attribute-based taxonomy registration.
  *
- * This provider discovers and registers all classes implementing the Taxonomy interface
- * and processes their PHP attributes to configure WordPress custom taxonomies.
+ * This provider processes taxonomies discovered by the Discoverer system
+ * and registers them with WordPress.
  */
 class TaxonomyAttributeServiceProvider extends ServiceProvider
 {
@@ -34,34 +33,22 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      *
-     * Discovers and registers all taxonomies defined using PHP attributes.
+     * Processes discovered taxonomies and registers them with WordPress.
      */
-    public function boot(): void
+    public function boot(DiscoveryRegistry $registry): void
     {
-        $this->registerTaxonomies();
+        $this->registerTaxonomies($registry);
     }
 
     /**
-     * Register all taxonomies defined using PHP attributes.
+     * Register all taxonomies from the registry.
      *
-     * Discovers all classes implementing the Taxonomy interface, processes their
-     * attributes, and registers them with WordPress.
+     * @param DiscoveryRegistry $registry The discovery registry
      */
-    protected function registerTaxonomies(): void
+    protected function registerTaxonomies(DiscoveryRegistry $registry): void
     {
-        // Check if the directory exists before attempting to discover classes
-        $directory = app_path('Cms/Taxonomies');
-        if (! is_dir($directory)) {
-            return; // Return early as there are no classes to discover yet
-        }
+        $taxonomyClasses = $registry->getByType('taxonomy');
 
-        // Discover all classes implementing the Taxonomy interface
-        $taxonomyClasses = Discover::in($directory)
-            ->extending(AbstractTaxonomy::class)
-            ->classes()
-            ->get();
-
-        // Register each taxonomy with WordPress
         foreach ($taxonomyClasses as $taxonomyClass) {
             $this->registerTaxonomy($taxonomyClass);
         }

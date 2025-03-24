@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace Pollora\PostType;
 
 use Illuminate\Support\ServiceProvider;
+use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Attributes\AttributeProcessor;
+use Pollora\Discoverer\Contracts\DiscoveryRegistry;
+use Pollora\Discoverer\Discoverer;
 use Pollora\PostType\Commands\PostTypeMakeCommand;
-use Pollora\PostType\Contracts\PostType;
-use Spatie\StructureDiscoverer\Discover;
 
 /**
  * Service provider for attribute-based post type registration.
  *
- * This provider discovers and registers all classes implementing the PostType interface
- * and processes their PHP attributes to configure WordPress custom post types.
+ * This provider processes post types discovered by the Discoverer system
+ * and registers them with WordPress.
  */
 class PostTypeAttributeServiceProvider extends ServiceProvider
 {
@@ -34,34 +35,22 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      *
-     * Discovers and registers all post types defined using PHP attributes.
+     * Processes discovered post types and registers them with WordPress.
      */
-    public function boot(): void
+    public function boot(DiscoveryRegistry $registry): void
     {
-        $this->registerPostTypes();
+        $this->registerPostTypes($registry);
     }
 
     /**
-     * Register all post types defined using PHP attributes.
+     * Register all post types from the registry.
      *
-     * Discovers all classes implementing the PostType interface, processes their
-     * attributes, and registers them with WordPress.
+     * @param DiscoveryRegistry $registry The discovery registry
      */
-    protected function registerPostTypes(): void
+    protected function registerPostTypes(DiscoveryRegistry $registry): void
     {
-        // Check if the directory exists before attempting to discover classes
-        $directory = app_path('Cms/PostTypes');
-        if (! is_dir($directory)) {
-            return; // Return early as there are no classes to discover yet
-        }
+        $postTypeClasses = $registry->getByType('post_type');
 
-        // Discover all classes implementing the PostType interface
-        $postTypeClasses = Discover::in($directory)
-            ->extending(AbstractPostType::class)
-            ->classes()
-            ->get();
-
-        // Register each post type with WordPress
         foreach ($postTypeClasses as $postTypeClass) {
             $this->registerPostType($postTypeClass);
         }
@@ -69,9 +58,6 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
 
     /**
      * Register a single post type with WordPress.
-     *
-     * Creates an instance of the post type class, processes its attributes,
-     * and registers it with WordPress using register_post_type().
      *
      * @param  string  $postTypeClass  The fully qualified class name of the post type
      */
