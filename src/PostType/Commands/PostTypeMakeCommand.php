@@ -21,7 +21,7 @@ class PostTypeMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $name = 'make:posttype';
+    protected $name = 'pollora:make-posttype';
 
     /**
      * The console command description.

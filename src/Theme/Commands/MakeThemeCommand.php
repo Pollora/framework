@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Pollora\Theme\Commands;
@@ -14,7 +13,7 @@ use function Laravel\Prompts\text;
 
 class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput
 {
-    protected $signature = 'theme:make {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name}';
+    protected $signature = 'pollora:make-theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name}';
 
     protected $description = 'Generate theme structure with the ability to copy an existing folder and replace strings';
 
