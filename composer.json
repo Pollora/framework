@@ -36,7 +36,8 @@
         "roots/bedrock-autoloader": "^1.0",
         "pollora/query": "dev-main",
         "spatie/php-structure-discoverer": "dev-main",
-        "coduo/php-humanizer": "5.x-dev"
+        "coduo/php-humanizer": "5.x-dev",
+        "nwidart/laravel-modules": "^12.0@dev"
     },
     "autoload": {
         "psr-4": {
@@ -79,7 +80,8 @@
         "allow-plugins": {
             "cweagans/composer-patches": true,
             "pestphp/pest-plugin": true,
-            "pollora/helper-overrider": true
+            "pollora/helper-overrider": true,
+            "wikimedia/composer-merge-plugin": true
         }
     },
     "require-dev": {

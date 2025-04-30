@@ -23,7 +23,7 @@ use Pollora\Attributes\Taxonomy\ObjectType;
 #[ShowAdminColumn]
 #[Hierarchical]
 #[ShowInRest]
-#[ObjectType('DummyPostType')]
+#[ObjectType(['DummyPostType'])]
 class DummyClass extends AbstractTaxonomy
 {
-} 
+}

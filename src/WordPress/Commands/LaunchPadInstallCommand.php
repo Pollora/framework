@@ -14,7 +14,7 @@ use function Laravel\Prompts\info;
 
 class LaunchPadInstallCommand extends Command
 {
-    protected $signature = 'wp:install';
+    protected $signature = 'pollora:install';
 
     protected $description = 'Install and configure WordPress';
 

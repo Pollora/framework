@@ -24,19 +24,8 @@ class RewriteServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->registerUrlMacro()
-            ->registerPermalinkManager()
+        $this->registerPermalinkManager()
             ->registerFilters();
-    }
-
-    /**
-     * Register the removeTrailingSlash macro on the URL generator.
-     */
-    protected function registerUrlMacro(): self
-    {
-        URL::macro('removeTrailingSlash', static fn (?string $url) => app(Uri::class)->removeTrailingSlash($url));
-
-        return $this;
     }
 
     /**

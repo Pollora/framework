@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Permalink;
 
 use Illuminate\Routing\UrlGenerator;
+use Pollora\Support\Uri;
 
 /**
  * Manages permalink structure and canonical redirections.
@@ -86,6 +87,6 @@ class PermalinkManager
             }
         }
 
-        return app(UrlGenerator::class)->removeTrailingSlash($canonicalUrl);
+        return app(Uri::class)->removeTrailingSlash($canonicalUrl);
     }
 }

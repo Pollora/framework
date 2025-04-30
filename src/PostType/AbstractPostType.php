@@ -6,6 +6,7 @@ namespace Pollora\PostType;
 
 use Illuminate\Support\Str;
 use Pollora\Attributes\Attributable;
+use Pollora\Discoverer\Contracts\Discoverable;
 use Pollora\PostType\Contracts\PostType;
 
 /**
