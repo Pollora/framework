@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Attributes\WpRestRoute\Permissions;
+namespace Pollora\WpRest\Permissions;
 
 use Pollora\Attributes\WpRestRoute\Permission;
 use WP_Error;

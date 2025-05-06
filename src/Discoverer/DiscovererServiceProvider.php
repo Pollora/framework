@@ -10,6 +10,7 @@ use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Discoverer\Scouts\AbstractScout;
 use Pollora\Discoverer\Scouts\AttributeScout;
 use Pollora\Discoverer\Scouts\PostTypeScout;
+use Pollora\Discoverer\Scouts\RestScout;
 use Pollora\Discoverer\Scouts\TaxonomyScout;
 
 /**
@@ -26,6 +27,7 @@ class DiscovererServiceProvider extends ServiceProvider
         AttributeScout::class,
         PostTypeScout::class,
         TaxonomyScout::class,
+        RestScout::class,
     ];
 
     /**
