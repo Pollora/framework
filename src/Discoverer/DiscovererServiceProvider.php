@@ -8,7 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Discoverer\Contracts\Discoverable;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Discoverer\Scouts\AbstractScout;
-use Pollora\Discoverer\Scouts\HookScout;
+use Pollora\Discoverer\Scouts\AttributeScout;
 use Pollora\Discoverer\Scouts\PostTypeScout;
 use Pollora\Discoverer\Scouts\TaxonomyScout;
 
@@ -23,7 +23,7 @@ class DiscovererServiceProvider extends ServiceProvider
      * @var array<class-string>
      */
     protected array $scouts = [
-        HookScout::class,
+        AttributeScout::class,
         PostTypeScout::class,
         TaxonomyScout::class,
     ];
@@ -76,6 +76,7 @@ class DiscovererServiceProvider extends ServiceProvider
                 if ($scoutInstance instanceof AbstractScout) {
                     // Register the discovered classes with the registry
                     $discoveredClasses = $scoutInstance->get();
+
                     $type = $scoutInstance->getType();
 
                     // Enregistrer dans le registry

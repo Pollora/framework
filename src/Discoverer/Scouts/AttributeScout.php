@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace Pollora\Discoverer\Scouts;
 
 use Nwidart\Modules\Contracts\RepositoryInterface;
-use Pollora\Attributes\AttributeProcessor;
+use Pollora\Attributes\Attributable;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
-use Pollora\PostType\AbstractPostType;
+use Pollora\Hook\Contracts\Hooks;
 use Spatie\StructureDiscoverer\Discover;
 use Spatie\StructureDiscoverer\DiscoverConditionFactory;
 
 /**
- * Scout for discovering post types.
+ * Scout for discovering WordPress hooks.
  *
- * Discovers classes that extend AbstractPostType.
+ * Discovers classes that implement the Hooks interface.
  */
-class PostTypeScout extends AbstractScout
+class AttributeScout extends AbstractScout
 {
     /**
      * Get the directories to scan.
@@ -24,7 +24,7 @@ class PostTypeScout extends AbstractScout
      * @return array<string> Directories to scan
      */
     protected function directory(): array
-    {
+    {;
         return [
             app_path(),
             app(RepositoryInterface::class)->getPath()
@@ -38,7 +38,7 @@ class PostTypeScout extends AbstractScout
      */
     protected function type(): string
     {
-        return 'post_type';
+        return 'attribute';
     }
 
     /**
@@ -49,6 +49,6 @@ class PostTypeScout extends AbstractScout
      */
     protected function criteria(Discover|DiscoverConditionFactory $discover): Discover|DiscoverConditionFactory
     {
-        return $discover->extending(AbstractPostType::class);
+        return $discover->implementing(Attributable::class, Hooks::class);
     }
 }
