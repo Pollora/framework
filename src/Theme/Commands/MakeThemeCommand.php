@@ -27,7 +27,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      *
      * @var string
      */
-    protected $signature = 'pollora:make-theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name}';
+    protected $signature = 'pollora:make-theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name} {--repo= : GitHub repository URL to use instead of the default}';
 
     /**
      * The console command description.
@@ -74,34 +74,59 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return self::FAILURE;
         }
 
-        $this->setupContainerFolders()
-            ->generateThemeStructure();
+        $repo = $this->option('repo');
+        $slug = $this->argument('name');
+        if (!$repo) {
+            $repo = "https://github.com/Pollora/theme-{$slug}.git";
+        }
+        $destination = $this->theme->getBasePath();
+        $this->info("Cloning theme from $repo ...");
+        try {
+            $output = null;
+            $result = null;
+            @mkdir($destination, 0755, true);
+            exec("git clone --depth=1 " . escapeshellarg($repo) . " " . escapeshellarg($destination), $output, $result);
+            if ($result !== 0) {
+                $this->error("Failed to clone repository: $repo");
+                return self::FAILURE;
+            }
+            // Nettoyer le dossier .git pour ne pas embarquer l'historique
+            if (is_dir($destination . '/.git')) {
+                exec('rm -rf ' . escapeshellarg($destination . '/.git'));
+            }
+            $this->info("Theme \"{$this->theme->getName()}\" cloned successfully from $repo.");
 
-        if ($this->option('source')) {
-            $this->copySourceFolder();
+            // Appliquer la structure et les remplacements
+            $this->setupContainerFolders();
+            $this->applyReplacementsToDirectory($destination);
+            if ($this->option('source')) {
+                $this->copySourceFolder();
+            }
+        } catch (\Throwable $e) {
+            $this->error('Error cloning theme: ' . $e->getMessage());
+            return self::FAILURE;
         }
 
-        $this->info("Theme \"{$this->theme->getName()}\" created successfully.");
 
-        // Run npm install and npm run build in the frontend directory of the new theme
+        // npm install/build si frontend
         if (is_dir($this->theme->getBasePath())) {
-            $this->info('Running npm install and npm run build in '.$this->theme->getBasePath().' ...');
+            $this->info('Running npm install and npm run build in ' . $this->theme->getBasePath() . ' ...');
             try {
                 (new NpmRunner($this->theme->getBasePath()))
                     ->install()
                     ->build();
                 $this->info('npm install and build completed.');
             } catch (\Throwable $e) {
-                $this->error('npm install or build failed: '.$e->getMessage());
+                $this->error('npm install or build failed: ' . $e->getMessage());
                 // Continue script even if npm fails
             }
         } else {
-            $this->info('No frontend directory found at '.$this->theme->getBasePath().', skipping npm install/build.');
+            $this->info('No frontend directory found at ' . $this->theme->getBasePath() . ', skipping npm install/build.');
         }
 
         // Prompt to set this theme as the active WordPress theme
         $shouldSetActive = select(
-            label: 'Do you want to set "'.$this->theme->getName().'" as the active WordPress theme?',
+            label: 'Do you want to set "' . $this->theme->getName() . '" as the active WordPress theme?',
             options: [
                 'yes' => 'Yes',
                 'no' => 'No',
@@ -114,7 +139,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             if (function_exists('update_option')) {
                 update_option('stylesheet', $this->theme->getName());
                 update_option('template', $this->theme->getName());
-                $this->info('Theme "'.$this->theme->getName().'" is now set as the active WordPress theme.');
+                $this->info('Theme "' . $this->theme->getName() . '" is now set as the active WordPress theme.');
             } else {
                 $this->warn('Unable to set the theme as active: WordPress functions are not available in this context.');
             }
@@ -436,5 +461,26 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected function getThemesPath(): string
     {
         return $this->config->get('theme.directory', base_path('themes'));
+    }
+
+    /**
+     * Applique les remplacements dans tous les fichiers du dossier donné.
+     */
+    protected function applyReplacementsToDirectory(string $directory): void
+    {
+        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory));
+        foreach ($rii as $file) {
+            if ($file->isDir()) {
+                continue;
+            }
+            $path = $file->getPathname();
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            if ($this->isTextFile($path, $extension)) {
+                $content = file_get_contents($path);
+                $replacements = $this->getReplacements();
+                $content = str_replace(array_keys($replacements), array_values($replacements), $content);
+                file_put_contents($path, $content);
+            }
+        }
     }
 }
