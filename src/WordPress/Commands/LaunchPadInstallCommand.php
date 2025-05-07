@@ -14,7 +14,7 @@ use function Laravel\Prompts\info;
 
 class LaunchPadInstallCommand extends Command
 {
-    protected $signature = 'pollora:install';
+    protected $signature = 'pollora:install {--install : Suppress informational output for automated runs}';
 
     protected $description = 'Install and configure WordPress';
 
@@ -27,34 +27,41 @@ class LaunchPadInstallCommand extends Command
 
     public function handle(): int
     {
+        $installMode = $this->option('install');
+
         try {
             if ($this->installationService->isInstalled()) {
-                info('WordPress is already installed.');
-
+                if (! $installMode) {
+                    info('WordPress is already installed.');
+                }
                 return self::SUCCESS;
             }
 
             if (! $this->databaseService->isConfigured()) {
-                info('Database not configured. Please run: php artisan wp:env-setup');
-
+                if (! $installMode) {
+                    info("Application environment is not configured. Aborting.");
+                }
                 return self::FAILURE;
             }
 
-            $this->installWordPress();
+            $this->installWordPress($installMode);
 
             return self::SUCCESS;
 
         } catch (\Throwable $e) {
             error($e->getMessage());
-            $this->handleError($e);
+
+            $this->handleError($e, $installMode);
 
             return self::FAILURE;
         }
     }
 
-    private function installWordPress(): void
+    private function installWordPress(bool $silent = false): void
     {
-        info('Starting WordPress installation...');
+        if (! $silent) {
+            info('Starting WordPress installation...');
+        }
 
         $config = InstallationConfig::fromPrompts();
 
@@ -62,17 +69,24 @@ class LaunchPadInstallCommand extends Command
 
         $this->runMigrations();
 
+        $this->installTheme();
+
         $this->displaySuccessMessage();
+    }
+
+    private function installTheme(): void
+    {
+        $this->call('pollora:make-theme');
     }
 
     public function runMigrations(): void
     {
         info('Running migration.');
-
         $this->call('migrate');
 
         info('Migration completed successfully.');
         info('WordPress has been successfully installed!');
+
     }
 
     private function displaySuccessMessage(): void
@@ -81,7 +95,7 @@ class LaunchPadInstallCommand extends Command
         info('Next steps:');
         info('1. Access your WordPress admin at: '.admin_url());
         info('2. Start customizing your site');
-        info('3. Install your preferred theme and plugins');
+        info('3. Enjoy Pollora :)');
     }
 
     private function handleError(\Throwable $e): void

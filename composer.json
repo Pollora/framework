@@ -37,7 +37,10 @@
         "pollora/query": "dev-main",
         "spatie/php-structure-discoverer": "dev-main",
         "coduo/php-humanizer": "5.x-dev",
-        "nwidart/laravel-modules": "^12.0@dev"
+        "nwidart/laravel-modules": "^12.0@dev",
+        "symfony/process": "^7.2.0",
+        "illuminate/config": "12.x-dev",
+        "laravel/prompts": "^0.3.0@dev"
     },
     "autoload": {
         "psr-4": {

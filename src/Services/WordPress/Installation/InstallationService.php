@@ -7,6 +7,7 @@ namespace Pollora\Services\WordPress\Installation;
 use DB;
 use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 
 /**
@@ -95,6 +96,18 @@ class InstallationService
     {
         update_option('blogdescription', $config->description);
         update_option('blog_public', $config->isPublic ? '1' : '0');
+
+
+        // Enable pretty permalinks by default
+        if (function_exists('update_option')) {
+            update_option('permalink_structure', '/%postname%/');
+            if (function_exists('flush_rewrite_rules')) {
+                flush_rewrite_rules();
+            }
+            info('Pretty permalinks have been enabled by default.');
+        } else {
+            info('Permalink structure could not be set automatically. Ensure WordPress is loaded.');
+        }
 
         $uploadDir = wp_upload_dir();
         if (! empty($uploadDir['error'])) {

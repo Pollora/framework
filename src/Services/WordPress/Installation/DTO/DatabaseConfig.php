@@ -96,6 +96,7 @@ class DatabaseConfig
             siteUrl: text(
                 label: 'Site URL?',
                 default: $defaults->siteUrl,
+                required: 'Site URL is required',
                 validate: function (string $value): ?string {
                     if (! filter_var($value, FILTER_VALIDATE_URL)) {
                         return 'Please enter a valid URL (e.g., https://pollora.ddev.site)';
@@ -110,8 +111,7 @@ class DatabaseConfig
                     }
 
                     return null;
-                },
-                required: 'Site URL is required'
+                }
             ),
         );
     }

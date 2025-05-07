@@ -77,8 +77,7 @@ class InstallationConfig
             ),
             locale: (new LanguageService)->promptForLanguage(),
             isPublic: confirm(
-                label: 'Allow search engine indexing?',
-                default: true
+                label: 'Allow search engine indexing?'
             ),
         );
     }

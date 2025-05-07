@@ -1,4 +1,11 @@
 <?php
+
+/**
+ * Class MakeThemeCommand
+ *
+ * Artisan command to scaffold a new theme directory structure, optionally copy a source folder,
+ * perform string replacements, run npm install/build, and optionally set the theme as the active WordPress theme.
+ */
 declare(strict_types=1);
 
 namespace Pollora\Theme\Commands;
@@ -7,27 +14,58 @@ use Illuminate\Config\Repository;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
+use Pollora\Support\NpmRunner;
 use Pollora\Theme\ThemeMetadata;
 
+use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
 class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
     protected $signature = 'pollora:make-theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name}';
 
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
     protected $description = 'Generate theme structure with the ability to copy an existing folder and replace strings';
 
+    /**
+     * List of file extensions considered as text for replacements.
+     *
+     * @var array<int, string>
+     */
     protected $textExtensions = ['php', 'js', 'css', 'html', 'htm', 'xml', 'txt', 'md', 'json', 'yaml', 'yml', 'svg', 'twig', 'blade.php', 'stub'];
 
+    /**
+     * The ThemeMetadata instance representing the theme being created.
+     */
     protected ThemeMetadata $theme;
 
+    /**
+     * Container folder mapping (assets, lang, layouts, etc).
+     *
+     * @var array<string, string>
+     */
     protected array $containerFolder;
 
+    /**
+     * Constructor.
+     */
     public function __construct(Repository $config, Filesystem $files)
     {
         parent::__construct($config, $files);
     }
 
+    /**
+     * Handle the command execution.
+     */
     public function handle(): int
     {
         $this->theme = $this->makeTheme($this->argument('name'));
@@ -45,9 +83,49 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         $this->info("Theme \"{$this->theme->getName()}\" created successfully.");
 
+        // Run npm install and npm run build in the frontend directory of the new theme
+        if (is_dir($this->theme->getBasePath())) {
+            $this->info('Running npm install and npm run build in '.$this->theme->getBasePath().' ...');
+            try {
+                (new NpmRunner($this->theme->getBasePath()))
+                    ->install()
+                    ->build();
+                $this->info('npm install and build completed.');
+            } catch (\Throwable $e) {
+                $this->error('npm install or build failed: '.$e->getMessage());
+                // Continue script even if npm fails
+            }
+        } else {
+            $this->info('No frontend directory found at '.$this->theme->getBasePath().', skipping npm install/build.');
+        }
+
+        // Prompt to set this theme as the active WordPress theme
+        $shouldSetActive = select(
+            label: 'Do you want to set "'.$this->theme->getName().'" as the active WordPress theme?',
+            options: [
+                'yes' => 'Yes',
+                'no' => 'No',
+            ],
+            default: 'yes',
+            hint: 'Selecting "Yes" will set this theme as the active one in WordPress.'
+        );
+        if ($shouldSetActive === 'yes') {
+            // Set the theme as active in WordPress (update the stylesheet and template options)
+            if (function_exists('update_option')) {
+                update_option('stylesheet', $this->theme->getName());
+                update_option('template', $this->theme->getName());
+                $this->info('Theme "'.$this->theme->getName().'" is now set as the active WordPress theme.');
+            } else {
+                $this->warn('Unable to set the theme as active: WordPress functions are not available in this context.');
+            }
+        }
+
         return self::SUCCESS;
     }
 
+    /**
+     * Validate the theme name.
+     */
     protected function validateThemeName(): bool
     {
         $message = $this->validateValue($this->argument('name'));
@@ -60,6 +138,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         return true;
     }
 
+    /**
+     * Check if the theme can be generated.
+     */
     protected function canGenerateTheme(): bool
     {
         if (! $this->directoryExists()) {
@@ -76,6 +157,11 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         return $this->confirm("Are you sure you want to override \"{$name}\" theme folder?");
     }
 
+    /**
+     * Setup container folders.
+     *
+     * @return $this
+     */
     protected function setupContainerFolders(): self
     {
         $dirMapping = $this->config->get('theme.structure', []);
@@ -90,11 +176,17 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         return $this;
     }
 
+    /**
+     * Generate theme structure.
+     */
     protected function generateThemeStructure(): void
     {
         $this->copyDirectory($this->getTemplatePath('common'), $this->theme->getBasePath());
     }
 
+    /**
+     * Copy source folder.
+     */
     protected function copySourceFolder(): void
     {
         $sourcePath = $this->option('source');
@@ -110,6 +202,11 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $this->info('Source folder contents copied successfully.');
     }
 
+    /**
+     * Copy directory.
+     *
+     * @param  string  $source
+     */
     protected function copyDirectory($source, string $destination): void
     {
         if (! File::isDirectory($destination)) {
@@ -121,6 +218,11 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
     }
 
+    /**
+     * Process file.
+     *
+     * @param  object  $item
+     */
     protected function processFile($item, string $destination): void
     {
         $relativePath = $item->getRelativePath();
@@ -135,6 +237,11 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
     }
 
+    /**
+     * Get target path info.
+     *
+     * @param  object  $item
+     */
     protected function getTargetPathInfo($item, string $destination, string $relativePath): array
     {
         $targetDir = $destination.($relativePath !== '' && $relativePath !== '0' ? '/'.$relativePath : '');
@@ -153,6 +260,11 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         ];
     }
 
+    /**
+     * Handle file copy.
+     *
+     * @param  object  $item
+     */
     protected function handleFileCopy($item, string $targetPath): void
     {
         if (File::exists($targetPath) &&
@@ -165,6 +277,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $this->copyFileWithReplacements($item->getRealPath(), $targetPath);
     }
 
+    /**
+     * Ensure directory exists.
+     */
     protected function ensureDirectoryExists(string $directory): void
     {
         if (! File::isDirectory($directory)) {
@@ -172,6 +287,12 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
     }
 
+    /**
+     * Copy file with replacements.
+     *
+     * @param  string  $sourcePath
+     * @param  string  $destinationPath
+     */
     protected function copyFileWithReplacements($sourcePath, $destinationPath): void
     {
         $extension = pathinfo((string) $destinationPath, PATHINFO_EXTENSION);
@@ -195,6 +316,12 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
     }
 
+    /**
+     * Check if file is text file.
+     *
+     * @param  string  $filePath
+     * @param  string  $extension
+     */
     protected function isTextFile($filePath, $extension): bool
     {
         if (in_array(strtolower((string) $extension), $this->textExtensions)) {
@@ -219,6 +346,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         return in_array($mimeType, $textMimeTypes) || str_starts_with($mimeType, 'text/');
     }
 
+    /**
+     * Get replacements.
+     */
     protected function getReplacements(): array
     {
         return [
@@ -232,6 +362,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         ];
     }
 
+    /**
+     * Prompt for missing arguments.
+     */
     protected function promptForMissingArgumentsUsing(): array
     {
         return [
@@ -268,6 +401,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         ];
     }
 
+    /**
+     * Validate value.
+     */
     protected function validateValue(string $value): ?string
     {
         return match (true) {
@@ -278,16 +414,25 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         };
     }
 
+    /**
+     * Get template path.
+     */
     protected function getTemplatePath(string $templateName): string
     {
         return realpath(__DIR__.'/../stubs/'.$templateName);
     }
 
+    /**
+     * Make theme.
+     */
     protected function makeTheme(string $name): ThemeMetadata
     {
         return new ThemeMetadata($name, $this->getThemesPath());
     }
 
+    /**
+     * Get themes path.
+     */
     protected function getThemesPath(): string
     {
         return $this->config->get('theme.directory', base_path('themes'));
