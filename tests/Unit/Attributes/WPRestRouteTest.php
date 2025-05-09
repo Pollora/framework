@@ -34,6 +34,14 @@ class TestController implements Attributable
     }
 }
 
+// Mock register_rest_route if not already defined
+if (!function_exists('register_rest_route')) {
+    function register_rest_route($namespace, $route, $args) {
+        // Mock: ne rien faire
+        return true;
+    }
+}
+
 beforeAll(function () {
     // Créer et configurer le container
     $app = new Container;
@@ -69,9 +77,9 @@ test('WpRestRoute attribute sets correct properties on class', function () {
 });
 
 test('Method attribute validates HTTP methods correctly', function () {
-    expect(fn () => new Method(['INVALID']))->toThrow(InvalidArgumentException::class);
+    expect(fn () => new Method(['INVALID']))->toThrow(InvalidArgumentException::class)
+        ->and(fn () => new Method(['GET', 'POST']))->not->toThrow(InvalidArgumentException::class);
 
-    expect(fn () => new Method(['GET', 'POST']))->not->toThrow(InvalidArgumentException::class);
 });
 
 test('Method attribute correctly handles multiple HTTP methods', function () {

@@ -8,6 +8,7 @@
 *.swp
 *.swo
 /.idea
+/node_modules
 
 global_rules.md
 .windsurfrules

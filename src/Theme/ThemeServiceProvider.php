@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Asset\AssetContainerManager;
+use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Theme;
@@ -98,14 +98,14 @@ class ThemeServiceProvider extends ServiceProvider
 
         $currentTheme = $theme->active();
 
-        $this->app->make(AssetContainerManager::class)->addContainer('theme', [
+        $this->app->make(AssetManager::class)->addContainer('theme', [
             'hot_file' => public_path("{$currentTheme}.hot"),
             'build_directory' => "build/{$currentTheme}",
             'manifest_path' => 'manifest.json',
             'base_path' => '',
         ]);
 
-        $this->app->make(AssetContainerManager::class)->setDefaultContainer('theme');
+        // TODO: If needed, implement setDefaultContainer logic in AssetManager
 
         $this->loadConfigurations();
 

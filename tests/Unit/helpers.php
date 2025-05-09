@@ -52,6 +52,10 @@ function setupWordPressMocks()
         ->byDefault()
         ->andReturn(true);
 
+    WP::$wpFunctions->shouldReceive('register_rest_route')
+        ->byDefault()
+        ->andReturn(true);
+
     WP::$wpFunctions->shouldReceive('is_archive')
         ->byDefault()
         ->andReturn(false);
