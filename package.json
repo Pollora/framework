@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Pollora framework",
   "main": "commitlint.config.js",
-  "directories": {
-    "test": "tests"
-  },
   "scripts": {
     "prepare": "husky"
   },
