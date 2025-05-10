@@ -32,8 +32,6 @@ use Pollora\Attributes\Taxonomy\ShowTagcloud;
 use Pollora\Attributes\Taxonomy\ShowUI;
 use Pollora\Attributes\Taxonomy\Sort;
 use Pollora\Attributes\Taxonomy\UpdateCountCallback;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Taxonomy\Contracts\Taxonomy;
 
 // Test class implementing the Taxonomy interface
@@ -148,7 +146,7 @@ afterAll(function () {
 function testBooleanAttribute(string $attributeName, string $argName): void
 {
     test("$attributeName attribute sets $argName parameter", function () use ($argName) {
-        $processor = new AttributeProcessor();
+        $processor = new AttributeProcessor;
         $taxonomy = new TestTaxonomy;
         $processor->process($taxonomy);
 
@@ -160,7 +158,7 @@ function testBooleanAttribute(string $attributeName, string $argName): void
 function testValueAttribute(string $attributeName, string $argName, mixed $expectedValue): void
 {
     test("$attributeName attribute sets $argName parameter", function () use ($argName, $expectedValue) {
-        $processor = new AttributeProcessor();
+        $processor = new AttributeProcessor;
         $taxonomy = new TestTaxonomy;
         $processor->process($taxonomy);
 
@@ -232,7 +230,7 @@ testMethodAttribute('UpdateCountCallback', 'update_count_callback', 'updateCount
 
 // Test the final getArgs method
 test('getArgs method merges attribute args with withArgs and labels', function () {
-    $processor = new AttributeProcessor();
+    $processor = new AttributeProcessor;
     $taxonomy = new TestTaxonomy;
     $processor->process($taxonomy);
 
@@ -245,7 +243,7 @@ test('getArgs method merges attribute args with withArgs and labels', function (
         'allow_hierarchy', 'public', 'label', 'description', 'show_ui',
         'show_in_nav_menus', 'query_var', 'rewrite', 'rest_namespace',
         'rest_controller_class', 'rest_base', 'show_in_rest',
-        'hierarchical', 'labels'
+        'hierarchical', 'labels',
     ];
 
     foreach ($expectedKeys as $key) {

@@ -33,12 +33,14 @@ class AssetFile extends DomainAssetFile implements AssetFileInterface
             if ($assetContainer === null) {
                 return '';
             }
+
             return (new ViteManager($assetContainer))->asset($this->filename);
         } catch (\Throwable $e) {
             Log::error('Error in AssetFile::__toString', [
                 'error' => $e->getMessage(),
                 'path' => $this->filename,
             ]);
+
             return '';
         }
     }

@@ -1,4 +1,5 @@
 <?php
+
 // Relocated from Commands/AttributeMakeCommand.php. Content will be copied verbatim and namespace updated.
 
 declare(strict_types=1);
@@ -29,8 +30,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Get the stub file for the generator.
-     *
-     * @return string
      */
     protected function getStub(): string
     {
@@ -39,8 +38,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Resolve the fully-qualified path to the stub.
-     *
-     * @return string
      */
     protected function resolveStubPath(string $stub): string
     {
@@ -53,7 +50,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      * Get the default namespace for the class.
      *
      * @param  string  $rootNamespace
-     * @return string
      */
     protected function getDefaultNamespace($rootNamespace): string
     {
@@ -64,7 +60,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      * Build the class with the given name.
      *
      * @param  string  $name
-     * @return string
      */
     protected function buildClass($name): string
     {
@@ -75,8 +70,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Get the console command options.
-     *
-     * @return array
      */
     protected function getOptions(): array
     {
@@ -90,7 +83,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
     /**
      * Execute the console command.
      *
-     * @return bool|null
      * @throws FileNotFoundException
      */
     public function handle(): ?bool
@@ -112,8 +104,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Validate the command options.
-     *
-     * @return void
      */
     protected function validateOptions(): void
     {
@@ -126,9 +116,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Update an existing file with new content.
-     *
-     * @param string $path
-     * @return void
      */
     protected function updateExistingFile(string $path): void
     {
@@ -188,8 +175,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Make replacements in the stub.
-     *
-     * @return string
      */
     public function makeReplacements(string $stub): string
     {
@@ -212,8 +197,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Get the update stub file path.
-     *
-     * @return string
      */
     protected function getUpdateStub(): string
     {
@@ -222,8 +205,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Get the source file path for the generated class.
-     *
-     * @return string
      */
     protected function getSourceFilePath(): string
     {
@@ -234,7 +215,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      * Determine if the file already exists.
      *
      * @param  string  $rawName
-     * @return bool
      */
     protected function alreadyExists($rawName): bool
     {
@@ -243,9 +223,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Get the default option value.
-     *
-     * @param string $key
-     * @return mixed
      */
     protected function getDefaultOption(string $key): mixed
     {

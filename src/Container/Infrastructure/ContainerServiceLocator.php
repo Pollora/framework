@@ -22,7 +22,7 @@ class ContainerServiceLocator implements ServiceLocator
     /**
      * ContainerServiceLocator constructor.
      *
-     * @param mixed $container Le conteneur d'injection de dépendances
+     * @param  mixed  $container  Le conteneur d'injection de dépendances
      */
     public function __construct($container)
     {
@@ -34,7 +34,7 @@ class ContainerServiceLocator implements ServiceLocator
      */
     public function resolve(string $serviceClass)
     {
-        if (!$this->container) {
+        if (! $this->container) {
             return null;
         }
 

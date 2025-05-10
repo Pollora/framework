@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Application\Services;
 
-use Pollora\Asset\Domain\Services\AssetContainerManager;
 use Pollora\Asset\Domain\Models\Asset;
+use Pollora\Asset\Domain\Services\AssetContainerManager;
 
 /**
  * Application service for retrieving assets from asset containers.
@@ -15,15 +17,13 @@ class AssetRetrievalService
 {
     /**
      * The asset container manager instance.
-     *
-     * @var AssetContainerManager
      */
     private AssetContainerManager $manager;
 
     /**
      * Initializes the retrieval service with the container manager.
      *
-     * @param AssetContainerManager $manager The asset container manager
+     * @param  AssetContainerManager  $manager  The asset container manager
      */
     public function __construct(AssetContainerManager $manager)
     {
@@ -33,7 +33,7 @@ class AssetRetrievalService
     /**
      * Retrieves a single asset by name.
      *
-     * @param string $name Asset name/handle
+     * @param  string  $name  Asset name/handle
      * @return Asset|null The asset instance, or null if not found
      */
     public function get(string $name): ?Asset

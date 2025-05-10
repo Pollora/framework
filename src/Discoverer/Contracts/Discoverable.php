@@ -16,8 +16,6 @@ interface Discoverable
      * Register the discoverable instance.
      *
      * This method is called when the class is discovered during application boot.
-     *
-     * @return void
      */
     public function register(): void;
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Ajax\Domain\Models;
 
-use Pollora\Ajax\Domain\Exceptions\InvalidAjaxActionException;
 use Pollora\Ajax\Application\Services\RegisterAjaxActionService;
+use Pollora\Ajax\Domain\Exceptions\InvalidAjaxActionException;
 
 /**
  * Domain entity representing an AJAX action definition.
@@ -17,31 +17,28 @@ class AjaxAction
      * User type constant for both logged and guest users.
      */
     public const BOTH_USERS = 'both';
+
     /**
      * User type constant for logged-in users only.
      */
     public const LOGGED_USERS = 'logged';
+
     /**
      * User type constant for guest users only.
      */
     public const GUEST_USERS = 'guest';
 
-    /**
-     * @var string
-     */
     private string $userType = self::BOTH_USERS;
 
-    /**
-     * @var RegisterAjaxActionService|null
-     */
     private ?RegisterAjaxActionService $registerService;
 
     /**
      * AjaxAction constructor.
      *
-     * @param string $name The action name.
-     * @param callable|string $callback The callback to execute.
-     * @param RegisterAjaxActionService|null $registerService The application service for registration.
+     * @param  string  $name  The action name.
+     * @param  callable|string  $callback  The callback to execute.
+     * @param  RegisterAjaxActionService|null  $registerService  The application service for registration.
+     *
      * @throws InvalidAjaxActionException
      */
     public function __construct(
@@ -64,19 +61,17 @@ class AjaxAction
     /**
      * Set the user type for this action.
      *
-     * @param string $userType
      * @return $this
      */
     public function setUserType(string $userType): static
     {
         $this->userType = $userType;
+
         return $this;
     }
 
     /**
      * Get the user type for this action.
-     *
-     * @return string
      */
     public function getUserType(): string
     {
@@ -91,6 +86,7 @@ class AjaxAction
     public function forLoggedUsers(): static
     {
         $this->setUserType(self::LOGGED_USERS);
+
         return $this;
     }
 
@@ -102,39 +98,36 @@ class AjaxAction
     public function forGuestUsers(): static
     {
         $this->setUserType(self::GUEST_USERS);
+
         return $this;
     }
 
     /**
      * Check if the action is for both or logged-in users.
-     *
-     * @return bool
      */
     public function isBothOrLoggedUsers(): bool
     {
         if ($this->getUserType() === self::BOTH_USERS) {
             return true;
         }
+
         return $this->getUserType() === self::LOGGED_USERS;
     }
 
     /**
      * Check if the action is for both or guest users.
-     *
-     * @return bool
      */
     public function isBothOrGuestUsers(): bool
     {
         if ($this->getUserType() === self::BOTH_USERS) {
             return true;
         }
+
         return $this->getUserType() === self::GUEST_USERS;
     }
 
     /**
      * Get the action name.
-     *
-     * @return string
      */
     public function getName(): string
     {

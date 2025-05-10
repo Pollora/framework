@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Domain\Services;
 
-use Pollora\Asset\Domain\Models\Asset;
 use Pollora\Asset\Domain\Contracts\AssetRepositoryInterface;
+use Pollora\Asset\Domain\Models\Asset;
 
 /**
  * Domain service for managing asset containers and asset registration/retrieval.
@@ -15,15 +17,13 @@ class AssetContainerManager
 {
     /**
      * The asset repository instance.
-     *
-     * @var AssetRepositoryInterface
      */
     private AssetRepositoryInterface $repository;
 
     /**
      * Initializes the container manager with a repository implementation.
      *
-     * @param AssetRepositoryInterface $repository The asset repository
+     * @param  AssetRepositoryInterface  $repository  The asset repository
      */
     public function __construct(AssetRepositoryInterface $repository)
     {
@@ -33,8 +33,7 @@ class AssetContainerManager
     /**
      * Registers an asset in the repository.
      *
-     * @param Asset $asset The asset instance to register
-     * @return void
+     * @param  Asset  $asset  The asset instance to register
      */
     public function registerAsset(Asset $asset): void
     {
@@ -44,7 +43,7 @@ class AssetContainerManager
     /**
      * Retrieves a single asset by name.
      *
-     * @param string $name Asset name/handle
+     * @param  string  $name  Asset name/handle
      * @return Asset|null The asset instance, or null if not found
      */
     public function getAsset(string $name): ?Asset

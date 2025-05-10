@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace Pollora\PostType;
 
 use Illuminate\Support\ServiceProvider;
-use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Discoverer\Discoverer;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\PostType\Commands\PostTypeMakeCommand;
 
 /**
@@ -47,7 +44,7 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
     /**
      * Register all post types from the registry.
      *
-     * @param DiscoveryRegistry $registry The discovery registry
+     * @param  DiscoveryRegistry  $registry  The discovery registry
      */
     protected function registerPostTypes(DiscoveryRegistry $registry): void
     {

@@ -8,8 +8,6 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Taxonomy\Commands\TaxonomyMakeCommand;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
 
 /**
  * Service provider for attribute-based taxonomy registration.
@@ -45,7 +43,7 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
     /**
      * Register all taxonomies from the registry.
      *
-     * @param DiscoveryRegistry $registry The discovery registry
+     * @param  DiscoveryRegistry  $registry  The discovery registry
      */
     protected function registerTaxonomies(DiscoveryRegistry $registry): void
     {

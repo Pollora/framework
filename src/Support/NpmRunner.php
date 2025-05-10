@@ -17,7 +17,7 @@ class NpmRunner
     /**
      * Instantiate NpmRunner with the specified working directory.
      *
-     * @param string $workingDirectory Path to the directory where npm commands will be executed.
+     * @param  string  $workingDirectory  Path to the directory where npm commands will be executed.
      */
     public function __construct(string $workingDirectory)
     {
@@ -51,7 +51,8 @@ class NpmRunner
     /**
      * Run a shell command in the working directory.
      *
-     * @param array<int, string> $command The command to execute.
+     * @param  array<int, string>  $command  The command to execute.
+     *
      * @throws ProcessFailedException If the command fails.
      */
     protected function runCommand(array $command): void

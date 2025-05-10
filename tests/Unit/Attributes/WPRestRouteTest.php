@@ -2,14 +2,10 @@
 
 declare(strict_types=1);
 
-use Illuminate\Container\Container;
-use Illuminate\Support\Facades\Facade;
-use Mockery as m;
 use Pollora\Attributes\Attributable;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Attributes\WpRestRoute;
 use Pollora\Attributes\WpRestRoute\Method;
-use Pollora\Support\Facades\Action;
 
 // Test class implementing the Attributable interface
 #[WpRestRoute('api/v1', '/test', 'TestPermission')]
@@ -35,8 +31,9 @@ class TestController implements Attributable
 }
 
 // Mock register_rest_route if not already defined
-if (!function_exists('register_rest_route')) {
-    function register_rest_route($namespace, $route, $args) {
+if (! function_exists('register_rest_route')) {
+    function register_rest_route($namespace, $route, $args)
+    {
         // Mock: do nothing
         return true;
     }
@@ -45,10 +42,10 @@ if (!function_exists('register_rest_route')) {
 /**
  * WpRestRoute attribute tests
  */
-describe('WpRestRoute attribute', function() {
+describe('WpRestRoute attribute', function () {
     test('sets correct properties on class', function () {
         $controller = new TestController;
-        $processor = new AttributeProcessor();
+        $processor = new AttributeProcessor;
         $processor->process($controller);
 
         expect($controller->namespace)->toBe('api/v1')
@@ -60,7 +57,7 @@ describe('WpRestRoute attribute', function() {
 /**
  * Method attribute tests
  */
-describe('Method attribute', function() {
+describe('Method attribute', function () {
     test('validates HTTP methods correctly', function () {
         expect(fn () => new Method(['INVALID']))
             ->toThrow(InvalidArgumentException::class);

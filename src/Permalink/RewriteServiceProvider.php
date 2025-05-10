@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
-use Pollora\Support\Uri;
 
 /**
  * Service provider for URL rewrite management.

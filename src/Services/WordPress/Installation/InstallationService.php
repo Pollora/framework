@@ -97,7 +97,6 @@ class InstallationService
         update_option('blogdescription', $config->description);
         update_option('blog_public', $config->isPublic ? '1' : '0');
 
-
         // Enable pretty permalinks by default
         if (function_exists('update_option')) {
             update_option('permalink_structure', '/%postname%/');

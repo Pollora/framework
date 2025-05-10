@@ -7,8 +7,8 @@ namespace Pollora\Asset\Infrastructure\Services;
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Vite as ViteFacade;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Domain\Exceptions\AssetException;
+use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 
 /**
  * Infrastructure implementation of ViteManagerInterface using Vite and asset containers.
@@ -61,6 +61,7 @@ class ViteManager implements ViteManagerInterface
         if ($entrypoints === []) {
             throw new AssetException('Entry points array cannot be empty.');
         }
+
         return $this->getViteInstance()->getAssetUrls($entrypoints);
     }
 
@@ -105,6 +106,7 @@ class ViteManager implements ViteManagerInterface
         $this->vite = ViteFacade::useHotFile($this->container->getHotFile())
             ->useBuildDirectory($this->container->getBuildDirectory())
             ->useManifestFilename($this->container->getManifestPath());
+
         return $this->vite;
     }
 
@@ -122,8 +124,6 @@ class ViteManager implements ViteManagerInterface
      * Registers custom macros for the Vite facade.
      *
      * This method allows additional functionality to be added dynamically to Vite.
-     *
-     * @return void
      */
     public function registerMacros(): void
     {
@@ -134,8 +134,6 @@ class ViteManager implements ViteManagerInterface
      * Registers a macro for retrieving asset URLs from the Vite manifest.
      *
      * This macro allows resolving entry point assets including JavaScript and CSS files.
-     *
-     * @return void
      */
     private function registerAssetUrlsMacro(): void
     {
@@ -153,8 +151,10 @@ class ViteManager implements ViteManagerInterface
                     foreach ($chunk['css'] ?? [] as $css) {
                         $assets['css'][] = $this->assetPath("{$buildDirectory}/{$css}");
                     }
+
                     return $assets;
                 }, ['js' => [], 'css' => []]);
+
             return collect($assets)->map(fn ($paths): array => array_unique($paths))->all();
         });
     }

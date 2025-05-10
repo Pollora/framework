@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Domain\Exceptions;
 
 use Exception;
@@ -11,6 +13,4 @@ use Exception;
  * during asset management, such as invalid configuration, missing files,
  * or unsupported asset types.
  */
-class AssetException extends Exception
-{
-}
+class AssetException extends Exception {}

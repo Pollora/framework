@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Domain\Contracts;
 
 use Pollora\Asset\Domain\Models\Asset;
@@ -16,7 +18,7 @@ interface AssetRepositoryInterface
     /**
      * Finds an asset by its name/handle.
      *
-     * @param string $name The asset name/handle
+     * @param  string  $name  The asset name/handle
      * @return Asset|null The asset instance, or null if not found
      */
     public function findByName(string $name): ?Asset;
@@ -24,8 +26,7 @@ interface AssetRepositoryInterface
     /**
      * Saves an asset instance to the repository.
      *
-     * @param Asset $asset The asset instance to save
-     * @return void
+     * @param  Asset  $asset  The asset instance to save
      */
     public function save(Asset $asset): void;
 

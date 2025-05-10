@@ -37,9 +37,7 @@ abstract class AbstractEventDispatcher
          * The WordPress action service
          */
         protected Action $action
-    )
-    {
-    }
+    ) {}
 
     /**
      * Register WordPress hooks for this dispatcher.

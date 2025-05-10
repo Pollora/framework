@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Application\Services;
 
 use Pollora\Asset\Domain\Models\Asset;
@@ -15,15 +17,13 @@ class AssetRegistrationService
 {
     /**
      * The asset container manager instance.
-     *
-     * @var AssetContainerManager
      */
     private AssetContainerManager $manager;
 
     /**
      * Initializes the registration service with the container manager.
      *
-     * @param AssetContainerManager $manager The asset container manager
+     * @param  AssetContainerManager  $manager  The asset container manager
      */
     public function __construct(AssetContainerManager $manager)
     {
@@ -33,10 +33,9 @@ class AssetRegistrationService
     /**
      * Registers a new asset in the container manager.
      *
-     * @param string $name The asset name/handle
-     * @param string $path The asset file path
-     * @param array $attributes Optional attributes (e.g., dependencies, type)
-     * @return void
+     * @param  string  $name  The asset name/handle
+     * @param  string  $path  The asset file path
+     * @param  array  $attributes  Optional attributes (e.g., dependencies, type)
      */
     public function register(string $name, string $path, array $attributes = []): void
     {

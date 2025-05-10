@@ -27,10 +27,11 @@ beforeEach(function () {
             if ($serviceClass === ActionService::class) {
                 return $this->actionService;
             }
+
             return null;
         }
     };
-    
+
     $this->processor = new AttributeProcessor($this->mockContainer);
 });
 
@@ -40,7 +41,7 @@ class SingleActionClass implements Attributable
     public function actionMethod($param = null)
     {
         // Test method
-        return $param ? "processed_{$param}" : "processed";
+        return $param ? "processed_{$param}" : 'processed';
     }
 }
 
@@ -50,14 +51,14 @@ class MultipleActionClass implements Attributable
     public function actionMethod($param = null)
     {
         // Test method
-        return $param ? "processed_{$param}" : "processed";
+        return $param ? "processed_{$param}" : 'processed';
     }
-    
+
     #[Action('another_action', priority: 20)]
     public function anotherActionMethod()
     {
         // Another test method
-        return "another_processed";
+        return 'another_processed';
     }
 }
 
@@ -67,7 +68,7 @@ class DefaultPriorityActionClass implements Attributable
     public function actionMethod($param = null)
     {
         // Test method with default priority
-        return $param ? "processed_{$param}" : "processed";
+        return $param ? "processed_{$param}" : 'processed';
     }
 }
 
@@ -77,7 +78,7 @@ class CustomPriorityActionClass implements Attributable
     public function actionMethod($param = null)
     {
         // Test method with custom priority
-        return $param ? "processed_{$param}" : "processed";
+        return $param ? "processed_{$param}" : 'processed';
     }
 }
 
@@ -95,7 +96,7 @@ it('registers an action hook correctly', function () {
         });
 
     // Process the test class
-    $testClass = new SingleActionClass();
+    $testClass = new SingleActionClass;
     $this->processor->process($testClass);
 });
 
@@ -110,7 +111,7 @@ it('registers multiple action hooks with different priorities', function () {
                 && $callback[1] === 'actionMethod'
                 && $priority === 10;
         });
-    
+
     $this->mockAction->shouldReceive('add')
         ->once()
         ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
@@ -122,7 +123,7 @@ it('registers multiple action hooks with different priorities', function () {
         });
 
     // Process the test class
-    $testClass = new MultipleActionClass();
+    $testClass = new MultipleActionClass;
     $this->processor->process($testClass);
 });
 
@@ -140,7 +141,7 @@ it('registers an action hook with default priority (10)', function () {
         });
 
     // Process the test class
-    $testClass = new DefaultPriorityActionClass();
+    $testClass = new DefaultPriorityActionClass;
     $this->processor->process($testClass);
 });
 
@@ -158,26 +159,26 @@ it('registers an action hook with custom priority', function () {
         });
 
     // Process the test class
-    $testClass = new CustomPriorityActionClass();
+    $testClass = new CustomPriorityActionClass;
     $this->processor->process($testClass);
 });
 
 it('handles null service locator resolution gracefully', function () {
     // Create a container that returns null for the service
-    $mockContainer = new class()
+    $mockContainer = new class
     {
         public function get($serviceClass)
         {
             return null;
         }
     };
-    
+
     $processor = new AttributeProcessor($mockContainer);
-    $testClass = new SingleActionClass();
-    
+    $testClass = new SingleActionClass;
+
     // This should not throw an exception
     $processor->process($testClass);
-    
+
     // No assertions needed - we're just checking that it doesn't throw
     expect(true)->toBeTrue();
 });

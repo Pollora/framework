@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Proxy;
 
-use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
