@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Theme;
 
 use Illuminate\Contracts\Config\Repository;
-use Illuminate\Contracts\Container\Container;
+use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\Filter;
 
 /**
  * Class TemplateHierarchy
@@ -45,16 +46,17 @@ class TemplateHierarchy
     /**
      * Create a new TemplateHierarchy instance.
      */
-    public function __construct(/**
-     * The configuration repository
-     */
-    private readonly Repository $config)
+    public function __construct(
+        private readonly Repository $config,
+        private readonly Action $action,
+        private readonly Filter $filter
+    )
     {
         // Hook into template_include at a high priority to capture the final template
-        add_filter('template_include', $this->captureTemplateInclude(...), PHP_INT_MAX - 10);
+        $this->filter->add('template_include', [$this, 'captureTemplateInclude'], PHP_INT_MAX - 10);
 
         // Add early hook to compute hierarchy during template_redirect
-        add_action('template_redirect', $this->computeHierarchyEarly(...), 0);
+        $this->action->add('template_redirect', [$this, 'computeHierarchyEarly'], 0);
     }
 
     /**
@@ -65,7 +67,7 @@ class TemplateHierarchy
      */
     public function registerTemplateHandler(string $type, callable $callback): void
     {
-        add_filter("pollora/template_hierarchy/{$type}_templates", function ($templates) use ($callback): array {
+        $this->filter->add("pollora/template_hierarchy/{$type}_templates", function ($templates) use ($callback): array {
             $customTemplates = call_user_func($callback, $this->queriedObject());
 
             return array_merge($customTemplates, $templates);
@@ -125,7 +127,7 @@ class TemplateHierarchy
         }
 
         // Allow other plugins to filter the final hierarchy
-        return apply_filters('pollora/template_hierarchy/hierarchy', $this->templateHierarchy);
+        return $this->filter->apply('pollora/template_hierarchy/hierarchy', $this->templateHierarchy);
     }
 
     /**
@@ -511,7 +513,7 @@ class TemplateHierarchy
         };
 
         // Allow plugins to filter templates for each type
-        return apply_filters("pollora/template_hierarchy/{$type}_templates", $templates, $this->queriedObject());
+        return $this->filter->apply("pollora/template_hierarchy/{$type}_templates", $templates, $this->queriedObject());
     }
 
     /**
@@ -708,7 +710,7 @@ class TemplateHierarchy
         $conditions = $this->config->get('wordpress.conditions', []);
 
         // Allow plugins to register additional conditions
-        return apply_filters('pollora/template_hierarchy/conditions', $conditions);
+        return $this->filter->apply('pollora/template_hierarchy/conditions', $conditions);
     }
 
     /**
@@ -749,7 +751,7 @@ class TemplateHierarchy
         $hierarchyOrder = array_keys($conditions);
 
         // Allow plugins to modify the hierarchy order
-        $hierarchyOrder = apply_filters('pollora/template_hierarchy/order', $hierarchyOrder);
+        $hierarchyOrder = $this->filter->apply('pollora/template_hierarchy/order', $hierarchyOrder);
 
         $hierarchyOrder[] = '__return_true';
 

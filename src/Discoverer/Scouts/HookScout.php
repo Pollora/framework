@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Discoverer\Scouts;
 
 use Nwidart\Modules\Contracts\RepositoryInterface;
-use Pollora\Discoverer\Contracts\DiscoveryRegistry;
-use Pollora\Hook\Contracts\Hooks;
+use Pollora\Hook\Domain\Contracts\Hooks;
 use Spatie\StructureDiscoverer\Discover;
 use Spatie\StructureDiscoverer\DiscoverConditionFactory;
 
@@ -26,7 +25,7 @@ class HookScout extends AbstractScout
     {
         return [
             app_path('Cms'),
-            app(RepositoryInterface::class)->getPath()
+            app(RepositoryInterface::class)->getPath(),
         ];
     }
 
@@ -43,7 +42,7 @@ class HookScout extends AbstractScout
     /**
      * Define the discovery criteria.
      *
-     * @param Discover|DiscoverConditionFactory $discover Discover instance
+     * @param  Discover|DiscoverConditionFactory  $discover  Discover instance
      * @return Discover|DiscoverConditionFactory Configured discover instance
      */
     protected function criteria(Discover|DiscoverConditionFactory $discover): Discover|DiscoverConditionFactory

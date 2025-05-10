@@ -1,13 +1,17 @@
 <?php
+// Relocated from Commands/FilterMakeCommand.php. Content will be copied verbatim and namespace updated.
 
 declare(strict_types=1);
 
-namespace Pollora\Hook\Commands;
+namespace Pollora\Hook\UI\Console;
 
 /**
  * Class FilterMakeCommand
  *
- * Command to create a new filter hook class.
+ * Command to create a new filter hook class (feature UI layer).
+ * Relocated from Commands/FilterMakeCommand.php as part of Hexagonal refactor.
+ *
+ * @package Pollora\Hook\UI\Console
  */
 class FilterMakeCommand extends AttributeMakeCommand
 {

@@ -9,6 +9,8 @@ use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Discoverer\Discoverer;
+use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\PostType\Commands\PostTypeMakeCommand;
 
 /**
@@ -66,7 +68,8 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
         $postType = $this->app->make($postTypeClass);
 
         // Process attributes
-        AttributeProcessor::process($postType);
+        $processor = new AttributeProcessor($this->app);
+        $processor->process($postType);
 
         // Register the post type with WordPress
         if (function_exists('register_extended_post_type')) {

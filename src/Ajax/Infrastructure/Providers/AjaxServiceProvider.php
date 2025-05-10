@@ -10,6 +10,7 @@ use Pollora\Ajax\Domain\Contracts\AjaxActionRegistrarInterface;
 use Pollora\Ajax\Infrastructure\Repositories\WordPressAjaxActionRegistrar;
 use Pollora\Ajax\Infrastructure\Services\AjaxFactory;
 use Pollora\Ajax\Infrastructure\Services\ScriptInjectionService;
+use Pollora\Hook\Infrastructure\Services\Action;
 
 class AjaxServiceProvider extends ServiceProvider
 {
@@ -18,7 +19,7 @@ class AjaxServiceProvider extends ServiceProvider
         $this->app->singleton(AjaxActionRegistrarInterface::class, fn ($app) => new WordPressAjaxActionRegistrar);
         $this->app->singleton(RegisterAjaxActionService::class, fn ($app) => new RegisterAjaxActionService($app->make(AjaxActionRegistrarInterface::class)));
         $this->app->singleton('wp.ajax', fn ($app) => new AjaxFactory($app->make(RegisterAjaxActionService::class)));
-        $this->app->singleton(ScriptInjectionService::class, fn ($app) => new ScriptInjectionService);
+        $this->app->singleton(ScriptInjectionService::class, fn ($app) => new ScriptInjectionService($app->make(Action::class)));
     }
 
     public function boot(): void

@@ -6,7 +6,7 @@ namespace Pollora\Attributes\Taxonomy;
 
 use Attribute;
 use Pollora\Attributes\Attributable;
-use Pollora\Attributes\HandlesAttributes;
+use Pollora\Attributes\Contracts\HandlesAttributes;
 use Pollora\Taxonomy\Contracts\Taxonomy;
 use ReflectionClass;
 use ReflectionMethod;
@@ -33,7 +33,7 @@ abstract class TaxonomyAttribute implements HandlesAttributes
      * @param ReflectionClass|ReflectionMethod $context The reflection class of the instance
      * @param object $attribute The attribute instance
      */
-    public function handle(Attributable $instance, ReflectionClass|ReflectionMethod $context, object $attribute): void
+    public function handle($container, Attributable $instance, ReflectionClass|ReflectionMethod $context, object $attribute): void
     {
         if (! $instance instanceof Taxonomy) {
             return;

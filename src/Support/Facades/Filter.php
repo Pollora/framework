@@ -27,6 +27,6 @@ class Filter extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return \Pollora\Hook\Filter::class;
+        return \Pollora\Hook\Infrastructure\Services\Filter::class;
     }
 }

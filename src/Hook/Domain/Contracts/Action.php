@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Hook\Contracts;
+namespace Pollora\Hook\Domain\Contracts;
 
 /**
  * Interface for WordPress Action hooks.

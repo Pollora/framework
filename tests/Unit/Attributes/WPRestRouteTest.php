@@ -11,7 +11,7 @@ use Pollora\Attributes\WpRestRoute;
 use Pollora\Attributes\WpRestRoute\Method;
 use Pollora\Support\Facades\Action;
 
-// Classe de test qui implémente l'interface Attributable
+// Test class implementing the Attributable interface
 #[WpRestRoute('api/v1', '/test', 'TestPermission')]
 class TestController implements Attributable
 {
@@ -37,73 +37,64 @@ class TestController implements Attributable
 // Mock register_rest_route if not already defined
 if (!function_exists('register_rest_route')) {
     function register_rest_route($namespace, $route, $args) {
-        // Mock: ne rien faire
+        // Mock: do nothing
         return true;
     }
 }
 
-beforeAll(function () {
-    // Créer et configurer le container
-    $app = new Container;
-    Facade::setFacadeApplication($app);
+/**
+ * WpRestRoute attribute tests
+ */
+describe('WpRestRoute attribute', function() {
+    test('sets correct properties on class', function () {
+        $controller = new TestController;
+        $processor = new AttributeProcessor();
+        $processor->process($controller);
 
-    // Définir un mock pour la façade Action
-    $mock = m::mock('stdClass');
-    $mock->shouldReceive('add')
-        ->with('rest_api_init', m::type('Closure'))
-        ->andReturnNull();
-
-    // Enregistrer le mock dans le container avec la clé correcte
-    $app->instance(\Pollora\Hook\Action::class, $mock);
-
-    // S'assurer que la façade est réinitialisée
-    Action::clearResolvedInstances();
-    Action::setFacadeApplication($app);
+        expect($controller->namespace)->toBe('api/v1')
+            ->and($controller->route)->toBe('/test')
+            ->and($controller->classPermission)->toBe('TestPermission');
+    });
 });
 
-afterAll(function () {
-    m::close();
-    Facade::clearResolvedInstances();
-    Facade::setFacadeApplication(null);
-});
+/**
+ * Method attribute tests
+ */
+describe('Method attribute', function() {
+    test('validates HTTP methods correctly', function () {
+        expect(fn () => new Method(['INVALID']))
+            ->toThrow(InvalidArgumentException::class);
 
-test('WpRestRoute attribute sets correct properties on class', function () {
-    $controller = new TestController;
-    AttributeProcessor::process($controller);
+        expect(fn () => new Method(['GET', 'POST']))
+            ->not->toThrow(InvalidArgumentException::class);
+    });
 
-    expect($controller->namespace)->toBe('api/v1')
-        ->and($controller->route)->toBe('/test')
-        ->and($controller->classPermission)->toBe('TestPermission');
-});
+    test('correctly handles multiple HTTP methods', function () {
+        $method = new Method(['GET', 'POST']);
 
-test('Method attribute validates HTTP methods correctly', function () {
-    expect(fn () => new Method(['INVALID']))->toThrow(InvalidArgumentException::class)
-        ->and(fn () => new Method(['GET', 'POST']))->not->toThrow(InvalidArgumentException::class);
+        expect($method->getMethods())
+            ->toBe(['GET', 'POST'])
+            ->toBeArray()
+            ->toHaveCount(2);
+    });
 
-});
+    test('accepts single HTTP method as string', function () {
+        $method = new Method('GET');
 
-test('Method attribute correctly handles multiple HTTP methods', function () {
-    $method = new Method(['GET', 'POST']);
+        expect($method->getMethods())
+            ->toBe(['GET'])
+            ->toBeArray()
+            ->toHaveCount(1);
+    });
 
-    expect($method->getMethods())
-        ->toBe(['GET', 'POST'])
-        ->toBeArray()
-        ->toHaveCount(2);
-});
+    test('handles permission callbacks correctly', function () {
+        $methodWithDefaultPermission = new Method('GET');
+        $methodWithCustomPermission = new Method('GET', 'CustomPermission');
 
-test('Method attribute accepts single HTTP method as string', function () {
-    $method = new Method('GET');
+        expect($methodWithDefaultPermission->permissionCallback)
+            ->toBeNull();
 
-    expect($method->getMethods())
-        ->toBe(['GET'])
-        ->toBeArray()
-        ->toHaveCount(1);
-});
-
-test('Method attribute handles permission callbacks correctly', function () {
-    $methodWithDefaultPermission = new Method('GET');
-    $methodWithCustomPermission = new Method('GET', 'CustomPermission');
-
-    expect($methodWithDefaultPermission->permissionCallback)->toBeNull()
-        ->and($methodWithCustomPermission->permissionCallback)->toBe('CustomPermission');
+        expect($methodWithCustomPermission->permissionCallback)
+            ->toBe('CustomPermission');
+    });
 });

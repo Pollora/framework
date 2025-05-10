@@ -6,8 +6,6 @@ namespace Pollora\Discoverer\Scouts;
 
 use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Attributes\Attributable;
-use Pollora\Discoverer\Contracts\DiscoveryRegistry;
-use Pollora\Hook\Contracts\Hooks;
 use Spatie\StructureDiscoverer\Discover;
 use Spatie\StructureDiscoverer\DiscoverConditionFactory;
 
@@ -49,6 +47,6 @@ class AttributeScout extends AbstractScout
      */
     protected function criteria(Discover|DiscoverConditionFactory $discover): Discover|DiscoverConditionFactory
     {
-        return $discover->implementing(Attributable::class, Hooks::class);
+        return $discover->implementing(Attributable::class);
     }
 }

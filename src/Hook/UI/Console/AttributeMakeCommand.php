@@ -1,8 +1,9 @@
 <?php
+// Relocated from Commands/AttributeMakeCommand.php. Content will be copied verbatim and namespace updated.
 
 declare(strict_types=1);
 
-namespace Pollora\Hook\Commands;
+namespace Pollora\Hook\UI\Console;
 
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;

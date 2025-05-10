@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Theme;
 
-use Illuminate\Container\Container;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
@@ -12,7 +11,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Foundation\Support\IncludesFiles;
-use Pollora\Support\Facades\Action;
+use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Commands\MakeThemeCommand;
 use Pollora\Theme\Commands\RemoveThemeCommand;
@@ -70,13 +70,14 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(TemplateHierarchy::class, function (Application $app): TemplateHierarchy {
             return new TemplateHierarchy(
                 $app->make('config'),
-                $app
+                $app->make(Action::class),
+                $app->make(Filter::class)
             );
         });
 
         $this->app->make(ThemeComponentProvider::class)->register();
 
-        Action::add('after_setup_theme', $this->bootTheme(...));
+        $this->app->make(Action::class)->add('after_setup_theme', [$this, 'bootTheme']);
     }
 
     /**

@@ -32,9 +32,11 @@ use Pollora\Attributes\Taxonomy\ShowTagcloud;
 use Pollora\Attributes\Taxonomy\ShowUI;
 use Pollora\Attributes\Taxonomy\Sort;
 use Pollora\Attributes\Taxonomy\UpdateCountCallback;
+use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Taxonomy\Contracts\Taxonomy;
 
-// Classe de test qui implémente l'interface Taxonomy
+// Test class implementing the Taxonomy interface
 #[ShowTagcloud]
 #[ShowInQuickEdit]
 #[ShowAdminColumn]
@@ -131,7 +133,7 @@ class TestTaxonomy implements Attributable, Taxonomy
 }
 
 beforeAll(function () {
-    // Créer et configurer le container
+    // Create and configure the container
     $app = new Container;
     Facade::setFacadeApplication($app);
 });
@@ -142,271 +144,115 @@ afterAll(function () {
     Facade::setFacadeApplication(null);
 });
 
-test('ShowTagcloud attribute sets show_tagcloud parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
+// Helper function to test simple boolean attributes
+function testBooleanAttribute(string $attributeName, string $argName): void
+{
+    test("$attributeName attribute sets $argName parameter", function () use ($argName) {
+        $processor = new AttributeProcessor();
+        $taxonomy = new TestTaxonomy;
+        $processor->process($taxonomy);
 
-    expect($taxonomy->attributeArgs['show_tagcloud'])->toBeTrue();
-});
+        expect($taxonomy->attributeArgs[$argName])->toBeTrue();
+    });
+}
 
-test('ShowInQuickEdit attribute sets show_in_quick_edit parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
+// Helper function to test string/value attributes
+function testValueAttribute(string $attributeName, string $argName, mixed $expectedValue): void
+{
+    test("$attributeName attribute sets $argName parameter", function () use ($argName, $expectedValue) {
+        $processor = new AttributeProcessor();
+        $taxonomy = new TestTaxonomy;
+        $processor->process($taxonomy);
 
-    expect($taxonomy->attributeArgs['show_in_quick_edit'])->toBeTrue();
-});
+        expect($taxonomy->attributeArgs[$argName])->toBe($expectedValue);
+    });
+}
 
-test('ShowAdminColumn attribute sets show_admin_column parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
+// Helper function to test method attributes
+function testMethodAttribute(string $attributeName, string $argName, string $methodName, string $attributeClass): void
+{
+    test("$attributeName attribute sets $argName parameter", function () use ($argName, $methodName, $attributeClass) {
+        $taxonomy = new TestTaxonomy;
 
-    expect($taxonomy->attributeArgs['show_admin_column'])->toBeTrue();
-});
+        // Reset attributeArgs to avoid interference
+        $taxonomy->attributeArgs = [];
 
-test('DefaultTerm attribute sets default_term parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
+        // Get methods with the specific attribute
+        $reflectionClass = new ReflectionClass($taxonomy);
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
 
-    expect($taxonomy->attributeArgs['default_term'])->toBe('Default Term');
-});
-
-test('Sort attribute sets sort parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['sort'])->toBeTrue();
-});
-
-test('Args attribute sets args parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['args'])->toBe(['orderby' => 'name']);
-});
-
-test('CheckedOntop attribute sets checked_ontop parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['checked_ontop'])->toBeTrue();
-});
-
-test('Exclusive attribute sets exclusive parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['exclusive'])->toBeTrue();
-});
-
-test('AllowHierarchy attribute sets allow_hierarchy parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['allow_hierarchy'])->toBeTrue();
-});
-
-test('MetaBoxCb attribute sets meta_box_cb parameter', function () {
-    $taxonomy = new TestTaxonomy;
-
-    // Réinitialiser attributeArgs pour éviter les interférences
-    $taxonomy->attributeArgs = [];
-
-    // Récupérer les méthodes avec l'attribut MetaBoxCb
-    $reflectionClass = new ReflectionClass($taxonomy);
-    $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
-
-    foreach ($methods as $method) {
-        $attributes = $method->getAttributes(MetaBoxCb::class);
-        foreach ($attributes as $attribute) {
-            $attributeInstance = $attribute->newInstance();
-            $attributeInstance->handle($taxonomy, $method, $attributeInstance);
+        foreach ($methods as $method) {
+            $attributes = $method->getAttributes($attributeClass);
+            foreach ($attributes as $attribute) {
+                $attributeInstance = $attribute->newInstance();
+                $attributeInstance->handle(null, $taxonomy, $method, $attributeInstance);
+            }
         }
-    }
 
-    expect($taxonomy->attributeArgs['meta_box_cb'])->toBeArray()
-        ->toHaveCount(2)
-        ->toHaveKey(0)
-        ->toHaveKey(1);
+        expect($taxonomy->attributeArgs[$argName])->toBeArray()
+            ->toHaveCount(2)
+            ->toHaveKey(0)
+            ->toHaveKey(1);
 
-    expect($taxonomy->attributeArgs['meta_box_cb'][0])->toBe($taxonomy);
-    expect($taxonomy->attributeArgs['meta_box_cb'][1])->toBe('metaBoxCallback');
-});
+        expect($taxonomy->attributeArgs[$argName][0])->toBe($taxonomy);
+        expect($taxonomy->attributeArgs[$argName][1])->toBe($methodName);
+    });
+}
 
-test('MetaBoxSanitizeCb attribute sets meta_box_sanitize_cb parameter', function () {
-    $taxonomy = new TestTaxonomy;
+// Group 1: Boolean Attributes Tests
+testBooleanAttribute('ShowTagcloud', 'show_tagcloud');
+testBooleanAttribute('ShowInQuickEdit', 'show_in_quick_edit');
+testBooleanAttribute('ShowAdminColumn', 'show_admin_column');
+testBooleanAttribute('Sort', 'sort');
+testBooleanAttribute('CheckedOntop', 'checked_ontop');
+testBooleanAttribute('Exclusive', 'exclusive');
+testBooleanAttribute('AllowHierarchy', 'allow_hierarchy');
+testBooleanAttribute('PublicTaxonomy', 'public');
+testBooleanAttribute('ShowUI', 'show_ui');
+testBooleanAttribute('ShowInNavMenus', 'show_in_nav_menus');
+testBooleanAttribute('ShowInRest', 'show_in_rest');
+testBooleanAttribute('Hierarchical', 'hierarchical');
 
-    // Réinitialiser attributeArgs pour éviter les interférences
-    $taxonomy->attributeArgs = [];
+// Group 2: Value Attributes Tests
+testValueAttribute('DefaultTerm', 'default_term', 'Default Term');
+testValueAttribute('Args', 'args', ['orderby' => 'name']);
+testValueAttribute('ObjectType', 'object_type', ['post', 'page']);
+testValueAttribute('Label', 'label', 'Test Taxonomy');
+testValueAttribute('Description', 'description', 'This is a test taxonomy description');
+testValueAttribute('QueryVar', 'query_var', 'test_query_var');
+testValueAttribute('Rewrite', 'rewrite', ['slug' => 'test-slug']);
+testValueAttribute('RestNamespace', 'rest_namespace', 'test/v1');
+testValueAttribute('RestControllerClass', 'rest_controller_class', 'WP_REST_Terms_Controller');
+testValueAttribute('RestBase', 'rest_base', 'test-terms');
 
-    // Récupérer les méthodes avec l'attribut MetaBoxSanitizeCb
-    $reflectionClass = new ReflectionClass($taxonomy);
-    $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+// Group 3: Method Attributes Tests
+testMethodAttribute('MetaBoxCb', 'meta_box_cb', 'metaBoxCallback', MetaBoxCb::class);
+testMethodAttribute('MetaBoxSanitizeCb', 'meta_box_sanitize_cb', 'sanitizeMetaBox', MetaBoxSanitizeCb::class);
+testMethodAttribute('UpdateCountCallback', 'update_count_callback', 'updateCount', UpdateCountCallback::class);
 
-    foreach ($methods as $method) {
-        $attributes = $method->getAttributes(MetaBoxSanitizeCb::class);
-        foreach ($attributes as $attribute) {
-            $attributeInstance = $attribute->newInstance();
-            $attributeInstance->handle($taxonomy, $method, $attributeInstance);
-        }
-    }
-
-    expect($taxonomy->attributeArgs['meta_box_sanitize_cb'])->toBeArray()
-        ->toHaveCount(2)
-        ->toHaveKey(0)
-        ->toHaveKey(1);
-
-    expect($taxonomy->attributeArgs['meta_box_sanitize_cb'][0])->toBe($taxonomy);
-    expect($taxonomy->attributeArgs['meta_box_sanitize_cb'][1])->toBe('sanitizeMetaBox');
-});
-
-test('UpdateCountCallback attribute sets update_count_callback parameter', function () {
-    $taxonomy = new TestTaxonomy;
-
-    // Réinitialiser attributeArgs pour éviter les interférences
-    $taxonomy->attributeArgs = [];
-
-    // Récupérer les méthodes avec l'attribut UpdateCountCallback
-    $reflectionClass = new ReflectionClass($taxonomy);
-    $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
-
-    foreach ($methods as $method) {
-        $attributes = $method->getAttributes(UpdateCountCallback::class);
-        foreach ($attributes as $attribute) {
-            $attributeInstance = $attribute->newInstance();
-            $attributeInstance->handle($taxonomy, $method, $attributeInstance);
-        }
-    }
-
-    expect($taxonomy->attributeArgs['update_count_callback'])->toBeArray()
-        ->toHaveCount(2)
-        ->toHaveKey(0)
-        ->toHaveKey(1);
-
-    expect($taxonomy->attributeArgs['update_count_callback'][0])->toBe($taxonomy);
-    expect($taxonomy->attributeArgs['update_count_callback'][1])->toBe('updateCount');
-});
-
-test('ObjectType attribute sets object_type parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['object_type'])->toBe(['post', 'page']);
-});
-
-test('PublicTaxonomy attribute sets public parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['public'])->toBeTrue();
-});
-
-test('Label attribute sets label parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['label'])->toBe('Test Taxonomy');
-});
-
-test('Description attribute sets description parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['description'])->toBe('This is a test taxonomy description');
-});
-
-test('ShowUI attribute sets show_ui parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['show_ui'])->toBeTrue();
-});
-
-test('ShowInNavMenus attribute sets show_in_nav_menus parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['show_in_nav_menus'])->toBeTrue();
-});
-
-test('QueryVar attribute sets query_var parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['query_var'])->toBe('test_query_var');
-});
-
-test('Rewrite attribute sets rewrite parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['rewrite'])->toBe(['slug' => 'test-slug']);
-});
-
-test('RestNamespace attribute sets rest_namespace parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['rest_namespace'])->toBe('test/v1');
-});
-
-test('RestControllerClass attribute sets rest_controller_class parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['rest_controller_class'])->toBe('WP_REST_Terms_Controller');
-});
-
-test('RestBase attribute sets rest_base parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['rest_base'])->toBe('test-terms');
-});
-
-test('ShowInRest attribute sets show_in_rest parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['show_in_rest'])->toBeTrue();
-});
-
-test('Hierarchical attribute sets hierarchical parameter', function () {
-    $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
-
-    expect($taxonomy->attributeArgs['hierarchical'])->toBeTrue();
-});
-
+// Test the final getArgs method
 test('getArgs method merges attribute args with withArgs and labels', function () {
+    $processor = new AttributeProcessor();
     $taxonomy = new TestTaxonomy;
-    AttributeProcessor::process($taxonomy);
+    $processor->process($taxonomy);
 
     $args = $taxonomy->getArgs();
 
-    expect($args)->toBeArray()
-        ->toHaveKey('show_tagcloud')
-        ->toHaveKey('show_in_quick_edit')
-        ->toHaveKey('show_admin_column')
-        ->toHaveKey('default_term')
-        ->toHaveKey('sort')
-        ->toHaveKey('args')
-        ->toHaveKey('checked_ontop')
-        ->toHaveKey('exclusive')
-        ->toHaveKey('allow_hierarchy')
-        ->toHaveKey('public')
-        ->toHaveKey('label')
-        ->toHaveKey('description')
-        ->toHaveKey('show_ui')
-        ->toHaveKey('show_in_nav_menus')
-        ->toHaveKey('query_var')
-        ->toHaveKey('rewrite')
-        ->toHaveKey('rest_namespace')
-        ->toHaveKey('rest_controller_class')
-        ->toHaveKey('rest_base')
-        ->toHaveKey('show_in_rest')
-        ->toHaveKey('hierarchical')
-        ->toHaveKey('labels');
+    // Check that all expected keys exist
+    $expectedKeys = [
+        'show_tagcloud', 'show_in_quick_edit', 'show_admin_column',
+        'default_term', 'sort', 'args', 'checked_ontop', 'exclusive',
+        'allow_hierarchy', 'public', 'label', 'description', 'show_ui',
+        'show_in_nav_menus', 'query_var', 'rewrite', 'rest_namespace',
+        'rest_controller_class', 'rest_base', 'show_in_rest',
+        'hierarchical', 'labels'
+    ];
 
+    foreach ($expectedKeys as $key) {
+        expect($args)->toHaveKey($key);
+    }
+
+    // Check specific values
     expect($args['public'])->toBeTrue();
     expect($args['labels'])->toBeArray()
         ->toHaveKey('name')

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Discoverer;
 
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
-use Pollora\Discoverer\Scouts\AbstractScout;
 use Spatie\StructureDiscoverer\Discover;
 
 /**
@@ -22,18 +21,17 @@ class Discoverer
     protected array $discoveredCache = [];
 
     /**
-     * @param DiscoveryRegistry $registry Registry for discovered classes
+     * @param  DiscoveryRegistry  $registry  Registry for discovered classes
      */
     public function __construct(
         protected readonly DiscoveryRegistry $registry
-    ) {
-    }
+    ) {}
 
     /**
      * Discover classes based on criteria.
      *
-     * @param string|array<string> $directories Directory or directories to scan
-     * @param callable $criteriaCallback Callback to configure discovery criteria
+     * @param  string|array<string>  $directories  Directory or directories to scan
+     * @param  callable  $criteriaCallback  Callback to configure discovery criteria
      * @return array<string> Array of discovered class names
      */
     public function discover(string|array $directories, callable $criteriaCallback): array
@@ -42,7 +40,7 @@ class Discoverer
         $dirs = is_array($directories) ? $directories : [$directories];
 
         // Filter valid directories
-        $validDirs = array_filter($dirs, function($dir) {
+        $validDirs = array_filter($dirs, function ($dir) {
             return is_dir($dir);
         });
 
@@ -61,8 +59,8 @@ class Discoverer
     /**
      * Discover classes implementing a specific interface.
      *
-     * @param string|array<string> $directories Directory or directories to scan
-     * @param string $interface Interface class name
+     * @param  string|array<string>  $directories  Directory or directories to scan
+     * @param  string  $interface  Interface class name
      * @return array<string> Array of discovered class names
      */
     public function discoverImplementing(string|array $directories, string $interface): array
@@ -75,8 +73,8 @@ class Discoverer
     /**
      * Discover classes extending a specific class.
      *
-     * @param string|array<string> $directories Directory or directories to scan
-     * @param string $baseClass Base class name
+     * @param  string|array<string>  $directories  Directory or directories to scan
+     * @param  string  $baseClass  Base class name
      * @return array<string> Array of discovered class names
      */
     public function discoverExtending(string|array $directories, string $baseClass): array
@@ -89,8 +87,8 @@ class Discoverer
     /**
      * Discover classes using a specific attribute.
      *
-     * @param string|array<string> $directories Directory or directories to scan
-     * @param string $attribute Attribute class name
+     * @param  string|array<string>  $directories  Directory or directories to scan
+     * @param  string  $attribute  Attribute class name
      * @return array<string> Array of discovered class names
      */
     public function discoverWithAttribute(string|array $directories, string $attribute): array
@@ -103,14 +101,13 @@ class Discoverer
     /**
      * Register discovered classes with the registry.
      *
-     * @param array<string> $classes Array of class names
-     * @param string $type Type identifier for the discovered classes
-     * @return void
+     * @param  array<string>  $classes  Array of class names
+     * @param  string  $type  Type identifier for the discovered classes
      */
     public function registerDiscovered(array $classes, string $type): void
     {
         foreach ($classes as $class) {
-            if (!isset($this->discoveredCache[$class])) {
+            if (! isset($this->discoveredCache[$class])) {
                 $this->registry->register($class, $type);
                 $this->discoveredCache[$class] = true;
             }

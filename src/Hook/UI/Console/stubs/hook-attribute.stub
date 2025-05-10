@@ -1,5 +1,4 @@
 <?php
-
 namespace {{ namespace }};
 
 use Pollora\Hook\Contracts\Hooks;

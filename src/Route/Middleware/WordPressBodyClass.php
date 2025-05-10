@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Route\Middleware;
 
 use Closure;
-use Pollora\Hook\Filter;
+use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Route\Route;
 
 /**

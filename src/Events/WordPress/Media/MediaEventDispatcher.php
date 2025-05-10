@@ -25,8 +25,8 @@ class MediaEventDispatcher extends AbstractEventDispatcher
         'add_attachment',
         'edit_attachment',
         'delete_attachment',
-        'wp_save_image_editor_file',
-        'wp_save_image_file',
+        //'wp_save_image_editor_file',
+        //'wp_save_image_file',
     ];
 
     /**

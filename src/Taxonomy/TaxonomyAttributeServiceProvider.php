@@ -8,6 +8,8 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Taxonomy\Commands\TaxonomyMakeCommand;
+use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\Filter;
 
 /**
  * Service provider for attribute-based taxonomy registration.
@@ -67,7 +69,8 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
         $taxonomy = $this->app->make($taxonomyClass);
 
         // Process attributes
-        AttributeProcessor::process($taxonomy);
+        $processor = new AttributeProcessor($this->app);
+        $processor->process($taxonomy);
 
         // Register the taxonomy with WordPress
         if (function_exists('register_extended_taxonomy')) {

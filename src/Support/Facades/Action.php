@@ -27,6 +27,6 @@ class Action extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return \Pollora\Hook\Action::class;
+        return \Pollora\Hook\Infrastructure\Services\Action::class;
     }
 }

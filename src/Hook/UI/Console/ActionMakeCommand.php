@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Hook\Commands;
+namespace Pollora\Hook\UI\Console;
 
 /**
  * Class ActionMakeCommand
  *
- * Command to create a new action hook class.
+ * Command to create a new action hook class (feature UI layer).
+ * Relocated from Commands/ActionMakeCommand.php as part of Hexagonal refactor.
+ *
+ * @package Pollora\Hook\UI\Console
  */
 class ActionMakeCommand extends AttributeMakeCommand
 {

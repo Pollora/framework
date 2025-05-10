@@ -2,18 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Hook;
+namespace Pollora\Hook\Infrastructure\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\ServiceProvider;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
-use Pollora\Hook\Commands\ActionMakeCommand;
-use Pollora\Hook\Commands\FilterMakeCommand;
+use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\UI\Console\ActionMakeCommand;
+use Pollora\Hook\UI\Console\FilterMakeCommand;
 
 /**
- * Service provider for WordPress hook functionality.
+ * Service provider for Hook feature (Infrastructure layer).
  *
- * Manages hooks discovered by the Discoverer system and registers them with WordPress.
+ * Registers hook services, binds contracts to implementations, and integrates
+ * with Laravel's service container and console commands.
  */
 class HookServiceProvider extends ServiceProvider
 {
@@ -27,7 +30,7 @@ class HookServiceProvider extends ServiceProvider
     /**
      * Register hook-related services in the application.
      *
-     * Binds hook configurations and hook implementations as singletons
+     * Binds hook contracts and implementations as singletons
      * in the application container.
      */
     public function register(): void
@@ -51,19 +54,17 @@ class HookServiceProvider extends ServiceProvider
     public function boot(Application $app, DiscoveryRegistry $registry): void
     {
         $this->app = $app;
-
         $this->loadHooks($registry);
     }
 
     /**
      * Load all discovered hooks.
      *
-     * @param DiscoveryRegistry $registry The discovery registry
+     * @param  DiscoveryRegistry  $registry  The discovery registry
      */
     protected function loadHooks(DiscoveryRegistry $registry): void
     {
         $hooks = $registry->getByType('hook');
-
         foreach ($hooks as $hookClass) {
             $this->registerHook($hookClass);
         }

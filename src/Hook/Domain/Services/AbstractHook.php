@@ -2,21 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Hook;
+namespace Pollora\Hook\Domain\Services;
 
-use Exception;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use Pollora\Hook\Contracts\HookInterface;
-use ReflectionException;
-use ReflectionMethod;
+use Pollora\Hook\Domain\Contracts\HookInterface;
 
 /**
- * Abstract base class for WordPress hooks implementation.
+ * Abstract base class for hook management (Domain layer, framework-agnostic).
  *
- * Provides common functionality for managing WordPress hooks (actions and filters)
- * with automatic dependency resolution and argument detection.
- * Uses caching for reflection operations to improve performance.
+ * Provides common functionality for managing hooks (actions and filters)
+ * with dependency resolution and argument detection, but does NOT depend on Laravel or WordPress.
+ *
+ * This class is a POPO and does not depend on any framework collections or helpers.
  */
 abstract class AbstractHook implements HookInterface
 {
@@ -32,7 +28,7 @@ abstract class AbstractHook implements HookInterface
      *    ...
      * ]
      */
-    protected Collection $hooks;
+    protected array $hooks = [];
 
     /**
      * Static cache for storing reflection results to improve performance.
@@ -49,7 +45,7 @@ abstract class AbstractHook implements HookInterface
      */
     public function __construct()
     {
-        $this->hooks = collect();
+        $this->hooks = [];
     }
 
     /**
@@ -60,13 +56,13 @@ abstract class AbstractHook implements HookInterface
      * @param  int  $priority  Optional. Priority of the hook (default: 10)
      * @param  int|null  $acceptedArgs  Optional. Number of arguments the callback accepts (default: auto-detected)
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function add(string|array $hooks, callable|string|array $callback, int $priority = 10, ?int $acceptedArgs = null): self
     {
         foreach ((array) $hooks as $hook) {
-            $callback = $this->resolveCallback($hook, $callback, $acceptedArgs);
-            $this->addHookEvent($hook, $callback['callable'], $priority, $callback['args']);
+            $resolvedCallback = $this->resolveCallback($hook, $callback, $acceptedArgs);
+            $this->addHookEvent($hook, $resolvedCallback['callable'], $priority, $resolvedCallback['args']);
         }
 
         return $this;
@@ -95,25 +91,22 @@ abstract class AbstractHook implements HookInterface
             $callback = $firstHook['callback'];
             $priority = (int) $firstHook['priority'];
             // Remove from our collection
-            $this->hooks->forget($hook);
-        } elseif ($this->hooks->has($hook)) {
+            unset($this->hooks[$hook]);
+        } elseif (isset($this->hooks[$hook])) {
             // Remove the specific hook with the corresponding callback and priority
-            $hookCallbacks = $this->hooks->get($hook);
+            $hookCallbacks = $this->hooks[$hook];
             // Find and remove the matching callback using our improved comparison function
-            $filteredCallbacks = $hookCallbacks->reject(
-                fn (array $item): bool => $item['priority'] === $priority && $this->compareCallbacks($item['callback'], $callback)
-            )->values();
+            $filteredCallbacks = array_values(array_filter(
+                $hookCallbacks,
+                fn (array $item): bool => ! ($item['priority'] === $priority && $this->compareCallbacks($item['callback'], $callback))
+            ));
             // Update or remove the hook entry
-            if ($filteredCallbacks->isEmpty()) {
-                $this->hooks->forget($hook);
+            if (empty($filteredCallbacks)) {
+                unset($this->hooks[$hook]);
             } else {
-                $this->hooks->put($hook, $filteredCallbacks);
+                $this->hooks[$hook] = $filteredCallbacks;
             }
         }
-
-        // Remove from WordPress - be careful here as well, same issue
-        // WordPress has a function wp_filter_object_to_string that handles part of the work
-        remove_filter($hook, $callback, $priority);
 
         return $this;
     }
@@ -158,7 +151,7 @@ abstract class AbstractHook implements HookInterface
             // Compare objects/classes
             if (is_object($regObject) && is_string($reqObject)) {
                 // Case where the registered callback has an object but the request has a class
-                return $regObject instanceof $reqObject || $regObject::class === $reqObject;
+                return $regObject instanceof $reqObject || get_class($regObject) === $reqObject;
             }
 
             if (is_string($regObject) && is_string($reqObject)) {
@@ -168,7 +161,7 @@ abstract class AbstractHook implements HookInterface
 
             if (is_object($regObject) && is_object($reqObject)) {
                 // Case where both are objects
-                return $regObject::class === $reqObject::class;
+                return get_class($regObject) === get_class($reqObject);
             }
         }
 
@@ -187,25 +180,27 @@ abstract class AbstractHook implements HookInterface
     {
         // If no specific callback is requested, just check if the hook name exists
         if ($callback === null) {
-            return $this->hooks->has($hook) && ! $this->hooks->get($hook)->isEmpty();
+            return isset($this->hooks[$hook]) && ! empty($this->hooks[$hook]);
         }
 
         // If the hook doesn't exist at all, return false
-        if (! $this->hooks->has($hook)) {
+        if (! isset($this->hooks[$hook])) {
             return false;
         }
 
         // Get all callbacks for this hook
         // Filter by callback and priority if specified
-        return $this->hooks->get($hook)->contains(function (array $item) use ($callback, $priority): bool {
-            // If priority is specified and doesn't match, return false
+        foreach ($this->hooks[$hook] as $item) {
             if ($priority !== null && $item['priority'] !== $priority) {
-                return false;
+                continue;
             }
 
-            // Check if the callbacks are the same
-            return $item['callback'] === $callback;
-        });
+            if ($item['callback'] === $callback) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -232,6 +227,8 @@ abstract class AbstractHook implements HookInterface
                 'args' => $acceptedArgs ?? $this->detectArguments($callback),
             ];
         }
+
+        throw new \InvalidArgumentException("Invalid callback provided for hook: {$hook}");
     }
 
     /**
@@ -247,11 +244,12 @@ abstract class AbstractHook implements HookInterface
     protected function resolveClassMethodCallback(string $hook, string $className, ?int $acceptedArgs): array
     {
         try {
-            // Resolve the instance with dependency injection
-            $instance = app($className);
+            // Create a new instance without using dependency injection
+            $instance = new $className;
 
+            // Prepare the method name (similar to Laravel's Str::studly but without dependency)
             $hook = preg_replace('/[^a-zA-Z0-9_]+/', '_', $hook);
-            $hookMethod = lcfirst(Str::studly($hook));
+            $hookMethod = lcfirst($this->studly($hook));
 
             // If the method exists, return the callable
             if (method_exists($instance, $hookMethod)) {
@@ -262,9 +260,21 @@ abstract class AbstractHook implements HookInterface
             }
 
             throw new \RuntimeException("Method '{$hookMethod}' not found in class '{$className}'.");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new \RuntimeException("Failed to resolve '{$className}': ".$e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Convert a string to StudlyCase.
+     * A simple implementation to replace Laravel's Str::studly.
+     */
+    private function studly(string $value): string
+    {
+        $words = explode('_', $value);
+        $studlyWords = array_map('ucfirst', $words);
+
+        return implode('', $studlyWords);
     }
 
     /**
@@ -289,7 +299,7 @@ abstract class AbstractHook implements HookInterface
         try {
             if (is_array($callback)) {
                 [$object, $method] = $callback;
-                $reflection = new ReflectionMethod($object, $method);
+                $reflection = new \ReflectionMethod($object, $method);
             } else {
                 $reflection = new \ReflectionFunction($callback);
             }
@@ -300,7 +310,7 @@ abstract class AbstractHook implements HookInterface
             static::$reflectionCache[$cacheKey] = $paramCount;
 
             return $paramCount;
-        } catch (ReflectionException $e) {
+        } catch (\ReflectionException $e) {
             throw new \RuntimeException('Failed to analyze callable: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
@@ -318,7 +328,7 @@ abstract class AbstractHook implements HookInterface
             $method = $callback[1];
 
             if (is_object($object)) {
-                return $object::class.'::'.$method.'@'.spl_object_id($object);
+                return get_class($object).'::'.$method.'@'.spl_object_id($object);
             }
 
             return $object.'::'.$method;
@@ -338,7 +348,7 @@ abstract class AbstractHook implements HookInterface
     }
 
     /**
-     * Add a single hook event to WordPress.
+     * Add a single hook event.
      *
      * @param  string  $hook  The hook name
      * @param  callable  $callback  The resolved callback function
@@ -355,22 +365,13 @@ abstract class AbstractHook implements HookInterface
             'args' => $acceptedArgs,
         ];
 
-        // Get existing hooks for this hook name or create new collection
-        $hookCallbacks = $this->hooks->get($hook, collect());
-
-        // Add this hook to the collection
-        if ($hookCallbacks instanceof Collection) {
-            $hookCallbacks->push($hookData);
-        } else {
-            // If it's not a collection (first hook for this name), create a new one
-            $hookCallbacks = collect([$hookData]);
+        // Make sure the hook array exists
+        if (! isset($this->hooks[$hook])) {
+            $this->hooks[$hook] = [];
         }
 
-        // Update the main hooks collection
-        $this->hooks->put($hook, $hookCallbacks);
-
-        // Register hook with WordPress
-        add_filter($hook, $callback, $priority, $acceptedArgs);
+        // Add this hook data to the array
+        $this->hooks[$hook][] = $hookData;
     }
 
     /**
@@ -391,18 +392,10 @@ abstract class AbstractHook implements HookInterface
      */
     public function getCallbacks(string $hook): ?array
     {
-        if (! $this->hooks->has($hook)) {
+        if (! isset($this->hooks[$hook])) {
             return null;
         }
 
-        $hookCallbacks = $this->hooks->get($hook);
-
-        // If hookCallbacks is a Collection, convert it to array with all registered callbacks
-        if ($hookCallbacks instanceof Collection) {
-            return $hookCallbacks->toArray();
-        }
-
-        // Single callback case
-        return [$hookCallbacks];
+        return $this->hooks[$hook];
     }
 }

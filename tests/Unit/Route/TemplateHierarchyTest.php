@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Config\Repository;
 use Mockery as m;
+use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Theme\TemplateHierarchy;
 
 /**
@@ -95,57 +97,6 @@ function setupTemplateHierarchyTest()
         'config' => $config,
         'realContainer' => $realContainer,
     ];
-}
-
-/**
- * Override WordPress functions for testing
- */
-function setupWordPressMocksForTemplateHierarchy($conditions = [])
-{
-    WP::$wpFunctions = m::mock('stdClass');
-
-    // Setup add_filter mock - accepting ANY arguments with withAnyArgs()
-    WP::$wpFunctions->shouldReceive('add_filter')
-        ->withAnyArgs()
-        ->andReturn(true);
-
-    // Setup apply_filters mock
-    WP::$wpFunctions->shouldReceive('apply_filters')
-        ->withAnyArgs()
-        ->andReturnUsing(function ($tag, $value) {
-            return $value;
-        });
-
-    // Default conditions
-    $defaultConditions = [
-        'is_page' => false,
-        'is_singular' => false,
-        'is_archive' => false,
-        'is_404' => false,
-        'is_search' => false,
-        'is_category' => false,
-        'is_tag' => false,
-        'is_tax' => false,
-    ];
-
-    // Apply overrides
-    $conditions = array_merge($defaultConditions, $conditions);
-
-    // Setup is_page condition
-    WP::$wpFunctions->shouldReceive('is_page')
-        ->andReturn($conditions['is_page']);
-
-    // Setup is_singular condition
-    WP::$wpFunctions->shouldReceive('is_singular')
-        ->andReturn($conditions['is_singular']);
-
-    // Setup is_archive condition
-    WP::$wpFunctions->shouldReceive('is_archive')
-        ->andReturn($conditions['is_archive']);
-
-    // Setup is_404 condition
-    WP::$wpFunctions->shouldReceive('is_404')
-        ->andReturn($conditions['is_404']);
 }
 
 /**
@@ -294,11 +245,12 @@ test('template include is captured and prepended to hierarchy', function () {
     $config = m::mock(Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
-    // Create container
-    $container = new Container;
+    // Create Action and Filter mocks/services
+    $action = new Action;
+    $filter = new Filter;
 
     // Create a real TemplateHierarchy instance
-    $templateHierarchy = new TemplateHierarchy($config, $container);
+    $templateHierarchy = new TemplateHierarchy($config, $action, $filter);
 
     // Set up reflection to access private property
     $hierarchyProp = new ReflectionProperty($templateHierarchy, 'templateHierarchy');
@@ -337,11 +289,12 @@ test('blade template variants are correctly generated', function () {
     $config = m::mock(Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
-    // Create container
-    $container = new Container;
+    // Create Action and Filter mocks/services
+    $action = new Action;
+    $filter = new Filter;
 
     // Create a real instance for testing
-    $templateHierarchy = new TemplateHierarchy($config, $container);
+    $templateHierarchy = new TemplateHierarchy($config, $action, $filter);
 
     // Set up reflection to access private methods and properties
     $method = new ReflectionMethod($templateHierarchy, 'addBladeTemplateVariants');
@@ -391,11 +344,12 @@ test('template handlers can be registered', function () {
     $config = m::mock(\Illuminate\Contracts\Config\Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
-    // Create container
-    $container = new \Illuminate\Container\Container;
+    // Create Action and Filter mocks/services
+    $action = new Action;
+    $filter = new Filter;
 
     // Create an instance of TemplateHierarchy
-    $templateHierarchy = new \Pollora\Theme\TemplateHierarchy($config, $container);
+    $templateHierarchy = new \Pollora\Theme\TemplateHierarchy($config, $action, $filter);
 
     // Create a handler callback
     $handlerCallback = function ($obj) {
@@ -448,11 +402,12 @@ test('condition satisfaction detection works with different WordPress functions'
     $config = m::mock(Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
-    // Create container
-    $container = new Container;
+    // Create Action and Filter mocks/services
+    $action = new Action;
+    $filter = new Filter;
 
     // Create a real instance for testing
-    $templateHierarchy = new TemplateHierarchy($config, $container);
+    $templateHierarchy = new TemplateHierarchy($config, $action, $filter);
 
     // Use reflection to access private method
     $method = new ReflectionMethod($templateHierarchy, 'isConditionSatisfied');
