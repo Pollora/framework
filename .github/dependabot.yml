@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "automerge"
+    versioning-strategy: "increase"
+    
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "automerge"
