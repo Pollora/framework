@@ -92,20 +92,24 @@ trait QueryTrait
         // Handle special request types
         if (is_robots()) {
             do_action('do_robots');
+
             return;
         }
         if (is_favicon()) {
             do_action('do_favicon');
+
             return;
         }
         if (is_feed()) {
             do_feed();
+
             return;
         }
 
         // Handle special request types
         if (is_trackback()) {
             require_once ABSPATH.'wp-trackback.php';
+
             return;
         }
 

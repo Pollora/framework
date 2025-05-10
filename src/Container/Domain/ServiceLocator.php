@@ -15,7 +15,7 @@ interface ServiceLocator
     /**
      * Résout un service à partir de sa classe.
      *
-     * @param string $serviceClass La classe du service à résoudre
+     * @param  string  $serviceClass  La classe du service à résoudre
      * @return mixed|null Le service résolu ou null s'il n'est pas trouvé
      */
     public function resolve(string $serviceClass);

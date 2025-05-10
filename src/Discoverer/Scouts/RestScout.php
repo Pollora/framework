@@ -22,10 +22,10 @@ class RestScout extends AbstractScout
      * @return array<string> Directories to scan
      */
     protected function directory(): array
-    {;
+    {
         return [
             app_path(),
-            app(RepositoryInterface::class)->getPath()
+            app(RepositoryInterface::class)->getPath(),
         ];
     }
 
@@ -42,7 +42,7 @@ class RestScout extends AbstractScout
     /**
      * Define the discovery criteria.
      *
-     * @param Discover|DiscoverConditionFactory $discover Discover instance
+     * @param  Discover|DiscoverConditionFactory  $discover  Discover instance
      * @return Discover|DiscoverConditionFactory Configured discover instance
      */
     protected function criteria(Discover|DiscoverConditionFactory $discover): Discover|DiscoverConditionFactory

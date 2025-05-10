@@ -15,16 +15,15 @@ interface DiscoveryRegistry
     /**
      * Register a class with the registry.
      *
-     * @param string $class Fully qualified class name
-     * @param string $type Type identifier for the class
-     * @return void
+     * @param  string  $class  Fully qualified class name
+     * @param  string  $type  Type identifier for the class
      */
     public function register(string $class, string $type): void;
 
     /**
      * Get all registered classes of a specific type.
      *
-     * @param string $type Type identifier
+     * @param  string  $type  Type identifier
      * @return array<string> Array of class names
      */
     public function getByType(string $type): array;
@@ -32,7 +31,7 @@ interface DiscoveryRegistry
     /**
      * Check if a class is registered.
      *
-     * @param string $class Fully qualified class name
+     * @param  string  $class  Fully qualified class name
      * @return bool True if the class is registered
      */
     public function has(string $class): bool;

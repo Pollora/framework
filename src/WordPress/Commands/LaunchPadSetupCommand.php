@@ -32,6 +32,7 @@ class LaunchPadSetupCommand extends Command
                 if (! $install) {
                     info('Database is already configured.');
                 }
+
                 return self::SUCCESS;
             }
 

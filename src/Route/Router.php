@@ -332,6 +332,7 @@ class Router extends IlluminateRouter
     private function isWordPressAdminRequest(): bool
     {
         $app = $this->container['app'] ?? null;
+
         return $app && method_exists($app, 'isWordPressAdmin') && $app->isWordPressAdmin();
     }
 

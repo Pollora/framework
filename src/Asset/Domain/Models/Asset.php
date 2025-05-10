@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Domain\Models;
 
 /**
@@ -12,28 +14,25 @@ class Asset
 {
     /**
      * The unique name or handle of the asset.
-     * @var string
      */
     private string $name;
 
     /**
      * The file path or URL to the asset.
-     * @var string
      */
     private string $path;
 
     /**
      * Additional attributes for the asset (type, version, dependencies, etc.).
-     * @var array
      */
     private array $attributes;
 
     /**
      * Initializes a new asset instance.
      *
-     * @param string $name The unique name or handle of the asset
-     * @param string $path The file path or URL to the asset
-     * @param array $attributes Additional attributes (optional)
+     * @param  string  $name  The unique name or handle of the asset
+     * @param  string  $path  The file path or URL to the asset
+     * @param  array  $attributes  Additional attributes (optional)
      */
     public function __construct(string $name, string $path, array $attributes = [])
     {
@@ -44,7 +43,6 @@ class Asset
 
     /**
      * Gets the asset's unique name or handle.
-     * @return string
      */
     public function getName(): string
     {
@@ -53,7 +51,6 @@ class Asset
 
     /**
      * Gets the file path or URL to the asset.
-     * @return string
      */
     public function getPath(): string
     {
@@ -62,7 +59,6 @@ class Asset
 
     /**
      * Gets the asset's additional attributes.
-     * @return array
      */
     public function getAttributes(): array
     {

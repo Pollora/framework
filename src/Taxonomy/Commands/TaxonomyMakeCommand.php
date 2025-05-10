@@ -145,7 +145,7 @@ class TaxonomyMakeCommand extends GeneratorCommand
             return "['".$items[0]."']";
         }
 
-        $formattedItems = array_map(fn(string $item): string => "'".$item."'", $items);
+        $formattedItems = array_map(fn (string $item): string => "'".$item."'", $items);
 
         return '['.implode(', ', $formattedItems).']';
     }

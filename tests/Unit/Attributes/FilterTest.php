@@ -27,10 +27,11 @@ beforeEach(function () {
             if ($serviceClass === FilterService::class) {
                 return $this->filterService;
             }
+
             return null;
         }
     };
-    
+
     $this->processor = new AttributeProcessor($this->mockContainer);
 });
 
@@ -50,11 +51,12 @@ class MultipleFilterClass implements Attributable
     {
         return "modified_{$value}";
     }
-    
+
     #[Filter('another_filter', priority: 20)]
     public function anotherFilterMethod(array $data): array
     {
         $data['modified'] = true;
+
         return $data;
     }
 }
@@ -93,7 +95,7 @@ it('registers a filter hook correctly', function () {
         });
 
     // Process the test class
-    $testClass = new SingleFilterClass();
+    $testClass = new SingleFilterClass;
     $this->processor->process($testClass);
 });
 
@@ -108,7 +110,7 @@ it('registers multiple filter hooks with different priorities', function () {
                 && $callback[1] === 'filterMethod'
                 && $priority === 10;
         });
-    
+
     $this->mockFilter->shouldReceive('add')
         ->once()
         ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
@@ -120,7 +122,7 @@ it('registers multiple filter hooks with different priorities', function () {
         });
 
     // Process the test class
-    $testClass = new MultipleFilterClass();
+    $testClass = new MultipleFilterClass;
     $this->processor->process($testClass);
 });
 
@@ -138,7 +140,7 @@ it('registers a filter hook with default priority (10)', function () {
         });
 
     // Process the test class
-    $testClass = new DefaultPriorityFilterClass();
+    $testClass = new DefaultPriorityFilterClass;
     $this->processor->process($testClass);
 });
 
@@ -156,7 +158,7 @@ it('registers a filter hook with custom priority', function () {
         });
 
     // Process the test class
-    $testClass = new CustomPriorityFilterClass();
+    $testClass = new CustomPriorityFilterClass;
     $this->processor->process($testClass);
 });
 
@@ -165,7 +167,7 @@ it('executes filter and returns modified value', function () {
     $this->mockFilter->shouldReceive('add')
         ->once()
         ->withAnyArgs();
-    
+
     // Set up expectations for the apply method
     $this->mockFilter->shouldReceive('apply')
         ->once()
@@ -173,9 +175,9 @@ it('executes filter and returns modified value', function () {
         ->andReturn('modified_original');
 
     // Process the test class
-    $testClass = new SingleFilterClass();
+    $testClass = new SingleFilterClass;
     $this->processor->process($testClass);
-    
+
     // Test the apply method
     $result = $this->mockFilter->apply('test_filter', 'original');
     expect($result)->toBe('modified_original');
@@ -183,20 +185,20 @@ it('executes filter and returns modified value', function () {
 
 it('handles null service locator resolution gracefully', function () {
     // Create a container that returns null for the service
-    $mockContainer = new class()
+    $mockContainer = new class
     {
         public function get($serviceClass)
         {
             return null;
         }
     };
-    
+
     $processor = new AttributeProcessor($mockContainer);
-    $testClass = new SingleFilterClass();
-    
+    $testClass = new SingleFilterClass;
+
     // This should not throw an exception
     $processor->process($testClass);
-    
+
     // No assertions needed - we're just checking that it doesn't throw
     expect(true)->toBeTrue();
 });

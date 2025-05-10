@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Discoverer\Scouts;
 
-use Illuminate\Support\Facades\App;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Cache\FileDiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
@@ -47,7 +46,7 @@ abstract class AbstractScout extends StructureScout
     /**
      * Define the discovery criteria.
      *
-     * @param Discover|DiscoverConditionFactory $discover Discover instance
+     * @param  Discover|DiscoverConditionFactory  $discover  Discover instance
      * @return Discover|DiscoverConditionFactory Configured discover instance
      */
     abstract protected function criteria(Discover|DiscoverConditionFactory $discover): Discover|DiscoverConditionFactory;
@@ -65,7 +64,7 @@ abstract class AbstractScout extends StructureScout
             : [$this->directory()];
 
         // Filter out non-existent directories
-        $validDirectories = array_filter($directories, function($dir) {
+        $validDirectories = array_filter($directories, function ($dir) {
             return is_dir($dir);
         });
 
@@ -84,13 +83,14 @@ abstract class AbstractScout extends StructureScout
 
             return $result;
         } catch (\Exception $e) {
-            \Log::error("Error in scout " . static::class . ": " . $e->getMessage());
+            \Log::error('Error in scout '.static::class.': '.$e->getMessage());
+
             return [];
         }
     }
 
     public function cacheDriver(): DiscoverCacheDriver
     {
-        return app()->isLocal() || config('app.debug') ? new NullDiscoverCacheDriver() : new FileDiscoverCacheDriver(storage_path('discoverer'));
+        return app()->isLocal() || config('app.debug') ? new NullDiscoverCacheDriver : new FileDiscoverCacheDriver(storage_path('discoverer'));
     }
 }

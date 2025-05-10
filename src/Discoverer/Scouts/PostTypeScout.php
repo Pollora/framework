@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Discoverer\Scouts;
 
 use Nwidart\Modules\Contracts\RepositoryInterface;
-use Pollora\Attributes\AttributeProcessor;
-use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\PostType\AbstractPostType;
 use Spatie\StructureDiscoverer\Discover;
 use Spatie\StructureDiscoverer\DiscoverConditionFactory;
@@ -27,7 +25,7 @@ class PostTypeScout extends AbstractScout
     {
         return [
             app_path(),
-            app(RepositoryInterface::class)->getPath()
+            app(RepositoryInterface::class)->getPath(),
         ];
     }
 
@@ -44,7 +42,7 @@ class PostTypeScout extends AbstractScout
     /**
      * Define the discovery criteria.
      *
-     * @param Discover|DiscoverConditionFactory $discover Discover instance
+     * @param  Discover|DiscoverConditionFactory  $discover  Discover instance
      * @return Discover|DiscoverConditionFactory Configured discover instance
      */
     protected function criteria(Discover|DiscoverConditionFactory $discover): Discover|DiscoverConditionFactory

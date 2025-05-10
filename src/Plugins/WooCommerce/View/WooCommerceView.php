@@ -29,7 +29,6 @@ class WooCommerceView
 
     /**
      * Get the theme file finder
-     *
      */
     protected function getFileFinder(): FileViewFinder
     {

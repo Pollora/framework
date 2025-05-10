@@ -58,7 +58,6 @@ class PostTypeMakeCommand extends GeneratorCommand
     /**
      * Execute the console command.
      *
-     * @return bool|null
      *
      * @throws FileNotFoundException
      */

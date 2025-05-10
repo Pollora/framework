@@ -27,7 +27,6 @@ use Pollora\PostType\PostTypeAttributeServiceProvider;
 use Pollora\PostType\PostTypeServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
-use Pollora\Support\Facades\Action;
 use Pollora\Taxonomy\TaxonomyAttributeServiceProvider;
 use Pollora\Taxonomy\TaxonomyServiceProvider;
 use Pollora\Theme\ThemeServiceProvider;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Infrastructure\Repositories;
 
 use Pollora\Asset\Domain\Contracts\AssetRepositoryInterface;
@@ -16,6 +18,7 @@ class InMemoryAssetRepository implements AssetRepositoryInterface
 {
     /**
      * Internal array of assets, keyed by asset name/handle.
+     *
      * @var array<string, Asset>
      */
     private array $assets = [];
@@ -23,7 +26,7 @@ class InMemoryAssetRepository implements AssetRepositoryInterface
     /**
      * Finds an asset by its name/handle.
      *
-     * @param string $name The asset name/handle
+     * @param  string  $name  The asset name/handle
      * @return Asset|null The asset instance, or null if not found
      */
     public function findByName(string $name): ?Asset
@@ -34,8 +37,7 @@ class InMemoryAssetRepository implements AssetRepositoryInterface
     /**
      * Saves an asset instance to the repository.
      *
-     * @param Asset $asset The asset instance to save
-     * @return void
+     * @param  Asset  $asset  The asset instance to save
      */
     public function save(Asset $asset): void
     {

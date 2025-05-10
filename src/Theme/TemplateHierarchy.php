@@ -50,8 +50,7 @@ class TemplateHierarchy
         private readonly Repository $config,
         private readonly Action $action,
         private readonly Filter $filter
-    )
-    {
+    ) {
         // Hook into template_include at a high priority to capture the final template
         $this->filter->add('template_include', [$this, 'captureTemplateInclude'], PHP_INT_MAX - 10);
 

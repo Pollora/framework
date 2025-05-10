@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Domain\Models;
 
 use Pollora\Asset\Domain\Contracts\AssetFileInterface;
@@ -15,27 +17,24 @@ class AssetFile implements AssetFileInterface
 {
     /**
      * The asset file name or relative path.
-     * @var string
      */
     protected string $filename;
 
     /**
      * The asset container identifier.
-     * @var string
      */
     protected string $assetContainer = 'theme';
 
     /**
      * The asset file content (if applicable).
-     * @var string
      */
     protected string $content;
 
     /**
      * Initializes a new asset file instance.
      *
-     * @param string $filename The file name or relative path
-     * @param string $content Optional file content
+     * @param  string  $filename  The file name or relative path
+     * @param  string  $content  Optional file content
      */
     public function __construct(string $filename, string $content = '')
     {
@@ -66,12 +65,12 @@ class AssetFile implements AssetFileInterface
     /**
      * Sets the asset container to use.
      *
-     * @param string $assetContainer The container identifier
-     * @return static
+     * @param  string  $assetContainer  The container identifier
      */
     public function from(string $assetContainer): static
     {
         $this->assetContainer = $assetContainer;
+
         return $this;
     }
 

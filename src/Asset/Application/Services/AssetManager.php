@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Asset\Application\Services;
 
 use Pollora\Asset\Domain\Models\Asset;
@@ -17,15 +19,11 @@ class AssetManager
 {
     /**
      * Service for registering assets.
-     *
-     * @var AssetRegistrationService
      */
     private AssetRegistrationService $registrationService;
 
     /**
      * Service for retrieving assets.
-     *
-     * @var AssetRetrievalService
      */
     private AssetRetrievalService $retrievalService;
 
@@ -38,16 +36,14 @@ class AssetManager
 
     /**
      * The default asset container name.
-     *
-     * @var string|null
      */
     protected ?string $defaultContainer = null;
 
     /**
      * Initializes the asset manager with the registration and retrieval services.
      *
-     * @param AssetRegistrationService $registrationService Service for registering assets
-     * @param AssetRetrievalService $retrievalService Service for retrieving assets
+     * @param  AssetRegistrationService  $registrationService  Service for registering assets
+     * @param  AssetRetrievalService  $retrievalService  Service for retrieving assets
      */
     public function __construct(
         AssetRegistrationService $registrationService,
@@ -60,8 +56,8 @@ class AssetManager
     /**
      * Factory method: returns an AssetEnqueuer (builder) for fluent asset management and enqueueing.
      *
-     * @param string $handle Asset handle
-     * @param string $file Asset file path
+     * @param  string  $handle  Asset handle
+     * @param  string  $file  Asset file path
      * @return AssetEnqueuer Asset enqueuer instance
      */
     public function add(string $handle, string $file): AssetEnqueuer
@@ -72,10 +68,10 @@ class AssetManager
     /**
      * Retrieves an asset by name.
      *
-     * @param string $name Asset name
+     * @param  string  $name  Asset name
      * @return Asset|null Asset instance or null if not found
      */
-    public function get(string $name): Asset|null
+    public function get(string $name): ?Asset
     {
         return $this->retrievalService->get($name);
     }
@@ -93,9 +89,8 @@ class AssetManager
     /**
      * Adds a new asset container.
      *
-     * @param string $name Name of the container
-     * @param array $config Configuration for the container
-     * @return void
+     * @param  string  $name  Name of the container
+     * @param  array  $config  Configuration for the container
      */
     public function addContainer(string $name, array $config): void
     {
@@ -105,7 +100,7 @@ class AssetManager
     /**
      * Retrieves an asset container by name.
      *
-     * @param string $name Name of the container
+     * @param  string  $name  Name of the container
      * @return AssetContainer|null The asset container instance or null if not found
      */
     public function getContainer(string $name): ?AssetContainer
@@ -116,8 +111,7 @@ class AssetManager
     /**
      * Sets the default asset container.
      *
-     * @param string $name Name of the container to set as default
-     * @return void
+     * @param  string  $name  Name of the container to set as default
      */
     public function setDefaultContainer(string $name): void
     {
@@ -137,7 +131,7 @@ class AssetManager
     /**
      * Infrastructure factory for asset file URL resolution (Vite, containers, etc.).
      *
-     * @param string $file Asset file path
+     * @param  string  $file  Asset file path
      * @return AssetFile Asset file instance for URL resolution
      */
     public function url(string $file): AssetFile

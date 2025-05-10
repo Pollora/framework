@@ -34,13 +34,15 @@ class LaunchPadInstallCommand extends Command
                 if (! $installMode) {
                     info('WordPress is already installed.');
                 }
+
                 return self::SUCCESS;
             }
 
             if (! $this->databaseService->isConfigured()) {
                 if (! $installMode) {
-                    info("Application environment is not configured. Aborting.");
+                    info('Application environment is not configured. Aborting.');
                 }
+
                 return self::FAILURE;
             }
 

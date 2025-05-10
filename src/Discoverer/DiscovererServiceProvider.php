@@ -90,7 +90,7 @@ class DiscovererServiceProvider extends ServiceProvider
                 }
             } catch (\Exception $e) {
                 $this->app->make('log')->error(
-                    "Error processing scout {$scoutClass}: " . $e->getMessage()
+                    "Error processing scout {$scoutClass}: ".$e->getMessage()
                 );
             }
         }
@@ -99,11 +99,11 @@ class DiscovererServiceProvider extends ServiceProvider
     /**
      * Register a discovered class with the application.
      *
-     * @param string $discoveredClass Fully qualified class name
+     * @param  string  $discoveredClass  Fully qualified class name
      */
     protected function registerDiscoveredClass(string $discoveredClass): void
     {
-        if (!class_exists($discoveredClass)) {
+        if (! class_exists($discoveredClass)) {
             return;
         }
 
@@ -115,7 +115,7 @@ class DiscovererServiceProvider extends ServiceProvider
             }
         } catch (\Exception $e) {
             $this->app->make('log')->error(
-                "Error registering discovered class {$discoveredClass}: " . $e->getMessage()
+                "Error registering discovered class {$discoveredClass}: ".$e->getMessage()
             );
         }
     }

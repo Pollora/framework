@@ -13,9 +13,6 @@ interface AjaxActionRegistrarInterface
 {
     /**
      * Register the given AjaxAction.
-     *
-     * @param AjaxAction $action
-     * @return void
      */
     public function register(AjaxAction $action): void;
 }

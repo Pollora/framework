@@ -28,8 +28,8 @@ class Registry implements DiscoveryRegistry
     /**
      * Register a class with the registry, only if it doesn't belong to a disabled module.
      *
-     * @param string $class Fully qualified class name
-     * @param string $type Type identifier for the class
+     * @param  string  $class  Fully qualified class name
+     * @param  string  $type  Type identifier for the class
      */
     public function register(string $class, string $type): void
     {
@@ -42,15 +42,14 @@ class Registry implements DiscoveryRegistry
     /**
      * Determine if a class should be registered based on its module's status.
      *
-     * @param string $class Fully qualified class name
-     *
+     * @param  string  $class  Fully qualified class name
      * @return bool True if class should be registered
      */
     protected function shouldRegisterClass(string $class): bool
     {
         $moduleName = $this->extractModuleName($class);
 
-        return !$moduleName || app(RepositoryInterface::class)->isEnabled($moduleName);
+        return ! $moduleName || app(RepositoryInterface::class)->isEnabled($moduleName);
     }
 
     /**
@@ -59,15 +58,14 @@ class Registry implements DiscoveryRegistry
      * Returns the immediate namespace segment after the configured module namespace,
      * or false if the class is not within a module namespace.
      *
-     * @param string $class Fully qualified class name
-     *
+     * @param  string  $class  Fully qualified class name
      * @return string|false Module name or false
      */
     protected function extractModuleName(string $class): string|false
     {
-        $moduleNamespace = config('modules.namespace') . '\\';
+        $moduleNamespace = config('modules.namespace').'\\';
 
-        if (!str_starts_with($class, $moduleNamespace)) {
+        if (! str_starts_with($class, $moduleNamespace)) {
             return false;
         }
 
@@ -79,8 +77,7 @@ class Registry implements DiscoveryRegistry
     /**
      * Get all registered classes of a specific type.
      *
-     * @param string $type Type identifier
-     *
+     * @param  string  $type  Type identifier
      * @return array<string> Array of class names
      */
     public function getByType(string $type): array
@@ -91,8 +88,7 @@ class Registry implements DiscoveryRegistry
     /**
      * Check if a class is registered.
      *
-     * @param string $class Fully qualified class name
-     *
+     * @param  string  $class  Fully qualified class name
      * @return bool True if the class is registered
      */
     public function has(string $class): bool

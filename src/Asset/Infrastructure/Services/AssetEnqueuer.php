@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Pollora\Asset\Infrastructure\Services;
 
+use Illuminate\Support\Facades\Log;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Exceptions\AssetException;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -22,93 +22,85 @@ class AssetEnqueuer
 {
     /**
      * The asset path or array of paths.
+     *
      * @var string|array<string>
      */
     protected string|array $path;
 
     /**
      * The type of asset ('css' or 'js').
-     * @var string
      */
     protected string $type;
 
     /**
      * Array of asset handles that this asset depends on.
+     *
      * @var array<string>
      */
     protected array $dependencies = [];
 
     /**
      * The asset container instance.
-     * @var AssetContainer|null
      */
     protected ?AssetContainer $container = null;
 
     /**
      * The Vite manager instance.
-     * @var ViteManager|null
      */
     protected ?ViteManager $viteManager = null;
 
     /**
      * Whether to use Vite.js for asset handling.
-     * @var bool
      */
     protected bool $useVite = false;
 
     /**
      * The version string for cache busting.
-     * @var string|null
      */
     protected ?string $version = null;
 
     /**
      * The media query for stylesheet (e.g., 'all', 'print', 'screen').
-     * @var string
      */
     protected string $media = 'all';
 
     /**
      * Whether to load the script in the footer.
-     * @var bool
      */
     protected bool $loadInFooter = false;
 
     /**
      * The loading strategy for scripts (e.g., 'defer', 'async').
-     * @var string|null
      */
     protected ?string $loadStrategy = null;
 
     /**
      * The content to be added inline with the asset.
-     * @var string|null
      */
     protected ?string $inlineContent = null;
 
     /**
      * The position for inline content ('before' or 'after').
-     * @var string|null
      */
     protected ?string $inlinePosition = null;
 
     /**
      * Array of WordPress hooks where the asset should be enqueued.
+     *
      * @var array<string>
      */
     protected array $hooks = [];
 
     /**
      * The asset handle (unique identifier).
-     * @var string
      */
     protected string $handle;
 
     /**
      * Constructor.
      *
-     * @param string $handle Unique identifier for the asset
-     * @param string $path Path to the asset file
+     * @param  string  $handle  Unique identifier for the asset
+     * @param  string  $path  Path to the asset file
      */
     public function __construct(string $handle, string $path)
     {
@@ -120,134 +112,197 @@ class AssetEnqueuer
     /**
      * Sets the asset container by name.
      *
-     * @param string $containerName Name of the container
+     * @param  string  $containerName  Name of the container
      * @return $this
+     *
      * @throws \RuntimeException If the container is not found
      */
     public function container(string $containerName): self
     {
         $container = app(AssetManager::class)->getContainer($containerName);
-        if (!$container) {
+        if (! $container) {
             throw new \RuntimeException("Asset container '{$containerName}' not found. Make sure you have added it via AssetManager::addContainer().");
         }
         $this->container = $container;
+
         return $this;
     }
 
     /**
      * Sets asset dependencies.
      *
-     * @param array $dependencies Array of dependency handles
+     * @param  array  $dependencies  Array of dependency handles
      * @return $this
      */
-    public function dependencies(array $dependencies): self { $this->dependencies = $dependencies; return $this; }
+    public function dependencies(array $dependencies): self
+    {
+        $this->dependencies = $dependencies;
+
+        return $this;
+    }
 
     /**
      * Enables Vite.js integration for this asset.
      *
      * @return $this
+     *
      * @throws \RuntimeException If no asset container is defined
      */
-    public function useVite(): self {
-        if (!$this->container) {
+    public function useVite(): self
+    {
+        if (! $this->container) {
             throw new \RuntimeException("No asset container defined before useVite(). Use ->container('theme') before ->useVite().");
         }
         $this->useVite = true;
         $this->viteManager = new ViteManager($this->container);
+
         return $this;
     }
 
     /**
      * Sets the asset version for cache busting.
      *
-     * @param string $version Version string
+     * @param  string  $version  Version string
      * @return $this
      */
-    public function version(string $version): self { $this->version = $version; return $this; }
+    public function version(string $version): self
+    {
+        $this->version = $version;
+
+        return $this;
+    }
 
     /**
      * Sets the media type for stylesheets.
      *
-     * @param string $media Media query string
+     * @param  string  $media  Media query string
      * @return $this
      */
-    public function media(string $media): self { $this->media = $media; return $this; }
+    public function media(string $media): self
+    {
+        $this->media = $media;
+
+        return $this;
+    }
 
     /**
      * Sets script to load in the footer.
      *
      * @return $this
      */
-    public function loadInFooter(): self { $this->loadInFooter = true; return $this; }
+    public function loadInFooter(): self
+    {
+        $this->loadInFooter = true;
+
+        return $this;
+    }
 
     /**
      * Sets the loading strategy for scripts.
      *
-     * @param string $strategy Loading strategy (e.g., 'defer', 'async')
+     * @param  string  $strategy  Loading strategy (e.g., 'defer', 'async')
      * @return $this
      */
-    public function loadStrategy(string $strategy): self { $this->loadStrategy = $strategy; return $this; }
+    public function loadStrategy(string $strategy): self
+    {
+        $this->loadStrategy = $strategy;
+
+        return $this;
+    }
 
     /**
      * Sets the asset type manually.
      *
-     * @param string $type The asset type ('css' or 'js')
+     * @param  string  $type  The asset type ('css' or 'js')
      * @return $this
      */
-    public function setType(string $type): self { $this->type = $type; return $this; }
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+
+        return $this;
+    }
 
     /**
      * Enqueues the asset in WordPress frontend (wp_enqueue_scripts).
      *
      * @return $this
      */
-    public function toFrontend(): self { return $this->addHook('wp_enqueue_scripts'); }
+    public function toFrontend(): self
+    {
+        return $this->addHook('wp_enqueue_scripts');
+    }
 
     /**
      * Enqueues the asset in WordPress admin area (admin_enqueue_scripts).
      *
      * @return $this
      */
-    public function toBackend(): self { return $this->addHook('admin_enqueue_scripts'); }
+    public function toBackend(): self
+    {
+        return $this->addHook('admin_enqueue_scripts');
+    }
 
     /**
      * Enqueues the asset on the login screen (login_enqueue_scripts).
      *
      * @return $this
      */
-    public function toLoginScreen(): self { return $this->addHook('login_enqueue_scripts'); }
+    public function toLoginScreen(): self
+    {
+        return $this->addHook('login_enqueue_scripts');
+    }
 
     /**
      * Enqueues the asset in the customizer preview (customize_preview_init).
      *
      * @return $this
      */
-    public function toCustomizer(): self { return $this->addHook('customize_preview_init'); }
+    public function toCustomizer(): self
+    {
+        return $this->addHook('customize_preview_init');
+    }
 
     /**
      * Enqueues the asset in the block editor (enqueue_block_editor_assets).
      *
      * @return $this
      */
-    public function toEditor(): self { return $this->addHook('enqueue_block_editor_assets'); }
+    public function toEditor(): self
+    {
+        return $this->addHook('enqueue_block_editor_assets');
+    }
 
     /**
      * Localizes a JavaScript file with data.
      *
-     * @param string $objectName JavaScript object name
-     * @param array $data Data to localize
+     * @param  string  $objectName  JavaScript object name
+     * @param  array  $data  Data to localize
      * @return $this
      */
-    public function localize(string $objectName, array $data): self { if ($this->type === 'script') { wp_localize_script($this->handle, $objectName, $data); } return $this; }
+    public function localize(string $objectName, array $data): self
+    {
+        if ($this->type === 'script') {
+            wp_localize_script($this->handle, $objectName, $data);
+        }
+
+return $this;
+    }
 
     /**
      * Adds inline content to the asset.
      *
-     * @param string $content Inline CSS/JS content
-     * @param string $position Position ('before' or 'after')
+     * @param  string  $content  Inline CSS/JS content
+     * @param  string  $position  Position ('before' or 'after')
      * @return $this
      */
-    public function inline(string $content, string $position = 'after'): self { $this->inlineContent = $content; $this->inlinePosition = $position; return $this; }
+    public function inline(string $content, string $position = 'after'): self
+    {
+        $this->inlineContent = $content;
+        $this->inlinePosition = $position;
+
+        return $this;
+    }
 
     /**
      * Handles the actual enqueuing of the asset.
@@ -257,13 +312,17 @@ class AssetEnqueuer
     {
         try {
             $this->hooks = $this->hooks !== [] ? $this->hooks : ['wp_enqueue_scripts'];
-            if ($this->useVite) { $this->configureViteAssets(); }
+            if ($this->useVite) {
+                $this->configureViteAssets();
+            }
             foreach ($this->hooks as $hook) {
-                if ($this->needToLoadViteClient()) { $this->loadViteClient($hook); }
+                if ($this->needToLoadViteClient()) {
+                    $this->loadViteClient($hook);
+                }
                 Action::add($hook, [$this, 'enqueueStyleOrScript'], 99);
             }
         } catch (\Throwable $e) {
-            Log::error('Error in AssetEnqueuer::__destruct', [ 'error' => $e->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null, ]);
+            Log::error('Error in AssetEnqueuer::__destruct', ['error' => $e->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
         }
     }
 
@@ -283,15 +342,20 @@ class AssetEnqueuer
     /**
      * Adds a WordPress hook for asset enqueuing.
      *
-     * @param string $hook WordPress hook name
+     * @param  string  $hook  WordPress hook name
      * @return $this
      */
-    protected function addHook(string $hook): self { $this->hooks[] = $hook; return $this; }
+    protected function addHook(string $hook): self
+    {
+        $this->hooks[] = $hook;
+
+        return $this;
+    }
 
     /**
      * Loads the Vite client script when in development mode.
      *
-     * @param string $hook WordPress hook to attach the client script
+     * @param  string  $hook  WordPress hook to attach the client script
      */
     protected function loadViteClient(string $hook): void
     {
@@ -338,14 +402,16 @@ class AssetEnqueuer
         if ($this->useVite && ! $this->viteManager->isRunningHot()) {
             return $this->path;
         }
+
         return [$this->type => [$this->path]];
     }
 
     /**
      * Enqueues an individual asset based on its type.
      *
-     * @param string $type Asset type (css or js)
-     * @param string $path Asset path
+     * @param  string  $type  Asset type (css or js)
+     * @param  string  $path  Asset path
+     *
      * @throws \InvalidArgumentException When asset type is not supported
      */
     protected function enqueueAsset(string $type, string $path): void
@@ -361,12 +427,14 @@ class AssetEnqueuer
     /**
      * Enqueues a JavaScript file with WordPress.
      *
-     * @param string $path Path to the JavaScript file
+     * @param  string  $path  Path to the JavaScript file
      */
     protected function enqueueScript(string $path): void
     {
         wp_enqueue_script($this->handle, $path, $this->dependencies, $this->version, $this->loadInFooter);
-        if ($this->useVite) { $this->addViteScriptAttributes(); }
+        if ($this->useVite) {
+            $this->addViteScriptAttributes();
+        }
         if ($this->loadStrategy !== null && $this->loadStrategy !== '' && $this->loadStrategy !== '0') {
             wp_script_add_data($this->handle, 'defer', true);
         }
@@ -378,8 +446,8 @@ class AssetEnqueuer
     /**
      * Enqueues a CSS file with WordPress.
      *
-     * @param string $path Path to the CSS file
-     * @param string $handle Unique identifier for the stylesheet
+     * @param  string  $path  Path to the CSS file
+     * @param  string  $handle  Unique identifier for the stylesheet
      */
     protected function enqueueStyle(string $path, string $handle): void
     {
@@ -402,22 +470,26 @@ class AssetEnqueuer
     /**
      * Ensures a full URL is used for the asset path.
      *
-     * @param string $path Asset path
+     * @param  string  $path  Asset path
      * @return string Full URL to the asset
      */
     protected function forceFullUrl(string $path): string
     {
-        if (str_contains($path, '://')) { return $path; }
+        if (str_contains($path, '://')) {
+            return $path;
+        }
         $basePath = $this->container ? $this->container->getBasePath() : '';
         $fullPath = $basePath.'/'.ltrim($path, '/');
+
         return home_url($fullPath);
     }
 
     /**
      * Determines the file type from the path extension.
      *
-     * @param string $path File path
+     * @param  string  $path  File path
      * @return string File type (css or js)
+     *
      * @throws \InvalidArgumentException When file type is not supported
      */
     protected function determineFileType(string $path): string
@@ -426,6 +498,7 @@ class AssetEnqueuer
         if (! in_array($type, ['css', 'js'])) {
             throw new \InvalidArgumentException("Unsupported file type: {$type}");
         }
+
         return $type;
     }
 }

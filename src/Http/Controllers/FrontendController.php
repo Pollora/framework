@@ -26,8 +26,6 @@ class FrontendController extends Controller
      *
      * This method will automatically determine the appropriate view
      * based on WordPress conditional tags and template hierarchy.
-     *
-     * @return View
      */
     public function handle(): ?View
     {
