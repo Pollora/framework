@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Gutenberg\Registrars;
 
+use Pollora\Gutenberg\Domain\Contracts\CollectionFactoryInterface;
+use Pollora\Gutenberg\Domain\Contracts\ConfigRepositoryInterface;
+
 /**
  * Registrar for Gutenberg block categories.
  *
@@ -12,6 +15,21 @@ namespace Pollora\Gutenberg\Registrars;
  */
 class BlockCategoryRegistrar
 {
+    private ConfigRepositoryInterface $config;
+
+    private CollectionFactoryInterface $collectionFactory;
+
+    /**
+     * BlockCategoryRegistrar constructor.
+     */
+    public function __construct(
+        ConfigRepositoryInterface $config,
+        CollectionFactoryInterface $collectionFactory
+    ) {
+        $this->config = $config;
+        $this->collectionFactory = $collectionFactory;
+    }
+
     /**
      * Register configured block categories.
      *
@@ -20,7 +38,10 @@ class BlockCategoryRegistrar
      */
     public function register(): void
     {
-        $configuredCategories = collect(config('theme.gutenberg.categories.blocks'));
+        /** @var \Illuminate\Support\Collection<string, array<string, mixed>> $configuredCategories */
+        $configuredCategories = $this->collectionFactory->make(
+            $this->config->get('theme.gutenberg.categories.blocks', [])
+        );
 
         add_filter('block_categories_all', fn (array $categories): array => array_merge(
             $categories,

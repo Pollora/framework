@@ -9,7 +9,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router as IlluminateRouter;
 use Pollora\Route\Bindings\NullableWpPost;
-use Pollora\Theme\TemplateHierarchy;
+use Pollora\Theme\Domain\Services\TemplateHierarchy;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -46,9 +46,9 @@ class Router extends IlluminateRouter
      * @param  array<string>  $methods  HTTP methods
      * @param  string  $uri  URI pattern
      * @param  mixed  $action  Route action
-     * @return \Pollora\Route\Route New route instance with WordPress conditions
+     * @return Route New route instance with WordPress conditions
      */
-    public function newRoute($methods, $uri, $action): \Pollora\Route\Route
+    public function newRoute($methods, $uri, $action): Route
     {
         $this->setConditionsIfEmpty();
 
@@ -79,7 +79,7 @@ class Router extends IlluminateRouter
         if ($this->isSpecialWordPressRequest()) {
             // First check if there's an explicit route defined for this special request
             $specialRoute = $this->findSpecialWordPressRoute();
-            if ($specialRoute instanceof \Pollora\Route\Route) {
+            if ($specialRoute instanceof Route) {
                 return $specialRoute;
             }
 
@@ -168,7 +168,7 @@ class Router extends IlluminateRouter
     /**
      * Find a route explicitly defined for special WordPress request types.
      *
-     * @return \Pollora\Route\Route|null The matching route or null if none found
+     * @return Route|null The matching route or null if none found
      */
     private function findSpecialWordPressRoute(): ?Route
     {

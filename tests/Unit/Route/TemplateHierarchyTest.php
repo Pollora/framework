@@ -7,7 +7,7 @@ use Illuminate\Contracts\Config\Repository;
 use Mockery as m;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Theme\TemplateHierarchy;
+use Pollora\Theme\Domain\Services\TemplateHierarchy;
 
 /**
  * Setup function for all template hierarchy tests
@@ -104,8 +104,8 @@ function setupTemplateHierarchyTest()
  */
 function assertHierarchyOrder(array $hierarchyOrder, string $firstCondition, string $secondCondition): void
 {
-    $firstIndex = array_search($firstCondition, $hierarchyOrder);
-    $secondIndex = array_search($secondCondition, $hierarchyOrder);
+    $firstIndex = array_search($firstCondition, $hierarchyOrder, true);
+    $secondIndex = array_search($secondCondition, $hierarchyOrder, true);
 
     expect($firstIndex)->toBeLessThan($secondIndex);
 }
@@ -115,7 +115,7 @@ function assertHierarchyOrder(array $hierarchyOrder, string $firstCondition, str
  */
 afterEach(function () {
     Container::setInstance(null);
-    WP::$wpFunctions = null;
+    resetWordPressMocks();
     m::close();
 });
 
@@ -235,11 +235,8 @@ test('expected archive templates match WordPress conventions', function () {
  * Test template capture functionality
  */
 test('template include is captured and prepended to hierarchy', function () {
-    // Setup specific mock for this test to handle the template_include hook
-    WP::$wpFunctions = m::mock('stdClass');
-    WP::$wpFunctions->shouldReceive('add_filter')
-        ->withAnyArgs()
-        ->andReturn(true);
+    // Initialize WordPress mocks with support for both template_include and custom filters
+    setupWordPressMocks();
 
     // Create configuration mock
     $config = m::mock(Repository::class);
@@ -279,11 +276,8 @@ test('template include is captured and prepended to hierarchy', function () {
  * Test handling of blade template variants
  */
 test('blade template variants are correctly generated', function () {
-    // Setup specific mock for this test
-    WP::$wpFunctions = m::mock('stdClass');
-    WP::$wpFunctions->shouldReceive('add_filter')
-        ->withAnyArgs()
-        ->andReturn(true);
+    // Initialize WordPress mocks with support for both template_include and custom filters
+    setupWordPressMocks();
 
     // Create config mock
     $config = m::mock(Repository::class);
@@ -331,7 +325,7 @@ test('blade template variants are correctly generated', function () {
  * Test that template handler registration works properly
  */
 test('template handlers can be registered', function () {
-    // Initialize WordPress mocks with support for both template_include and custom filters
+    // Initialize WordPress mocks avec la méthode centralisée
     setupWordPressMocks();
 
     // Add specific expectation for our custom filter
@@ -349,7 +343,7 @@ test('template handlers can be registered', function () {
     $filter = new Filter;
 
     // Create an instance of TemplateHierarchy
-    $templateHierarchy = new \Pollora\Theme\TemplateHierarchy($config, $action, $filter);
+    $templateHierarchy = new \Pollora\Theme\Domain\Services\TemplateHierarchy($config, $action, $filter);
 
     // Create a handler callback
     $handlerCallback = function ($obj) {
@@ -366,11 +360,8 @@ test('template handlers can be registered', function () {
  * Test WordPress condition detection
  */
 test('condition satisfaction detection works with different WordPress functions', function () {
-    // Create a mock that won't interfere with template_include
-    WP::$wpFunctions = m::mock('stdClass');
-    WP::$wpFunctions->shouldReceive('add_filter')
-        ->withAnyArgs()
-        ->andReturn(true);
+    // Initialize WordPress mocks avec la méthode centralisée
+    setupWordPressMocks();
 
     // Define is_page and is_archive functions for this test
     if (! function_exists('is_page')) {

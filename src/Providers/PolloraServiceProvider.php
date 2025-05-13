@@ -15,7 +15,7 @@ use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\Discoverer\DiscovererServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
-use Pollora\Gutenberg\GutenbergServiceProvider;
+use Pollora\Gutenberg\Infrastructure\Providers\GutenbergServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
@@ -29,7 +29,7 @@ use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\TaxonomyAttributeServiceProvider;
 use Pollora\Taxonomy\TaxonomyServiceProvider;
-use Pollora\Theme\ThemeServiceProvider;
+use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
@@ -90,7 +90,7 @@ class PolloraServiceProvider extends ServiceProvider
         if (config('wordpress.use_laravel_scheduler', false)) {
             $this->app->register(SchedulerServiceProvider::class);
         }
-        $this->app->singleton(JobDispatcher::class, fn ($app): \Pollora\Scheduler\Jobs\JobDispatcher => new JobDispatcher($app->make(Dispatcher::class)));
+        $this->app->singleton(JobDispatcher::class, fn ($app): JobDispatcher => new JobDispatcher($app->make(Dispatcher::class)));
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);

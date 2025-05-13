@@ -3,41 +3,70 @@
 declare(strict_types=1);
 
 /**
- * Class PostTypeFactory
- *
- * This class is responsible for creating instances of the PostType class.
+ * Factory for creating and configuring custom post types.
+ * 
+ * This class provides methods for creating PostType instances
+ * and handles the interaction with WordPress registration.
  */
 
 namespace Pollora\PostType;
 
-use Illuminate\Foundation\Application;
-use Pollora\Entity\PostTypeException;
+use Illuminate\Contracts\Foundation\Application;
+use Pollora\Entity\PostType;
+use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 
-class PostTypeFactory
+class PostTypeFactory implements PostTypeFactoryInterface
 {
-    public function __construct(protected Application $container) {}
+    /**
+     * The application instance.
+     */
+    protected Application $app;
 
     /**
-     * Creates a new post type and registers it in the container.
-     *
-     * @param  string  $slug  The slug for the post type.
-     * @param  string|null  $singular  The singular name for the post type. Optional.
-     * @param  string|null  $plural  The plural name for the post type. Optional.
-     * @return PostType The created post type object.
-     *
-     * @throws PostTypeException if the post type with the given slug already exists.
+     * Create a new PostTypeFactory instance.
      */
-    public function make(string $slug, ?string $singular, ?string $plural): \Pollora\PostType\PostType
+    public function __construct(Application $app)
     {
-        $abstract = sprintf('wp.posttype.%s', $slug);
+        $this->app = $app;
+    }
 
-        if ($this->container->bound($abstract)) {
-            throw new PostTypeException(sprintf('The post type "%s" already exists.', $slug));
-        }
+    /**
+     * Create a new post type instance.
+     * 
+     * @param string $slug The post type slug
+     * @param string|null $singular The singular label for the post type
+     * @param string|null $plural The plural label for the post type
+     * @return PostType
+     */
+    public function make(string $slug, ?string $singular = null, ?string $plural = null): PostType
+    {
+        return new PostType($slug, $singular, $plural);
+    }
 
-        $postType = new PostType($slug, $singular, $plural);
-        $this->container->instance($abstract, $postType);
+    /**
+     * Check if a post type exists.
+     * 
+     * @param string $postType The post type slug to check
+     * @return bool
+     */
+    public function exists(string $postType): bool
+    {
+        // Implementation would depend on WordPress functions or your own abstraction
+        // This is a placeholder for the actual implementation
+        // In a WordPress context, this might use post_type_exists()
+        return false;
+    }
 
-        return $postType;
+    /**
+     * Get all registered post types.
+     * 
+     * @return array
+     */
+    public function getRegistered(): array
+    {
+        // Implementation would depend on WordPress functions or your own abstraction
+        // This is a placeholder for the actual implementation
+        // In a WordPress context, this might use get_post_types()
+        return [];
     }
 }

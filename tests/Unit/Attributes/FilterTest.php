@@ -2,41 +2,38 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Facade;
+require_once __DIR__.'/../helpers.php';
+
+use Mockery\MockInterface;
 use Pollora\Attributes\Attributable;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Attributes\Filter;
 use Pollora\Hook\Infrastructure\Services\Filter as FilterService;
 
-beforeEach(function () {
-    // Mock Filter service
+beforeEach(function (): void {
+    // Mock Filter service for testing hook registration
     $this->mockFilter = Mockery::mock(FilterService::class);
 
-    // Create a fake container that will be wrapped by ContainerServiceLocator
-    $this->mockContainer = new class($this->mockFilter)
-    {
-        private $filterService;
+    // Use generic TestContainer helper for service injection
+    $this->mockContainer = new TestContainer([
+        FilterService::class => $this->mockFilter,
+    ]);
 
-        public function __construct($filterService)
-        {
-            $this->filterService = $filterService;
-        }
-
-        public function get($serviceClass)
-        {
-            if ($serviceClass === FilterService::class) {
-                return $this->filterService;
-            }
-
-            return null;
-        }
-    };
-
+    // Initialize the processor with our test container
     $this->processor = new AttributeProcessor($this->mockContainer);
 });
 
+/**
+ * Test class with a single filter hook
+ */
 class SingleFilterClass implements Attributable
 {
+    /**
+     * Method with a single filter attribute
+     *
+     * @param  string  $value  The input value to filter
+     * @return string The modified value
+     */
     #[Filter('test_filter', priority: 10)]
     public function filterMethod(string $value): string
     {
@@ -44,14 +41,29 @@ class SingleFilterClass implements Attributable
     }
 }
 
+/**
+ * Test class with multiple filter hooks
+ */
 class MultipleFilterClass implements Attributable
 {
+    /**
+     * First filter method
+     *
+     * @param  string  $value  The input value to filter
+     * @return string The modified value
+     */
     #[Filter('test_filter', priority: 10)]
     public function filterMethod(string $value): string
     {
         return "modified_{$value}";
     }
 
+    /**
+     * Second filter method with different hook and priority
+     *
+     * @param  array<string, mixed>  $data  The input data to filter
+     * @return array<string, mixed> The modified data
+     */
     #[Filter('another_filter', priority: 20)]
     public function anotherFilterMethod(array $data): array
     {
@@ -61,31 +73,49 @@ class MultipleFilterClass implements Attributable
     }
 }
 
+/**
+ * Test class with default priority filter hook
+ */
 class DefaultPriorityFilterClass implements Attributable
 {
+    /**
+     * Method with default priority (should be 10)
+     *
+     * @param  string  $value  The input value to filter
+     * @return string The modified value
+     */
     #[Filter('test_filter')]
     public function filterMethod(string $value): string
     {
-        // Test method with default priority
         return "modified_{$value}";
     }
 }
 
+/**
+ * Test class with custom priority filter hook
+ */
 class CustomPriorityFilterClass implements Attributable
 {
+    /**
+     * Method with custom priority value
+     *
+     * @param  string  $value  The input value to filter
+     * @return string The modified value
+     */
     #[Filter('test_filter', priority: 99)]
     public function filterMethod(string $value): string
     {
-        // Test method with custom priority
         return "modified_{$value}";
     }
 }
 
-it('registers a filter hook correctly', function () {
-    // Set up expectations
+it('registers a filter hook correctly', function (): void {
+    // Arrange: Set up expectations for filter service
+    /** @var MockInterface $this->mockFilter */
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
+            // Verify all parameters are correctly passed to the filter service
             return $hook === 'test_filter'
                 && is_array($callback)
                 && $callback[0] instanceof SingleFilterClass
@@ -94,16 +124,19 @@ it('registers a filter hook correctly', function () {
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Act: Process the test class with attributes
     $testClass = new SingleFilterClass;
     $this->processor->process($testClass);
+
+    // Assert: Verification happens in the mock expectations
 });
 
-it('registers multiple filter hooks with different priorities', function () {
-    // Set up expectations for both filters
+it('registers multiple filter hooks with different priorities', function (): void {
+    // Arrange: Set up expectations for both filter hooks
+    /** @var MockInterface $this->mockFilter */
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
             return $hook === 'test_filter'
                 && is_array($callback)
                 && $callback[0] instanceof MultipleFilterClass
@@ -113,7 +146,7 @@ it('registers multiple filter hooks with different priorities', function () {
 
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
             return $hook === 'another_filter'
                 && is_array($callback)
                 && $callback[0] instanceof MultipleFilterClass
@@ -121,89 +154,97 @@ it('registers multiple filter hooks with different priorities', function () {
                 && $priority === 20;
         });
 
-    // Process the test class
+    // Act: Process the test class with multiple attributes
     $testClass = new MultipleFilterClass;
     $this->processor->process($testClass);
+
+    // Assert: Verification happens in the mock expectations
 });
 
-it('registers a filter hook with default priority (10)', function () {
-    // Set up expectations
+it('registers a filter hook with default priority (10)', function (): void {
+    // Arrange: Set up expectations for default priority
+    /** @var MockInterface $this->mockFilter */
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
             return $hook === 'test_filter'
                 && is_array($callback)
                 && $callback[0] instanceof DefaultPriorityFilterClass
                 && $callback[1] === 'filterMethod'
-                && $priority === 10 // Default priority should be 10
+                && $priority === 10 // Verify default priority is 10
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Act: Process the test class with default priority attribute
     $testClass = new DefaultPriorityFilterClass;
     $this->processor->process($testClass);
+
+    // Assert: Verification happens in the mock expectations
 });
 
-it('registers a filter hook with custom priority', function () {
-    // Set up expectations
+it('registers a filter hook with custom priority', function (): void {
+    // Arrange: Set up expectations for custom priority
+    /** @var MockInterface $this->mockFilter */
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
             return $hook === 'test_filter'
                 && is_array($callback)
                 && $callback[0] instanceof CustomPriorityFilterClass
                 && $callback[1] === 'filterMethod'
-                && $priority === 99 // Custom priority
+                && $priority === 99 // Verify custom priority is respected
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Act: Process the test class with custom priority attribute
     $testClass = new CustomPriorityFilterClass;
     $this->processor->process($testClass);
+
+    // Assert: Verification happens in the mock expectations
 });
 
-it('executes filter and returns modified value', function () {
-    // Set up expectations for the add method
+it('executes filter and returns modified value', function (): void {
+    // Arrange: Set up expectations for both methods
+    /** @var MockInterface $this->mockFilter */
     $this->mockFilter->shouldReceive('add')
         ->once()
         ->withAnyArgs();
 
-    // Set up expectations for the apply method
     $this->mockFilter->shouldReceive('apply')
         ->once()
         ->with('test_filter', 'original')
         ->andReturn('modified_original');
 
-    // Process the test class
+    // Act: Process the test class and apply the filter
     $testClass = new SingleFilterClass;
     $this->processor->process($testClass);
-
-    // Test the apply method
     $result = $this->mockFilter->apply('test_filter', 'original');
+
+    // Assert: Verify the filter returns the expected modified value
     expect($result)->toBe('modified_original');
 });
 
-it('handles null service locator resolution gracefully', function () {
-    // Create a container that returns null for the service
+it('handles null service locator resolution gracefully', function (): void {
+    // Arrange: Create a container that returns null for the service
     $mockContainer = new class
     {
-        public function get($serviceClass)
+        public function get(string $serviceClass): ?object
         {
             return null;
         }
     };
 
+    // Act: Initialize processor with null-returning container and process a class
     $processor = new AttributeProcessor($mockContainer);
     $testClass = new SingleFilterClass;
 
     // This should not throw an exception
-    $processor->process($testClass);
+    $result = $processor->process($testClass);
 
-    // No assertions needed - we're just checking that it doesn't throw
+    // Assert: Method completes without exceptions
     expect(true)->toBeTrue();
 });
 
-afterEach(function () {
+afterEach(function (): void {
     Mockery::close();
-    Facade::clearResolvedInstances();
 });

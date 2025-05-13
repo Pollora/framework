@@ -6,6 +6,7 @@ namespace Pollora\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Colt\Model\User as BaseUser;
+use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Models\Post;
 use Pollora\Models\User;
 use Pollora\Query\DateQuery;
@@ -51,7 +52,7 @@ class QueryServiceProvider extends ServiceProvider
         $this->app->singleton('wp.query.date', fn (): DateQuery => new DateQuery);
 
         // Loop and current post bindings
-        $this->app->bind('wp.loop', fn (): Loop => new Loop);
+        $this->app->bind('wp.loop', fn ($app): Loop => new Loop($app->make(ServiceLocator::class)));
         $this->app->singleton(Post::class, fn () => Post::find(get_the_ID()));
     }
 }

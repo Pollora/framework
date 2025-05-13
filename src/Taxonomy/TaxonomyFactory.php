@@ -10,12 +10,24 @@ declare(strict_types=1);
 
 namespace Pollora\Taxonomy;
 
-use Illuminate\Foundation\Application;
-use Pollora\Entity\TaxonomyException;
+use Illuminate\Contracts\Foundation\Application;
+use Pollora\Entity\Taxonomy;
+use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 
-class TaxonomyFactory
+class TaxonomyFactory implements TaxonomyFactoryInterface
 {
-    public function __construct(protected Application $container) {}
+    /**
+     * The application instance.
+     */
+    protected Application $app;
+
+    /**
+     * Create a new TaxonomyFactory instance.
+     */
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
+    }
 
     /**
      * Creates a new taxonomy.
@@ -25,20 +37,36 @@ class TaxonomyFactory
      * @param  string|null  $singular  The singular name for the taxonomy (optional).
      * @param  string|null  $plural  The plural name for the taxonomy (optional).
      * @return Taxonomy The newly created Taxonomy object.
-     *
-     * @throws TaxonomyException If the taxonomy with the given slug already exists.
      */
-    public function make(string $slug, string|array $objectType, ?string $singular, ?string $plural): \Pollora\Taxonomy\Taxonomy
+    public function make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null): Taxonomy
     {
-        $abstract = sprintf('wp.taxonomy.%s', $slug);
+        return new Taxonomy($slug, $objectType, $singular, $plural);
+    }
 
-        if ($this->container->bound($abstract)) {
-            throw new TaxonomyException(sprintf('The taxonomy "%s" already exists.', $slug));
-        }
+    /**
+     * Check if a taxonomy exists.
+     * 
+     * @param string $taxonomy The taxonomy slug to check
+     * @return bool
+     */
+    public function exists(string $taxonomy): bool
+    {
+        // Implementation would depend on WordPress functions or your own abstraction
+        // This is a placeholder for the actual implementation
+        // In a WordPress context, this might use taxonomy_exists()
+        return false;
+    }
 
-        $taxonomy = new Taxonomy($slug, $objectType, $singular, $plural);
-        $this->container->instance($abstract, $taxonomy);
-
-        return $taxonomy;
+    /**
+     * Get all registered taxonomies.
+     * 
+     * @return array
+     */
+    public function getRegistered(): array
+    {
+        // Implementation would depend on WordPress functions or your own abstraction
+        // This is a placeholder for the actual implementation
+        // In a WordPress context, this might use get_taxonomies()
+        return [];
     }
 }

@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use Pollora\Support\Facades\Action;
+use Pollora\Container\Domain\ServiceLocator;
+use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
 
@@ -117,8 +118,10 @@ class Bootstrap
      */
     private function setupActionHooks(): void
     {
+        $locator = app(ServiceLocator::class);
+        $action = $locator->resolve(Action::class);
         if (app()->runningInWpCli()) {
-            Action::add('init', $this->fixNetworkUrl(...), 1);
+            $action->add('init', $this->fixNetworkUrl(...), 1);
         } else {
             $this->fixNetworkUrl();
         }
@@ -207,7 +210,9 @@ class Bootstrap
      */
     public function fixNetworkUrl(): void
     {
-        Action::add('network_site_url', $this->rewriteNetworkUrl(...), 10, 3);
+        $locator = app(ServiceLocator::class);
+        $action = $locator->resolve(Action::class);
+        $action->add('network_site_url', $this->rewriteNetworkUrl(...), 10, 3);
     }
 
     /**

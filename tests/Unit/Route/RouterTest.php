@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Mockery as m;
 use Pollora\Route\Route;
 use Pollora\Route\Router;
-use Pollora\Theme\TemplateHierarchy;
+use Pollora\Theme\Domain\Services\TemplateHierarchy;
 
 /**
  * Setup function to create mocks and the router instance for all tests
@@ -70,7 +70,7 @@ function mockWordPressClasses(): void
  */
 afterEach(function () {
     Container::setInstance(null);
-    WP::$wpFunctions = null;
+    resetWordPressMocks();
     m::close();
 });
 

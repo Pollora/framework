@@ -72,8 +72,8 @@ test('route can define and retrieve WordPress condition', function () {
     $route->setConditions(['is_page' => 'is_page']);
 
     // Verify that the condition is correctly defined
-    expect($route->getCondition())->toBe('is_page');
-    expect($route->hasCondition())->toBeTrue();
+    expect($route->getCondition())->toBe('is_page')
+        ->and($route->hasCondition())->toBeTrue();
 });
 
 /**
@@ -137,8 +137,8 @@ test('route initializes WordPress validators correctly', function () {
 
     // Verify that WordPress validators are correctly initialized
     $validators = $route->getWordPressValidators();
-    expect($validators)->toBeArray();
-    expect($validators[0])->toBeInstanceOf(ConditionValidator::class);
+    expect($validators)->toBeArray()
+        ->and($validators[0])->toBeInstanceOf(ConditionValidator::class);
 });
 
 /**

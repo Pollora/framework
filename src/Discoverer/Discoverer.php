@@ -40,7 +40,7 @@ class Discoverer
         $dirs = is_array($directories) ? $directories : [$directories];
 
         // Filter valid directories
-        $validDirs = array_filter($dirs, function ($dir) {
+        $validDirs = array_filter($dirs, static function ($dir) {
             return is_dir($dir);
         });
 

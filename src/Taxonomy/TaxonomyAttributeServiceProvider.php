@@ -71,12 +71,7 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
         $processor->process($taxonomy);
 
         // Register the taxonomy with WordPress
-        if (function_exists('register_extended_taxonomy')) {
-            register_extended_taxonomy(
-                $taxonomy->getSlug(),
-                $taxonomy->getObjectType(),
-                $taxonomy->getArgs()
-            );
-        }
+        Taxonomy::make($taxonomy->getSlug(), $taxonomy->getObjectType())
+            ->setRawArgs($taxonomy->getArgs());
     }
 }

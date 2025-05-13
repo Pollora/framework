@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Services\WordPress\Installation;
 
 use Illuminate\Support\Facades\Config;
-use Pollora\Support\Facades\Filter;
+use Pollora\Container\Domain\ServiceLocator;
+use Pollora\Hook\Infrastructure\Services\Filter;
 
 /**
  * Service for loading WordPress core files and initializing the environment.
@@ -60,6 +61,16 @@ class WordPressInstallLoaderService
         '/class-wp-http-requests-response.php',
         '/class-wp-block-parser.php',
     ];
+
+    protected ServiceLocator $locator;
+
+    protected Filter $filter;
+
+    public function __construct(ServiceLocator $locator)
+    {
+        $this->locator = $locator;
+        $this->filter = $locator->resolve(Filter::class);
+    }
 
     /**
      * Bootstrap the WordPress installation environment.
@@ -172,7 +183,7 @@ class WordPressInstallLoaderService
         $GLOBALS['wp_textdomain_registry']->init();
 
         // Configure permalink structure
-        Filter::add('pre_option_permalink_structure', fn (): string => '');
+        $this->filter->add('pre_option_permalink_structure', fn (): string => '');
 
         // Initialize rewrite component
         $GLOBALS['wp_rewrite'] = new \WP_Rewrite;

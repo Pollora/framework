@@ -36,10 +36,9 @@ class AssetFile implements AssetFileInterface
      * @param  string  $filename  The file name or relative path
      * @param  string  $content  Optional file content
      */
-    public function __construct(string $filename, string $content = '')
+    public function __construct(string $filename)
     {
         $this->filename = $filename;
-        $this->content = $content;
     }
 
     /**

@@ -37,9 +37,9 @@ class AssetRegistrationService
      * @param  string  $path  The asset file path
      * @param  array  $attributes  Optional attributes (e.g., dependencies, type)
      */
-    public function register(string $name, string $path, array $attributes = []): void
+    public function register(string $name, string $path, array $attributes = [], string $assetClass = Asset::class): void
     {
-        $asset = new Asset($name, $path, $attributes);
+        $asset = new $assetClass($name, $path, $attributes);
         $this->manager->registerAsset($asset);
     }
 }

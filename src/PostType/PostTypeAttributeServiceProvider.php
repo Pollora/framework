@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Discoverer\Discoverer;
+use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\PostType\Commands\PostTypeMakeCommand;
 
 /**
@@ -18,6 +19,11 @@ use Pollora\PostType\Commands\PostTypeMakeCommand;
  */
 class PostTypeAttributeServiceProvider extends ServiceProvider
 {
+    /**
+     * @var Action The action service
+     */
+    protected Action $action;
+
     /**
      * Register services.
      */
@@ -36,8 +42,9 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
      *
      * Processes discovered post types and registers them with WordPress.
      */
-    public function boot(DiscoveryRegistry $registry): void
+    public function boot(DiscoveryRegistry $registry, Action $action): void
     {
+        $this->action = $action;
         $this->registerPostTypes($registry);
     }
 
@@ -69,11 +76,8 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
         $processor->process($postType);
 
         // Register the post type with WordPress
-        if (function_exists('register_extended_post_type')) {
-            register_extended_post_type(
-                $postType->getSlug(),
-                $postType->getArgs()
-            );
-        }
+        PostType::make($postType->getSlug())
+            ->setRawArgs($postType->getArgs());
+
     }
 }

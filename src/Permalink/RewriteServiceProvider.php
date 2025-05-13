@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Pollora\Permalink;
 
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Support\Facades\Action;
-use Pollora\Support\Facades\Filter;
+use Pollora\Container\Infrastructure\ContainerServiceLocator;
+use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\Filter;
 
 /**
  * Service provider for URL rewrite management.
@@ -18,33 +18,15 @@ use Pollora\Support\Facades\Filter;
  */
 class RewriteServiceProvider extends ServiceProvider
 {
+    private PermalinkManager $permalinkManager;
+
     /**
      * Register URL rewrite related services.
      */
     public function register(): void
     {
-        $this->registerPermalinkManager()
-            ->registerFilters();
-    }
-
-    /**
-     * Register the permalink manager as a singleton.
-     */
-    protected function registerPermalinkManager(): self
-    {
-        $this->app->singleton(PermalinkManager::class);
-
-        return $this;
-    }
-
-    /**
-     * Register necessary WordPress filters.
-     */
-    protected function registerFilters(): self
-    {
-        Filter::add('redirect_canonical', static fn ($canonicalUrl) => app(PermalinkManager::class)->handleCanonicalRedirect($canonicalUrl));
-
-        return $this;
+        $this->registerPermalinkManager();
+        $this->registerWordPressFilters();
     }
 
     /**
@@ -52,10 +34,49 @@ class RewriteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Action::add(
+        $this->registerWordPressActions();
+    }
+
+    /**
+     * Register the permalink manager as a singleton.
+     */
+    private function registerPermalinkManager(): void
+    {
+        $this->permalinkManager = new PermalinkManager;
+    }
+
+    /**
+     * Register necessary WordPress filters.
+     */
+    private function registerWordPressFilters(): void
+    {
+        $filter = $this->getServiceLocator()->resolve(Filter::class);
+        $manager = $this->permalinkManager;
+        $filter->add(
+            'redirect_canonical',
+            fn ($canonicalUrl) => $manager->handleCanonicalRedirect($canonicalUrl)
+        );
+    }
+
+    /**
+     * Register necessary WordPress actions.
+     */
+    private function registerWordPressActions(): void
+    {
+        $action = $this->getServiceLocator()->resolve(Action::class);
+        $manager = $this->permalinkManager;
+        $action->add(
             'permalink_structure_changed',
-            static fn (string $old, string $new) => app(PermalinkManager::class)->updateStructure($new),
+            fn (string $old, string $new) => $manager->updateStructure($new),
             90
         );
+    }
+
+    /**
+     * Get the service locator instance.
+     */
+    private function getServiceLocator(): ContainerServiceLocator
+    {
+        return new ContainerServiceLocator($this->app);
     }
 }

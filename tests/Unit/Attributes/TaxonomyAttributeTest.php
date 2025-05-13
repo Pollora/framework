@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Container\Container;
-use Illuminate\Support\Facades\Facade;
 use Mockery as m;
 use Pollora\Attributes\Attributable;
 use Pollora\Attributes\AttributeProcessor;
@@ -130,16 +128,8 @@ class TestTaxonomy implements Attributable, Taxonomy
     }
 }
 
-beforeAll(function () {
-    // Create and configure the container
-    $app = new Container;
-    Facade::setFacadeApplication($app);
-});
-
 afterAll(function () {
     m::close();
-    Facade::clearResolvedInstances();
-    Facade::setFacadeApplication(null);
 });
 
 // Helper function to test simple boolean attributes

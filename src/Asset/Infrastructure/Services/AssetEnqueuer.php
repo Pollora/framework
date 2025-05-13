@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Log;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Exceptions\AssetException;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
-use Pollora\Support\Facades\Action;
-use Pollora\Support\Facades\Filter;
+use Pollora\Hook\Infrastructure\Services\Action as HookAction;
+use Pollora\Hook\Infrastructure\Services\Filter as HookFilter;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -321,7 +321,7 @@ class AssetEnqueuer
                 if ($this->needToLoadViteClient()) {
                     $this->loadViteClient($hook);
                 }
-                Action::add($hook, [$this, 'enqueueStyleOrScript'], 99);
+                app(HookAction::class)->add($hook, [$this, 'enqueueStyleOrScript'], 99);
             }
         } catch (\Throwable $e) {
             Log::error('Error in AssetEnqueuer::__destruct', ['error' => $e->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
@@ -361,7 +361,7 @@ class AssetEnqueuer
      */
     protected function loadViteClient(string $hook): void
     {
-        Action::add($hook, function (): void {
+        app(HookAction::class)->add($hook, function (): void {
             if ($this->viteManager && $this->viteManager->isRunningHot()) {
                 echo $this->viteManager->getViteClientHtml();
             }
@@ -464,7 +464,7 @@ class AssetEnqueuer
      */
     protected function addViteScriptAttributes(): void
     {
-        Filter::add('script_loader_tag', fn ($tag, $handle, $src) => $handle === $this->handle
+        app(HookFilter::class)->add('script_loader_tag', fn ($tag, $handle, $src) => $handle === $this->handle
             ? '<script type="module" crossorigin src="'.esc_url($src).'"></script>'
             : $tag, 10, 3);
     }

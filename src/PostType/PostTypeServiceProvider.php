@@ -9,7 +9,9 @@ declare(strict_types=1);
 namespace Pollora\PostType;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Support\Facades\PostType;
+use Pollora\Entity\PostType;
+use Pollora\PostType\Application\Services\PostTypeService;
+use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 
 /**
  * Service provider for registering custom post types.
@@ -23,12 +25,24 @@ class PostTypeServiceProvider extends ServiceProvider
     /**
      * Register post type services.
      *
-     * Binds the PostTypeFactory to the service container for creating
-     * new post type instances.
+     * Binds the PostTypeFactory and PostTypeService to the service container
+     * following the hexagonal architecture principles.
      */
     public function register(): void
     {
-        $this->app->bind('wp.posttype', fn ($app): PostTypeFactory => new PostTypeFactory($app));
+        // Bind the interface to the concrete implementation
+        $this->app->singleton(PostTypeFactoryInterface::class, PostTypeFactory::class);
+        
+        // Register the PostTypeService
+        $this->app->singleton(PostTypeService::class, function ($app) {
+            return new PostTypeService(
+                $app->make(PostTypeFactoryInterface::class)
+            );
+        });
+        
+        // Legacy bindings for backward compatibility
+        $this->app->alias(PostTypeFactoryInterface::class, 'wp.posttype');
+        
         $this->registerPostTypes();
 
         // Register the attribute-based post type service provider
@@ -52,8 +66,8 @@ class PostTypeServiceProvider extends ServiceProvider
      * Register all configured custom post types.
      *
      * Reads post type configurations from the config file and registers
-     * each post type with WordPress using the PostType facade.
-     *
+     * each post type using the PostTypeService, following hexagonal architecture
+     * principles by using dependency injection instead of facades.
      *
      * @example Configuration format:
      * [
@@ -69,17 +83,20 @@ class PostTypeServiceProvider extends ServiceProvider
      */
     public function registerPostTypes(): void
     {
-        // Get the post types from the config.
-        $postTypes = config('post-types');
+        // Get the post types from the config
+        $postTypes = $this->app['config']->get('post-types', []);
+        
+        // Resolve the service from the container
+        $postTypeService = $this->app->make(PostTypeService::class);
 
-        // Iterate over each post type.
-        collect($postTypes)->each(function (array $args, $key): void {
-            // Register the extended post type.
+        // Iterate over each post type
+        collect($postTypes)->each(function (array $args, string $key) use ($postTypeService): void {
+            // Get the singular and plural names
             $singular = $args['names']['singular'] ?? null;
             $plural = $args['names']['plural'] ?? null;
 
-            // Create the post type instance with the provided arguments
-            PostType::make($key, $singular, $plural);
+            // Create the post type instance using the service
+            $postTypeService->register($key, $singular, $plural);
         });
     }
 }

@@ -7,7 +7,8 @@ namespace Pollora\Mail;
 use Illuminate\Mail\Message;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Mail;
-use Pollora\Support\Facades\Filter;
+use Pollora\Container\Domain\ServiceLocator;
+use Pollora\Hook\Infrastructure\Services\Filter;
 
 /**
  * Class Mailer
@@ -17,6 +18,16 @@ use Pollora\Support\Facades\Filter;
  */
 class Mailer
 {
+    protected ServiceLocator $locator;
+
+    protected Filter $filter;
+
+    public function __construct(ServiceLocator $locator)
+    {
+        $this->locator = $locator;
+        $this->filter = $locator->resolve(Filter::class);
+    }
+
     /**
      * Send an email message.
      *
@@ -37,7 +48,7 @@ class Mailer
         string|array $headers = '',
         array $attachments = []
     ): ?SentMessage {
-        $values = Filter::apply('wp_mail', [$to, $subject, $message, $headers, $attachments]);
+        $values = $this->filter->apply('wp_mail', [$to, $subject, $message, $headers, $attachments]);
         [$to, $subject, $message, $headers, $attachments] = $values;
 
         try {

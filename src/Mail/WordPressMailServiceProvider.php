@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Mail;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Container\Domain\ServiceLocator;
 
 /**
  * Class WordPressMailServiceProvider
@@ -21,7 +22,7 @@ class WordPressMailServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.mail', fn ($app): \Pollora\Mail\Mailer => new Mailer);
+        $this->app->singleton('wp.mail', fn ($app): Mailer => new Mailer($app->make(ServiceLocator::class)));
     }
 
     /**
