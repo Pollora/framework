@@ -9,6 +9,7 @@ use Pollora\Entity\PostType;
 use Pollora\PostType\PostTypeFactory;
 
 beforeEach(function () {
+    setupWordPressMocks();
     $this->mockApp = mock(Application::class);
     $this->factory = new PostTypeFactory($this->mockApp);
 });

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Gutenberg\Helpers\PatternDataProcessor;
+use Pollora\BlockPattern\Infrastructure\Helpers\PatternDataProcessor;
 
 require_once __DIR__.'/../../helpers.php';
 

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Models;
 
 use Illuminate\Contracts\Foundation\Application;
+use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Pollora\Theme\Domain\Support\ThemeConfig;
 
 /**
  * Class Templates
@@ -17,13 +19,14 @@ use Pollora\Theme\Domain\Contracts\ThemeComponent;
 class Templates implements ThemeComponent
 {
     protected Application $app;
-
     protected Action $action;
+    protected ConfigRepositoryInterface $config;
 
-    public function __construct(ServiceLocator $locator)
+    public function __construct(ServiceLocator $locator, ConfigRepositoryInterface $config)
     {
         $this->app = $locator->resolve(Application::class);
         $this->action = $locator->resolve(Action::class);
+        $this->config = $config;
     }
 
     public function register(): void
@@ -56,7 +59,7 @@ class Templates implements ThemeComponent
      */
     public function getThemePageTemplates($postType): array
     {
-        $configPageTemplates = (array) config('theme.templates');
+        $configPageTemplates = (array) ThemeConfig::get('theme.templates', []);
 
         $pageTemplates = [];
 

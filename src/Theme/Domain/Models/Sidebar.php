@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Models;
 
 use Illuminate\Contracts\Foundation\Application;
+use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Services\Translater;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Pollora\Theme\Domain\Support\ThemeConfig;
 
 /**
  * Class Sidebar
@@ -18,13 +20,14 @@ use Pollora\Theme\Domain\Contracts\ThemeComponent;
 class Sidebar implements ThemeComponent
 {
     protected Application $app;
-
     protected Action $action;
+    protected ConfigRepositoryInterface $config;
 
-    public function __construct(ServiceLocator $locator)
+    public function __construct(ServiceLocator $locator, ConfigRepositoryInterface $config)
     {
         $this->app = $locator->resolve(Application::class);
         $this->action = $locator->resolve(Action::class);
+        $this->config = $config;
     }
 
     public function register(): void
@@ -37,12 +40,12 @@ class Sidebar implements ThemeComponent
      */
     public function registerSidebars(): void
     {
-        $sidebars = (array) config('theme.sidebars');
+        $sidebars = (array) ThemeConfig::get('theme.sidebars', []);
         $translater = new Translater($sidebars, 'sidebars');
         $sidebars = $translater->translate(['*.name', '*.description']);
 
-        collect($sidebars)->each(function ($value): void {
-            register_sidebar($value);
-        });
+        foreach ($sidebars as $value) {
+            \register_sidebar($value);
+        }
     }
 }

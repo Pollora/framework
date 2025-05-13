@@ -13,9 +13,12 @@ use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
+use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
+use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
+use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
+use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider as SharedConfigServiceProvider;
 use Pollora\Discoverer\DiscovererServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
-use Pollora\Gutenberg\Infrastructure\Providers\GutenbergServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
@@ -67,7 +70,15 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
-        $this->app->register(GutenbergServiceProvider::class);
+        
+        // Shared modules
+        $this->app->register(CollectionServiceProvider::class);
+        $this->app->register(SharedConfigServiceProvider::class);
+        
+        // Block features
+        $this->app->register(BlockCategoryServiceProvider::class);
+        $this->app->register(BlockPatternServiceProvider::class);
+        
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);

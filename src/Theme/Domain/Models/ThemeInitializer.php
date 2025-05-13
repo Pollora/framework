@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Models;
 
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Support\Facades\Config;
 use Pollora\Asset\Domain\Models\AssetFile;
+use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Contracts\ThemeService;
+use Pollora\Theme\Domain\Support\ThemeConfig;
 
 class ThemeInitializer implements ThemeComponent
 {
@@ -30,27 +31,22 @@ class ThemeInitializer implements ThemeComponent
     protected ServiceLocator $locator;
 
     protected $themeManager;
+    
+    protected ConfigRepositoryInterface $config;
 
     /**
      * Create a new theme initializer
      */
-    public function __construct(ServiceLocator $locator)
+    public function __construct(ServiceLocator $locator, ConfigRepositoryInterface $config)
     {
         $this->locator = $locator;
         $this->app = $locator->resolve(Application::class);
-        $this->themeRoot = $this->config('theme.base_path');
+        $this->config = $config;
+        $this->themeRoot = ThemeConfig::get('theme.base_path');
         $this->action = $locator->resolve(Action::class);
         $this->filter = $locator->resolve(Filter::class);
 
         $this->filter->add('stylesheet_directory', $this->overrideStylesheetDirectory(...), 90, 3);
-    }
-
-    /**
-     * Helper method for accessing config values
-     */
-    protected function config(string $key, $default = null)
-    {
-        return Config::get($key, $default);
     }
 
     /**
@@ -82,7 +78,7 @@ class ThemeInitializer implements ThemeComponent
         $this->action->add('after_setup_theme', function (): void {
             // WordPress specific function - we'll keep this in the implementation
             // but it would be better to inject a WordPress service abstraction
-            if (function_exists('wp_installing') && wp_installing()) {
+            if (function_exists('wp_installing') && \wp_installing()) {
                 return;
             }
             $this->initializeTheme();
@@ -96,7 +92,7 @@ class ThemeInitializer implements ThemeComponent
      */
     public function overrideStylesheetDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
     {
-        return str_replace($themeRootUri, $this->config('theme.base_path'), $stylesheetDirUri);
+        return str_replace($themeRootUri, ThemeConfig::get('theme.base_path'), $stylesheetDirUri);
     }
 
     /**
@@ -106,7 +102,7 @@ class ThemeInitializer implements ThemeComponent
     {
         // WordPress specific function - would need proper abstraction
         if (function_exists('register_theme_directory')) {
-            register_theme_directory($this->themeRoot);
+            \register_theme_directory($this->themeRoot);
         }
 
         $this->setThemes();
@@ -119,7 +115,7 @@ class ThemeInitializer implements ThemeComponent
 
         // WordPress function - would need proper abstraction
         if (function_exists('wp_get_theme')) {
-            $this->wp_theme = wp_get_theme();
+            $this->wp_theme = \wp_get_theme();
             $this->app->singleton('wp.theme', fn () => $this->wp_theme);
         }
     }
@@ -129,7 +125,7 @@ class ThemeInitializer implements ThemeComponent
      */
     private function registerThemeProvider(): void
     {
-        foreach ((array) $this->config('theme.providers', []) as $provider) {
+        foreach ((array) ThemeConfig::get('theme.providers', []) as $provider) {
             $this->app->register($provider);
         }
     }

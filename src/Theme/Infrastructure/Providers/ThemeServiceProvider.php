@@ -10,18 +10,20 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Asset\Application\Services\AssetManager;
+use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
+use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Container\Infrastructure\ContainerServiceLocator;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Support\Facades\Theme;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Services\TemplateHierarchy;
 use Pollora\Theme\Infrastructure\Services\ComponentFactory;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
+use Pollora\Theme\Domain\Support\ThemeCollection;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -39,6 +41,13 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Register Config and Collection providers
+        $this->app->register(\Pollora\Config\Infrastructure\Providers\ConfigServiceProvider::class);
+        $this->app->register(\Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider::class);
+        
+        // Initialize utility classes
+        $this->initializeUtilityClasses();
+        
         // Register ServiceLocator first as many other services depend on it
         $this->app->singleton(ServiceLocator::class, function ($app) {
             return new ContainerServiceLocator($app);
@@ -65,6 +74,30 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
+     * Initialize the utility classes with their respective dependencies.
+     */
+    protected function initializeUtilityClasses(): void
+    {
+        // Initialize ThemeConfig
+        $this->app->afterResolving(ConfigRepositoryInterface::class, function (ConfigRepositoryInterface $config) {
+            \Pollora\Theme\Domain\Support\ThemeConfig::setRepository($config);
+        });
+
+        // Initialize ThemeCollection
+        $this->app->afterResolving(CollectionFactoryInterface::class, function (CollectionFactoryInterface $factory) {
+            \Pollora\Theme\Domain\Support\ThemeCollection::setFactory($factory);
+        });
+    }
+
+    /**
+     * Load helper functions.
+     */
+    protected function loadHelpers(): void
+    {
+        // No longer needed as we're using utility classes
+    }
+
+    /**
      * Register the console commands
      */
     protected function registerCommands(): void
@@ -84,18 +117,14 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register component factory and provider
+     * Register component provider
      */
     protected function registerComponentServices(): void
     {
-        $this->app->singleton(ComponentFactory::class, function ($app) {
-            return new ComponentFactory($app->make(ServiceLocator::class));
-        });
-
         $this->app->singleton(ThemeComponentProvider::class, function ($app) {
             return new ThemeComponentProvider(
                 $app->make(ServiceLocator::class),
-                $app->make(ComponentFactory::class)
+                $app
             );
         });
 
@@ -179,6 +208,17 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function directives(): Collection
     {
+        $directiveCollection = ThemeCollection::make(['Directives']);
+        
+        if ($directiveCollection instanceof Collection) {
+            return $directiveCollection->flatMap(function ($directive) {
+                if (file_exists($directives = __DIR__.'/'.$directive.'.php')) {
+                    return require $directives;
+                }
+            });
+        }
+        
+        // Fallback si l'instance retournée n'est pas une Collection Laravel
         return collect(['Directives'])
             ->flatMap(function ($directive) {
                 if (file_exists($directives = __DIR__.'/'.$directive.'.php')) {
