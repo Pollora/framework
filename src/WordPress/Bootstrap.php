@@ -44,7 +44,8 @@ class Bootstrap
         }
 
         if (app()->runningInConsole() && ! $this->isWordPressInstalled()) {
-            define('WP_INSTALLING', true);
+            Constant::queue('WP_INSTALLING', true);
+            Constant::apply();
         }
         if (! app()->runningInConsole() && $this->isWordPressInstalled()) {
             $this->runWp();
