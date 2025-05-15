@@ -49,6 +49,6 @@ class AttributeScout extends AbstractScout
      */
     protected function criteria(Discover|DiscoverConditionFactory $discover): Discover|DiscoverConditionFactory
     {
-        return $discover->implementing(Attributable::class, Hooks::class);
+        return $discover->implementing(Attributable::class);
     }
 }

@@ -9,6 +9,7 @@ use Pollora\Discoverer\Contracts\Discoverable;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Discoverer\Scouts\AbstractScout;
 use Pollora\Discoverer\Scouts\AttributeScout;
+use Pollora\Discoverer\Scouts\HookScout;
 use Pollora\Discoverer\Scouts\PostTypeScout;
 use Pollora\Discoverer\Scouts\RestScout;
 use Pollora\Discoverer\Scouts\TaxonomyScout;
@@ -25,6 +26,7 @@ class DiscovererServiceProvider extends ServiceProvider
      */
     protected array $scouts = [
         AttributeScout::class,
+        HookScout::class,
         PostTypeScout::class,
         TaxonomyScout::class,
         RestScout::class,
