@@ -36,7 +36,17 @@ class PostTypeFactory
         }
 
         $postType = new PostType($slug, $singular, $plural);
+        $postType->init();
+        
+        // Bind the instance to the container
         $this->container->instance($abstract, $postType);
+
+        // Register the post type for WordPress
+        if (function_exists('add_action')) {
+            add_action('init', function () use ($postType) {
+                $postType->registerEntityType();
+            }, 99);
+        }
 
         return $postType;
     }
