@@ -64,6 +64,7 @@ class WordPressRouteServiceProvider extends ServiceProvider
             // Last argument is always the callback
             $action = $args[count($args) - 1];
 
+
             // Create the route with specific HTTP methods
             $route = Route::addRoute($methods, $uri, $action);
             $route->setIsWordPressRoute(true);

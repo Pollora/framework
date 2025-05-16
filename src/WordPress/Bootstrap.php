@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
@@ -16,6 +17,14 @@ use Psr\Container\ContainerInterface;
 class Bootstrap
 {
     use QueryTrait;
+
+    /** @var ConsoleDetectionService */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct(ConsoleDetectionService $consoleDetectionService = null)
+    {
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
 
     /**
      * Database configuration array.
@@ -50,11 +59,11 @@ class Bootstrap
             $this->loadWordPressSettings();
         }
 
-        if ($this->app->runningInConsole() && ! $this->isWordPressInstalled()) {
+        if ($this->consoleDetectionService->isConsole() && ! $this->isWordPressInstalled()) {
             Constant::queue('WP_INSTALLING', true);
             Constant::apply();
         }
-        if (! $this->app->runningInConsole() && $this->isWordPressInstalled()) {
+        if (! $this->consoleDetectionService->isConsole() && $this->isWordPressInstalled()) {
             $this->runWp();
         }
         $this->setupActionHooks();
@@ -111,11 +120,11 @@ class Bootstrap
 
         $table_prefix = $this->db['prefix'];
 
-        if ($this->app->runningInConsole() && ! $this->isWordPressInstalled()) {
+        if ($this->consoleDetectionService->isConsole() && ! $this->isWordPressInstalled()) {
             define('SHORTINIT', true);
         }
 
-        if (! $this->app->runningInWpCli()) {
+        if (! $this->consoleDetectionService->isWpCli()) {
             require_once ABSPATH.'wp-settings.php';
         }
     }
@@ -125,8 +134,8 @@ class Bootstrap
      */
     private function setupActionHooks(): void
     {
-        if ($this->app->runningInWpCli()) {
-            $this->action->add('init', $this->fixNetworkUrl(...), 1);
+        if ($this->consoleDetectionService->isWpCli()) {
+            Action::add('init', $this->fixNetworkUrl(...), 1);
         } else {
             $this->fixNetworkUrl();
         }
@@ -177,7 +186,7 @@ class Bootstrap
         $this->defineWordPressConstants();
         $this->setLocationConstants();
 
-        if ($this->app->runningInConsole()) {
+        if ($this->consoleDetectionService->isConsole()) {
             $this->setConsoleServerVariables();
         }
     }
@@ -188,7 +197,7 @@ class Bootstrap
     private function defineWordPressConstants(): void
     {
         // Define default constants
-        Constant::queue('WP_USE_THEMES', ! $this->app->runningInConsole() && ! str_starts_with((string) request()->server('REQUEST_URI'), '/cms/'));
+        Constant::queue('WP_USE_THEMES', ! $this->consoleDetectionService->isConsole() && ! str_starts_with((string) request()->server('REQUEST_URI'), '/cms/'));
 
         Constant::queue('WP_AUTO_UPDATE_CORE', false);
         Constant::queue('DISALLOW_FILE_MODS', true);

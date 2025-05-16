@@ -11,6 +11,7 @@ use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Hook\UI\Console\ActionMakeCommand;
 use Pollora\Hook\UI\Console\FilterMakeCommand;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 /**
  * Service provider for Hook feature (Infrastructure layer).
@@ -28,6 +29,19 @@ class HookServiceProvider extends ServiceProvider
     protected $app;
 
     /**
+     * Console detection service instance.
+     *
+     * @var ConsoleDetectionService
+     */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    {
+        parent::__construct($app);
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
+
+    /**
      * Register hook-related services in the application.
      *
      * Binds hook contracts and implementations as singletons
@@ -38,7 +52,7 @@ class HookServiceProvider extends ServiceProvider
         $this->app->singleton(Action::class, Action::class);
         $this->app->singleton(Filter::class, Filter::class);
 
-        if ($this->app->runningInConsole()) {
+        if ($this->consoleDetectionService->isConsole()) {
             $this->commands([
                 ActionMakeCommand::class,
                 FilterMakeCommand::class,

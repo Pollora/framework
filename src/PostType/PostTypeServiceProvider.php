@@ -12,6 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Entity\PostType;
 use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 /**
  * Service provider for registering custom post types.
@@ -23,6 +24,17 @@ use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 class PostTypeServiceProvider extends ServiceProvider
 {
     /**
+     * @var ConsoleDetectionService
+     */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    {
+        parent::__construct($app);
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
+
+    /**
      * Register post type services.
      *
      * Binds the PostTypeFactory and PostTypeService to the service container
@@ -32,17 +44,17 @@ class PostTypeServiceProvider extends ServiceProvider
     {
         // Bind the interface to the concrete implementation
         $this->app->singleton(PostTypeFactoryInterface::class, PostTypeFactory::class);
-        
+
         // Register the PostTypeService
         $this->app->singleton(PostTypeService::class, function ($app) {
             return new PostTypeService(
                 $app->make(PostTypeFactoryInterface::class)
             );
         });
-        
+
         // Legacy bindings for backward compatibility
         $this->app->alias(PostTypeFactoryInterface::class, 'wp.posttype');
-        
+
         $this->registerPostTypes();
 
         // Register the attribute-based post type service provider
@@ -55,7 +67,7 @@ class PostTypeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Publish configuration
-        if ($this->app->runningInConsole()) {
+        if ($this->consoleDetectionService->isConsole()) {
             $this->publishes([
                 __DIR__.'/config/posttype.php' => config_path('posttype.php'),
             ], 'pollora-posttype-config');
@@ -85,7 +97,7 @@ class PostTypeServiceProvider extends ServiceProvider
     {
         // Get the post types from the config
         $postTypes = $this->app['config']->get('post-types', []);
-        
+
         // Resolve the service from the container
         $postTypeService = $this->app->make(PostTypeService::class);
 

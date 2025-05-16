@@ -7,6 +7,7 @@ namespace Pollora\WordPress;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\InstallationService;
@@ -18,6 +19,14 @@ use Pollora\WordPress\Commands\LaunchPadSetupCommand;
 class WordPressServiceProvider extends ServiceProvider
 {
     protected Bootstrap $bootstrap;
+    /** @var ConsoleDetectionService */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    {
+        parent::__construct($app);
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
 
     /**
      * Register services.
@@ -46,7 +55,7 @@ class WordPressServiceProvider extends ServiceProvider
 
         $this->bootstrap->boot();
 
-        if ($this->app->runningInConsole()) {
+        if ($this->consoleDetectionService->isConsole()) {
             $this->publishes([
                 __DIR__.'/../../config/wordpress.php' => config_path('wordpress.php'),
             ], 'wp-config');

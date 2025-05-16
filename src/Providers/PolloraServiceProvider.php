@@ -13,6 +13,7 @@ use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
+use Pollora\Console\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
@@ -62,23 +63,22 @@ class PolloraServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        Application::macro('runningInWpCli', fn (): bool => defined('\WP_CLI') && \WP_CLI);
-
         // Generic service providers
+        $this->app->register(ConsoleServiceProvider::class);
         $this->app->register(DiscovererServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
-        
+
         // Shared modules
         $this->app->register(CollectionServiceProvider::class);
         $this->app->register(SharedConfigServiceProvider::class);
-        
+
         // Block features
         $this->app->register(BlockCategoryServiceProvider::class);
         $this->app->register(BlockPatternServiceProvider::class);
-        
+
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);

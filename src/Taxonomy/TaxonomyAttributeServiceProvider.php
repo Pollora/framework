@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Taxonomy\Commands\TaxonomyMakeCommand;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 /**
  * Service provider for attribute-based taxonomy registration.
@@ -18,12 +19,23 @@ use Pollora\Taxonomy\Commands\TaxonomyMakeCommand;
 class TaxonomyAttributeServiceProvider extends ServiceProvider
 {
     /**
+     * @var ConsoleDetectionService
+     */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    {
+        parent::__construct($app);
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
+
+    /**
      * Register services.
      */
     public function register(): void
     {
         // Register the make:taxonomy command
-        if ($this->app->runningInConsole()) {
+        if ($this->consoleDetectionService->isConsole()) {
             $this->commands([
                 TaxonomyMakeCommand::class,
             ]);
