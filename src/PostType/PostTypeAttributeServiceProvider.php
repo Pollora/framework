@@ -6,6 +6,7 @@ namespace Pollora\PostType;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 use Pollora\Discoverer\Contracts\DiscoveryRegistry;
 use Pollora\Discoverer\Discoverer;
 use Pollora\PostType\Commands\PostTypeMakeCommand;
@@ -19,12 +20,23 @@ use Pollora\PostType\Commands\PostTypeMakeCommand;
 class PostTypeAttributeServiceProvider extends ServiceProvider
 {
     /**
+     * @var ConsoleDetectionService
+     */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    {
+        parent::__construct($app);
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
+
+    /**
      * Register services.
      */
     public function register(): void
     {
         // Register the make:posttype command
-        if ($this->app->runningInConsole()) {
+        if ($this->consoleDetectionService->isConsole()) {
             $this->commands([
                 PostTypeMakeCommand::class,
             ]);

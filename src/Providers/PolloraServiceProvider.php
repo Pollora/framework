@@ -13,6 +13,7 @@ use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
+use Pollora\Console\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\Discoverer\DiscovererServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Gutenberg\GutenbergServiceProvider;
@@ -59,9 +60,8 @@ class PolloraServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        Application::macro('runningInWpCli', fn (): bool => defined('\WP_CLI') && \WP_CLI);
-
         // Generic service providers
+        $this->app->register(ConsoleServiceProvider::class);
         $this->app->register(DiscovererServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);

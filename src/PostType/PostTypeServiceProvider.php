@@ -10,6 +10,7 @@ namespace Pollora\PostType;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Support\Facades\PostType;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 /**
  * Service provider for registering custom post types.
@@ -20,6 +21,17 @@ use Pollora\Support\Facades\PostType;
  */
 class PostTypeServiceProvider extends ServiceProvider
 {
+    /**
+     * @var ConsoleDetectionService
+     */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    {
+        parent::__construct($app);
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
+
     /**
      * Register post type services.
      *
@@ -41,7 +53,7 @@ class PostTypeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Publish configuration
-        if ($this->app->runningInConsole()) {
+        if ($this->consoleDetectionService->isConsole()) {
             $this->publishes([
                 __DIR__.'/config/posttype.php' => config_path('posttype.php'),
             ], 'pollora-posttype-config');

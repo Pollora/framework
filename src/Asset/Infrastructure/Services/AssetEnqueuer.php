@@ -8,8 +8,10 @@ use Illuminate\Support\Facades\Log;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Exceptions\AssetException;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
+use Illuminate\Foundation\Application;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -97,16 +99,47 @@ class AssetEnqueuer
     protected string $handle;
 
     /**
-     * Constructor.
+     * AssetManager instance for container resolution.
+     */
+    protected AssetManager $assetManager;
+
+    /**
+     * Console detection service instance.
+     */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    /**
+     * Constructor with dependency injection.
+     */
+    public function __construct(Application $app)
+    {
+        $this->assetManager = $app->make(AssetManager::class);
+        $this->consoleDetectionService = $app->make(ConsoleDetectionService::class);
+    }
+
+    /**
+     * Sets the asset handle (unique identifier).
      *
      * @param  string  $handle  Unique identifier for the asset
-     * @param  string  $path  Path to the asset file
+     * @return $this
      */
-    public function __construct(string $handle, string $path)
+    public function handle(string $handle): self
     {
         $this->handle = $handle;
+        return $this;
+    }
+
+    /**
+     * Sets the asset path and determines the type.
+     *
+     * @param  string  $path  Path to the asset file
+     * @return $this
+     */
+    public function path(string $path): self
+    {
         $this->path = $path;
         $this->type = $this->determineFileType($path);
+        return $this;
     }
 
     /**
@@ -119,14 +152,14 @@ class AssetEnqueuer
      */
     public function container(string $containerName): self
     {
-        $container = app(AssetManager::class)->getContainer($containerName);
-
+        if ($this->consoleDetectionService->isConsole() || $this->consoleDetectionService->isWpCli()) {
+            return $this;
+        }
+        $container = $this->assetManager->getContainer($containerName);
         if (! $container) {
             throw new \RuntimeException("Asset container '{$containerName}' not found. Make sure you have added it via AssetManager::addContainer().");
         }
-
         $this->container = $container;
-
         return $this;
     }
 
@@ -152,6 +185,10 @@ class AssetEnqueuer
      */
     public function useVite(): self
     {
+        if ($this->consoleDetectionService->isConsole() || $this->consoleDetectionService->isWpCli()) {
+            return $this;
+        }
+
         if (! $this->container) {
             throw new \RuntimeException("No asset container defined before useVite(). Use ->container('theme') before ->useVite().");
         }

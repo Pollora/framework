@@ -16,6 +16,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Foundation\Support\IncludesFiles;
+use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 class ThemeManager
 {
@@ -27,7 +28,20 @@ class ThemeManager
 
     protected ?ThemeMetadata $theme = null;
 
-    public function __construct(protected Application $app, protected ViewFinderInterface $viewFinder, protected ?Loader $localeLoader) {}
+    /**
+     * @var ConsoleDetectionService
+     */
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct(
+        protected Application $app,
+        protected ViewFinderInterface $viewFinder,
+        protected ?Loader $localeLoader,
+        ?ConsoleDetectionService $consoleDetectionService = null
+    ) {
+        // Fallback for backward compatibility if not injected
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
 
     public function instance(): ThemeManager
     {
@@ -45,7 +59,7 @@ class ThemeManager
         $currentTheme = $baseTheme;
 
         while (true) {
-            if (! is_dir($currentTheme->getBasePath()) && ! app()->runningInConsole()) {
+            if (! is_dir($currentTheme->getBasePath()) && ! $this->consoleDetectionService->isConsole()) {
                 throw new ThemeException("Theme directory {$currentTheme->getName()} not found.");
             }
 
