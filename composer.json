@@ -89,7 +89,7 @@
     },
     "require-dev": {
         "pestphp/pest": "^3.8.2",
-        "pestphp/pest-plugin-type-coverage": "^3.0",
+        "pestphp/pest-plugin-type-coverage": "^3.5",
         "symfony/var-dumper": "^7.2.6",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
