@@ -31,7 +31,7 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
 
     /**
      * Check if a taxonomy exists.
-     *
+*
      * @param string $taxonomy The taxonomy slug to check
      * @return bool
      */

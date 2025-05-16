@@ -48,7 +48,7 @@ class PostTypeFactory implements PostTypeFactoryInterface
      *
      * @param string $postType The post type slug to check
      * @return bool
-     */
+*/
     public function exists(string $postType): bool
     {
         // Implementation would depend on WordPress functions or your own abstraction

@@ -6,48 +6,40 @@ namespace Pollora\Route\Matching;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Matching\ValidatorInterface;
-use Illuminate\Routing\Route;
+use Pollora\Route\Route;
 
 /**
- * WordPress condition validator for routes.
+ * Validator for WordPress conditional tags.
  *
- * This validator checks if a route matches based on WordPress conditional functions
- * such as is_page(), is_single(), etc.
+ * This class validates if a route matches a specific WordPress condition,
+ * with plugin conditions taking priority over native WordPress conditions.
  */
 class ConditionValidator implements ValidatorInterface
 {
     /**
      * Determine if the route matches the given request based on WordPress conditions.
      *
-     * Checks if:
-     * 1. The condition function exists in WordPress
-     * 2. The condition function returns true when called with the route parameters
-     *
-     * @param  Route  $route  The route to validate
-     * @param  Request  $request  The current HTTP request
-     * @return bool True if the WordPress condition is met, false otherwise
-     *
-     * @example
-     * // For a route with condition 'is_single' and parameter [123]
-     * // This will effectively call: is_single(123)
+     * @param  \Illuminate\Routing\Route  $route  Route to validate
+     * @param  Request  $request  Request to check against
+     * @return bool True if the route matches the request, false otherwise
      */
-    public function matches(Route $route, Request $request): bool
+    public function matches($route, $request): bool
     {
-        // Get the WordPress condition from the route
-        $condition = $route->getCondition();
+        // If this isn't a WordPress route or has no condition, nothing to validate
+        if (! $route instanceof Route || ! $route->isWordPressRoute() || ! $route->hasCondition()) {
+            return true;
+        }
 
-        // Check if the condition function exists
+        $condition = $route->getCondition();
+        $params = $route->getConditionParameters();
+
+        // Check if function exists before trying to call it
         if (! function_exists($condition)) {
             return false;
         }
 
-        // Get the parameters for the condition
-        $parameters = $route->getConditionParameters();
-
-        // Call the WordPress condition function with the parameters
-        $result = call_user_func_array($condition, $parameters);
-
-        // Convert the result to a boolean
-        return (bool) $result;
+        // Call the WordPress conditional function with the given parameters
+        // Explicitly cast the result to boolean to ensure correct return type
+        return (bool) call_user_func_array($condition, $params);
     }
 }
