@@ -11,6 +11,13 @@ use Pollora\Attributes\WpRestRoute;
 use Pollora\Attributes\WpRestRoute\Method;
 use Pollora\Support\Facades\Action;
 
+if (!function_exists('register_rest_route')) {
+    function register_rest_route(...$args) {
+        // Stub pour les tests
+        return true;
+    }
+}
+
 // Classe de test qui implémente l'interface Attributable
 #[WpRestRoute('api/v1', '/test', 'TestPermission')]
 class TestController implements Attributable

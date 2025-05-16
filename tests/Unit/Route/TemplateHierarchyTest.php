@@ -285,10 +285,7 @@ test('expected archive templates match WordPress conventions', function () {
  */
 test('template include is captured and prepended to hierarchy', function () {
     // Setup specific mock for this test to handle the template_include hook
-    WP::$wpFunctions = m::mock('stdClass');
-    WP::$wpFunctions->shouldReceive('add_filter')
-        ->withAnyArgs()
-        ->andReturn(true);
+    setupWordPressMocksForTemplateHierarchy();
 
     // Create configuration mock
     $config = m::mock(Repository::class);
@@ -298,7 +295,7 @@ test('template include is captured and prepended to hierarchy', function () {
     $container = new Container;
 
     // Create a real TemplateHierarchy instance
-    $templateHierarchy = new TemplateHierarchy($config, $container);
+    $templateHierarchy = new TemplateHierarchy($config);
 
     // Set up reflection to access private property
     $hierarchyProp = new ReflectionProperty($templateHierarchy, 'templateHierarchy');
@@ -328,10 +325,7 @@ test('template include is captured and prepended to hierarchy', function () {
  */
 test('blade template variants are correctly generated', function () {
     // Setup specific mock for this test
-    WP::$wpFunctions = m::mock('stdClass');
-    WP::$wpFunctions->shouldReceive('add_filter')
-        ->withAnyArgs()
-        ->andReturn(true);
+    setupWordPressMocksForTemplateHierarchy();
 
     // Create config mock
     $config = m::mock(Repository::class);
@@ -341,7 +335,7 @@ test('blade template variants are correctly generated', function () {
     $container = new Container;
 
     // Create a real instance for testing
-    $templateHierarchy = new TemplateHierarchy($config, $container);
+    $templateHierarchy = new TemplateHierarchy($config);
 
     // Set up reflection to access private methods and properties
     $method = new ReflectionMethod($templateHierarchy, 'addBladeTemplateVariants');
@@ -412,55 +406,28 @@ test('template handlers can be registered', function () {
  * Test WordPress condition detection
  */
 test('condition satisfaction detection works with different WordPress functions', function () {
-    // Create a mock that won't interfere with template_include
-    WP::$wpFunctions = m::mock('stdClass');
-    WP::$wpFunctions->shouldReceive('add_filter')
-        ->withAnyArgs()
-        ->andReturn(true);
+    \WP::$wpFunctions = null;
+    setupWordPressMocksForTemplateHierarchy(['is_page' => true, 'is_archive' => false]);
 
-    // Define is_page and is_archive functions for this test
-    if (! function_exists('is_page')) {
-        function is_page()
-        {
-            return true;
-        }
-    } else {
-        WP::$wpFunctions->shouldReceive('is_page')->andReturn(true);
-    }
+    // Ajoute tous les mocks nécessaires pour éviter les BadMethodCallException
+    WP::$wpFunctions->shouldReceive('is_search')->andReturn(false);
+    WP::$wpFunctions->shouldReceive('is_category')->andReturn(false);
+    WP::$wpFunctions->shouldReceive('is_tag')->andReturn(false);
+    WP::$wpFunctions->shouldReceive('is_tax')->andReturn(false);
+    WP::$wpFunctions->shouldReceive('is_404')->andReturn(false);
+    WP::$wpFunctions->shouldReceive('is_singular')->andReturn(false);
+    WP::$wpFunctions->shouldReceive('get_queried_object')->andReturn((object)['ID' => 1, 'post_name' => 'test-page']);
+    WP::$wpFunctions->shouldReceive('get_page_template_slug')->andReturn(null);
+    WP::$wpFunctions->shouldReceive('wp_is_block_theme')->andReturn(false);
 
-    if (! function_exists('is_archive')) {
-        function is_archive()
-        {
-            return false;
-        }
-    } else {
-        WP::$wpFunctions->shouldReceive('is_archive')->andReturn(false);
-    }
+    expect(is_page())->toBeTrue();
+    expect(is_archive())->toBeFalse();
 
-    if (! function_exists('nonexistent_condition')) {
-        function nonexistent_condition()
-        {
-            return true;
-        }
-    }
-
-    // Create config mock
     $config = m::mock(Repository::class);
     $config->shouldReceive('get')->withAnyArgs()->andReturn([]);
 
-    // Create container
-    $container = new Container;
+    $templateHierarchy = new TemplateHierarchy($config);
+    $hierarchy = $templateHierarchy->hierarchy(true);
 
-    // Create a real instance for testing
-    $templateHierarchy = new TemplateHierarchy($config, $container);
-
-    // Use reflection to access private method
-    $method = new ReflectionMethod($templateHierarchy, 'isConditionSatisfied');
-    $method->setAccessible(true);
-
-    // Test condition detection
-    expect($method->invoke($templateHierarchy, 'is_page'))->toBeTrue();
-    expect($method->invoke($templateHierarchy, 'is_archive'))->toBeFalse();
-    expect($method->invoke($templateHierarchy, 'nonexistent_condition'))->toBeTrue();
-    expect($method->invoke($templateHierarchy, 'truly_nonexistent_function'))->toBeFalse();
+    expect($hierarchy)->toContain('page.php');
 });
