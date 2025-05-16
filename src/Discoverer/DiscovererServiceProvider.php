@@ -27,6 +27,7 @@ class DiscovererServiceProvider extends ServiceProvider
     protected array $scouts = [
         HookScout::class,
         AttributeScout::class,
+        HookScout::class,
         PostTypeScout::class,
         TaxonomyScout::class,
         RestScout::class,

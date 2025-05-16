@@ -37,7 +37,17 @@ class TaxonomyFactory
         }
 
         $taxonomy = new Taxonomy($slug, $objectType, $singular, $plural);
+        $taxonomy->init();
+        
+        // Bind the instance to the container
         $this->container->instance($abstract, $taxonomy);
+
+        // Register the taxonomy for WordPress
+        if (function_exists('add_action')) {
+            add_action('init', function () use ($taxonomy) {
+                $taxonomy->registerEntityType();
+            }, 99);
+        }
 
         return $taxonomy;
     }

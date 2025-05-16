@@ -24,8 +24,8 @@ class HookScout extends AbstractScout
     protected function directory(): array
     {
         return [
-            app_path('Cms'),
-            app(RepositoryInterface::class)->getPath(),
+            app_path(),
+            app(RepositoryInterface::class)->getPath()
         ];
     }
 
