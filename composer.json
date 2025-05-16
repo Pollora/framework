@@ -36,7 +36,7 @@
         "roots/bedrock-autoloader": "^1.0",
         "pollora/query": "dev-main",
         "spatie/php-structure-discoverer": "dev-main",
-        "coduo/php-humanizer": "5.x-dev",
+        "coduo/php-humanizer": "5.0.2",
         "nwidart/laravel-modules": "^12.0@dev",
         "symfony/process": "^7.2.0",
         "illuminate/config": "12.14.1",
