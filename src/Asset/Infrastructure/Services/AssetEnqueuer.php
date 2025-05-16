@@ -286,7 +286,7 @@ class AssetEnqueuer
             wp_localize_script($this->handle, $objectName, $data);
         }
 
-return $this;
+        return $this;
     }
 
     /**

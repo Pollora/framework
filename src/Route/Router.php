@@ -9,7 +9,6 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router as IlluminateRouter;
 use Pollora\Route\Bindings\NullableWpPost;
-use Pollora\Theme\TemplateHierarchy;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -117,9 +116,29 @@ class Router extends IlluminateRouter
 
                 // If routes match, find the most specific one
                 if ($matchingRoutes !== []) {
-                    // Get the WordPress template hierarchy order from the container
-                    $templateHierarchy = $this->container->make(TemplateHierarchy::class);
-                    $hierarchyOrder = $templateHierarchy->getHierarchyOrder();
+                    // Get the WordPress conditions and plugin conditions from the config
+                    $config = $this->container->make('config');
+
+                    // Get plugin conditions (higher priority)
+                    $pluginConditionsConfig = $config->get('wordpress.plugin_conditions', []);
+                    $pluginConditions = [];
+
+                    foreach ($pluginConditionsConfig as $pluginName => $pluginConditionGroup) {
+                        $pluginConditions = array_merge($pluginConditions, array_keys($pluginConditionGroup));
+                    }
+
+                    // Get native WordPress conditions (lower priority)
+                    $wordpressConditions = $config->get('wordpress.conditions', []);
+
+                    // Create hierarchyOrder with plugin conditions first (more specific)
+                    // Then add native WordPress conditions
+                    $hierarchyOrder = array_merge(
+                        $pluginConditions,
+                        array_keys($wordpressConditions)
+                    );
+
+                    // Add fallback condition
+                    $hierarchyOrder[] = '__return_true';
 
                     // Go through the hierarchy order to find the most specific route
                     foreach ($hierarchyOrder as $condition) {
@@ -272,14 +291,30 @@ class Router extends IlluminateRouter
      * Set WordPress routing conditions.
      *
      * Merges provided conditions with those from configuration.
+     * Plugin conditions are added with higher priority than native conditions.
      *
      * @param  array<string, mixed>  $conditions  Additional conditions to set
      */
     public function setConditions(array $conditions = []): void
     {
+        $config = $this->container->make('config');
+
+        // Get plugin conditions first (higher priority)
+        $pluginConditions = [];
+        $pluginConditionsConfig = $config->get('wordpress.plugin_conditions', []);
+
+        foreach ($pluginConditionsConfig as $pluginName => $pluginConditionGroup) {
+            $pluginConditions = array_merge($pluginConditions, $pluginConditionGroup);
+        }
+
+        // Then get native WordPress conditions
+        $nativeConditions = $config->get('wordpress.conditions', []);
+
+        // Merge in order of priority: custom conditions, plugin conditions, native conditions
         $this->conditions = array_merge(
-            $this->container->make('config')->get('wordpress.conditions', []),
-            $conditions
+            $conditions,
+            $pluginConditions,
+            $nativeConditions
         );
     }
 

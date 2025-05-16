@@ -73,7 +73,10 @@ test('validator returns false if condition function does not exist', function ()
 
     // Create a mock of the route
     $route = m::mock(Route::class);
+    $route->shouldReceive('isWordPressRoute')->andReturn(true);
+    $route->shouldReceive('hasCondition')->andReturn(true);
     $route->shouldReceive('getCondition')->andReturn('nonexistent_function');
+    $route->shouldReceive('getConditionParameters')->andReturn([]);
 
     // Create a request
     $request = Request::create('/test', 'GET');
@@ -91,6 +94,8 @@ test('validator calls condition function with correct parameters', function () {
 
     // Create a mock of the route
     $route = m::mock(Route::class);
+    $route->shouldReceive('isWordPressRoute')->andReturn(true);
+    $route->shouldReceive('hasCondition')->andReturn(true);
     $route->shouldReceive('getCondition')->andReturn('test_condition_with_params');
     $route->shouldReceive('getConditionParameters')->andReturn(['value1', 'value2']);
 
@@ -102,6 +107,8 @@ test('validator calls condition function with correct parameters', function () {
 
     // Modify the parameters to make the condition return false
     $route = m::mock(Route::class);
+    $route->shouldReceive('isWordPressRoute')->andReturn(true);
+    $route->shouldReceive('hasCondition')->andReturn(true);
     $route->shouldReceive('getCondition')->andReturn('test_condition_with_params');
     $route->shouldReceive('getConditionParameters')->andReturn(['wrong', 'value2']);
 
@@ -118,6 +125,8 @@ test('validator handles conditions without parameters', function () {
 
     // Create a mock of the route
     $route = m::mock(Route::class);
+    $route->shouldReceive('isWordPressRoute')->andReturn(true);
+    $route->shouldReceive('hasCondition')->andReturn(true);
     $route->shouldReceive('getCondition')->andReturn('test_condition_no_params');
     $route->shouldReceive('getConditionParameters')->andReturn([]);
 
@@ -129,6 +138,8 @@ test('validator handles conditions without parameters', function () {
 
     // Modify the route to use the function that returns false
     $route = m::mock(Route::class);
+    $route->shouldReceive('isWordPressRoute')->andReturn(true);
+    $route->shouldReceive('hasCondition')->andReturn(true);
     $route->shouldReceive('getCondition')->andReturn('test_condition_no_params_false');
     $route->shouldReceive('getConditionParameters')->andReturn([]);
 
@@ -156,6 +167,8 @@ test('validator converts various result types to boolean', function () {
 
     foreach ($conditions as $condition => $expected) {
         $route = m::mock(Route::class);
+        $route->shouldReceive('isWordPressRoute')->andReturn(true);
+        $route->shouldReceive('hasCondition')->andReturn(true);
         $route->shouldReceive('getCondition')->andReturn($condition);
         $route->shouldReceive('getConditionParameters')->andReturn([]);
 

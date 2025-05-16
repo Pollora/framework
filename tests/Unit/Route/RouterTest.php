@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Mockery as m;
 use Pollora\Route\Route;
 use Pollora\Route\Router;
-use Pollora\Theme\TemplateHierarchy;
 
 /**
  * Setup function to create mocks and the router instance for all tests
@@ -24,22 +23,23 @@ function setupRouterTest()
 
     // Create container
     $container = new Container;
+
+    // Configure the container with WordPress conditions
     $container->instance('config', new class
     {
         public function get($key, $default = null)
         {
+            if ($key === 'wordpress.conditions') {
+                return [
+                    'is_page' => 'page',
+                    'is_singular' => 'singular',
+                    'is_archive' => 'archive',
+                ];
+            }
+
             return $default;
         }
     });
-
-    // Create and configure the TemplateHierarchy mock
-    $templateHierarchy = m::mock(TemplateHierarchy::class);
-
-    // Register the mock in the container
-    $container->instance(TemplateHierarchy::class, $templateHierarchy);
-
-    // Set as global container instance
-    Container::setInstance($container);
 
     // Create router
     $router = new Router($events, $container);
@@ -51,7 +51,6 @@ function setupRouterTest()
         'router' => $router,
         'events' => $events,
         'container' => $container,
-        'templateHierarchy' => $templateHierarchy,
     ];
 }
 
@@ -107,7 +106,6 @@ test('router finds Laravel route', function () {
 test('router finds WordPress route', function () {
     $setup = setupRouterTest();
     $router = $setup['router'];
-    $templateHierarchy = $setup['templateHierarchy'];
 
     // Configure WordPress conditions with setWordPressConditions from helpers.php
     setWordPressConditions([
@@ -136,11 +134,6 @@ test('router finds WordPress route', function () {
     $router->getRoutes()->add($routePage);
     $router->getRoutes()->add($routeSingular);
 
-    // Set up the mock for getHierarchyOrder
-    $hierarchyOrder = ['is_page', 'is_singular', '__return_true'];
-    $templateHierarchy->shouldReceive('getHierarchyOrder')
-        ->andReturn($hierarchyOrder);
-
     // Call the findRoute method
     $method = new ReflectionMethod($router, 'findRoute');
     $method->setAccessible(true);
@@ -156,7 +149,6 @@ test('router finds WordPress route', function () {
 test('router finds most specific WordPress route with page first', function () {
     $setup = setupRouterTest();
     $router = $setup['router'];
-    $templateHierarchy = $setup['templateHierarchy'];
 
     // Configure WordPress conditions with setWordPressConditions from helpers.php
     setWordPressConditions([
@@ -192,11 +184,6 @@ test('router finds most specific WordPress route with page first', function () {
     $router->getRoutes()->add($routeSingular);
     $router->getRoutes()->add($routeArchive);
 
-    // Set up the mock for getHierarchyOrder
-    $hierarchyOrder = ['is_page', 'is_singular', 'is_archive', '__return_true'];
-    $templateHierarchy->shouldReceive('getHierarchyOrder')
-        ->andReturn($hierarchyOrder);
-
     // Call the findRoute method
     $method = new ReflectionMethod($router, 'findRoute');
     $method->setAccessible(true);
@@ -212,7 +199,6 @@ test('router finds most specific WordPress route with page first', function () {
 test('router finds most specific WordPress route with archive first', function () {
     $setup = setupRouterTest();
     $router = $setup['router'];
-    $templateHierarchy = $setup['templateHierarchy'];
 
     // Important: seule la condition is_archive est vraie, les autres sont fausses
     setWordPressConditions([
@@ -248,10 +234,23 @@ test('router finds most specific WordPress route with archive first', function (
     $router->getRoutes()->add($routeSingular);
     $router->getRoutes()->add($routeArchive);
 
-    // Set up the mock for getHierarchyOrder
-    $hierarchyOrder = ['is_archive', 'is_page', 'is_singular', '__return_true'];
-    $templateHierarchy->shouldReceive('getHierarchyOrder')
-        ->andReturn($hierarchyOrder);
+    // Modify the config to prioritize archive first
+    $container = $setup['container'];
+    $container->instance('config', new class
+    {
+        public function get($key, $default = null)
+        {
+            if ($key === 'wordpress.conditions') {
+                return [
+                    'is_archive' => 'archive',
+                    'is_page' => 'page',
+                    'is_singular' => 'singular',
+                ];
+            }
+
+            return $default;
+        }
+    });
 
     // Call the findRoute method
     $method = new ReflectionMethod($router, 'findRoute');

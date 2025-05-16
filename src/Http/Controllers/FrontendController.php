@@ -7,7 +7,7 @@ namespace Pollora\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Illuminate\View\View;
-use Pollora\Theme\TemplateHierarchy;
+use Pollora\TemplateHierarchy\TemplateHierarchy;
 
 class FrontendController extends Controller
 {
@@ -32,7 +32,8 @@ class FrontendController extends Controller
         global $wp_query;
 
         // Obtenir la hiérarchie des templates pour la requête actuelle
-        $views = $this->templateHierarchy->hierarchy();
+        // Utiliser directement la méthode qui renvoie les chemins de template
+        $views = $this->templateHierarchy->getAllTemplatePaths();
 
         // Vérifier si des vues existent pour chaque template dans la hiérarchie
         foreach ($views as $view) {

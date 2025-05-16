@@ -7,8 +7,9 @@ use Pollora\Attributes\AttributeProcessor;
 use Pollora\Attributes\WpRestRoute;
 use Pollora\Attributes\WpRestRoute\Method;
 
-if (!function_exists('register_rest_route')) {
-    function register_rest_route(...$args) {
+if (! function_exists('register_rest_route')) {
+    function register_rest_route(...$args)
+    {
         // Stub pour les tests
         return true;
     }

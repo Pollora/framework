@@ -38,7 +38,7 @@ class TaxonomyFactory
 
         $taxonomy = new Taxonomy($slug, $objectType, $singular, $plural);
         $taxonomy->init();
-        
+
         // Bind the instance to the container
         $this->container->instance($abstract, $taxonomy);
 

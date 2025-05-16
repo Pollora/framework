@@ -25,7 +25,7 @@ class HookScout extends AbstractScout
     {
         return [
             app_path(),
-            app(RepositoryInterface::class)->getPath()
+            app(RepositoryInterface::class)->getPath(),
         ];
     }
 

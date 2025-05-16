@@ -228,6 +228,7 @@ class Route extends IlluminateRoute
      */
     protected function parseCondition(string $condition): string
     {
+        // First check in all conditions (includes plugin conditions)
         foreach ($this->getConditions() as $signature => $conds) {
             $conds = (array) $conds;
             if (in_array($condition, $conds, true)) {
@@ -321,5 +322,35 @@ class Route extends IlluminateRoute
         }
 
         return true;
+    }
+
+    /**
+     * Check if the current condition is a plugin condition.
+     *
+     * @return bool True if this is a plugin condition, false otherwise
+     */
+    public function isPluginCondition(): bool
+    {
+        if (! $this->hasCondition()) {
+            return false;
+        }
+
+        $condition = $this->getCondition();
+        $app = $this->container->get('app');
+
+        if (! method_exists($app, 'make')) {
+            return false;
+        }
+
+        $config = $app->make('config');
+        $pluginConditionsConfig = $config->get('wordpress.plugin_conditions', []);
+
+        foreach ($pluginConditionsConfig as $pluginConditions) {
+            if (array_key_exists($condition, $pluginConditions)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

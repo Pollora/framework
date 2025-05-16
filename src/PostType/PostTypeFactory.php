@@ -37,7 +37,7 @@ class PostTypeFactory
 
         $postType = new PostType($slug, $singular, $plural);
         $postType->init();
-        
+
         // Bind the instance to the container
         $this->container->instance($abstract, $postType);
 
