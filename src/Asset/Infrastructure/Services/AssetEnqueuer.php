@@ -120,9 +120,11 @@ class AssetEnqueuer
     public function container(string $containerName): self
     {
         $container = app(AssetManager::class)->getContainer($containerName);
+
         if (! $container) {
             throw new \RuntimeException("Asset container '{$containerName}' not found. Make sure you have added it via AssetManager::addContainer().");
         }
+
         $this->container = $container;
 
         return $this;

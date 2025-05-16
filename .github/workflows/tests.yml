@@ -44,12 +44,21 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.3
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           coverage: none
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: PHP version
+        run: php -v
+
+      - name: Pint version
+        run: vendor/bin/pint --version
+
+      - name: Affiche le diff Pint
+        run: vendor/bin/pint --test src/Asset/Infrastructure/Services/AssetEnqueuer.php || true
 
       - name: Check code style
         run: composer test:lint

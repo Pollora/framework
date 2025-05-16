@@ -22,7 +22,7 @@
         }
     ],
     "require": {
-        "php": "^8.2.0",
+        "php": "^8.2.0|^8.3.0",
         "pollora/helper-overrider": "dev-main",
         "illuminate/support": "^12.14",
         "illuminate/database": "^12.14",
@@ -96,7 +96,9 @@
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^11.4",
-        "mockery/mockery": "2.0.x-dev"
+        "mockery/mockery": "2.0.x-dev",
+        "driftingly/rector-laravel": "dev-main",
+        "laravel/pint": "^1.22"
     },
     "autoload-dev": {
         "psr-4": {
