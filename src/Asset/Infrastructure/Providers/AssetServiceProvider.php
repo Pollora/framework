@@ -11,8 +11,6 @@ use Pollora\Asset\Application\Services\AssetRetrievalService;
 use Pollora\Asset\Domain\Contracts\AssetRepositoryInterface;
 use Pollora\Asset\Infrastructure\Repositories\InMemoryAssetRepository;
 use Pollora\Asset\Infrastructure\Services\AssetEnqueuer;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
-
 
 /**
  * Laravel service provider for asset management services and bindings.

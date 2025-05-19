@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Pollora\Taxonomy;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Attributes\AttributeProcessor;
-use Pollora\Discoverer\Contracts\DiscoveryRegistry;
+use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
 use Pollora\Taxonomy\Commands\TaxonomyMakeCommand;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 /**
  * Service provider for attribute-based taxonomy registration.
@@ -18,12 +18,9 @@ use Pollora\Console\Application\Services\ConsoleDetectionService;
  */
 class TaxonomyAttributeServiceProvider extends ServiceProvider
 {
-    /**
-     * @var ConsoleDetectionService
-     */
     protected ConsoleDetectionService $consoleDetectionService;
 
-    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
@@ -47,7 +44,7 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
      *
      * Processes discovered taxonomies and registers them with WordPress.
      */
-    public function boot(DiscoveryRegistry $registry): void
+    public function boot(DiscoveryRegistryInterface $registry): void
     {
         $this->registerTaxonomies($registry);
     }
@@ -55,14 +52,14 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
     /**
      * Register all taxonomies from the registry.
      *
-     * @param  DiscoveryRegistry  $registry  The discovery registry
+     * @param  DiscoveryRegistryInterface  $registry  The discovery registry
      */
-    protected function registerTaxonomies(DiscoveryRegistry $registry): void
+    protected function registerTaxonomies(DiscoveryRegistryInterface $registry): void
     {
         $taxonomyClasses = $registry->getByType('taxonomy');
 
         foreach ($taxonomyClasses as $taxonomyClass) {
-            $this->registerTaxonomy($taxonomyClass);
+            $this->registerTaxonomy($taxonomyClass->getClassName());
         }
     }
 

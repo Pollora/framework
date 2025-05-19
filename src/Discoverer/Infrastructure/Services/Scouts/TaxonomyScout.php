@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Pollora\Discoverer\Infrastructure\Services\Scouts;
+
+use Illuminate\Contracts\Container\Container;
+use Pollora\Discoverer\Infrastructure\Services\SpatieDiscoveryAdapter;
+use Pollora\Taxonomy\AbstractTaxonomy;
+use Spatie\StructureDiscoverer\Discover;
+
+/**
+ * Scout for discovering taxonomies.
+ */
+final class TaxonomyScout extends SpatieDiscoveryAdapter
+{
+    /**
+     * Directories to scan for taxonomies.
+     *
+     * @var array<string>
+     */
+    private array $directories = [];
+
+    /**
+     * Constructor.
+     *
+     * @param  Container  $app  The Laravel application container
+     * @param  array<string>  $directories  Directories to scan for taxonomies
+     */
+    public function __construct(
+        Container $app,
+        array $directories = []
+    ) {
+        parent::__construct($app);
+        $this->directories = $directories;
+    }
+
+    /**
+     * Get default directories for taxonomy discovery.
+     * This can be called from the service provider.
+     *
+     * @param  string  $appPath  Application path
+     * @param  string  $modulesPath  Modules path
+     * @return array<string>
+     */
+    public static function getDefaultDirectories(string $appPath = '', string $modulesPath = ''): array
+    {
+        $directories = [];
+
+        if ($appPath) {
+            $directories[] = $appPath;
+        }
+
+        if ($modulesPath) {
+            $directories[] = $modulesPath;
+        }
+
+        return $directories;
+    }
+
+    public function getDirectories(): array
+    {
+        return $this->directories;
+    }
+
+    public function getType(): string
+    {
+        return 'taxonomy';
+    }
+
+    protected function criteria(Discover $discover): Discover
+    {
+        return $discover->extending(AbstractTaxonomy::class);
+    }
+}

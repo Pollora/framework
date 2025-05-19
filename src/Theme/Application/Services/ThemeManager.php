@@ -14,6 +14,7 @@ namespace Pollora\Theme\Application\Services;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Console\Application\Services\ConsoleDetectionService;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -31,9 +32,6 @@ class ThemeManager implements ThemeService
 
     protected ?ThemeMetadata $theme = null;
 
-    /**
-     * @var ConsoleDetectionService
-     */
     protected ConsoleDetectionService $consoleDetectionService;
 
     public function __construct(

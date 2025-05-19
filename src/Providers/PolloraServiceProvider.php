@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Pollora\Providers;
 
 use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollora\Admin\PageServiceProvider;
 use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
+use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
+use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
@@ -19,6 +20,7 @@ use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider as SharedConfigServiceProvider;
 use Pollora\Discoverer\DiscovererServiceProvider;
+use Pollora\Discoverer\Infrastructure\Providers\DiscovererServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
@@ -65,6 +67,7 @@ class PolloraServiceProvider extends ServiceProvider
     {
         // Generic service providers
         $this->app->register(ConsoleServiceProvider::class);
+        $this->app->register(DebugServiceProvider::class);
         $this->app->register(DiscovererServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);

@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Pollora\PostType;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Attributes\AttributeProcessor;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
-use Pollora\Discoverer\Contracts\DiscoveryRegistry;
-use Pollora\Discoverer\Discoverer;
+use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\PostType\Commands\PostTypeMakeCommand;
 
@@ -20,12 +19,9 @@ use Pollora\PostType\Commands\PostTypeMakeCommand;
  */
 class PostTypeAttributeServiceProvider extends ServiceProvider
 {
-    /**
-     * @var ConsoleDetectionService
-     */
     protected ConsoleDetectionService $consoleDetectionService;
 
-    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
@@ -49,7 +45,7 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
      *
      * Processes discovered post types and registers them with WordPress.
      */
-    public function boot(DiscoveryRegistry $registry, Action $action): void
+    public function boot(DiscoveryRegistryInterface $registry, Action $action): void
     {
         $this->action = $action;
         $this->registerPostTypes($registry);
@@ -58,14 +54,14 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
     /**
      * Register all post types from the registry.
      *
-     * @param  DiscoveryRegistry  $registry  The discovery registry
+     * @param  DiscoveryRegistryInterface  $registry  The discovery registry
      */
-    protected function registerPostTypes(DiscoveryRegistry $registry): void
+    protected function registerPostTypes(DiscoveryRegistryInterface $registry): void
     {
         $postTypeClasses = $registry->getByType('post_type');
 
         foreach ($postTypeClasses as $postTypeClass) {
-            $this->registerPostType($postTypeClass);
+            $this->registerPostType($postTypeClass->getClassName());
         }
     }
 

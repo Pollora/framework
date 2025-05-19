@@ -5,22 +5,19 @@ declare(strict_types=1);
 namespace Pollora\TemplateHierarchy\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\TemplateHierarchy\TemplateHierarchy;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 /**
  * Service provider for the Template Hierarchy System.
  */
 class TemplateHierarchyServiceProvider extends ServiceProvider
 {
-    /**
-     * @var ConsoleDetectionService
-     */
     protected ConsoleDetectionService $consoleDetectionService;
 
-    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
