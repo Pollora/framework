@@ -6,7 +6,7 @@ namespace Pollora\Discoverer\Infrastructure\Services\Scouts;
 
 use Illuminate\Contracts\Container\Container;
 use Pollora\Discoverer\Infrastructure\Services\SpatieDiscoveryAdapter;
-use Pollora\Hook\Domain\Services\AbstractHook;
+use Pollora\Hook\Domain\Contracts\Hooks;
 use Spatie\StructureDiscoverer\Discover;
 
 /**
@@ -70,6 +70,6 @@ final class HookScout extends SpatieDiscoveryAdapter
 
     protected function criteria(Discover $discover): Discover
     {
-        return $discover->extending(AbstractHook::class);
+        return $discover->implementing(Hooks::class);
     }
 }

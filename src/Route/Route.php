@@ -228,7 +228,13 @@ class Route extends IlluminateRoute
      */
     protected function parseCondition(string $condition): string
     {
-        // First check in all conditions (includes plugin conditions)
+        // If the condition contains an underscore followed by an MD5 hash (our parameter suffix),
+        // extract only the base condition name
+        if (preg_match('/^([^_]+)_[a-f0-9]{32}$/', $condition, $matches)) {
+            $condition = $matches[1];
+        }
+
+        // Check in all conditions (includes plugin conditions)
         foreach ($this->getConditions() as $signature => $conds) {
             $conds = (array) $conds;
             if (in_array($condition, $conds, true)) {

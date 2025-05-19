@@ -178,3 +178,53 @@ test('validator converts various result types to boolean', function () {
             ->toBeString();
     }
 });
+
+/**
+ * Test that the validator correctly handles routes with the same condition but different parameters.
+ */
+test('validator selects correct route based on condition parameters', function () {
+    $setup = setupConditionValidatorTest();
+    $validator = $setup['validator'];
+
+    // Setup a global for our mock function
+    $GLOBALS['test_post_type_param'] = 'realisations';
+
+    // Define test function that returns true for a specific post type parameter
+    if (! function_exists('is_post_type')) {
+        eval('namespace { function is_post_type($post_type = null) { 
+            return $post_type === $GLOBALS["test_post_type_param"];
+        } }');
+    }
+
+    // Create a request
+    $request = Request::create('/test', 'GET');
+
+    // Create route with 'realisations' parameter - should match
+    $routeRealisations = m::mock(Route::class);
+    $routeRealisations->shouldReceive('isWordPressRoute')->andReturn(true);
+    $routeRealisations->shouldReceive('hasCondition')->andReturn(true);
+    $routeRealisations->shouldReceive('getCondition')->andReturn('is_post_type');
+    $routeRealisations->shouldReceive('getConditionParameters')->andReturn(['realisations']);
+
+    // Create route with 'post' parameter - should not match
+    $routePost = m::mock(Route::class);
+    $routePost->shouldReceive('isWordPressRoute')->andReturn(true);
+    $routePost->shouldReceive('hasCondition')->andReturn(true);
+    $routePost->shouldReceive('getCondition')->andReturn('is_post_type');
+    $routePost->shouldReceive('getConditionParameters')->andReturn(['post']);
+
+    // First test: GLOBALS['test_post_type_param'] = 'realisations'
+    // Should match the realisations route
+    expect($validator->matches($routeRealisations, $request))->toBeTrue();
+    // Should not match the post route
+    expect($validator->matches($routePost, $request))->toBeFalse();
+
+    // Now change the global parameter to 'post'
+    $GLOBALS['test_post_type_param'] = 'post';
+
+    // Second test: GLOBALS['test_post_type_param'] = 'post'
+    // Should not match the realisations route now
+    expect($validator->matches($routeRealisations, $request))->toBeFalse();
+    // Should match the post route
+    expect($validator->matches($routePost, $request))->toBeTrue();
+});

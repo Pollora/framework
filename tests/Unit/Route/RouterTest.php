@@ -283,3 +283,11 @@ test('router creates fallback when no route found', function () {
     $action = $foundRoute->getAction();
     expect($action['uses'])->toBe('Pollora\Http\Controllers\FrontendController@handle');
 });
+
+/**
+ * Test that WordPress routes with different parameters are handled correctly.
+ * This test has been moved to ConditionValidatorTest to avoid function redeclaration issues.
+ *
+ * @see ConditionValidatorTest::validator_selects_correct_route_based_on_condition_parameters
+ */
+// test('router distinguishes between routes with same condition but different parameters', function () { ... })

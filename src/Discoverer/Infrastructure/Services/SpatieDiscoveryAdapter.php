@@ -103,7 +103,7 @@ abstract class SpatieDiscoveryAdapter implements ScoutInterface
             $discover = $this->criteria($discover);
 
             // Apply caching if enabled
-            if ($this->shouldUseCache() && $this->cacheDriver !== null) {
+            if ($this->cacheDriver !== null && $this->shouldUseCache()) {
                 $discover = $discover->withCache(
                     $this->getCacheIdentifier(),
                     $this->cacheDriver

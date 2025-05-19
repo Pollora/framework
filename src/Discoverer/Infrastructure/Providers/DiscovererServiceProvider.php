@@ -17,6 +17,7 @@ use Pollora\Discoverer\Infrastructure\Services\Scouts\RestScout;
 use Pollora\Discoverer\Infrastructure\Services\Scouts\TaxonomyScout;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Cache\FileDiscoverCacheDriver;
+use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
 
 /**
  * Service provider for class auto-discovery functionality.
@@ -52,9 +53,9 @@ final class DiscovererServiceProvider extends ServiceProvider
         // Create a cache service for Spatie's Structure Discoverer
         $this->app->singleton(DiscoverCacheDriver::class, function (Container $app) {
             // Use Laravel cache if available
-            if (class_exists(\Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver::class)
+            if (class_exists(LaravelDiscoverCacheDriver::class)
                 && method_exists($app, 'environment')) {
-                return new \Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
+                return new LaravelDiscoverCacheDriver;
             }
 
             // Otherwise use file cache

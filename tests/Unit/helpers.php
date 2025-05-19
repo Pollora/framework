@@ -380,6 +380,16 @@ if (! function_exists('__return_false')) {
     }
 }
 
+/**
+ * Helper function for route condition testing
+ */
+if (! function_exists('route_condition_test')) {
+    function route_condition_test($param = null)
+    {
+        return false; // Default implementation, will be mocked in tests
+    }
+}
+
 if (! function_exists('translate_with_gettext_context')) {
     function translate_with_gettext_context($text, $context, $domain = null)
     {

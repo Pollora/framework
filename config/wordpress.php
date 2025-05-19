@@ -10,41 +10,31 @@ return [
      * These conditions are used by Route::wordpress() and Route::wp() methods.
      */
     'conditions' => [
-        // Error and special pages
+        'is_embed' => 'embed',
         'is_404' => '404',
         'is_search' => 'search',
         'is_paged' => 'paged',
-
-        // Homepage and blog index
         'is_front_page' => ['/', 'front'],
         'is_home' => ['home', 'blog'],
-
-        // Specific template
-        'is_page_template' => 'template',
-
-        // Custom post type hierarchy
-        'is_singular' => 'singular',
-        'is_single' => 'single',
-        'is_attachment' => 'attachment',
+        'is_privacy_policy' => 'privacy_policy',
         'is_post_type_archive' => ['post-type-archive', 'postTypeArchive'],
-        'is_archive' => 'archive',
-
-        // Taxonomies
+        'is_tax' => 'taxonomy',
+        'is_attachment' => 'attachment',
+        'is_page_template' => 'template',
+        'is_sticky' => 'sticky',
+        'is_single' => 'single',
+        'is_subpage' => ['subpage', 'subpageof'],
+        'is_page' => 'page',
+        'is_singular' => 'singular',
         'is_category' => ['category', 'cat'],
         'is_tag' => 'tag',
-        'is_tax' => 'tax',
-
-        // Time hierarchy
+        'is_author' => 'author',
         'is_date' => 'date',
         'is_year' => 'year',
         'is_month' => 'month',
         'is_day' => 'day',
         'is_time' => 'time',
-
-        // Others conditions
-        'is_author' => 'author',
-        'is_sticky' => 'sticky',
-        'is_subpage' => ['subpage', 'subpageof'],
+        'is_archive' => 'archive',
     ],
 
     'plugin_conditions' => [

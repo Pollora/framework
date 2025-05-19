@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Contracts\Container\Container;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discoverer\Infrastructure\Services\Scouts\HookScout;
-use Pollora\Hook\Domain\Services\AbstractHook;
+use Pollora\Hook\Domain\Contracts\Hooks;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
 
@@ -44,9 +44,9 @@ test('criteria applies AbstractHook class filter', function () {
     $discover = Mockery::mock(Discover::class);
 
     // Configuration du mock pour la chaîne d'appels
-    $discover->shouldReceive('extending')
+    $discover->shouldReceive('implementing')
         ->once()
-        ->with(AbstractHook::class)
+        ->with(Hooks::class)
         ->andReturnSelf();
 
     // Utilisation de la réflexion pour accéder à la méthode protégée
