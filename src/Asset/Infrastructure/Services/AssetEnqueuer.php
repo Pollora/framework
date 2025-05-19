@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Pollora\Asset\Infrastructure\Services;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Log;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Exceptions\AssetException;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Filter;
-use Illuminate\Foundation\Application;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -126,6 +126,7 @@ class AssetEnqueuer
     public function handle(string $handle): self
     {
         $this->handle = $handle;
+
         return $this;
     }
 
@@ -139,6 +140,7 @@ class AssetEnqueuer
     {
         $this->path = $path;
         $this->type = $this->determineFileType($path);
+
         return $this;
     }
 
@@ -160,6 +162,7 @@ class AssetEnqueuer
             throw new \RuntimeException("Asset container '{$containerName}' not found. Make sure you have added it via AssetManager::addContainer().");
         }
         $this->container = $container;
+
         return $this;
     }
 

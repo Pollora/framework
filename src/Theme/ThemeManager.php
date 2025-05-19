@@ -15,8 +15,8 @@ use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Foundation\Support\IncludesFiles;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 class ThemeManager
 {
@@ -28,9 +28,6 @@ class ThemeManager
 
     protected ?ThemeMetadata $theme = null;
 
-    /**
-     * @var ConsoleDetectionService
-     */
     protected ConsoleDetectionService $consoleDetectionService;
 
     public function __construct(

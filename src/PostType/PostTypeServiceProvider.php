@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace Pollora\PostType;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Support\Facades\PostType;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 /**
  * Service provider for registering custom post types.
@@ -21,12 +21,9 @@ use Pollora\Console\Application\Services\ConsoleDetectionService;
  */
 class PostTypeServiceProvider extends ServiceProvider
 {
-    /**
-     * @var ConsoleDetectionService
-     */
     protected ConsoleDetectionService $consoleDetectionService;
 
-    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);

@@ -6,12 +6,12 @@ namespace Pollora\Hook\Infrastructure\Providers;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Discoverer\Contracts\DiscoveryRegistry;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
+use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Hook\UI\Console\ActionMakeCommand;
 use Pollora\Hook\UI\Console\FilterMakeCommand;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
 
 /**
  * Service provider for Hook feature (Infrastructure layer).
@@ -30,12 +30,10 @@ class HookServiceProvider extends ServiceProvider
 
     /**
      * Console detection service instance.
-     *
-     * @var ConsoleDetectionService
      */
     protected ConsoleDetectionService $consoleDetectionService;
 
-    public function __construct($app, ConsoleDetectionService $consoleDetectionService = null)
+    public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
@@ -65,7 +63,7 @@ class HookServiceProvider extends ServiceProvider
      *
      * Instantiates and registers all hooks discovered by the Discoverer system.
      */
-    public function boot(Application $app, DiscoveryRegistry $registry): void
+    public function boot(Application $app, DiscoveryRegistryInterface $registry): void
     {
         $this->app = $app;
         $this->loadHooks($registry);
@@ -76,11 +74,11 @@ class HookServiceProvider extends ServiceProvider
      *
      * @param  DiscoveryRegistry  $registry  The discovery registry
      */
-    protected function loadHooks(DiscoveryRegistry $registry): void
+    protected function loadHooks(DiscoveryRegistryInterface $registry): void
     {
         $hooks = $registry->getByType('hook');
         foreach ($hooks as $hookClass) {
-            $this->registerHook($hookClass);
+            $this->registerHook($hookClass->getClassName());
         }
     }
 

@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
+use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Support\Facades\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
@@ -17,12 +18,13 @@ class Bootstrap
 {
     use QueryTrait;
 
-    /** @var ConsoleDetectionService */
     protected ConsoleDetectionService $consoleDetectionService;
+    protected DebugDetectorInterface $debugDetector;
 
-    public function __construct(ConsoleDetectionService $consoleDetectionService = null)
+    public function __construct(?ConsoleDetectionService $consoleDetectionService = null, DebugDetectorInterface $debugDetector)
     {
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+        $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
     }
 
     /**
@@ -193,16 +195,17 @@ class Bootstrap
         Constant::queue('WP_USE_THEMES', ! $this->consoleDetectionService->isConsole() && ! str_starts_with((string) request()->server('REQUEST_URI'), '/cms/'));
 
         Constant::queue('WP_AUTO_UPDATE_CORE', false);
-        Constant::queue('DISALLOW_FILE_MODS', true);
-        Constant::queue('DISALLOW_FILE_EDIT', true);
+        // Constant::queue('DISALLOW_FILE_MODS', true);
+        // Constant::queue('DISALLOW_FILE_EDIT', true);
         Constant::queue('DISABLE_WP_CRON', true);
         Constant::queue('WP_POST_REVISIONS', 5);
 
-        Constant::queue('WP_DEBUG', config('app.debug'));
-        Constant::queue('WP_DEBUG_DISPLAY', config('app.debug'));
+        $debugMode = $this->debugDetector->isDebugMode();
+        Constant::queue('WP_DEBUG', $debugMode);
+        Constant::queue('WP_DEBUG_DISPLAY', $debugMode);
         Constant::queue('WP_DEFAULT_THEME', 'default');
 
-        Constant::queue('JETPACK_DEV_DEBUG', config('app.debug'));
+        Constant::queue('JETPACK_DEV_DEBUG', $debugMode);
 
         foreach ((array) config('wordpress.constants', []) as $key => $value) {
             $key = strtoupper($key);
