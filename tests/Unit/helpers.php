@@ -363,3 +363,13 @@ if (! function_exists('__return_false')) {
         return false;
     }
 }
+
+/**
+ * Helper function for route condition testing
+ */
+if (! function_exists('route_condition_test')) {
+    function route_condition_test($param = null)
+    {
+        return false; // Default implementation, will be mocked in tests
+    }
+}

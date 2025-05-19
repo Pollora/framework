@@ -103,13 +103,39 @@ class Router extends IlluminateRouter
 
                 // Check which WordPress routes match the current request
                 $matchingRoutes = [];
+
+                // First, sort the WordPress routes by priority based on their condition parameters
+                // This ensures more specific routes are checked first
+                usort($wpRoutes, function ($a, $b) {
+                    // Routes with parameters should come first
+                    $aHasParams = ! empty($a->getConditionParameters());
+                    $bHasParams = ! empty($b->getConditionParameters());
+
+                    if ($aHasParams && ! $bHasParams) {
+                        return -1;
+                    }
+
+                    if (! $aHasParams && $bHasParams) {
+                        return 1;
+                    }
+
+                    // If both have or don't have parameters, maintain original order
+                    return 0;
+                });
+
+                // Then check each route
                 foreach ($wpRoutes as $route) {
                     $condition = $route->getCondition();
                     if (function_exists($condition)) {
                         // Directly check if the WordPress condition is satisfied
                         $params = $route->getConditionParameters();
                         if (call_user_func_array($condition, $params)) {
-                            $matchingRoutes[$condition] = $route;
+                            // Generate a unique key for this route that includes both condition and parameters
+                            $uniqueKey = $condition;
+                            if (! empty($params)) {
+                                $uniqueKey .= ':'.serialize($params);
+                            }
+                            $matchingRoutes[$uniqueKey] = $route;
                         }
                     }
                 }
@@ -142,20 +168,28 @@ class Router extends IlluminateRouter
 
                     // Go through the hierarchy order to find the most specific route
                     foreach ($hierarchyOrder as $condition) {
-                        if (isset($matchingRoutes[$condition])) {
-                            $route = $matchingRoutes[$condition];
+                        // Find any route with this condition (regardless of parameters)
+                        $matchedRoute = null;
 
+                        foreach ($matchingRoutes as $key => $route) {
+                            if (strpos($key, $condition) === 0) {
+                                $matchedRoute = $route;
+                                break;
+                            }
+                        }
+
+                        if ($matchedRoute) {
                             // Initialize parameters if needed
-                            if ($route->parameters === null) {
-                                $route->parameters = [];
+                            if ($matchedRoute->parameters === null) {
+                                $matchedRoute->parameters = [];
                             }
 
                             // Add WordPress bindings
                             global $post, $wp_query;
-                            $route->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
-                            $route->parameters['wp_query'] = $wp_query;
+                            $matchedRoute->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
+                            $matchedRoute->parameters['wp_query'] = $wp_query;
 
-                            return $route;
+                            return $matchedRoute;
                         }
                     }
                 }
@@ -250,7 +284,7 @@ class Router extends IlluminateRouter
             }
 
             // Fallback to 404 if none of the special handlers match
-            abort(404);
+            throw new NotFoundHttpException;
         };
 
         // Create a route with the special handler

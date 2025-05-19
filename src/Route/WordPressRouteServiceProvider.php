@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Route;
 
-use Illuminate\Foundation\Application;
+use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Http\Controllers\FrontendController;
@@ -34,7 +34,7 @@ class WordPressRouteServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->extend('router', fn ($router, Application $app): Router => new Router($app->make('events'), $app));
+        $this->app->extend('router', fn ($router, Container $app): Router => new Router($app->make('events'), $app));
     }
 
     /**
@@ -58,21 +58,30 @@ class WordPressRouteServiceProvider extends ServiceProvider
                 throw new \InvalidArgumentException('The wp route requires at least a condition and a callback.');
             }
 
-            // First argument is the condition
-            $uri = $condition;
-
             // Last argument is always the callback
             $action = $args[count($args) - 1];
-
-            // Create the route with specific HTTP methods
-            $route = Route::addRoute($methods, $uri, $action);
-            $route->setIsWordPressRoute(true);
 
             // Extract condition parameters (all arguments except the last one)
             $conditionParams = [];
             if (count($args) > 1) {
                 $conditionParams = array_slice($args, 0, count($args) - 1);
             }
+
+            // Create a unique URI that incorporates both the condition and parameters
+            // This ensures that routes with the same condition but different parameters
+            // are treated as distinct routes
+            $uri = $condition;
+
+            // Only modify URI if we have parameters
+            if (! empty($conditionParams)) {
+                // Create a unique suffix based on the parameters
+                $paramSuffix = '_'.md5(serialize($conditionParams));
+                $uri = $condition.$paramSuffix;
+            }
+
+            // Create the route with specific HTTP methods
+            $route = Route::addRoute($methods, $uri, $action);
+            $route->setIsWordPressRoute(true);
 
             // Set condition parameters
             $route->setConditionParameters($conditionParams);

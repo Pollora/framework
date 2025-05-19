@@ -19,9 +19,10 @@ class Bootstrap
     use QueryTrait;
 
     protected ConsoleDetectionService $consoleDetectionService;
+
     protected DebugDetectorInterface $debugDetector;
 
-    public function __construct(?ConsoleDetectionService $consoleDetectionService = null, DebugDetectorInterface $debugDetector)
+    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector)
     {
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
         $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
