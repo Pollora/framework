@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Route;
+namespace Pollora\Route\Infrastructure\Adapters;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Route as IlluminateRoute;
-use Pollora\Route\Matching\ConditionValidator;
+use Pollora\Route\Infrastructure\Matching\ConditionValidator;
 
 /**
  * Extended Route class that adds WordPress-specific routing capabilities.
@@ -217,7 +217,11 @@ class Route extends IlluminateRoute
      */
     public function getWordPressValidators(): array
     {
-        return $this->wordpressValidators ??= [new ConditionValidator];
+        if ($this->wordpressValidators === null) {
+            $this->wordpressValidators = [new ConditionValidator];
+        }
+
+        return $this->wordpressValidators;
     }
 
     /**

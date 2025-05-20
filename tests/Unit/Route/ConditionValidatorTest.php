@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Http\Request;
 use Mockery as m;
-use Pollora\Route\Matching\ConditionValidator;
-use Pollora\Route\Route;
+use Pollora\Route\Infrastructure\Matching\ConditionValidator;
+use Pollora\Route\Infrastructure\Adapters\Route;
 
 /**
  * Setup function to create the validator and mock WordPress functions
@@ -191,7 +191,7 @@ test('validator selects correct route based on condition parameters', function (
 
     // Define test function that returns true for a specific post type parameter
     if (! function_exists('is_post_type')) {
-        eval('namespace { function is_post_type($post_type = null) { 
+        eval('namespace { function is_post_type($post_type = null) {
             return $post_type === $GLOBALS["test_post_type_param"];
         } }');
     }

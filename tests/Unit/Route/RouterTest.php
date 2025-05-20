@@ -6,8 +6,8 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
 use Mockery as m;
-use Pollora\Route\Route;
-use Pollora\Route\Router;
+use Pollora\Route\Infrastructure\Adapters\Route;
+use Pollora\Route\Infrastructure\Adapters\Router;
 
 /**
  * Setup function to create mocks and the router instance for all tests
