@@ -7,6 +7,7 @@ namespace Pollora\Services\WordPress\Installation;
 use Illuminate\Support\Facades\Config;
 use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\MeiliScout\Foundation\Application;
 
 /**
  * Service for loading WordPress core files and initializing the environment.
@@ -62,14 +63,11 @@ class WordPressInstallLoaderService
         '/class-wp-block-parser.php',
     ];
 
-    protected ServiceLocator $locator;
-
     protected Filter $filter;
 
-    public function __construct(ServiceLocator $locator)
+    public function __construct(Application $app)
     {
-        $this->locator = $locator;
-        $this->filter = $locator->resolve(Filter::class);
+        $this->filter = $app->get(Filter::class);
     }
 
     /**

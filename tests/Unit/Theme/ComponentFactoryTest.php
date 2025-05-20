@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Foundation\Application;
 use Mockery as m;
+use Pollora\Theme\Domain\Contracts\ContainerInterface;
 use Pollora\Theme\Domain\Models\ThemeInitializer;
 
 require_once __DIR__.'/../helpers.php';
@@ -12,7 +12,7 @@ describe('ComponentFactory', function () {
     it(/**
      * @throws ReflectionException
      */ 'injects ServiceLocator into ThemeComponent (without constructor)', function () {
-        $mockApp = m::mock(Application::class);
+        $mockApp = m::mock(ContainerInterface::class);
         $ref = new ReflectionClass(ThemeInitializer::class);
         $instance = $ref->newInstanceWithoutConstructor();
         $refProp = $ref->getProperty('app');

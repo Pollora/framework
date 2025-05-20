@@ -7,8 +7,9 @@ namespace Pollora\Route\Infrastructure\Adapters;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Router as IlluminateRouter;
-use Pollora\Route\Bindings\NullableWpPost;
+use Pollora\Route\Domain\Models\NullablePostEntity;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -37,7 +38,7 @@ class Router extends IlluminateRouter
         parent::__construct($events, $container);
 
         $this->routes = new RouteCollection;
-        
+
         // Ensure we properly set the container for route resolution
         if ($container) {
             $this->container = $container;
@@ -177,7 +178,7 @@ class Router extends IlluminateRouter
                         $matchedRoute = null;
 
                         foreach ($matchingRoutes as $key => $route) {
-                            if (strpos($key, $condition) === 0) {
+                            if (str_starts_with($key, $condition)) {
                                 $matchedRoute = $route;
                                 break;
                             }
@@ -191,7 +192,7 @@ class Router extends IlluminateRouter
 
                             // Add WordPress bindings
                             global $post, $wp_query;
-                            $matchedRoute->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
+                            $matchedRoute->parameters['post'] = $post ?? (new WordPressNullablePost)->toWpPost(new NullablePostEntity);
                             $matchedRoute->parameters['wp_query'] = $wp_query;
 
                             return $matchedRoute;
@@ -217,10 +218,10 @@ class Router extends IlluminateRouter
      */
     private function isSpecialWordPressRequest(): bool
     {
-        return (function_exists('is_robots') && is_robots())
-            || (function_exists('is_favicon') && is_favicon())
-            || (function_exists('is_feed') && is_feed())
-            || (function_exists('is_trackback') && is_trackback());
+        return (function_exists('is_robots') && \is_robots())
+            || (function_exists('is_favicon') && \is_favicon())
+            || (function_exists('is_feed') && \is_feed())
+            || (function_exists('is_trackback') && \is_trackback());
     }
 
     /**
@@ -232,13 +233,13 @@ class Router extends IlluminateRouter
     {
         $specialCondition = null;
 
-        if (function_exists('is_robots') && is_robots()) {
+        if (function_exists('is_robots') && \is_robots()) {
             $specialCondition = 'is_robots';
-        } elseif (function_exists('is_favicon') && is_favicon()) {
+        } elseif (function_exists('is_favicon') && \is_favicon()) {
             $specialCondition = 'is_favicon';
-        } elseif (function_exists('is_feed') && is_feed()) {
+        } elseif (function_exists('is_feed') && \is_feed()) {
             $specialCondition = 'is_feed';
-        } elseif (function_exists('is_trackback') && is_trackback()) {
+        } elseif (function_exists('is_trackback') && \is_trackback()) {
             $specialCondition = 'is_trackback';
         }
 
@@ -271,18 +272,18 @@ class Router extends IlluminateRouter
             'middleware' => [
                 'web',
             ],
-            'uses' => fn () => new \Illuminate\Http\Response(),
+            'uses' => fn () => new Response,
         ];
 
         // Create a new route with a unique name based on the type of special request
         $specialType = 'unknown';
-        if (function_exists('is_robots') && is_robots()) {
+        if (function_exists('is_robots') && \is_robots()) {
             $specialType = 'robots';
-        } elseif (function_exists('is_favicon') && is_favicon()) {
+        } elseif (function_exists('is_favicon') && \is_favicon()) {
             $specialType = 'favicon';
-        } elseif (function_exists('is_feed') && is_feed()) {
+        } elseif (function_exists('is_feed') && \is_feed()) {
             $specialType = 'feed';
-        } elseif (function_exists('is_trackback') && is_trackback()) {
+        } elseif (function_exists('is_trackback') && \is_trackback()) {
             $specialType = 'trackback';
         }
 
@@ -321,7 +322,6 @@ class Router extends IlluminateRouter
      * Set WordPress conditions for routes.
      *
      * @param  array<string, mixed>  $conditions  Mapping of condition signatures to routes
-     * @return void
      */
     public function setConditions(array $conditions = []): void
     {
@@ -343,7 +343,7 @@ class Router extends IlluminateRouter
 
         // Add WordPress bindings
         global $post, $wp_query;
-        $route->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
+        $route->parameters['post'] = $post ?? (new WordPressNullablePost)->toWpPost(new NullablePostEntity);
         $route->parameters['wp_query'] = $wp_query;
 
         return $route;
@@ -351,8 +351,6 @@ class Router extends IlluminateRouter
 
     /**
      * Initialize WordPress conditions from config if not already set.
-     *
-     * @return void
      */
     private function setConditionsIfEmpty(): void
     {
@@ -369,7 +367,7 @@ class Router extends IlluminateRouter
      */
     private function isWordPressAdminRequest(): bool
     {
-        return function_exists('is_admin') && is_admin();
+        return function_exists('is_admin') && \is_admin();
     }
 
     /**
@@ -382,6 +380,7 @@ class Router extends IlluminateRouter
     {
         $config = $this->container->make('config');
         $adminRoute = new AdminRoute($request, $this, $config);
+
         return $adminRoute->get();
     }
-} 
+}

@@ -9,17 +9,15 @@ use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollora\Admin\PageServiceProvider;
 use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
-use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Attributes\AttributesServiceProvider;
+use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
-use Pollora\Console\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
-use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider as SharedConfigServiceProvider;
-use Pollora\Discoverer\DiscovererServiceProvider;
+use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Discoverer\Infrastructure\Providers\DiscovererServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
@@ -67,7 +65,7 @@ class PolloraServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Generic service providers
-        //$this->app->register(RoutingServiceProvider::class);
+        $this->app->register(RoutingServiceProvider::class);
         $this->app->register(ConsoleServiceProvider::class);
         $this->app->register(DebugServiceProvider::class);
         $this->app->register(DiscovererServiceProvider::class);
@@ -78,7 +76,6 @@ class PolloraServiceProvider extends ServiceProvider
 
         // Shared modules
         $this->app->register(CollectionServiceProvider::class);
-        $this->app->register(SharedConfigServiceProvider::class);
 
         // Block features
         $this->app->register(BlockCategoryServiceProvider::class);

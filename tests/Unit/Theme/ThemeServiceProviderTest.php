@@ -2,14 +2,20 @@
 
 declare(strict_types=1);
 
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Mockery as m;
+use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
+use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Services\TemplateHierarchy;
 use Pollora\Theme\Infrastructure\Providers\ThemeComponentProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\Theme\Infrastructure\Services\ComponentFactory;
+use Pollora\Theme\Domain\Contracts\ContainerInterface as ThemeContainerInterface;
+use Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface;
+use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
+use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 
 describe('ThemeServiceProvider', function () {
     it('registers services in Laravel container', function () {
@@ -32,9 +38,32 @@ describe('ThemeServiceProvider', function () {
             })->atMost()->once();
         }
 
+        // Mock the WordPressThemeInterface binding
+        $mockApp->shouldReceive('singleton')
+            ->with(WordPressThemeInterface::class, WordPressThemeAdapter::class)
+            ->once();
+
+        // Mock ContainerInterface singleton binding
+        $mockApp->shouldReceive('singleton')
+            ->with(ThemeContainerInterface::class, m::type('Closure'))
+            ->once();
+            
+        // Mock TemplateHierarchyInterface singleton binding
+        $mockApp->shouldReceive('singleton')
+            ->with(TemplateHierarchyInterface::class, m::type('Closure'))
+            ->zeroOrMoreTimes();
+
         // Mock register() expectations for config providers
-        $mockApp->shouldReceive('register')->with('Pollora\\Config\\Infrastructure\\Providers\\ConfigServiceProvider')->once();
-        $mockApp->shouldReceive('register')->with('Pollora\\Support\\Infrastructure\\Providers\\CollectionServiceProvider')->once();
+        $mockApp->shouldReceive('register')->with('Pollora\Config\Infrastructure\Providers\ConfigServiceProvider')->once();
+        $mockApp->shouldReceive('register')->with('Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider')->once();
+        
+        // Mock afterResolving calls
+        $mockApp->shouldReceive('afterResolving')
+            ->with(ConfigRepositoryInterface::class, m::type('Closure'))
+            ->zeroOrMoreTimes();
+        $mockApp->shouldReceive('afterResolving')
+            ->with(CollectionFactoryInterface::class, m::type('Closure'))
+            ->zeroOrMoreTimes();
 
         // Mock ThemeComponentProvider et attente sur register()
         $themeComponentProvider = m::mock(ThemeComponentProvider::class);

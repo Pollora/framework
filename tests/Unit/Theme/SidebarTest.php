@@ -2,20 +2,28 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Foundation\Application;
 use Mockery as m;
+use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
+use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Theme\Domain\Models\Sidebar;
+use Psr\Container\ContainerInterface;
 
 require_once __DIR__.'/../helpers.php';
 
 describe('Sidebar', function () {
     it('resolves Application from Laravel container', function () {
-        $mockApp = m::mock(Application::class);
-        $mockAction = m::mock('Pollora\\Hook\\Infrastructure\\Services\\Action');
-        // Simuler la résolution via le container Laravel
-        $sidebar = new Sidebar($mockApp, $mockAction); // Adapter le constructeur si besoin
+        $mockAction = m::mock(Action::class);
+        $mockContainer = m::mock(ContainerInterface::class);
+        $mockConfig = m::mock(ConfigRepositoryInterface::class);
+        
+        // Container should provide Action when requested
+        $mockContainer->shouldReceive('get')
+            ->with(Action::class)
+            ->andReturn($mockAction);
+            
+        $sidebar = new Sidebar($mockContainer, $mockConfig);
         $ref = new ReflectionProperty($sidebar, 'app');
         $ref->setAccessible(true);
-        expect($ref->getValue($sidebar))->toBe($mockApp);
+        expect($ref->getValue($sidebar))->toBe($mockContainer);
     });
 });

@@ -7,7 +7,7 @@ namespace Pollora\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Illuminate\View\View;
-use Pollora\TemplateHierarchy\Domain\Services\TemplateHierarchy;
+use Pollora\TemplateHierarchy\TemplateHierarchy;
 
 class FrontendController extends Controller
 {

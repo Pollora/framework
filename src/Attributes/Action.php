@@ -34,19 +34,19 @@ class Action extends Hook
     /**
      * Handle the attribute processing.
      *
-     * @param  object  $app  Le service locator pour résoudre les dépendances
+     * @param  object  $serviceLocator  Le service locator pour résoudre les dépendances
      * @param  object  $instance  The instance being processed
      * @param  ReflectionMethod|ReflectionClass  $context  The reflection context
      * @param  object  $attribute  The attribute instance
      */
     public function handle(
-        $app,
+        $serviceLocator,
         object $instance,
         ReflectionMethod|ReflectionClass $context,
         object $attribute,
     ): void {
         // Récupérer le service Action depuis le service locator
-        $actionService = $app->make(ActionService::class);
+        $actionService = $serviceLocator->get(ActionService::class);
         if (! $actionService) {
             return;
         }

@@ -2,20 +2,32 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Translation\Loader;
-use Psr\Container\ContainerInterface;
 use Illuminate\View\ViewFinderInterface;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 beforeEach(function () {
     // Create mock container with config property
-    $this->app = Mockery::mock(ContainerInterface::class);
+    $this->app = Mockery::mock(\Illuminate\Contracts\Container\Container::class);
     $this->config = Mockery::mock('config');
     $this->config->shouldReceive('get')->withAnyArgs()->andReturn('/test/path');
     $this->app->shouldReceive('offsetGet')->with('config')->andReturn($this->config);
-
+    
+    // Mock the Console Detection Service
+    $mockConsoleDetectionService = Mockery::mock(\Pollora\Application\Application\Services\ConsoleDetectionService::class);
+    $mockConsoleDetectionService->shouldReceive('isConsole')->andReturn(false);
+    $mockConsoleDetectionService->shouldReceive('isWpCli')->andReturn(false);
+    $this->app->shouldReceive('make')->with(\Pollora\Application\Application\Services\ConsoleDetectionService::class)
+        ->andReturn($mockConsoleDetectionService);
+    $this->app->shouldReceive('has')->withAnyArgs()->andReturn(true);
+    
+    // Mock the bind for any dependencies
+    $this->app->shouldReceive('bind')->withAnyArgs()->andReturnNull();
+    
     // Other required mocks
     $this->viewFinder = Mockery::mock(ViewFinderInterface::class);
     $this->localeLoader = Mockery::mock(Loader::class);
@@ -35,11 +47,20 @@ test('loads a valid theme', function () {
     $themeName = 'testTheme';
 
     // Create a better mock of the container
-    $app = Mockery::mock(ContainerInterface::class);
+    $app = Mockery::mock(\Illuminate\Contracts\Container\Container::class);
     $config = Mockery::mock('config');
     $config->shouldReceive('get')->withAnyArgs()->andReturn($testPath);
     $app->shouldReceive('offsetGet')->with('config')->andReturn($config);
     $app->shouldReceive('runningInConsole')->andReturn(true);
+    
+    // Mock the Console Detection Service
+    $mockConsoleDetectionService = Mockery::mock(\Pollora\Application\Application\Services\ConsoleDetectionService::class);
+    $mockConsoleDetectionService->shouldReceive('isConsole')->andReturn(false);
+    $mockConsoleDetectionService->shouldReceive('isWpCli')->andReturn(false);
+    $app->shouldReceive('make')->with(\Pollora\Application\Application\Services\ConsoleDetectionService::class)
+        ->andReturn($mockConsoleDetectionService);
+    $app->shouldReceive('has')->withAnyArgs()->andReturn(true);
+    $app->shouldReceive('bind')->withAnyArgs()->andReturnNull();
 
     // Create manager with proper mocks
     $manager = Mockery::mock(
@@ -78,11 +99,20 @@ test('throws an exception if theme directory does not exist', function () {
     $themeName = 'nonexistent';
 
     // Create a better mock of the container
-    $app = Mockery::mock(ContainerInterface::class);
+    $app = Mockery::mock(\Illuminate\Contracts\Container\Container::class);
     $config = Mockery::mock('config');
     $config->shouldReceive('get')->withAnyArgs()->andReturn('/path/to/themes');
     $app->shouldReceive('offsetGet')->with('config')->andReturn($config);
     $app->shouldReceive('runningInConsole')->andReturn(false);
+    
+    // Mock the Console Detection Service
+    $mockConsoleDetectionService = Mockery::mock(\Pollora\Application\Application\Services\ConsoleDetectionService::class);
+    $mockConsoleDetectionService->shouldReceive('isConsole')->andReturn(false);
+    $mockConsoleDetectionService->shouldReceive('isWpCli')->andReturn(false);
+    $app->shouldReceive('make')->with(\Pollora\Application\Application\Services\ConsoleDetectionService::class)
+        ->andReturn($mockConsoleDetectionService);
+    $app->shouldReceive('has')->withAnyArgs()->andReturn(true);
+    $app->shouldReceive('bind')->withAnyArgs()->andReturnNull();
 
     // Create manager with proper mocks
     $manager = Mockery::mock(

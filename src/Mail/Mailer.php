@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Mail;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Mail\Message;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Mail;
@@ -22,10 +23,9 @@ class Mailer
 
     protected Filter $filter;
 
-    public function __construct(ServiceLocator $locator)
+    public function __construct(Application $app)
     {
-        $this->locator = $locator;
-        $this->filter = $locator->resolve(Filter::class);
+        $this->filter = $app->get(Filter::class);
     }
 
     /**

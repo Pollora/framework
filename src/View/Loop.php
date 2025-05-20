@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace Pollora\View;
 
-use Pollora\Container\Domain\ServiceLocator;
+use Illuminate\Contracts\Container\Container;
 use Pollora\Hook\Infrastructure\Services\Filter;
 
 class Loop
 {
-    protected ServiceLocator $locator;
 
     protected Filter $filter;
 
-    public function __construct(ServiceLocator $locator)
+    public function __construct(Container $app)
     {
-        $this->locator = $locator;
-        $this->filter = $locator->resolve(Filter::class);
+        $this->filter = $app->get(Filter::class);
     }
 
     /**

@@ -22,7 +22,7 @@ class WordPressMailServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.mail', fn ($app): Mailer => new Mailer($app->make(ServiceLocator::class)));
+        $this->app->singleton('wp.mail', fn ($app): Mailer => new Mailer($app));
     }
 
     /**

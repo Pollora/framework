@@ -16,7 +16,6 @@ use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Foundation\Support\IncludesFiles;
-use Pollora\Console\Application\Services\ConsoleDetectionService;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;

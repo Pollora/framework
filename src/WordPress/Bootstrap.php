@@ -13,7 +13,6 @@ use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
-use Psr\Container\ContainerInterface;
 
 class Bootstrap
 {
@@ -23,21 +22,18 @@ class Bootstrap
 
     protected DebugDetectorInterface $debugDetector;
 
-    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector)
-    {
-        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
-        $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
-    }
-
     /**
      * Database configuration array.
      */
     private array $db;
+
     protected \Pollora\Hook\Domain\Contracts\Action $action;
 
-    public function __construct(protected ContainerInterface $app)
+    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, Action $action)
     {
-        $this->action = $this->app->get(Action::class);
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+        $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
+        $this->action = $action;
     }
 
     /**

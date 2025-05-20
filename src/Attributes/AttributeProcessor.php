@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Attributes;
 
 use Pollora\Attributes\Exceptions\AttributeProcessingException;
-use Pollora\Container\Domain\ServiceLocator;
-use Pollora\Container\Infrastructure\ContainerServiceLocator;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
