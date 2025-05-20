@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Pollora\BlockPattern\UI;
 
 use Pollora\BlockPattern\Domain\Contracts\PatternServiceInterface;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Psr\Container\ContainerInterface;
 
 /**
  * ThemeComponent for registering Gutenberg patterns and categories.
@@ -23,10 +23,10 @@ class PatternComponent implements ThemeComponent
     /**
      * PatternComponent constructor.
      */
-    public function __construct(ServiceLocator $locator)
+    public function __construct(protected ContainerInterface $app)
     {
-        $this->registrationService = $locator->resolve(PatternServiceInterface::class);
-        $this->action = $locator->resolve(Action::class);
+        $this->registrationService = $this->app->get(PatternServiceInterface::class);
+        $this->action = $this->app->get(Action::class);
     }
 
     /**
@@ -44,4 +44,4 @@ class PatternComponent implements ThemeComponent
             $this->registrationService->registerAll();
         });
     }
-} 
+}

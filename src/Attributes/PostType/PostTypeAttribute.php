@@ -8,6 +8,7 @@ use Attribute;
 use Pollora\Attributes\Attributable;
 use Pollora\Attributes\Contracts\HandlesAttributes;
 use Pollora\PostType\Contracts\PostType;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -33,7 +34,7 @@ abstract class PostTypeAttribute implements HandlesAttributes
      * @param  ReflectionClass|ReflectionMethod  $context  The reflection class of the instance
      * @param  object  $attribute  The attribute instance
      */
-    public function handle($container, Attributable $instance, ReflectionClass|ReflectionMethod $context, object $attribute): void
+    public function handle(ContainerInterface $app, Attributable $instance, ReflectionClass|ReflectionMethod $context, object $attribute): void
     {
         if (! $instance instanceof PostType) {
             return;

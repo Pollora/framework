@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Services;
 
-use Illuminate\Contracts\Foundation\Application;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Psr\Container\ContainerInterface;
 
 /**
  * Factory responsible for creating theme component instances with proper dependency injection.
@@ -14,12 +13,10 @@ use Pollora\Theme\Domain\Contracts\ThemeComponent;
 class ComponentFactory
 {
     /**
-     * @param ServiceLocator $serviceLocator Used for backward compatibility
-     * @param Application $app The Laravel application container
+     * @param ContainerInterface $app The Laravel application container
      */
     public function __construct(
-        protected ServiceLocator $serviceLocator,
-        protected Application $app
+        protected ContainerInterface $app
     ) {}
 
     /**
@@ -31,6 +28,6 @@ class ComponentFactory
     public function make(string $component): ThemeComponent
     {
         // This simple call will properly resolve all dependencies through Laravel's container
-        return $this->app->make($component);
+        return $this->app->get($component);
     }
 }

@@ -6,8 +6,8 @@ namespace Pollora\Ajax\Infrastructure\Repositories;
 
 use Pollora\Ajax\Domain\Contracts\AjaxActionRegistrarInterface;
 use Pollora\Ajax\Domain\Models\AjaxAction;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
+use Psr\Container\ContainerInterface;
 
 /**
  * Infrastructure adapter for registering AjaxActions using WordPress hooks.
@@ -15,14 +15,12 @@ use Pollora\Hook\Infrastructure\Services\Action;
  */
 class WordPressAjaxActionRegistrar implements AjaxActionRegistrarInterface
 {
-    protected ServiceLocator $locator;
 
     protected Action $action;
 
-    public function __construct(ServiceLocator $locator)
+    public function __construct(protected ContainerInterface $app)
     {
-        $this->locator = $locator;
-        $this->action = $locator->resolve(Action::class);
+        $this->action = $this->app->get(Action::class);
     }
 
     /**

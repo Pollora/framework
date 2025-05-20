@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
+use Psr\Container\ContainerInterface;
 
 class Bootstrap
 {
@@ -21,6 +21,12 @@ class Bootstrap
      * Database configuration array.
      */
     private array $db;
+    protected \Pollora\Hook\Domain\Contracts\Action $action;
+
+    public function __construct(protected ContainerInterface $app)
+    {
+        $this->action = $this->app->get(Action::class);
+    }
 
     /**
      * Register Bootstrap configurations.
@@ -44,10 +50,10 @@ class Bootstrap
             $this->loadWordPressSettings();
         }
 
-        if (app()->runningInConsole() && ! $this->isWordPressInstalled()) {
+        if ($this->app->runningInConsole() && ! $this->isWordPressInstalled()) {
             define('WP_INSTALLING', true);
         }
-        if (! app()->runningInConsole() && $this->isWordPressInstalled()) {
+        if (! $this->app->runningInConsole() && $this->isWordPressInstalled()) {
             $this->runWp();
         }
         $this->setupActionHooks();
@@ -104,11 +110,11 @@ class Bootstrap
 
         $table_prefix = $this->db['prefix'];
 
-        if (app()->runningInConsole() && ! $this->isWordPressInstalled()) {
+        if ($this->app->runningInConsole() && ! $this->isWordPressInstalled()) {
             define('SHORTINIT', true);
         }
 
-        if (! app()->runningInWpCli()) {
+        if (! $this->app->runningInWpCli()) {
             require_once ABSPATH.'wp-settings.php';
         }
     }
@@ -118,10 +124,8 @@ class Bootstrap
      */
     private function setupActionHooks(): void
     {
-        $locator = app(ServiceLocator::class);
-        $action = $locator->resolve(Action::class);
-        if (app()->runningInWpCli()) {
-            $action->add('init', $this->fixNetworkUrl(...), 1);
+        if ($this->app->runningInWpCli()) {
+            $this->action->add('init', $this->fixNetworkUrl(...), 1);
         } else {
             $this->fixNetworkUrl();
         }
@@ -172,7 +176,7 @@ class Bootstrap
         $this->defineWordPressConstants();
         $this->setLocationConstants();
 
-        if (app()->runningInConsole()) {
+        if ($this->app->runningInConsole()) {
             $this->setConsoleServerVariables();
         }
     }
@@ -183,7 +187,7 @@ class Bootstrap
     private function defineWordPressConstants(): void
     {
         // Define default constants
-        Constant::queue('WP_USE_THEMES', ! app()->runningInConsole() && ! str_starts_with((string) request()->server('REQUEST_URI'), '/cms/'));
+        Constant::queue('WP_USE_THEMES', ! $this->app->runningInConsole() && ! str_starts_with((string) request()->server('REQUEST_URI'), '/cms/'));
 
         Constant::queue('WP_AUTO_UPDATE_CORE', false);
         Constant::queue('DISALLOW_FILE_MODS', true);
@@ -210,9 +214,7 @@ class Bootstrap
      */
     public function fixNetworkUrl(): void
     {
-        $locator = app(ServiceLocator::class);
-        $action = $locator->resolve(Action::class);
-        $action->add('network_site_url', $this->rewriteNetworkUrl(...), 10, 3);
+        $this->action->add('network_site_url', $this->rewriteNetworkUrl(...), 10, 3);
     }
 
     /**

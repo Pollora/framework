@@ -6,7 +6,6 @@ namespace Pollora\Scheduler;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Scheduler\Contracts\SchedulerInterface;
 
@@ -47,11 +46,8 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     protected function registerFilters(SchedulerInterface $scheduler): void
     {
-        /** @var ServiceLocator $locator */
-        $locator = $this->app->make(ServiceLocator::class);
-
         /** @var Filter $filter */
-        $filter = $locator->resolve(Filter::class);
+        $filter = $this->app->make(Filter::class);
         $filters = [
             'pre_get_scheduled_event' => 'preGetScheduledEvent',
             'pre_get_ready_cron_jobs' => 'preGetReadyCronJobs',

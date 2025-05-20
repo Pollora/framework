@@ -6,8 +6,6 @@ namespace Pollora\Theme\Infrastructure\Providers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Pollora\BlockPattern\UI\PatternComponent;
-use Pollora\Container\Domain\ServiceLocator;
-use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\Menus;
 use Pollora\Theme\Domain\Models\Sidebar;
@@ -35,22 +33,16 @@ class ThemeComponentProvider
     ];
 
     /**
-     * @param ServiceLocator $locator The service locator for resolving dependencies
-     * @param Application|null $app The Laravel application instance (for direct resolution)
+     * @param  Application|null  $app  The Laravel application instance (for direct resolution)
      */
     public function __construct(
-        protected ServiceLocator $locator,
         protected ?Application $app = null
     ) {
-        // If app is not passed, try to resolve it from the locator
-        if ($this->app === null) {
-            $this->app = $locator->resolve(Application::class);
-        }
     }
 
     /**
      * Register all theme components.
-     * 
+     *
      * This will:
      * 1. Register each component in the service container
      * 2. Call the register() method on each component
@@ -58,7 +50,7 @@ class ThemeComponentProvider
     public function register(): void
     {
         // Make sure we have an app instance
-        if (!$this->app) {
+        if (! $this->app) {
             throw new \RuntimeException('Cannot register components: Application instance not available');
         }
 
@@ -66,25 +58,22 @@ class ThemeComponentProvider
         foreach ($this->components as $component) {
             try {
                 // Check if already bound to avoid redundant registrations
-                if (!$this->app->bound($component)) {
+                if (! $this->app->bound($component)) {
                     // Simply register the component as a singleton
                     $this->app->singleton($component);
                 }
 
                 // Resolve from container (injection happens automatically)
                 $instance = $this->app->make($component);
-                
+
                 // Register the component
                 $instance->register();
             } catch (\Throwable $e) {
-                // Log the error
-                error_log("Error registering component {$component}: " . $e->getMessage());
-                
                 // In debug mode, re-throw for easier debugging
                 if (env('APP_DEBUG', false)) {
                     throw new \RuntimeException(
-                        "Failed to register component {$component}: " . $e->getMessage(), 
-                        0, 
+                        "Failed to register component {$component}: ".$e->getMessage(),
+                        0,
                         $e
                     );
                 }
@@ -94,16 +83,15 @@ class ThemeComponentProvider
 
     /**
      * Add a component to the list.
-     * 
-     * @param string $componentClass The class name of the component to add
-     * @return self
+     *
+     * @param  string  $componentClass  The class name of the component to add
      */
     public function addComponent(string $componentClass): self
     {
-        if (!in_array($componentClass, $this->components)) {
+        if (! in_array($componentClass, $this->components)) {
             $this->components[] = $componentClass;
         }
-        
+
         return $this;
     }
 }

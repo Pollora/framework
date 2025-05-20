@@ -7,6 +7,7 @@ namespace Pollora\Theme\Domain\Services;
 use Illuminate\Contracts\Config\Repository;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface;
 
 /**
  * Class TemplateHierarchy
@@ -14,7 +15,7 @@ use Pollora\Hook\Infrastructure\Services\Filter;
  * Retrieves the WordPress template hierarchy before page loading.
  * Supports plugin template directories and Blade template conversion.
  */
-class TemplateHierarchy
+class TemplateHierarchy implements TemplateHierarchyInterface
 {
     /**
      * Store the template hierarchy

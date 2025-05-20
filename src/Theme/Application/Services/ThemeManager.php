@@ -12,13 +12,13 @@ declare(strict_types=1);
 namespace Pollora\Theme\Application\Services;
 
 use Illuminate\Contracts\Translation\Loader;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
+use Psr\Container\ContainerInterface;
 
 class ThemeManager implements ThemeService
 {
@@ -30,7 +30,7 @@ class ThemeManager implements ThemeService
 
     protected ?ThemeMetadata $theme = null;
 
-    public function __construct(protected Application $app, protected ViewFinderInterface $viewFinder, protected ?Loader $localeLoader) {}
+    public function __construct(protected ContainerInterface $app, protected ViewFinderInterface $viewFinder, protected ?Loader $localeLoader) {}
 
     public function instance(): ThemeManager
     {

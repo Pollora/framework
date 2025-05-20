@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Permalink;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Container\Infrastructure\ContainerServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 
@@ -50,7 +49,7 @@ class RewriteServiceProvider extends ServiceProvider
      */
     private function registerWordPressFilters(): void
     {
-        $filter = $this->getServiceLocator()->resolve(Filter::class);
+        $filter = $this->app->make(Filter::class);
         $manager = $this->permalinkManager;
         $filter->add(
             'redirect_canonical',
@@ -63,20 +62,12 @@ class RewriteServiceProvider extends ServiceProvider
      */
     private function registerWordPressActions(): void
     {
-        $action = $this->getServiceLocator()->resolve(Action::class);
+        $action = $this->app->make(Action::class);
         $manager = $this->permalinkManager;
         $action->add(
             'permalink_structure_changed',
             fn (string $old, string $new) => $manager->updateStructure($new),
             90
         );
-    }
-
-    /**
-     * Get the service locator instance.
-     */
-    private function getServiceLocator(): ContainerServiceLocator
-    {
-        return new ContainerServiceLocator($this->app);
     }
 }

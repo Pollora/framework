@@ -3,15 +3,15 @@
 declare(strict_types=1);
 
 use Illuminate\Contracts\Translation\Loader;
-use Illuminate\Foundation\Application;
+use Psr\Container\ContainerInterface;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 beforeEach(function () {
-    // Create mock application with config property
-    $this->app = Mockery::mock(Application::class);
+    // Create mock container with config property
+    $this->app = Mockery::mock(ContainerInterface::class);
     $this->config = Mockery::mock('config');
     $this->config->shouldReceive('get')->withAnyArgs()->andReturn('/test/path');
     $this->app->shouldReceive('offsetGet')->with('config')->andReturn($this->config);
@@ -34,8 +34,8 @@ test('loads a valid theme', function () {
     // Mock ThemeManager with specific methods
     $themeName = 'testTheme';
 
-    // Create a better mock of the application
-    $app = Mockery::mock(Application::class);
+    // Create a better mock of the container
+    $app = Mockery::mock(ContainerInterface::class);
     $config = Mockery::mock('config');
     $config->shouldReceive('get')->withAnyArgs()->andReturn($testPath);
     $app->shouldReceive('offsetGet')->with('config')->andReturn($config);
@@ -77,8 +77,8 @@ test('throws an exception if theme name is empty', function () {
 test('throws an exception if theme directory does not exist', function () {
     $themeName = 'nonexistent';
 
-    // Create a better mock of the application
-    $app = Mockery::mock(Application::class);
+    // Create a better mock of the container
+    $app = Mockery::mock(ContainerInterface::class);
     $config = Mockery::mock('config');
     $config->shouldReceive('get')->withAnyArgs()->andReturn('/path/to/themes');
     $app->shouldReceive('offsetGet')->with('config')->andReturn($config);

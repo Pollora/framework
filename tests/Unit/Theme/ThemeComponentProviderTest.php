@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Application;
-use Pollora\Container\Domain\ServiceLocator;
+use Illuminate\Support\ServiceProvider;
+use Mockery as m;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -19,26 +20,25 @@ use Pollora\Theme\Infrastructure\Services\ComponentFactory;
 use Pollora\Theme\Infrastructure\Services\Support;
 
 beforeEach(function () {
-    $this->app = Mockery::mock(Application::class);
+    $this->app = m::mock(Application::class);
     $this->provider = new ThemeServiceProvider($this->app);
 });
 
 test('register binds all required singletons, resolves and calls register on ThemeComponentProvider, and registers commands', function () {
     // Expect singleton binding for all known classes used in ThemeServiceProvider
-    $this->app->shouldReceive('singleton')->with(ThemeService::class, Mockery::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with('theme', Mockery::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with('theme.generator', Mockery::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with('theme.remover', Mockery::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with(ServiceLocator::class, Mockery::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with(ComponentFactory::class, Mockery::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with(ThemeComponentProvider::class, Mockery::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with(TemplateHierarchy::class, Mockery::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(Templates::class, Mockery::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(Sidebar::class, Mockery::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(Support::class, Mockery::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(Menus::class, Mockery::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(ImageSize::class, Mockery::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(ThemeInitializer::class, Mockery::type('callable'))->zeroOrMoreTimes();
+    $this->app->shouldReceive('singleton')->with(ThemeService::class, m::type('callable'))->once();
+    $this->app->shouldReceive('singleton')->with('theme', m::type('callable'))->once();
+    $this->app->shouldReceive('singleton')->with('theme.generator', m::type('callable'))->once();
+    $this->app->shouldReceive('singleton')->with('theme.remover', m::type('callable'))->once();
+    $this->app->shouldReceive('singleton')->with(ComponentFactory::class, m::type('callable'))->once();
+    $this->app->shouldReceive('singleton')->with(ThemeComponentProvider::class, m::type('callable'))->once();
+    $this->app->shouldReceive('singleton')->with(TemplateHierarchy::class, m::type('callable'))->zeroOrMoreTimes();
+    $this->app->shouldReceive('singleton')->with(Templates::class, m::type('callable'))->zeroOrMoreTimes();
+    $this->app->shouldReceive('singleton')->with(Sidebar::class, m::type('callable'))->zeroOrMoreTimes();
+    $this->app->shouldReceive('singleton')->with(Support::class, m::type('callable'))->zeroOrMoreTimes();
+    $this->app->shouldReceive('singleton')->with(Menus::class, m::type('callable'))->zeroOrMoreTimes();
+    $this->app->shouldReceive('singleton')->with(ImageSize::class, m::type('callable'))->zeroOrMoreTimes();
+    $this->app->shouldReceive('singleton')->with(ThemeInitializer::class, m::type('callable'))->zeroOrMoreTimes();
     $this->app->shouldReceive('commands')->with(['theme.generator', 'theme.remover'])->zeroOrMoreTimes();
 
     // Ajoute un mock pour le singleton TemplateHierarchy (domaine)
@@ -51,28 +51,21 @@ test('register binds all required singletons, resolves and calls register on The
         return $a === 'Pollora\\Theme\\Infrastructure\\Providers\\TemplateHierarchy' && is_callable($closure);
     })->atMost()->once();
 
-    // Ajout pour ServiceLocator injection hexagonale
-    $mockLocator = Mockery::mock(ServiceLocator::class);
-    $mockAction = Mockery::mock(Action::class);
-    $mockAction->shouldReceive('add')->andReturn($mockAction);
-    $mockLocator->shouldReceive('resolve')->with(Action::class)->andReturn($mockAction);
-    $this->app->shouldReceive('make')->with(ServiceLocator::class)->andReturn($mockLocator);
-
     // Mock make() for ThemeComponentProvider and other required services
-    $themeComponentProviderMock = Mockery::mock(ThemeComponentProvider::class);
+    $themeComponentProviderMock = m::mock(ThemeComponentProvider::class);
     $themeComponentProviderMock->shouldReceive('register')->once();
     $this->app->shouldReceive('make')->with(ThemeComponentProvider::class)->andReturn($themeComponentProviderMock);
     // Mock Action and Filter services with add() method
-    $actionMock = Mockery::mock(Action::class);
+    $actionMock = m::mock(Action::class);
     $actionMock->shouldReceive('add')->andReturn($actionMock);
     $this->app->shouldReceive('make')->with(Action::class)->andReturn($actionMock);
-    $filterMock = Mockery::mock(Filter::class);
+    $filterMock = m::mock(Filter::class);
     $filterMock->shouldReceive('add')->andReturn($filterMock);
     $this->app->shouldReceive('make')->with(Filter::class)->andReturn($filterMock);
     // Mock config for ThemeInitializer, etc.
     $this->app->shouldReceive('make')->with('config')->andReturn([]);
     // Mock ComponentFactory
-    $factory = Mockery::mock(ComponentFactory::class);
+    $factory = m::mock(ComponentFactory::class);
     $factory->shouldReceive('make')->zeroOrMoreTimes()->andReturn(new class implements \Pollora\Theme\Domain\Contracts\ThemeComponent
     {
         public function register(): void {}
@@ -80,4 +73,12 @@ test('register binds all required singletons, resolves and calls register on The
     $this->app->shouldReceive('make')->with(ComponentFactory::class)->andReturn($factory);
 
     $this->provider->register();
+});
+
+describe('ThemeComponentProvider', function () {
+    it('registers ThemeComponent in Laravel container', function () {
+        $mockApp = m::mock('Illuminate\\Contracts\\Foundation\\Application');
+        $provider = new ThemeComponentProvider($mockApp);
+        expect($provider)->toBeInstanceOf(ThemeComponentProvider::class);
+    });
 });

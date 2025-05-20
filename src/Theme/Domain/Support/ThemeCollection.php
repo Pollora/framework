@@ -30,11 +30,14 @@ class ThemeCollection
      *
      * @param array $items Items to collect
      * @return CollectionInterface Framework-agnostic collection
+     * @throws \RuntimeException If the collection factory is not set
      */
     public static function make(array $items = []): CollectionInterface
     {
         if (self::$collectionFactory === null) {
-            self::$collectionFactory = app(CollectionFactoryInterface::class);
+            throw new \RuntimeException(
+                'CollectionFactory not initialized. Call ThemeCollection::setFactory() before using this class.'
+            );
         }
 
         return self::$collectionFactory->make($items);

@@ -30,11 +30,14 @@ class ThemeConfig
      * @param string $key The configuration key to retrieve
      * @param mixed $default The default value if the key is not found
      * @return mixed The configuration value
+     * @throws \RuntimeException If the config repository is not set
      */
     public static function get(string $key, mixed $default = null): mixed
     {
         if (self::$configRepository === null) {
-            self::$configRepository = app(ConfigRepositoryInterface::class);
+            throw new \RuntimeException(
+                'ConfigRepository not initialized. Call ThemeConfig::setRepository() before using this class.'
+            );
         }
 
         return self::$configRepository->get($key, $default);

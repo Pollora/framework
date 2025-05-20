@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Domain\Models;
 
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-
 /**
  * Represents metadata for a WordPress theme
  */
@@ -105,7 +102,7 @@ class ThemeMetadata
      */
     public function getThemeNamespace(): string
     {
-        return Str::studly($this->getName());
+        return $this->studlify($this->getName());
     }
 
     /**
@@ -116,7 +113,7 @@ class ThemeMetadata
      */
     public function getThemeAppDir(string $subDirectory = ''): string
     {
-        return rtrim(app_path('Themes'.DIRECTORY_SEPARATOR.$this->getThemeNamespace()).DIRECTORY_SEPARATOR.$subDirectory, DIRECTORY_SEPARATOR);
+        return rtrim($this->getApplicationPath().DIRECTORY_SEPARATOR.'Themes'.DIRECTORY_SEPARATOR.$this->getThemeNamespace()).DIRECTORY_SEPARATOR.$subDirectory;
     }
 
     /**
@@ -148,9 +145,43 @@ class ThemeMetadata
      */
     public function getPathForItem(string|array|null $pathParts = null): string
     {
-        $pathParts = Arr::wrap($pathParts);
+        $pathParts = $this->wrapInArray($pathParts);
         $folders = empty($pathParts) ? '' : implode('/', $pathParts);
 
         return $this->getBasePath().'/'.$folders;
+    }
+
+    /**
+     * Get the application base path - abstracted to remove framework dependency
+     */
+    protected function getApplicationPath(): string
+    {
+        if (function_exists('app_path')) {
+            return app_path();
+        }
+        
+        // Fallback to a reasonable default when outside framework
+        return getcwd() . '/app';
+    }
+    
+    /**
+     * Convert a string to StudlyCase format
+     */
+    protected function studlify(string $value): string
+    {
+        $value = ucwords(str_replace(['-', '_'], ' ', $value));
+        return str_replace(' ', '', $value);
+    }
+    
+    /**
+     * Wrap a value in an array if it's not already an array
+     */
+    protected function wrapInArray(mixed $value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+        
+        return $value === null ? [] : [$value];
     }
 }

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Domain\Models;
 
-use Illuminate\Contracts\Foundation\Application;
 use Pollora\Asset\Domain\Models\AssetFile;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Theme\Domain\Contracts\ContainerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Contracts\ThemeService;
+use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 
 class ThemeInitializer implements ThemeComponent
@@ -20,31 +20,25 @@ class ThemeInitializer implements ThemeComponent
 
     protected $wp_theme;
 
-    protected Application $app;
-
     protected Action $action;
 
     protected Filter $filter;
 
     protected ?ThemeService $themeService = null;
 
-    protected ServiceLocator $locator;
-
-    protected $themeManager;
-    
-    protected ConfigRepositoryInterface $config;
+    protected WordPressThemeInterface $wpTheme;
 
     /**
      * Create a new theme initializer
      */
-    public function __construct(ServiceLocator $locator, ConfigRepositoryInterface $config)
-    {
-        $this->locator = $locator;
-        $this->app = $locator->resolve(Application::class);
-        $this->config = $config;
+    public function __construct(
+        protected ContainerInterface $app, 
+        protected ConfigRepositoryInterface $config
+    ) {
         $this->themeRoot = ThemeConfig::get('theme.base_path');
-        $this->action = $locator->resolve(Action::class);
-        $this->filter = $locator->resolve(Filter::class);
+        $this->action = $this->app->get(Action::class);
+        $this->filter = $this->app->get(Filter::class);
+        $this->wpTheme = $this->app->get(WordPressThemeInterface::class);
 
         $this->filter->add('stylesheet_directory', $this->overrideStylesheetDirectory(...), 90, 3);
     }
@@ -55,11 +49,11 @@ class ThemeInitializer implements ThemeComponent
     protected function getThemeService(): ThemeService
     {
         if ($this->themeService === null) {
-            $this->themeService = $this->locator->resolve(ThemeService::class);
+            $this->themeService = $this->app->get(ThemeService::class);
 
             // Fallback to 'theme' binding if ThemeService interface isn't registered yet
             if ($this->themeService === null) {
-                $this->themeService = $this->locator->resolve('theme');
+                $this->themeService = $this->app->get('theme');
             }
 
             if ($this->themeService === null) {
@@ -76,9 +70,8 @@ class ThemeInitializer implements ThemeComponent
     public function register(): void
     {
         $this->action->add('after_setup_theme', function (): void {
-            // WordPress specific function - we'll keep this in the implementation
-            // but it would be better to inject a WordPress service abstraction
-            if (function_exists('wp_installing') && \wp_installing()) {
+            // Use the interface instead of direct function call
+            if ($this->wpTheme->isInstalling()) {
                 return;
             }
             $this->initializeTheme();
@@ -100,24 +93,30 @@ class ThemeInitializer implements ThemeComponent
      */
     private function initializeTheme(): void
     {
-        // WordPress specific function - would need proper abstraction
-        if (function_exists('register_theme_directory')) {
-            \register_theme_directory($this->themeRoot);
-        }
+        // Use the interface instead of direct function call
+        $this->wpTheme->registerThemeDirectory($this->themeRoot);
 
         $this->setThemes();
         $this->registerThemeProvider();
 
-        // WordPress globals - would need proper abstraction
-        if (defined('WP_CONTENT_DIR')) {
-            $GLOBALS['wp_theme_directories'][] = WP_CONTENT_DIR.'/themes';
+        // Use the interface to get theme directories
+        $directories = $this->wpTheme->getThemeDirectories();
+        if (!empty($directories)) {
+            if (isset($GLOBALS['wp_theme_directories'])) {
+                $GLOBALS['wp_theme_directories'] = array_merge(
+                    $GLOBALS['wp_theme_directories'],
+                    $directories
+                );
+            } else {
+                $GLOBALS['wp_theme_directories'] = $directories;
+            }
         }
 
-        // WordPress function - would need proper abstraction
-        if (function_exists('wp_get_theme')) {
-            $this->wp_theme = \wp_get_theme();
-            $this->app->singleton('wp.theme', fn () => $this->wp_theme);
-        }
+        // Use the interface to get the theme instance
+        $this->wp_theme = $this->wpTheme->getTheme();
+        
+        // Use our specialized container interface
+        $this->app->bindShared('wp.theme', fn () => $this->wp_theme);
     }
 
     /**
@@ -125,8 +124,11 @@ class ThemeInitializer implements ThemeComponent
      */
     private function registerThemeProvider(): void
     {
-        foreach ((array) ThemeConfig::get('theme.providers', []) as $provider) {
-            $this->app->register($provider);
+        $providers = (array) ThemeConfig::get('theme.providers', []);
+        
+        foreach ($providers as $provider) {
+            // Using our specialized container interface
+            $this->app->registerProvider($provider);
         }
     }
 
@@ -135,8 +137,8 @@ class ThemeInitializer implements ThemeComponent
      */
     public function setThemes(): void
     {
-        // WordPress function - would need proper abstraction
-        $childTheme = function_exists('get_stylesheet') ? get_stylesheet() : 'default';
+        // Use the interface instead of direct function call
+        $childTheme = $this->wpTheme->getStylesheet();
 
         $this->getThemeService()->load($childTheme);
 
@@ -150,8 +152,8 @@ class ThemeInitializer implements ThemeComponent
             'providers',
         ];
 
-        // Laravel method - better to check if method exists
-        if (method_exists($this->app, 'configurationIsCached') && ! $this->app->configurationIsCached()) {
+        // Using our specialized container interface
+        if (!$this->app->isConfigurationCached()) {
             foreach ($themeConfigs as $themeConfig) {
                 $this->mergeConfigFrom($this->getThemeService()->path("config/{$themeConfig}.php"), "theme.{$themeConfig}");
             }
@@ -163,8 +165,8 @@ class ThemeInitializer implements ThemeComponent
      */
     public function isThemeIdentical($childTheme): bool
     {
-        // WordPress function - would need proper abstraction
-        return function_exists('get_template') && get_template() === $childTheme;
+        // Use the interface instead of direct function call
+        return $this->wpTheme->getTemplate() === $childTheme;
     }
 
     /**
@@ -172,11 +174,11 @@ class ThemeInitializer implements ThemeComponent
      */
     protected function mergeConfigFrom($path, $key): void
     {
-        $config = $this->app['config']->get($key, []);
+        $config = $this->app->getConfig($key, []);
         if (! file_exists($path)) {
             return;
         }
-        $this->app['config']->set($key, array_merge(require $path, $config));
+        $this->app->setConfig($key, array_merge(require $path, $config));
     }
 
     /**
@@ -196,10 +198,8 @@ class ThemeInitializer implements ThemeComponent
      */
     protected function getRelativePath(string $fullPath): string
     {
-        // WordPress function - would need proper abstraction
-        $stylesheetUri = function_exists('get_stylesheet_directory_uri')
-            ? get_stylesheet_directory_uri().'/'
-            : '/';
+        // Use the interface instead of direct function call
+        $stylesheetUri = $this->wpTheme->getStylesheetDirectoryUri();
 
         return str_replace($stylesheetUri, '', $fullPath);
     }

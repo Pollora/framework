@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Domain\Models;
 
-use Illuminate\Contracts\Foundation\Application;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Services\Translater;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Support\ThemeConfig;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class Menus
@@ -49,16 +48,16 @@ class Menus implements ThemeComponent
         'class' => '',
     ];
 
-    protected Application $app;
+    protected ContainerInterface $app;
     protected Action $action;
     protected Filter $filter;
     protected ConfigRepositoryInterface $config;
 
-    public function __construct(ServiceLocator $locator, ConfigRepositoryInterface $config)
+    public function __construct(ContainerInterface $app, ConfigRepositoryInterface $config)
     {
-        $this->app = $locator->resolve(Application::class);
-        $this->action = $locator->resolve(Action::class);
-        $this->filter = $locator->resolve(Filter::class);
+        $this->app = $app;
+        $this->action = $this->app->get(Action::class);
+        $this->filter = $this->app->get(Filter::class);
         $this->config = $config;
     }
 

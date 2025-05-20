@@ -7,7 +7,6 @@ namespace Pollora\WordPress;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\InstallationService;
@@ -57,10 +56,8 @@ class WordPressServiceProvider extends ServiceProvider
                 LaunchPadInstallCommand::class,
             ]);
         } else {
-            /** @var ServiceLocator $locator */
-            $locator = $this->app->make(ServiceLocator::class);
             /** @var Action $action */
-            $action = $locator->resolve(Action::class);
+            $action = $this->app->make(Action::class);
             $action->add('wp_install', function (): void {
                 Artisan::call('migrate');
             });

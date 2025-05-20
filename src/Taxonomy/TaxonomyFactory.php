@@ -10,25 +10,11 @@ declare(strict_types=1);
 
 namespace Pollora\Taxonomy;
 
-use Illuminate\Contracts\Foundation\Application;
 use Pollora\Entity\Taxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 
 class TaxonomyFactory implements TaxonomyFactoryInterface
 {
-    /**
-     * The application instance.
-     */
-    protected Application $app;
-
-    /**
-     * Create a new TaxonomyFactory instance.
-     */
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
-    }
-
     /**
      * Creates a new taxonomy.
      *
@@ -45,7 +31,7 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
 
     /**
      * Check if a taxonomy exists.
-     * 
+     *
      * @param string $taxonomy The taxonomy slug to check
      * @return bool
      */
@@ -59,7 +45,7 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
 
     /**
      * Get all registered taxonomies.
-     * 
+     *
      * @return array
      */
     public function getRegistered(): array

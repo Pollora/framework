@@ -4,35 +4,35 @@ declare(strict_types=1);
 
 /**
  * Factory for creating and configuring custom post types.
- * 
+ *
  * This class provides methods for creating PostType instances
  * and handles the interaction with WordPress registration.
  */
 
 namespace Pollora\PostType;
 
-use Illuminate\Contracts\Foundation\Application;
 use Pollora\Entity\PostType;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class PostTypeFactory implements PostTypeFactoryInterface
 {
     /**
      * The application instance.
      */
-    protected Application $app;
+    protected ContainerInterface $app;
 
     /**
      * Create a new PostTypeFactory instance.
      */
-    public function __construct(Application $app)
+    public function __construct(ContainerInterface $app)
     {
         $this->app = $app;
     }
 
     /**
      * Create a new post type instance.
-     * 
+     *
      * @param string $slug The post type slug
      * @param string|null $singular The singular label for the post type
      * @param string|null $plural The plural label for the post type
@@ -45,7 +45,7 @@ class PostTypeFactory implements PostTypeFactoryInterface
 
     /**
      * Check if a post type exists.
-     * 
+     *
      * @param string $postType The post type slug to check
      * @return bool
      */
@@ -59,7 +59,7 @@ class PostTypeFactory implements PostTypeFactoryInterface
 
     /**
      * Get all registered post types.
-     * 
+     *
      * @return array
      */
     public function getRegistered(): array

@@ -23,6 +23,6 @@ class RoutingServiceProvider extends BaseRoutingServiceProvider
      */
     public function registerRouter(): void
     {
-        $this->app->singleton('router', fn (Application $app): \Pollora\Route\Router => new Router($app->make('events'), $app));
+        $this->app->singleton('router', fn (Application $app): Router => new Router($app->make('events'), $app));
     }
 }

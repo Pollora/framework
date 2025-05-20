@@ -11,16 +11,16 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
+use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Container\Domain\ServiceLocator;
-use Pollora\Container\Infrastructure\ContainerServiceLocator;
+use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Services\TemplateHierarchy;
-use Pollora\Theme\Infrastructure\Services\ComponentFactory;
+use Pollora\Theme\Domain\Support\ThemeConfig;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
 use Pollora\Theme\Domain\Support\ThemeCollection;
@@ -42,16 +42,17 @@ class ThemeServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register Config and Collection providers
-        $this->app->register(\Pollora\Config\Infrastructure\Providers\ConfigServiceProvider::class);
-        $this->app->register(\Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider::class);
-        
+        $this->app->register(ConfigServiceProvider::class);
+        $this->app->register(CollectionServiceProvider::class);
+
         // Initialize utility classes
         $this->initializeUtilityClasses();
-        
-        // Register ServiceLocator first as many other services depend on it
-        $this->app->singleton(ServiceLocator::class, function ($app) {
-            return new ContainerServiceLocator($app);
-        });
+
+        // Register WordPress theme interface binding
+        $this->app->singleton(
+            \Pollora\Theme\Domain\Contracts\WordPressThemeInterface::class,
+            \Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter::class
+        );
 
         // Register ThemeService interface binding
         $this->app->singleton(ThemeService::class, function ($app) {
@@ -80,12 +81,12 @@ class ThemeServiceProvider extends ServiceProvider
     {
         // Initialize ThemeConfig
         $this->app->afterResolving(ConfigRepositoryInterface::class, function (ConfigRepositoryInterface $config) {
-            \Pollora\Theme\Domain\Support\ThemeConfig::setRepository($config);
+            ThemeConfig::setRepository($config);
         });
 
         // Initialize ThemeCollection
         $this->app->afterResolving(CollectionFactoryInterface::class, function (CollectionFactoryInterface $factory) {
-            \Pollora\Theme\Domain\Support\ThemeCollection::setFactory($factory);
+            ThemeCollection::setFactory($factory);
         });
     }
 
@@ -121,9 +122,47 @@ class ThemeServiceProvider extends ServiceProvider
      */
     protected function registerComponentServices(): void
     {
+        // Register our domain container interface to Laravel's application
+        $this->app->singleton(
+            \Pollora\Theme\Domain\Contracts\ContainerInterface::class,
+            function ($app) {
+                // Return a very simple container implementation that delegates to Laravel
+                return new class($app) implements \Pollora\Theme\Domain\Contracts\ContainerInterface {
+                    public function __construct(protected $app) {}
+                    
+                    public function get(string $id): mixed { 
+                        return $this->app->make($id); 
+                    }
+                    
+                    public function has(string $id): bool { 
+                        return $this->app->bound($id); 
+                    }
+                    
+                    public function registerProvider(string|object $provider): void {
+                        $this->app->register($provider);
+                    }
+                    
+                    public function bindShared(string $abstract, mixed $concrete): void {
+                        $this->app->singleton($abstract, $concrete);
+                    }
+                    
+                    public function isConfigurationCached(): bool {
+                        return false; // Always assume configs need to be loaded
+                    }
+                    
+                    public function getConfig(string $key, mixed $default = null): mixed {
+                        return $this->app['config']->get($key, $default);
+                    }
+                    
+                    public function setConfig(string $key, mixed $value): void {
+                        $this->app['config']->set($key, $value);
+                    }
+                };
+            }
+        );
+
         $this->app->singleton(ThemeComponentProvider::class, function ($app) {
             return new ThemeComponentProvider(
-                $app->make(ServiceLocator::class),
                 $app
             );
         });
@@ -132,10 +171,8 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->make(ThemeComponentProvider::class)->register();
 
         // Register theme setup action
-        /** @var ServiceLocator $locator */
-        $locator = $this->app->make(ServiceLocator::class);
         /** @var Action $action */
-        $action = $locator->resolve(Action::class);
+        $action = $this->app->make(Action::class);
 
         if ($action !== null) {
             $action->add('after_setup_theme', [$this, 'bootTheme']);
@@ -147,14 +184,17 @@ class ThemeServiceProvider extends ServiceProvider
      */
     protected function registerTemplateHierarchy(): void
     {
-        $this->app->singleton(TemplateHierarchy::class, function ($app) {
-            $locator = $app->make(ServiceLocator::class);
-
+        $this->app->singleton(\Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface::class, function ($app) {
             return new TemplateHierarchy(
                 $app->make('config'),
-                $locator->resolve(Action::class),
-                $locator->resolve(Filter::class)
+                $app->get(Action::class),
+                $app->get(Filter::class)
             );
+        });
+        
+        // For backward compatibility
+        $this->app->singleton(TemplateHierarchy::class, function ($app) {
+            return $app->make(\Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface::class);
         });
     }
 
@@ -173,10 +213,8 @@ class ThemeServiceProvider extends ServiceProvider
         $themeInclude = $themeService->theme()->getThemeIncDir();
 
         if (File::exists($themeInclude) && File::isDirectory($themeInclude)) {
-            // If the class uses IncludesFiles trait
-            if (method_exists($themeService, 'includes')) {
-                $themeService->includes([$themeService->theme()->getThemeIncDir()]);
-            }
+            // Load all PHP files in the theme's include directory
+            $this->loadFilesFrom($themeInclude);
         }
 
         $currentTheme = $themeService->active();
@@ -198,6 +236,28 @@ class ThemeServiceProvider extends ServiceProvider
             });
     }
 
+    /**
+     * Load all PHP files from a directory recursively.
+     *
+     * @param  string  $directory  The directory to load files from
+     */
+    protected function loadFilesFrom(string $directory): void
+    {
+        if (!File::isDirectory($directory)) {
+            return;
+        }
+
+        foreach (File::files($directory) as $file) {
+            if ($file->getExtension() === 'php') {
+                require_once $file->getPathname();
+            }
+        }
+
+        foreach (File::directories($directory) as $subDir) {
+            $this->loadFilesFrom($subDir);
+        }
+    }
+
     protected function loadConfigurations(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/theme.php', 'theme');
@@ -209,7 +269,7 @@ class ThemeServiceProvider extends ServiceProvider
     public function directives(): Collection
     {
         $directiveCollection = ThemeCollection::make(['Directives']);
-        
+
         if ($directiveCollection instanceof Collection) {
             return $directiveCollection->flatMap(function ($directive) {
                 if (file_exists($directives = __DIR__.'/'.$directive.'.php')) {
@@ -217,7 +277,7 @@ class ThemeServiceProvider extends ServiceProvider
                 }
             });
         }
-        
+
         // Fallback si l'instance retournée n'est pas une Collection Laravel
         return collect(['Directives'])
             ->flatMap(function ($directive) {
