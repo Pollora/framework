@@ -14,9 +14,11 @@ use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Attributes\AttributesServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
+use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
+use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
+use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Discoverer\Infrastructure\Providers\DiscovererServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
-use Pollora\Gutenberg\GutenbergServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
@@ -31,10 +33,11 @@ use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\TaxonomyAttributeServiceProvider;
 use Pollora\Taxonomy\TaxonomyServiceProvider;
-use Pollora\Theme\ThemeServiceProvider;
+use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
+use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 
 /**
  * Main service provider for the Pollora framework.
@@ -62,7 +65,9 @@ class PolloraServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Generic service providers
-        //$this->app->register(RoutingServiceProvider::class);
+        $this->app->register(ConfigServiceProvider::class);
+        $this->app->register(CollectionServiceProvider::class);
+        $this->app->register(RoutingServiceProvider::class);
         $this->app->register(ConsoleServiceProvider::class);
         $this->app->register(DebugServiceProvider::class);
         $this->app->register(DiscovererServiceProvider::class);
@@ -70,7 +75,8 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
-        $this->app->register(GutenbergServiceProvider::class);
+        $this->app->register(BlockCategoryServiceProvider::class);
+        $this->app->register(BlockPatternServiceProvider::class);
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);
