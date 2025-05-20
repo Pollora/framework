@@ -161,6 +161,13 @@ class ThemeServiceProvider extends ServiceProvider
             }
         );
 
+        $this->app->singleton(
+            \Pollora\Theme\Infrastructure\Services\ComponentFactory::class,
+            function ($app) {
+                return new \Pollora\Theme\Infrastructure\Services\ComponentFactory($app);
+            }
+        );
+
         $this->app->singleton(ThemeComponentProvider::class, function ($app) {
             return new ThemeComponentProvider(
                 $app

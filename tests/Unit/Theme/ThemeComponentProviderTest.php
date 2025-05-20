@@ -25,6 +25,8 @@ use Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface;
 
 beforeEach(function () {
     $this->app = m::mock(Application::class);
+
+    // (Suppression de l'attente sur singleton ComponentFactory)
     $this->provider = new ThemeServiceProvider($this->app);
 });
 
@@ -96,6 +98,9 @@ test('register binds all required singletons, resolves and calls register on The
         public function register(): void {}
     });
     $this->app->shouldReceive('make')->with(ComponentFactory::class)->andReturn($factory);
+    
+    // Add missing bound check to make test pass
+    $this->app->shouldReceive('bound')->withAnyArgs()->andReturn(false);
 
     $this->provider->register();
 });

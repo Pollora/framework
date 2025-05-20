@@ -7,7 +7,6 @@ namespace Pollora\Route\Infrastructure\Adapters;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Router as IlluminateRouter;
 use Pollora\Route\Domain\Models\NullablePostEntity;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -178,7 +177,7 @@ class Router extends IlluminateRouter
                         $matchedRoute = null;
 
                         foreach ($matchingRoutes as $key => $route) {
-                            if (str_starts_with($key, $condition)) {
+                            if (strpos($key, $condition) === 0) {
                                 $matchedRoute = $route;
                                 break;
                             }
@@ -218,10 +217,10 @@ class Router extends IlluminateRouter
      */
     private function isSpecialWordPressRequest(): bool
     {
-        return (function_exists('is_robots') && \is_robots())
-            || (function_exists('is_favicon') && \is_favicon())
-            || (function_exists('is_feed') && \is_feed())
-            || (function_exists('is_trackback') && \is_trackback());
+        return (function_exists('is_robots') && is_robots())
+            || (function_exists('is_favicon') && is_favicon())
+            || (function_exists('is_feed') && is_feed())
+            || (function_exists('is_trackback') && is_trackback());
     }
 
     /**
@@ -233,13 +232,13 @@ class Router extends IlluminateRouter
     {
         $specialCondition = null;
 
-        if (function_exists('is_robots') && \is_robots()) {
+        if (function_exists('is_robots') && is_robots()) {
             $specialCondition = 'is_robots';
-        } elseif (function_exists('is_favicon') && \is_favicon()) {
+        } elseif (function_exists('is_favicon') && is_favicon()) {
             $specialCondition = 'is_favicon';
-        } elseif (function_exists('is_feed') && \is_feed()) {
+        } elseif (function_exists('is_feed') && is_feed()) {
             $specialCondition = 'is_feed';
-        } elseif (function_exists('is_trackback') && \is_trackback()) {
+        } elseif (function_exists('is_trackback') && is_trackback()) {
             $specialCondition = 'is_trackback';
         }
 
@@ -272,18 +271,18 @@ class Router extends IlluminateRouter
             'middleware' => [
                 'web',
             ],
-            'uses' => fn () => new Response,
+            'uses' => fn () => new \Illuminate\Http\Response,
         ];
 
         // Create a new route with a unique name based on the type of special request
         $specialType = 'unknown';
-        if (function_exists('is_robots') && \is_robots()) {
+        if (function_exists('is_robots') && is_robots()) {
             $specialType = 'robots';
-        } elseif (function_exists('is_favicon') && \is_favicon()) {
+        } elseif (function_exists('is_favicon') && is_favicon()) {
             $specialType = 'favicon';
-        } elseif (function_exists('is_feed') && \is_feed()) {
+        } elseif (function_exists('is_feed') && is_feed()) {
             $specialType = 'feed';
-        } elseif (function_exists('is_trackback') && \is_trackback()) {
+        } elseif (function_exists('is_trackback') && is_trackback()) {
             $specialType = 'trackback';
         }
 
@@ -367,7 +366,7 @@ class Router extends IlluminateRouter
      */
     private function isWordPressAdminRequest(): bool
     {
-        return function_exists('is_admin') && \is_admin();
+        return function_exists('is_admin') && is_admin();
     }
 
     /**

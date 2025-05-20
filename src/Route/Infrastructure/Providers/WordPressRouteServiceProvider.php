@@ -39,17 +39,21 @@ class WordPressRouteServiceProvider extends ServiceProvider
         // Register the CallableDispatcher, which is needed by the Router
         $this->app->singleton(CallableDispatcherContract::class, CallableDispatcher::class);
         
-        // Explicitly instantiate the custom Router with all required dependencies
-        $this->app->singleton('router', function ($app) {
+        // Étend le router existant pour garder les routes Laravel classiques
+        $this->app->extend('router', function ($router, $app) {
             $events = $app->make(Dispatcher::class);
-            $router = new Router($events, $app);
-            
-            // Make sure any Laravel Router setup is applied to our custom Router
-            if (method_exists($router, 'setContainer')) {
-                $router->setContainer($app);
+            $customRouter = new Router($events, $app);
+
+            // Copier les routes déjà enregistrées
+            foreach ($router->getRoutes() as $route) {
+                $customRouter->getRoutes()->add($route);
             }
-            
-            return $router;
+
+            if (method_exists($customRouter, 'setContainer')) {
+                $customRouter->setContainer($app);
+            }
+
+            return $customRouter;
         });
     }
 

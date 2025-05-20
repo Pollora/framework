@@ -21,6 +21,14 @@ describe('ThemeServiceProvider', function () {
     it('registers services in Laravel container', function () {
         $mockApp = m::mock('Illuminate\\Contracts\\Foundation\\Application');
 
+        // Register a singleton for ConsoleDetectorInterface to avoid BindingResolutionException
+        $mockApp->shouldReceive('singleton')->with(
+            \Pollora\Application\Domain\Contracts\ConsoleDetectorInterface::class,
+            m::type('callable')
+        )->andReturnUsing(function ($abstract, $concrete) use ($mockApp) {
+            $concrete($mockApp);
+        });
+
         // Mock tous les singletons attendus par le provider
         foreach ([
             ThemeService::class,

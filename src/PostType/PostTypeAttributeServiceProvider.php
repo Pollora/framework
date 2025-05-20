@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
+use Pollora\Hook\Domain\Contracts\Action as ContractsAction;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\PostType\Commands\PostTypeMakeCommand;
 
@@ -20,6 +21,7 @@ use Pollora\PostType\Commands\PostTypeMakeCommand;
 class PostTypeAttributeServiceProvider extends ServiceProvider
 {
     protected ConsoleDetectionService $consoleDetectionService;
+    protected ContractsAction $action;
 
     public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
