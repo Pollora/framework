@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Route;
+namespace Pollora\Route\Infrastructure\Adapters;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -37,6 +37,11 @@ class Router extends IlluminateRouter
         parent::__construct($events, $container);
 
         $this->routes = new RouteCollection;
+        
+        // Ensure we properly set the container for route resolution
+        if ($container) {
+            $this->container = $container;
+        }
     }
 
     /**
@@ -254,128 +259,90 @@ class Router extends IlluminateRouter
     }
 
     /**
-     * Create a special route for WordPress special request types.
+     * Create a special route for WordPress built-in request types.
      *
-     * This route will delegate to WordPress's built-in handlers for
-     * robots.txt, favicon, feeds, and trackbacks.
-     *
-     * @param  Request  $request  Current request instance
-     * @return \Illuminate\Routing\Route Special WordPress route
+     * @param  Request  $request  The current request
+     * @return Route A route that delegates to WordPress's handling
      */
-    private function createSpecialWordPressRoute(Request $request): \Illuminate\Routing\Route
+    private function createSpecialWordPressRoute(Request $request): Route
     {
-        // Determine which special handler to use
-        $handler = function (): void {
-            if (function_exists('is_robots') && is_robots()) {
-                do_action('do_robots');
-                exit;
-            }
-            if (function_exists('is_favicon') && is_favicon()) {
-                do_action('do_favicon');
-                exit;
-            }
-            if (function_exists('is_feed') && is_feed()) {
-                do_feed();
-                exit;
-            }
-            if (function_exists('is_trackback') && is_trackback()) {
-                require_once ABSPATH.'wp-trackback.php';
-                exit;
-            }
+        $methods = ['GET', 'HEAD'];
+        $action = [
+            'middleware' => [
+                'web',
+            ],
+            'uses' => fn () => new \Illuminate\Http\Response(),
+        ];
 
-            // Fallback to 404 if none of the special handlers match
-            throw new NotFoundHttpException;
-        };
+        // Create a new route with a unique name based on the type of special request
+        $specialType = 'unknown';
+        if (function_exists('is_robots') && is_robots()) {
+            $specialType = 'robots';
+        } elseif (function_exists('is_favicon') && is_favicon()) {
+            $specialType = 'favicon';
+        } elseif (function_exists('is_feed') && is_feed()) {
+            $specialType = 'feed';
+        } elseif (function_exists('is_trackback') && is_trackback()) {
+            $specialType = 'trackback';
+        }
 
-        // Create a route with the special handler
-        $route = $this->newRoute(['GET', 'HEAD'], $request->path(), $handler);
-        $route->setIsWordPressRoute(true);
-
-        // Set the current route
-        $this->current = $route;
-        $this->container->instance(Route::class, $route);
+        // Create a route for this special request
+        $route = new Route($methods, "special-wordpress-{$specialType}", $action);
+        $route->bind($request);
 
         return $route;
     }
 
     /**
-     * Create a fallback route for requests that don't match any defined routes.
+     * Create a fallback route for WordPress template handling.
      *
-     * This route will delegate to the FrontendController to handle the request
-     * using WordPress's template hierarchy.
-     *
-     * @param  Request  $request  Current request instance
-     * @return \Illuminate\Routing\Route Fallback route
+     * @param  Request  $request  The current request
+     * @return Route A route that delegates to the FrontendController
      */
-    private function createFallbackRoute(Request $request): \Illuminate\Routing\Route
+    private function createFallbackRoute(Request $request): Route
     {
-        // Create a route that delegates to the FrontendController
-        $route = $this->newRoute(['GET', 'HEAD'], $request->path(), [
+        $methods = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'];
+        $action = [
             'uses' => 'Pollora\Http\Controllers\FrontendController@handle',
-        ]);
+            'controller' => 'Pollora\Http\Controllers\FrontendController@handle',
+            'namespace' => null,
+            'prefix' => null,
+        ];
 
-        // Set the current route
-        $this->current = $route;
-        $this->container->instance(Route::class, $route);
+        // Create a new fallback route
+        $route = new Route($methods, '{fallbackPlaceholder}', $action);
+        $route->where('fallbackPlaceholder', '.*');
+        $route->bind($request);
 
         return $route;
     }
 
     /**
-     * Set WordPress routing conditions.
+     * Set WordPress conditions for routes.
      *
-     * Merges provided conditions with those from configuration.
-     * Plugin conditions are added with higher priority than native conditions.
-     *
-     * @param  array<string, mixed>  $conditions  Additional conditions to set
+     * @param  array<string, mixed>  $conditions  Mapping of condition signatures to routes
+     * @return void
      */
     public function setConditions(array $conditions = []): void
     {
-        $config = $this->container->make('config');
-
-        // Get plugin conditions first (higher priority)
-        $pluginConditions = [];
-        $pluginConditionsConfig = $config->get('wordpress.plugin_conditions', []);
-
-        foreach ($pluginConditionsConfig as $pluginName => $pluginConditionGroup) {
-            $pluginConditions = array_merge($pluginConditions, $pluginConditionGroup);
-        }
-
-        // Then get native WordPress conditions
-        $nativeConditions = $config->get('wordpress.conditions', []);
-
-        // Merge in order of priority: custom conditions, plugin conditions, native conditions
-        $this->conditions = array_merge(
-            $conditions,
-            $pluginConditions,
-            $nativeConditions
-        );
+        $this->conditions = $conditions;
     }
 
     /**
-     * Add WordPress-specific bindings to a route.
+     * Add WordPress bindings to a route.
      *
-     * Binds current WordPress post and query objects to the route parameters.
-     * Only applies to routes created with Route::wordpress().
-     *
-     * @param  Route  $route  Route to add bindings to
-     * @return Route Route with WordPress bindings
+     * @param  Route  $route  The route to add bindings to
+     * @return Route Returns the modified route
      */
     public function addWordPressBindings(Route $route): Route
     {
-        // Don't add bindings if it's not a WordPress route
-        if (! ($route instanceof Route) || ! $route->isWordPressRoute()) {
-            return $route;
-        }
-
-        global $post, $wp_query;
-
         // Initialize parameters if needed
         if ($route->parameters === null) {
             $route->parameters = [];
         }
 
-        // Directly add WordPress bindings to parameters
+        // Add WordPress bindings
+        global $post, $wp_query;
         $route->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
         $route->parameters['wp_query'] = $wp_query;
 
@@ -383,43 +350,38 @@ class Router extends IlluminateRouter
     }
 
     /**
-     * Ensure conditions are set if they haven't been initialized.
+     * Initialize WordPress conditions from config if not already set.
+     *
+     * @return void
      */
     private function setConditionsIfEmpty(): void
     {
         if ($this->conditions === []) {
-            $this->setConditions();
+            $config = $this->container->make('config');
+            $this->conditions = $config->get('wordpress.conditions', []);
         }
     }
 
     /**
-     * @TODO implement exception handling for WordPress Admin specific routes
-     * Determine if the current request is for the WordPress admin area.
+     * Check if the current request is for the WordPress admin area.
      *
-     * @return bool True if request is for wp-admin, false otherwise
+     * @return bool True if this is an admin request, false otherwise
      */
     private function isWordPressAdminRequest(): bool
     {
-        $app = $this->container['app'] ?? null;
-
-        return $app && method_exists($app, 'isWordPressAdmin') && $app->isWordPressAdmin();
+        return function_exists('is_admin') && is_admin();
     }
 
     /**
-     * Create a new WordPress admin route.
+     * Create an admin route for WordPress admin panel handling.
      *
-     * Sets up a route specifically for handling WordPress admin requests
-     * and registers it in the container.
-     *
-     * @param  Request  $request  Current request instance
-     * @return \Illuminate\Routing\Route Configured admin route
+     * @param  Request  $request  The current request
+     * @return Route A route for WordPress admin requests
      */
-    private function createAdminRoute($request): \Illuminate\Routing\Route
+    private function createAdminRoute($request): Route
     {
-        $route = (new AdminRoute($request, $this))->get();
-        $this->current = $route;
-        $this->container->instance(Route::class, $route);
-
-        return $route;
+        $config = $this->container->make('config');
+        $adminRoute = new AdminRoute($request, $this, $config);
+        return $adminRoute->get();
     }
-}
+} 

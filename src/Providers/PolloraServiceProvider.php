@@ -31,6 +31,7 @@ use Pollora\Plugins\WooCommerce\WooCommerceProvider;
 use Pollora\Plugins\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\PostTypeAttributeServiceProvider;
 use Pollora\PostType\PostTypeServiceProvider;
+use Pollora\Route\Infrastructure\Providers\RoutingServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\TaxonomyAttributeServiceProvider;
@@ -66,6 +67,7 @@ class PolloraServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Generic service providers
+        //$this->app->register(RoutingServiceProvider::class);
         $this->app->register(ConsoleServiceProvider::class);
         $this->app->register(DebugServiceProvider::class);
         $this->app->register(DiscovererServiceProvider::class);

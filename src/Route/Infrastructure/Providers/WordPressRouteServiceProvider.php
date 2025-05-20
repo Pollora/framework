@@ -2,16 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Route;
+namespace Pollora\Route\Infrastructure\Providers;
 
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Container\Container;
+use Illuminate\Routing\CallableDispatcher;
+use Illuminate\Routing\Contracts\CallableDispatcher as CallableDispatcherContract;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Http\Controllers\FrontendController;
-use Pollora\Route\Middleware\WordPressBindings;
-use Pollora\Route\Middleware\WordPressBodyClass;
-use Pollora\Route\Middleware\WordPressHeaders;
-use Pollora\Route\Middleware\WordPressShutdown;
+use Pollora\Route\Infrastructure\Adapters\LaravelBodyClassMiddleware;
+use Pollora\Route\Infrastructure\Adapters\LaravelHeadersMiddleware;
+use Pollora\Route\Infrastructure\Adapters\LaravelRouteBindingMiddleware;
+use Pollora\Route\Infrastructure\Adapters\LaravelShutdownMiddleware;
+use Pollora\Route\Infrastructure\Adapters\Router;
 
 /**
  * Service provider for WordPress-specific routing functionalities.
@@ -24,17 +28,29 @@ class WordPressRouteServiceProvider extends ServiceProvider
     /**
      * The priority level of the service provider.
      * A lower priority means it will be loaded later.
-     *
-     * @var int
      */
-    public $priority = -99;
+    public int $priority = -99;
 
     /**
      * Register any application services.
      */
     public function register(): void
     {
-        $this->app->extend('router', fn ($router, Container $app): Router => new Router($app->make('events'), $app));
+        // Register the CallableDispatcher, which is needed by the Router
+        $this->app->singleton(CallableDispatcherContract::class, CallableDispatcher::class);
+        
+        // Explicitly instantiate the custom Router with all required dependencies
+        $this->app->singleton('router', function ($app) {
+            $events = $app->make(Dispatcher::class);
+            $router = new Router($events, $app);
+            
+            // Make sure any Laravel Router setup is applied to our custom Router
+            if (method_exists($router, 'setContainer')) {
+                $router->setContainer($app);
+            }
+            
+            return $router;
+        });
     }
 
     /**
@@ -88,10 +104,10 @@ class WordPressRouteServiceProvider extends ServiceProvider
 
             // Add WordPress middleware
             $route->middleware([
-                WordPressBindings::class,
-                WordPressHeaders::class,
-                WordPressBodyClass::class,
-                WordPressShutdown::class,
+                LaravelBodyClassMiddleware::class,
+                LaravelRouteBindingMiddleware::class,
+                LaravelShutdownMiddleware::class,
+                LaravelHeadersMiddleware::class,
             ]);
 
             return $route;
@@ -114,10 +130,10 @@ class WordPressRouteServiceProvider extends ServiceProvider
         Route::any('{any}', [FrontendController::class, 'handle'])
             ->where('any', '.*')
             ->middleware([
-                WordPressBindings::class,
-                WordPressHeaders::class,
-                WordPressBodyClass::class,
-                WordPressShutdown::class,
+                LaravelBodyClassMiddleware::class,
+                LaravelRouteBindingMiddleware::class,
+                LaravelShutdownMiddleware::class,
+                LaravelHeadersMiddleware::class,
             ]);
     }
 }

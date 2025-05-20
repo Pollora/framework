@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Http\Request;
 use Mockery as m;
-use Pollora\Route\Matching\ConditionValidator;
-use Pollora\Route\Route;
+use Pollora\Route\Infrastructure\Matching\ConditionValidator;
+use Pollora\Route\Infrastructure\Adapters\Route;
 
 /**
  * Setup function to create test environment for route tests

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Route;
+namespace Pollora\Route\Infrastructure\Adapters;
 
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Router as IlluminateRouter;
 
 /**
  * Class for handling WordPress admin routes.
@@ -21,11 +21,13 @@ class AdminRoute
      * Create a new admin route instance.
      *
      * @param  Request  $request  The current HTTP request instance used for route binding
-     * @param  IlluminateRouter  $router  Laravel router instance for route registration
+     * @param  Router  $router  Laravel router instance for route registration
+     * @param  Repository  $config  Configuration repository
      */
     public function __construct(
         private readonly Request $request,
-        private readonly IlluminateRouter $router
+        private readonly Router $router,
+        private readonly Repository $config
     ) {}
 
     /**
@@ -37,22 +39,22 @@ class AdminRoute
      * - Binds the current request
      * - Returns an empty response
      *
-     * @return \Illuminate\Routing\Route The configured WordPress admin route instance
+     * @return Route The configured WordPress admin route instance
      *
      * @example
      * // If WordPress is installed in 'cms' directory, this will match:
      * // - cms/wp-admin
      * // - cms/wp-admin/any/path
      */
-    public function get(): \Illuminate\Routing\Route
+    public function get(): Route
     {
         // Get WordPress installation directory from config
-        $wordpressUri = trim((string) config('app.wp.dir', 'cms'), '\/');
+        $wordpressUri = trim((string) $this->config->get('app.wp.dir', 'cms'), '\/');
 
         // Create catch-all route for wp-admin
         $route = $this->router->any(
             "$wordpressUri/wp-admin/{any?}",
-            fn (): \Illuminate\Http\Response => new Response
+            fn (): Response => new Response
         );
 
         // Add admin middleware and bind request
@@ -61,4 +63,4 @@ class AdminRoute
 
         return $route;
     }
-}
+} 

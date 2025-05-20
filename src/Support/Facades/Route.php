@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Route\Router;
+use Pollora\Route\Infrastructure\Adapters\Router;
 
 /**
  * Facade for WordPress Router.
@@ -14,7 +14,7 @@ use Pollora\Route\Router;
  * support for route conditions, authentication, and WordPress-specific bindings.
  *
  * @method static array setConditions(array $conditions = []) Set route conditions
- * @method static \Themosis\Route\Route addWordPressBindings(\Themosis\Route\Route $route) Add WordPress route bindings
+ * @method static \Pollora\Route\Infrastructure\Adapters\Route addWordPressBindings(\Pollora\Route\Infrastructure\Adapters\Route $route) Add WordPress route bindings
  * @method static void auth(array $options = []) Add authentication middleware
  * @method static \Illuminate\Routing\Route get(string $uri, \Closure|array|string|callable|null $action = null) Add GET route
  * @method static \Illuminate\Routing\Route post(string $uri, \Closure|array|string|callable|null $action = null) Add POST route
@@ -46,7 +46,7 @@ use Pollora\Route\Router;
  * @method static string|null currentRouteName() Get current route name
  * @method static string|null currentRouteAction() Get current route action
  *
- * @see \Pollora\Route\Router
+ * @see Router
  */
 class Route extends Facade
 {

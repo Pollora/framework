@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Route\Matching;
+namespace Pollora\Route\Infrastructure\Matching;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Matching\ValidatorInterface;
-use Pollora\Route\Route;
+use Pollora\Route\Infrastructure\Adapters\Route;
 
 /**
- * Validator for WordPress conditional tags.
+ * Implementation of the condition validator.
  *
  * This class validates if a route matches a specific WordPress condition,
  * with plugin conditions taking priority over native WordPress conditions.

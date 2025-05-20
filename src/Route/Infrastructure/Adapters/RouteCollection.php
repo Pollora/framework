@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Route;
+namespace Pollora\Route\Infrastructure\Adapters;
 
 use Illuminate\Routing\RouteCollection as IlluminateRouteCollection;
 
@@ -54,4 +54,4 @@ class RouteCollection extends IlluminateRouteCollection
 
         return $domainAndUri;
     }
-}
+} 
