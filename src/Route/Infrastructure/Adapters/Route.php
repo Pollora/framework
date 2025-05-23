@@ -363,4 +363,52 @@ class Route extends IlluminateRoute
 
         return false;
     }
+
+    /**
+     * Determine if the route action is a controller action.
+     *
+     * @return bool
+     */
+    protected function isControllerAction()
+    {
+        return isset($this->action['uses']) && is_string($this->action['uses']) && ! $this->isSerializedClosure();
+    }
+
+    /**
+     * Determine if the route action is a serialized Closure.
+     *
+     * @return bool
+     */
+    protected function isSerializedClosure()
+    {
+        return isset($this->action['uses']) && is_string($this->action['uses']) &&
+               strpos($this->action['uses'], 'SerializableClosure') !== false;
+    }
+
+    /**
+     * Lazy-load the controller instance if needed when controller dispatcher is requested
+     *
+     * @return \Illuminate\Routing\Contracts\ControllerDispatcher
+     */
+    public function controllerDispatcher()
+    {
+        // Essayer de récupérer le container s'il n'est pas défini
+        if (! $this->container) {
+            if (class_exists('Illuminate\Container\Container')) {
+                $this->container = \Illuminate\Container\Container::getInstance();
+            }
+
+            // Si toujours pas de container, lancer une exception
+            if (! $this->container) {
+                throw new \RuntimeException('Container is not set on route.');
+            }
+        }
+
+        // Initialize controller if action uses a controller but controller is not set
+        if ($this->isControllerAction() && ! $this->controller) {
+            $this->controller = $this->getController();
+        }
+
+        return parent::controllerDispatcher();
+    }
 }

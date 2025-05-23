@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
-use Pollora\Support\Facades\Action;
+use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
 
@@ -22,16 +22,19 @@ class Bootstrap
 
     protected DebugDetectorInterface $debugDetector;
 
-    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector)
-    {
-        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
-        $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
-    }
-
     /**
      * Database configuration array.
      */
     private array $db;
+
+    protected \Pollora\Hook\Domain\Contracts\Action $action;
+
+    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, Action $action)
+    {
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+        $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
+        $this->action = $action;
+    }
 
     /**
      * Register Bootstrap configurations.
@@ -131,7 +134,7 @@ class Bootstrap
     private function setupActionHooks(): void
     {
         if ($this->consoleDetectionService->isWpCli()) {
-            Action::add('init', $this->fixNetworkUrl(...), 1);
+            $this->action->add('init', $this->fixNetworkUrl(...), 1);
         } else {
             $this->fixNetworkUrl();
         }
@@ -221,7 +224,7 @@ class Bootstrap
      */
     public function fixNetworkUrl(): void
     {
-        Action::add('network_site_url', $this->rewriteNetworkUrl(...), 10, 3);
+        $this->action->add('network_site_url', $this->rewriteNetworkUrl(...), 10, 3);
     }
 
     /**

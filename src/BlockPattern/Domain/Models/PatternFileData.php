@@ -14,8 +14,8 @@ class PatternFileData
     /**
      * Create a new pattern file data object.
      *
-     * @param string $file Path to the pattern file
-     * @param array<string, string|null> $headers Extracted headers from the file
+     * @param  string  $file  Path to the pattern file
+     * @param  array<string, string|null>  $headers  Extracted headers from the file
      */
     public function __construct(
         private string $file,
@@ -43,8 +43,8 @@ class PatternFileData
     /**
      * Get a specific header value.
      *
-     * @param string $key Header key
-     * @param string|null $default Default value if key not found
+     * @param  string  $key  Header key
+     * @param  string|null  $default  Default value if key not found
      * @return string|null Header value
      */
     public function getHeader(string $key, ?string $default = null): ?string
@@ -57,6 +57,6 @@ class PatternFileData
      */
     public function isValid(): bool
     {
-        return !empty($this->headers['slug']) && !empty($this->headers['title']);
+        return ! empty($this->headers['slug']) && ! empty($this->headers['title']);
     }
-} 
+}

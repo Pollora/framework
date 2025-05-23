@@ -19,10 +19,10 @@ class WordPressThemeProvider implements ThemeProviderInterface
      */
     public function getActiveThemes(): array
     {
-        if (!function_exists('get_stylesheet') || !function_exists('get_template') || !function_exists('wp_get_theme')) {
+        if (! function_exists('get_stylesheet') || ! function_exists('get_template') || ! function_exists('wp_get_theme')) {
             return [];
         }
-        
+
         $stylesheet = \get_stylesheet();
         $template = \get_template();
 
@@ -30,4 +30,4 @@ class WordPressThemeProvider implements ThemeProviderInterface
             ? [\wp_get_theme($stylesheet)]
             : [\wp_get_theme($stylesheet), \wp_get_theme($template)];
     }
-} 
+}

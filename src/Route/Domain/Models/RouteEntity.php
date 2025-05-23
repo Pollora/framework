@@ -6,7 +6,7 @@ namespace Pollora\Route\Domain\Models;
 
 /**
  * Represents a route entity in the domain layer.
- * 
+ *
  * This is a framework-agnostic representation of a route with WordPress
  * condition capabilities.
  */
@@ -17,45 +17,32 @@ class RouteEntity
      */
     private array $methods = [];
 
-    /**
-     * @var string
-     */
     private string $uri = '';
-    
+
     /**
      * @var mixed
      */
     private $action;
-    
+
     /**
      * @var array<string, mixed>
      */
     private array $parameters = [];
-    
-    /**
-     * @var string
-     */
+
     private string $domain = '';
-    
-    /**
-     * @var bool
-     */
+
     private bool $isWordPressRoute = false;
-    
-    /**
-     * @var string
-     */
+
     private string $condition = '';
-    
+
     /**
      * @var array<mixed>
      */
     private array $conditionParameters = [];
 
     /**
-     * @param array<int, string> $methods
-     * @param string $uri
-     * @param mixed $action
+     * @param  array<int, string>  $methods
+     * @param  mixed  $action
      */
     public function __construct(array $methods, string $uri, $action)
     {
@@ -72,9 +59,6 @@ class RouteEntity
         return $this->methods;
     }
 
-    /**
-     * @return string
-     */
     public function getUri(): string
     {
         return $this->uri;
@@ -88,31 +72,25 @@ class RouteEntity
         return $this->action;
     }
 
-    /**
-     * @param string $domain
-     * @return self
-     */
     public function setDomain(string $domain): self
     {
         $this->domain = $domain;
+
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getDomain(): string
     {
         return $this->domain;
     }
 
     /**
-     * @param array<string, mixed> $parameters
-     * @return self
+     * @param  array<string, mixed>  $parameters
      */
     public function setParameters(array $parameters): self
     {
         $this->parameters = $parameters;
+
         return $this;
     }
 
@@ -125,13 +103,12 @@ class RouteEntity
     }
 
     /**
-     * @param string $name
-     * @param mixed $value
-     * @return self
+     * @param  mixed  $value
      */
     public function setParameter(string $name, $value): self
     {
         $this->parameters[$name] = $value;
+
         return $this;
     }
 
@@ -148,12 +125,13 @@ class RouteEntity
     /**
      * Mark this route as a WordPress route.
      *
-     * @param bool $isWordPressRoute Whether this is a WordPress route
+     * @param  bool  $isWordPressRoute  Whether this is a WordPress route
      * @return self Returns the current instance for method chaining
      */
     public function setIsWordPressRoute(bool $isWordPressRoute = true): self
     {
         $this->isWordPressRoute = $isWordPressRoute;
+
         return $this;
     }
 
@@ -169,13 +147,13 @@ class RouteEntity
 
     /**
      * Set the current WordPress condition.
-     * 
-     * @param string $condition The condition to set
-     * @return self
+     *
+     * @param  string  $condition  The condition to set
      */
     public function setCondition(string $condition): self
     {
         $this->condition = $condition;
+
         return $this;
     }
 
@@ -202,12 +180,13 @@ class RouteEntity
     /**
      * Set parameters for the current condition.
      *
-     * @param array<mixed> $parameters The parameters to set for the condition
+     * @param  array<mixed>  $parameters  The parameters to set for the condition
      * @return self Returns the current instance for method chaining
      */
     public function setConditionParameters(array $parameters = []): self
     {
         $this->conditionParameters = $parameters;
+
         return $this;
     }
-} 
+}

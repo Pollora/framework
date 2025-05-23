@@ -8,7 +8,6 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router as IlluminateRouter;
-use Pollora\Route\Bindings\NullableWpPost;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -37,11 +36,6 @@ class Router extends IlluminateRouter
         parent::__construct($events, $container);
 
         $this->routes = new RouteCollection;
-        
-        // Ensure we properly set the container for route resolution
-        if ($container) {
-            $this->container = $container;
-        }
     }
 
     /**
@@ -98,6 +92,7 @@ class Router extends IlluminateRouter
 
             // If it's a WordPress route, check if there's a more specific route
             if ($laravelRoute instanceof Route && $laravelRoute->isWordPressRoute()) {
+
                 // Get all WordPress routes
                 $wpRoutes = [];
                 foreach ($this->routes->getRoutes() as $route) {
@@ -131,10 +126,16 @@ class Router extends IlluminateRouter
                 // Then check each route
                 foreach ($wpRoutes as $route) {
                     $condition = $route->getCondition();
-                    if (function_exists($condition)) {
+
+                    if (function_exists('\\'.$condition)) {
                         // Directly check if the WordPress condition is satisfied
                         $params = $route->getConditionParameters();
-                        if (call_user_func_array($condition, $params)) {
+
+                        // Appeler la fonction dans l'espace de noms global
+                        $conditionFunc = '\\'.$condition;
+                        $conditionResult = $conditionFunc(...$params);
+
+                        if ($conditionResult) {
                             // Generate a unique key for this route that includes both condition and parameters
                             $uniqueKey = $condition;
                             if (! empty($params)) {
@@ -154,7 +155,7 @@ class Router extends IlluminateRouter
                     $pluginConditionsConfig = $config->get('wordpress.plugin_conditions', []);
                     $pluginConditions = [];
 
-                    foreach ($pluginConditionsConfig as $pluginName => $pluginConditionGroup) {
+                    foreach ($pluginConditionsConfig as $pluginConditionGroup) {
                         $pluginConditions = array_merge($pluginConditions, array_keys($pluginConditionGroup));
                     }
 
@@ -171,31 +172,38 @@ class Router extends IlluminateRouter
                     // Add fallback condition
                     $hierarchyOrder[] = '__return_true';
 
-                    // Go through the hierarchy order to find the most specific route
-                    foreach ($hierarchyOrder as $condition) {
-                        // Find any route with this condition (regardless of parameters)
-                        $matchedRoute = null;
+                    // Separate all matching routes by parameter status first
+                    $routesWithParams = [];
+                    $routesWithoutParams = [];
 
-                        foreach ($matchingRoutes as $key => $route) {
-                            if (strpos($key, $condition) === 0) {
-                                $matchedRoute = $route;
-                                break;
-                            }
+                    foreach ($matchingRoutes as $key => $route) {
+                        if (str_contains($key, ':')) {
+                            $routesWithParams[$key] = $route;
+                        } else {
+                            $routesWithoutParams[$key] = $route;
+                        }
+                    }
+
+                    // First try to find the best route among those WITH parameters
+                    $bestRoute = $this->findBestRouteInGroup($routesWithParams, $hierarchyOrder);
+
+                    // If no route with parameters found, try those WITHOUT parameters
+                    if ($bestRoute === null) {
+                        $bestRoute = $this->findBestRouteInGroup($routesWithoutParams, $hierarchyOrder);
+                    }
+
+                    if ($bestRoute !== null) {
+                        // Initialize parameters if needed
+                        if ($bestRoute->parameters === null) {
+                            $bestRoute->parameters = [];
                         }
 
-                        if ($matchedRoute) {
-                            // Initialize parameters if needed
-                            if ($matchedRoute->parameters === null) {
-                                $matchedRoute->parameters = [];
-                            }
+                        // Add WordPress bindings
+                        global $post, $wp_query;
+                        $bestRoute->parameters['post'] = $post ?? null;
+                        $bestRoute->parameters['wp_query'] = $wp_query;
 
-                            // Add WordPress bindings
-                            global $post, $wp_query;
-                            $matchedRoute->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
-                            $matchedRoute->parameters['wp_query'] = $wp_query;
-
-                            return $matchedRoute;
-                        }
+                        return $bestRoute;
                     }
                 }
             }
@@ -217,10 +225,10 @@ class Router extends IlluminateRouter
      */
     private function isSpecialWordPressRequest(): bool
     {
-        return (function_exists('is_robots') && is_robots())
-            || (function_exists('is_favicon') && is_favicon())
-            || (function_exists('is_feed') && is_feed())
-            || (function_exists('is_trackback') && is_trackback());
+        return $this->callWordPressFunction('is_robots')
+            || $this->callWordPressFunction('is_favicon')
+            || $this->callWordPressFunction('is_feed')
+            || $this->callWordPressFunction('is_trackback');
     }
 
     /**
@@ -232,13 +240,13 @@ class Router extends IlluminateRouter
     {
         $specialCondition = null;
 
-        if (function_exists('is_robots') && is_robots()) {
+        if ($this->callWordPressFunction('is_robots')) {
             $specialCondition = 'is_robots';
-        } elseif (function_exists('is_favicon') && is_favicon()) {
+        } elseif ($this->callWordPressFunction('is_favicon')) {
             $specialCondition = 'is_favicon';
-        } elseif (function_exists('is_feed') && is_feed()) {
+        } elseif ($this->callWordPressFunction('is_feed')) {
             $specialCondition = 'is_feed';
-        } elseif (function_exists('is_trackback') && is_trackback()) {
+        } elseif ($this->callWordPressFunction('is_trackback')) {
             $specialCondition = 'is_trackback';
         }
 
@@ -271,18 +279,18 @@ class Router extends IlluminateRouter
             'middleware' => [
                 'web',
             ],
-            'uses' => fn () => new \Illuminate\Http\Response(),
+            'uses' => fn () => new \Illuminate\Http\Response,
         ];
 
         // Create a new route with a unique name based on the type of special request
         $specialType = 'unknown';
-        if (function_exists('is_robots') && is_robots()) {
+        if ($this->callWordPressFunction('is_robots')) {
             $specialType = 'robots';
-        } elseif (function_exists('is_favicon') && is_favicon()) {
+        } elseif ($this->callWordPressFunction('is_favicon')) {
             $specialType = 'favicon';
-        } elseif (function_exists('is_feed') && is_feed()) {
+        } elseif ($this->callWordPressFunction('is_feed')) {
             $specialType = 'feed';
-        } elseif (function_exists('is_trackback') && is_trackback()) {
+        } elseif ($this->callWordPressFunction('is_trackback')) {
             $specialType = 'trackback';
         }
 
@@ -321,7 +329,6 @@ class Router extends IlluminateRouter
      * Set WordPress conditions for routes.
      *
      * @param  array<string, mixed>  $conditions  Mapping of condition signatures to routes
-     * @return void
      */
     public function setConditions(array $conditions = []): void
     {
@@ -343,7 +350,7 @@ class Router extends IlluminateRouter
 
         // Add WordPress bindings
         global $post, $wp_query;
-        $route->parameters['post'] = $post ?? (new NullableWpPost)->toWpPost();
+        $route->parameters['post'] = $post ?? null;
         $route->parameters['wp_query'] = $wp_query;
 
         return $route;
@@ -351,8 +358,6 @@ class Router extends IlluminateRouter
 
     /**
      * Initialize WordPress conditions from config if not already set.
-     *
-     * @return void
      */
     private function setConditionsIfEmpty(): void
     {
@@ -369,7 +374,7 @@ class Router extends IlluminateRouter
      */
     private function isWordPressAdminRequest(): bool
     {
-        return function_exists('is_admin') && is_admin();
+        return $this->callWordPressFunction('is_admin');
     }
 
     /**
@@ -382,6 +387,46 @@ class Router extends IlluminateRouter
     {
         $config = $this->container->make('config');
         $adminRoute = new AdminRoute($request, $this, $config);
+
         return $adminRoute->get();
     }
-} 
+
+    /**
+     * Safely call a WordPress function if it exists.
+     *
+     * @param  string  $functionName  The WordPress function name
+     * @param  array  $arguments  Arguments to pass to the function
+     * @return bool The result of the function call, or false if function doesn't exist
+     */
+    private function callWordPressFunction(string $functionName, array $arguments = []): bool
+    {
+        $globalFunctionName = '\\'.$functionName;
+
+        if (! function_exists($globalFunctionName)) {
+            return false;
+        }
+
+        return (bool) call_user_func_array($globalFunctionName, $arguments);
+    }
+
+    /**
+     * Find the best route in a group based on the hierarchy order.
+     *
+     * @param  array<Route>  $routes  Array of routes
+     * @param  array<string>  $hierarchyOrder  Array of condition strings
+     * @return Route|null The best route found, or null if no route matches
+     */
+    private function findBestRouteInGroup(array $routes, array $hierarchyOrder): ?Route
+    {
+        foreach ($hierarchyOrder as $condition) {
+            // Find the first route that matches this condition
+            foreach ($routes as $key => $route) {
+                if (strpos($key, $condition) === 0) {
+                    return $route;
+                }
+            }
+        }
+
+        return null;
+    }
+}

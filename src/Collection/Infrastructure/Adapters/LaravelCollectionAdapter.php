@@ -130,4 +130,4 @@ class LaravelCollectionAdapter implements CollectionInterface
     {
         $this->laravelCollection->offsetUnset($offset);
     }
-} 
+}

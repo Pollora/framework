@@ -63,4 +63,4 @@ class AdminRoute
 
         return $route;
     }
-} 
+}

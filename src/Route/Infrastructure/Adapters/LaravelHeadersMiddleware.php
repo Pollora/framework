@@ -42,35 +42,35 @@ class LaravelHeadersMiddleware
     {
         $response = $next($request);
 
-        // Skip non-Response objects
-        if (!$response instanceof Response) {
+        if (! $response instanceof Response) {
             return $response;
         }
 
-        // Extract all current headers from the response
+        // Get current header array from Symfony Response
         $headers = [];
         foreach ($response->headers->all() as $name => $values) {
-            // For simplicity, we take only the first value if there are multiple values
             $headers[$name] = $response->headers->get($name);
         }
 
         // Check if the user is logged in
         $isUserLoggedIn = $this->authorizer->isLoggedIn();
 
+        // Add framework header
+        $headers = $this->headerManager->addIdentificationHeaders($headers);
+
         // Determine if this is a WordPress route
         $route = $request->route();
         $isWordPressRoute = ($route instanceof Route && $route->hasCondition());
 
-        // Apply header modifications through the header manager service
-        $headers = $this->headerManager->addIdentificationHeaders($headers);
+        // Cleanup WordPress headers
         $headers = $this->headerManager->cleanupWordPressHeaders($headers, $isWordPressRoute, $isUserLoggedIn);
+
+        // Add cache control directives
         $headers = $this->headerManager->addCacheControlDirectives($headers, $isUserLoggedIn);
 
-        // Explicitly set each modified header on the response
+        // Apply the modified headers to the response
         foreach ($headers as $name => $value) {
-            if ($value !== null) {
-                $response->headers->set($name, $value);
-            }
+            $response->headers->set($name, $value);
         }
 
         return $response;

@@ -18,8 +18,8 @@ class LaravelRoute
     /**
      * Convert a domain RouteEntity to a framework Route.
      *
-     * @param RouteEntity $routeEntity Domain route entity
-     * @param Route $routePrototype Laravel route prototype to populate
+     * @param  RouteEntity  $routeEntity  Domain route entity
+     * @param  Route  $routePrototype  Laravel route prototype to populate
      * @return Route Framework route instance
      */
     public function toFrameworkRoute(RouteEntity $routeEntity, Route $routePrototype): Route
@@ -34,7 +34,7 @@ class LaravelRoute
 
         // Set parameters if any exist
         $params = $routeEntity->getParameters();
-        if (!empty($params)) {
+        if (! empty($params)) {
             foreach ($params as $key => $value) {
                 $routePrototype->setParameter($key, $value);
             }
@@ -46,7 +46,7 @@ class LaravelRoute
     /**
      * Convert a framework Route to a domain RouteEntity.
      *
-     * @param IlluminateRoute $route Framework route
+     * @param  IlluminateRoute  $route  Framework route
      * @return RouteEntity Domain route entity
      */
     public function toDomainEntity(IlluminateRoute $route): RouteEntity
@@ -77,7 +77,7 @@ class LaravelRoute
             }
         }
 
-        if (!empty($parameters)) {
+        if (! empty($parameters)) {
             $entity->setParameters($parameters);
         }
 

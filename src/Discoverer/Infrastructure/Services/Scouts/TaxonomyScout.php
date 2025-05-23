@@ -6,7 +6,7 @@ namespace Pollora\Discoverer\Infrastructure\Services\Scouts;
 
 use Illuminate\Contracts\Container\Container;
 use Pollora\Discoverer\Infrastructure\Services\SpatieDiscoveryAdapter;
-use Pollora\Taxonomy\AbstractTaxonomy;
+use Pollora\Taxonomy\Domain\Models\AbstractTaxonomy;
 use Spatie\StructureDiscoverer\Discover;
 
 /**

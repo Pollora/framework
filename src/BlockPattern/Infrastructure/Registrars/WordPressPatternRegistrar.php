@@ -20,10 +20,10 @@ class WordPressPatternRegistrar implements PatternRegistrarInterface
      */
     public function registerPattern(Pattern $pattern): void
     {
-        if (!function_exists('register_block_pattern')) {
+        if (! function_exists('register_block_pattern')) {
             return;
         }
 
         \register_block_pattern($pattern->getSlug(), $pattern->toArray());
     }
-} 
+}

@@ -51,15 +51,6 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: PHP version
-        run: php -v
-
-      - name: Pint version
-        run: vendor/bin/pint --version
-
-      - name: Affiche le diff Pint
-        run: vendor/bin/pint --test src/Asset/Infrastructure/Services/AssetEnqueuer.php || true
-
       - name: Check code style
         run: composer test:lint
 

@@ -51,10 +51,10 @@ class PatternValidator implements PatternValidatorInterface
      */
     private function isPatternRegistered(string $slug): bool
     {
-        if (!class_exists('WP_Block_Patterns_Registry')) {
+        if (! class_exists('WP_Block_Patterns_Registry')) {
             return false;
         }
-        
+
         return \WP_Block_Patterns_Registry::get_instance()->is_registered($slug);
     }
 
@@ -66,14 +66,14 @@ class PatternValidator implements PatternValidatorInterface
      */
     protected function logPatternError(string $file, array $patternData): void
     {
-        if (!function_exists('__') || !function_exists('_doing_it_wrong') || !function_exists('sprintf')) {
+        if (! function_exists('__') || ! function_exists('_doing_it_wrong') || ! function_exists('sprintf')) {
             return;
         }
-        
+
         $message = empty($patternData['slug'])
             ? \__('Could not register file "%s" as a block pattern ("Slug" field missing)')
             : \__('Could not register file "%s" as a block pattern ("Title" field missing)');
 
         \_doing_it_wrong('_register_theme_block_patterns', \sprintf($message, $file), '6.0.0');
     }
-} 
+}

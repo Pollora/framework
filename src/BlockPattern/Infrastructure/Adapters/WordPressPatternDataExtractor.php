@@ -67,7 +67,7 @@ class WordPressPatternDataExtractor implements PatternDataExtractorInterface
     public function processData(PatternFileData $fileData, object $theme): array
     {
         $patternData = $fileData->getHeaders();
-        
+
         return $this->collectionFactory->make($patternData)
             ->map(function ($value, $key) use ($theme) {
                 $arrayProperties = ['categories', 'keywords', 'blockTypes', 'postTypes'];
@@ -81,14 +81,14 @@ class WordPressPatternDataExtractor implements PatternDataExtractorInterface
                     return $value ? in_array(strtolower($value), ['yes', 'true']) : null;
                 }
                 if (in_array($key, ['title', 'description'])) {
-                    if (!function_exists('translate_with_gettext_context') || !method_exists($theme, 'get')) {
+                    if (! function_exists('translate_with_gettext_context') || ! method_exists($theme, 'get')) {
                         return $value;
                     }
-                    
+
                     $context = $key === 'title' ? 'Pattern title' : 'Pattern description';
                     $domain = $theme->get('TextDomain');
-                    
-                    if (!is_string($domain)) {
+
+                    if (! is_string($domain)) {
                         return $value;
                     }
 
@@ -110,4 +110,4 @@ class WordPressPatternDataExtractor implements PatternDataExtractorInterface
 
         return View::exists($viewName) ? View::make($viewName)->render() : null;
     }
-} 
+}

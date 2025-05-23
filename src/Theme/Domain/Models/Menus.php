@@ -49,8 +49,11 @@ class Menus implements ThemeComponent
     ];
 
     protected ContainerInterface $app;
+
     protected Action $action;
+
     protected Filter $filter;
+
     protected ConfigRepositoryInterface $config;
 
     public function __construct(ContainerInterface $app, ConfigRepositoryInterface $config)

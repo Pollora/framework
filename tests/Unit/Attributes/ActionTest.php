@@ -2,91 +2,103 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Facade;
+require_once __DIR__.'/../helpers.php';
+
+use Mockery\MockInterface;
 use Pollora\Attributes\Action;
 use Pollora\Attributes\Attributable;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Hook\Infrastructure\Services\Action as ActionService;
 
-beforeEach(function () {
-    // Mock Action service
+beforeEach(function (): void {
+    // Mock the Action service for testing hook registration
     $this->mockAction = Mockery::mock(ActionService::class);
 
-    // Create a fake container that will be wrapped by ContainerServiceLocator
-    $this->mockContainer = new class($this->mockAction)
-    {
-        private $actionService;
+    // Use generic TestContainer helper for service injection
+    $this->mockContainer = new TestContainer([
+        ActionService::class => $this->mockAction,
+    ]);
 
-        public function __construct($actionService)
-        {
-            $this->actionService = $actionService;
-        }
-
-        public function get($serviceClass)
-        {
-            if ($serviceClass === ActionService::class) {
-                return $this->actionService;
-            }
-
-            return null;
-        }
-    };
-
+    // Initialize the processor with our test container
     $this->processor = new AttributeProcessor($this->mockContainer);
 });
 
+/**
+ * Test class with a single action hook
+ */
 class SingleActionClass implements Attributable
 {
+    /**
+     * Method with a single action attribute
+     */
     #[Action('test_action', priority: 10)]
-    public function actionMethod($param = null)
+    public function actionMethod(?string $param = null): string
     {
-        // Test method
         return $param ? "processed_{$param}" : 'processed';
     }
 }
 
+/**
+ * Test class with multiple action hooks
+ */
 class MultipleActionClass implements Attributable
 {
+    /**
+     * First action method
+     */
     #[Action('test_action', priority: 10)]
-    public function actionMethod($param = null)
+    public function actionMethod(?string $param = null): string
     {
-        // Test method
         return $param ? "processed_{$param}" : 'processed';
     }
 
+    /**
+     * Second action method with different hook and priority
+     */
     #[Action('another_action', priority: 20)]
-    public function anotherActionMethod()
+    public function anotherActionMethod(): string
     {
-        // Another test method
         return 'another_processed';
     }
 }
 
+/**
+ * Test class with default priority action hook
+ */
 class DefaultPriorityActionClass implements Attributable
 {
+    /**
+     * Method with default priority (should be 10)
+     */
     #[Action('test_action')]
-    public function actionMethod($param = null)
+    public function actionMethod(?string $param = null): string
     {
-        // Test method with default priority
         return $param ? "processed_{$param}" : 'processed';
     }
 }
 
+/**
+ * Test class with custom priority action hook
+ */
 class CustomPriorityActionClass implements Attributable
 {
+    /**
+     * Method with custom priority value
+     */
     #[Action('test_action', priority: 42)]
-    public function actionMethod($param = null)
+    public function actionMethod(?string $param = null): string
     {
-        // Test method with custom priority
         return $param ? "processed_{$param}" : 'processed';
     }
 }
 
-it('registers an action hook correctly', function () {
-    // Set up expectations
+it('registers an action hook correctly', function (): void {
+    // Arrange: Set up expectations for action service
+    /** @var MockInterface $this->mockAction */
     $this->mockAction->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
+            // Verify all parameters are correctly passed to the action service
             return $hook === 'test_action'
                 && is_array($callback)
                 && $callback[0] instanceof SingleActionClass
@@ -95,16 +107,19 @@ it('registers an action hook correctly', function () {
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Act: Process the test class with attributes
     $testClass = new SingleActionClass;
     $this->processor->process($testClass);
+
+    // Assert: Verification happens in the mock expectations
 });
 
-it('registers multiple action hooks with different priorities', function () {
-    // Set up expectations for both actions
+it('registers multiple action hooks with different priorities', function (): void {
+    // Arrange: Set up expectations for both action hooks
+    /** @var MockInterface $this->mockAction */
     $this->mockAction->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
             return $hook === 'test_action'
                 && is_array($callback)
                 && $callback[0] instanceof MultipleActionClass
@@ -114,7 +129,7 @@ it('registers multiple action hooks with different priorities', function () {
 
     $this->mockAction->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
             return $hook === 'another_action'
                 && is_array($callback)
                 && $callback[0] instanceof MultipleActionClass
@@ -122,68 +137,76 @@ it('registers multiple action hooks with different priorities', function () {
                 && $priority === 20;
         });
 
-    // Process the test class
+    // Act: Process the test class with multiple attributes
     $testClass = new MultipleActionClass;
     $this->processor->process($testClass);
+
+    // Assert: Verification happens in the mock expectations
 });
 
-it('registers an action hook with default priority (10)', function () {
-    // Set up expectations
+it('registers an action hook with default priority (10)', function (): void {
+    // Arrange: Set up expectations for default priority
+    /** @var MockInterface $this->mockAction */
     $this->mockAction->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
             return $hook === 'test_action'
                 && is_array($callback)
                 && $callback[0] instanceof DefaultPriorityActionClass
                 && $callback[1] === 'actionMethod'
-                && $priority === 10 // Default priority should be 10
+                && $priority === 10 // Verify default priority is 10
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Act: Process the test class with default priority attribute
     $testClass = new DefaultPriorityActionClass;
     $this->processor->process($testClass);
+
+    // Assert: Verification happens in the mock expectations
 });
 
-it('registers an action hook with custom priority', function () {
-    // Set up expectations
+it('registers an action hook with custom priority', function (): void {
+    // Arrange: Set up expectations for custom priority
+    /** @var MockInterface $this->mockAction */
     $this->mockAction->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
+        ->withArgs(function (string $hook, ?array $callback, int $priority, int $acceptedArgs): bool {
             return $hook === 'test_action'
                 && is_array($callback)
                 && $callback[0] instanceof CustomPriorityActionClass
                 && $callback[1] === 'actionMethod'
-                && $priority === 42 // Custom priority
+                && $priority === 42 // Verify custom priority is respected
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Act: Process the test class with custom priority attribute
     $testClass = new CustomPriorityActionClass;
     $this->processor->process($testClass);
+
+    // Assert: Verification happens in the mock expectations
 });
 
-it('handles null service locator resolution gracefully', function () {
-    // Create a container that returns null for the service
+it('handles null service locator resolution gracefully', function (): void {
+    // Arrange: Create a container that returns null for the service
     $mockContainer = new class
     {
-        public function get($serviceClass)
+        public function get(string $serviceClass): ?object
         {
             return null;
         }
     };
 
+    // Act: Initialize processor with null-returning container and process a class
     $processor = new AttributeProcessor($mockContainer);
     $testClass = new SingleActionClass;
 
     // This should not throw an exception
-    $processor->process($testClass);
+    $result = $processor->process($testClass);
 
-    // No assertions needed - we're just checking that it doesn't throw
+    // Assert: Method completes without exceptions
     expect(true)->toBeTrue();
 });
 
-afterEach(function () {
+afterEach(function (): void {
     Mockery::close();
-    Facade::clearResolvedInstances();
 });

@@ -20,4 +20,4 @@ class CollectionServiceProvider extends ServiceProvider
     {
         $this->app->bind(CollectionFactoryInterface::class, LaravelCollectionFactory::class);
     }
-} 
+}

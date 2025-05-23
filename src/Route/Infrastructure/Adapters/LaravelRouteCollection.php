@@ -15,9 +15,6 @@ use ReflectionClass;
  */
 class LaravelRouteCollection
 {
-    /**
-     * @param LaravelRoute $routeAdapter
-     */
     public function __construct(
         private LaravelRoute $routeAdapter
     ) {}
@@ -25,12 +22,12 @@ class LaravelRouteCollection
     /**
      * Convert a domain RouteCollectionEntity to a framework RouteCollection.
      *
-     * @param RouteCollectionEntity $collection Domain collection entity
+     * @param  RouteCollectionEntity  $collection  Domain collection entity
      * @return RouteCollection Framework route collection
      */
     public function toFrameworkCollection(RouteCollectionEntity $collection): RouteCollection
     {
-        $frameworkCollection = new RouteCollection();
+        $frameworkCollection = new RouteCollection;
 
         // Convert each route entity to a framework route and add to collection
         foreach ($collection->getRoutes() as $routeEntity) {
@@ -54,12 +51,12 @@ class LaravelRouteCollection
     /**
      * Convert a framework RouteCollection to a domain RouteCollectionEntity.
      *
-     * @param RouteCollection $collection Framework route collection
+     * @param  RouteCollection  $collection  Framework route collection
      * @return RouteCollectionEntity Domain collection entity
      */
     public function toDomainCollection(RouteCollection $collection): RouteCollectionEntity
     {
-        $domainCollection = new RouteCollectionEntity();
+        $domainCollection = new RouteCollectionEntity;
 
         // Convert each framework route to a domain entity and add to collection
         foreach ($collection->getRoutes() as $frameworkRoute) {
@@ -73,9 +70,8 @@ class LaravelRouteCollection
     /**
      * Add a route to the framework collection using reflection to access protected methods.
      *
-     * @param RouteCollection $collection Framework collection
-     * @param Route $route Framework route
-     * @return void
+     * @param  RouteCollection  $collection  Framework collection
+     * @param  Route  $route  Framework route
      */
     private function addRouteToCollection(RouteCollection $collection, Route $route): void
     {

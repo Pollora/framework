@@ -6,7 +6,7 @@ namespace Pollora\Theme\Domain\Contracts;
 
 /**
  * Interface for template hierarchy management in themes.
- * 
+ *
  * This defines the contract for handling template hierarchies
  * without coupling to WordPress or Laravel.
  */
@@ -19,7 +19,7 @@ interface TemplateHierarchyInterface
      * @param  callable  $callback  Function that returns an array of template files
      */
     public function registerTemplateHandler(string $type, callable $callback): void;
-    
+
     /**
      * Get the template hierarchy for the current request.
      *
@@ -27,11 +27,11 @@ interface TemplateHierarchyInterface
      * @return string[] The template hierarchy
      */
     public function hierarchy(bool $refresh = false): array;
-    
+
     /**
      * Get the WordPress template hierarchy order from most specific to least specific.
      *
      * @return string[] Array of conditional function names in order of specificity
      */
     public function getHierarchyOrder(): array;
-} 
+}

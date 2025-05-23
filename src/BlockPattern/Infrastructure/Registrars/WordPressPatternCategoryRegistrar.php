@@ -19,10 +19,10 @@ class WordPressPatternCategoryRegistrar implements PatternCategoryRegistrarInter
      */
     public function registerCategory(string $slug, array $attributes): void
     {
-        if (!function_exists('register_block_pattern_category')) {
+        if (! function_exists('register_block_pattern_category')) {
             return;
         }
 
         \register_block_pattern_category($slug, $attributes);
     }
-} 
+}

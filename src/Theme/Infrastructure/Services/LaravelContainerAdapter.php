@@ -9,7 +9,7 @@ use Pollora\Theme\Domain\Contracts\ContainerInterface;
 
 /**
  * Laravel implementation of the Theme ContainerInterface.
- * 
+ *
  * This adapter wraps the Laravel Application instance and provides
  * the domain-specific container operations.
  */
@@ -49,7 +49,7 @@ class LaravelContainerAdapter implements ContainerInterface
                 // Fall through to fallback
             }
         }
-        
+
         // Fallback implementation - assume not cached
         return false;
     }
@@ -85,4 +85,4 @@ class LaravelContainerAdapter implements ContainerInterface
     {
         return $this->app->make($id);
     }
-} 
+}

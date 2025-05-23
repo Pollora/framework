@@ -6,8 +6,8 @@ namespace Pollora\Scheduler;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Scheduler\Contracts\SchedulerInterface;
-use Pollora\Support\Facades\Filter;
 
 /**
  * Service provider for WordPress cron scheduler functionality.
@@ -46,6 +46,17 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     protected function registerFilters(SchedulerInterface $scheduler): void
     {
+        /** @var Filter $filter */
+        $filter = $this->app->make(Filter::class);
+        $filters = [
+            'pre_get_scheduled_event' => 'preGetScheduledEvent',
+            'pre_get_ready_cron_jobs' => 'preGetReadyCronJobs',
+        ];
+
+        foreach ($filters as $hook => $method) {
+            $filter->add($hook, [$scheduler, $method], 10, 5);
+        }
+
         $filters = [
             'pre_update_option_cron' => 'preUpdateOptionCron',
             'pre_option_cron' => 'preOptionCron',
@@ -54,12 +65,10 @@ class SchedulerServiceProvider extends ServiceProvider
             'pre_unschedule_event' => 'preUnscheduleEvent',
             'pre_clear_scheduled_hook' => 'preClearScheduledHook',
             'pre_unschedule_hook' => 'preUnscheduleHook',
-            'pre_get_scheduled_event' => 'preGetScheduledEvent',
-            'pre_get_ready_cron_jobs' => 'preGetReadyCronJobs',
         ];
 
         foreach ($filters as $hook => $method) {
-            Filter::add($hook, [$scheduler, $method], 10, 5);
+            $filter->add($hook, [$scheduler, $method], 10, 5);
         }
     }
 

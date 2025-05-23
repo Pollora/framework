@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace Pollora\View;
 
-use Pollora\Support\Facades\Filter;
+use Illuminate\Contracts\Container\Container;
+use Pollora\Hook\Infrastructure\Services\Filter;
 
 class Loop
 {
+    protected Filter $filter;
+
+    public function __construct(Container $app)
+    {
+        $this->filter = $app->get(Filter::class);
+    }
+
     /**
      * Get the id of the current post.
      *
@@ -60,7 +68,7 @@ class Loop
      */
     public function content($more_text = null, $strip_teaser = false): string|array
     {
-        $content = Filter::apply('the_content', get_the_content($more_text, $strip_teaser));
+        $content = $this->filter->apply('the_content', get_the_content($more_text, $strip_teaser));
 
         return str_replace(']]>', ']]&gt;', $content);
     }
@@ -73,7 +81,7 @@ class Loop
      */
     public function excerpt($post = null)
     {
-        return Filter::apply('the_excerpt', get_the_excerpt($post));
+        return $this->filter->apply('the_excerpt', get_the_excerpt($post));
     }
 
     /**

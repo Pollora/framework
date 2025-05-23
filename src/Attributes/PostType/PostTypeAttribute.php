@@ -7,7 +7,7 @@ namespace Pollora\Attributes\PostType;
 use Attribute;
 use Pollora\Attributes\Attributable;
 use Pollora\Attributes\Contracts\HandlesAttributes;
-use Pollora\PostType\Contracts\PostType;
+use Pollora\PostType\Domain\Contracts\PostTypeAttributeInterface;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -35,7 +35,7 @@ abstract class PostTypeAttribute implements HandlesAttributes
      */
     public function handle($container, Attributable $instance, ReflectionClass|ReflectionMethod $context, object $attribute): void
     {
-        if (! $instance instanceof PostType) {
+        if (! $instance instanceof PostTypeAttributeInterface) {
             return;
         }
 
@@ -48,7 +48,7 @@ abstract class PostTypeAttribute implements HandlesAttributes
      * This method should be implemented by child classes to set specific
      * configuration options on the post type instance.
      *
-     * @param  PostType  $postType  The post type instance to configure
+     * @param  PostTypeAttributeInterface  $postType  The post type instance to configure
      */
-    abstract protected function configure(PostType $postType): void;
+    abstract protected function configure(PostTypeAttributeInterface $postType): void;
 }

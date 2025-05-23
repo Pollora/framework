@@ -30,15 +30,15 @@ class PatternCategoryRegistrar
     public function register(): void
     {
         $patterns = $this->config->get('theme.gutenberg.categories.patterns', []);
-        
-        if (empty($patterns) || !is_array($patterns)) {
+
+        if (empty($patterns) || ! is_array($patterns)) {
             return;
         }
-        
+
         foreach ($patterns as $key => $args) {
             if (function_exists('register_block_pattern_category')) {
                 \register_block_pattern_category($key, $args);
             }
         }
     }
-} 
+}

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\BlockPattern\Domain\Contracts;
 
-use Pollora\BlockPattern\Domain\Models\PatternCategory;
-
 /**
  * Port interface for registering pattern categories.
  *
@@ -18,8 +16,8 @@ interface PatternCategoryRegistrarInterface
     /**
      * Register a pattern category with the underlying system.
      *
-     * @param string $slug The category slug
-     * @param array<string, mixed> $attributes The category attributes
+     * @param  string  $slug  The category slug
+     * @param  array<string, mixed>  $attributes  The category attributes
      */
     public function registerCategory(string $slug, array $attributes): void;
-} 
+}

@@ -14,8 +14,8 @@ interface CollectionFactoryInterface
     /**
      * Create a collection instance from items.
      *
-     * @param array $items Items to collect
+     * @param  array  $items  Items to collect
      * @return CollectionInterface Framework-agnostic collection
      */
     public function make(array $items): CollectionInterface;
-} 
+}

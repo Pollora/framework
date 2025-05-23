@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Contracts\Container\Container;
 use Pollora\Discoverer\Infrastructure\Services\Scouts\PostTypeScout;
-use Pollora\PostType\AbstractPostType;
+use Pollora\PostType\Domain\Models\AbstractPostType;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
 

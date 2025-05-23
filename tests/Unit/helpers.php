@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Container\Container;
+
 class WP
 {
     public static $wpFunctions;
@@ -148,6 +150,14 @@ function setWordPressConditions(array $conditions = [])
 }
 
 /**
+ * Réinitialise le mock global des fonctions WordPress
+ */
+function resetWordPressMocks()
+{
+    WP::$wpFunctions = null;
+}
+
+/**
  * Helper functions for tests
  */
 if (! function_exists('app')) {
@@ -159,7 +169,7 @@ if (! function_exists('app')) {
      */
     function app($abstract = null, array $parameters = [])
     {
-        $app = \Illuminate\Container\Container::getInstance();
+        $app = Container::getInstance();
 
         if (is_null($abstract)) {
             return $app;
@@ -349,6 +359,12 @@ if (! function_exists('wp_is_block_theme')) {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_is_block_theme() : false;
     }
 }
+if (! function_exists('get_file_data')) {
+    function get_file_data($file, $headers)
+    {
+        return ['title' => 'Title', 'slug' => 'slug-demo', 'description' => 'Desc'];
+    }
+}
 
 if (! function_exists('__return_true')) {
     function __return_true()
@@ -371,5 +387,54 @@ if (! function_exists('route_condition_test')) {
     function route_condition_test($param = null)
     {
         return false; // Default implementation, will be mocked in tests
+    }
+}
+
+if (! function_exists('translate_with_gettext_context')) {
+    function translate_with_gettext_context($text, $context, $domain = null)
+    {
+        return $text;
+    }
+}
+
+// MockActionFacade for WordPressAjaxActionRegistrarTest
+if (! class_exists('MockActionFacade')) {
+    class MockActionFacade
+    {
+        public array $calls = [];
+
+        public function add($hook, $callback): void
+        {
+            $GLOBALS['pollora_action_calls'][] = [$hook, $callback];
+        }
+    }
+}
+
+// Generic TestContainer for service locator pattern in tests
+if (! class_exists('TestContainer')) {
+    class TestContainer
+    {
+        private array $services;
+
+        public function __construct(array $services = [])
+        {
+            $this->services = $services;
+        }
+
+        public function get(string $serviceClass): ?object
+        {
+            return $this->services[$serviceClass] ?? null;
+        }
+
+        // Ajout pour compatibilité avec les tests d'attributs
+        public function make(string $serviceClass): ?object
+        {
+            return $this->get($serviceClass);
+        }
+
+        public function resolve(string $serviceClass): ?object
+        {
+            return $this->get($serviceClass);
+        }
     }
 }

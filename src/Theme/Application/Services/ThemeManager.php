@@ -14,6 +14,7 @@ namespace Pollora\Theme\Application\Services;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
@@ -30,7 +31,17 @@ class ThemeManager implements ThemeService
 
     protected ?ThemeMetadata $theme = null;
 
-    public function __construct(protected ContainerInterface $app, protected ViewFinderInterface $viewFinder, protected ?Loader $localeLoader) {}
+    protected ConsoleDetectionService $consoleDetectionService;
+
+    public function __construct(
+        protected ContainerInterface $app,
+        protected ViewFinderInterface $viewFinder,
+        protected ?Loader $localeLoader,
+        ?ConsoleDetectionService $consoleDetectionService = null
+    ) {
+        // Fallback for backward compatibility if not injected
+        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+    }
 
     public function instance(): ThemeManager
     {
@@ -58,7 +69,7 @@ class ThemeManager implements ThemeService
         $currentTheme = $baseTheme;
 
         while (true) {
-            if (! is_dir($currentTheme->getBasePath()) && ! $this->app->runningInConsole()) {
+            if (! is_dir($currentTheme->getBasePath()) && ! $this->consoleDetectionService->isConsole()) {
                 throw new ThemeException("Theme directory {$currentTheme->getName()} not found.");
             }
 

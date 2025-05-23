@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Container\Container;
-use Illuminate\Support\Facades\Facade;
 use Mockery as m;
-use Pollora\Attributes\Attributable;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Attributes\Taxonomy\AllowHierarchy;
 use Pollora\Attributes\Taxonomy\Args;
@@ -57,13 +54,13 @@ use Pollora\Taxonomy\Contracts\Taxonomy;
 #[ShowInRest]
 #[Hierarchical]
 #[ObjectType(['post', 'page'])]
-class TestTaxonomy implements Attributable, Taxonomy
+class TestTaxonomy extends \Pollora\Taxonomy\Domain\Models\AbstractTaxonomy
 {
     public array $attributeArgs = [];
 
-    protected string $slug = 'test-taxonomy';
+    protected ?string $slug = 'test-taxonomy';
 
-    protected array $objectType = ['post'];
+    protected array|string $objectType = ['post'];
 
     public function getSlug(): string
     {
@@ -130,16 +127,8 @@ class TestTaxonomy implements Attributable, Taxonomy
     }
 }
 
-beforeAll(function () {
-    // Create and configure the container
-    $app = new Container;
-    Facade::setFacadeApplication($app);
-});
-
 afterAll(function () {
     m::close();
-    Facade::clearResolvedInstances();
-    Facade::setFacadeApplication(null);
 });
 
 // Helper function to test simple boolean attributes

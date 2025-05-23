@@ -159,20 +159,21 @@ class ThemeMetadata
         if (function_exists('app_path')) {
             return app_path();
         }
-        
+
         // Fallback to a reasonable default when outside framework
-        return getcwd() . '/app';
+        return getcwd().'/app';
     }
-    
+
     /**
      * Convert a string to StudlyCase format
      */
     protected function studlify(string $value): string
     {
         $value = ucwords(str_replace(['-', '_'], ' ', $value));
+
         return str_replace(' ', '', $value);
     }
-    
+
     /**
      * Wrap a value in an array if it's not already an array
      */
@@ -181,7 +182,7 @@ class ThemeMetadata
         if (is_array($value)) {
             return $value;
         }
-        
+
         return $value === null ? [] : [$value];
     }
 }

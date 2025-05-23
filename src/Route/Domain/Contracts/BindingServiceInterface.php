@@ -16,16 +16,16 @@ interface BindingServiceInterface
     /**
      * Add WordPress objects to route parameters.
      *
-     * @param RouteEntity $route The route to add bindings to
+     * @param  RouteEntity  $route  The route to add bindings to
      * @return RouteEntity The route with added bindings
      */
     public function addBindings(RouteEntity $route): RouteEntity;
-    
+
     /**
      * Check if bindings should be added to this route.
      *
-     * @param RouteEntity $route The route to check
+     * @param  RouteEntity  $route  The route to check
      * @return bool True if bindings should be added
      */
     public function shouldAddBindings(RouteEntity $route): bool;
-} 
+}

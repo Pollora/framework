@@ -19,11 +19,13 @@ use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeService;
+use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
 use Pollora\Theme\Domain\Services\TemplateHierarchy;
+use Pollora\Theme\Domain\Support\ThemeCollection;
 use Pollora\Theme\Domain\Support\ThemeConfig;
+use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
-use Pollora\Theme\Domain\Support\ThemeCollection;
 
 /**
  * Provide extra blade directives to aid in WordPress view development.
@@ -50,8 +52,8 @@ class ThemeServiceProvider extends ServiceProvider
 
         // Register WordPress theme interface binding
         $this->app->singleton(
-            \Pollora\Theme\Domain\Contracts\WordPressThemeInterface::class,
-            \Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter::class
+            WordPressThemeInterface::class,
+            WordPressThemeAdapter::class
         );
 
         // Register ThemeService interface binding
@@ -70,6 +72,10 @@ class ThemeServiceProvider extends ServiceProvider
 
         // Register remaining services
         $this->registerCommands();
+    }
+
+    public function boot()
+    {
         $this->registerComponentServices();
         $this->registerTemplateHierarchy();
     }
@@ -127,37 +133,52 @@ class ThemeServiceProvider extends ServiceProvider
             \Pollora\Theme\Domain\Contracts\ContainerInterface::class,
             function ($app) {
                 // Return a very simple container implementation that delegates to Laravel
-                return new class($app) implements \Pollora\Theme\Domain\Contracts\ContainerInterface {
+                return new class($app) implements \Pollora\Theme\Domain\Contracts\ContainerInterface
+                {
                     public function __construct(protected $app) {}
-                    
-                    public function get(string $id): mixed { 
-                        return $this->app->make($id); 
+
+                    public function get(string $id): mixed
+                    {
+                        return $this->app->make($id);
                     }
-                    
-                    public function has(string $id): bool { 
-                        return $this->app->bound($id); 
+
+                    public function has(string $id): bool
+                    {
+                        return $this->app->bound($id);
                     }
-                    
-                    public function registerProvider(string|object $provider): void {
+
+                    public function registerProvider(string|object $provider): void
+                    {
                         $this->app->register($provider);
                     }
-                    
-                    public function bindShared(string $abstract, mixed $concrete): void {
+
+                    public function bindShared(string $abstract, mixed $concrete): void
+                    {
                         $this->app->singleton($abstract, $concrete);
                     }
-                    
-                    public function isConfigurationCached(): bool {
+
+                    public function isConfigurationCached(): bool
+                    {
                         return false; // Always assume configs need to be loaded
                     }
-                    
-                    public function getConfig(string $key, mixed $default = null): mixed {
+
+                    public function getConfig(string $key, mixed $default = null): mixed
+                    {
                         return $this->app['config']->get($key, $default);
                     }
-                    
-                    public function setConfig(string $key, mixed $value): void {
+
+                    public function setConfig(string $key, mixed $value): void
+                    {
                         $this->app['config']->set($key, $value);
                     }
                 };
+            }
+        );
+
+        $this->app->singleton(
+            \Pollora\Theme\Infrastructure\Services\ComponentFactory::class,
+            function ($app) {
+                return new \Pollora\Theme\Infrastructure\Services\ComponentFactory($app);
             }
         );
 
@@ -191,7 +212,7 @@ class ThemeServiceProvider extends ServiceProvider
                 $app->get(Filter::class)
             );
         });
-        
+
         // For backward compatibility
         $this->app->singleton(TemplateHierarchy::class, function ($app) {
             return $app->make(\Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface::class);
@@ -243,7 +264,7 @@ class ThemeServiceProvider extends ServiceProvider
      */
     protected function loadFilesFrom(string $directory): void
     {
-        if (!File::isDirectory($directory)) {
+        if (! File::isDirectory($directory)) {
             return;
         }
 

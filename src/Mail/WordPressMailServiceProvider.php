@@ -21,7 +21,7 @@ class WordPressMailServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('wp.mail', fn ($app): \Pollora\Mail\Mailer => new Mailer);
+        $this->app->singleton('wp.mail', fn ($app): Mailer => new Mailer($app));
     }
 
     /**

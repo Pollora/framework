@@ -39,10 +39,10 @@ class PatternDataProcessor implements PatternDataProcessorInterface
      */
     public function getPatternData(string $file): array
     {
-        if (!function_exists('get_file_data')) {
+        if (! function_exists('get_file_data')) {
             return [];
         }
-        
+
         return \get_file_data($file, $this->defaultHeaders);
     }
 
@@ -70,14 +70,14 @@ class PatternDataProcessor implements PatternDataProcessorInterface
                     return $value ? in_array(strtolower($value), ['yes', 'true']) : null;
                 }
                 if (in_array($key, ['title', 'description'])) {
-                    if (!function_exists('translate_with_gettext_context') || !method_exists($theme, 'get')) {
+                    if (! function_exists('translate_with_gettext_context') || ! method_exists($theme, 'get')) {
                         return $value;
                     }
-                    
+
                     $context = $key === 'title' ? 'Pattern title' : 'Pattern description';
                     $domain = $theme->get('TextDomain');
-                    
-                    if (!is_string($domain)) {
+
+                    if (! is_string($domain)) {
                         return $value;
                     }
 
@@ -89,4 +89,4 @@ class PatternDataProcessor implements PatternDataProcessorInterface
             ->filter()
             ->all();
     }
-} 
+}

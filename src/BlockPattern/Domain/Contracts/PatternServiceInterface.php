@@ -20,4 +20,4 @@ interface PatternServiceInterface
      * with the underlying system.
      */
     public function registerAll(): void;
-} 
+}

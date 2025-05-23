@@ -20,4 +20,4 @@ class ConfigServiceProvider extends ServiceProvider
     {
         $this->app->bind(ConfigRepositoryInterface::class, LaravelConfigRepository::class);
     }
-} 
+}
