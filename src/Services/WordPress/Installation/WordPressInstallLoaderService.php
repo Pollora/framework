@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Services\WordPress\Installation;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Config;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\MeiliScout\Foundation\Application;
 
 /**
  * Service for loading WordPress core files and initializing the environment.

@@ -66,14 +66,14 @@ class PatternService implements PatternServiceInterface
         $themes = $this->themeProvider->getActiveThemes();
 
         foreach ($themes as $theme) {
-            if (!method_exists($theme, 'get_stylesheet_directory')) {
+            if (! method_exists($theme, 'get_stylesheet_directory')) {
                 continue;
             }
 
-            $patternDir = $theme->get_stylesheet_directory() . self::PATTERN_DIRECTORY;
+            $patternDir = $theme->get_stylesheet_directory().self::PATTERN_DIRECTORY;
 
             // Skip if directory doesn't exist
-            if (!is_dir($patternDir)) {
+            if (! is_dir($patternDir)) {
                 continue;
             }
 
@@ -84,8 +84,8 @@ class PatternService implements PatternServiceInterface
     /**
      * Register patterns from a specific directory.
      *
-     * @param string $directory Pattern directory path
-     * @param object $theme Theme object
+     * @param  string  $directory  Pattern directory path
+     * @param  object  $theme  Theme object
      */
     private function registerPatternsFromDirectory(string $directory, object $theme): void
     {
@@ -104,8 +104,8 @@ class PatternService implements PatternServiceInterface
     /**
      * Process a single pattern file and register it if valid.
      *
-     * @param string $file Pattern file path
-     * @param object $theme Theme object
+     * @param  string  $file  Pattern file path
+     * @param  object  $theme  Theme object
      */
     private function processPatternFile(string $file, object $theme): void
     {
@@ -113,7 +113,7 @@ class PatternService implements PatternServiceInterface
         $fileData = $this->dataExtractor->extractFromFile($file);
 
         // Skip if data is not valid
-        if (!$fileData->isValid()) {
+        if (! $fileData->isValid()) {
             return;
         }
 
@@ -134,4 +134,4 @@ class PatternService implements PatternServiceInterface
         // Register the pattern
         $this->patternRegistrar->registerPattern($pattern);
     }
-} 
+}

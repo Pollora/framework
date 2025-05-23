@@ -18,13 +18,13 @@ class WordPressNullablePost
     /**
      * Convert a domain NullablePostEntity to a WordPress WP_Post.
      *
-     * @param NullablePostEntity $entity The domain entity to convert
+     * @param  NullablePostEntity  $entity  The domain entity to convert
      * @return WP_Post The WordPress post object
      */
     public function toWpPost(NullablePostEntity $entity): WP_Post
     {
         // Convert the entity to a simple object with WordPress-style property names
-        $wpPost = new \stdClass();
+        $wpPost = new \stdClass;
         $wpPost->ID = $entity->id;
         $wpPost->post_author = $entity->authorId;
         $wpPost->post_date = $entity->date;
@@ -48,26 +48,26 @@ class WordPressNullablePost
         $wpPost->post_type = $entity->type;
         $wpPost->post_mime_type = $entity->mimeType;
         $wpPost->comment_count = $entity->commentCount;
-        
+
         // Convert to WP_Post
         return new WP_Post($wpPost);
     }
-    
+
     /**
      * Convert a WordPress WP_Post to a domain NullablePostEntity.
      *
-     * @param WP_Post|null $post The WordPress post to convert
+     * @param  WP_Post|null  $post  The WordPress post to convert
      * @return NullablePostEntity The domain entity
      */
     public function toDomainEntity(?WP_Post $post = null): NullablePostEntity
     {
         if ($post === null) {
-            return new NullablePostEntity();
+            return new NullablePostEntity;
         }
-        
+
         return new NullablePostEntity(
             id: $post->ID,
-            authorId: (int)$post->post_author,
+            authorId: (int) $post->post_author,
             date: $post->post_date,
             dateGmt: $post->post_date_gmt,
             content: $post->post_content ?? '',
@@ -83,15 +83,15 @@ class WordPressNullablePost
             modified: $post->post_modified,
             modifiedGmt: $post->post_modified_gmt,
             contentFiltered: $post->post_content_filtered,
-            parentId: (int)$post->post_parent,
+            parentId: (int) $post->post_parent,
             guid: $post->guid,
-            menuOrder: (int)$post->menu_order,
+            menuOrder: (int) $post->menu_order,
             type: $post->post_type,
             mimeType: $post->post_mime_type,
-            commentCount: (int)$post->comment_count
+            commentCount: (int) $post->comment_count
         );
     }
-    
+
     /**
      * Create a WordPress WP_Post with default values.
      *
@@ -99,6 +99,6 @@ class WordPressNullablePost
      */
     public function createDefaultWpPost(): WP_Post
     {
-        return $this->toWpPost(new NullablePostEntity());
+        return $this->toWpPost(new NullablePostEntity);
     }
-} 
+}

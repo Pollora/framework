@@ -14,16 +14,16 @@ class Pattern
     /**
      * Create a new pattern.
      *
-     * @param string $slug Unique identifier for the pattern
-     * @param string $title Display title for the pattern
-     * @param string $content Pattern content (HTML/markup)
-     * @param string|null $description Optional description
-     * @param array<int, string>|null $categories Optional categories this pattern belongs to
-     * @param array<int, string>|null $keywords Optional keywords for searching
-     * @param array<int, string>|null $blockTypes Optional block types this pattern is for
-     * @param array<int, string>|null $postTypes Optional post types this pattern is for
-     * @param bool|null $inserter Whether to show in inserter
-     * @param int|null $viewportWidth Optional viewport width
+     * @param  string  $slug  Unique identifier for the pattern
+     * @param  string  $title  Display title for the pattern
+     * @param  string  $content  Pattern content (HTML/markup)
+     * @param  string|null  $description  Optional description
+     * @param  array<int, string>|null  $categories  Optional categories this pattern belongs to
+     * @param  array<int, string>|null  $keywords  Optional keywords for searching
+     * @param  array<int, string>|null  $blockTypes  Optional block types this pattern is for
+     * @param  array<int, string>|null  $postTypes  Optional post types this pattern is for
+     * @param  bool|null  $inserter  Whether to show in inserter
+     * @param  int|null  $viewportWidth  Optional viewport width
      */
     public function __construct(
         private string $slug,
@@ -173,9 +173,8 @@ class Pattern
     /**
      * Create a pattern from raw data.
      *
-     * @param array<string, mixed> $data Raw pattern data
-     * @param string $content Pattern content
-     * @return self
+     * @param  array<string, mixed>  $data  Raw pattern data
+     * @param  string  $content  Pattern content
      */
     public static function fromArray(array $data, string $content): self
     {
@@ -192,4 +191,4 @@ class Pattern
             $data['viewportWidth'] ?? null
         );
     }
-} 
+}

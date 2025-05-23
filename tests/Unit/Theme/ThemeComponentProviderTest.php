@@ -2,113 +2,100 @@
 
 declare(strict_types=1);
 
+namespace Tests\Unit\Theme;
+
+use Illuminate\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Support\ServiceProvider;
 use Mockery as m;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Theme\Domain\Contracts\ThemeService;
+use Pollora\BlockPattern\UI\PatternComponent;
+use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\Menus;
 use Pollora\Theme\Domain\Models\Sidebar;
 use Pollora\Theme\Domain\Models\Templates;
 use Pollora\Theme\Domain\Models\ThemeInitializer;
-use Pollora\Theme\Domain\Services\TemplateHierarchy;
 use Pollora\Theme\Infrastructure\Providers\ThemeComponentProvider;
-use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
-use Pollora\Theme\Infrastructure\Services\ComponentFactory;
 use Pollora\Theme\Infrastructure\Services\Support;
-use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
-use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
-use Pollora\Theme\Domain\Contracts\ContainerInterface as ThemeContainerInterface;
-use Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface;
+
+// Properties that were class members are now typically managed via `beforeEach` closures or `uses()`.
+// For simplicity with Mockery, we'll define them in `beforeEach` and access them via `$this`.
+// Pest will make $this available in tests if the closure in beforeEach uses $this.
 
 beforeEach(function () {
-    $this->app = m::mock(Application::class);
+    // parent::setUp() from TestCase is usually not needed directly in Pest unless it does something critical.
+    // If TestCase::setUp() has essential mocking or app bootstrapping, it might need to be replicated or called.
+    // Assuming Tests\TestCase::setUp() is for general Laravel testing setup, which Pest handles via uses(Tests\TestCase::class).
+    // However, direct property access like $this->app implies Pest's context or `uses()`.
 
-    // (Suppression de l'attente sur singleton ComponentFactory)
-    $this->provider = new ThemeServiceProvider($this->app);
+    $this->app = m::mock(Application::class);
+    $this->config = m::mock(Repository::class);
+    $this->provider = new ThemeComponentProvider($this->app);
+
+    // Define core components that should be registered - order matters from the provider
+    $this->coreComponents = [
+        ThemeInitializer::class,
+        PatternComponent::class,
+        Menus::class,
+        Support::class,
+        Sidebar::class,
+        Templates::class,
+        ImageSize::class,
+    ];
+
+    $this->app->shouldReceive('environment')->andReturn('testing');
+    $this->app->shouldReceive('runningInConsole')->andReturn(false);
+    $this->app->shouldReceive('make')->with('config')->andReturn($this->config);
+    $this->config->shouldReceive('get')->andReturn([]);
 });
 
-test('register binds all required singletons, resolves and calls register on ThemeComponentProvider, and registers commands', function () {
-    // Expect singleton binding for all known classes used in ThemeServiceProvider
-    $this->app->shouldReceive('singleton')->with(ThemeService::class, m::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with('theme', m::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with('theme.generator', m::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with('theme.remover', m::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with(ComponentFactory::class, m::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with(ThemeComponentProvider::class, m::type('callable'))->once();
-    $this->app->shouldReceive('singleton')->with(TemplateHierarchy::class, m::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(Templates::class, m::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(Sidebar::class, m::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(Support::class, m::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(Menus::class, m::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(ImageSize::class, m::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('singleton')->with(ThemeInitializer::class, m::type('callable'))->zeroOrMoreTimes();
-    $this->app->shouldReceive('commands')->with(['theme.generator', 'theme.remover'])->zeroOrMoreTimes();
-    
-    // Mock the WordPressThemeInterface binding
-    $this->app->shouldReceive('singleton')
-        ->with(WordPressThemeInterface::class, WordPressThemeAdapter::class)
-        ->once();
+// If Tests\TestCase is needed for other base functionality (like custom assertions or helpers)
+// it should be included with `uses(Tests\TestCase::class);` at the top level of the file.
+// For now, assuming it's not strictly necessary for these specific tests beyond Mockery setup.
 
-    // Mock ContainerInterface singleton binding
-    $this->app->shouldReceive('singleton')
-        ->with(ThemeContainerInterface::class, m::type('Closure'))
-        ->once();
+it('registers component factory (verifies all core components registration)', function () {
+    // This test is named component_factory, but ThemeComponentProvider doesn't deal with ComponentFactory directly.
+    // It registers individual components. Let's assume this test is actually about verifying that
+    // all components defined in the provider are registered correctly.
 
-    // Mock TemplateHierarchyInterface singleton binding
-    $this->app->shouldReceive('singleton')
-        ->with(TemplateHierarchyInterface::class, m::type('Closure'))
-        ->once();
+    $mockComponent = m::mock(ThemeComponent::class);
+    $mockComponent->shouldReceive('register')->byDefault(); // All components have a register method
 
-    // Mock the register method for service providers
-    $this->app->shouldReceive('register')->withAnyArgs()->zeroOrMoreTimes();
-    
-    // Mock the afterResolving method
-    $this->app->shouldReceive('afterResolving')->withAnyArgs()->zeroOrMoreTimes();
-    
-    // Ajoute un mock pour le singleton TemplateHierarchy (domaine)
-    $this->app->shouldReceive('singleton')->withArgs(function ($a, $closure) {
-        return $a === 'Pollora\\Theme\\Domain\\Services\\TemplateHierarchy' && is_callable($closure);
-    })->zeroOrMoreTimes();
-
-    // Ajoute un mock pour le singleton TemplateHierarchy
-    $this->app->shouldReceive('singleton')->withArgs(function ($a, $closure) {
-        return $a === 'Pollora\\Theme\\Infrastructure\\Providers\\TemplateHierarchy' && is_callable($closure);
-    })->atMost()->once();
-
-    // Mock make() for ThemeComponentProvider and other required services
-    $themeComponentProviderMock = m::mock(ThemeComponentProvider::class);
-    $themeComponentProviderMock->shouldReceive('register')->once();
-    $this->app->shouldReceive('make')->with(ThemeComponentProvider::class)->andReturn($themeComponentProviderMock);
-    // Mock Action and Filter services with add() method
-    $actionMock = m::mock(Action::class);
-    $actionMock->shouldReceive('add')->andReturn($actionMock);
-    $this->app->shouldReceive('make')->with(Action::class)->andReturn($actionMock);
-    $filterMock = m::mock(Filter::class);
-    $filterMock->shouldReceive('add')->andReturn($filterMock);
-    $this->app->shouldReceive('make')->with(Filter::class)->andReturn($filterMock);
-    // Mock config for ThemeInitializer, etc.
-    $this->app->shouldReceive('make')->with('config')->andReturn([]);
-    // Mock ComponentFactory
-    $factory = m::mock(ComponentFactory::class);
-    $factory->shouldReceive('make')->zeroOrMoreTimes()->andReturn(new class implements \Pollora\Theme\Domain\Contracts\ThemeComponent
-    {
-        public function register(): void {}
-    });
-    $this->app->shouldReceive('make')->with(ComponentFactory::class)->andReturn($factory);
-    
-    // Add missing bound check to make test pass
-    $this->app->shouldReceive('bound')->withAnyArgs()->andReturn(false);
+    foreach ($this->coreComponents as $component) {
+        $this->app->shouldReceive('bound')->with($component)->ordered()->andReturn(false);
+        $this->app->shouldReceive('singleton')->with($component)->ordered();
+        $this->app->shouldReceive('make')->with($component)->ordered()->andReturn($mockComponent);
+    }
 
     $this->provider->register();
+    expect($this->provider)->toBeInstanceOf(ThemeComponentProvider::class);
 });
 
-describe('ThemeComponentProvider', function () {
-    it('registers ThemeComponent in Laravel container', function () {
-        $mockApp = m::mock('Illuminate\\Contracts\\Foundation\\Application');
-        $provider = new ThemeComponentProvider($mockApp);
-        expect($provider)->toBeInstanceOf(ThemeComponentProvider::class);
-    });
+it('registers core components', function () {
+    $mockComponent = m::mock(ThemeComponent::class);
+    $mockComponent->shouldReceive('register')->byDefault(); // All components have a register method
+
+    foreach ($this->coreComponents as $component) {
+        $this->app->shouldReceive('bound')->with($component)->ordered()->andReturn(false);
+        $this->app->shouldReceive('singleton')
+            ->with($component)
+            ->ordered();
+
+        $this->app->shouldReceive('make')
+            ->with($component)
+            ->ordered()
+            ->andReturn($mockComponent);
+    }
+
+    $this->provider->register();
+    expect($this->provider)->toBeInstanceOf(ThemeComponentProvider::class);
+});
+
+it('can be instantiated', function () {
+    expect($this->provider)->toBeInstanceOf(ThemeComponentProvider::class);
+});
+
+// tearDown with m::close() is usually handled by Pest's Mockery plugin or a global helper if needed.
+// If not using the plugin, m::close() might be called in an `afterEach`.
+afterEach(function () {
+    m::close();
 });

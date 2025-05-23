@@ -14,8 +14,8 @@ class PatternCategory
     /**
      * Create a new pattern category.
      *
-     * @param string $slug Unique identifier for the category
-     * @param array<string, mixed> $attributes Additional attributes for the category
+     * @param  string  $slug  Unique identifier for the category
+     * @param  array<string, mixed>  $attributes  Additional attributes for the category
      */
     public function __construct(
         private string $slug,
@@ -52,4 +52,4 @@ class PatternCategory
             'attributes' => $this->attributes,
         ];
     }
-} 
+}

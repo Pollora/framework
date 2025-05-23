@@ -15,12 +15,12 @@ describe('ImageSize', function () {
         $mockAction = m::mock(Action::class);
         $mockContainer = m::mock(ContainerInterface::class);
         $mockConfig = m::mock(ConfigRepositoryInterface::class);
-        
+
         // Container should provide Action when requested
         $mockContainer->shouldReceive('get')
             ->with(Action::class)
             ->andReturn($mockAction);
-            
+
         $imageSize = new ImageSize($mockContainer, $mockConfig);
         expect($imageSize)->toBeInstanceOf(ImageSize::class);
     });

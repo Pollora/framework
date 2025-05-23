@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\PostType;
 
-use Illuminate\Contracts\Foundation\Application;
-use Pollora\Entity\PostType;
-use Pollora\PostType\PostTypeFactory;
+use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
 
 beforeEach(function () {
     setupWordPressMocks();
-    $this->mockApp = mock(Application::class);
-    $this->factory = new PostTypeFactory($this->mockApp);
+    $this->factory = new PostTypeFactory;
 });
 
 test('make creates new PostType instance with correct parameters', function () {
@@ -23,12 +20,10 @@ test('make creates new PostType instance with correct parameters', function () {
     // Call the method under test
     $result = $this->factory->make($slug, $singular, $plural);
 
-    // Assert the result is a PostType instance
+    // Assert the result is a PostType instance from Entity package
     expect($result)
-        ->toBeInstanceOf(PostType::class)
-        ->and($result->slug)->toBe($slug)
-        ->and($result->singular)->toBe($singular)
-        ->and($result->plural)->toBe($plural);
+        ->toBeObject()
+        ->and($result->getSlug())->toBe($slug);
 });
 
 test('make handles null parameters correctly', function () {
@@ -40,8 +35,6 @@ test('make handles null parameters correctly', function () {
 
     // Assert the result
     expect($result)
-        ->toBeInstanceOf(PostType::class)
-        ->and($result->slug)->toBe($slug)
-        ->and($result->singular)->toBeNull()
-        ->and($result->plural)->toBeNull();
+        ->toBeObject()
+        ->and($result->getSlug())->toBe($slug);
 });

@@ -4,62 +4,91 @@ declare(strict_types=1);
 
 namespace Pollora\Taxonomy\Application\Services;
 
-use Pollora\Entity\Taxonomy;
+use Pollora\Entity\Domain\Model\Taxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
+use Pollora\Taxonomy\Domain\Contracts\TaxonomyRegistryInterface;
+use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 
 /**
- * Service for managing taxonomies in the application layer.
- * 
- * This service provides methods for working with taxonomies,
- * following hexagonal architecture by using the domain contracts.
+ * Application service for taxonomy management.
+ *
+ * This service orchestrates the creation and registration of taxonomies
+ * following hexagonal architecture principles and implementing the common interface.
  */
-class TaxonomyService
+readonly class TaxonomyService implements TaxonomyServiceInterface
 {
-    /**
-     * The taxonomy factory implementation.
-     */
-    private TaxonomyFactoryInterface $factory;
-
     /**
      * Create a new TaxonomyService instance.
      */
-    public function __construct(TaxonomyFactoryInterface $factory)
-    {
-        $this->factory = $factory;
-    }
+    public function __construct(
+        private TaxonomyFactoryInterface $factory,
+        private TaxonomyRegistryInterface $registry
+    ) {}
 
     /**
      * Create a new taxonomy instance.
-     * 
-     * @param string $slug The taxonomy slug
-     * @param string|array $objectType The post type(s) to be associated
-     * @param string|null $singular The singular label for the taxonomy
-     * @param string|null $plural The plural label for the taxonomy
-     * @return Taxonomy
+     *
+     * @param  string  $slug  The taxonomy slug
+     * @param  string|array  $objectType  The post type(s) to be associated
+     * @param  string|null  $singular  The singular label for the taxonomy
+     * @param  string|null  $plural  The plural label for the taxonomy
+     * @param  array<string, mixed>  $args  Additional arguments
+     * @return object The created taxonomy instance
      */
-    public function register(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null): Taxonomy
+    public function create(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object
     {
         return $this->factory->make($slug, $objectType, $singular, $plural);
     }
 
     /**
-     * Check if a taxonomy exists.
-     * 
-     * @param string $taxonomy The taxonomy slug to check
-     * @return bool
+     * Register a taxonomy with the system.
+     *
+     * @param  string  $slug  The taxonomy slug
+     * @param  string|array  $objectType  The post type(s) to be associated
+     * @param  string|null  $singular  The singular label for the taxonomy
+     * @param  string|null  $plural  The plural label for the taxonomy
+     * @param  array<string, mixed>  $args  Additional arguments
+     * @return object The registered taxonomy instance
      */
-    public function exists(string $taxonomy): bool
+    public function register(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object
     {
-        return $this->factory->exists($taxonomy);
+        // Use the factory to create the taxonomy
+        $taxonomy = $this->factory->make($slug, $objectType, $singular, $plural);
+
+        // Register the taxonomy with the registry
+        $this->registry->register($taxonomy);
+
+        return $taxonomy;
+    }
+
+    /**
+     * Register a taxonomy instance.
+     *
+     * @param  object  $taxonomy  The taxonomy instance to register
+     */
+    public function registerInstance(object $taxonomy): void
+    {
+        $this->registry->register($taxonomy);
+    }
+
+    /**
+     * Check if a taxonomy exists.
+     *
+     * @param  string  $slug  The taxonomy slug to check
+     * @return bool True if the taxonomy exists
+     */
+    public function exists(string $slug): bool
+    {
+        return $this->registry->exists($slug);
     }
 
     /**
      * Get all registered taxonomies.
-     * 
-     * @return array
+     *
+     * @return array<string, mixed> The registered taxonomies
      */
     public function getRegistered(): array
     {
-        return $this->factory->getRegistered();
+        return $this->registry->getAll();
     }
-} 
+}

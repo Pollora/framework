@@ -15,16 +15,16 @@ describe('PatternComponent', function () {
         $mockPatternService = m::mock(PatternServiceInterface::class);
         $mockAction = m::mock(Action::class);
         $mockContainer = m::mock(ContainerInterface::class);
-        
+
         // Set up container mock to return our dependencies
         $mockContainer->shouldReceive('get')
             ->with(PatternServiceInterface::class)
             ->andReturn($mockPatternService);
-            
+
         $mockContainer->shouldReceive('get')
             ->with(Action::class)
             ->andReturn($mockAction);
-            
+
         $component = new PatternComponent($mockContainer);
         expect($component)->toBeInstanceOf(PatternComponent::class);
     });

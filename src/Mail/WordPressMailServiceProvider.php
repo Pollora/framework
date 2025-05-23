@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Mail;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Container\Domain\ServiceLocator;
 
 /**
  * Class WordPressMailServiceProvider

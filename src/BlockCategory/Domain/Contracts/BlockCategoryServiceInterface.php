@@ -19,4 +19,4 @@ interface BlockCategoryServiceInterface
      * domain objects, and register them with the system.
      */
     public function registerConfiguredCategories(): void;
-} 
+}

@@ -13,7 +13,7 @@ use Psr\Container\ContainerInterface;
 class ComponentFactory
 {
     /**
-     * @param ContainerInterface $app The Laravel application container
+     * @param  ContainerInterface  $app  The Laravel application container
      */
     public function __construct(
         protected ContainerInterface $app
@@ -22,7 +22,7 @@ class ComponentFactory
     /**
      * Create a new component instance using Laravel's container for dependency injection.
      *
-     * @param string $component The fully qualified class name of the component
+     * @param  string  $component  The fully qualified class name of the component
      * @return ThemeComponent The instantiated component
      */
     public function make(string $component): ThemeComponent

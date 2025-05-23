@@ -18,4 +18,4 @@ interface ThemeProviderInterface
      * @return array<object> Array of active theme objects
      */
     public function getActiveThemes(): array;
-} 
+}

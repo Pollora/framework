@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\PostType;
 
-use Pollora\Entity\PostType;
 use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
+use Pollora\PostType\Domain\Contracts\PostTypeRegistryInterface;
 
 beforeEach(function () {
     $this->mockFactory = mock(PostTypeFactoryInterface::class);
-    $this->mockPostType = mock(PostType::class);
-    $this->postTypeService = new PostTypeService($this->mockFactory);
+    $this->mockRegistry = mock(PostTypeRegistryInterface::class);
+    $this->postTypeService = new PostTypeService($this->mockFactory, $this->mockRegistry);
 });
 
 test('register calls make on factory', function () {
@@ -19,52 +19,61 @@ test('register calls make on factory', function () {
     $slug = 'test-post-type';
     $singular = 'Test Post Type';
     $plural = 'Test Post Types';
-    
-    // Configure the mock
+    $args = ['public' => true];
+
+    $mockPostType = new \stdClass;
+
+    // Configure the mock - register method should call the factory to create the post type
     $this->mockFactory
         ->shouldReceive('make')
-        ->with($slug, $singular, $plural)
+        ->with($slug, $singular, $plural, $args)
         ->once()
-        ->andReturn($this->mockPostType);
-    
+        ->andReturn($mockPostType);
+
+    // Configure the mock - register method should also call the registry to register the post type
+    $this->mockRegistry
+        ->shouldReceive('register')
+        ->with($mockPostType)
+        ->once();
+
     // Call the method under test
-    $result = $this->postTypeService->register($slug, $singular, $plural);
-    
+    $result = $this->postTypeService->register($slug, $singular, $plural, $args);
+
     // Assert the result
-    expect($result)->toBe($this->mockPostType);
+    expect($result)->toBe($mockPostType);
 });
 
-test('exists calls exists on factory', function () {
+test('exists calls exists on registry', function () {
     // Define test values
-    $postType = 'test-post-type';
-    
+    $slug = 'test-post-type';
+
     // Configure the mock
-    $this->mockFactory
+    $this->mockRegistry
         ->shouldReceive('exists')
-        ->with($postType)
+        ->with($slug)
         ->once()
         ->andReturn(true);
-    
+
     // Call the method under test
-    $result = $this->postTypeService->exists($postType);
-    
+    $result = $this->postTypeService->exists($slug);
+
     // Assert the result
     expect($result)->toBeTrue();
 });
 
-test('getRegistered calls getRegistered on factory', function () {
+test('getRegistered calls getAll on registry', function () {
     // Define test values
-    $registeredPostTypes = ['post', 'page', 'test-post-type'];
-    
+    $registeredPostTypes = ['post' => [], 'page' => [], 'test-post-type' => []];
+
     // Configure the mock
-    $this->mockFactory
-        ->shouldReceive('getRegistered')
+    $this->mockRegistry
+        ->shouldReceive('getAll')
         ->once()
         ->andReturn($registeredPostTypes);
-    
+
     // Call the method under test
     $result = $this->postTypeService->getRegistered();
-    
+
     // Assert the result
     expect($result)->toBe($registeredPostTypes);
-}); 
+});

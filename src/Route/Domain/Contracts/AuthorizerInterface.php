@@ -14,15 +14,15 @@ interface AuthorizerInterface
     /**
      * Check if the current user is authorized.
      *
-     * @param string $capability The capability to check
+     * @param  string  $capability  The capability to check
      * @return bool True if user is authorized, false otherwise
      */
     public function isAuthorized(string $capability): bool;
-    
+
     /**
      * Check if a user is logged in.
      *
      * @return bool True if user is logged in, false otherwise
      */
     public function isLoggedIn(): bool;
-} 
+}

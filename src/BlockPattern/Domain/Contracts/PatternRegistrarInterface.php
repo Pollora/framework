@@ -18,7 +18,7 @@ interface PatternRegistrarInterface
     /**
      * Register a pattern with the underlying system.
      *
-     * @param Pattern $pattern The pattern to register
+     * @param  Pattern  $pattern  The pattern to register
      */
     public function registerPattern(Pattern $pattern): void;
-} 
+}

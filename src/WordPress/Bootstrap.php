@@ -134,7 +134,7 @@ class Bootstrap
     private function setupActionHooks(): void
     {
         if ($this->consoleDetectionService->isWpCli()) {
-            Action::add('init', $this->fixNetworkUrl(...), 1);
+            $this->action->add('init', $this->fixNetworkUrl(...), 1);
         } else {
             $this->fixNetworkUrl();
         }

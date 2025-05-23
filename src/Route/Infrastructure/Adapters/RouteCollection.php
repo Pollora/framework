@@ -54,4 +54,4 @@ class RouteCollection extends IlluminateRouteCollection
 
         return $domainAndUri;
     }
-} 
+}

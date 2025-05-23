@@ -37,8 +37,7 @@ class ThemeComponentProvider
      */
     public function __construct(
         protected ?Application $app = null
-    ) {
-    }
+    ) {}
 
     /**
      * Register all theme components.

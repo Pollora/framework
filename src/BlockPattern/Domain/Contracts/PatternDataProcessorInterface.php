@@ -6,7 +6,7 @@ namespace Pollora\BlockPattern\Domain\Contracts;
 
 /**
  * Interface for pattern data processor.
- * 
+ *
  * Handles extraction and processing of pattern metadata from files.
  */
 interface PatternDataProcessorInterface
@@ -18,7 +18,7 @@ interface PatternDataProcessorInterface
      * @return array<string, string|null> Extracted pattern data
      */
     public function getPatternData(string $file): array;
-    
+
     /**
      * Process pattern data for registration.
      *
@@ -29,4 +29,4 @@ interface PatternDataProcessorInterface
      * @return array<string, mixed> Processed pattern data
      */
     public function process(array $patternData, object $theme): array;
-} 
+}

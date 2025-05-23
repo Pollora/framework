@@ -32,7 +32,7 @@ class ThemeInitializer implements ThemeComponent
      * Create a new theme initializer
      */
     public function __construct(
-        protected ContainerInterface $app, 
+        protected ContainerInterface $app,
         protected ConfigRepositoryInterface $config
     ) {
         $this->themeRoot = ThemeConfig::get('theme.base_path');
@@ -101,7 +101,7 @@ class ThemeInitializer implements ThemeComponent
 
         // Use the interface to get theme directories
         $directories = $this->wpTheme->getThemeDirectories();
-        if (!empty($directories)) {
+        if (! empty($directories)) {
             if (isset($GLOBALS['wp_theme_directories'])) {
                 $GLOBALS['wp_theme_directories'] = array_merge(
                     $GLOBALS['wp_theme_directories'],
@@ -114,7 +114,7 @@ class ThemeInitializer implements ThemeComponent
 
         // Use the interface to get the theme instance
         $this->wp_theme = $this->wpTheme->getTheme();
-        
+
         // Use our specialized container interface
         $this->app->bindShared('wp.theme', fn () => $this->wp_theme);
     }
@@ -125,7 +125,7 @@ class ThemeInitializer implements ThemeComponent
     private function registerThemeProvider(): void
     {
         $providers = (array) ThemeConfig::get('theme.providers', []);
-        
+
         foreach ($providers as $provider) {
             // Using our specialized container interface
             $this->app->registerProvider($provider);
@@ -153,7 +153,7 @@ class ThemeInitializer implements ThemeComponent
         ];
 
         // Using our specialized container interface
-        if (!$this->app->isConfigurationCached()) {
+        if (! $this->app->isConfigurationCached()) {
             foreach ($themeConfigs as $themeConfig) {
                 $this->mergeConfigFrom($this->getThemeService()->path("config/{$themeConfig}.php"), "theme.{$themeConfig}");
             }

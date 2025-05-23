@@ -16,9 +16,6 @@ use Pollora\Route\Domain\Models\RouteEntity;
  */
 class RouteMatchingService
 {
-    /**
-     * @param ConditionValidatorInterface $conditionValidator
-     */
     public function __construct(
         private ConditionValidatorInterface $conditionValidator
     ) {}
@@ -26,9 +23,9 @@ class RouteMatchingService
     /**
      * Find a matching route for a request.
      *
-     * @param mixed $request The request to match
-     * @param RouteCollectionEntity $routeCollection Collection of routes to check
-     * @param array<string, mixed> $config Configuration settings
+     * @param  mixed  $request  The request to match
+     * @param  RouteCollectionEntity  $routeCollection  Collection of routes to check
+     * @param  array<string, mixed>  $config  Configuration settings
      * @return RouteEntity|null The matching route or null if none found
      */
     public function findMatchingRoute($request, RouteCollectionEntity $routeCollection, array $config): ?RouteEntity
@@ -50,15 +47,16 @@ class RouteMatchingService
 
         // First find standard routes that match
         $matchingRoute = $this->findStandardRoute($request, $routeCollection);
-        
+
         // If we found a WordPress route, check for more specific ones
         if ($matchingRoute !== null && $matchingRoute->isWordPressRoute()) {
             $wpRoutes = $this->getWordPressRoutes($routeCollection);
             $specificRoute = $this->findMostSpecificWordPressRoute($wpRoutes, $config);
-            
+
             if ($specificRoute !== null) {
                 // Add WordPress bindings
                 $this->addWordPressBindings($specificRoute);
+
                 return $specificRoute;
             }
         }
@@ -97,7 +95,7 @@ class RouteMatchingService
     /**
      * Find a route specifically for handling special WordPress requests.
      *
-     * @param RouteCollectionEntity $routeCollection Collection to search in
+     * @param  RouteCollectionEntity  $routeCollection  Collection to search in
      * @return RouteEntity|null The matching special route or null
      */
     private function findSpecialWordPressRoute(RouteCollectionEntity $routeCollection): ?RouteEntity
@@ -132,7 +130,7 @@ class RouteMatchingService
      * Create a placeholder for an admin route. In the infrastructure layer, this
      * would be implemented to return an actual Route object.
      *
-     * @param mixed $request The current request
+     * @param  mixed  $request  The current request
      * @return RouteEntity A placeholder admin route
      */
     private function createAdminRoute($request): RouteEntity
@@ -145,7 +143,7 @@ class RouteMatchingService
     /**
      * Create a placeholder for a special WordPress route.
      *
-     * @param mixed $request The current request
+     * @param  mixed  $request  The current request
      * @return RouteEntity A placeholder special route
      */
     private function createSpecialWordPressRoute($request): RouteEntity
@@ -157,7 +155,7 @@ class RouteMatchingService
     /**
      * Create a fallback route for when no routes match the request.
      *
-     * @param mixed $request The current request
+     * @param  mixed  $request  The current request
      * @return RouteEntity A placeholder fallback route
      */
     private function createFallbackRoute($request): RouteEntity
@@ -169,8 +167,8 @@ class RouteMatchingService
     /**
      * Find a standard route matching the request.
      *
-     * @param mixed $request The request to match
-     * @param RouteCollectionEntity $routeCollection Collection to search in
+     * @param  mixed  $request  The request to match
+     * @param  RouteCollectionEntity  $routeCollection  Collection to search in
      * @return RouteEntity|null The matching route or null
      */
     private function findStandardRoute($request, RouteCollectionEntity $routeCollection): ?RouteEntity
@@ -183,45 +181,45 @@ class RouteMatchingService
     /**
      * Get all WordPress routes from the collection.
      *
-     * @param RouteCollectionEntity $routeCollection Collection to filter
+     * @param  RouteCollectionEntity  $routeCollection  Collection to filter
      * @return array<RouteEntity> WordPress routes
      */
     private function getWordPressRoutes(RouteCollectionEntity $routeCollection): array
     {
         $wpRoutes = [];
-        
+
         foreach ($routeCollection->getRoutes() as $route) {
             if ($route->isWordPressRoute()) {
                 $wpRoutes[] = $route;
             }
         }
-        
+
         // Sort WordPress routes by specificity
         usort($wpRoutes, function ($a, $b) {
             // Routes with parameters should come first
-            $aHasParams = !empty($a->getConditionParameters());
-            $bHasParams = !empty($b->getConditionParameters());
+            $aHasParams = ! empty($a->getConditionParameters());
+            $bHasParams = ! empty($b->getConditionParameters());
 
-            if ($aHasParams && !$bHasParams) {
+            if ($aHasParams && ! $bHasParams) {
                 return -1;
             }
 
-            if (!$aHasParams && $bHasParams) {
+            if (! $aHasParams && $bHasParams) {
                 return 1;
             }
 
             // If both have or don't have parameters, maintain original order
             return 0;
         });
-        
+
         return $wpRoutes;
     }
 
     /**
      * Find the most specific WordPress route that matches the current request.
      *
-     * @param array<RouteEntity> $wpRoutes Routes to check
-     * @param array<string, mixed> $config Configuration settings
+     * @param  array<RouteEntity>  $wpRoutes  Routes to check
+     * @param  array<string, mixed>  $config  Configuration settings
      * @return RouteEntity|null The most specific matching route or null
      */
     private function findMostSpecificWordPressRoute(array $wpRoutes, array $config): ?RouteEntity
@@ -236,8 +234,8 @@ class RouteMatchingService
                 if (call_user_func_array($condition, $params)) {
                     // Generate a unique key for this route
                     $uniqueKey = $condition;
-                    if (!empty($params)) {
-                        $uniqueKey .= ':' . serialize($params);
+                    if (! empty($params)) {
+                        $uniqueKey .= ':'.serialize($params);
                     }
                     $matchingRoutes[$uniqueKey] = $route;
                 }
@@ -278,12 +276,11 @@ class RouteMatchingService
     /**
      * Add WordPress data bindings to a route.
      *
-     * @param RouteEntity $route The route to add bindings to
-     * @return void
+     * @param  RouteEntity  $route  The route to add bindings to
      */
     private function addWordPressBindings(RouteEntity $route): void
     {
         // This would be implemented in the infrastructure layer
         // to add actual WordPress data to the route parameters
     }
-} 
+}

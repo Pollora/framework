@@ -20,4 +20,4 @@ class LaravelCollectionFactory implements CollectionFactoryInterface
     {
         return new LaravelCollectionAdapter($items);
     }
-} 
+}

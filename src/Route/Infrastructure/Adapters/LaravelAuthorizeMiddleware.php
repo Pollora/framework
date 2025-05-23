@@ -46,4 +46,4 @@ class LaravelAuthorizeMiddleware
 
         throw new HttpException(404);
     }
-} 
+}

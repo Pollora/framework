@@ -24,7 +24,7 @@ class BlockCategoryServiceProvider extends ServiceProvider
     {
         // Bind domain interfaces to infrastructure implementations
         $this->app->bind(BlockCategoryRegistrarInterface::class, BlockCategoryRegistrar::class);
-        
+
         // Bind application interfaces to application implementations
         $this->app->bind(BlockCategoryServiceInterface::class, BlockCategoryService::class);
     }
@@ -37,4 +37,4 @@ class BlockCategoryServiceProvider extends ServiceProvider
         // Trigger the application service to register configured categories
         $this->app->make(BlockCategoryServiceInterface::class)->registerConfiguredCategories();
     }
-} 
+}

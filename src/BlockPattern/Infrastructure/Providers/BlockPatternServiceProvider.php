@@ -33,7 +33,7 @@ class BlockPatternServiceProvider extends ServiceProvider
         $this->app->bind(PatternCategoryRegistrarInterface::class, WordPressPatternCategoryRegistrar::class);
         $this->app->bind(PatternRegistrarInterface::class, WordPressPatternRegistrar::class);
         $this->app->bind(ThemeProviderInterface::class, WordPressThemeProvider::class);
-        
+
         // Bind application interfaces to application implementations
         $this->app->bind(PatternServiceInterface::class, PatternService::class);
     }
@@ -46,4 +46,4 @@ class BlockPatternServiceProvider extends ServiceProvider
         // Trigger the application service to register patterns and categories
         $this->app->make(PatternServiceInterface::class)->registerAll();
     }
-} 
+}

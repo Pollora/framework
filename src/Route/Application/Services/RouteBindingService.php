@@ -16,7 +16,7 @@ class RouteBindingService implements BindingServiceInterface
     /**
      * Add WordPress objects to route parameters.
      *
-     * @param RouteEntity $route The route to add bindings to
+     * @param  RouteEntity  $route  The route to add bindings to
      * @return RouteEntity The route with added bindings
      */
     public function addBindings(RouteEntity $route): RouteEntity
@@ -24,26 +24,26 @@ class RouteBindingService implements BindingServiceInterface
         // Get the global WordPress objects
         $post = $this->getGlobalPost();
         $wpQuery = $this->getGlobalWpQuery();
-        
+
         // Add them to route parameters
         $parameters = $route->getParameters();
         $parameters['post'] = $post;
         $parameters['wp_query'] = $wpQuery;
-        
+
         return $route->setParameters($parameters);
     }
-    
+
     /**
      * Check if bindings should be added to this route.
      *
-     * @param RouteEntity $route The route to check
+     * @param  RouteEntity  $route  The route to check
      * @return bool True if bindings should be added
      */
     public function shouldAddBindings(RouteEntity $route): bool
     {
         return $route->hasCondition();
     }
-    
+
     /**
      * Get the global WordPress post object.
      *
@@ -52,9 +52,10 @@ class RouteBindingService implements BindingServiceInterface
     protected function getGlobalPost(): object
     {
         global $post;
-        return $post ?? new NullablePostEntity();
+
+        return $post ?? new NullablePostEntity;
     }
-    
+
     /**
      * Get the global WordPress query object.
      *
@@ -63,6 +64,7 @@ class RouteBindingService implements BindingServiceInterface
     protected function getGlobalWpQuery(): ?object
     {
         global $wp_query;
+
         return $wp_query ?? null;
     }
-} 
+}

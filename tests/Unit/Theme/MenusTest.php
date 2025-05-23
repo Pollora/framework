@@ -17,20 +17,20 @@ describe('Menus', function () {
         $mockFilter = m::mock(Filter::class);
         $mockContainer = m::mock(ContainerInterface::class);
         $mockConfig = m::mock(ConfigRepositoryInterface::class);
-        
+
         // Set up container mock to return our dependencies
         $mockContainer->shouldReceive('get')
             ->with(Action::class)
             ->andReturn($mockAction);
-            
+
         $mockContainer->shouldReceive('get')
             ->with(Filter::class)
             ->andReturn($mockFilter);
-        
+
         if (! function_exists('Pollora\\Theme\\config')) {
             eval('namespace Pollora\\Theme; function config($key) { return "/fake/theme/path"; }');
         }
-        
+
         $component = new Menus($mockContainer, $mockConfig);
         $ref = new ReflectionProperty($component, 'app');
         $ref->setAccessible(true);

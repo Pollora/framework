@@ -6,7 +6,7 @@ namespace Pollora\Route\Domain\Models;
 
 /**
  * A collection of routes in the domain layer.
- * 
+ *
  * This is a framework-agnostic representation of a route collection
  * with capabilities for managing WordPress-specific routes.
  */
@@ -28,9 +28,6 @@ class RouteCollectionEntity
 
     /**
      * Add a route to the collection.
-     *
-     * @param RouteEntity $route
-     * @return void
      */
     public function addRoute(RouteEntity $route): void
     {
@@ -38,7 +35,7 @@ class RouteCollectionEntity
 
         foreach ($route->getMethods() as $method) {
             $this->routes[$method][$domainAndUri] = $route;
-            $this->allRoutes[$method . $domainAndUri] = $route;
+            $this->allRoutes[$method.$domainAndUri] = $route;
         }
     }
 
@@ -55,7 +52,6 @@ class RouteCollectionEntity
     /**
      * Get routes for a specific method.
      *
-     * @param string $method
      * @return array<string, RouteEntity>
      */
     public function getRoutesByMethod(string $method): array
@@ -65,18 +61,15 @@ class RouteCollectionEntity
 
     /**
      * Build a unique identifier for the route based on domain, URI, and condition parameters.
-     *
-     * @param RouteEntity $route
-     * @return string
      */
     private function buildDomainAndUri(RouteEntity $route): string
     {
-        $domainAndUri = $route->getDomain() . $route->getUri();
+        $domainAndUri = $route->getDomain().$route->getUri();
 
-        if ($route->hasCondition() && !empty($route->getConditionParameters())) {
+        if ($route->hasCondition() && ! empty($route->getConditionParameters())) {
             $domainAndUri .= serialize($route->getConditionParameters());
         }
 
         return $domainAndUri;
     }
-} 
+}

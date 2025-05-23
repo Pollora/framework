@@ -4,16 +4,28 @@ declare(strict_types=1);
 
 namespace Pollora\Route\Infrastructure\Providers;
 
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Container\Container;
-use Illuminate\Routing\CallableDispatcher;
-use Illuminate\Routing\Contracts\CallableDispatcher as CallableDispatcherContract;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Http\Controllers\FrontendController;
+use Pollora\Route\Application\Services\AuthorizerService;
+use Pollora\Route\Application\Services\BodyClassService;
+use Pollora\Route\Application\Services\HeaderManagerService;
+use Pollora\Route\Application\Services\RouteBindingService;
+use Pollora\Route\Application\Services\ShutdownHandlerService;
+use Pollora\Route\Domain\Contracts\AuthorizerInterface;
+use Pollora\Route\Domain\Contracts\BindingServiceInterface;
+use Pollora\Route\Domain\Contracts\BodyClassServiceInterface;
+use Pollora\Route\Domain\Contracts\ConditionValidatorInterface;
+use Pollora\Route\Domain\Contracts\HeaderManagerInterface;
+use Pollora\Route\Domain\Contracts\ShutdownHandlerInterface;
+use Pollora\Route\Domain\Services\ConditionValidator as DomainConditionValidator;
 use Pollora\Route\Infrastructure\Adapters\LaravelBodyClassMiddleware;
 use Pollora\Route\Infrastructure\Adapters\LaravelHeadersMiddleware;
+use Pollora\Route\Infrastructure\Adapters\LaravelRoute;
 use Pollora\Route\Infrastructure\Adapters\LaravelRouteBindingMiddleware;
+use Pollora\Route\Infrastructure\Adapters\LaravelRouteCollection;
 use Pollora\Route\Infrastructure\Adapters\LaravelShutdownMiddleware;
 use Pollora\Route\Infrastructure\Adapters\Router;
 
@@ -36,25 +48,20 @@ class WordPressRouteServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register the CallableDispatcher, which is needed by the Router
-        $this->app->singleton(CallableDispatcherContract::class, CallableDispatcher::class);
-        
-        // Étend le router existant pour garder les routes Laravel classiques
-        $this->app->extend('router', function ($router, $app) {
-            $events = $app->make(Dispatcher::class);
-            $customRouter = new Router($events, $app);
+        // Bind the domain services
+        $this->app->singleton(ConditionValidatorInterface::class, DomainConditionValidator::class);
 
-            // Copier les routes déjà enregistrées
-            foreach ($router->getRoutes() as $route) {
-                $customRouter->getRoutes()->add($route);
-            }
+        // Bind application services
+        $this->app->singleton(BodyClassServiceInterface::class, BodyClassService::class);
+        $this->app->singleton(BindingServiceInterface::class, RouteBindingService::class);
+        $this->app->singleton(HeaderManagerInterface::class, HeaderManagerService::class);
+        $this->app->singleton(AuthorizerInterface::class, AuthorizerService::class);
+        $this->app->singleton(ShutdownHandlerInterface::class, ShutdownHandlerService::class);
 
-            if (method_exists($customRouter, 'setContainer')) {
-                $customRouter->setContainer($app);
-            }
-
-            return $customRouter;
-        });
+        // Bind adapters
+        $this->app->singleton(LaravelRoute::class);
+        $this->app->singleton(LaravelRouteCollection::class);
+        $this->app->extend('router', fn ($router, Container $app): Router => new Router($app->make('events'), $app));
     }
 
     /**
@@ -101,7 +108,8 @@ class WordPressRouteServiceProvider extends ServiceProvider
 
             // Create the route with specific HTTP methods
             $route = Route::addRoute($methods, $uri, $action);
-            $route->setIsWordPressRoute(true);
+
+            $route->setIsWordPressRoute();
 
             // Set condition parameters
             $route->setConditionParameters($conditionParams);
@@ -109,9 +117,9 @@ class WordPressRouteServiceProvider extends ServiceProvider
             // Add WordPress middleware
             $route->middleware([
                 LaravelBodyClassMiddleware::class,
+                LaravelHeadersMiddleware::class,
                 LaravelRouteBindingMiddleware::class,
                 LaravelShutdownMiddleware::class,
-                LaravelHeadersMiddleware::class,
             ]);
 
             return $route;
@@ -135,9 +143,9 @@ class WordPressRouteServiceProvider extends ServiceProvider
             ->where('any', '.*')
             ->middleware([
                 LaravelBodyClassMiddleware::class,
+                LaravelHeadersMiddleware::class,
                 LaravelRouteBindingMiddleware::class,
                 LaravelShutdownMiddleware::class,
-                LaravelHeadersMiddleware::class,
             ]);
     }
 }

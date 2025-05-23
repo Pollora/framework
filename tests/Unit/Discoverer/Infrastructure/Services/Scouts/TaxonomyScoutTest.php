@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Contracts\Container\Container;
 use Pollora\Discoverer\Infrastructure\Services\Scouts\TaxonomyScout;
-use Pollora\Taxonomy\AbstractTaxonomy;
+use Pollora\Taxonomy\Domain\Models\AbstractTaxonomy;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
 

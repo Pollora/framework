@@ -19,7 +19,9 @@ use Psr\Container\ContainerInterface;
 class Sidebar implements ThemeComponent
 {
     protected ContainerInterface $app;
+
     protected Action $action;
+
     protected ConfigRepositoryInterface $config;
 
     public function __construct(ContainerInterface $app, ConfigRepositoryInterface $config)

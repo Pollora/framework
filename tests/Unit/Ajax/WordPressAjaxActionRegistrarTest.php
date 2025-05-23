@@ -5,10 +5,10 @@ declare(strict_types=1);
 require_once __DIR__.'/../helpers.php';
 
 use Mockery as m;
-use Psr\Container\ContainerInterface;
 use Pollora\Ajax\Domain\Models\AjaxAction;
 use Pollora\Ajax\Infrastructure\Repositories\WordPressAjaxActionRegistrar;
 use Pollora\Hook\Infrastructure\Services\Action;
+use Psr\Container\ContainerInterface;
 
 beforeEach(function () {
     $GLOBALS['pollora_action_calls'] = [];

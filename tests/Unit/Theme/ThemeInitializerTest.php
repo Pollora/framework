@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Mockery as m;
-use Pollora\Theme\Domain\Models\ThemeInitializer;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
+use Pollora\Theme\Domain\Models\ThemeInitializer;
 
 require_once __DIR__.'/../helpers.php';
 

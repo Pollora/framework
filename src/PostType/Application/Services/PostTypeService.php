@@ -4,61 +4,88 @@ declare(strict_types=1);
 
 namespace Pollora\PostType\Application\Services;
 
-use Pollora\Entity\PostType;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
+use Pollora\PostType\Domain\Contracts\PostTypeRegistryInterface;
+use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
 
 /**
- * Service for managing post types in the application layer.
- * 
- * This service provides methods for working with post types,
- * following hexagonal architecture by using the domain contracts.
+ * Application service for post type management.
+ *
+ * This service orchestrates the creation and registration of post types
+ * following hexagonal architecture principles and implementing the common interface.
  */
-class PostTypeService
+class PostTypeService implements PostTypeServiceInterface
 {
-    /**
-     * The post type factory implementation.
-     */
-    private PostTypeFactoryInterface $factory;
-
     /**
      * Create a new PostTypeService instance.
      */
-    public function __construct(PostTypeFactoryInterface $factory)
-    {
-        $this->factory = $factory;
-    }
+    public function __construct(
+        private readonly PostTypeFactoryInterface $factory,
+        private readonly PostTypeRegistryInterface $registry
+    ) {}
 
     /**
      * Create a new post type instance.
-     * 
-     * @param string $slug The post type slug
-     * @param string|null $singular The singular label for the post type
-     * @param string|null $plural The plural label for the post type
-     * @return PostType
+     *
+     * @param  string  $slug  The post type slug
+     * @param  string|null  $singular  The singular label for the post type
+     * @param  string|null  $plural  The plural label for the post type
+     * @param  array<string, mixed>  $args  Additional arguments
+     * @return object The created post type instance
      */
-    public function register(string $slug, ?string $singular = null, ?string $plural = null): PostType
+    public function create(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object
     {
-        return $this->factory->make($slug, $singular, $plural);
+        return $this->factory->make($slug, $singular, $plural, $args);
+    }
+
+    /**
+     * Register a new post type.
+     *
+     * @param  string  $slug  The post type slug
+     * @param  string|null  $singular  The singular label for the post type
+     * @param  string|null  $plural  The plural label for the post type
+     * @param  array<string, mixed>  $args  Additional arguments
+     * @return object The registered post type instance
+     */
+    public function register(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object
+    {
+        // Use the factory to create the post type
+        $postType = $this->factory->make($slug, $singular, $plural, $args);
+
+        // Register the post type with the registry
+        $this->registry->register($postType);
+
+        return $postType;
+    }
+
+    /**
+     * Register a post type instance.
+     *
+     * @param  object  $postType  The post type instance to register
+     */
+    public function registerInstance(object $postType): void
+    {
+        $this->registry->register($postType);
     }
 
     /**
      * Check if a post type exists.
-     * 
-     * @param string $postType The post type slug to check
-     * @return bool
+     *
+     * @param  string  $slug  The post type slug to check
+     * @return bool True if the post type exists
      */
-    public function exists(string $postType): bool
+    public function exists(string $slug): bool
     {
-        return $this->factory->exists($postType);
+        return $this->registry->exists($slug);
     }
 
     /**
      * Get all registered post types.
-     * 
-     * @return array
+     *
+     * @return array<string, mixed> The registered post types
      */
     public function getRegistered(): array
     {
-        return $this->factory->getRegistered();
+        return $this->registry->getAll();
     }
-} 
+}

@@ -9,7 +9,6 @@ use Pollora\Hook\Infrastructure\Services\Filter;
 
 class Loop
 {
-
     protected Filter $filter;
 
     public function __construct(Container $app)

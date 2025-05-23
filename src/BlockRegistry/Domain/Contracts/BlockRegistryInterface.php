@@ -29,14 +29,15 @@ interface BlockRegistryInterface
      *
      * @param  string  $path  The base path in which block files for the collection reside.
      * @param  string  $manifest  The path to the manifest file for the collection.
-     * @return bool
+     *
      * @throws BlockRegistryException
      */
     public function registerBlockMetadataCollection(string $path, string $manifest): bool;
 
     /**
      * Register a collection of blocks from a WordPress scripts compiled manifest file.
-     * @param  string $manifest The path to the manifest file for the collection.
+     *
+     * @param  string  $manifest  The path to the manifest file for the collection.
      */
     public function registerBlockCollectionFromManifest(string $manifest): bool;
 }

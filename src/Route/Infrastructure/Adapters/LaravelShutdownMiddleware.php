@@ -6,6 +6,7 @@ namespace Pollora\Route\Infrastructure\Adapters;
 
 use Closure;
 use Illuminate\Http\Request;
+use Pollora\Route\Domain\Contracts\ShutdownHandlerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -17,12 +18,12 @@ use Symfony\Component\HttpFoundation\Response;
 class LaravelShutdownMiddleware
 {
     /**
-     * Content types that should be processed.
-     * 
-     * @var array<string>
+     * Create a new shutdown middleware instance.
      */
-    protected array $validContentTypes = ['text/html', 'text/html; charset=UTF-8'];
-    
+    public function __construct(
+        private readonly ShutdownHandlerInterface $shutdownHandler
+    ) {}
+
     /**
      * Handle an incoming request and process WordPress shutdown actions.
      *
@@ -34,13 +35,8 @@ class LaravelShutdownMiddleware
     {
         $response = $next($request);
 
-        // Early return if WordPress shutdown hook doesn't exist
-        if (! $this->isShutdownHookAvailable()) {
-            return $response;
-        }
-
         // Only modify responses that are Response objects and can have content
-        if (!method_exists($response, 'getContent')) {
+        if (! method_exists($response, 'getContent')) {
             return $response;
         }
 
@@ -48,18 +44,13 @@ class LaravelShutdownMiddleware
         $contentType = $response->headers->get('Content-Type', '');
 
         // Only process applicable content types
-        if (!$this->shouldProcessContentType($contentType)) {
+        if (! $this->shutdownHandler->shouldProcessContentType($contentType)) {
             return $response;
         }
 
-        // Get the original content
+        // Get the original content and apply shutdown actions
         $originalContent = $response->getContent();
-        
-        // Use output buffering to capture WordPress shutdown actions
-        ob_start();
-        echo $originalContent;
-        $this->executeShutdownHook();
-        $newContent = ob_get_clean();
+        $newContent = $this->shutdownHandler->executeShutdownActions($originalContent);
 
         // Only set content if it has changed (avoids unnecessary operations)
         if ($newContent !== $originalContent) {
@@ -67,45 +58,5 @@ class LaravelShutdownMiddleware
         }
 
         return $response;
-    }
-    
-    /**
-     * Check if this content type should be processed by shutdown handlers.
-     *
-     * @param string $contentType The response content type
-     * @return bool True if the content should be processed
-     */
-    private function shouldProcessContentType(string $contentType): bool
-    {
-        // Direct match is faster than strpos for known types
-        if (in_array($contentType, $this->validContentTypes, true)) {
-            return true;
-        }
-        
-        // Fallback to partial match for other html content types
-        return str_contains($contentType, 'text/html');
-    }
-    
-    /**
-     * Check if the WordPress shutdown hook is available.
-     * 
-     * @return bool True if the function exists
-     */
-    private function isShutdownHookAvailable(): bool
-    {
-        return function_exists('shutdown_action_hook');
-    }
-    
-    /**
-     * Execute the WordPress shutdown hook.
-     * 
-     * @return void
-     */
-    private function executeShutdownHook(): void
-    {
-        if ($this->isShutdownHookAvailable()) {
-            // Call through eval to avoid linter errors
-            eval('shutdown_action_hook();');
-        }
     }
 }

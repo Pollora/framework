@@ -46,21 +46,21 @@ class PatternRegistrar
     public function register(): void
     {
         // Skip if required WordPress functions don't exist
-        if (!function_exists('get_stylesheet') || !function_exists('get_template') || !function_exists('wp_get_theme')) {
+        if (! function_exists('get_stylesheet') || ! function_exists('get_template') || ! function_exists('wp_get_theme')) {
             return;
         }
-        
+
         $themes = $this->getThemes();
-        
+
         if (empty($themes)) {
             return;
         }
 
         foreach ($themes as $theme) {
-            if (!method_exists($theme, 'get_stylesheet_directory')) {
+            if (! method_exists($theme, 'get_stylesheet_directory')) {
                 continue;
             }
-            
+
             $dirpath = $theme->get_stylesheet_directory().self::PATTERN_DIRECTORY;
 
             if (! File::isDirectory($dirpath)) {
@@ -86,10 +86,10 @@ class PatternRegistrar
      */
     protected function getThemes(): array
     {
-        if (!function_exists('get_stylesheet') || !function_exists('get_template') || !function_exists('wp_get_theme')) {
+        if (! function_exists('get_stylesheet') || ! function_exists('get_template') || ! function_exists('wp_get_theme')) {
             return [];
         }
-        
+
         $stylesheet = \get_stylesheet();
         $template = \get_template();
 
@@ -139,4 +139,4 @@ class PatternRegistrar
 
         return View::exists($viewName) ? View::make($viewName)->render() : null;
     }
-} 
+}

@@ -23,6 +23,10 @@ class WooCommerceProvider extends ServiceProvider
         $this->filter = $this->app->make(Filter::class);
 
         $this->app->singleton(WooCommerceView::class, WooCommerceView::class);
+    }
+
+    public function boot()
+    {
         $this->action->add('plugins_loaded', function (): void {
             if (defined('WC_ABSPATH')) {
                 $this->bindFilters();

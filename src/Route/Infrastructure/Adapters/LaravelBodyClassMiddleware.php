@@ -37,12 +37,12 @@ class LaravelBodyClassMiddleware
     public function handle($request, Closure $next)
     {
         $laravelRoute = $request->route();
-        
+
         // If there's a valid route, add the body class filter
         if ($laravelRoute !== null) {
             // Convert to domain entity
             $routeEntity = $this->routeAdapter->toDomainEntity($laravelRoute);
-            
+
             // Add filter to WordPress body_class hook
             $this->filter->add('body_class', function (array $classes) use ($routeEntity): array {
                 return $this->bodyClassService->modifyBodyClasses($classes, $routeEntity);
@@ -51,4 +51,4 @@ class LaravelBodyClassMiddleware
 
         return $next($request);
     }
-} 
+}

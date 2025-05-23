@@ -97,12 +97,12 @@
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^11.4",
         "mockery/mockery": "2.0.x-dev",
-        "driftingly/rector-laravel": "dev-main",
-        "laravel/pint": "^1.22",
-        "larastan/larastan": "^3.0"
+        "larastan/larastan": "^3.0",
+        "phpoption/phpoption": "^1.9@dev"
     },
     "autoload-dev": {
         "psr-4": {
+            "Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/",
             "Workbench\\Database\\Factories\\": "workbench/database/factories/",
             "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"

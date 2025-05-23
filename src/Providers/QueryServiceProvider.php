@@ -6,7 +6,6 @@ namespace Pollora\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Colt\Model\User as BaseUser;
-use Pollora\Container\Domain\ServiceLocator;
 use Pollora\Models\Post;
 use Pollora\Models\User;
 use Pollora\Query\DateQuery;

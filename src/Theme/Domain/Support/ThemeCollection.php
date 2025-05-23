@@ -9,8 +9,8 @@ use Pollora\Collection\Domain\Contracts\CollectionInterface;
 
 /**
  * Theme collection utility class.
- * 
- * Provides a clean, object-oriented interface for creating and working 
+ *
+ * Provides a clean, object-oriented interface for creating and working
  * with collections while maintaining hexagonal architecture principles.
  */
 class ThemeCollection
@@ -28,8 +28,9 @@ class ThemeCollection
     /**
      * Create a collection from the given items.
      *
-     * @param array $items Items to collect
+     * @param  array  $items  Items to collect
      * @return CollectionInterface Framework-agnostic collection
+     *
      * @throws \RuntimeException If the collection factory is not set
      */
     public static function make(array $items = []): CollectionInterface
@@ -42,4 +43,4 @@ class ThemeCollection
 
         return self::$collectionFactory->make($items);
     }
-} 
+}

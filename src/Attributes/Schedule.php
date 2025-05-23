@@ -69,7 +69,7 @@ class Schedule implements HandlesAttributes
         } else {
             $actionService = $container->get(ActionService::class);
         }
-        
+
         if (! $actionService) {
             return;
         }

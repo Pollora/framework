@@ -25,7 +25,6 @@ class RewriteServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerPermalinkManager();
-        $this->registerWordPressFilters();
     }
 
     /**
@@ -33,6 +32,7 @@ class RewriteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerWordPressFilters();
         $this->registerWordPressActions();
     }
 

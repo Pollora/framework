@@ -2,88 +2,91 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Foundation\Application;
+namespace Tests\Unit\Theme;
+
+use Illuminate\Contracts\Foundation\Application as LaravelApplicationContract;
+use Illuminate\Contracts\Translation\Loader as TranslationLoaderInterface;
+use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\View\ViewFinderInterface;
 use Mockery as m;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
+use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
+use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeService;
-use Pollora\Theme\Domain\Services\TemplateHierarchy;
-use Pollora\Theme\Infrastructure\Providers\ThemeComponentProvider;
-use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
-use Pollora\Theme\Infrastructure\Services\ComponentFactory;
-use Pollora\Theme\Domain\Contracts\ContainerInterface as ThemeContainerInterface;
-use Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
+use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 
-describe('ThemeServiceProvider', function () {
-    it('registers services in Laravel container', function () {
-        $mockApp = m::mock('Illuminate\\Contracts\\Foundation\\Application');
+beforeEach(function () {
+    $this->app = m::mock(LaravelApplicationContract::class);
+    $this->viewFactory = m::mock(ViewFactory::class);
+    $this->translationLoader = m::mock(TranslationLoaderInterface::class);
+    $this->provider = new ThemeServiceProvider($this->app);
 
-        // Register a singleton for ConsoleDetectorInterface to avoid BindingResolutionException
-        $mockApp->shouldReceive('singleton')->with(
-            \Pollora\Application\Domain\Contracts\ConsoleDetectorInterface::class,
-            m::type('callable')
-        )->andReturnUsing(function ($abstract, $concrete) use ($mockApp) {
-            $concrete($mockApp);
+    $this->app->shouldReceive('environment')->andReturn('testing');
+    $this->app->shouldReceive('runningInConsole')->andReturn(false);
+});
+
+afterEach(function () {
+    m::close();
+});
+
+it('registers all services and providers via register method', function () {
+    $this->app->shouldReceive('singleton')
+        ->with(WordPressThemeInterface::class, WordPressThemeAdapter::class)
+        ->once();
+
+    $this->app->shouldReceive('register')->once()->with(ConfigServiceProvider::class);
+    $this->app->shouldReceive('register')->once()->with(CollectionServiceProvider::class);
+
+    $this->app->shouldReceive('afterResolving')->once()->with(ConfigRepositoryInterface::class, m::type('Closure'));
+    $this->app->shouldReceive('afterResolving')->once()->with(CollectionFactoryInterface::class, m::type('Closure'));
+
+    $this->app->shouldReceive('make')->with('view')->andReturn($this->viewFactory);
+    $mockViewFinder = m::mock(ViewFinderInterface::class);
+    $this->viewFactory->shouldReceive('getFinder')->andReturn($mockViewFinder);
+
+    $mockActualTranslationLoader = m::mock(TranslationLoaderInterface::class);
+    $this->translationLoader->shouldReceive('getLoader')->andReturn($mockActualTranslationLoader);
+    $this->app->shouldReceive('make')->with('translator')->andReturn($this->translationLoader);
+
+    $mockConsoleDetectionService = m::mock(ConsoleDetectionService::class);
+
+    $this->app->shouldReceive('singleton')
+        ->once()
+        ->with(ThemeService::class, m::type('Closure'))
+        ->andReturnUsing(function ($class, \Closure $providerClosure) use ($mockViewFinder, $mockActualTranslationLoader, $mockConsoleDetectionService) {
+            $instance = new ThemeManager(
+                $this->app,
+                $mockViewFinder,
+                $mockActualTranslationLoader,
+                $mockConsoleDetectionService
+            );
+            expect($instance)->toBeInstanceOf(ThemeManager::class);
+
+            return $instance;
         });
 
-        // Mock tous les singletons attendus par le provider
-        foreach ([
-            ThemeService::class,
-            'theme',
-            'theme.generator',
-            'theme.remover',
-            ComponentFactory::class,
-            ThemeComponentProvider::class,
-            TemplateHierarchy::class,
-            'Pollora\\Theme\\Infrastructure\\Providers\\TemplateHierarchy',
-            'Pollora\\Theme\\Domain\\Services\\TemplateHierarchy',
-        ] as $abstract) {
-            $mockApp->shouldReceive('singleton')->withArgs(function ($a, $closure) use ($abstract) {
-                return $a === $abstract && is_callable($closure);
-            })->atMost()->once();
-        }
+    $this->app->shouldReceive('singleton')
+        ->once()
+        ->with('theme', m::type('Closure'))
+        ->andReturnUsing(function ($alias, $closure) {
+            $this->app->shouldReceive('make')->with(ThemeService::class)->once()->andReturn(m::mock(ThemeService::class));
 
-        // Mock the WordPressThemeInterface binding
-        $mockApp->shouldReceive('singleton')
-            ->with(WordPressThemeInterface::class, WordPressThemeAdapter::class)
-            ->once();
+            return $closure($this->app);
+        });
 
-        // Mock ContainerInterface singleton binding
-        $mockApp->shouldReceive('singleton')
-            ->with(ThemeContainerInterface::class, m::type('Closure'))
-            ->once();
-            
-        // Mock TemplateHierarchyInterface singleton binding
-        $mockApp->shouldReceive('singleton')
-            ->with(TemplateHierarchyInterface::class, m::type('Closure'))
-            ->zeroOrMoreTimes();
+    $configMock = m::mock(ConfigRepositoryInterface::class);
+    $filesMock = m::mock(Filesystem::class);
+    $this->app->shouldReceive('make')->with('config')->andReturn($configMock);
+    $this->app->shouldReceive('make')->with('files')->andReturn($filesMock);
 
-        // Mock register() expectations for config providers
-        $mockApp->shouldReceive('register')->with('Pollora\Config\Infrastructure\Providers\ConfigServiceProvider')->once();
-        $mockApp->shouldReceive('register')->with('Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider')->once();
-        
-        // Mock afterResolving calls
-        $mockApp->shouldReceive('afterResolving')
-            ->with(ConfigRepositoryInterface::class, m::type('Closure'))
-            ->zeroOrMoreTimes();
-        $mockApp->shouldReceive('afterResolving')
-            ->with(CollectionFactoryInterface::class, m::type('Closure'))
-            ->zeroOrMoreTimes();
+    $this->app->shouldReceive('singleton')->once()->with('theme.generator', m::type('Closure'));
+    $this->app->shouldReceive('singleton')->once()->with('theme.remover', m::type('Closure'));
 
-        // Mock ThemeComponentProvider et attente sur register()
-        $themeComponentProvider = m::mock(ThemeComponentProvider::class);
-        $themeComponentProvider->shouldReceive('register')->once();
-        $mockApp->shouldReceive('make')->with(ThemeComponentProvider::class)->andReturn($themeComponentProvider);
-
-        // Mock Action pour injection hexagonale
-        $action = m::mock(Action::class);
-        $action->shouldReceive('add')->with('after_setup_theme', m::type('array'))->once();
-        $mockApp->shouldReceive('make')->with(Action::class)->andReturn($action);
-
-        $provider = new ThemeServiceProvider($mockApp);
-        $provider->register();
-    });
+    $this->provider->register();
 });

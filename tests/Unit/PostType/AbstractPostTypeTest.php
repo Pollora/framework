@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Str;
-use Pollora\PostType\AbstractPostType;
+use Pollora\PostType\Domain\Models\AbstractPostType;
 
 /**
  * Create a test post type class that extends AbstractPostType

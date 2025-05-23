@@ -19,4 +19,4 @@ class LaravelConfigRepository implements ConfigRepositoryInterface
     {
         return Config::get($key, $default);
     }
-} 
+}

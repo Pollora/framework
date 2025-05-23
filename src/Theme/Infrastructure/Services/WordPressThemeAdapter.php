@@ -8,7 +8,7 @@ use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
 
 /**
  * WordPress implementation of the WordPressThemeInterface.
- * 
+ *
  * This adapter provides access to WordPress theme functions,
  * implementing the domain interface and containing all direct
  * WordPress function calls.
@@ -22,7 +22,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
     {
         return function_exists('wp_installing') && \wp_installing();
     }
-    
+
     /**
      * Register a theme directory with WordPress.
      */
@@ -31,10 +31,10 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         if (function_exists('register_theme_directory')) {
             return (bool) \register_theme_directory($path);
         }
-        
+
         return false;
     }
-    
+
     /**
      * Get the current active theme's stylesheet name.
      */
@@ -43,10 +43,10 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         if (function_exists('get_stylesheet')) {
             return \get_stylesheet();
         }
-        
+
         return 'default';
     }
-    
+
     /**
      * Get the current parent theme's template name.
      */
@@ -55,10 +55,10 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         if (function_exists('get_template')) {
             return \get_template();
         }
-        
+
         return 'default';
     }
-    
+
     /**
      * Get a WP_Theme instance.
      */
@@ -67,17 +67,21 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         if (function_exists('wp_get_theme')) {
             return \wp_get_theme($themeName);
         }
-        
+
         // Return a placeholder object if WordPress functions are not available
-        return new class {
+        return new class
+        {
             public $stylesheet = 'default';
+
             public $template = 'default';
-            public function get($key, $default = '') {
+
+            public function get($key, $default = '')
+            {
                 return $default;
             }
         };
     }
-    
+
     /**
      * Get WordPress content directories.
      */
@@ -86,10 +90,10 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         if (defined('WP_CONTENT_DIR')) {
             return [WP_CONTENT_DIR.'/themes'];
         }
-        
+
         return [];
     }
-    
+
     /**
      * Get stylesheet directory URI.
      */
@@ -98,7 +102,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         if (function_exists('get_stylesheet_directory_uri')) {
             return \get_stylesheet_directory_uri().'/';
         }
-        
+
         return '/';
     }
-} 
+}

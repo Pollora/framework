@@ -15,7 +15,6 @@ use Psr\Container\ContainerInterface;
  */
 class WordPressAjaxActionRegistrar implements AjaxActionRegistrarInterface
 {
-
     protected Action $action;
 
     public function __construct(protected ContainerInterface $app)

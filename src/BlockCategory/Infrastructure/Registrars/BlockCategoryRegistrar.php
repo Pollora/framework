@@ -33,4 +33,4 @@ class BlockCategoryRegistrar implements BlockCategoryRegistrarInterface
             });
         }
     }
-} 
+}

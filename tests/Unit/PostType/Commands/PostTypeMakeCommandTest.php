@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Filesystem\Filesystem;
 use Mockery as m;
-use Pollora\PostType\Commands\PostTypeMakeCommand;
+use Pollora\PostType\UI\Console\PostTypeMakeCommand;
 
 beforeEach(function () {
     // Create a mock filesystem

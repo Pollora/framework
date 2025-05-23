@@ -6,7 +6,7 @@ namespace Pollora\BlockPattern\Domain\Contracts;
 
 /**
  * Interface for pattern validator.
- * 
+ *
  * Validates pattern data before registration.
  */
 interface PatternValidatorInterface
@@ -19,4 +19,4 @@ interface PatternValidatorInterface
      * @return bool Whether the pattern is valid and can be registered
      */
     public function isValid(array $patternData, string $file): bool;
-} 
+}

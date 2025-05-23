@@ -64,4 +64,4 @@ class NullablePostEntity
         public readonly string $mimeType = '',
         public readonly int $commentCount = 0,
     ) {}
-} 
+}

@@ -17,4 +17,4 @@ interface ConfigRepositoryInterface
      * @return mixed
      */
     public function get(string $key, mixed $default = null);
-} 
+}

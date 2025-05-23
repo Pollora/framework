@@ -15,12 +15,12 @@ describe('Sidebar', function () {
         $mockAction = m::mock(Action::class);
         $mockContainer = m::mock(ContainerInterface::class);
         $mockConfig = m::mock(ConfigRepositoryInterface::class);
-        
+
         // Container should provide Action when requested
         $mockContainer->shouldReceive('get')
             ->with(Action::class)
             ->andReturn($mockAction);
-            
+
         $sidebar = new Sidebar($mockContainer, $mockConfig);
         $ref = new ReflectionProperty($sidebar, 'app');
         $ref->setAccessible(true);

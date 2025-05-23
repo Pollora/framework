@@ -5,10 +5,10 @@ declare(strict_types=1);
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\View\ViewFinderInterface;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
-use Pollora\Application\Application\Services\ConsoleDetectionService;
 
 beforeEach(function () {
     // Create mock container with config property
