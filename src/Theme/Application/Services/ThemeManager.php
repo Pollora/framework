@@ -94,7 +94,6 @@ class ThemeManager implements ThemeService
 
     protected function registerThemeDirectories(ThemeMetadata $theme): void
     {
-        $this->viewFinder->addLocation($theme->getBasePath());
         $this->viewFinder->addLocation($theme->getViewPath());
     }
 

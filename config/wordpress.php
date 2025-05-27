@@ -14,7 +14,7 @@ return [
         'is_404' => '404',
         'is_search' => 'search',
         'is_paged' => 'paged',
-        'is_front_page' => ['/', 'front'],
+        'is_front_page' => ['front', '/'],
         'is_home' => ['home', 'blog'],
         'is_privacy_policy' => 'privacy_policy',
         'is_post_type_archive' => ['post-type-archive', 'postTypeArchive'],
@@ -72,4 +72,18 @@ return [
 
     // Database caching
     'caching' => env('DB_CACHE'),
+
+    // Route priority configuration
+    'routing' => [
+        'priority' => [
+            'template_existence_bonus' => 200,      // Bonus for existing templates
+            'route_parameter_weight' => 25,         // Weight for route parameters
+            'template_depth_weight' => 50,          // Weight for template specificity depth
+            'template_specificity_multiplier' => 2, // Multiplier for template specificity
+            'route_condition_weight' => 0.5,        // Weight for route condition specificity
+            'same_specificity_prefers_template' => true, // Prefer template on tie
+            'laravel_route_override_threshold' => 1500,  // Threshold for Laravel route override
+            'debug_comparison' => false,             // Enable debug comparison output
+        ],
+    ],
 ];
