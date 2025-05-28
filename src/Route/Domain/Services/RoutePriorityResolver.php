@@ -7,7 +7,6 @@ namespace Pollora\Route\Domain\Services;
 use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Domain\Models\RouteMatch;
 use Pollora\Route\Domain\Models\TemplateHierarchy;
-use Pollora\Route\Domain\Services\ComparisonResult;
 
 /**
  * Service for resolving route priorities
@@ -17,7 +16,6 @@ use Pollora\Route\Domain\Services\ComparisonResult;
  */
 final class RoutePriorityResolver
 {
-    private ?TemplatePriorityComparator $comparator = null;
     /**
      * Priority levels for different route types
      */
@@ -107,53 +105,20 @@ final class RoutePriorityResolver
     /**
      * Check if a template hierarchy should override a route
      *
+     * Routes always take priority over templates.
+     *
      * @param TemplateHierarchy $hierarchy The template hierarchy
      * @param Route $route The route to check against
      * @param array $context Additional context for comparison
-     * @return bool True if hierarchy should override
+     * @return bool Always false - routes have absolute priority
      */
     public function shouldTemplateOverrideRoute(TemplateHierarchy $hierarchy, Route $route, array $context = []): bool
     {
-        // Use the fine-grained comparator if available
-        if ($this->comparator !== null) {
-            return $this->comparator->shouldTemplateOverrideRoute($hierarchy, $route, $context);
-        }
-
-        // Fallback to simple comparison for backward compatibility
-        if (!$route->isWordPressRoute()) {
-            return false;
-        }
-
-        return $hierarchy->hasMoreSpecificTemplateThan($route);
+        // Routes always take priority over templates
+        return false;
     }
 
-    /**
-     * Set the template priority comparator for fine-grained comparison
-     *
-     * @param TemplatePriorityComparator $comparator The comparator to use
-     * @return void
-     */
-    public function setTemplatePriorityComparator(TemplatePriorityComparator $comparator): void
-    {
-        $this->comparator = $comparator;
-    }
 
-    /**
-     * Get detailed comparison result between template and route
-     *
-     * @param TemplateHierarchy $hierarchy The template hierarchy
-     * @param Route $route The route to compare
-     * @param array $context Additional context for comparison
-     * @return ComparisonResult|null Detailed comparison result or null if no comparator set
-     */
-    public function getDetailedComparison(TemplateHierarchy $hierarchy, Route $route, array $context = []): ?ComparisonResult
-    {
-        if ($this->comparator === null) {
-            return null;
-        }
-
-        return $this->comparator->compareTemplateToRoute($hierarchy, $route, $context);
-    }
 
     /**
      * Get priority level for different route types

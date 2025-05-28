@@ -115,5 +115,7 @@ trait QueryTrait
 
         // Load the default WordPress template loader
         require_once ABSPATH.WPINC.'/template-loader.php';
+
+        do_action('pollora_loaded');
     }
 }

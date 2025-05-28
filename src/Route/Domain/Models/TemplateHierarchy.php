@@ -142,21 +142,6 @@ final class TemplateHierarchy
     }
 
     /**
-     * Check if this hierarchy has a more specific template than a route
-     */
-    public function hasMoreSpecificTemplateThan(Route $route): bool
-    {
-        if (!$route->isWordPressRoute()) {
-            return true; // Template hierarchy always beats Laravel routes
-        }
-
-        // Compare specificity scores
-        $routeSpecificity = $route->getCondition()->getSpecificity();
-
-        return $this->priority > $routeSpecificity;
-    }
-
-    /**
      * Check if a specific template exists in this hierarchy
      */
     public function hasTemplate(string $template): bool

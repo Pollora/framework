@@ -6,11 +6,11 @@ namespace Pollora\Route\Infrastructure\Laravel;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use Pollora\Route\Application\Services\BuildTemplateHierarchyService;
 use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
-use Pollora\Route\Domain\Models\Route as DomainRoute;
-use Pollora\Route\Domain\Models\RouteCondition;
-use Pollora\Route\Domain\Services\TemplatePriorityComparator;
+use Pollora\Route\UI\Http\Middleware\WordPressBindings;
+use Pollora\Route\UI\Http\Middleware\WordPressBodyClass;
+use Pollora\Route\UI\Http\Middleware\WordPressHeaders;
+use Pollora\Route\UI\Http\Middleware\WordPressShutdown;
 
 /**
  * Extended Laravel Route with WordPress support
@@ -28,9 +28,6 @@ final class ExtendedRoute extends Route
 
     private ?ConditionResolverInterface $conditionResolver = null;
 
-    private ?TemplatePriorityComparator $templateComparator = null;
-
-    private ?BuildTemplateHierarchyService $hierarchyService = null;
 
     /**
      * Determine if the route matches the request
@@ -112,25 +109,6 @@ final class ExtendedRoute extends Route
         return $this;
     }
 
-    /**
-     * Set the template priority comparator
-     */
-    public function setTemplatePriorityComparator(TemplatePriorityComparator $comparator): self
-    {
-        $this->templateComparator = $comparator;
-
-        return $this;
-    }
-
-    /**
-     * Set the template hierarchy service
-     */
-    public function setTemplateHierarchyService(BuildTemplateHierarchyService $service): self
-    {
-        $this->hierarchyService = $service;
-
-        return $this;
-    }
 
     /**
      * Check if this route handles special WordPress requests
@@ -208,10 +186,10 @@ final class ExtendedRoute extends Route
         }
 
         $wordpressMiddleware = [
-            'Pollora\Route\UI\Http\Middleware\WordPressBindings',
-            'Pollora\Route\UI\Http\Middleware\WordPressHeaders',
-            'Pollora\Route\UI\Http\Middleware\WordPressBodyClass',
-            'Pollora\Route\UI\Http\Middleware\WordPressShutdown',
+            WordPressBindings::class,
+            WordPressHeaders::class,
+            WordPressBodyClass::class,
+            WordPressShutdown::class,
         ];
 
         return $this->middleware($wordpressMiddleware);
@@ -236,14 +214,12 @@ final class ExtendedRoute extends Route
      */
     private function evaluateWordPressCondition(): bool
     {
-
         if (empty($this->wordpressCondition)) {
             return false;
         }
 
         // First check if WordPress condition is satisfied
         if ($this->conditionResolver) {
-
             $conditionMet = $this->conditionResolver->resolve(
                 $this->wordpressCondition,
                 $this->conditionParameters
@@ -258,85 +234,13 @@ final class ExtendedRoute extends Route
             return false;
         }
 
-        // Check if a template should override this route
-        if ($this->shouldTemplateOverrideRoute()) {
-            return false; // Template takes precedence, so route should not match
-        }
+        // Routes always take priority over templates, no need to check template override
 
         return true;
     }
 
-    /**
-     * Check if a template should override this route
-     */
-    private function shouldTemplateOverrideRoute(): bool
-    {
-        // Only check template priority if we have the necessary services
-        if (! $this->templateComparator || ! $this->hierarchyService) {
-            return false;
-        }
 
-        try {
-            // Build current context for template hierarchy
-            $context = $this->buildCurrentContext();
 
-            // Get template hierarchy for current context
-            $templateHierarchy = $this->hierarchyService->forCondition(
-                $this->wordpressCondition,
-                $this->conditionParameters,
-                $context
-            );
-
-            // Convert this Laravel route to domain route for comparison
-            $domainRoute = $this->toDomainRoute();
-
-            // Use template comparator to determine if template should override
-            return $this->templateComparator->shouldTemplateOverrideRoute(
-                $templateHierarchy,
-                $domainRoute,
-                $context
-            );
-        } catch (\Throwable $e) {
-            // If any error occurs during template priority check, let route proceed
-            // This ensures backward compatibility and prevents route failures
-            return false;
-        }
-    }
-
-    /**
-     * Build current WordPress context
-     */
-    private function buildCurrentContext(): array
-    {
-        global $post, $wp_query;
-
-        return [
-            'wp_post' => $post,
-            'wp_query' => $wp_query,
-            'condition' => $this->wordpressCondition,
-            'parameters' => $this->conditionParameters,
-            'uri' => $this->uri(),
-            'methods' => $this->methods(),
-        ];
-    }
-
-    /**
-     * Convert this Laravel route to domain route for comparison
-     */
-    private function toDomainRoute(): DomainRoute
-    {
-        $condition = RouteCondition::fromWordPressTag(
-            $this->wordpressCondition,
-            $this->conditionParameters
-        );
-
-        return DomainRoute::wordpress(
-            methods: $this->methods(),
-            condition: $condition,
-            action: $this->getAction(),
-            priority: $this->getWordPressPriority()
-        );
-    }
 
     /**
      * Call WordPress function directly

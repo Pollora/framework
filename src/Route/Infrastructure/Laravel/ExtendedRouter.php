@@ -13,8 +13,6 @@ use Pollora\Route\Domain\Models\RouteCondition;
 use Pollora\Route\Domain\Models\SpecialRequest;
 use Pollora\Route\Domain\Services\SpecialRequestDetector;
 use Pollora\Route\Domain\Services\WordPressContextBuilder;
-use Pollora\Route\Domain\Services\TemplatePriorityComparator;
-use Pollora\Route\Application\Services\BuildTemplateHierarchyService;
 use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
 
 /**
@@ -30,12 +28,9 @@ final class ExtendedRouter extends Router
     private SpecialRequestHandlerInterface $specialRequestHandler;
 
     private WordPressContextBuilder $contextBuilder;
-    
+
     private ?RouteRegistryInterface $routeRegistry = null;
 
-    private ?TemplatePriorityComparator $templateComparator = null;
-
-    private ?BuildTemplateHierarchyService $hierarchyService = null;
 
     private ?ConditionResolverInterface $conditionResolver = null;
 
@@ -90,21 +85,6 @@ final class ExtendedRouter extends Router
         $this->routeRegistry = $registry;
     }
 
-    /**
-     * Set the template priority comparator
-     */
-    public function setTemplatePriorityComparator(TemplatePriorityComparator $comparator): void
-    {
-        $this->templateComparator = $comparator;
-    }
-
-    /**
-     * Set the template hierarchy service
-     */
-    public function setTemplateHierarchyService(BuildTemplateHierarchyService $service): void
-    {
-        $this->hierarchyService = $service;
-    }
 
     /**
      * Set the condition resolver
@@ -142,14 +122,7 @@ final class ExtendedRouter extends Router
                 ->setWordPressCondition($condition)
                 ->setConditionParameters($conditionParams);
 
-            // Ensure services are injected (they should already be from newRoute())
-            if ($this->templateComparator) {
-                $route->setTemplatePriorityComparator($this->templateComparator);
-            }
-
-            if ($this->hierarchyService) {
-                $route->setTemplateHierarchyService($this->hierarchyService);
-            }
+            // Inject condition resolver if available
 
             if ($this->conditionResolver) {
                 $route->setConditionResolver($this->conditionResolver);
@@ -178,14 +151,7 @@ final class ExtendedRouter extends Router
             ->setRouter($this)
             ->setContainer($this->container);
 
-        // Inject services if available
-        if ($this->templateComparator) {
-            $route->setTemplatePriorityComparator($this->templateComparator);
-        }
-
-        if ($this->hierarchyService) {
-            $route->setTemplateHierarchyService($this->hierarchyService);
-        }
+        // Inject condition resolver if available
 
         if ($this->conditionResolver) {
             $route->setConditionResolver($this->conditionResolver);

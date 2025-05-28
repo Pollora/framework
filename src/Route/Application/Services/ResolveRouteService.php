@@ -20,7 +20,7 @@ use Pollora\Route\Domain\Services\WordPressContextBuilder;
  * 2. Laravel routes
  * 3. WordPress routes with specific conditions
  * 4. WordPress routes with generic conditions
- * 5. Template hierarchy with view priority check
+ * 5. Template hierarchy (only if no route matches)
  * 6. Special WordPress requests (default handlers)
  * 7. 404 fallback
  */
@@ -64,17 +64,7 @@ final class ResolveRouteService
         $routeMatch = $this->routeMatcher->match($uri, $method, $fullContext);
 
         if ($routeMatch && $routeMatch->isMatched()) {
-            // Check if template hierarchy should override this route
-            if ($routeMatch->isWordPressRoute()) {
-                $templateHierarchy = $this->templateResolver->resolveHierarchy($fullContext);
-                if ($this->priorityResolver->shouldTemplateOverrideRoute($templateHierarchy, $routeMatch->getRoute(), $fullContext)) {
-                    $templatePath = $this->templateResolver->findTemplate($templateHierarchy);
-                    if ($templatePath) {
-                        return RouteResolution::fromTemplate($templateHierarchy, $templatePath, 'template_override');
-                    }
-                }
-            }
-
+            // Routes always take priority over templates
             return RouteResolution::fromRouteMatch($routeMatch, 'route_match');
         }
 
@@ -164,55 +154,6 @@ final class ResolveRouteService
         return $results;
     }
 
-    /**
-     * Get detailed comparison information for debugging template vs route decisions
-     *
-     * @param  string  $uri  Request URI
-     * @param  string  $method  HTTP method
-     * @param  array  $context  Additional context
-     * @return array|null Detailed comparison information or null if no comparison needed
-     */
-    public function getComparisonDetails(string $uri, string $method, array $context = []): ?array
-    {
-        $fullContext = $this->buildContext($uri, $method, $context);
-
-        // Get route match
-        $routeMatch = $this->routeMatcher->match($uri, $method, $fullContext);
-        if (! $routeMatch || ! $routeMatch->isMatched() || ! $routeMatch->isWordPressRoute()) {
-            return null;
-        }
-
-        // Get template hierarchy
-        $templateHierarchy = $this->templateResolver->resolveHierarchy($fullContext);
-
-        // Get detailed comparison if available
-        $comparisonResult = $this->priorityResolver->getDetailedComparison(
-            $templateHierarchy,
-            $routeMatch->getRoute(),
-            $fullContext
-        );
-
-        if (! $comparisonResult) {
-            return null;
-        }
-
-        return [
-            'route' => [
-                'id' => $routeMatch->getRoute()->getId(),
-                'condition' => $routeMatch->getRoute()->getCondition()->getCondition(),
-                'priority' => $routeMatch->getRoute()->getPriority(),
-                'parameters' => $routeMatch->getRoute()->getCondition()->getParameters(),
-            ],
-            'template' => [
-                'condition' => $templateHierarchy->getCondition(),
-                'templates' => $templateHierarchy->getTemplatesInOrder(),
-                'priority' => $templateHierarchy->getPriority(),
-                'primary_template' => $templateHierarchy->getPrimaryTemplate(),
-            ],
-            'comparison' => $comparisonResult->toArray(),
-            'context' => $fullContext,
-        ];
-    }
 
     /**
      * Build comprehensive context for route resolution

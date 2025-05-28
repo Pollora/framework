@@ -20,7 +20,6 @@ use Pollora\Route\Domain\Contracts\TemplateResolverInterface;
 use Pollora\Route\Domain\Services\ConditionValidator;
 use Pollora\Route\Domain\Services\RoutePriorityResolver;
 use Pollora\Route\Domain\Services\SpecialRequestDetector;
-use Pollora\Route\Domain\Services\TemplatePriorityComparator;
 use Pollora\Route\Domain\Services\WordPressContextBuilder;
 use Pollora\Route\Infrastructure\Repositories\InMemoryRouteRegistry;
 use Pollora\Route\Infrastructure\Services\LaravelRouteMatcher;
@@ -63,7 +62,7 @@ final class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->singleton(ConditionResolverInterface::class, fn ($app) =>
-            new ConditionalTagsResolver($app['config']->get('wordpress', []))
+        new ConditionalTagsResolver($app['config']->get('wordpress', []))
         );
 
         // Publish configuration file
@@ -124,11 +123,7 @@ final class RouteServiceProvider extends ServiceProvider
      */
     private function registerDomainServices(): void
     {
-        $this->app->singleton(RoutePriorityResolver::class, function ($app) {
-            $resolver = new RoutePriorityResolver();
-            $resolver->setTemplatePriorityComparator($app->make(TemplatePriorityComparator::class));
-            return $resolver;
-        });
+        $this->app->singleton(RoutePriorityResolver::class);
         $this->app->singleton(SpecialRequestDetector::class);
         $this->app->singleton(WordPressContextBuilder::class);
 
@@ -138,14 +133,6 @@ final class RouteServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(TemplatePriorityComparator::class, function ($app) {
-            // Get template priority config with fallback
-            $config = $this->getTemplatePriorityConfig($app);
-            return new TemplatePriorityComparator(
-                $app->make(TemplateResolverInterface::class),
-                $config
-            );
-        });
     }
 
     /**
@@ -212,9 +199,7 @@ final class RouteServiceProvider extends ServiceProvider
             $extendedRouter->setSpecialRequestHandler($app->make(SpecialRequestHandlerInterface::class));
             $extendedRouter->setRouteRegistry($app->make(RouteRegistryInterface::class));
 
-            // Inject services for template priority checking
-            $extendedRouter->setTemplatePriorityComparator($app->make(TemplatePriorityComparator::class));
-            $extendedRouter->setTemplateHierarchyService($app->make(BuildTemplateHierarchyService::class));
+            // Inject condition resolver
             $extendedRouter->setConditionResolver($app->make(ConditionResolverInterface::class));
 
             return $extendedRouter;
@@ -331,9 +316,7 @@ final class RouteServiceProvider extends ServiceProvider
             $router->setSpecialRequestDetector($this->app->make(SpecialRequestDetector::class));
             $router->setSpecialRequestHandler($this->app->make(SpecialRequestHandlerInterface::class));
 
-            // Ensure template priority checking services are injected
-            $router->setTemplatePriorityComparator($this->app->make(TemplatePriorityComparator::class));
-            $router->setTemplateHierarchyService($this->app->make(BuildTemplateHierarchyService::class));
+            // Inject condition resolver
             $router->setConditionResolver($this->app->make(ConditionResolverInterface::class));
         }
     }
@@ -346,8 +329,8 @@ final class RouteServiceProvider extends ServiceProvider
         $router = $this->app->make('router');
 
         $fallbackRoute = $router->any('{any}', [FrontendController::class, 'handle'])
-             ->where('any', '.*')
-             ->fallback();
+            ->where('any', '.*')
+            ->fallback();
         $fallbackRoute->name('wordpress.fallback');
     }
 
@@ -370,27 +353,6 @@ final class RouteServiceProvider extends ServiceProvider
 
         // Fallback to loading the default configuration file directly
         return $this->getDefaultWordPressConfig();
-    }
-
-    /**
-     * Get template priority configuration with fallback
-     */
-    private function getTemplatePriorityConfig($app): array
-    {
-        try {
-            // Try to get configuration from Laravel config
-            if ($app->bound('config')) {
-                $config = $app['config']->get('wordpress.routing.priority', []);
-                if (!empty($config)) {
-                    return $config;
-                }
-            }
-        } catch (\Throwable) {
-            // Ignore errors and fallback to default config
-        }
-
-        // Fallback to default template priority configuration
-        return $this->getDefaultTemplatePriorityConfig();
     }
 
     /**
@@ -434,23 +396,6 @@ final class RouteServiceProvider extends ServiceProvider
                     'is_product_tag' => 'product_tag',
                 ],
             ],
-        ];
-    }
-
-    /**
-     * Get default template priority configuration
-     */
-    private function getDefaultTemplatePriorityConfig(): array
-    {
-        return [
-            'template_existence_bonus' => 200,
-            'route_parameter_weight' => 25,
-            'template_depth_weight' => 50,
-            'template_specificity_multiplier' => 2,
-            'route_condition_weight' => 0.5,
-            'same_specificity_prefers_template' => true,
-            'laravel_route_override_threshold' => 1500,
-            'debug_comparison' => false,
         ];
     }
 
