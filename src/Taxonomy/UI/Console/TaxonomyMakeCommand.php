@@ -6,6 +6,10 @@ namespace Pollora\Taxonomy\UI\Console;
 
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Pollora\Console\Domain\Shared\Traits\HasModulePathSupport;
+use Pollora\Console\Domain\Shared\Traits\HasNameSupport;
+use Pollora\Console\Domain\Shared\Traits\HasPathSupport;
+use Pollora\Console\Domain\Shared\Traits\HasPluginPathSupport;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -17,6 +21,11 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class TaxonomyMakeCommand extends GeneratorCommand
 {
+    use HasNameSupport;
+    use HasModulePathSupport;
+    use HasPluginPathSupport;
+    use HasPathSupport;
+
     /**
      * The console command name.
      *
@@ -81,7 +90,10 @@ class TaxonomyMakeCommand extends GeneratorCommand
     protected function getArguments(): array
     {
         return [
-            ['name', InputArgument::REQUIRED, 'The name of the taxonomy class'],
+            static::getNameArgDefinition('The name of the taxonomy class'),
+            //static::getPluginPathArgDefinition(),
+            //static::getModulePathArgDefinition(),
+            //static::getPathArgDefinition(),
         ];
     }
 

@@ -6,6 +6,10 @@ namespace Pollora\PostType\UI\Console;
 
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Pollora\Console\Domain\Shared\Traits\HasModulePathSupport;
+use Pollora\Console\Domain\Shared\Traits\HasNameSupport;
+use Pollora\Console\Domain\Shared\Traits\HasPathSupport;
+use Pollora\Console\Domain\Shared\Traits\HasPluginPathSupport;
 use Symfony\Component\Console\Input\InputArgument;
 
 /**
@@ -16,6 +20,10 @@ use Symfony\Component\Console\Input\InputArgument;
  */
 class PostTypeMakeCommand extends GeneratorCommand
 {
+    use HasNameSupport;
+    use HasModulePathSupport;
+    use HasPluginPathSupport;
+    use HasPathSupport;
     /**
      * The console command name.
      *
@@ -81,7 +89,10 @@ class PostTypeMakeCommand extends GeneratorCommand
     protected function getArguments(): array
     {
         return [
-            ['name', InputArgument::REQUIRED, 'The name of the post type class'],
+            static::getNameArgDefinition('The name of the post type class'),
+            //static::getPluginPathArgDefinition(),
+            //static::getModulePathArgDefinition(),
+            //static::getPathArgDefinition(),
         ];
     }
 
