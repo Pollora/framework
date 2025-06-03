@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WpRocket;
+namespace Pollora\ThirdParty\WpRocket;
 
 use Illuminate\Support\ServiceProvider;
 

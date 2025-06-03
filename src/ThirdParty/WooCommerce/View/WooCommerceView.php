@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\View;
+namespace Pollora\ThirdParty\WooCommerce\View;
 
 use Illuminate\Support\Str;
 use Pollora\Filesystem\Filesystem;

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce;
+namespace Pollora\ThirdParty\WooCommerce;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Plugins\WooCommerce\View\WooCommerceView;
+use Pollora\ThirdParty\WooCommerce\View\WooCommerceView;
 
 class WooCommerceProvider extends ServiceProvider
 {
@@ -36,7 +36,7 @@ class WooCommerceProvider extends ServiceProvider
 
     public function bindFilters(): void
     {
-        $wp_view = $this->app->make(\Pollora\Plugins\WooCommerce\View\WooCommerceView::class);
+        $wp_view = $this->app->make(WooCommerceView::class);
         $this->filter->add('woocommerce_locate_template', [$wp_view, 'template']);
         $this->filter->add('wc_get_template_part', [$wp_view, 'template']);
         $this->filter->add('comments_template', [$wp_view, 'reviewsTemplate'], 11);
