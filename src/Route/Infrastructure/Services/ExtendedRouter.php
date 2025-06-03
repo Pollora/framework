@@ -40,6 +40,9 @@ class ExtendedRouter extends IlluminateRouter
     {
         parent::__construct($events, $container);
         // Don't load conditions in constructor - Laravel config may not be ready yet
+        
+        // Register WordPress types in the container for dependency injection
+        $this->registerWordPressTypesInContainer();
     }
 
     /**
@@ -259,6 +262,66 @@ class ExtendedRouter extends IlluminateRouter
         }
 
         return null;
+    }
+
+    /**
+     * Register WordPress types in Laravel's dependency injection container.
+     * 
+     * This allows Laravel to resolve WordPress types like WP_Post, WP_Term, etc.
+     * when they are type-hinted in controller methods or closures.
+     */
+    protected function registerWordPressTypesInContainer(): void
+    {
+        if (!$this->container) {
+            return;
+        }
+
+        // Register WP_Post
+        $this->container->bind('WP_Post', function () {
+            try {
+                return $this->resolveWPPost();
+            } catch (\Exception) {
+                return null;
+            }
+        });
+
+        // Register WP_Term
+        $this->container->bind('WP_Term', function () {
+            try {
+                return $this->resolveWPTerm();
+            } catch (\Exception) {
+                return null;
+            }
+        });
+
+        // Register WP_User
+        $this->container->bind('WP_User', function () {
+            try {
+                return $this->resolveWPUser();
+            } catch (\Exception) {
+                return null;
+            }
+        });
+
+        // Register WP_Query
+        $this->container->bind('WP_Query', function () {
+            try {
+                global $wp_query;
+                return $wp_query;
+            } catch (\Exception) {
+                return null;
+            }
+        });
+
+        // Register WP (WordPress rewrite)
+        $this->container->bind('WP', function () {
+            try {
+                global $wp;
+                return $wp;
+            } catch (\Exception) {
+                return null;
+            }
+        });
     }
 
 }
