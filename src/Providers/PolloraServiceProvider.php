@@ -25,6 +25,7 @@ use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\ModuleServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
+use Pollora\Plugins\Infrastructure\Providers\PluginsServiceProvider;
 use Pollora\ThirdParty\WooCommerce\WooCommerceProvider;
 use Pollora\ThirdParty\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeAttributeServiceProvider;
@@ -77,6 +78,9 @@ class PolloraServiceProvider extends ServiceProvider
 
         $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(PostTypeAttributeServiceProvider::class);
+
+        // @TODO: Re-enable this when plugins are ready
+        //$this->app->register(PluginsServiceProvider::class);
 
         // Shared modules
         $this->app->register(CollectionServiceProvider::class);
