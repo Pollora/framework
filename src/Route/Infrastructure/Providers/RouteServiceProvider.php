@@ -12,6 +12,10 @@ use Pollora\Route\Infrastructure\Middleware\WordPressBodyClass;
 use Pollora\Route\Infrastructure\Middleware\WordPressHeaders;
 use Pollora\Route\Infrastructure\Middleware\WordPressShutdown;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
+use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
+use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
+use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
+use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
 
 /**
@@ -33,9 +37,31 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->extend('router', fn ($router, Application $app): ExtendedRouter => 
-            new ExtendedRouter($app->make('events'), $app)
-        );
+        // Register the WordPress type resolver
+        $this->app->singleton(WordPressTypeResolverInterface::class, WordPressTypeResolver::class);
+        
+        // Register the condition manager
+        $this->app->singleton(WordPressConditionManagerInterface::class, function ($app) {
+            return new WordPressConditionManager($app);
+        });
+        
+        // Override the default router with our extended version
+        $this->app->extend('router', function ($router, Application $app): ExtendedRouter {
+            $logger = null;
+            try {
+                $logger = $app->make('log');
+            } catch (\Exception) {
+                // Logger not available
+            }
+            
+            return new ExtendedRouter(
+                $app->make('events'),
+                $app,
+                $app->make(WordPressConditionManagerInterface::class),
+                $app->make(WordPressTypeResolverInterface::class),
+                $logger
+            );
+        });
     }
 
     /**

@@ -8,6 +8,9 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Router as IlluminateRouter;
 use Pollora\Route\Domain\Models\Route;
+use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
+use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Extended Laravel Router with WordPress condition support.
@@ -18,30 +21,26 @@ use Pollora\Route\Domain\Models\Route;
  */
 class ExtendedRouter extends IlluminateRouter
 {
-    /**
-     * WordPress condition aliases.
-     *
-     * @var array<string, string>
-     */
-    protected array $conditions = [];
-
-    /**
-     * Whether WordPress conditions have been loaded.
-     */
-    protected bool $conditionsLoaded = false;
+    private WordPressConditionManagerInterface $conditionManager;
+    private WordPressTypeResolverInterface $typeResolver;
+    private ?LoggerInterface $logger;
 
     /**
      * Create a new extended router instance.
-     *
-     * @param  Dispatcher  $events
-     * @param  Container|null  $container
      */
-    public function __construct(Dispatcher $events, Container $container = null)
-    {
+    public function __construct(
+        Dispatcher $events,
+        Container $container = null,
+        WordPressConditionManagerInterface $conditionManager = null,
+        WordPressTypeResolverInterface $typeResolver = null,
+        LoggerInterface $logger = null
+    ) {
         parent::__construct($events, $container);
-        // Don't load conditions in constructor - Laravel config may not be ready yet
         
-        // Register WordPress types in the container for dependency injection
+        $this->conditionManager = $conditionManager ?? $this->createDefaultConditionManager();
+        $this->typeResolver = $typeResolver ?? new Resolvers\WordPressTypeResolver();
+        $this->logger = $logger;
+
         $this->registerWordPressTypesInContainer();
     }
 
@@ -61,207 +60,143 @@ class ExtendedRouter extends IlluminateRouter
     }
 
     /**
-     * Load WordPress condition aliases from configuration.
-     * Uses lazy loading to ensure configuration is available.
-     */
-    protected function loadWordPressConditions(): void
-    {
-        if ($this->conditionsLoaded) {
-            return;
-        }
-
-        $this->conditions = [];
-
-        // Try to load from config if available
-        try {
-            if ($this->container && $this->container->bound('config')) {
-                $config = $this->container->make('config');
-                $configConditions = $config->get('wordpress.routing.conditions', []);
-
-                if (!empty($configConditions)) {
-                    // Merge config conditions with defaults, config takes precedence
-                    $this->conditions = array_merge($this->conditions, $configConditions);
-                }
-            }
-        } catch (\Exception) {
-            // Silently ignore if config is not available yet
-        }
-
-        $this->conditionsLoaded = true;
-    }
-
-    /**
      * Get WordPress condition aliases.
-     * Ensures conditions are loaded before returning them.
      *
      * @return array<string, string>
      */
     public function getConditions(): array
     {
-        $this->loadWordPressConditions();
-        return $this->conditions;
+        return $this->conditionManager->getConditions();
     }
 
     /**
      * Resolve a condition alias to the actual WordPress function.
-     * Uses lazy loading to ensure configuration is available when needed.
-     *
-     * @param  string  $condition
-     * @return string
      */
     public function resolveCondition(string $condition): string
     {
-        $this->loadWordPressConditions();
-        return $this->conditions[$condition] ?? $condition;
+        return $this->conditionManager->resolveCondition($condition);
     }
 
     /**
      * Add WordPress dependency injection bindings to a route.
-     * 
-     * Analyzes the route action parameters and injects WordPress objects
-     * based on their type hints (WP_Post, WP_Term, WP_User, WP_Query, etc.).
-     *
-     * @param  Route  $route
-     * @return Route
      */
     public function addWordPressBindings(Route $route): Route
     {
-        $action = $route->getAction();
-        
-        // Skip if no action or not a closure/callable
-        if (!isset($action['uses']) || !is_callable($action['uses'])) {
-            return $route;
-        }
-
         try {
-            // Get reflection of the callable
+            $action = $route->getAction();
+            
+            if (!$this->isValidActionForBinding($action)) {
+                return $route;
+            }
+
             $reflection = $this->getCallableReflection($action['uses']);
             if (!$reflection) {
                 return $route;
             }
 
-            // Analyze parameters and inject WordPress objects
-            foreach ($reflection->getParameters() as $parameter) {
-                $type = $parameter->getType();
-                if (!$type || $type->isBuiltin()) {
-                    continue;
-                }
+            $this->bindWordPressParametersToRoute($route, $reflection);
 
-                $typeName = $type->getName();
-                $value = $this->resolveWordPressType($typeName);
-                
-                if ($value !== null) {
-                    $route->setParameter($parameter->getName(), $value);
-                }
-            }
-        } catch (\Exception $e) {
-            // Silently continue if reflection fails
+        } catch (\Throwable $e) {
+            $this->logError('Failed to add WordPress bindings', $e, [
+                'route_uri' => $route->uri(),
+                'route_methods' => $route->methods()
+            ]);
         }
 
         return $route;
     }
 
     /**
-     * Get reflection from a callable.
+     * Check if action is valid for WordPress binding.
+     */
+    private function isValidActionForBinding(array $action): bool
+    {
+        return isset($action['uses']) && is_callable($action['uses']);
+    }
+
+    /**
+     * Bind WordPress parameters to route based on reflection.
+     */
+    private function bindWordPressParametersToRoute(Route $route, \ReflectionFunctionAbstract $reflection): void
+    {
+        foreach ($reflection->getParameters() as $parameter) {
+            $type = $parameter->getType();
+            
+            if (!$type || $type->isBuiltin()) {
+                continue;
+            }
+
+            $typeName = $type->getName();
+            $value = $this->typeResolver->resolve($typeName);
+            
+            if ($value !== null) {
+                $route->setParameter($parameter->getName(), $value);
+            }
+        }
+    }
+
+    /**
+     * Get reflection from a callable with improved error handling.
      */
     protected function getCallableReflection($callable): ?\ReflectionFunctionAbstract
     {
-        if ($callable instanceof \Closure) {
-            return new \ReflectionFunction($callable);
+        try {
+            return match (true) {
+                $callable instanceof \Closure => new \ReflectionFunction($callable),
+                is_string($callable) && str_contains($callable, '@') => $this->getMethodReflection($callable),
+                is_array($callable) && count($callable) === 2 => new \ReflectionMethod($callable[0], $callable[1]),
+                is_string($callable) && class_exists($callable) => new \ReflectionMethod($callable, '__invoke'),
+                default => null,
+            };
+        } catch (\ReflectionException $e) {
+            $this->logError('Failed to get callable reflection', $e, ['callable' => $callable]);
+            return null;
         }
-
-        if (is_string($callable) && str_contains($callable, '@')) {
-            [$class, $method] = explode('@', $callable, 2);
-            return new \ReflectionMethod($class, $method);
-        }
-
-        if (is_array($callable) && count($callable) === 2) {
-            return new \ReflectionMethod($callable[0], $callable[1]);
-        }
-
-        if (is_string($callable) && class_exists($callable)) {
-            return new \ReflectionMethod($callable, '__invoke');
-        }
-
-        return null;
     }
 
     /**
-     * Resolve WordPress object by type name.
+     * Get method reflection from string format (Class@method).
      */
-    protected function resolveWordPressType(string $typeName): mixed
+    private function getMethodReflection(string $callable): \ReflectionMethod
     {
-        global $post, $wp_query, $wp;
+        [$class, $method] = explode('@', $callable, 2);
+        return new \ReflectionMethod($class, $method);
+    }
 
-        return match ($typeName) {
-            'WP_Post' => $this->resolveWPPost(),
-            'WP_Term' => $this->resolveWPTerm(),
-            'WP_User' => $this->resolveWPUser(),
-            'WP_Query' => $wp_query,
-            'WP' => $wp,
-            default => null,
+    /**
+     * Create default condition manager if none provided.
+     */
+    private function createDefaultConditionManager(): WordPressConditionManagerInterface
+    {
+        return new WordPressConditionManager($this->container);
+    }
+
+    /**
+     * Log error with context if logger is available.
+     */
+    private function logError(string $message, \Throwable $exception, array $context = []): void
+    {
+        if (!$this->logger) {
+            return;
+        }
+
+        $context['exception'] = $exception;
+        $this->logger->error($message, $context);
+    }
+
+    /**
+     * Create a safe resolver that handles exceptions.
+     */
+    private function createSafeResolver(callable $resolver): \Closure
+    {
+        return function () use ($resolver) {
+            try {
+                return $resolver();
+            } catch (\Throwable $e) {
+                $this->logError('WordPress type resolution failed', $e);
+                return null;
+            }
         };
-    }
-
-    /**
-     * Resolve WP_Post object.
-     */
-    protected function resolveWPPost(): ?\WP_Post
-    {
-        global $post;
-
-        // First try global post
-        if ($post instanceof \WP_Post) {
-            return $post;
-        }
-
-        // Try queried object if it's a post
-        if (function_exists('get_queried_object')) {
-            $queried = get_queried_object();
-            if ($queried instanceof \WP_Post) {
-                return $queried;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Resolve WP_Term object.
-     */
-    protected function resolveWPTerm(): ?\WP_Term
-    {
-        if (function_exists('get_queried_object')) {
-            $queried = get_queried_object();
-            if ($queried instanceof \WP_Term) {
-                return $queried;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Resolve WP_User object.
-     */
-    protected function resolveWPUser(): ?\WP_User
-    {
-        if (function_exists('get_queried_object')) {
-            $queried = get_queried_object();
-            if ($queried instanceof \WP_User) {
-                return $queried;
-            }
-        }
-
-        // Try current user as fallback
-        if (function_exists('wp_get_current_user')) {
-            $current_user = wp_get_current_user();
-            if ($current_user instanceof \WP_User && $current_user->ID > 0) {
-                return $current_user;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -276,52 +211,17 @@ class ExtendedRouter extends IlluminateRouter
             return;
         }
 
-        // Register WP_Post
-        $this->container->bind('WP_Post', function () {
-            try {
-                return $this->resolveWPPost();
-            } catch (\Exception) {
-                return null;
-            }
-        });
+        $typesToRegister = [
+            'WP_Post' => fn() => $this->typeResolver->resolvePost(),
+            'WP_Term' => fn() => $this->typeResolver->resolveTerm(),
+            'WP_User' => fn() => $this->typeResolver->resolveUser(),
+            'WP_Query' => fn() => $this->typeResolver->resolveQuery(),
+            'WP' => fn() => $this->typeResolver->resolveWP(),
+        ];
 
-        // Register WP_Term
-        $this->container->bind('WP_Term', function () {
-            try {
-                return $this->resolveWPTerm();
-            } catch (\Exception) {
-                return null;
-            }
-        });
-
-        // Register WP_User
-        $this->container->bind('WP_User', function () {
-            try {
-                return $this->resolveWPUser();
-            } catch (\Exception) {
-                return null;
-            }
-        });
-
-        // Register WP_Query
-        $this->container->bind('WP_Query', function () {
-            try {
-                global $wp_query;
-                return $wp_query;
-            } catch (\Exception) {
-                return null;
-            }
-        });
-
-        // Register WP (WordPress rewrite)
-        $this->container->bind('WP', function () {
-            try {
-                global $wp;
-                return $wp;
-            } catch (\Exception) {
-                return null;
-            }
-        });
+        foreach ($typesToRegister as $type => $resolver) {
+            $this->container->bind($type, $this->createSafeResolver($resolver));
+        }
     }
 
 }
