@@ -74,10 +74,11 @@ trait QueryTrait
     }
 
     /**
-     * Run the WordPress bootstrap process and load the default template loader.
+     * Run the WordPress bootstrap process.
      *
      * This method initializes WordPress and handles special request types
-     * like robots.txt, favicon, feeds, and trackbacks.
+     * like robots.txt, favicon, feeds, and trackbacks. Normal template
+     * resolution is delegated to the Laravel routing system.
      *
      * @throws \RuntimeException If WordPress core functions are not available
      */
@@ -89,32 +90,27 @@ trait QueryTrait
 
         // Initialize WordPress for the current request
         wp();
-        // Handle special request types
+
+        // Handle special request types that should bypass Laravel routing
         if (is_robots()) {
             do_action('do_robots');
-
-            return;
+            exit;
         }
         if (is_favicon()) {
             do_action('do_favicon');
-
-            return;
+            exit;
         }
         if (is_feed()) {
             do_feed();
-
-            return;
+            exit;
         }
-
-        // Handle special request types
         if (is_trackback()) {
             require_once ABSPATH.'wp-trackback.php';
-
-            return;
+            exit;
         }
 
-        // Load the default WordPress template loader
-        require_once ABSPATH.WPINC.'/template-loader.php';
+        // For normal requests, let Laravel routing handle template resolution
+        // Do not load WordPress template-loader.php as we use FrontendController instead
 
         do_action('pollora_loaded');
     }

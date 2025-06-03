@@ -33,10 +33,6 @@ class WordPressHeaders
      * - Adding framework identification
      * - Cleaning up WordPress headers for non-authenticated requests
      * - Setting appropriate cache control directives
-     *
-     * @param  Request  $request
-     * @param  Closure  $next
-     * @return SymfonyResponse
      */
     public function handle(Request $request, Closure $next): SymfonyResponse
     {
@@ -63,8 +59,6 @@ class WordPressHeaders
 
     /**
      * Add the framework identification header.
-     *
-     * @param  SymfonyResponse  $response
      */
     private function addFrameworkHeader(SymfonyResponse $response): void
     {
@@ -73,25 +67,20 @@ class WordPressHeaders
 
     /**
      * Determine if WordPress headers should be cleaned up.
-     *
-     * @param  Request  $request
-     * @return bool
      */
     private function shouldCleanupHeaders(Request $request): bool
     {
         $route = $request->route();
-        
-        return $route && 
-               method_exists($route, 'hasCondition') && 
-               !$route->hasCondition() &&
+
+        return $route &&
+               method_exists($route, 'hasCondition') &&
+               ! $route->hasCondition() &&
                $this->isWordPressFunctionAvailable('is_user_logged_in') &&
-               !is_user_logged_in();
+               ! is_user_logged_in();
     }
 
     /**
      * Remove WordPress-specific headers from the response.
-     *
-     * @param  SymfonyResponse  $response
      */
     private function removeWordPressHeaders(SymfonyResponse $response): void
     {
@@ -102,19 +91,14 @@ class WordPressHeaders
 
     /**
      * Determine if public cache headers should be set.
-     *
-     * @return bool
      */
     private function shouldSetPublicCache(): bool
     {
-        return $this->isWordPressFunctionAvailable('is_user_logged_in') && !is_user_logged_in();
+        return $this->isWordPressFunctionAvailable('is_user_logged_in') && ! is_user_logged_in();
     }
 
     /**
      * Check if a WordPress function is available.
-     *
-     * @param  string  $function
-     * @return bool
      */
     private function isWordPressFunctionAvailable(string $function): bool
     {

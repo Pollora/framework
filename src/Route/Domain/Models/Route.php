@@ -35,13 +35,12 @@ class Route extends IlluminateRoute
     /**
      * Set whether this is a WordPress route.
      *
-     * @param  bool  $isWordPressRoute
      * @return $this
      */
     public function setIsWordPressRoute(bool $isWordPressRoute): self
     {
         $this->isWordPressRoute = $isWordPressRoute;
-        
+
         return $this;
     }
 
@@ -56,13 +55,12 @@ class Route extends IlluminateRoute
     /**
      * Set the WordPress condition.
      *
-     * @param  string  $condition
      * @return $this
      */
     public function setCondition(string $condition): self
     {
         $this->condition = $condition;
-        
+
         return $this;
     }
 
@@ -79,7 +77,7 @@ class Route extends IlluminateRoute
      */
     public function hasCondition(): bool
     {
-        return !empty($this->condition);
+        return ! empty($this->condition);
     }
 
     /**
@@ -91,7 +89,7 @@ class Route extends IlluminateRoute
     public function setConditionParameters(array $parameters): self
     {
         $this->conditionParameters = $parameters;
-        
+
         return $this;
     }
 
@@ -108,7 +106,6 @@ class Route extends IlluminateRoute
     /**
      * Determine if the route matches given request.
      *
-     * @param  Request  $request
      * @param  bool  $includingMethod
      */
     public function matches(Request $request, $includingMethod = true): bool
@@ -131,7 +128,7 @@ class Route extends IlluminateRoute
     {
         // Ensure WordPress has parsed the request before evaluating conditions
         $this->ensureWordPressQueryParsed();
-        
+
         $condition = $this->getCondition();
         $parameters = $this->getConditionParameters();
 
@@ -151,7 +148,7 @@ class Route extends IlluminateRoute
         global $wp, $wp_query;
 
         // If WordPress hasn't parsed the request yet, do it now
-        if (function_exists('wp') && isset($wp) && !$wp->did_permalink && !$wp_query->is_main_query()) {
+        if (function_exists('wp') && isset($wp) && ! $wp->did_permalink && ! $wp_query->is_main_query()) {
             // Parse the current request URL to set up WordPress query vars
             if (function_exists('wp_parse_request')) {
                 wp_parse_request();

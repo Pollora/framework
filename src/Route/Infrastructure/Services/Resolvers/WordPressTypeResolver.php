@@ -29,7 +29,7 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
 
     public function resolve(string $typeName): mixed
     {
-        if (!isset($this->resolvers[$typeName])) {
+        if (! isset($this->resolvers[$typeName])) {
             return null;
         }
 
@@ -58,11 +58,12 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
 
     public function resolveTerm(): ?\WP_Term
     {
-        if (!function_exists('get_queried_object')) {
+        if (! function_exists('get_queried_object')) {
             return null;
         }
 
         $queried = get_queried_object();
+
         return $queried instanceof \WP_Term ? $queried : null;
     }
 
@@ -89,12 +90,14 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
     public function resolveQuery(): ?\WP_Query
     {
         global $wp_query;
+
         return $wp_query instanceof \WP_Query ? $wp_query : null;
     }
 
     public function resolveWP(): ?\WP
     {
         global $wp;
+
         return $wp instanceof \WP ? $wp : null;
     }
 }

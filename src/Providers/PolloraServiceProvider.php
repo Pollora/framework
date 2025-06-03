@@ -29,6 +29,7 @@ use Pollora\Plugins\WooCommerce\WooCommerceProvider;
 use Pollora\Plugins\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeAttributeServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
+use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyAttributeServiceProvider;
@@ -37,7 +38,6 @@ use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
-use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 
 /**
  * Main service provider for the Pollora framework.

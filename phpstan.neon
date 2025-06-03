@@ -7,12 +7,8 @@ parameters:
     paths:
         - src
         - config
-        - database/migrations/create_permission_tables.php.stub
-        - database/migrations/add_teams_fields.php.stub
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
-    stubFiles:
-        - stubs/Container.stub
     bootstrapFiles:
         - phpstan-bootstrap.php
     ignoreErrors:

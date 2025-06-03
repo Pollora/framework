@@ -18,8 +18,6 @@ class WordPressBindings
 {
     /**
      * Create a new WordPress bindings middleware instance.
-     *
-     * @param  ExtendedRouter  $router
      */
     public function __construct(private readonly ExtendedRouter $router) {}
 
@@ -27,10 +25,6 @@ class WordPressBindings
      * Handle the incoming request.
      *
      * Adds WordPress bindings to routes that have WordPress conditions.
-     *
-     * @param  Request  $request
-     * @param  Closure  $next
-     * @return mixed
      */
     public function handle(Request $request, Closure $next): mixed
     {

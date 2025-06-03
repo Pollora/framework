@@ -13,7 +13,9 @@ use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInt
 class WordPressConditionManager implements WordPressConditionManagerInterface
 {
     private array $conditions = [];
+
     private bool $loaded = false;
+
     private ?Container $container;
 
     public function __construct(?Container $container = null)
@@ -24,12 +26,14 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
     public function getConditions(): array
     {
         $this->ensureConditionsLoaded();
+
         return $this->conditions;
     }
 
     public function resolveCondition(string $condition): string
     {
         $this->ensureConditionsLoaded();
+
         return $this->conditions[$condition] ?? $condition;
     }
 
@@ -50,7 +54,7 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
 
         $this->loadDefaultConditions();
         $this->loadConfigConditions();
-        
+
         $this->loaded = true;
     }
 
@@ -98,7 +102,7 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
             if ($this->container && $this->container->bound('config')) {
                 $config = $this->container->make('config');
                 $configConditions = $config->get('wordpress.routing.conditions', []);
-                
+
                 $this->conditions = array_merge($this->conditions, $configConditions);
             }
         } catch (\Throwable) {

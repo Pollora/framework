@@ -22,7 +22,9 @@ use Psr\Log\LoggerInterface;
 class ExtendedRouter extends IlluminateRouter
 {
     private WordPressConditionManagerInterface $conditionManager;
+
     private WordPressTypeResolverInterface $typeResolver;
+
     private ?LoggerInterface $logger;
 
     /**
@@ -30,15 +32,15 @@ class ExtendedRouter extends IlluminateRouter
      */
     public function __construct(
         Dispatcher $events,
-        Container $container = null,
-        WordPressConditionManagerInterface $conditionManager = null,
-        WordPressTypeResolverInterface $typeResolver = null,
-        LoggerInterface $logger = null
+        ?Container $container = null,
+        ?WordPressConditionManagerInterface $conditionManager = null,
+        ?WordPressTypeResolverInterface $typeResolver = null,
+        ?LoggerInterface $logger = null
     ) {
         parent::__construct($events, $container);
-        
+
         $this->conditionManager = $conditionManager ?? $this->createDefaultConditionManager();
-        $this->typeResolver = $typeResolver ?? new Resolvers\WordPressTypeResolver();
+        $this->typeResolver = $typeResolver ?? new Resolvers\WordPressTypeResolver;
         $this->logger = $logger;
 
         $this->registerWordPressTypesInContainer();
@@ -50,7 +52,6 @@ class ExtendedRouter extends IlluminateRouter
      * @param  array|string  $methods
      * @param  string  $uri
      * @param  mixed  $action
-     * @return Route
      */
     public function newRoute($methods, $uri, $action): Route
     {
@@ -84,13 +85,13 @@ class ExtendedRouter extends IlluminateRouter
     {
         try {
             $action = $route->getAction();
-            
-            if (!$this->isValidActionForBinding($action)) {
+
+            if (! $this->isValidActionForBinding($action)) {
                 return $route;
             }
 
             $reflection = $this->getCallableReflection($action['uses']);
-            if (!$reflection) {
+            if (! $reflection) {
                 return $route;
             }
 
@@ -99,7 +100,7 @@ class ExtendedRouter extends IlluminateRouter
         } catch (\Throwable $e) {
             $this->logError('Failed to add WordPress bindings', $e, [
                 'route_uri' => $route->uri(),
-                'route_methods' => $route->methods()
+                'route_methods' => $route->methods(),
             ]);
         }
 
@@ -121,14 +122,14 @@ class ExtendedRouter extends IlluminateRouter
     {
         foreach ($reflection->getParameters() as $parameter) {
             $type = $parameter->getType();
-            
-            if (!$type || $type->isBuiltin()) {
+
+            if (! $type || $type->isBuiltin()) {
                 continue;
             }
 
             $typeName = $type->getName();
             $value = $this->typeResolver->resolve($typeName);
-            
+
             if ($value !== null) {
                 $route->setParameter($parameter->getName(), $value);
             }
@@ -150,6 +151,7 @@ class ExtendedRouter extends IlluminateRouter
             };
         } catch (\ReflectionException $e) {
             $this->logError('Failed to get callable reflection', $e, ['callable' => $callable]);
+
             return null;
         }
     }
@@ -160,6 +162,7 @@ class ExtendedRouter extends IlluminateRouter
     private function getMethodReflection(string $callable): \ReflectionMethod
     {
         [$class, $method] = explode('@', $callable, 2);
+
         return new \ReflectionMethod($class, $method);
     }
 
@@ -176,7 +179,7 @@ class ExtendedRouter extends IlluminateRouter
      */
     private function logError(string $message, \Throwable $exception, array $context = []): void
     {
-        if (!$this->logger) {
+        if (! $this->logger) {
             return;
         }
 
@@ -194,6 +197,7 @@ class ExtendedRouter extends IlluminateRouter
                 return $resolver();
             } catch (\Throwable $e) {
                 $this->logError('WordPress type resolution failed', $e);
+
                 return null;
             }
         };
@@ -201,27 +205,26 @@ class ExtendedRouter extends IlluminateRouter
 
     /**
      * Register WordPress types in Laravel's dependency injection container.
-     * 
+     *
      * This allows Laravel to resolve WordPress types like WP_Post, WP_Term, etc.
      * when they are type-hinted in controller methods or closures.
      */
     protected function registerWordPressTypesInContainer(): void
     {
-        if (!$this->container) {
+        if (! $this->container) {
             return;
         }
 
         $typesToRegister = [
-            'WP_Post' => fn() => $this->typeResolver->resolvePost(),
-            'WP_Term' => fn() => $this->typeResolver->resolveTerm(),
-            'WP_User' => fn() => $this->typeResolver->resolveUser(),
-            'WP_Query' => fn() => $this->typeResolver->resolveQuery(),
-            'WP' => fn() => $this->typeResolver->resolveWP(),
+            'WP_Post' => fn () => $this->typeResolver->resolvePost(),
+            'WP_Term' => fn () => $this->typeResolver->resolveTerm(),
+            'WP_User' => fn () => $this->typeResolver->resolveUser(),
+            'WP_Query' => fn () => $this->typeResolver->resolveQuery(),
+            'WP' => fn () => $this->typeResolver->resolveWP(),
         ];
 
         foreach ($typesToRegister as $type => $resolver) {
             $this->container->bind($type, $this->createSafeResolver($resolver));
         }
     }
-
 }

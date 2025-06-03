@@ -11,7 +11,7 @@ interface WordPressConditionManagerInterface
 {
     /**
      * Get all WordPress condition aliases.
-     * 
+     *
      * @return array<string, string>
      */
     public function getConditions(): array;

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Route\Infrastructure\Providers;
 
-use Illuminate\Foundation\Application;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\TestCase;
@@ -14,13 +15,22 @@ use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 class RouteServiceProviderTest extends TestCase
 {
     private RouteServiceProvider $provider;
-    private Application $app;
+    private Container $app;
 
     protected function setUp(): void
     {
         parent::setUp();
         
-        $this->app = new Application();
+        $this->app = new Container();
+        
+        // Mock required services
+        $dispatcher = $this->createMock(Dispatcher::class);
+        $this->app->instance('events', $dispatcher);
+        
+        // Mock config if needed
+        $config = $this->createMock(\Illuminate\Config\Repository::class);
+        $this->app->instance('config', $config);
+        
         $this->provider = new RouteServiceProvider($this->app);
     }
 

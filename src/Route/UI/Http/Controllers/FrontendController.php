@@ -12,22 +12,28 @@ use Illuminate\Support\Facades\View;
  * Frontend controller for WordPress template fallback.
  *
  * This controller handles requests that don't match any defined routes
- * by falling back to WordPress template hierarchy.
+ * by falling back to WordPress template hierarchy. Special WordPress requests
+ * (robots.txt, favicon, feeds, trackbacks) are handled earlier in the WordPress
+ * bootstrap process and will not reach this controller.
+ *
+ * The controller respects wp_using_themes() condition and implements the same
+ * template hierarchy logic as WordPress's template-loader.php but using
+ * Laravel's View system instead of PHP includes.
  */
 class FrontendController
 {
     /**
      * Handle the request using WordPress template hierarchy.
-     *
-     * @param  Request  $request
-     * @return Response
      */
     public function handle(Request $request): Response
     {
+        // Early return if themes are not being used
+        if (function_exists('wp_using_themes') && ! wp_using_themes()) {
+            abort(404, 'Themes are disabled');
+        }
+
         // Build the most specific template slug possible
         $slug = $this->buildTemplateSlug();
-
-        $template_include = apply_filters('template_include', null);
 
         // Get template hierarchy using WordPress filters (like Sage does)
         $templates = $this->getTemplateHierarchy($slug);
@@ -45,8 +51,6 @@ class FrontendController
 
     /**
      * Build the most specific template slug based on WordPress context.
-     *
-     * @return string
      */
     protected function buildTemplateSlug(): string
     {
@@ -58,6 +62,7 @@ class FrontendController
                     return "single-{$post->post_type}-{$post->post_name}";
                 }
             }
+
             return 'single';
         }
 
@@ -69,6 +74,7 @@ class FrontendController
                     return "page-{$post->post_name}";
                 }
             }
+
             return 'page';
         }
 
@@ -78,6 +84,7 @@ class FrontendController
             if ($term) {
                 return "category-{$term->slug}";
             }
+
             return 'category';
         }
 
@@ -87,6 +94,7 @@ class FrontendController
             if ($term) {
                 return "tag-{$term->slug}";
             }
+
             return 'tag';
         }
 
@@ -96,6 +104,7 @@ class FrontendController
             if ($term) {
                 return "taxonomy-{$term->taxonomy}-{$term->slug}";
             }
+
             return 'taxonomy';
         }
 
@@ -105,6 +114,7 @@ class FrontendController
             if ($author) {
                 return "author-{$author->user_nicename}";
             }
+
             return 'author';
         }
 
@@ -119,6 +129,7 @@ class FrontendController
             if (is_year()) {
                 return 'date-year';
             }
+
             return 'date';
         }
 
@@ -128,6 +139,7 @@ class FrontendController
             if (is_array($post_type)) {
                 $post_type = reset($post_type);
             }
+
             return "archive-{$post_type}";
         }
 
@@ -161,7 +173,6 @@ class FrontendController
      * This approach is inspired by Sage Acorn and uses WordPress's own
      * template hierarchy system with filters.
      *
-     * @param  string  $slug
      * @return array<string>
      */
     protected function getTemplateHierarchy(string $slug): array
@@ -253,7 +264,7 @@ class FrontendController
         }
 
         // Always add index as final fallback
-        if (!in_array('index', $templates)) {
+        if (! in_array('index', $templates)) {
             $templates[] = 'index';
         }
 
@@ -268,8 +279,6 @@ class FrontendController
 
     /**
      * Get the current template type for filters.
-     *
-     * @return string
      */
     protected function getTemplateType(): string
     {

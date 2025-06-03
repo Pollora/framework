@@ -13,7 +13,7 @@ use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 
 /**
  * Tests for WordPress route resolution based on conditions.
- * 
+ *
  * This test suite replicates the route definitions from web.php
  * and verifies that each WordPress condition correctly matches
  * the appropriate route using the existing WordPress mock system.
@@ -21,18 +21,19 @@ use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 class WordPressRouteResolutionTest extends TestCase
 {
     private ExtendedRouter $router;
+
     private Container $container;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Initialize WordPress mocks system
         setupWordPressMocks();
-        
-        $this->container = new Container();
+
+        $this->container = new Container;
         $dispatcher = $this->createMock(Dispatcher::class);
-        
+
         // Mock config for WordPress routing conditions
         $config = $this->createMock(\Illuminate\Config\Repository::class);
         $config->method('get')
@@ -47,7 +48,7 @@ class WordPressRouteResolutionTest extends TestCase
                 'template' => 'is_page_template',
                 '404' => 'is_404',
             ]);
-        
+
         $this->container->instance('config', $config);
         $this->router = new ExtendedRouter($dispatcher, $this->container);
     }
@@ -62,16 +63,18 @@ class WordPressRouteResolutionTest extends TestCase
     /**
      * Helper to create a WordPress route with mocked functions
      */
-    private function createWordPressRoute(string $condition, array $parameters = [], callable $action = null): Route
+    private function createWordPressRoute(string $condition, array $parameters = [], ?callable $action = null): Route
     {
-        $action = $action ?: function () { return 'matched'; };
+        $action = $action ?: function () {
+            return 'matched';
+        };
         $resolvedCondition = $this->router->resolveCondition($condition);
-        
+
         $route = new Route(['GET'], $condition, $action);
         $route->setIsWordPressRoute(true);
         $route->setCondition($resolvedCondition);
         $route->setConditionParameters($parameters);
-        
+
         return $route;
     }
 
@@ -86,7 +89,7 @@ class WordPressRouteResolutionTest extends TestCase
         $this->assertEquals('is_category', $this->router->resolveCondition('archive'));
         $this->assertEquals('is_page_template', $this->router->resolveCondition('template'));
         $this->assertEquals('404', $this->router->resolveCondition('404'));
-        
+
         // Test that direct WordPress function names pass through unchanged
         $this->assertEquals('is_singular', $this->router->resolveCondition('is_singular'));
     }
@@ -95,9 +98,11 @@ class WordPressRouteResolutionTest extends TestCase
     {
         // Define a WordPress route
         $wpRoute = $this->createWordPressRoute('front');
-        
+
         // Define a regular Laravel route for comparison
-        $laravelRoute = new Route(['GET'], '/test', function () { return 'test'; });
+        $laravelRoute = new Route(['GET'], '/test', function () {
+            return 'test';
+        });
 
         // Test that the WordPress route is correctly marked
         $this->assertTrue($wpRoute->isWordPressRoute());
@@ -107,7 +112,7 @@ class WordPressRouteResolutionTest extends TestCase
     public function test_wordpress_route_has_correct_condition(): void
     {
         $route = $this->createWordPressRoute('front');
-        
+
         $this->assertEquals('is_front_page', $route->getCondition());
         $this->assertTrue($route->hasCondition());
     }
@@ -115,7 +120,7 @@ class WordPressRouteResolutionTest extends TestCase
     public function test_wordpress_route_with_parameters(): void
     {
         $route = $this->createWordPressRoute('is_singular', ['realisations']);
-        
+
         $this->assertEquals('is_singular', $route->getCondition());
         $this->assertEquals(['realisations'], $route->getConditionParameters());
     }
@@ -123,7 +128,7 @@ class WordPressRouteResolutionTest extends TestCase
     public function test_route_methods_and_properties(): void
     {
         $route = $this->createWordPressRoute('front');
-        
+
         // Test basic route properties (Laravel automatically adds HEAD for GET routes)
         $this->assertEquals(['GET', 'HEAD'], $route->methods());
         $this->assertEquals('front', $route->uri());
@@ -150,7 +155,7 @@ class WordPressRouteResolutionTest extends TestCase
 
         foreach ($webRoutes as $alias => $expectedCondition) {
             $route = $this->createWordPressRoute($alias);
-            $this->assertEquals($expectedCondition, $route->getCondition(), 
+            $this->assertEquals($expectedCondition, $route->getCondition(),
                 "Route alias '{$alias}' should resolve to '{$expectedCondition}'");
         }
     }
@@ -159,7 +164,7 @@ class WordPressRouteResolutionTest extends TestCase
     {
         // Test the specific route from web.php: Route::wp('is_singular', 'realisations', ...)
         $route = $this->createWordPressRoute('is_singular', ['realisations']);
-        
+
         $this->assertEquals('is_singular', $route->getCondition());
         $this->assertEquals(['realisations'], $route->getConditionParameters());
         $this->assertTrue($route->isWordPressRoute());
@@ -169,10 +174,10 @@ class WordPressRouteResolutionTest extends TestCase
     {
         // Test the 404 route - it doesn't have a default alias so returns as-is
         $resolvedCondition = $this->router->resolveCondition('404');
-        
+
         // '404' is not in default conditions, so returns as-is
         $this->assertEquals('404', $resolvedCondition);
-        
+
         // Create route with '404' condition
         $route = $this->createWordPressRoute('404');
         $this->assertEquals('404', $route->getCondition());
@@ -182,25 +187,25 @@ class WordPressRouteResolutionTest extends TestCase
     public function test_route_matches_with_wordpress_condition_mocking(): void
     {
         // Test specific route matching using the WordPress mocking system
-        
+
         // Test 1: front page route with is_front_page() = true
-        setWordPressFunction('is_front_page', fn() => true);
+        setWordPressFunction('is_front_page', fn () => true);
         $frontRoute = $this->createWordPressRoute('front');
         $request = Request::create('/', 'GET');
         $this->assertTrue($frontRoute->matches($request));
-        
+
         // Test 2: front page route with is_front_page() = false
-        setWordPressFunction('is_front_page', fn() => false);
+        setWordPressFunction('is_front_page', fn () => false);
         $this->assertFalse($frontRoute->matches($request));
-        
+
         // Test 3: single post route with is_single() = true
-        setWordPressFunction('is_single', fn() => true);
+        setWordPressFunction('is_single', fn () => true);
         $singleRoute = $this->createWordPressRoute('single');
         $singleRequest = Request::create('/blog/article', 'GET');
         $this->assertTrue($singleRoute->matches($singleRequest));
-        
+
         // Test 4: category route with is_category() = true
-        setWordPressFunction('is_category', fn() => true);
+        setWordPressFunction('is_category', fn () => true);
         $categoryRoute = $this->createWordPressRoute('archive');
         $categoryRequest = Request::create('/category/news', 'GET');
         $this->assertTrue($categoryRoute->matches($categoryRequest));
@@ -211,31 +216,31 @@ class WordPressRouteResolutionTest extends TestCase
         // Test route with parameters - like Route::wp('is_singular', 'realisations', ...)
         // Note: The existing mock system doesn't fully support parameterized WordPress functions
         // so we'll test the route structure and basic condition matching
-        
+
         $route = $this->createWordPressRoute('is_singular', ['realisations']);
-        
+
         // Test that the route correctly stores the parameters
         $this->assertEquals(['realisations'], $route->getConditionParameters());
         $this->assertEquals('is_singular', $route->getCondition());
         $this->assertTrue($route->isWordPressRoute());
-        
+
         // Mock is_singular to return true (simulating a match)
-        setWordPressFunction('is_singular', fn() => true);
-        
+        setWordPressFunction('is_singular', fn () => true);
+
         $request = Request::create('/realisations/campus-vert', 'GET');
-        
+
         // The route should match because our mock returns true
         $this->assertTrue($route->matches($request));
-        
+
         // Test with mock returning false
-        setWordPressFunction('is_singular', fn() => false);
+        setWordPressFunction('is_singular', fn () => false);
         $this->assertFalse($route->matches($request));
     }
 
     public function test_multiple_conditions_simulation(): void
     {
         // Simulate different WordPress context scenarios from web.php
-        
+
         // Scenario 1: Homepage
         setWordPressConditions([
             'is_front_page' => true,
@@ -245,14 +250,14 @@ class WordPressRouteResolutionTest extends TestCase
             'is_category' => false,
             'is_404' => false,
         ]);
-        
+
         $frontRoute = $this->createWordPressRoute('front');
         $homeRoute = $this->createWordPressRoute('home');
-        
+
         $request = Request::create('/', 'GET');
         $this->assertTrue($frontRoute->matches($request));
         $this->assertFalse($homeRoute->matches($request));
-        
+
         // Scenario 2: Blog archive
         setWordPressConditions([
             'is_front_page' => false,
@@ -262,12 +267,12 @@ class WordPressRouteResolutionTest extends TestCase
             'is_category' => false,
             'is_404' => false,
         ]);
-        
+
         $blogRequest = Request::create('/blog', 'GET');
         $this->assertFalse($frontRoute->matches($blogRequest));
         $this->assertTrue($homeRoute->matches($blogRequest));
-        
-        // Scenario 3: Category page  
+
+        // Scenario 3: Category page
         setWordPressConditions([
             'is_front_page' => false,
             'is_home' => false,
@@ -276,7 +281,7 @@ class WordPressRouteResolutionTest extends TestCase
             'is_category' => true,
             'is_404' => false,
         ]);
-        
+
         $categoryRoute = $this->createWordPressRoute('archive');
         $categoryRequest = Request::create('/blog/category/actus', 'GET');
         $this->assertTrue($categoryRoute->matches($categoryRequest));

@@ -11,9 +11,9 @@ use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
 use Pollora\Route\Infrastructure\Middleware\WordPressBodyClass;
 use Pollora\Route\Infrastructure\Middleware\WordPressHeaders;
 use Pollora\Route\Infrastructure\Middleware\WordPressShutdown;
-use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
+use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
@@ -39,12 +39,12 @@ class RouteServiceProvider extends ServiceProvider
     {
         // Register the WordPress type resolver
         $this->app->singleton(WordPressTypeResolverInterface::class, WordPressTypeResolver::class);
-        
+
         // Register the condition manager
         $this->app->singleton(WordPressConditionManagerInterface::class, function ($app) {
             return new WordPressConditionManager($app);
         });
-        
+
         // Override the default router with our extended version
         $this->app->extend('router', function ($router, Application $app): ExtendedRouter {
             $logger = null;
@@ -53,7 +53,7 @@ class RouteServiceProvider extends ServiceProvider
             } catch (\Exception) {
                 // Logger not available
             }
-            
+
             return new ExtendedRouter(
                 $app->make('events'),
                 $app,
@@ -76,7 +76,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->registerWpMatchMacro();
         $this->registerWpMacro();
-        
+
         $this->app->booted(function (): void {
             $this->bootFallbackRoute();
         });
@@ -98,10 +98,10 @@ class RouteServiceProvider extends ServiceProvider
 
             // Create a unique URI for the route
             $uri = $condition;
-            if (!empty($args) && count($args) > 1) {
+            if (! empty($args) && count($args) > 1) {
                 // Hash the parameters to ensure uniqueness
                 $paramHash = md5(serialize(array_slice($args, 0, -1)));
-                $uri .= '_' . $paramHash;
+                $uri .= '_'.$paramHash;
             }
 
             // Last argument is always the callback
@@ -138,8 +138,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function registerWpMacro(): void
     {
-        Route::macro('wp', fn (string $condition, ...$args) => 
-            Route::wpMatch(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $condition, ...$args)
+        Route::macro('wp', fn (string $condition, ...$args) => Route::wpMatch(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $condition, ...$args)
         );
     }
 

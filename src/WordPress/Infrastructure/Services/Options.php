@@ -18,8 +18,9 @@ class Options implements OptionsInterface
      * Get an option value.
      *
      * @template T
-     * @param string $key The option key
-     * @param T $default The default value if the option doesn't exist
+     *
+     * @param  string  $key  The option key
+     * @param  T  $default  The default value if the option doesn't exist
      * @return T The option value
      *
      * @phpstan-ignore-next-line WordPress function
@@ -33,8 +34,8 @@ class Options implements OptionsInterface
     /**
      * Update an option value.
      *
-     * @param string $key The option key
-     * @param mixed $value The new value
+     * @param  string  $key  The option key
+     * @param  mixed  $value  The new value
      *
      * @phpstan-ignore-next-line WordPress function
      */
@@ -65,4 +66,4 @@ class Options implements OptionsInterface
         /** @phpstan-ignore-next-line WordPress function */
         return \get_option($key) !== false;
     }
-} 
+}
