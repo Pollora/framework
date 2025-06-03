@@ -73,17 +73,45 @@ return [
     // Database caching
     'caching' => env('DB_CACHE'),
 
-    // Route priority configuration
     'routing' => [
-        'priority' => [
-            'template_existence_bonus' => 200,      // Bonus for existing templates
-            'route_parameter_weight' => 25,         // Weight for route parameters
-            'template_depth_weight' => 50,          // Weight for template specificity depth
-            'template_specificity_multiplier' => 2, // Multiplier for template specificity
-            'route_condition_weight' => 0.5,        // Weight for route condition specificity
-            'same_specificity_prefers_template' => true, // Prefer template on tie
-            'laravel_route_override_threshold' => 1500,  // Threshold for Laravel route override
-            'debug_comparison' => false,             // Enable debug comparison output
+        // WordPress condition aliases for the new routing system
+        // Maps route aliases to WordPress conditional function names
+        'conditions' => [
+            'front' => 'is_front_page',
+            'home' => 'is_home',
+            'page' => 'is_page',
+            'single' => 'is_single',
+            'singular' => 'is_singular',
+            'author' => 'is_author',
+            'category' => 'is_category',
+            'tag' => 'is_tag',
+            'archive' => 'is_archive',
+            'date' => 'is_date',
+            'year' => 'is_year',
+            'month' => 'is_month',
+            'day' => 'is_day',
+            'time' => 'is_time',
+            'search' => 'is_search',
+            'attachment' => 'is_attachment',
+            'template' => 'is_page_template',
+            '404' => 'is_404',
+            'embed' => 'is_embed',
+            'paged' => 'is_paged',
+            'privacy_policy' => 'is_privacy_policy',
+            'post_type_archive' => 'is_post_type_archive',
+            'tax' => 'is_tax',
+            'sticky' => 'is_sticky',
+            'subpage' => 'is_subpage',
+
+            // WooCommerce conditions
+            'is_shop' => 'shop',
+            'is_product' => 'product',
+            'is_cart' => 'cart',
+            'is_checkout' => 'checkout',
+            'is_account_page' => 'account',
+            'is_product_category' => 'product_category',
+            'is_product_tag' => 'product_tag',
+            'is_wc_endpoint_url' => 'wc_endpoint',
         ],
     ],
 ];

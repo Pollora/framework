@@ -37,6 +37,7 @@ use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
+use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 
 /**
  * Main service provider for the Pollora framework.
@@ -99,6 +100,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(WooCommerceProvider::class);
         $this->app->register(WpRocketServiceProvider::class);
         $this->app->register(WordPressEventServiceProvider::class);
+        $this->app->register(RouteServiceProvider::class);
 
         if (config('wordpress.use_laravel_scheduler', false)) {
             $this->app->register(SchedulerServiceProvider::class);

@@ -4,133 +4,49 @@ declare(strict_types=1);
 
 namespace Pollora\Route\Domain\Models;
 
-use Pollora\Route\Domain\Exceptions\InvalidRouteConditionException;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route as IlluminateRoute;
 
 /**
- * Domain model representing a route
+ * Extended Route class with WordPress condition support.
  *
- * Encapsulates routing logic for both Laravel and WordPress routes
- * with support for conditional matching and priority resolution.
+ * This class extends Laravel's Route to add WordPress conditional tag support
+ * while maintaining full compatibility with Laravel's routing system.
  */
-final class Route
+class Route extends IlluminateRoute
 {
-    private readonly string $id;
-
-    private function __construct(
-        private readonly string $uri,
-        private readonly array $methods,
-        private readonly RouteCondition $condition,
-        private readonly mixed $action,
-        private readonly int $priority = 0,
-        private readonly array $middleware = [],
-        private readonly bool $isWordPressRoute = false,
-        private readonly array $metadata = []
-    ) {
-        $this->id = $this->generateId();
-    }
+    /**
+     * Whether this is a WordPress route.
+     */
+    protected bool $isWordPressRoute = false;
 
     /**
-     * Create a standard Laravel route
+     * WordPress condition function name.
      */
-    public static function laravel(
-        string $uri,
-        array $methods,
-        mixed $action,
-        array $middleware = []
-    ): self {
-        return new self(
-            uri: $uri,
-            methods: $methods,
-            condition: RouteCondition::fromLaravel($uri),
-            action: $action,
-            middleware: $middleware
-        );
-    }
+    protected string $condition = '';
 
     /**
-     * Create a WordPress route with condition
+     * Parameters for the WordPress condition.
+     *
+     * @var array<mixed>
      */
-    public static function wordpress(
-        array $methods,
-        RouteCondition $condition,
-        mixed $action,
-        int $priority = null,
-        array $middleware = []
-    ): self {
-        $calculatedPriority = $priority ?? $condition->getSpecificity();
-
-        return new self(
-            uri: $condition->toUniqueIdentifier(),
-            methods: $methods,
-            condition: $condition,
-            action: $action,
-            priority: $calculatedPriority,
-            middleware: $middleware,
-            isWordPressRoute: true
-        );
-    }
+    protected array $conditionParameters = [];
 
     /**
-     * Create a WordPress route from tag and parameters
+     * Set whether this is a WordPress route.
+     *
+     * @param  bool  $isWordPressRoute
+     * @return $this
      */
-    public static function fromWordPressTag(
-        array $methods,
-        string $tag,
-        array $parameters,
-        mixed $action,
-        array $middleware = []
-    ): self {
-        $condition = RouteCondition::fromWordPressTag($tag, $parameters);
-
-        return self::wordpress(
-            methods: $methods,
-            condition: $condition,
-            action: $action,
-            middleware: $middleware
-        );
-    }
-
-    /**
-     * Check if this route matches the given context
-     */
-    public function matches(array $context): RouteMatch
+    public function setIsWordPressRoute(bool $isWordPressRoute): self
     {
-        if (!$this->matchesMethods($context['method'] ?? 'GET')) {
-            return RouteMatch::failed();
-        }
-
-        if ($this->isWordPressRoute) {
-            return $this->matchesWordPressCondition($context);
-        }
-
-        return $this->matchesLaravelRoute($context);
+        $this->isWordPressRoute = $isWordPressRoute;
+        
+        return $this;
     }
 
     /**
-     * Check if this route has priority over another route
-     */
-    public function hasPriorityOver(self $other): bool
-    {
-        // WordPress routes generally have higher priority than Laravel routes
-        if ($this->isWordPressRoute && !$other->isWordPressRoute) {
-            return true;
-        }
-
-        if (!$this->isWordPressRoute && $other->isWordPressRoute) {
-            return false;
-        }
-
-        // Compare by priority score
-        if ($this->priority !== $other->priority) {
-            return $this->priority > $other->priority;
-        }
-
-        // If priorities are equal, compare condition specificity
-        return $this->condition->isMoreSpecificThan($other->condition);
-    }
-
-    /**
-     * Check if this is a WordPress route
+     * Check if this is a WordPress route.
      */
     public function isWordPressRoute(): bool
     {
@@ -138,161 +54,110 @@ final class Route
     }
 
     /**
-     * Get the route ID
+     * Set the WordPress condition.
+     *
+     * @param  string  $condition
+     * @return $this
      */
-    public function getId(): string
+    public function setCondition(string $condition): self
     {
-        return $this->id;
+        $this->condition = $condition;
+        
+        return $this;
     }
 
     /**
-     * Get the route URI
+     * Get the WordPress condition.
      */
-    public function getUri(): string
-    {
-        return $this->uri;
-    }
-
-    /**
-     * Get the HTTP methods
-     */
-    public function getMethods(): array
-    {
-        return $this->methods;
-    }
-
-    /**
-     * Get the route condition
-     */
-    public function getCondition(): RouteCondition
+    public function getCondition(): string
     {
         return $this->condition;
     }
 
     /**
-     * Get the route action
+     * Check if route has a WordPress condition.
      */
-    public function getAction(): mixed
+    public function hasCondition(): bool
     {
-        return $this->action;
+        return !empty($this->condition);
     }
 
     /**
-     * Get the route priority
+     * Set the condition parameters.
+     *
+     * @param  array<mixed>  $parameters
+     * @return $this
      */
-    public function getPriority(): int
+    public function setConditionParameters(array $parameters): self
     {
-        return $this->priority;
+        $this->conditionParameters = $parameters;
+        
+        return $this;
     }
 
     /**
-     * Get the middleware
+     * Get the condition parameters.
+     *
+     * @return array<mixed>
      */
-    public function getMiddleware(): array
+    public function getConditionParameters(): array
     {
-        return $this->middleware;
+        return $this->conditionParameters;
     }
 
     /**
-     * Get metadata
+     * Determine if the route matches given request.
+     *
+     * @param  Request  $request
+     * @param  bool  $includingMethod
      */
-    public function getMetadata(string $key = null): mixed
+    public function matches(Request $request, $includingMethod = true): bool
     {
-        if ($key === null) {
-            return $this->metadata;
+        $this->compileRoute();
+
+        // If this is a WordPress route, check the condition
+        if ($this->isWordPressRoute() && $this->hasCondition()) {
+            return $this->matchesWordPressCondition();
         }
 
-        return $this->metadata[$key] ?? null;
+        // Otherwise, use Laravel's default matching
+        return parent::matches($request, $includingMethod);
     }
 
     /**
-     * Create a new route with additional middleware
+     * Check if the WordPress condition matches.
      */
-    public function withMiddleware(array $middleware): self
+    protected function matchesWordPressCondition(): bool
     {
-        return new self(
-            $this->uri,
-            $this->methods,
-            $this->condition,
-            $this->action,
-            $this->priority,
-            array_merge($this->middleware, $middleware),
-            $this->isWordPressRoute,
-            $this->metadata
-        );
-    }
+        // Ensure WordPress has parsed the request before evaluating conditions
+        $this->ensureWordPressQueryParsed();
+        
+        $condition = $this->getCondition();
+        $parameters = $this->getConditionParameters();
 
-    /**
-     * Create a new route with metadata
-     */
-    public function withMetadata(array $metadata): self
-    {
-        return new self(
-            $this->uri,
-            $this->methods,
-            $this->condition,
-            $this->action,
-            $this->priority,
-            $this->middleware,
-            $this->isWordPressRoute,
-            array_merge($this->metadata, $metadata)
-        );
-    }
-
-    /**
-     * Generate a unique ID for this route
-     */
-    private function generateId(): string
-    {
-        $data = [
-            'uri' => $this->uri,
-            'methods' => $this->methods,
-            'condition' => $this->condition->toUniqueIdentifier(),
-            'is_wordpress' => $this->isWordPressRoute,
-        ];
-
-        return md5(serialize($data));
-    }
-
-    /**
-     * Check if route matches HTTP methods
-     */
-    private function matchesMethods(string $method): bool
-    {
-        return in_array(strtoupper($method), array_map('strtoupper', $this->methods), true);
-    }
-
-    /**
-     * Match WordPress conditional route
-     */
-    private function matchesWordPressCondition(array $context): RouteMatch
-    {
-        $isMatch = $this->condition->evaluate($context);
-
-        if (!$isMatch) {
-            return RouteMatch::failed();
+        // Check if the WordPress function exists and call it
+        if (function_exists($condition)) {
+            return call_user_func_array($condition, $parameters);
         }
 
-        return RouteMatch::success(
-            route: $this,
-            parameters: $context['parameters'] ?? [],
-            priority: $this->priority,
-            matchedBy: 'wordpress_condition'
-        );
+        return false;
     }
 
     /**
-     * Match Laravel route
+     * Ensure WordPress has parsed the current request.
      */
-    private function matchesLaravelRoute(array $context): RouteMatch
+    protected function ensureWordPressQueryParsed(): void
     {
-        // For Laravel routes, we delegate to Laravel's native matching
-        // This is handled by the Infrastructure layer
-        return RouteMatch::success(
-            route: $this,
-            parameters: $context['parameters'] ?? [],
-            priority: $this->priority,
-            matchedBy: 'laravel_pattern'
-        );
+        global $wp, $wp_query;
+
+        // If WordPress hasn't parsed the request yet, do it now
+        if (function_exists('wp') && isset($wp) && !$wp->did_permalink && !$wp_query->is_main_query()) {
+            // Parse the current request URL to set up WordPress query vars
+            if (function_exists('wp_parse_request')) {
+                wp_parse_request();
+            } elseif (method_exists($wp, 'parse_request')) {
+                $wp->parse_request();
+            }
+        }
     }
 }

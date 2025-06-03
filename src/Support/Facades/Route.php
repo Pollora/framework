@@ -5,56 +5,222 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Route\Infrastructure\Adapters\Router;
+use Pollora\Route\Domain\Contracts\RouteRegistryInterface;
+use Pollora\Route\Domain\Services\RouteBuilder;
 
 /**
- * Facade for WordPress Router.
- *
- * Provides a Laravel-style routing interface for WordPress, including
- * support for route conditions, authentication, and WordPress-specific bindings.
- *
- * @method static array setConditions(array $conditions = []) Set route conditions
- * @method static \Pollora\Route\Infrastructure\Adapters\Route addWordPressBindings(\Pollora\Route\Infrastructure\Adapters\Route $route) Add WordPress route bindings
- * @method static void auth(array $options = []) Add authentication middleware
- * @method static \Illuminate\Routing\Route get(string $uri, \Closure|array|string|callable|null $action = null) Add GET route
- * @method static \Illuminate\Routing\Route post(string $uri, \Closure|array|string|callable|null $action = null) Add POST route
- * @method static \Illuminate\Routing\Route put(string $uri, \Closure|array|string|callable|null $action = null) Add PUT route
- * @method static \Illuminate\Routing\Route delete(string $uri, \Closure|array|string|callable|null $action = null) Add DELETE route
- * @method static \Illuminate\Routing\Route patch(string $uri, \Closure|array|string|callable|null $action = null) Add PATCH route
- * @method static \Illuminate\Routing\Route options(string $uri, \Closure|array|string|callable|null $action = null) Add OPTIONS route
- * @method static \Illuminate\Routing\Route any(string $uri, \Closure|array|string|callable|null $action = null) Add route for any method
- * @method static \Illuminate\Routing\Route match(array|string $methods, string $uri, \Closure|array|string|callable|null $action = null) Add route for specific methods
- * @method static \Illuminate\Routing\RouteRegistrar prefix(string $prefix) Add route prefix
- * @method static \Illuminate\Routing\RouteRegistrar where(array $where) Add route constraints
- * @method static \Illuminate\Routing\PendingResourceRegistration resource(string $name, string $controller, array $options = []) Add resource route
- * @method static \Illuminate\Routing\PendingResourceRegistration apiResource(string $name, string $controller, array $options = []) Add API resource route
- * @method static void apiResources(array $resources) Add multiple API resources
- * @method static \Illuminate\Routing\RouteRegistrar middleware(array|string|null $middleware) Add route middleware
- * @method static \Illuminate\Routing\Route substituteBindings(\Illuminate\Support\Facades\Route $route) Substitute route bindings
- * @method static void substituteImplicitBindings(\Illuminate\Support\Facades\Route $route) Substitute implicit bindings
- * @method static \Illuminate\Routing\RouteRegistrar as(string $value) Add route name
- * @method static \Illuminate\Routing\RouteRegistrar domain(string $value) Add route domain
- * @method static \Illuminate\Routing\RouteRegistrar name(string $value) Add route name
- * @method static \Illuminate\Routing\RouteRegistrar namespace(string $value) Add route namespace
- * @method static \Illuminate\Routing\Router|\Illuminate\Routing\RouteRegistrar group(array|\Closure|string $attributes, \Closure|string $routes) Create route group
- * @method static \Illuminate\Routing\Route redirect(string $uri, string $destination, int $status = 302) Add redirect route
- * @method static \Illuminate\Routing\Route permanentRedirect(string $uri, string $destination) Add permanent redirect route
- * @method static \Illuminate\Routing\Route view(string $uri, string $view, array $data = []) Add view route
- * @method static void bind(string $key, string|callable $binder) Add route parameter binding
- * @method static void model(string $key, string $class, \Closure|null $callback = null) Add model binding
- * @method static \Illuminate\Routing\Route current() Get current route
- * @method static string|null currentRouteName() Get current route name
- * @method static string|null currentRouteAction() Get current route action
- *
- * @see Router
+ * Route facade for simplified WordPress/Laravel routing.
+ * 
+ * Provides a clean API for registering routes using the simplified
+ * order-based routing system without priority calculations.
+ * 
+ * @author Pollora Framework
+ * 
+ * @method static RouteBuilder create()
+ * @method static RouteBuilder id(string $id)
+ * @method static RouteBuilder methods(string ...$methods)
+ * @method static RouteBuilder uri(string $pattern)
+ * @method static RouteBuilder where(callable $callback)
+ * @method static RouteBuilder action(mixed $action)
+ * @method static RouteBuilder middleware(string ...$middleware)
  */
-class Route extends Facade
+final class Route extends Facade
 {
     /**
      * Get the registered name of the component.
+     *
+     * @return string
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'router';
+        return RouteBuilder::class;
+    }
+
+    /**
+     * Create a WordPress route with GET method.
+     * 
+     * Convenient method for creating WordPress conditional routes.
+     * Routes are automatically registered in the route registry.
+     * 
+     * Example:
+     * ```php
+     * Route::wp('single', function() {
+     *     return view('single-post');
+     * });
+     * ```
+     *
+     * @param string $condition WordPress conditional tag or alias
+     * @param mixed $action Route action
+     * @return void
+     */
+    public static function wp(string $condition, mixed $action = null): void
+    {
+        $builder = static::getFacadeRoot()->create()->get()->wp($condition);
+        
+        if ($action !== null) {
+            $builder = $builder->action($action);
+            $route = $builder->build();
+            app(RouteRegistryInterface::class)->register($route);
+        }
+    }
+
+    /**
+     * Create a WordPress route with custom parameters.
+     * 
+     * Example:
+     * ```php
+     * Route::wordpress('single', ['post_type' => 'product'], function() {
+     *     return view('single-product');
+     * });
+     * ```
+     *
+     * @param string $condition WordPress conditional tag or alias
+     * @param array<string, mixed> $parameters Parameters for the conditional tag
+     * @param mixed $action Route action
+     * @return void
+     */
+    public static function wordpress(string $condition, array $parameters = [], mixed $action = null): void
+    {
+        $builder = static::getFacadeRoot()->create()->get()->wordpress($condition, $parameters);
+        
+        if ($action !== null) {
+            $builder = $builder->action($action);
+            $route = $builder->build();
+            app(RouteRegistryInterface::class)->register($route);
+        }
+    }
+
+    /**
+     * Create a GET URI pattern route.
+     * 
+     * Example:
+     * ```php
+     * Route::get('/api/posts/{id}', function($id) {
+     *     return Post::find($id);
+     * });
+     * ```
+     *
+     * @param string $pattern URI pattern
+     * @param mixed $action Route action
+     * @return void
+     */
+    public static function get(string $pattern, mixed $action = null): void
+    {
+        $builder = static::getFacadeRoot()->create()->get()->uri($pattern);
+        
+        if ($action !== null) {
+            $builder = $builder->action($action);
+            $route = $builder->build();
+            app(RouteRegistryInterface::class)->register($route);
+        }
+    }
+
+    /**
+     * Create a POST URI pattern route.
+     *
+     * @param string $pattern URI pattern
+     * @param mixed $action Route action
+     * @return void
+     */
+    public static function post(string $pattern, mixed $action = null): void
+    {
+        $builder = static::getFacadeRoot()->create()->post()->uri($pattern);
+        
+        if ($action !== null) {
+            $builder = $builder->action($action);
+            $route = $builder->build();
+            app(RouteRegistryInterface::class)->register($route);
+        }
+    }
+
+    /**
+     * Create a PUT URI pattern route.
+     *
+     * @param string $pattern URI pattern
+     * @param mixed $action Route action
+     * @return void
+     */
+    public static function put(string $pattern, mixed $action = null): void
+    {
+        $builder = static::getFacadeRoot()->create()->put()->uri($pattern);
+        
+        if ($action !== null) {
+            $builder = $builder->action($action);
+            $route = $builder->build();
+            app(RouteRegistryInterface::class)->register($route);
+        }
+    }
+
+    /**
+     * Create a DELETE URI pattern route.
+     *
+     * @param string $pattern URI pattern
+     * @param mixed $action Route action
+     * @return void
+     */
+    public static function delete(string $pattern, mixed $action = null): void
+    {
+        $builder = static::getFacadeRoot()->create()->delete()->uri($pattern);
+        
+        if ($action !== null) {
+            $builder = $builder->action($action);
+            $route = $builder->build();
+            app(RouteRegistryInterface::class)->register($route);
+        }
+    }
+
+    /**
+     * Create a PATCH URI pattern route.
+     *
+     * @param string $pattern URI pattern
+     * @param mixed $action Route action
+     * @return void
+     */
+    public static function patch(string $pattern, mixed $action = null): void
+    {
+        $builder = static::getFacadeRoot()->create()->patch()->uri($pattern);
+        
+        if ($action !== null) {
+            $builder = $builder->action($action);
+            $route = $builder->build();
+            app(RouteRegistryInterface::class)->register($route);
+        }
+    }
+
+    /**
+     * Create a route builder instance for complex routing.
+     * 
+     * Use this method when you need to configure routes with multiple
+     * options like middleware, custom conditions, etc.
+     * 
+     * Example:
+     * ```php
+     * Route::builder()
+     *     ->wp('single', ['post_type' => 'product'])
+     *     ->middleware('auth', 'throttle')
+     *     ->action(ProductController::class . '@show')
+     *     ->register();
+     * ```
+     *
+     * @return \Pollora\Route\Domain\Services\RouteBuilder
+     */
+    public static function builder(): RouteBuilder
+    {
+        return static::getFacadeRoot()->create();
+    }
+
+    /**
+     * Register a built route manually.
+     * 
+     * This method should be called on RouteBuilder instances to actually
+     * register the route with the route registry.
+     *
+     * @param \Pollora\Route\Domain\Services\RouteBuilder $builder
+     * @return void
+     */
+    public static function register(RouteBuilder $builder): void
+    {
+        $route = $builder->build();
+        app(RouteRegistryInterface::class)->register($route);
     }
 }
