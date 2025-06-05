@@ -60,7 +60,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(ThemeService::class, function ($app) {
             return new ThemeManager(
                 $app,
-                $app->make('view')->getFinder(),
+                $app->get('view')->getFinder(),
                 $app->make('translator')->getLoader()
             );
         });

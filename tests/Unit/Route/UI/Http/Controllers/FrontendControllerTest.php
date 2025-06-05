@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Route\UI\Http\Controllers;
 
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\View;
+use Illuminate\View\View;
+use Mockery;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
@@ -18,11 +21,18 @@ class FrontendControllerTest extends TestCase
 {
     private FrontendController $controller;
 
+    private Container $container;
+
+    private ViewFactory $viewFactory;
+
     protected function setUp(): void
     {
         parent::setUp();
         setupWordPressMocks();
-        $this->controller = new FrontendController;
+
+        $this->container = Mockery::mock(Container::class);
+        $this->viewFactory = Mockery::mock(ViewFactory::class);
+        $this->controller = new FrontendController($this->container, $this->viewFactory);
     }
 
     public function test_handle_aborts_when_themes_disabled(): void
@@ -38,123 +48,108 @@ class FrontendControllerTest extends TestCase
         $this->controller->handle($request);
     }
 
-    public function test_handle_continues_when_themes_enabled(): void
+    public function test_handle_renders_blade_view_when_available(): void
     {
         // Mock wp_using_themes to return true
         setWordPressFunction('wp_using_themes', fn () => true);
+        setWordPressFunction('is_page', fn () => true);
+        setWordPressFunction('get_page_template', fn () => '/theme/page.php');
+        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
-        // Mock WordPress conditional functions for index template
-        setWordPressConditions([
-            'is_single' => false,
-            'is_page' => false,
-            'is_category' => false,
-            'is_tag' => false,
-            'is_tax' => false,
-            'is_author' => false,
-            'is_date' => false,
-            'is_post_type_archive' => false,
-            'is_search' => false,
-            'is_404' => false,
-            'is_front_page' => false,
-            'is_home' => false,
-        ]);
-
-        // Mock View to return a template
-        View::shouldReceive('exists')
-            ->with('index')
+        // Mock container to return blade view
+        $this->container->shouldReceive('bound')
+            ->with('pollora.view')
             ->andReturn(true);
+        $this->container->shouldReceive('get')
+            ->with('pollora.view')
+            ->andReturn('templates.page');
+        $this->container->shouldReceive('bound')
+            ->with('pollora.data')
+            ->andReturn(true);
+        $this->container->shouldReceive('get')
+            ->with('pollora.data')
+            ->andReturn(['foo' => 'bar']);
 
-        View::shouldReceive('make')
-            ->with('index')
-            ->andReturn('Template content');
+        // Mock view factory
+        $view = Mockery::mock(View::class);
+        $view->shouldReceive('render')->andReturn('<html>Blade page content</html>');
+
+        $this->viewFactory->shouldReceive('exists')
+            ->with('templates.page')
+            ->andReturn(true);
+        $this->viewFactory->shouldReceive('make')
+            ->with('templates.page', ['foo' => 'bar'])
+            ->andReturn($view);
 
         $request = Request::create('/test');
         $response = $this->controller->handle($request);
 
         $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals('<html>Blade page content</html>', $response->getContent());
     }
 
-    public function test_wp_using_themes_check_works(): void
+    public function test_handle_falls_back_to_php_template(): void
     {
-        // Test that wp_using_themes is properly checked
-        $this->assertTrue(wp_using_themes());
+        // Mock wp_using_themes to return true
+        setWordPressFunction('wp_using_themes', fn () => true);
+        setWordPressFunction('is_page', fn () => true);
+        setWordPressFunction('get_page_template', fn () => __FILE__);
+        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
-        // Set it to false
-        setWordPressFunction('wp_using_themes', fn () => false);
-        $this->assertFalse(wp_using_themes());
+        // Mock container to not have blade view
+        $this->container->shouldReceive('bound')
+            ->with('pollora.view')
+            ->andReturn(false);
+        $this->container->shouldReceive('bound')
+            ->with('pollora.data')
+            ->andReturn(false);
 
-        // Verify the function is accessible
-        $this->assertTrue(function_exists('wp_using_themes'));
+        $request = Request::create('/test');
+        $response = $this->controller->handle($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('<?php', $response->getContent());
     }
 
-    public function test_build_template_slug_returns_single_for_single_post(): void
+    public function test_handle_throws_404_when_no_template(): void
     {
+        // Mock wp_using_themes to return true
+        setWordPressFunction('wp_using_themes', fn () => true);
+
+        // Mock all template functions to return empty
         setWordPressConditions([
-            'is_single' => true,
-        ]);
-
-        // Mock get_post to return null so it falls back to 'single'
-        setWordPressFunction('get_post', fn () => null);
-
-        $method = new \ReflectionMethod($this->controller, 'buildTemplateSlug');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller);
-
-        $this->assertEquals('single', $result);
-    }
-
-    public function test_build_template_slug_returns_page_for_page(): void
-    {
-        setWordPressConditions([
-            'is_single' => false,
-            'is_page' => true,
-        ]);
-
-        // Mock get_post to return null so it falls back to 'page'
-        setWordPressFunction('get_post', fn () => null);
-
-        $method = new \ReflectionMethod($this->controller, 'buildTemplateSlug');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller);
-
-        $this->assertEquals('page', $result);
-    }
-
-    public function test_build_template_slug_returns_index_for_default(): void
-    {
-        setWordPressConditions([
-            'is_single' => false,
             'is_page' => false,
-            'is_category' => false,
-            'is_tag' => false,
-            'is_tax' => false,
-            'is_author' => false,
-            'is_date' => false,
-            'is_post_type_archive' => false,
-            'is_search' => false,
+            'is_singular' => false,
+            'is_archive' => false,
             'is_404' => false,
+            'is_search' => false,
             'is_front_page' => false,
             'is_home' => false,
+            'is_privacy_policy' => false,
+            'is_post_type_archive' => false,
+            'is_tax' => false,
+            'is_attachment' => false,
+            'is_single' => false,
+            'is_category' => false,
+            'is_tag' => false,
+            'is_author' => false,
+            'is_date' => false,
+            'is_embed' => false,
         ]);
 
-        $method = new \ReflectionMethod($this->controller, 'buildTemplateSlug');
-        $method->setAccessible(true);
+        setWordPressFunction('get_index_template', fn () => '');
+        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
-        $result = $method->invoke($this->controller);
+        $this->container->shouldReceive('bound')
+            ->with('pollora.view')
+            ->andReturn(false);
 
-        $this->assertEquals('index', $result);
-    }
+        $request = Request::create('/test');
 
-    public function test_get_template_hierarchy_includes_index_fallback(): void
-    {
-        $method = new \ReflectionMethod($this->controller, 'getTemplateHierarchy');
-        $method->setAccessible(true);
+        $this->expectException(HttpException::class);
+        $this->expectExceptionCode(404);
+        $this->expectExceptionMessage('Template not found');
 
-        $hierarchy = $method->invoke($this->controller, 'custom');
-
-        $this->assertContains('index', $hierarchy);
-        $this->assertEquals('index', end($hierarchy));
+        $this->controller->handle($request);
     }
 }

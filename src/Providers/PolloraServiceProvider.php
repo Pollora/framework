@@ -35,6 +35,7 @@ use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyAttributeServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
+use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
@@ -100,6 +101,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(WooCommerceProvider::class);
         $this->app->register(WpRocketServiceProvider::class);
         $this->app->register(WordPressEventServiceProvider::class);
+        $this->app->register(TemplateHierarchyServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
         if (config('wordpress.use_laravel_scheduler', false)) {

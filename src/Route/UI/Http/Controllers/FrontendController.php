@@ -7,6 +7,7 @@ namespace Pollora\Route\UI\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
+use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 /**
  * Frontend controller for WordPress template fallback.
@@ -22,6 +23,10 @@ use Illuminate\Support\Facades\View;
  */
 class FrontendController
 {
+    public function __construct(
+        private readonly TemplateFinderInterface $templateFinder
+    ) {}
+
     /**
      * Handle the request using WordPress template hierarchy.
      */
@@ -32,17 +37,21 @@ class FrontendController
             abort(404, 'Themes are disabled');
         }
 
-        // Build the most specific template slug possible
-        $slug = $this->buildTemplateSlug();
+        $templatePath = $this->getTemplateFile();
 
-        // Get template hierarchy using WordPress filters (like Sage does)
-        $templates = $this->getTemplateHierarchy($slug);
+        // Convert file path to Laravel view name
+        $viewName = $this->templateFinder->getViewNameFromPath($templatePath);
 
-        // Find the first template that exists
-        foreach ($templates as $template) {
-            if (View::exists($template)) {
-                return response(View::make($template));
-            }
+        if ($viewName && View::exists($viewName)) {
+            return response(View::make($viewName));
+        }
+
+        if (file_exists($templatePath)) {
+            ob_start();
+            include $templatePath;
+            $content = ob_get_clean();
+
+            return response($content);
         }
 
         // If no template found, return 404
@@ -50,275 +59,65 @@ class FrontendController
     }
 
     /**
-     * Build the most specific template slug based on WordPress context.
-     */
-    protected function buildTemplateSlug(): string
-    {
-        // Single post
-        if (function_exists('is_single') && is_single()) {
-            if (function_exists('get_post')) {
-                $post = get_post();
-                if ($post) {
-                    return "single-{$post->post_type}-{$post->post_name}";
-                }
-            }
-
-            return 'single';
-        }
-
-        // Page
-        if (function_exists('is_page') && is_page()) {
-            if (function_exists('get_post')) {
-                $post = get_post();
-                if ($post) {
-                    return "page-{$post->post_name}";
-                }
-            }
-
-            return 'page';
-        }
-
-        // Category archive
-        if (function_exists('is_category') && is_category()) {
-            $term = get_queried_object();
-            if ($term) {
-                return "category-{$term->slug}";
-            }
-
-            return 'category';
-        }
-
-        // Tag archive
-        if (function_exists('is_tag') && is_tag()) {
-            $term = get_queried_object();
-            if ($term) {
-                return "tag-{$term->slug}";
-            }
-
-            return 'tag';
-        }
-
-        // Custom taxonomy
-        if (function_exists('is_tax') && is_tax()) {
-            $term = get_queried_object();
-            if ($term) {
-                return "taxonomy-{$term->taxonomy}-{$term->slug}";
-            }
-
-            return 'taxonomy';
-        }
-
-        // Author archive
-        if (function_exists('is_author') && is_author()) {
-            $author = get_queried_object();
-            if ($author) {
-                return "author-{$author->user_nicename}";
-            }
-
-            return 'author';
-        }
-
-        // Date archive
-        if (function_exists('is_date') && is_date()) {
-            if (is_day()) {
-                return 'date-day';
-            }
-            if (is_month()) {
-                return 'date-month';
-            }
-            if (is_year()) {
-                return 'date-year';
-            }
-
-            return 'date';
-        }
-
-        // Custom post type archive
-        if (function_exists('is_post_type_archive') && is_post_type_archive()) {
-            $post_type = get_query_var('post_type');
-            if (is_array($post_type)) {
-                $post_type = reset($post_type);
-            }
-
-            return "archive-{$post_type}";
-        }
-
-        // Search results
-        if (function_exists('is_search') && is_search()) {
-            return 'search';
-        }
-
-        // 404
-        if (function_exists('is_404') && is_404()) {
-            return '404';
-        }
-
-        // Front page
-        if (function_exists('is_front_page') && is_front_page()) {
-            return 'front-page';
-        }
-
-        // Home (blog index)
-        if (function_exists('is_home') && is_home()) {
-            return 'home';
-        }
-
-        // Default fallback
-        return 'index';
-    }
-
-    /**
      * Get template hierarchy using WordPress filters.
      *
      * This approach is inspired by Sage Acorn and uses WordPress's own
      * template hierarchy system with filters.
-     *
-     * @return array<string>
      */
-    protected function getTemplateHierarchy(string $slug): array
+    protected function getTemplateFile(): string
     {
-        $templates = [];
+        if (wp_using_themes()) {
 
-        // Build hierarchy based on context
-        if (function_exists('is_single') && is_single()) {
-            $post = get_post();
-            if ($post) {
-                $templates = [
-                    "single-{$post->post_type}-{$post->post_name}",
-                    "single-{$post->post_type}",
-                    'single',
-                ];
-            }
-        } elseif (function_exists('is_page') && is_page()) {
-            $post = get_post();
-            if ($post) {
-                $template = get_page_template_slug($post);
-                if ($template) {
-                    $templates[] = $template;
-                }
-                $templates = array_merge($templates, [
-                    "page-{$post->post_name}",
-                    "page-{$post->ID}",
-                    'page',
-                ]);
-            }
-        } elseif (function_exists('is_category') && is_category()) {
-            $term = get_queried_object();
-            if ($term) {
-                $templates = [
-                    "category-{$term->slug}",
-                    "category-{$term->term_id}",
-                    'category',
-                    'archive',
-                ];
-            }
-        } elseif (function_exists('is_tag') && is_tag()) {
-            $term = get_queried_object();
-            if ($term) {
-                $templates = [
-                    "tag-{$term->slug}",
-                    "tag-{$term->term_id}",
-                    'tag',
-                    'archive',
-                ];
-            }
-        } elseif (function_exists('is_tax') && is_tax()) {
-            $term = get_queried_object();
-            if ($term) {
-                $templates = [
-                    "taxonomy-{$term->taxonomy}-{$term->slug}",
-                    "taxonomy-{$term->taxonomy}",
-                    'taxonomy',
-                    'archive',
-                ];
-            }
-        } elseif (function_exists('is_author') && is_author()) {
-            $author = get_queried_object();
-            if ($author) {
-                $templates = [
-                    "author-{$author->user_nicename}",
-                    "author-{$author->ID}",
-                    'author',
-                    'archive',
-                ];
-            }
-        } elseif (function_exists('is_date') && is_date()) {
-            $templates = ['date', 'archive'];
-        } elseif (function_exists('is_post_type_archive') && is_post_type_archive()) {
-            $post_type = get_query_var('post_type');
-            if (is_array($post_type)) {
-                $post_type = reset($post_type);
-            }
-            $templates = [
-                "archive-{$post_type}",
-                'archive',
+            $tag_templates = [
+                'is_embed' => 'get_embed_template',
+                'is_404' => 'get_404_template',
+                'is_search' => 'get_search_template',
+                'is_front_page' => 'get_front_page_template',
+                'is_home' => 'get_home_template',
+                'is_privacy_policy' => 'get_privacy_policy_template',
+                'is_post_type_archive' => 'get_post_type_archive_template',
+                'is_tax' => 'get_taxonomy_template',
+                'is_attachment' => 'get_attachment_template',
+                'is_single' => 'get_single_template',
+                'is_page' => 'get_page_template',
+                'is_singular' => 'get_singular_template',
+                'is_category' => 'get_category_template',
+                'is_tag' => 'get_tag_template',
+                'is_author' => 'get_author_template',
+                'is_date' => 'get_date_template',
+                'is_archive' => 'get_archive_template',
             ];
-        } elseif (function_exists('is_search') && is_search()) {
-            $templates = ['search'];
-        } elseif (function_exists('is_404') && is_404()) {
-            $templates = ['404'];
-        } elseif (function_exists('is_front_page') && is_front_page()) {
-            $templates = ['front-page', 'home'];
-        } elseif (function_exists('is_home') && is_home()) {
-            $templates = ['home', 'index'];
+            $template = false;
+
+            // Loop through each of the template conditionals, and find the appropriate template file.
+            foreach ($tag_templates as $tag => $template_getter) {
+                if (call_user_func($tag)) {
+                    $template = call_user_func($template_getter);
+                }
+
+                if ($template) {
+                    if ($tag === 'is_attachment') {
+                        remove_filter('the_content', 'prepend_attachment');
+                    }
+
+                    break;
+                }
+            }
+
+            if (! $template) {
+                $template = get_index_template();
+            }
+
+            /**
+             * Filters the path of the current template before including it.
+             *
+             * @since 3.0.0
+             *
+             * @param  string  $template  The path of the template to include.
+             */
+            return apply_filters('template_include', $template);
         }
 
-        // Always add index as final fallback
-        if (! in_array('index', $templates)) {
-            $templates[] = 'index';
-        }
-
-        // Apply WordPress filters if available
-        if (function_exists('apply_filters')) {
-            $template_type = $this->getTemplateType();
-            $templates = apply_filters("{$template_type}_template_hierarchy", $templates);
-        }
-
-        return $templates;
-    }
-
-    /**
-     * Get the current template type for filters.
-     */
-    protected function getTemplateType(): string
-    {
-        if (function_exists('is_single') && is_single()) {
-            return 'single';
-        }
-        if (function_exists('is_page') && is_page()) {
-            return 'page';
-        }
-        if (function_exists('is_category') && is_category()) {
-            return 'category';
-        }
-        if (function_exists('is_tag') && is_tag()) {
-            return 'tag';
-        }
-        if (function_exists('is_tax') && is_tax()) {
-            return 'taxonomy';
-        }
-        if (function_exists('is_author') && is_author()) {
-            return 'author';
-        }
-        if (function_exists('is_date') && is_date()) {
-            return 'date';
-        }
-        if (function_exists('is_post_type_archive') && is_post_type_archive()) {
-            return 'archive';
-        }
-        if (function_exists('is_search') && is_search()) {
-            return 'search';
-        }
-        if (function_exists('is_404') && is_404()) {
-            return '404';
-        }
-        if (function_exists('is_front_page') && is_front_page()) {
-            return 'frontpage';
-        }
-        if (function_exists('is_home') && is_home()) {
-            return 'home';
-        }
-
-        return 'index';
+        return '';
     }
 }

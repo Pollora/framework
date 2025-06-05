@@ -66,7 +66,7 @@ class ThemeMetadata
      */
     public function getThemeIncDir(): string
     {
-        return $this->getBasePath().'/inc';
+        return $this->getThemeAppDir().'/inc';
     }
 
     /**

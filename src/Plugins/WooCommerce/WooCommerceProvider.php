@@ -7,7 +7,8 @@ namespace Pollora\Plugins\WooCommerce;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Plugins\WooCommerce\View\WooCommerceView;
+use Pollora\Plugins\WooCommerce\View\WooCommerceTemplateResolver;
+use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 class WooCommerceProvider extends ServiceProvider
 {
@@ -22,10 +23,16 @@ class WooCommerceProvider extends ServiceProvider
         /** @var Filter $filter */
         $this->filter = $this->app->make(Filter::class);
 
-        $this->app->singleton(WooCommerceView::class, WooCommerceView::class);
+        // Register the new WooCommerce template resolver
+        $this->app->singleton(WooCommerceTemplateResolver::class, function ($app) {
+            return new WooCommerceTemplateResolver(
+                $app->make(TemplateFinderInterface::class),
+                $app->get('view')
+            );
+        });
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->action->add('plugins_loaded', function (): void {
             if (defined('WC_ABSPATH')) {
@@ -36,10 +43,10 @@ class WooCommerceProvider extends ServiceProvider
 
     public function bindFilters(): void
     {
-        $wp_view = $this->app->make(\Pollora\Plugins\WooCommerce\View\WooCommerceView::class);
-        $this->filter->add('woocommerce_locate_template', [$wp_view, 'template']);
-        $this->filter->add('wc_get_template_part', [$wp_view, 'template']);
-        $this->filter->add('comments_template', [$wp_view, 'reviewsTemplate'], 11);
-        $this->filter->add('wc_get_template', [$wp_view, 'template'], 1000);
+        $resolver = $this->app->make(WooCommerceTemplateResolver::class);
+
+        // Hook into WooCommerce's own template loader files filter
+        // This is where we can inject our Blade templates into WC's search list
+        $this->filter->add('woocommerce_template_loader_files', [$resolver, 'extendTemplateLoaderFiles'], 10, 2);
     }
 }
