@@ -73,7 +73,7 @@ class WordPressTaxonomyRegistry implements TaxonomyRegistryInterface
      */
     private function prepareTaxonomyArgs(object $taxonomy): array
     {
-        // Utilise les méthodes si elles existent
+        // Use the methods if they exist
         $args = method_exists($taxonomy, 'getArgs') ? $taxonomy->getArgs() : [];
 
         // Add labels if not explicitly provided

@@ -72,7 +72,7 @@ class WordPressPostTypeRegistry implements PostTypeRegistryInterface
      */
     private function preparePostTypeArgs(object $postType): array
     {
-        // Utilise les méthodes si elles existent
+        // Use the methods if they exist
         $args = method_exists($postType, 'getArgs') ? $postType->getArgs() : [];
 
         // Add labels if not explicitly provided

@@ -392,13 +392,13 @@ class Route extends IlluminateRoute
      */
     public function controllerDispatcher()
     {
-        // Essayer de récupérer le container s'il n'est pas défini
+        // Attempt to retrieve the container if it has not been set
         if (! $this->container) {
             if (class_exists('Illuminate\Container\Container')) {
                 $this->container = \Illuminate\Container\Container::getInstance();
             }
 
-            // Si toujours pas de container, lancer une exception
+            // If a container still cannot be found, throw an exception
             if (! $this->container) {
                 throw new \RuntimeException('Container is not set on route.');
             }

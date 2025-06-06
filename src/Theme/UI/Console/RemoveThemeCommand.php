@@ -7,17 +7,31 @@ namespace Pollora\Theme\UI\Console;
 use Illuminate\Config\Repository;
 use Illuminate\Filesystem\Filesystem;
 
+/**
+ * Console command used to remove an existing theme from the filesystem.
+ */
 class RemoveThemeCommand extends BaseThemeCommand
 {
     protected $signature = 'pollora:delete-theme {name : Name of the theme to remove}';
 
     protected $description = 'Remove an existing theme';
 
+    /**
+     * Create a new command instance.
+     *
+     * @param  Repository  $config  The configuration repository
+     * @param  Filesystem  $files   Filesystem instance used for file operations
+     */
     public function __construct(Repository $config, Filesystem $files)
     {
         parent::__construct($config, $files);
     }
 
+    /**
+     * Execute the command.
+     *
+     * @return int Command exit code
+     */
     public function handle(): int
     {
         $themeName = $this->argument('name');
@@ -40,6 +54,11 @@ class RemoveThemeCommand extends BaseThemeCommand
         return self::SUCCESS;
     }
 
+    /**
+     * Delete the theme directory and its assets.
+     *
+     * @return void
+     */
     protected function removeTheme(): void
     {
         $themePath = $this->getTheme()->getBasePath();
@@ -51,6 +70,11 @@ class RemoveThemeCommand extends BaseThemeCommand
         }
     }
 
+    /**
+     * Get the public path where theme assets are stored.
+     *
+     * @return string The absolute path to the assets directory
+     */
     protected function getAssetsPath(): string
     {
         $assetsPath = $this->config->get('theme.assets_path', 'themes');
