@@ -26,6 +26,14 @@ class Uri
         }
 
         $urlParts = parse_url($url);
+
+        // If the URL cannot be parsed, simply trim the trailing slash and
+        // return the result. This avoids throwing errors when `parse_url`
+        // returns false for malformed URLs.
+        if ($urlParts === false) {
+            return rtrim($url, '/');
+        }
+
         $urlParts['path'] ??= '';
         $urlParts['path'] = rtrim($urlParts['path'], '/');
 
