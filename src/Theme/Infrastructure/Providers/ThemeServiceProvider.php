@@ -299,7 +299,7 @@ class ThemeServiceProvider extends ServiceProvider
             });
         }
 
-        // Fallback si l'instance retournée n'est pas une Collection Laravel
+        // Fallback if the returned instance is not a Laravel Collection
         return collect(['Directives'])
             ->flatMap(function ($directive) {
                 if (file_exists($directives = __DIR__.'/'.$directive.'.php')) {

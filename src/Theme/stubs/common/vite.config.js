@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import laravel, { refreshPaths } from 'laravel-vite-plugin';
 import path from 'path';
 
-// Détection de l'environnement
+// Environment detection
 const isDocker = process.env.IS_DOCKER || process.env.DOCKER_ENV || process.env.DDEV_PRIMARY_URL;
 const port = 5173;
 const publicDirectory = "../../public";

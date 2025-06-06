@@ -301,17 +301,17 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             $content = File::get($sourcePath);
             $replacements = $this->getReplacements();
 
-            // Appliquer les remplacements
+            // Apply placeholder replacements
             $content = str_replace(
                 array_keys($replacements),
                 array_values($replacements),
                 $content
             );
 
-            // Écrire le contenu modifié dans le fichier de destination
+            // Write the modified content to the destination file
             File::put($destinationPath, $content);
         } else {
-            // Copier simplement les fichiers non textuels sans modification
+            // Simply copy non-text files without modification
             File::copy($sourcePath, $destinationPath);
         }
     }

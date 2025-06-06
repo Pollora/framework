@@ -13,10 +13,12 @@ class FrontendController extends Controller
 {
     /**
      * Create a new FrontendController instance.
+     *
+     * @param  TemplateHierarchy  $templateHierarchy  Template hierarchy resolver
      */
     public function __construct(
         /**
-         * The template hierarchy instance
+         * Template hierarchy resolver
          */
         private readonly TemplateHierarchy $templateHierarchy
     ) {}
@@ -24,25 +26,27 @@ class FrontendController extends Controller
     /**
      * Handle the automatic view assignment for WordPress templates.
      *
-     * This method will automatically determine the appropriate view
-     * based on WordPress conditional tags and template hierarchy.
+     * This method automatically determines the appropriate view
+     * based on WordPress conditional tags and the template hierarchy.
+     *
+     * @return View|null The resolved view instance or null on failure
      */
     public function handle(): ?View
     {
         global $wp_query;
 
-        // Obtenir la hiérarchie des templates pour la requête actuelle
-        // Utiliser directement la méthode qui renvoie les chemins de template
+        // Get the template hierarchy for the current request
+        // Use the method that directly returns the template paths
         $views = $this->templateHierarchy->getAllTemplatePaths();
 
-        // Vérifier si des vues existent pour chaque template dans la hiérarchie
+        // Check if a view exists for each template in the hierarchy
         foreach ($views as $view) {
             if (ViewFacade::exists($view)) {
                 return view($view);
             }
         }
 
-        // Si aucun template n'est trouvé, retourner une vue 404
+        // If no template is found, return a 404 view
         $wp_query->set_404();
         abort(404);
     }
