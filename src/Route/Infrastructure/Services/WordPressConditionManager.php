@@ -12,17 +12,38 @@ use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInt
  */
 class WordPressConditionManager implements WordPressConditionManagerInterface
 {
+    /**
+     * Registered condition aliases mapped to their WordPress functions.
+     *
+     * @var array<string, string>
+     */
     private array $conditions = [];
 
+    /**
+     * Indicates whether conditions have been loaded from all sources.
+     */
     private bool $loaded = false;
 
+    /**
+     * Laravel container instance for optional config access.
+     */
     private ?Container $container;
 
+    /**
+     * Create a new condition manager instance.
+     *
+     * @param  Container|null  $container  Optional service container
+     */
     public function __construct(?Container $container = null)
     {
         $this->container = $container;
     }
 
+    /**
+     * Get all registered conditions.
+     *
+     * @return array<string, string> List of condition aliases and functions
+     */
     public function getConditions(): array
     {
         $this->ensureConditionsLoaded();
@@ -30,6 +51,12 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
         return $this->conditions;
     }
 
+    /**
+     * Resolve a condition alias to its WordPress function.
+     *
+     * @param  string  $condition  Condition alias
+     * @return string  Resolved WordPress function name
+     */
     public function resolveCondition(string $condition): string
     {
         $this->ensureConditionsLoaded();
@@ -37,6 +64,12 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
         return $this->conditions[$condition] ?? $condition;
     }
 
+    /**
+     * Add a new condition alias mapping.
+     *
+     * @param  string  $alias     Alias used in routing configuration
+     * @param  string  $function  WordPress conditional function name
+     */
     public function addCondition(string $alias, string $function): void
     {
         $this->ensureConditionsLoaded();
@@ -45,6 +78,9 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
 
     /**
      * Load conditions from multiple sources.
+     */
+    /**
+     * Ensure conditions are loaded from defaults and configuration.
      */
     private function ensureConditionsLoaded(): void
     {
@@ -60,6 +96,9 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
 
     /**
      * Load default WordPress conditions.
+     */
+    /**
+     * Load the built-in set of WordPress conditions.
      */
     private function loadDefaultConditions(): void
     {
@@ -95,6 +134,9 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
 
     /**
      * Load conditions from Laravel config.
+     */
+    /**
+     * Load additional conditions from configuration if available.
      */
     private function loadConfigConditions(): void
     {

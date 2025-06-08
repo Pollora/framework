@@ -25,6 +25,10 @@ class WordPressBodyClass
      * Handle the incoming request.
      *
      * Adds a filter to modify the WordPress body classes based on the current route.
+     *
+     * @param  Request  $request  Incoming HTTP request
+     * @param  Closure  $next     Next middleware handler
+     * @return mixed             Response from subsequent middleware
      */
     public function handle(Request $request, Closure $next): mixed
     {
@@ -39,6 +43,9 @@ class WordPressBodyClass
 
     /**
      * Get the callback for modifying body classes.
+     *
+     * @param  Route  $route  The current route instance
+     * @return Closure       Callback that filters the body class array
      */
     private function getBodyClassCallback(Route $route): Closure
     {
@@ -64,7 +71,8 @@ class WordPressBodyClass
     /**
      * Extract route tokens for body classes.
      *
-     * @return array<string>
+     * @param  Route  $route  Route instance to inspect
+     * @return array<string> Array of tokens for body class generation
      */
     private function getRouteTokens(Route $route): array
     {
@@ -89,6 +97,10 @@ class WordPressBodyClass
 
     /**
      * Handle variable tokens in the route.
+     *
+     * @param  array  $token  Token definition from the compiled route
+     * @param  Route  $route  Current route instance
+     * @return string|false  Sanitized token or false when not applicable
      */
     private function handleVariableToken(array $token, Route $route): string|false
     {
@@ -105,6 +117,9 @@ class WordPressBodyClass
 
     /**
      * Sanitize a string for use as a CSS class.
+     *
+     * @param  string  $text  Text to sanitize
+     * @return string        Sanitized CSS class value
      */
     private function sanitizeClass(string $text): string
     {

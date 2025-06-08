@@ -6,6 +6,16 @@ use Illuminate\Support\Str;
 use Pollora\Support\RecursiveMenuIterator;
 
 if (! function_exists('wp_mail')) {
+    /**
+     * Send an email using the configured mailer.
+     *
+     * @param  string|array  $to          Recipient email address or array of addresses
+     * @param  string        $subject     Email subject line
+     * @param  string        $message     Email body content
+     * @param  string|array  $headers     Optional headers
+     * @param  array         $attachments List of file paths to attach
+     * @return bool          True on success, false otherwise
+     */
     function wp_mail($to, $subject, $message, $headers = '', $attachments = []): bool
     {
         $result = app('wp.mail')->send($to, $subject, $message, $headers, $attachments);
@@ -25,6 +35,11 @@ if (! function_exists('mysqli_report')) {
 }
 
 if (! function_exists('is_secured')) {
+    /**
+     * Determine if the application URL is served over HTTPS.
+     *
+     * @return bool True when the configured app URL uses the HTTPS scheme
+     */
     function is_secured(): bool
     {
         return str_contains((string) config('app.url'), 'https://');
