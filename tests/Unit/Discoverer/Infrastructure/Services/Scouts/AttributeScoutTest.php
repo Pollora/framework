@@ -34,27 +34,27 @@ test('getDirectories returns valid directories only', function () {
 
     expect($directories)->toBeArray()
         ->and($directories)->toContain(__DIR__)
-        ->and(count($directories))->toBeLessThanOrEqual(2); // Au maximum 2 chemins si modules existe
+        ->and(count($directories))->toBeLessThanOrEqual(2); // At most 2 paths if modules exist
 });
 
 test('criteria applies Attributable interface filter', function () {
-    // Création d'un mock de Discover
+    // Create a mock of Discover
     $discover = Mockery::mock(Discover::class);
 
-    // Configuration du mock pour la chaîne d'appels
+    // Configure the mock for method chaining
     $discover->shouldReceive('implementing')
         ->once()
         ->with(Attributable::class)
         ->andReturnSelf();
 
-    // Utilisation de la réflexion pour accéder à la méthode protégée
+    // Use reflection to access the protected method
     $reflection = new ReflectionClass($this->scout);
     $method = $reflection->getMethod('criteria');
     $method->setAccessible(true);
 
-    // Appel de la méthode criteria
+    // Call the criteria method
     $result = $method->invokeArgs($this->scout, [$discover]);
 
-    // Vérification que le résultat est bien le même objet
+    // Verify that the result is the same object
     expect($result)->toBe($discover);
 });

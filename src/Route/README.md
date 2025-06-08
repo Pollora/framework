@@ -1,73 +1,73 @@
 # Pollora Router
 
-Le système de routage hybride Laravel/WordPress de Pollora combine la puissance du routeur Laravel avec l'intégration native WordPress.
+Pollora's Laravel/WordPress hybrid routing system combines the power of the Laravel router with native WordPress integration.
 
 ## Vue d'ensemble
 
-Le routeur étendu de Pollora offre :
-- Support complet des routes Laravel standard
-- Intégration avec les conditional tags WordPress via `Route::wp()`
-- Système de bindings automatique des données WordPress
-- Résolution de templates WordPress en fallback
+Pollora's extended router offers:
+- Full support for standard Laravel routes
+- Integration with WordPress conditional tags via `Route::wp()`
+- Automatic binding system for WordPress data
+- Fallback WordPress template resolution
 
-## Utilisation des Routes WordPress
+## Using WordPress Routes
 
-### Syntaxe de base
+### Basic syntax
 
 ```php
 use Illuminate\Support\Facades\Route;
 
-// Route pour la page d'accueil
+// Route for the home page
 Route::wp('front', function () {
     return view('home');
 });
 
-// Route pour les articles individuels
+// Route for individual posts
 Route::wp('single', function () {
     return view('single');
 });
 
-// Route avec contrôleur
+// Route with controller
 Route::wp('category', CategoryController::class);
 ```
 
-### Syntaxe avec paramètres
+### Parameter syntax
 
-Beaucoup de conditions WordPress acceptent des paramètres. Vous pouvez les passer entre la condition et l'action :
+Many WordPress conditions accept parameters. You can pass them between the condition and the action:
 
 ```php
-// Route pour un type de post spécifique
+// Route for a specific post type
 Route::wp('is_singular', 'realisations', function () {
     return view('single-realisations');
 });
 
-// Route pour plusieurs types de posts
+// Route for multiple post types
 Route::wp('is_singular', ['post', 'page'], function () {
     return view('single-content');
 });
 
-// Avec un contrôleur
+// With a controller
 Route::wp('is_singular', 'realisations', RealisationsController::class);
 
-// Page spécifique par slug
+// Specific page by slug
 Route::wp('is_page', 'contact', function () {
     return view('contact');
 });
 
-// Catégorie spécifique
+// Specific category
 Route::wp('is_category', 'news', function () {
     return view('news-category');
 });
 ```
 
-### Conditions WordPress supportées
+### Supported WordPress conditions
 
-- `front` - Page d'accueil (is_front_page)
-- `home` - Page du blog (is_home)
-- `single` - Article individuel (is_single)
+- `front` - Home page (is_front_page)
+- `home` - Blog page (is_home)
+- `single` - Single post (is_single)
 - `page` - Page (is_page)
-- `category` - Archive de catégorie (is_category)
-- `tag` - Archive de tag (is_tag)
+- `category` - Category archive (is_category)
+- `tag` - Tag archive (is_tag)
 - `author` - Archive d'auteur (is_author)
 - `archive` - Archives générales (is_archive)
 - `search` - Page de recherche (is_search)

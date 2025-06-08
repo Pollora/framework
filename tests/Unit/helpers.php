@@ -973,7 +973,7 @@ if (! class_exists('TestContainer')) {
             return $this->services[$serviceClass] ?? null;
         }
 
-        // Ajout pour compatibilité avec les tests d'attributs
+        // Added for compatibility with attribute tests
         public function make(string $serviceClass): ?object
         {
             return $this->get($serviceClass);
