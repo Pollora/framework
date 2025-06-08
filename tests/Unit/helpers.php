@@ -36,6 +36,42 @@ function setupWordPressMocks()
         ->andReturn(true)
         ->byDefault();
 
+    // Mock WooCommerce specific functions
+    WP::$wpFunctions->shouldReceive('locate_template')
+        ->withAnyArgs()
+        ->andReturn('')
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('add_theme_support')
+        ->withAnyArgs()
+        ->andReturn(true)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('is_child_theme')
+        ->withAnyArgs()
+        ->andReturn(false)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('get_stylesheet_directory')
+        ->withAnyArgs()
+        ->andReturn('/theme/child')
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('wp_doing_ajax')
+        ->withAnyArgs()
+        ->andReturn(false)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('doing_action')
+        ->withAnyArgs()
+        ->andReturn(false)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('WC')
+        ->withAnyArgs()
+        ->andReturn(null)
+        ->byDefault();
+
     WP::$wpFunctions->shouldReceive('apply_filters')
         ->withAnyArgs()
         ->andReturnUsing(function ($tag, $value) {
@@ -526,6 +562,58 @@ if (! function_exists('abort')) {
     function abort($code, $message = '')
     {
         throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message);
+    }
+}
+
+/**
+ * WooCommerce mock functions
+ */
+if (! function_exists('locate_template')) {
+    function locate_template($templates, $load = false, $require_once = true)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->locate_template($templates, $load, $require_once) : '';
+    }
+}
+
+if (! function_exists('add_theme_support')) {
+    function add_theme_support($feature, $options = null)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->add_theme_support($feature, $options) : true;
+    }
+}
+
+if (! function_exists('is_child_theme')) {
+    function is_child_theme()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_child_theme() : false;
+    }
+}
+
+if (! function_exists('get_stylesheet_directory')) {
+    function get_stylesheet_directory()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_stylesheet_directory() : '/theme/child';
+    }
+}
+
+if (! function_exists('wp_doing_ajax')) {
+    function wp_doing_ajax()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_doing_ajax() : false;
+    }
+}
+
+if (! function_exists('doing_action')) {
+    function doing_action($action = null)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->doing_action($action) : false;
+    }
+}
+
+if (! function_exists('WC')) {
+    function WC()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->WC() : null;
     }
 }
 

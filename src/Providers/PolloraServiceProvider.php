@@ -25,7 +25,7 @@ use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\ModuleServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
-use Pollora\Plugins\WooCommerce\WooCommerceProvider;
+use Pollora\Plugins\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
 use Pollora\Plugins\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeAttributeServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
@@ -98,7 +98,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
-        $this->app->register(WooCommerceProvider::class);
+        $this->app->register(WooCommerceServiceProvider::class);
         $this->app->register(WpRocketServiceProvider::class);
         $this->app->register(WordPressEventServiceProvider::class);
         $this->app->register(TemplateHierarchyServiceProvider::class);
