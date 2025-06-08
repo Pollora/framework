@@ -7,16 +7,17 @@ namespace Pollora\Container\Domain;
 /**
  * Interface ServiceLocator
  *
- * Définit un contrat pour résoudre des services à partir d'un conteneur.
- * Cette interface fait partie du domaine et est indépendante de l'implémentation spécifique.
+ * Defines a contract for resolving services from a container.
+ * This interface is part of the domain layer and is independent of any
+ * specific implementation.
  */
 interface ServiceLocator
 {
     /**
-     * Résout un service à partir de sa classe.
+     * Resolve a service by its class name.
      *
-     * @param  string  $serviceClass  La classe du service à résoudre
-     * @return mixed|null Le service résolu ou null s'il n'est pas trouvé
+     * @param  string  $serviceClass  The class of the service to resolve
+     * @return mixed|null The resolved service or null if not found
      */
     public function resolve(string $serviceClass);
 }

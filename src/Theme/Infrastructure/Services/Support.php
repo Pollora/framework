@@ -17,20 +17,38 @@ use Psr\Container\ContainerInterface;
  */
 class Support implements ThemeComponent
 {
+    /**
+     * WordPress action service used to register callbacks.
+     *
+     * @var Action
+     */
     protected Action $action;
 
+    /**
+     * Create a new Support service instance.
+     *
+     * @param  ContainerInterface  $app     The service container
+     * @param  ConfigRepositoryInterface  $config  The configuration repository
+     */
     public function __construct(protected ContainerInterface $app, protected ConfigRepositoryInterface $config)
     {
         $this->action = $this->app->get(Action::class);
     }
 
+    /**
+     * Register the theme support callbacks.
+     *
+     * @return void
+     */
     public function register(): void
     {
         $this->action->add('after_setup_theme', [$this, 'addThemeSupport'], 1);
     }
 
     /**
-     * Register all of the site's theme support.
+     * Register all of the site's theme support options.
+     *
+     * @return void
      */
     public function addThemeSupport(): void
     {
