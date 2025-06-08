@@ -16,6 +16,9 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
      */
     private array $resolvers;
 
+    /**
+     * Create a new resolver instance and register default resolvers.
+     */
     public function __construct()
     {
         $this->resolvers = [
@@ -27,6 +30,12 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
         ];
     }
 
+    /**
+     * Resolve a WordPress type by name.
+     *
+     * @param  string  $typeName  Fully qualified WP_* class name
+     * @return mixed|null         The resolved object or null if unavailable
+     */
     public function resolve(string $typeName): mixed
     {
         if (! isset($this->resolvers[$typeName])) {
@@ -36,6 +45,11 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
         return call_user_func($this->resolvers[$typeName]);
     }
 
+    /**
+     * Resolve the current WP_Post object if available.
+     *
+     * @return \WP_Post|null
+     */
     public function resolvePost(): ?\WP_Post
     {
         global $post;
@@ -56,6 +70,11 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
         return null;
     }
 
+    /**
+     * Resolve the current WP_Term object if available.
+     *
+     * @return \WP_Term|null
+     */
     public function resolveTerm(): ?\WP_Term
     {
         if (! function_exists('get_queried_object')) {
@@ -67,6 +86,11 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
         return $queried instanceof \WP_Term ? $queried : null;
     }
 
+    /**
+     * Resolve the current WP_User object if available.
+     *
+     * @return \WP_User|null
+     */
     public function resolveUser(): ?\WP_User
     {
         if (function_exists('get_queried_object')) {
@@ -87,6 +111,11 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
         return null;
     }
 
+    /**
+     * Resolve the global WP_Query instance.
+     *
+     * @return \WP_Query|null
+     */
     public function resolveQuery(): ?\WP_Query
     {
         global $wp_query;
@@ -94,6 +123,11 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
         return $wp_query instanceof \WP_Query ? $wp_query : null;
     }
 
+    /**
+     * Resolve the global WP instance.
+     *
+     * @return \WP|null
+     */
     public function resolveWP(): ?\WP
     {
         global $wp;

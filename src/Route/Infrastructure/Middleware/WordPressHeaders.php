@@ -33,6 +33,10 @@ class WordPressHeaders
      * - Adding framework identification
      * - Cleaning up WordPress headers for non-authenticated requests
      * - Setting appropriate cache control directives
+     *
+     * @param  Request  $request  Incoming HTTP request
+     * @param  Closure  $next     Next middleware handler
+     * @return SymfonyResponse   Modified response instance
      */
     public function handle(Request $request, Closure $next): SymfonyResponse
     {
@@ -59,6 +63,8 @@ class WordPressHeaders
 
     /**
      * Add the framework identification header.
+     *
+     * @param  SymfonyResponse  $response  Response being modified
      */
     private function addFrameworkHeader(SymfonyResponse $response): void
     {
@@ -67,6 +73,9 @@ class WordPressHeaders
 
     /**
      * Determine if WordPress headers should be cleaned up.
+     *
+     * @param  Request  $request  Incoming request instance
+     * @return bool              True when headers should be removed
      */
     private function shouldCleanupHeaders(Request $request): bool
     {
@@ -81,6 +90,8 @@ class WordPressHeaders
 
     /**
      * Remove WordPress-specific headers from the response.
+     *
+     * @param  SymfonyResponse  $response  Response to clean up
      */
     private function removeWordPressHeaders(SymfonyResponse $response): void
     {
@@ -91,6 +102,8 @@ class WordPressHeaders
 
     /**
      * Determine if public cache headers should be set.
+     *
+     * @return bool True when public caching is allowed
      */
     private function shouldSetPublicCache(): bool
     {
@@ -99,6 +112,9 @@ class WordPressHeaders
 
     /**
      * Check if a WordPress function is available.
+     *
+     * @param  string  $function  Function name to check
+     * @return bool              True if the function exists
      */
     private function isWordPressFunctionAvailable(string $function): bool
     {
