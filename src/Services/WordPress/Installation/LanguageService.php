@@ -30,7 +30,7 @@ class LanguageService
      */
     private const FALLBACK_LANGUAGES = [
         'en_US' => 'English (United States)',
-        'fr_FR' => 'French (France) - Français',
+        'fr_FR' => 'French (France)',
         'es_ES' => 'Spanish (Spain) - Español',
         'de_DE' => 'German - Deutsch',
         'it_IT' => 'Italian - Italiano',
