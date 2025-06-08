@@ -53,7 +53,7 @@ class LaunchPadInstallCommand extends Command
         } catch (\Throwable $e) {
             error($e->getMessage());
 
-            $this->handleError($e);
+            $this->handleError($e, $installMode);
 
             return self::FAILURE;
         }

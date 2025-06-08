@@ -2,121 +2,80 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Route\UI\Http\Controllers;
-
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\View;
 use Mockery;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
+use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Tests\TestCase;
 
-/**
- * @covers \Pollora\Route\UI\Http\Controllers\FrontendController
- */
-class FrontendControllerTest extends TestCase
-{
-    private FrontendController $controller;
+require_once __DIR__.'/../../../../helpers.php';
 
-    private Container $container;
+beforeEach(function () {
+    setupWordPressMocks();
+    $this->templateFinder = Mockery::mock(TemplateFinderInterface::class);
+    $this->controller = new FrontendController($this->templateFinder);
+});
 
-    private ViewFactory $viewFactory;
+afterEach(function () {
+    Mockery::close();
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        setupWordPressMocks();
-
-        $this->container = Mockery::mock(Container::class);
-        $this->viewFactory = Mockery::mock(ViewFactory::class);
-        $this->controller = new FrontendController($this->container, $this->viewFactory);
-    }
-
-    public function test_handle_aborts_when_themes_disabled(): void
-    {
-        // Mock wp_using_themes to return false
+describe('FrontendController', function () {
+    it('aborts when themes disabled', function () {
         setWordPressFunction('wp_using_themes', fn () => false);
-
         $request = Request::create('/test');
+        
+        expect(fn () => $this->controller->handle($request))
+            ->toThrow(HttpException::class, 'Themes are disabled');
+    });
 
-        $this->expectException(HttpException::class);
-        $this->expectExceptionMessage('Themes are disabled');
-
-        $this->controller->handle($request);
-    }
-
-    public function test_handle_renders_blade_view_when_available(): void
-    {
-        // Mock wp_using_themes to return true
+    it('renders blade view when available', function () {
         setWordPressFunction('wp_using_themes', fn () => true);
         setWordPressFunction('is_page', fn () => true);
         setWordPressFunction('get_page_template', fn () => '/theme/page.php');
         setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
-        // Mock container to return blade view
-        $this->container->shouldReceive('bound')
-            ->with('pollora.view')
-            ->andReturn(true);
-        $this->container->shouldReceive('get')
-            ->with('pollora.view')
+        $this->templateFinder->shouldReceive('getViewNameFromPath')
+            ->with('/theme/page.php')
             ->andReturn('templates.page');
-        $this->container->shouldReceive('bound')
-            ->with('pollora.data')
-            ->andReturn(true);
-        $this->container->shouldReceive('get')
-            ->with('pollora.data')
-            ->andReturn(['foo' => 'bar']);
 
-        // Mock view factory
-        $view = Mockery::mock(View::class);
-        $view->shouldReceive('render')->andReturn('<html>Blade page content</html>');
-
-        $this->viewFactory->shouldReceive('exists')
+        View::shouldReceive('exists')
             ->with('templates.page')
             ->andReturn(true);
-        $this->viewFactory->shouldReceive('make')
-            ->with('templates.page', ['foo' => 'bar'])
-            ->andReturn($view);
+        View::shouldReceive('make')
+            ->with('templates.page')
+            ->andReturn('<html>Blade page content</html>');
 
         $request = Request::create('/test');
         $response = $this->controller->handle($request);
 
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals('<html>Blade page content</html>', $response->getContent());
-    }
+        expect($response)->toBeInstanceOf(Response::class);
+        expect($response->getContent())->toBe('<html>Blade page content</html>');
+    });
 
-    public function test_handle_falls_back_to_php_template(): void
-    {
-        // Mock wp_using_themes to return true
+    it('falls back to php template', function () {
+        $templatePath = __DIR__.'/test-template.php';
         setWordPressFunction('wp_using_themes', fn () => true);
         setWordPressFunction('is_page', fn () => true);
-        setWordPressFunction('get_page_template', fn () => __FILE__);
+        setWordPressFunction('get_page_template', fn () => $templatePath);
         setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
-        // Mock container to not have blade view
-        $this->container->shouldReceive('bound')
-            ->with('pollora.view')
-            ->andReturn(false);
-        $this->container->shouldReceive('bound')
-            ->with('pollora.data')
-            ->andReturn(false);
+        $this->templateFinder->shouldReceive('getViewNameFromPath')
+            ->with($templatePath)
+            ->andReturn(null);
 
         $request = Request::create('/test');
         $response = $this->controller->handle($request);
 
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('<?php', $response->getContent());
-    }
+        expect($response)->toBeInstanceOf(Response::class);
+        expect($response->getContent())->toBe('This is a PHP template');
+    });
 
-    public function test_handle_throws_404_when_no_template(): void
-    {
-        // Mock wp_using_themes to return true
+    it('throws 404 when no template', function () {
         setWordPressFunction('wp_using_themes', fn () => true);
 
-        // Mock all template functions to return empty
         setWordPressConditions([
             'is_page' => false,
             'is_singular' => false,
@@ -140,16 +99,13 @@ class FrontendControllerTest extends TestCase
         setWordPressFunction('get_index_template', fn () => '');
         setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
-        $this->container->shouldReceive('bound')
-            ->with('pollora.view')
-            ->andReturn(false);
+        $this->templateFinder->shouldReceive('getViewNameFromPath')
+            ->with('')
+            ->andReturn(null);
 
         $request = Request::create('/test');
 
-        $this->expectException(HttpException::class);
-        $this->expectExceptionCode(404);
-        $this->expectExceptionMessage('Template not found');
-
-        $this->controller->handle($request);
-    }
-}
+        expect(fn () => $this->controller->handle($request))
+            ->toThrow(HttpException::class);
+    });
+});

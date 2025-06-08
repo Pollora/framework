@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Container\Container;
+use Illuminate\Support\Facades\Facade;
 use Mockery as m;
 use Pollora\Support\Facades\Action;
 
@@ -32,6 +33,7 @@ if (! function_exists('mkdir_mock')) {
 
 beforeAll(function () {
     $app = new Container;
+    Facade::setFacadeApplication($app);
 
     $mock = m::mock('stdClass');
     $mock->shouldReceive('add')
@@ -46,4 +48,6 @@ beforeAll(function () {
 
 afterAll(function () {
     m::close();
+    Facade::clearResolvedInstances();
+    Facade::setFacadeApplication(null);
 });

@@ -77,8 +77,10 @@ trait QueryTrait
      * Run the WordPress bootstrap process.
      *
      * This method initializes WordPress and handles special request types
-     * like robots.txt, favicon, feeds, and trackbacks. Normal template
-     * resolution is delegated to the Laravel routing system.
+     * like robots.txt, favicon, feeds, trackbacks, and AJAX requests. AJAX requests
+     * are handled early and bypass the normal WordPress query processing to prevent
+     * them from reaching the Laravel routing system. Normal template resolution
+     * is delegated to the Laravel routing system.
      *
      * @throws \RuntimeException If WordPress core functions are not available
      */
@@ -88,7 +90,13 @@ trait QueryTrait
             throw new \RuntimeException('The WordPress core functions are not available. Ensure WordPress is loaded.');
         }
 
-        // Initialize WordPress for the current request
+        // Check for AJAX requests BEFORE calling wp() to prevent them from going through normal WordPress query processing
+        if ($this->isAjaxRequest()) {
+            $this->handleCustomAjaxRequest();
+            return; // Exit early, don't process through normal WordPress flow
+        }
+
+        // Initialize WordPress for the current request (only for non-AJAX requests)
         wp();
 
         // Handle special request types that should bypass Laravel routing
@@ -113,5 +121,48 @@ trait QueryTrait
         // Do not load WordPress template-loader.php as we use FrontendController instead
 
         do_action('pollora_loaded');
+    }
+
+    /**
+     * Check if the current request is an AJAX request.
+     *
+     * @return bool True if this is an AJAX request, false otherwise
+     */
+    private function isAjaxRequest(): bool
+    {
+        // Check if DOING_AJAX constant is already defined (set by admin-ajax.php)
+        if (defined('DOING_AJAX') && DOING_AJAX) {
+            return true;
+        }
+
+        // Check if this request is targeting admin-ajax.php
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        if (str_contains($requestUri, 'wp-admin/admin-ajax.php')) {
+            return true;
+        }
+
+        // Check for AJAX action parameter
+        if (isset($_REQUEST['action']) && str_contains($requestUri, '/cms/')) {
+            return true;
+        }
+
+        // Check for XMLHttpRequest header (set by most AJAX libraries)
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Handle AJAX requests using WordPress native AJAX system.
+     *
+     * This method ensures AJAX requests are processed by WordPress's admin-ajax.php
+     * and do not go through the normal template loading system.
+     */
+    private function handleCustomAjaxRequest(): void
+    {
+        $this->action->do('template_redirect');
     }
 }

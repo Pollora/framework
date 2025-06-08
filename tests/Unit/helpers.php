@@ -2,13 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Container\Container;
-
-// Define WordPress constants for tests
-if (! defined('OBJECT')) {
-    define('OBJECT', 'OBJECT');
-}
-
 class WP
 {
     public static $wpFunctions;
@@ -87,11 +80,7 @@ function setupWordPressMocks()
         ->byDefault()
         ->andReturn(false);
 
-    WP::$wpFunctions->shouldReceive('is_attachment')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_single')
+    WP::$wpFunctions->shouldReceive('is_front_page')
         ->byDefault()
         ->andReturn(false);
 
@@ -99,7 +88,7 @@ function setupWordPressMocks()
         ->byDefault()
         ->andReturn(false);
 
-    WP::$wpFunctions->shouldReceive('is_front_page')
+    WP::$wpFunctions->shouldReceive('is_single')
         ->byDefault()
         ->andReturn(false);
 
@@ -111,82 +100,17 @@ function setupWordPressMocks()
         ->byDefault()
         ->andReturn(false);
 
-    WP::$wpFunctions->shouldReceive('is_year')
+    WP::$wpFunctions->shouldReceive('is_page_template')
         ->byDefault()
         ->andReturn(false);
 
-    WP::$wpFunctions->shouldReceive('is_month')
+    WP::$wpFunctions->shouldReceive('is_attachment')
         ->byDefault()
         ->andReturn(false);
 
-    WP::$wpFunctions->shouldReceive('is_day')
+    WP::$wpFunctions->shouldReceive('is_embed')
         ->byDefault()
         ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_time')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('get_post_mime_type')
-        ->byDefault()
-        ->andReturn('text/plain');
-
-    WP::$wpFunctions->shouldReceive('get_the_category')
-        ->byDefault()
-        ->andReturn([]);
-
-    WP::$wpFunctions->shouldReceive('get_term')
-        ->byDefault()
-        ->andReturn(null);
-
-    WP::$wpFunctions->shouldReceive('get_userdata')
-        ->byDefault()
-        ->andReturn(null);
-
-    WP::$wpFunctions->shouldReceive('get_queried_object_id')
-        ->byDefault()
-        ->andReturn(0);
-
-    WP::$wpFunctions->shouldReceive('get_template')
-        ->byDefault()
-        ->andReturn('theme');
-
-    WP::$wpFunctions->shouldReceive('get_stylesheet')
-        ->byDefault()
-        ->andReturn('theme');
-
-    WP::$wpFunctions->shouldReceive('is_admin')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_main_query')
-        ->byDefault()
-        ->andReturn(true);
-
-    // Special WordPress request functions
-    WP::$wpFunctions->shouldReceive('wp_using_themes')
-        ->byDefault()
-        ->andReturn(true);
-
-    WP::$wpFunctions->shouldReceive('is_robots')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_favicon')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_feed')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_trackback')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('do_feed')
-        ->byDefault()
-        ->andReturn(true);
 
     WP::$wpFunctions->shouldReceive('is_privacy_policy')
         ->byDefault()
@@ -196,11 +120,7 @@ function setupWordPressMocks()
         ->byDefault()
         ->andReturn(false);
 
-    WP::$wpFunctions->shouldReceive('is_embed')
-        ->byDefault()
-        ->andReturn(false);
-
-    // Template hierarchy functions
+    // Mock template functions to return empty by default
     WP::$wpFunctions->shouldReceive('get_embed_template')
         ->byDefault()
         ->andReturn('');
@@ -273,76 +193,6 @@ function setupWordPressMocks()
         ->byDefault()
         ->andReturn('');
 
-    // WordPress theme functions
-    WP::$wpFunctions->shouldReceive('get_template_directory')
-        ->byDefault()
-        ->andReturn('/theme');
-
-    WP::$wpFunctions->shouldReceive('get_theme_file_path')
-        ->byDefault()
-        ->andReturn('/theme');
-
-    WP::$wpFunctions->shouldReceive('get_body_class')
-        ->byDefault()
-        ->andReturn(['page']);
-
-    WP::$wpFunctions->shouldReceive('current_theme_supports')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('wp_is_block_theme')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('remove_filter')
-        ->byDefault()
-        ->andReturn(true);
-
-    // WordPress cache functions
-    WP::$wpFunctions->shouldReceive('wp_cache_get')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('wp_cache_add')
-        ->byDefault()
-        ->andReturn(true);
-
-    // WordPress text functions
-    WP::$wpFunctions->shouldReceive('translate')
-        ->byDefault()
-        ->andReturnUsing(function ($text) {
-            return $text;
-        });
-
-    WP::$wpFunctions->shouldReceive('_cleanup_header_comment')
-        ->byDefault()
-        ->andReturnUsing(function ($str) {
-            return trim($str);
-        });
-
-    WP::$wpFunctions->shouldReceive('sanitize_key')
-        ->byDefault()
-        ->andReturnUsing(function ($key) {
-            return strtolower(trim($key));
-        });
-
-    // Mock WooCommerce functions
-    WP::$wpFunctions->shouldReceive('is_shop')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_product')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_cart')
-        ->byDefault()
-        ->andReturn(false);
-
-    WP::$wpFunctions->shouldReceive('is_checkout')
-        ->byDefault()
-        ->andReturn(false);
-
     // Mock scheduling functions
     WP::$wpFunctions->shouldReceive('wp_next_scheduled')
         ->withAnyArgs()
@@ -392,6 +242,27 @@ function setupWordPressMocks()
 }
 
 /**
+ * Convenience function to set mock WordPress condition values
+ */
+function setWordPressConditions(array $conditions = [])
+{
+    // Make sure WP::$wpFunctions is initialized
+    if (! isset(WP::$wpFunctions) || ! WP::$wpFunctions) {
+        setupWordPressMocks();
+    }
+
+    // Set each condition value
+    foreach ($conditions as $condition => $value) {
+        if (method_exists(WP::$wpFunctions, 'shouldReceive')) {
+            WP::$wpFunctions->shouldReceive($condition)
+                ->withAnyArgs()
+                ->andReturn($value)
+                ->byDefault();
+        }
+    }
+}
+
+/**
  * Helper functions for tests
  */
 if (! function_exists('app')) {
@@ -403,7 +274,7 @@ if (! function_exists('app')) {
      */
     function app($abstract = null, array $parameters = [])
     {
-        $app = Container::getInstance();
+        $app = \Illuminate\Container\Container::getInstance();
 
         if (is_null($abstract)) {
             return $app;
@@ -484,14 +355,14 @@ if (! function_exists('get_queried_object')) {
 }
 
 if (! function_exists('get_page_template_slug')) {
-    function get_page_template_slug($page_id = null)
+    function get_page_template_slug($page_id)
     {
         return WP::$wpFunctions->get_page_template_slug($page_id);
     }
 }
 
 if (! function_exists('get_post')) {
-    function get_post($post_id = null)
+    function get_post($post_id)
     {
         return WP::$wpFunctions->get_post($post_id);
     }
@@ -594,276 +465,6 @@ if (! function_exists('wp_is_block_theme')) {
     }
 }
 
-if (! function_exists('is_attachment')) {
-    function is_attachment()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_attachment() : false;
-    }
-}
-
-if (! function_exists('is_single')) {
-    function is_single()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_single() : false;
-    }
-}
-
-if (! function_exists('is_home')) {
-    function is_home()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_home() : false;
-    }
-}
-
-if (! function_exists('is_main_query')) {
-    function is_main_query()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_main_query() : true;
-    }
-}
-
-/**
- * WooCommerce functions
- */
-if (! function_exists('is_shop')) {
-    function is_shop()
-    {
-        return isset($GLOBALS['is_shop']) ? $GLOBALS['is_shop'] : false;
-    }
-}
-
-if (! function_exists('is_product')) {
-    function is_product()
-    {
-        return isset($GLOBALS['is_product']) ? $GLOBALS['is_product'] : false;
-    }
-}
-
-if (! function_exists('is_cart')) {
-    function is_cart()
-    {
-        return isset($GLOBALS['is_cart']) ? $GLOBALS['is_cart'] : false;
-    }
-}
-
-if (! function_exists('is_checkout')) {
-    function is_checkout()
-    {
-        return isset($GLOBALS['is_checkout']) ? $GLOBALS['is_checkout'] : false;
-    }
-}
-
-if (! function_exists('is_product_category')) {
-    function is_product_category()
-    {
-        return isset($GLOBALS['is_product_category']) ? $GLOBALS['is_product_category'] : false;
-    }
-}
-
-if (! function_exists('is_product_tag')) {
-    function is_product_tag()
-    {
-        return isset($GLOBALS['is_product_tag']) ? $GLOBALS['is_product_tag'] : false;
-    }
-}
-
-if (! function_exists('is_product_taxonomy')) {
-    function is_product_taxonomy()
-    {
-        return isset($GLOBALS['is_product_taxonomy']) ? $GLOBALS['is_product_taxonomy'] : false;
-    }
-}
-
-if (! function_exists('wc_get_product')) {
-    function wc_get_product($product = false)
-    {
-        return isset($GLOBALS['wc_get_product']) ? $GLOBALS['wc_get_product'] : false;
-    }
-}
-
-if (! function_exists('is_home')) {
-    function is_home()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_home() : false;
-    }
-}
-
-if (! function_exists('is_front_page')) {
-    function is_front_page()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_front_page() : false;
-    }
-}
-
-if (! function_exists('is_author')) {
-    function is_author()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_author() : false;
-    }
-}
-
-if (! function_exists('is_date')) {
-    function is_date()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_date() : false;
-    }
-}
-
-if (! function_exists('is_year')) {
-    function is_year()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_year() : false;
-    }
-}
-
-if (! function_exists('is_month')) {
-    function is_month()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_month() : false;
-    }
-}
-
-if (! function_exists('is_day')) {
-    function is_day()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_day() : false;
-    }
-}
-
-if (! function_exists('is_time')) {
-    function is_time()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_time() : false;
-    }
-}
-
-if (! function_exists('get_post_mime_type')) {
-    function get_post_mime_type($post_id = null)
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_post_mime_type($post_id) : 'text/plain';
-    }
-}
-
-if (! function_exists('get_the_category')) {
-    function get_the_category($post_id = null)
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_the_category($post_id) : [];
-    }
-}
-
-if (! function_exists('is_wp_error')) {
-    function is_wp_error($thing)
-    {
-        return $thing instanceof WP_Error;
-    }
-}
-
-if (! function_exists('get_term')) {
-    function get_term($term_id, $taxonomy = '', $output = OBJECT, $filter = 'raw')
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_term($term_id, $taxonomy, $output, $filter) : null;
-    }
-}
-
-if (! function_exists('get_userdata')) {
-    function get_userdata($user_id)
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_userdata($user_id) : null;
-    }
-}
-
-if (! function_exists('get_queried_object_id')) {
-    function get_queried_object_id()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_queried_object_id() : 0;
-    }
-}
-
-if (! function_exists('get_template')) {
-    function get_template()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_template() : 'theme';
-    }
-}
-
-if (! function_exists('get_stylesheet')) {
-    function get_stylesheet()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_stylesheet() : 'theme';
-    }
-}
-
-if (! function_exists('is_admin')) {
-    function is_admin()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_admin() : false;
-    }
-}
-
-if (! function_exists('is_main_query')) {
-    function is_main_query()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_main_query() : true;
-    }
-}
-
-if (! function_exists('view')) {
-    function view($view = null, $data = [], $mergeData = [])
-    {
-        // Mock function for Laravel view helper
-        return app('view');
-    }
-}
-
-if (! function_exists('abort')) {
-    function abort($code, $message = '', array $headers = [])
-    {
-        throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message, null, $headers);
-    }
-}
-
-if (! function_exists('response')) {
-    function response($content = '', $status = 200, array $headers = [])
-    {
-        return new \Illuminate\Http\Response($content, $status, $headers);
-    }
-}
-
-// Mock WooCommerce functions for plugin condition tests
-if (! function_exists('is_shop')) {
-    function is_shop()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_shop() : false;
-    }
-}
-
-if (! function_exists('is_product')) {
-    function is_product()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_product() : false;
-    }
-}
-
-if (! function_exists('is_cart')) {
-    function is_cart()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_cart() : false;
-    }
-}
-
-if (! function_exists('is_checkout')) {
-    function is_checkout()
-    {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_checkout() : false;
-    }
-}
-if (! function_exists('get_file_data')) {
-    function get_file_data($file, $headers)
-    {
-        return ['title' => 'Title', 'slug' => 'slug-demo', 'description' => 'Desc'];
-    }
-}
-
 if (! function_exists('__return_true')) {
     function __return_true()
     {
@@ -904,16 +505,6 @@ function setWordPressFunction(string $functionName, callable $callback): void
 }
 
 /**
- * Set WordPress conditions for testing
- */
-function setWordPressConditions(array $conditions): void
-{
-    foreach ($conditions as $condition => $value) {
-        setWordPressFunction($condition, fn () => $value);
-    }
-}
-
-/**
  * Reset WordPress mocks
  */
 function resetWordPressMocks(): void
@@ -928,6 +519,13 @@ if (! function_exists('translate_with_gettext_context')) {
     function translate_with_gettext_context($text, $context, $domain = null)
     {
         return $text;
+    }
+}
+
+if (! function_exists('abort')) {
+    function abort($code, $message = '')
+    {
+        throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message);
     }
 }
 
@@ -992,6 +590,55 @@ if (! function_exists('is_embed')) {
     function is_embed()
     {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_embed() : false;
+    }
+}
+
+if (! function_exists('is_front_page')) {
+    function is_front_page()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_front_page() : false;
+    }
+}
+
+if (! function_exists('is_home')) {
+    function is_home()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_home() : false;
+    }
+}
+
+if (! function_exists('is_single')) {
+    function is_single()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_single() : false;
+    }
+}
+
+if (! function_exists('is_author')) {
+    function is_author()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_author() : false;
+    }
+}
+
+if (! function_exists('is_date')) {
+    function is_date()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_date() : false;
+    }
+}
+
+if (! function_exists('is_page_template')) {
+    function is_page_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_page_template() : false;
+    }
+}
+
+if (! function_exists('is_attachment')) {
+    function is_attachment()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_attachment() : false;
     }
 }
 
@@ -1195,6 +842,20 @@ if (! function_exists('sanitize_key')) {
     }
 }
 
+if (! function_exists('get_file_data')) {
+    function get_file_data($file, $default_headers = [])
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_file_data($file, $default_headers) : [
+            'title' => 'Title',
+            'slug' => 'slug-demo',
+            'description' => 'Description',
+            'categories' => 'news,updates',
+            'keywords' => 'foo,bar',
+            'viewportWidth' => '1200',
+        ];
+    }
+}
+
 // MockActionFacade for WordPressAjaxActionRegistrarTest
 if (! class_exists('MockActionFacade')) {
     class MockActionFacade
@@ -1255,5 +916,13 @@ if (! class_exists('WP_Error')) {
         {
             // Mock implementation
         }
+    }
+}
+
+// Laravel response helper function
+if (! function_exists('response')) {
+    function response($content = '', $status = 200, array $headers = [])
+    {
+        return new \Illuminate\Http\Response($content, $status, $headers);
     }
 }
