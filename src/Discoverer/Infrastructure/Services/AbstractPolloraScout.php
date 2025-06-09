@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Discoverer\Infrastructure\Services;
 
 use Illuminate\Container\Container;
+use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 use Spatie\StructureDiscoverer\Discover;
 use Spatie\StructureDiscoverer\StructureScout;
 
@@ -220,6 +221,62 @@ abstract class AbstractPolloraScout extends StructureScout
         }
 
         return [WP_PLUGIN_DIR];
+    }
+
+    /**
+     * @return array<DiscoveredStructure>|array<string>
+     */
+    public function get(): array
+    {
+
+        $discover = $this->definition();
+
+        // Enable caching only in production environment
+        if ($this->shouldUseCache()) {
+            $discover = $discover->withCache($this->identifier());
+        };
+
+        return $discover->get();
+    }
+
+    /**
+     * Determine whether caching should be enabled based on the Laravel environment.
+     *
+     * Caching is disabled in development environments to ensure fresh discovery
+     * during development. This method uses Laravel's app environment detection.
+     *
+     * @return bool True if caching should be enabled, false otherwise
+     */
+    protected function shouldUseCache(): bool
+    {
+        // Laravel environment detection
+        if ($this->container->bound('app')) {
+            try {
+                $app = $this->container->get('app');
+                if (method_exists($app, 'environment')) {
+                    return $app->environment('production');
+                }
+            } catch (\Throwable) {
+                // If we can't get the app instance, continue to fallback
+            }
+        }
+
+        // Fallback: use environment function if available
+        if (function_exists('app') && function_exists('config')) {
+            try {
+                return app()->environment('production');
+            } catch (\Throwable) {
+                // If app() helper fails, continue to next fallback
+            }
+        }
+
+        // Fallback: check ENV directly
+        if (isset($_ENV['APP_ENV'])) {
+            return $_ENV['APP_ENV'] === 'production';
+        }
+
+        // Default to no caching in development
+        return false;
     }
 
     /**

@@ -220,6 +220,80 @@ final class AbstractPolloraScoutTest extends BaseTestCase
         $this->assertInstanceOf(Discover::class, $discover);
         // Should not throw exception even with invalid directories
     }
+
+    public function test_should_use_cache_detects_production_environment(): void
+    {
+        // Setup mock app with production environment
+        $mockApp = \Mockery::mock();
+        $mockApp->shouldReceive('environment')
+            ->with('production')
+            ->andReturn(true);
+        
+        $this->container->instance('app', $mockApp);
+
+        $scout = new TestConcreteScout($this->container);
+
+        $reflection = new \ReflectionClass($scout);
+        $method = $reflection->getMethod('shouldUseCache');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($scout);
+
+        $this->assertTrue($result);
+    }
+
+    public function test_should_use_cache_detects_development_environment(): void
+    {
+        // Setup mock app with development environment
+        $mockApp = \Mockery::mock();
+        $mockApp->shouldReceive('environment')
+            ->with('production')
+            ->andReturn(false);
+        
+        $this->container->instance('app', $mockApp);
+
+        $scout = new TestConcreteScout($this->container);
+
+        $reflection = new \ReflectionClass($scout);
+        $method = $reflection->getMethod('shouldUseCache');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($scout);
+
+        $this->assertFalse($result);
+    }
+
+    public function test_should_use_cache_falls_back_to_env_variable(): void
+    {
+        // Set environment variable
+        $_ENV['APP_ENV'] = 'production';
+
+        $scout = new TestConcreteScout($this->container);
+
+        $reflection = new \ReflectionClass($scout);
+        $method = $reflection->getMethod('shouldUseCache');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($scout);
+
+        $this->assertTrue($result);
+
+        // Cleanup
+        unset($_ENV['APP_ENV']);
+    }
+
+    public function test_should_use_cache_defaults_to_false_when_no_environment_detected(): void
+    {
+        $scout = new TestConcreteScout($this->container);
+
+        $reflection = new \ReflectionClass($scout);
+        $method = $reflection->getMethod('shouldUseCache');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($scout);
+
+        $this->assertFalse($result);
+    }
 }
 
 /**

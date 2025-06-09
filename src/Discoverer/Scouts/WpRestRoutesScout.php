@@ -60,7 +60,7 @@ final class WpRestRoutesScout extends AbstractPolloraScout
 
                 foreach ($modules->allEnabled() as $module) {
                     $routePaths = [
-                        $module->getPath().'/app/',
+                        $module->getPath().'/app',
                     ];
 
                     foreach ($routePaths as $path) {

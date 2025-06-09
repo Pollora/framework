@@ -1,7 +1,7 @@
 <?php
 namespace {{ namespace }};
 
-use Pollora\Hook\Contracts\Hooks;
+use Pollora\Hook\Domain\Contracts\Hooks;
 use Pollora\Attributes\{{ hookType }};
 
 class {{ class }} implements Hooks

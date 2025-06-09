@@ -76,6 +76,7 @@ class HookServiceProvider extends ServiceProvider
     {
         try {
             $hooks = PolloraDiscover::scout('hooks');
+          //  dd($hooks);
             foreach ($hooks as $hookClass) {
                 $this->registerHook($hookClass);
             }
