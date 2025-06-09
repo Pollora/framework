@@ -7,8 +7,6 @@ namespace Pollora\Theme\Infrastructure\Services;
 return [
     'usercan' => fn ($expression): string => "<?php if( User::current()->can({$expression}) ): ?>",
     'endusercan' => fn (): string => '<?php endif; ?>',
-    'loop' => fn (): string => '<?php if (have_posts()) { while (have_posts()) { the_post(); ?>',
-    'endloop' => fn (): string => '<?php }} ?>',
     'template' => function ($expression): string {
         $args = array_map(fn ($arg): string => trim($arg, '\/\'\" ()'), explode(',', (string) $expression));
 

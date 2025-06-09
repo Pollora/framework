@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-require_once __DIR__.'/../helpers.php';
-
 use Pollora\Ajax\Application\Services\RegisterAjaxActionService;
 use Pollora\Ajax\Domain\Exceptions\InvalidAjaxActionException;
 use Pollora\Ajax\Domain\Models\AjaxAction;
@@ -29,7 +27,7 @@ describe('AjaxAction', function () {
     });
 
     it('throws exception if name or callback is empty', function () {
-        expect(static fn () => new AjaxAction('', function () {}))->toThrow(InvalidAjaxActionException::class)
+        expect(fn () => new AjaxAction('', function () {}))->toThrow(InvalidAjaxActionException::class)
             ->and(fn () => new AjaxAction('my_action', null))->toThrow(InvalidAjaxActionException::class);
     });
 

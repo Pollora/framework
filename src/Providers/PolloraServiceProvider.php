@@ -25,15 +25,17 @@ use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\ModuleServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
-use Pollora\Plugins\WooCommerce\WooCommerceProvider;
+use Pollora\Plugins\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
 use Pollora\Plugins\WpRocket\WpRocketServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeAttributeServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
+use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyAttributeServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
+use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
@@ -96,9 +98,11 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
-        $this->app->register(WooCommerceProvider::class);
+        $this->app->register(WooCommerceServiceProvider::class);
         $this->app->register(WpRocketServiceProvider::class);
         $this->app->register(WordPressEventServiceProvider::class);
+        $this->app->register(TemplateHierarchyServiceProvider::class);
+        $this->app->register(RouteServiceProvider::class);
 
         if (config('wordpress.use_laravel_scheduler', false)) {
             $this->app->register(SchedulerServiceProvider::class);

@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Container\Container;
-
 class WP
 {
     public static $wpFunctions;
@@ -36,6 +34,42 @@ function setupWordPressMocks()
             return true;
         })
         ->andReturn(true)
+        ->byDefault();
+
+    // Mock WooCommerce specific functions
+    WP::$wpFunctions->shouldReceive('locate_template')
+        ->withAnyArgs()
+        ->andReturn('')
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('add_theme_support')
+        ->withAnyArgs()
+        ->andReturn(true)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('is_child_theme')
+        ->withAnyArgs()
+        ->andReturn(false)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('get_stylesheet_directory')
+        ->withAnyArgs()
+        ->andReturn('/theme/child')
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('wp_doing_ajax')
+        ->withAnyArgs()
+        ->andReturn(false)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('doing_action')
+        ->withAnyArgs()
+        ->andReturn(false)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('WC')
+        ->withAnyArgs()
+        ->andReturn(null)
         ->byDefault();
 
     WP::$wpFunctions->shouldReceive('apply_filters')
@@ -81,6 +115,119 @@ function setupWordPressMocks()
     WP::$wpFunctions->shouldReceive('is_tax')
         ->byDefault()
         ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_front_page')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_home')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_single')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_author')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_date')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_page_template')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_attachment')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_embed')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_privacy_policy')
+        ->byDefault()
+        ->andReturn(false);
+
+    WP::$wpFunctions->shouldReceive('is_post_type_archive')
+        ->byDefault()
+        ->andReturn(false);
+
+    // Mock template functions to return empty by default
+    WP::$wpFunctions->shouldReceive('get_embed_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_404_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_search_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_front_page_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_home_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_privacy_policy_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_post_type_archive_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_taxonomy_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_attachment_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_single_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_page_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_singular_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_category_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_tag_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_author_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_date_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_archive_template')
+        ->byDefault()
+        ->andReturn('');
+
+    WP::$wpFunctions->shouldReceive('get_index_template')
+        ->byDefault()
+        ->andReturn('');
 
     // Mock scheduling functions
     WP::$wpFunctions->shouldReceive('wp_next_scheduled')
@@ -144,17 +291,11 @@ function setWordPressConditions(array $conditions = [])
     foreach ($conditions as $condition => $value) {
         if (method_exists(WP::$wpFunctions, 'shouldReceive')) {
             WP::$wpFunctions->shouldReceive($condition)
-                ->andReturn($value);
+                ->withAnyArgs()
+                ->andReturn($value)
+                ->byDefault();
         }
     }
-}
-
-/**
- * Réinitialise le mock global des fonctions WordPress
- */
-function resetWordPressMocks()
-{
-    WP::$wpFunctions = null;
 }
 
 /**
@@ -169,7 +310,7 @@ if (! function_exists('app')) {
      */
     function app($abstract = null, array $parameters = [])
     {
-        $app = Container::getInstance();
+        $app = \Illuminate\Container\Container::getInstance();
 
         if (is_null($abstract)) {
             return $app;
@@ -359,12 +500,6 @@ if (! function_exists('wp_is_block_theme')) {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_is_block_theme() : false;
     }
 }
-if (! function_exists('get_file_data')) {
-    function get_file_data($file, $headers)
-    {
-        return ['title' => 'Title', 'slug' => 'slug-demo', 'description' => 'Desc'];
-    }
-}
 
 if (! function_exists('__return_true')) {
     function __return_true()
@@ -390,10 +525,422 @@ if (! function_exists('route_condition_test')) {
     }
 }
 
+/**
+ * Set a specific WordPress function mock
+ */
+function setWordPressFunction(string $functionName, callable $callback): void
+{
+    if (! isset(WP::$wpFunctions) || ! WP::$wpFunctions) {
+        setupWordPressMocks();
+    }
+
+    WP::$wpFunctions->shouldReceive($functionName)
+        ->withAnyArgs()
+        ->andReturnUsing($callback)
+        ->byDefault();
+}
+
+/**
+ * Reset WordPress mocks
+ */
+function resetWordPressMocks(): void
+{
+    if (isset(WP::$wpFunctions)) {
+        Mockery::close();
+        WP::$wpFunctions = null;
+    }
+}
+
 if (! function_exists('translate_with_gettext_context')) {
     function translate_with_gettext_context($text, $context, $domain = null)
     {
         return $text;
+    }
+}
+
+if (! function_exists('abort')) {
+    function abort($code, $message = '')
+    {
+        throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message);
+    }
+}
+
+/**
+ * WooCommerce mock functions
+ */
+if (! function_exists('locate_template')) {
+    function locate_template($templates, $load = false, $require_once = true)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->locate_template($templates, $load, $require_once) : '';
+    }
+}
+
+if (! function_exists('add_theme_support')) {
+    function add_theme_support($feature, $options = null)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->add_theme_support($feature, $options) : true;
+    }
+}
+
+if (! function_exists('is_child_theme')) {
+    function is_child_theme()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_child_theme() : false;
+    }
+}
+
+if (! function_exists('get_stylesheet_directory')) {
+    function get_stylesheet_directory()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_stylesheet_directory() : '/theme/child';
+    }
+}
+
+if (! function_exists('wp_doing_ajax')) {
+    function wp_doing_ajax()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_doing_ajax() : false;
+    }
+}
+
+if (! function_exists('doing_action')) {
+    function doing_action($action = null)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->doing_action($action) : false;
+    }
+}
+
+if (! function_exists('WC')) {
+    function WC()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->WC() : null;
+    }
+}
+
+// Special WordPress request functions
+if (! function_exists('wp_using_themes')) {
+    function wp_using_themes()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_using_themes() : true;
+    }
+}
+
+if (! function_exists('is_robots')) {
+    function is_robots()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_robots() : false;
+    }
+}
+
+if (! function_exists('is_favicon')) {
+    function is_favicon()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_favicon() : false;
+    }
+}
+
+if (! function_exists('is_feed')) {
+    function is_feed()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_feed() : false;
+    }
+}
+
+if (! function_exists('is_trackback')) {
+    function is_trackback()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_trackback() : false;
+    }
+}
+
+if (! function_exists('do_feed')) {
+    function do_feed()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->do_feed() : true;
+    }
+}
+
+if (! function_exists('is_privacy_policy')) {
+    function is_privacy_policy()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_privacy_policy() : false;
+    }
+}
+
+if (! function_exists('is_post_type_archive')) {
+    function is_post_type_archive()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_post_type_archive() : false;
+    }
+}
+
+if (! function_exists('is_embed')) {
+    function is_embed()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_embed() : false;
+    }
+}
+
+if (! function_exists('is_front_page')) {
+    function is_front_page()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_front_page() : false;
+    }
+}
+
+if (! function_exists('is_home')) {
+    function is_home()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_home() : false;
+    }
+}
+
+if (! function_exists('is_single')) {
+    function is_single()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_single() : false;
+    }
+}
+
+if (! function_exists('is_author')) {
+    function is_author()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_author() : false;
+    }
+}
+
+if (! function_exists('is_date')) {
+    function is_date()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_date() : false;
+    }
+}
+
+if (! function_exists('is_page_template')) {
+    function is_page_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_page_template() : false;
+    }
+}
+
+if (! function_exists('is_attachment')) {
+    function is_attachment()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_attachment() : false;
+    }
+}
+
+// Template hierarchy functions
+if (! function_exists('get_embed_template')) {
+    function get_embed_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_embed_template() : '';
+    }
+}
+
+if (! function_exists('get_404_template')) {
+    function get_404_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_404_template() : '';
+    }
+}
+
+if (! function_exists('get_search_template')) {
+    function get_search_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_search_template() : '';
+    }
+}
+
+if (! function_exists('get_front_page_template')) {
+    function get_front_page_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_front_page_template() : '';
+    }
+}
+
+if (! function_exists('get_home_template')) {
+    function get_home_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_home_template() : '';
+    }
+}
+
+if (! function_exists('get_privacy_policy_template')) {
+    function get_privacy_policy_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_privacy_policy_template() : '';
+    }
+}
+
+if (! function_exists('get_post_type_archive_template')) {
+    function get_post_type_archive_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_post_type_archive_template() : '';
+    }
+}
+
+if (! function_exists('get_taxonomy_template')) {
+    function get_taxonomy_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_taxonomy_template() : '';
+    }
+}
+
+if (! function_exists('get_attachment_template')) {
+    function get_attachment_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_attachment_template() : '';
+    }
+}
+
+if (! function_exists('get_single_template')) {
+    function get_single_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_single_template() : '';
+    }
+}
+
+if (! function_exists('get_page_template')) {
+    function get_page_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_page_template() : '';
+    }
+}
+
+if (! function_exists('get_singular_template')) {
+    function get_singular_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_singular_template() : '';
+    }
+}
+
+if (! function_exists('get_category_template')) {
+    function get_category_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_category_template() : '';
+    }
+}
+
+if (! function_exists('get_tag_template')) {
+    function get_tag_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_tag_template() : '';
+    }
+}
+
+if (! function_exists('get_author_template')) {
+    function get_author_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_author_template() : '';
+    }
+}
+
+if (! function_exists('get_date_template')) {
+    function get_date_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_date_template() : '';
+    }
+}
+
+if (! function_exists('get_archive_template')) {
+    function get_archive_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_archive_template() : '';
+    }
+}
+
+if (! function_exists('get_index_template')) {
+    function get_index_template()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_index_template() : '';
+    }
+}
+
+// WordPress theme functions
+if (! function_exists('get_template_directory')) {
+    function get_template_directory()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_template_directory() : '/theme';
+    }
+}
+
+if (! function_exists('get_theme_file_path')) {
+    function get_theme_file_path()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_theme_file_path() : '/theme';
+    }
+}
+
+if (! function_exists('get_body_class')) {
+    function get_body_class()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_body_class() : ['page'];
+    }
+}
+
+if (! function_exists('current_theme_supports')) {
+    function current_theme_supports($feature)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->current_theme_supports($feature) : false;
+    }
+}
+
+if (! function_exists('remove_filter')) {
+    function remove_filter($tag, $function_to_remove, $priority = 10)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->remove_filter($tag, $function_to_remove, $priority) : true;
+    }
+}
+
+// WordPress cache functions
+if (! function_exists('wp_cache_get')) {
+    function wp_cache_get($key, $group = '')
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_cache_get($key, $group) : false;
+    }
+}
+
+if (! function_exists('wp_cache_add')) {
+    function wp_cache_add($key, $data, $group = '', $expire = 0)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_cache_add($key, $data, $group, $expire) : true;
+    }
+}
+
+// WordPress text functions
+if (! function_exists('translate')) {
+    function translate($text, $domain = 'default')
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->translate($text, $domain) : $text;
+    }
+}
+
+if (! function_exists('_cleanup_header_comment')) {
+    function _cleanup_header_comment($str)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->_cleanup_header_comment($str) : trim($str);
+    }
+}
+
+if (! function_exists('sanitize_key')) {
+    function sanitize_key($key)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->sanitize_key($key) : strtolower(trim($key));
+    }
+}
+
+if (! function_exists('get_file_data')) {
+    function get_file_data($file, $default_headers = [])
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_file_data($file, $default_headers) : [
+            'title' => 'Title',
+            'slug' => 'slug-demo',
+            'description' => 'Description',
+            'categories' => 'news,updates',
+            'keywords' => 'foo,bar',
+            'viewportWidth' => '1200',
+        ];
     }
 }
 
@@ -426,7 +973,7 @@ if (! class_exists('TestContainer')) {
             return $this->services[$serviceClass] ?? null;
         }
 
-        // Ajout pour compatibilité avec les tests d'attributs
+        // Added for compatibility with attribute tests
         public function make(string $serviceClass): ?object
         {
             return $this->get($serviceClass);
@@ -436,5 +983,34 @@ if (! class_exists('TestContainer')) {
         {
             return $this->get($serviceClass);
         }
+
+        public function has(string $serviceClass): bool
+        {
+            return isset($this->services[$serviceClass]);
+        }
+
+        public function instance(string $abstract, $instance): void
+        {
+            $this->services[$abstract] = $instance;
+        }
+    }
+}
+
+// Mock WP_Error class for WordPress tests
+if (! class_exists('WP_Error')) {
+    class WP_Error
+    {
+        public function __construct()
+        {
+            // Mock implementation
+        }
+    }
+}
+
+// Laravel response helper function
+if (! function_exists('response')) {
+    function response($content = '', $status = 200, array $headers = [])
+    {
+        return new \Illuminate\Http\Response($content, $status, $headers);
     }
 }

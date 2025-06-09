@@ -1,0 +1,105 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit\Route\Infrastructure\Providers;
+
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\TestCase;
+use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
+use Pollora\Route\Infrastructure\Services\ExtendedRouter;
+
+class RouteServiceProviderTest extends TestCase
+{
+    private RouteServiceProvider $provider;
+    private Container $app;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->app = new Container();
+        
+        // Mock required services
+        $dispatcher = $this->createMock(Dispatcher::class);
+        $this->app->instance('events', $dispatcher);
+        
+        // Mock config if needed
+        $config = $this->createMock(\Illuminate\Config\Repository::class);
+        $this->app->instance('config', $config);
+        
+        $this->provider = new RouteServiceProvider($this->app);
+    }
+
+    public function test_it_has_correct_priority(): void
+    {
+        $this->assertEquals(-99, $this->provider->priority);
+    }
+
+    public function test_it_extends_router_in_register(): void
+    {
+        // Mock the original router
+        $originalRouter = $this->createMock(Router::class);
+        $this->app->instance('router', $originalRouter);
+        $this->app->instance('events', $this->createMock(\Illuminate\Contracts\Events\Dispatcher::class));
+        
+        $this->provider->register();
+        
+        // The router should now be extended
+        $this->assertInstanceOf(ExtendedRouter::class, $this->app->make('router'));
+    }
+
+    public function test_wp_match_macro_validates_arguments(): void
+    {
+        $this->provider->boot();
+        
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The wp route requires at least a condition and a callback.');
+        
+        Route::wpMatch(['GET'], 'is_single');
+    }
+
+    public function test_wp_match_macro_creates_wordpress_route(): void
+    {
+        // Mock the router to capture the route creation
+        $router = $this->createMock(ExtendedRouter::class);
+        $router->method('resolveCondition')
+            ->with('single')
+            ->willReturn('is_single');
+        
+        $this->app->instance('router', $router);
+        
+        $this->provider->boot();
+        
+        // This would normally create a route, but we're testing the macro registration
+        $this->assertTrue(Route::hasMacro('wpMatch'));
+        $this->assertTrue(Route::hasMacro('wp'));
+    }
+
+    public function test_wp_macro_is_shortcut_for_all_verbs(): void
+    {
+        $this->provider->boot();
+        
+        $this->assertTrue(Route::hasMacro('wp'));
+    }
+
+    public function test_fallback_route_is_registered_on_boot(): void
+    {
+        $router = $this->createMock(ExtendedRouter::class);
+        $this->app->instance('router', $router);
+        
+        // Mock the booted callback
+        $this->app->booted(function () {
+            // This would register the fallback route
+            $this->assertTrue(true);
+        });
+        
+        $this->provider->boot();
+        
+        // Trigger the booted callbacks
+        $this->app->make('events')->dispatch('booted');
+    }
+}

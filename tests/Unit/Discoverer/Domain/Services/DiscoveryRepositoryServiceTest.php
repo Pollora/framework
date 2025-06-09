@@ -8,11 +8,11 @@ use Pollora\Discoverer\Domain\Models\DiscoveredClass;
 use Pollora\Discoverer\Domain\Services\DiscoveryRepositoryService;
 
 beforeEach(function () {
-    // Mock des dépendances
+    // Mock dependencies
     $this->repository = Mockery::mock(DiscoveryRepositoryInterface::class);
     $this->registry = Mockery::mock(DiscoveryRegistryInterface::class);
 
-    // Service à tester
+    // Service under test
     $this->service = new DiscoveryRepositoryService($this->repository, $this->registry);
 });
 
@@ -21,7 +21,7 @@ afterEach(function () {
 });
 
 test('storeClass method creates and stores DiscoveredClass', function () {
-    // Assertion pour vérifier que la classe est correctement stockée
+    // Assertion to ensure the class is stored correctly
     $this->repository->shouldReceive('store')
         ->once()
         ->withArgs(function (DiscoveredClass $class) {
@@ -29,7 +29,7 @@ test('storeClass method creates and stores DiscoveredClass', function () {
                    $class->getType() === 'test_type';
         });
 
-    // Exécution de la méthode à tester
+    // Execute the method under test
     $this->service->storeClass('App\\Test\\Class1', 'test_type');
 });
 
@@ -89,7 +89,7 @@ test('syncFromRegistry copies classes from registry to repository', function () 
         ->once()
         ->andReturn($registryData);
 
-    // Assertions pour les appels à store
+    // Assertions for calls to store
     $this->repository->shouldReceive('store')
         ->once()
         ->with($class1);
@@ -98,10 +98,10 @@ test('syncFromRegistry copies classes from registry to repository', function () 
         ->once()
         ->with($class2);
 
-    // Assert que persist est appelé à la fin
+    // Assert that persist is called at the end
     $this->repository->shouldReceive('persist')
         ->once();
 
-    // Exécution de la méthode à tester
+    // Execute the method under test
     $this->service->syncFromRegistry();
 });

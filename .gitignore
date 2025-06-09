@@ -9,8 +9,9 @@
 *.swo
 /.idea
 /node_modules
-/build
 
 global_rules.md
 .windsurfrules
+build
+claude
 framework.code-workspace

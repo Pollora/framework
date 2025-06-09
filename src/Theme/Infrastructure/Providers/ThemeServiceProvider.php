@@ -20,7 +20,6 @@ use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
-use Pollora\Theme\Domain\Services\TemplateHierarchy;
 use Pollora\Theme\Domain\Support\ThemeCollection;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
@@ -60,7 +59,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(ThemeService::class, function ($app) {
             return new ThemeManager(
                 $app,
-                $app->make('view')->getFinder(),
+                $app->get('view')->getFinder(),
                 $app->make('translator')->getLoader()
             );
         });
@@ -77,7 +76,6 @@ class ThemeServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerComponentServices();
-        $this->registerTemplateHierarchy();
     }
 
     /**
@@ -198,25 +196,6 @@ class ThemeServiceProvider extends ServiceProvider
         if ($action !== null) {
             $action->add('after_setup_theme', [$this, 'bootTheme']);
         }
-    }
-
-    /**
-     * Register template hierarchy service
-     */
-    protected function registerTemplateHierarchy(): void
-    {
-        $this->app->singleton(\Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface::class, function ($app) {
-            return new TemplateHierarchy(
-                $app->make('config'),
-                $app->get(Action::class),
-                $app->get(Filter::class)
-            );
-        });
-
-        // For backward compatibility
-        $this->app->singleton(TemplateHierarchy::class, function ($app) {
-            return $app->make(\Pollora\Theme\Domain\Contracts\TemplateHierarchyInterface::class);
-        });
     }
 
     /**

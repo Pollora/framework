@@ -11,7 +11,7 @@ use Pollora\Hook\Infrastructure\Services\Action as ActionService;
 use Pollora\Hook\Infrastructure\Services\Filter as FilterService;
 
 // Modify the test class to use the Schedule attribute only on methods
-// since Schedule only targets methods
+// since Schedule targets methods only
 class TestScheduledTask implements Attributable
 {
     public function testMethod(): void
@@ -32,6 +32,14 @@ class TestScheduledTask implements Attributable
     }
 }
 
+// Function to simulate fixed timestamp for tests
+if (! function_exists('time')) {
+    function time()
+    {
+        return 1234567890; // Fixed value for tests
+    }
+}
+
 beforeEach(function () {
     $this->mockAction = Mockery::mock(ActionService::class);
     // Don't define default behavior here, each test will define its specific expectations
@@ -47,9 +55,6 @@ beforeEach(function () {
         ->with(FilterService::class)
         ->andReturn($this->mockFilter);
 
-    // Initialize WordPress mocks (centralisé)
-    setupWordPressMocks();
-
     // Create an AttributeProcessor mock that will use our ServiceLocator mock
     $this->processor = Mockery::mock(AttributeProcessor::class);
     $this->processor->shouldReceive('process')
@@ -63,11 +68,14 @@ beforeEach(function () {
                 }
             }
         });
+
+    // Initialize WordPress mocks
+    WP::$wpFunctions = m::mock('stdClass');
 });
 
 afterEach(function () {
-    resetWordPressMocks();
-    Mockery::close();
+    m::close();
+    WP::$wpFunctions = null;
 });
 
 test('Schedule attribute validates predefined recurrence correctly', function () {
@@ -263,7 +271,7 @@ test('Schedule attribute on hourly method works correctly', function () {
 
 // Test that AttributeProcessor processes all Schedule attributes on methods
 test('AttributeProcessor processes all Schedule attributes on methods', function () {
-    // Utilize an array to store all callbacks
+    // Utilisez un tableau pour stocker tous les callbacks
     $initCallbacks = [];
 
     // We expect 2 Schedule attributes to be processed: testHourlySchedule and testCustomSchedule

@@ -8,7 +8,7 @@ use Pollora\Discoverer\Infrastructure\Services\SpatieDiscoveryAdapter;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
 
-// Création d'une classe concrète pour tester l'adaptateur abstrait
+// Create a concrete class to test the abstract adapter
 class TestSpatieDiscoveryAdapter extends SpatieDiscoveryAdapter
 {
     private array $mockedDirectories;
@@ -43,11 +43,11 @@ class TestSpatieDiscoveryAdapter extends SpatieDiscoveryAdapter
 
     protected function criteria(Discover $discover): Discover
     {
-        // Si un résultat de critère est fourni, le retourner, sinon retourner le discoverer tel quel
+        // If a criteria result is provided, return it; otherwise return the discoverer as is
         return $this->criteriaResult ?? $discover;
     }
 
-    // Exposition des méthodes protégées pour les tests
+    // Expose protected methods for tests
     public function exposedGetCacheIdentifier(): string
     {
         return $this->getCacheIdentifier();
@@ -58,7 +58,7 @@ class TestSpatieDiscoveryAdapter extends SpatieDiscoveryAdapter
         return $this->shouldUseCache();
     }
 
-    // Override de la méthode shouldUseCache pour les tests
+    // Override the shouldUseCache method for tests
     protected function shouldUseCache(): bool
     {
         if (isset($this->shouldUseCache) && $this->shouldUseCache) {
@@ -83,7 +83,7 @@ beforeEach(function () {
 
     $this->adapter = new TestSpatieDiscoveryAdapter(
         $this->app,
-        [__DIR__], // Répertoire qui existe
+        [__DIR__], // Directory that exists
         'test_type'
     );
 });
@@ -103,7 +103,7 @@ test('discover returns empty array when no directories exist', function () {
 });
 
 test('discover applies criteria to discovery instance', function () {
-    // Mock qui va être retourné par criteria() pour nous permettre de vérifier
+    // Mock returned by criteria() for verification
     $criteriaResult = Mockery::mock(Discover::class);
     $criteriaResult->shouldReceive('get')->once()->andReturn(['Class1', 'Class2']);
 
@@ -112,7 +112,7 @@ test('discover applies criteria to discovery instance', function () {
 
     $adapter = new TestSpatieDiscoveryAdapter(
         $app,
-        [__DIR__], // Répertoire qui existe
+        [__DIR__], // Directory that exists
         'test_type',
         $criteriaResult
     );
@@ -141,12 +141,12 @@ test('discover applies cache when cache driver is provided and caching is enable
 
     $adapter = new TestSpatieDiscoveryAdapter(
         $app,
-        [__DIR__], // Répertoire qui existe
+        [__DIR__], // Directory that exists
         'test_type',
         $discoverInstance
     );
 
-    // Forcer l'activation du cache
+    // Force cache activation
     $adapter->shouldUseCache = true;
 
     expect($adapter->discover())->toBe(['Class1']);

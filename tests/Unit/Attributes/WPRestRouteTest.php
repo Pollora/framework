@@ -40,7 +40,7 @@ class TestController implements Attributable
 
 // Mock register_rest_route if not already defined
 if (! function_exists('register_rest_route')) {
-    function register_rest_route($namespace, $route, $args): true
+    function register_rest_route($namespace, $route, $args)
     {
         // Mock: do nothing
         return true;
@@ -68,10 +68,10 @@ describe('WpRestRoute attribute', function () {
 describe('Method attribute', function () {
     test('validates HTTP methods correctly', function () {
         expect(fn () => new Method(['INVALID']))
-            ->toThrow(InvalidArgumentException::class)
-            ->and(fn () => new Method(['GET', 'POST']))
-            ->not->toThrow(InvalidArgumentException::class);
+            ->toThrow(InvalidArgumentException::class);
 
+        expect(fn () => new Method(['GET', 'POST']))
+            ->not->toThrow(InvalidArgumentException::class);
     });
 
     test('correctly handles multiple HTTP methods', function () {
@@ -97,9 +97,9 @@ describe('Method attribute', function () {
         $methodWithCustomPermission = new Method('GET', 'CustomPermission');
 
         expect($methodWithDefaultPermission->permissionCallback)
-            ->toBeNull()
-            ->and($methodWithCustomPermission->permissionCallback)
-            ->toBe('CustomPermission');
+            ->toBeNull();
 
+        expect($methodWithCustomPermission->permissionCallback)
+            ->toBe('CustomPermission');
     });
 });

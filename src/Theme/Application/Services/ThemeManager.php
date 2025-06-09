@@ -39,7 +39,6 @@ class ThemeManager implements ThemeService
         protected ?Loader $localeLoader,
         ?ConsoleDetectionService $consoleDetectionService = null
     ) {
-        // Fallback for backward compatibility if not injected
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
     }
 
@@ -94,7 +93,6 @@ class ThemeManager implements ThemeService
 
     protected function registerThemeDirectories(ThemeMetadata $theme): void
     {
-        $this->viewFinder->addLocation($theme->getBasePath());
         $this->viewFinder->addLocation($theme->getViewPath());
     }
 

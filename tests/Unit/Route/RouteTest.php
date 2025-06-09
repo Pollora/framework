@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Http\Request;
 use Mockery as m;
-use Pollora\Route\Infrastructure\Adapters\Route;
-use Pollora\Route\Infrastructure\Matching\ConditionValidator;
+use Pollora\Route\Domain\Models\Route;
 
 /**
  * Setup function to create test environment for route tests
@@ -68,8 +67,8 @@ test('route can define and retrieve WordPress condition', function () {
     });
     $route->setIsWordPressRoute(true);
 
-    // Define the conditions
-    $route->setConditions(['is_page' => 'is_page']);
+    // Define the condition
+    $route->setCondition('is_page');
 
     // Verify that the condition is correctly defined
     expect($route->getCondition())->toBe('is_page');
@@ -107,7 +106,7 @@ test('route matches correctly for WordPress conditions', function () {
         return 'test';
     });
     $route->setIsWordPressRoute(true);
-    $route->setConditions(['test_condition' => 'test_condition']);
+    $route->setCondition('test_condition');
 
     // Create a request
     $request = Request::create('/test', 'GET');
@@ -125,61 +124,47 @@ test('route matches correctly for WordPress conditions', function () {
 });
 
 /**
- * Test that WordPress validators are correctly initialized.
+ * Test that route can check if it has WordPress conditions.
  */
-test('route initializes WordPress validators correctly', function () {
+test('route can check if it has WordPress conditions', function () {
     setupRouteTest();
 
-    // Create a route
+    // Create a route without conditions
     $route = new Route(['GET'], 'test', function () {
         return 'test';
     });
 
-    // Verify that WordPress validators are correctly initialized
-    $validators = $route->getWordPressValidators();
-    expect($validators)->toBeArray();
-    expect($validators[0])->toBeInstanceOf(ConditionValidator::class);
+    // Should not have condition initially
+    expect($route->hasCondition())->toBeFalse();
+
+    // Set a condition
+    $route->setCondition('is_page');
+
+    // Should now have condition
+    expect($route->hasCondition())->toBeTrue();
 });
 
 /**
- * Test that the matches method uses WordPress validators for WordPress routes.
+ * Test that the route correctly evaluates WordPress conditions during matching.
  */
-test('route uses WordPress validators for matching', function () {
+test('route evaluates WordPress conditions correctly', function () {
     setupRouteTest();
 
-    // Create a mock of the condition validator
-    $validator = m::mock(ConditionValidator::class);
-
-    // Create a WordPress route
+    // Create a WordPress route with a condition that exists
     $route = new Route(['GET'], 'is_page', function () {
         return 'page';
     });
     $route->setIsWordPressRoute(true);
-    $route->setConditions(['is_page' => 'is_page']);
-
-    // Replace WordPress validators with our mock
-    $reflection = new ReflectionProperty($route, 'wordpressValidators');
-    $reflection->setAccessible(true);
-    $reflection->setValue($route, [$validator]);
+    $route->setCondition('is_page');
 
     // Create a request
     $request = Request::create('/test', 'GET');
 
-    // Configure the mock to return true
-    $validator->shouldReceive('matches')
-        ->once()
-        ->with($route, $request)
-        ->andReturn(true);
-
-    // Verify that the matches method returns true
+    // Since is_page() function exists in helpers and returns true by default
+    // the route should match
     expect($route->matches($request))->toBeTrue();
 
-    // Configure the mock to return false
-    $validator->shouldReceive('matches')
-        ->once()
-        ->with($route, $request)
-        ->andReturn(false);
-
-    // Verify that the matches method returns false
+    // Test with a non-existent condition
+    $route->setCondition('nonexistent_function');
     expect($route->matches($request))->toBeFalse();
 });

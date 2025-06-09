@@ -22,7 +22,7 @@
             <div class="mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2">
                 @hasposts
                 <div class="flex flex-col gap-16">
-                    @loop
+                    @posts
                     <article class="group relative flex flex-col items-start">
                         <h2 class="text-base font-semibold tracking-tight text-zinc-800">
                             <div class="absolute -inset-x-4 -inset-y-6 z-0 scale-95 bg-zinc-50 opacity-0 transition group-hover:scale-100 group-hover:opacity-100 sm:-inset-x-6 sm:rounded-2xl"></div>
@@ -45,7 +45,7 @@
                             </svg>
                         </div>
                     </article>
-                    @endloop
+                    @endposts
                 </div>
                 @endhasposts
                 <div class="space-y-10 lg:pl-16 xl:pl-24">

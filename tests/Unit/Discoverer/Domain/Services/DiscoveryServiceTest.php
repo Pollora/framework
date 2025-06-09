@@ -8,11 +8,11 @@ use Pollora\Discoverer\Domain\Models\DiscoveredClass;
 use Pollora\Discoverer\Domain\Services\DiscoveryService;
 
 beforeEach(function () {
-    // Mock des dépendances
+    // Mock dependencies
     $this->registry = Mockery::mock(DiscoveryRegistryInterface::class);
     $this->scout = Mockery::mock(ScoutInterface::class);
 
-    // Service à tester
+    // Service under test
     $this->service = new DiscoveryService($this->registry, [$this->scout]);
 });
 
@@ -21,14 +21,14 @@ afterEach(function () {
 });
 
 test('discoverAndRegister method discovers and registers classes from scouts', function () {
-    // Configuration des mocks
+    // Mock configuration
     $this->scout->shouldReceive('getType')->andReturn('test_type');
     $this->scout->shouldReceive('discover')->once()->andReturn([
         'App\\Test\\Class1',
         'App\\Test\\Class2',
     ]);
 
-    // Assertions sur l'enregistrement des classes découvertes
+    // Assertions for registering discovered classes
     $this->registry->shouldReceive('register')
         ->twice()
         ->withArgs(function (DiscoveredClass $class) {
@@ -48,7 +48,7 @@ test('discoverAndRegister method discovers and registers classes from scouts', f
             return false;
         });
 
-    // Exécution de la méthode à tester
+    // Execute the method under test
     $this->service->discoverAndRegister();
 });
 

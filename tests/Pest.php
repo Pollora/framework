@@ -26,6 +26,10 @@ declare(strict_types=1);
 |
 */
 
+expect()->extend('toBeOne', function () {
+    return $this->toBe(1);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -36,6 +40,11 @@ declare(strict_types=1);
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
+
+function something()
+{
+    // ..
+}
 
 // Load helper functions
 require_once __DIR__.'/Unit/helpers.php';
