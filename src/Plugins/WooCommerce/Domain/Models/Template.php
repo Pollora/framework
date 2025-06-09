@@ -50,12 +50,12 @@ final readonly class Template
      */
     public function toBladeTemplate(): self
     {
-        if ($this->isBladeTemplate || !str_ends_with($this->path, '.php')) {
+        if ($this->isBladeTemplate || ! str_ends_with($this->path, '.php')) {
             return $this;
         }
 
         $bladePath = str_replace('.php', '.blade.php', $this->path);
-        
+
         return new self($bladePath, $this->name, true);
     }
 
@@ -64,13 +64,13 @@ final readonly class Template
      */
     public function getViewName(): string
     {
-        if (!$this->isBladeTemplate) {
+        if (! $this->isBladeTemplate) {
             return '';
         }
 
         // Convert path to view name: woocommerce/single-product.blade.php -> woocommerce.single-product
         $viewName = str_replace(['/', '.blade.php'], ['.', ''], $this->getRelativePath());
-        
+
         return trim($viewName, '.');
     }
 }

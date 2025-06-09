@@ -8,7 +8,7 @@ use Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService;
 describe('WooCommerceService', function () {
     beforeEach(function () {
         setupWordPressMocks();
-        $this->service = new WooCommerceService();
+        $this->service = new WooCommerceService;
     });
 
     afterEach(function () {
@@ -17,7 +17,7 @@ describe('WooCommerceService', function () {
 
     test('can get default template paths', function () {
         // Mock WC_ABSPATH constant
-        if (!defined('WC_ABSPATH')) {
+        if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
@@ -31,6 +31,7 @@ describe('WooCommerceService', function () {
         // Since we can't easily undefine constants in PHP, we'll skip if already defined
         if (defined('WC_ABSPATH')) {
             expect(true)->toBeTrue(); // Make test pass without assertions
+
             return;
         }
 
@@ -40,13 +41,13 @@ describe('WooCommerceService', function () {
 
     test('can get theme template paths for child themes', function () {
         // Mock WordPress functions
-        setWordPressFunction('is_child_theme', fn() => true);
-        setWordPressFunction('get_template_directory', fn() => '/themes/parent');
+        setWordPressFunction('is_child_theme', fn () => true);
+        setWordPressFunction('get_template_directory', fn () => '/themes/parent');
 
         // Mock WooCommerce function
         $mockWC = Mockery::mock();
         $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
-        setWordPressFunction('WC', fn() => $mockWC);
+        setWordPressFunction('WC', fn () => $mockWC);
 
         $paths = $this->service->getThemeTemplatePaths();
 
@@ -54,7 +55,7 @@ describe('WooCommerceService', function () {
     });
 
     test('returns empty array for non-child themes', function () {
-        setWordPressFunction('is_child_theme', fn() => false);
+        setWordPressFunction('is_child_theme', fn () => false);
 
         $paths = $this->service->getThemeTemplatePaths();
 
@@ -62,7 +63,7 @@ describe('WooCommerceService', function () {
     });
 
     test('can detect woocommerce status screen', function () {
-        $screen = new stdClass();
+        $screen = new stdClass;
         $screen->id = 'woocommerce_page_wc-status';
 
         $result = $this->service->isWooCommerceStatusScreen(true, false, $screen);
@@ -71,7 +72,7 @@ describe('WooCommerceService', function () {
     });
 
     test('returns false when not on woocommerce status screen', function () {
-        $screen = new stdClass();
+        $screen = new stdClass;
         $screen->id = 'edit-post';
 
         $result = $this->service->isWooCommerceStatusScreen(true, false, $screen);
@@ -80,7 +81,7 @@ describe('WooCommerceService', function () {
     });
 
     test('returns false when doing ajax', function () {
-        $screen = new stdClass();
+        $screen = new stdClass;
         $screen->id = 'woocommerce_page_wc-status';
 
         $result = $this->service->isWooCommerceStatusScreen(true, true, $screen);
@@ -89,7 +90,7 @@ describe('WooCommerceService', function () {
     });
 
     test('returns false when not in admin', function () {
-        $screen = new stdClass();
+        $screen = new stdClass;
         $screen->id = 'woocommerce_page_wc-status';
 
         $result = $this->service->isWooCommerceStatusScreen(false, false, $screen);
@@ -100,7 +101,7 @@ describe('WooCommerceService', function () {
     test('can get woocommerce template path with WC available', function () {
         $mockWC = Mockery::mock();
         $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
-        setWordPressFunction('WC', fn() => $mockWC);
+        setWordPressFunction('WC', fn () => $mockWC);
 
         $path = $this->service->getWooCommerceTemplatePath();
 
@@ -108,7 +109,7 @@ describe('WooCommerceService', function () {
     });
 
     test('returns default path when WC not available', function () {
-        setWordPressFunction('WC', fn() => null);
+        setWordPressFunction('WC', fn () => null);
 
         $path = $this->service->getWooCommerceTemplatePath();
 
@@ -117,16 +118,16 @@ describe('WooCommerceService', function () {
 
     test('can get all template paths', function () {
         // Mock WC_ABSPATH constant
-        if (!defined('WC_ABSPATH')) {
+        if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
-        setWordPressFunction('is_child_theme', fn() => true);
-        setWordPressFunction('get_template_directory', fn() => '/themes/parent');
+        setWordPressFunction('is_child_theme', fn () => true);
+        setWordPressFunction('get_template_directory', fn () => '/themes/parent');
 
         $mockWC = Mockery::mock();
         $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
-        setWordPressFunction('WC', fn() => $mockWC);
+        setWordPressFunction('WC', fn () => $mockWC);
 
         $paths = $this->service->getAllTemplatePaths();
 

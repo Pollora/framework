@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 use Mockery as m;
-use Pollora\Attributes\Attributable;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Attributes\Taxonomy\AllowHierarchy;
 use Pollora\Attributes\Taxonomy\Args;

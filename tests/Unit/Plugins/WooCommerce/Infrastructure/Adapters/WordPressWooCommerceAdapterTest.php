@@ -7,7 +7,7 @@ use Pollora\Plugins\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdap
 describe('WordPressWooCommerceAdapter', function () {
     beforeEach(function () {
         setupWordPressMocks();
-        $this->adapter = new WordPressWooCommerceAdapter();
+        $this->adapter = new WordPressWooCommerceAdapter;
     });
 
     afterEach(function () {
@@ -19,6 +19,7 @@ describe('WordPressWooCommerceAdapter', function () {
             expect($templates)->toBe('single-product.php');
             expect($load)->toBeFalse();
             expect($requireOnce)->toBeTrue();
+
             return '/theme/single-product.php';
         });
 
@@ -30,6 +31,7 @@ describe('WordPressWooCommerceAdapter', function () {
     test('can locate template with array of templates', function () {
         setWordPressFunction('locate_template', function ($templates, $load, $requireOnce) {
             expect($templates)->toBe(['single-product.blade.php', 'single-product.php']);
+
             return '/theme/single-product.php';
         });
 
@@ -40,7 +42,7 @@ describe('WordPressWooCommerceAdapter', function () {
 
     test('returns empty string when locate_template function not available', function () {
         // Don't set the function to simulate unavailability
-        $adapter = new WordPressWooCommerceAdapter();
+        $adapter = new WordPressWooCommerceAdapter;
 
         $result = $adapter->locateTemplate('single-product.php');
 
@@ -51,6 +53,7 @@ describe('WordPressWooCommerceAdapter', function () {
         setWordPressFunction('add_theme_support', function ($feature, $options = null) {
             expect($feature)->toBe('woocommerce');
             expect($options)->toBeNull();
+
             return true;
         });
 
@@ -63,6 +66,7 @@ describe('WordPressWooCommerceAdapter', function () {
         setWordPressFunction('add_theme_support', function ($feature, $options = null) {
             expect($feature)->toBe('woocommerce');
             expect($options)->toBe(['gallery_thumbnail_image_width' => 150]);
+
             return true;
         });
 
@@ -72,7 +76,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('returns false when add_theme_support not available', function () {
-        $adapter = new WordPressWooCommerceAdapter();
+        $adapter = new WordPressWooCommerceAdapter;
 
         $result = $adapter->addThemeSupport('woocommerce');
 
@@ -80,7 +84,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('can detect child theme', function () {
-        setWordPressFunction('is_child_theme', fn() => true);
+        setWordPressFunction('is_child_theme', fn () => true);
 
         $result = $this->adapter->isChildTheme();
 
@@ -88,7 +92,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('returns false when not child theme', function () {
-        setWordPressFunction('is_child_theme', fn() => false);
+        setWordPressFunction('is_child_theme', fn () => false);
 
         $result = $this->adapter->isChildTheme();
 
@@ -96,7 +100,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('can get stylesheet directory', function () {
-        setWordPressFunction('get_stylesheet_directory', fn() => '/themes/child');
+        setWordPressFunction('get_stylesheet_directory', fn () => '/themes/child');
 
         $result = $this->adapter->getStylesheetDirectory();
 
@@ -104,7 +108,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('can get template directory', function () {
-        setWordPressFunction('get_template_directory', fn() => '/themes/parent');
+        setWordPressFunction('get_template_directory', fn () => '/themes/parent');
 
         $result = $this->adapter->getTemplateDirectory();
 
@@ -112,7 +116,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('can detect admin area', function () {
-        setWordPressFunction('is_admin', fn() => true);
+        setWordPressFunction('is_admin', fn () => true);
 
         $result = $this->adapter->isAdmin();
 
@@ -120,7 +124,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('can detect ajax request', function () {
-        setWordPressFunction('wp_doing_ajax', fn() => true);
+        setWordPressFunction('wp_doing_ajax', fn () => true);
 
         $result = $this->adapter->isDoingAjax();
 
@@ -128,10 +132,10 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('can get current screen', function () {
-        $expectedScreen = new stdClass();
+        $expectedScreen = new stdClass;
         $expectedScreen->id = 'woocommerce_page_wc-status';
 
-        setWordPressFunction('get_current_screen', fn() => $expectedScreen);
+        setWordPressFunction('get_current_screen', fn () => $expectedScreen);
 
         $result = $this->adapter->getCurrentScreen();
 
@@ -141,6 +145,7 @@ describe('WordPressWooCommerceAdapter', function () {
     test('can detect doing action', function () {
         setWordPressFunction('doing_action', function ($action) {
             expect($action)->toBe('after_setup_theme');
+
             return true;
         });
 
@@ -152,7 +157,7 @@ describe('WordPressWooCommerceAdapter', function () {
     test('can get woocommerce template path', function () {
         $mockWC = Mockery::mock();
         $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
-        setWordPressFunction('WC', fn() => $mockWC);
+        setWordPressFunction('WC', fn () => $mockWC);
 
         $result = $this->adapter->getWooCommerceTemplatePath();
 
@@ -160,7 +165,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('returns default template path when WC not available', function () {
-        setWordPressFunction('WC', fn() => null);
+        setWordPressFunction('WC', fn () => null);
 
         $result = $this->adapter->getWooCommerceTemplatePath();
 
@@ -172,6 +177,7 @@ describe('WordPressWooCommerceAdapter', function () {
             expect($hook)->toBe('pollora/woocommerce/template_paths');
             expect($value)->toBe(['/default/path/']);
             expect($args)->toBe(['extra', 'args']);
+
             return ['/default/path/', '/custom/path/'];
         });
 
@@ -181,7 +187,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('returns original value when apply_filters not available', function () {
-        $adapter = new WordPressWooCommerceAdapter();
+        $adapter = new WordPressWooCommerceAdapter;
 
         $result = $adapter->applyFilters('test_hook', 'test_value');
 
@@ -189,11 +195,11 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('can detect woocommerce availability', function () {
-        if (!defined('WC_ABSPATH')) {
+        if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
-        setWordPressFunction('WC', fn() => new stdClass());
+        setWordPressFunction('WC', fn () => new stdClass);
 
         $result = $this->adapter->isWooCommerceAvailable();
 
@@ -201,11 +207,11 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('returns false when woocommerce not available', function () {
-        setWordPressFunction('WC', fn() => null);
+        setWordPressFunction('WC', fn () => null);
 
         $result = $this->adapter->isWooCommerceAvailable();
 
-        if (!defined('WC_ABSPATH')) {
+        if (! defined('WC_ABSPATH')) {
             expect($result)->toBeFalse();
         }
     });

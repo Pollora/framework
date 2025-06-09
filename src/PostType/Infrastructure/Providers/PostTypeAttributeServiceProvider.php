@@ -6,7 +6,7 @@ namespace Pollora\PostType\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
-use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
+use Pollora\Discoverer\Framework\API\PolloraDiscover;
 use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\Domain\Models\AbstractPostType;
 
@@ -31,27 +31,33 @@ class PostTypeAttributeServiceProvider extends ServiceProvider
      *
      * Processes discovered post types and registers them with WordPress.
      */
-    public function boot(DiscoveryRegistryInterface $registry): void
+    public function boot(): void
     {
-        $this->registerPostTypes($registry);
+        $this->registerPostTypes();
     }
 
     /**
-     * Register all post types from the registry.
-     *
-     * @param  DiscoveryRegistryInterface  $registry  The discovery registry
+     * Register all post types using the new discovery system.
      */
-    protected function registerPostTypes(DiscoveryRegistryInterface $registry): void
+    protected function registerPostTypes(): void
     {
-        $postTypeClasses = $registry->getByType('post_type');
+        try {
+            $postTypeClasses = PolloraDiscover::scout('post_types');
 
-        if (empty($postTypeClasses)) {
-            return;
-        }
-        $processor = new AttributeProcessor($this->app);
+            if ($postTypeClasses->isEmpty()) {
+                return;
+            }
 
-        foreach ($postTypeClasses as $postTypeClass) {
-            $this->registerPostType($postTypeClass->getClassName(), $processor);
+            $processor = new AttributeProcessor($this->app);
+
+            foreach ($postTypeClasses as $postTypeClass) {
+                $this->registerPostType($postTypeClass, $processor);
+            }
+        } catch (\Throwable $e) {
+            // Log error but don't break the application
+            if (function_exists('error_log')) {
+                error_log('Failed to load post types: '.$e->getMessage());
+            }
         }
     }
 

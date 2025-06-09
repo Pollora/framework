@@ -26,7 +26,7 @@ describe('FrontendController', function () {
     it('aborts when themes disabled', function () {
         setWordPressFunction('wp_using_themes', fn () => false);
         $request = Request::create('/test');
-        
+
         expect(fn () => $this->controller->handle($request))
             ->toThrow(HttpException::class, 'Themes are disabled');
     });

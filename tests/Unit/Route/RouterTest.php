@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Http\Request;
 use Mockery as m;
 use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
-use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 
 /**
  * Setup function to create mocks and the router instance for all tests

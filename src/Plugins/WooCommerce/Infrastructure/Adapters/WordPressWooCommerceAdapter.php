@@ -42,6 +42,7 @@ class WordPressWooCommerceAdapter
             if ($options !== null) {
                 return add_theme_support($feature, $options);
             }
+
             return add_theme_support($feature);
         }
 

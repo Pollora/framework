@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Container\Container;
 use Mockery as m;
 use Pollora\Ajax\Domain\Models\AjaxAction;
 use Pollora\Ajax\Infrastructure\Repositories\WordPressAjaxActionRegistrar;
@@ -34,6 +33,7 @@ describe('WordPressAjaxActionRegistrar', function () {
         $actionService = m::mock(Action::class);
         $actionService->shouldReceive('add')->andReturnUsing(function ($hook, $callback) use ($actionService) {
             $GLOBALS['pollora_action_calls'][] = [$hook, $callback];
+
             return $actionService;
         });
         $container->shouldReceive('get')->with(Action::class)->andReturn($actionService);
@@ -49,6 +49,7 @@ describe('WordPressAjaxActionRegistrar', function () {
         $actionService = m::mock(Action::class);
         $actionService->shouldReceive('add')->andReturnUsing(function ($hook, $callback) use ($actionService) {
             $GLOBALS['pollora_action_calls'][] = [$hook, $callback];
+
             return $actionService;
         });
         $container->shouldReceive('get')->with(Action::class)->andReturn($actionService);
@@ -64,6 +65,7 @@ describe('WordPressAjaxActionRegistrar', function () {
         $actionService = m::mock(Action::class);
         $actionService->shouldReceive('add')->andReturnUsing(function ($hook, $callback) use ($actionService) {
             $GLOBALS['pollora_action_calls'][] = [$hook, $callback];
+
             return $actionService;
         });
         $container->shouldReceive('get')->with(Action::class)->andReturn($actionService);

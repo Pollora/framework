@@ -34,7 +34,7 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
      * Resolve a WordPress type by name.
      *
      * @param  string  $typeName  Fully qualified WP_* class name
-     * @return mixed|null         The resolved object or null if unavailable
+     * @return mixed|null The resolved object or null if unavailable
      */
     public function resolve(string $typeName): mixed
     {
@@ -47,8 +47,6 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
 
     /**
      * Resolve the current WP_Post object if available.
-     *
-     * @return \WP_Post|null
      */
     public function resolvePost(): ?\WP_Post
     {
@@ -72,8 +70,6 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
 
     /**
      * Resolve the current WP_Term object if available.
-     *
-     * @return \WP_Term|null
      */
     public function resolveTerm(): ?\WP_Term
     {
@@ -88,8 +84,6 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
 
     /**
      * Resolve the current WP_User object if available.
-     *
-     * @return \WP_User|null
      */
     public function resolveUser(): ?\WP_User
     {
@@ -113,8 +107,6 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
 
     /**
      * Resolve the global WP_Query instance.
-     *
-     * @return \WP_Query|null
      */
     public function resolveQuery(): ?\WP_Query
     {
@@ -125,8 +117,6 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
 
     /**
      * Resolve the global WP instance.
-     *
-     * @return \WP|null
      */
     public function resolveWP(): ?\WP
     {

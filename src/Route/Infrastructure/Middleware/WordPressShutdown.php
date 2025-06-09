@@ -21,8 +21,8 @@ class WordPressShutdown
      * Ensures WordPress shutdown hooks are executed after the response.
      *
      * @param  Request  $request  Incoming HTTP request
-     * @param  Closure  $next     Next middleware handler
-     * @return mixed             Response from subsequent middleware
+     * @param  Closure  $next  Next middleware handler
+     * @return mixed Response from subsequent middleware
      */
     public function handle(Request $request, Closure $next): mixed
     {

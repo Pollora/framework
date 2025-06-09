@@ -93,6 +93,7 @@ trait QueryTrait
         // Check for AJAX requests BEFORE calling wp() to prevent them from going through normal WordPress query processing
         if ($this->isAjaxRequest()) {
             $this->handleCustomAjaxRequest();
+
             return; // Exit early, don't process through normal WordPress flow
         }
 

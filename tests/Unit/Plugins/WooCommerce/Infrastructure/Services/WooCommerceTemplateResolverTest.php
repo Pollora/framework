@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
-use Mockery\MockInterface;
 use Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService;
 use Pollora\Plugins\WooCommerce\Infrastructure\Services\WooCommerceTemplateResolver;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
@@ -143,7 +142,7 @@ describe('WooCommerceTemplateResolver', function () {
         $result = $this->resolver->extendTemplateLoaderFiles($templates, $defaultFile);
 
         // Count occurrences of blade template
-        $bladeCount = count(array_filter($result, fn($template) => $template === 'single-product.blade.php'));
+        $bladeCount = count(array_filter($result, fn ($template) => $template === 'single-product.blade.php'));
         expect($bladeCount)->toBe(1);
     });
 
@@ -171,7 +170,7 @@ describe('WooCommerceTemplateResolver', function () {
 
         // First few items should be blade templates
         expect($result[0])->toMatch('/\.blade\.php$/');
-        
+
         // Original templates should still be present but later
         expect($result)->toContain('single-product.php');
         expect($result)->toContain('archive-product.php');
