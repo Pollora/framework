@@ -91,9 +91,7 @@ final class HookClassesScout extends AbstractPolloraScout
         foreach ($this->getThemePaths() as $themePath) {
             // Common hook directory patterns in themes
             $hookPaths = [
-                $themePath.'/inc/Hooks',
-                $themePath.'/app/Hooks',
-                $themePath.'/Hooks',
+                $themePath.'/app',
             ];
 
             foreach ($hookPaths as $hookPath) {
