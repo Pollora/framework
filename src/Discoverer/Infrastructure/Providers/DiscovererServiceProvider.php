@@ -4,154 +4,98 @@ declare(strict_types=1);
 
 namespace Pollora\Discoverer\Infrastructure\Providers;
 
-use Illuminate\Contracts\Container\Container;
+use Illuminate\Container\Container;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
-use Pollora\Discoverer\Domain\Contracts\ScoutInterface;
-use Pollora\Discoverer\Domain\Services\DiscoveryService;
-use Pollora\Discoverer\Infrastructure\Repositories\InMemoryDiscoveryRegistry;
-use Pollora\Discoverer\Infrastructure\Services\Scouts\AttributeScout;
-use Pollora\Discoverer\Infrastructure\Services\Scouts\HookScout;
-use Pollora\Discoverer\Infrastructure\Services\Scouts\PostTypeScout;
-use Pollora\Discoverer\Infrastructure\Services\Scouts\RestScout;
-use Pollora\Discoverer\Infrastructure\Services\Scouts\TaxonomyScout;
-use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
-use Spatie\StructureDiscoverer\Cache\FileDiscoverCacheDriver;
-use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
+use Pollora\Discoverer\Domain\Contracts\ScoutRegistryInterface;
+use Pollora\Discoverer\Framework\API\PolloraDiscover;
+use Pollora\Discoverer\Infrastructure\Registry\ScoutRegistry;
+use Pollora\Discoverer\Scouts\AttributableClassesScout;
+use Pollora\Discoverer\Scouts\HookClassesScout;
+use Pollora\Discoverer\Scouts\PostTypeClassesScout;
+use Pollora\Discoverer\Scouts\TaxonomyClassesScout;
+use Pollora\Discoverer\Scouts\WpRestRoutesScout;
 
 /**
- * Service provider for class auto-discovery functionality.
+ * Service provider for the simplified Pollora discovery system.
+ *
+ * This provider registers the core discovery services and scouts following
+ * the new simplified architecture. It provides a clean registry-based approach
+ * for scout management and automatic discovery of framework components.
  */
 final class DiscovererServiceProvider extends ServiceProvider
 {
     /**
-     * Scout configurations with their custom directory mappings.
-     * Key is the scout class, value is a callback to define custom directories.
+     * Core scouts provided by the framework.
      *
-     * @var array<class-string<ScoutInterface>, callable>
+     * @var array<string, string> Scout key => Scout class mappings
      */
-    protected array $scoutConfigs = [];
-
-    /**
-     * Default scouts that should always be registered.
-     *
-     * @var array<class-string<ScoutInterface>>
-     */
-    protected array $scouts = [
-        HookScout::class,
-        AttributeScout::class,
-        PostTypeScout::class,
-        TaxonomyScout::class,
-        RestScout::class,
+    private array $coreScouts = [
+        'attributable' => AttributableClassesScout::class,
+        'hooks' => HookClassesScout::class,
+        'post_types' => PostTypeClassesScout::class,
+        'taxonomies' => TaxonomyClassesScout::class,
+        'wp_rest_routes' => WpRestRoutesScout::class,
     ];
 
+    /**
+     * Register the discovery services in the container.
+     */
     public function register(): void
     {
-        // Register the main registry (volatile memory)
-        $this->app->singleton(DiscoveryRegistryInterface::class, InMemoryDiscoveryRegistry::class);
+        $this->registerScoutRegistry();
+        $this->registerCoreScouts();
+    }
 
-        // Create a cache service for Spatie's Structure Discoverer
-        $this->app->singleton(DiscoverCacheDriver::class, function (Container $app) {
-            // Use Laravel cache if available
-            if (class_exists(LaravelDiscoverCacheDriver::class)
-                && method_exists($app, 'environment')) {
-                return new LaravelDiscoverCacheDriver;
-            }
+    /**
+     * Bootstrap the discovery services.
+     */
+    public function boot(): void
+    {
+        $this->bootCoreScouts();
+    }
 
-            // Otherwise use file cache
-            $cachePath = defined('WP_CONTENT_DIR')
-                ? WP_CONTENT_DIR.'/cache/pollora'
-                : __DIR__.'/../../../../storage/cache/pollora';
-
-            if (! is_dir($cachePath) && ! mkdir($cachePath, 0755, true) && ! is_dir($cachePath)) {
-                throw new \RuntimeException("Could not create cache directory: {$cachePath}");
-            }
-
-            return new FileDiscoverCacheDriver($cachePath);
-        });
-
-        // Detect generic application paths
-        $appPath = '';
-        $modulesPath = '';
-
-        // For Laravel
-        if (function_exists('app_path')) {
-            $appPath = app_path();
-        }
-
-        // For custom modules
-        if ($this->app->bound('modules')) {
-            try {
-                $modulesPath = $this->app->make('modules')->getPath();
-            } catch (\Exception $e) {
-                // Ignore error
-            }
-        }
-
-        // Register scouts with their cache injector
-        foreach ($this->scouts as $scoutClass) {
-            $this->app->singleton($scoutClass, function (Container $app) use ($scoutClass, $appPath, $modulesPath) {
-                // Initialize default directories
-                $directories = [];
-
-                // Use default directories defined by the scout class if method exists
-                if (method_exists($scoutClass, 'getDefaultDirectories')) {
-                    $directories = call_user_func([$scoutClass, 'getDefaultDirectories'], $appPath, $modulesPath);
-                } else {
-                    // Fallback for scouts without getDefaultDirectories method
-                    if ($appPath) {
-                        $directories[] = $appPath;
-                    }
-                    if ($modulesPath) {
-                        $directories[] = $modulesPath;
-                    }
-                }
-
-                // If a custom configuration exists for this scout, apply it
-                if (isset($this->scoutConfigs[$scoutClass])) {
-                    $customDirs = call_user_func($this->scoutConfigs[$scoutClass], $appPath, $modulesPath);
-                    if (is_array($customDirs) && ! empty($customDirs)) {
-                        $directories = $customDirs;
-                    }
-                }
-
-                return new $scoutClass(
-                    $app,
-                    $directories
-                );
-            });
-        }
-
-        // Register the discovery service
-        $this->app->singleton(DiscoveryService::class, function (Container $app) {
-            $scouts = array_map(
-                fn (string $scoutClass) => $app->make($scoutClass),
-                $this->scouts
-            );
-
-            return new DiscoveryService(
-                $app->make(DiscoveryRegistryInterface::class),
-                $scouts
-            );
+    /**
+     * Register the scout registry as a singleton.
+     */
+    private function registerScoutRegistry(): void
+    {
+        $this->app->singleton(ScoutRegistryInterface::class, function (Container $app): ScoutRegistry {
+            return new ScoutRegistry($app);
         });
     }
 
     /**
-     * Allow setting custom directories for a specific scout.
-     *
-     * @param  class-string<ScoutInterface>  $scoutClass  The scout class to configure
-     * @param  callable  $directoryCallback  Callback that returns an array of directories
-     * @return $this
+     * Register core scout classes in the container.
      */
-    public function setScoutDirectories(string $scoutClass, callable $directoryCallback): self
+    private function registerCoreScouts(): void
     {
-        $this->scoutConfigs[$scoutClass] = $directoryCallback;
-
-        return $this;
+        foreach ($this->coreScouts as $scoutClass) {
+            $this->app->singleton($scoutClass, function (Container $app) use ($scoutClass): object {
+                return new $scoutClass($app);
+            });
+        }
     }
 
-    public function boot(): void
+    /**
+     * Register core scouts with the discovery system.
+     */
+    private function bootCoreScouts(): void
     {
-        $this->app->make(DiscoveryService::class)->discoverAndRegister();
+        foreach ($this->coreScouts as $key => $scoutClass) {
+            PolloraDiscover::register($key, $scoutClass);
+        }
+    }
+
+    /**
+     * Get the services provided by this provider.
+     *
+     * @return array<string> Array of provided services
+     */
+    public function provides(): array
+    {
+        return [
+            ScoutRegistryInterface::class,
+            ...array_values($this->coreScouts),
+        ];
     }
 }

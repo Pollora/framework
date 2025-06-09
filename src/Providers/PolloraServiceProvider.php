@@ -13,6 +13,7 @@ use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Attributes\AttributesServiceProvider;
+use Pollora\Attributes\Infrastructure\Providers\AttributableServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
@@ -39,6 +40,7 @@ use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
+use Pollora\WpRest\Infrastructure\Providers\WpRestAttributeServiceProvider;
 
 /**
  * Main service provider for the Pollora framework.
@@ -72,6 +74,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
+        $this->app->register(AttributableServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
 
         $this->app->register(TaxonomyServiceProvider::class);
@@ -79,6 +82,9 @@ class PolloraServiceProvider extends ServiceProvider
 
         $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(PostTypeAttributeServiceProvider::class);
+
+        // WordPress REST API
+        $this->app->register(WpRestAttributeServiceProvider::class);
 
         // Shared modules
         $this->app->register(CollectionServiceProvider::class);

@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Support\ServiceProvider;
-use Mockery\MockInterface;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Plugins\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
@@ -22,7 +19,7 @@ describe('WooCommerceServiceProvider', function () {
     beforeEach(function () {
         setupWordPressMocks();
 
-        $this->container = new WooCommerceTestContainer();
+        $this->container = new WooCommerceTestContainer;
         $this->provider = new WooCommerceServiceProvider($this->container);
     });
 
@@ -76,8 +73,8 @@ describe('WooCommerceServiceProvider', function () {
         // Mock all required dependencies
         $this->container->instance(TemplateFinderInterface::class, Mockery::mock(TemplateFinderInterface::class));
         $this->container->instance(ViewFactory::class, Mockery::mock(ViewFactory::class));
-        $this->container->instance(WooCommerceService::class, new WooCommerceService());
-        $this->container->instance(WordPressWooCommerceAdapter::class, new WordPressWooCommerceAdapter());
+        $this->container->instance(WooCommerceService::class, new WooCommerceService);
+        $this->container->instance(WordPressWooCommerceAdapter::class, new WordPressWooCommerceAdapter);
 
         $this->provider->register();
 
@@ -89,7 +86,7 @@ describe('WooCommerceServiceProvider', function () {
         // Mock all required dependencies
         $this->container->instance(TemplateFinderInterface::class, Mockery::mock(TemplateFinderInterface::class));
         $this->container->instance(ViewFactory::class, Mockery::mock(ViewFactory::class));
-        $this->container->instance(WooCommerceService::class, new WooCommerceService());
+        $this->container->instance(WooCommerceService::class, new WooCommerceService);
 
         $this->provider->register();
 
@@ -103,8 +100,8 @@ describe('WooCommerceServiceProvider', function () {
         $this->container->instance(Filter::class, Mockery::mock(Filter::class));
         $this->container->instance(TemplateFinderInterface::class, Mockery::mock(TemplateFinderInterface::class));
         $this->container->instance(ViewFactory::class, Mockery::mock(ViewFactory::class));
-        $this->container->instance(WooCommerceService::class, new WooCommerceService());
-        $this->container->instance(WordPressWooCommerceAdapter::class, new WordPressWooCommerceAdapter());
+        $this->container->instance(WooCommerceService::class, new WooCommerceService);
+        $this->container->instance(WordPressWooCommerceAdapter::class, new WordPressWooCommerceAdapter);
 
         $this->provider->register();
 
@@ -141,10 +138,11 @@ class WooCommerceTestContainer extends \TestContainer
     {
         // Check if it's a singleton factory
         if (isset($this->singletons[$serviceClass])) {
-            if (!isset($this->services[$serviceClass])) {
+            if (! isset($this->services[$serviceClass])) {
                 $factory = $this->singletons[$serviceClass];
                 $this->services[$serviceClass] = $factory($this);
             }
+
             return $this->services[$serviceClass];
         }
 

@@ -6,7 +6,7 @@ namespace Pollora\Taxonomy\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
-use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
+use Pollora\Discoverer\Framework\API\PolloraDiscover;
 use Pollora\Taxonomy\Application\Services\TaxonomyService;
 use Pollora\Taxonomy\Domain\Models\AbstractTaxonomy;
 
@@ -31,28 +31,33 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
      *
      * Processes discovered taxonomies and registers them with WordPress.
      */
-    public function boot(DiscoveryRegistryInterface $registry): void
+    public function boot(): void
     {
-        $this->registerTaxonomies($registry);
+        $this->registerTaxonomies();
     }
 
     /**
-     * Register all taxonomies from the registry.
-     *
-     * @param  DiscoveryRegistryInterface  $registry  The discovery registry
+     * Register all taxonomies using the new discovery system.
      */
-    protected function registerTaxonomies(DiscoveryRegistryInterface $registry): void
+    protected function registerTaxonomies(): void
     {
-        $taxonomyClasses = $registry->getByType('taxonomy');
+        try {
+            $taxonomyClasses = PolloraDiscover::scout('taxonomies');
 
-        if (empty($taxonomyClasses)) {
-            return;
-        }
+            if ($taxonomyClasses->isEmpty()) {
+                return;
+            }
 
-        $processor = new AttributeProcessor($this->app);
+            $processor = new AttributeProcessor($this->app);
 
-        foreach ($taxonomyClasses as $taxonomyClass) {
-            $this->registerTaxonomy($taxonomyClass->getClassName(), $processor);
+            foreach ($taxonomyClasses as $taxonomyClass) {
+                $this->registerTaxonomy($taxonomyClass, $processor);
+            }
+        } catch (\Throwable $e) {
+            // Log error but don't break the application
+            if (function_exists('error_log')) {
+                error_log('Failed to load taxonomies: '.$e->getMessage());
+            }
         }
     }
 

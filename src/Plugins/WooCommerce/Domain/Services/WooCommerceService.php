@@ -25,7 +25,7 @@ class WooCommerceService
 
         // Add WooCommerce plugin templates path if defined
         if (defined('WC_ABSPATH')) {
-            $paths[] = WC_ABSPATH . 'templates/';
+            $paths[] = WC_ABSPATH.'templates/';
         }
 
         return $paths;
@@ -46,7 +46,7 @@ class WooCommerceService
             if (function_exists('WC') && WC() && method_exists(WC(), 'template_path')) {
                 $templatePath = WC()->template_path();
             }
-            $paths[] = get_template_directory() . '/' . $templatePath;
+            $paths[] = get_template_directory().'/'.$templatePath;
         }
 
         return $paths;
@@ -120,7 +120,7 @@ class WooCommerceService
         foreach ($templates as $template) {
             $templateObj = $this->createTemplate($template);
             $bladeTemplate = $templateObj->toBladeTemplate();
-            
+
             if ($bladeTemplate->isBladeTemplate && $bladeTemplate->path !== $templateObj->path) {
                 $bladeTemplates[] = $bladeTemplate->path;
             }

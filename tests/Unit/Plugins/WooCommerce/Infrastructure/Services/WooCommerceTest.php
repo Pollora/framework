@@ -5,9 +5,6 @@ declare(strict_types=1);
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Contracts\View\View;
-use Mockery\MockInterface;
-use Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService;
-use Pollora\Plugins\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
 use Pollora\Plugins\WooCommerce\Infrastructure\Services\WooCommerce;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
@@ -18,8 +15,8 @@ describe('WooCommerce', function () {
         $this->container = Mockery::mock(Container::class);
         $this->templateFinder = Mockery::mock(TemplateFinderInterface::class);
         $this->viewFactory = Mockery::mock(ViewFactory::class);
-        $this->domainService = Mockery::mock(WooCommerceService::class);
-        $this->adapter = Mockery::mock(WordPressWooCommerceAdapter::class);
+        $this->domainService = createMockWooCommerceService();
+        $this->adapter = createMockWooCommerceAdapter();
 
         $this->woocommerce = new WooCommerce(
             $this->container,
@@ -52,33 +49,23 @@ describe('WooCommerce', function () {
     });
 
     test('can handle reviews template for woocommerce templates', function () {
-        $templatePath = '/plugin/templates/single-product-reviews.php';
+        $templatePath = '/path/to/woocommerce/templates/single-product-reviews.php';
+
+        // Create a template instance from WooCommerce templates path
+        $templateInstance = createTestTemplate($templatePath);
 
         $this->domainService->shouldReceive('createTemplate')
             ->once()
             ->with($templatePath)
-            ->andReturn(Mockery::mock()->shouldReceive('isWooCommerceTemplate')->with([])->andReturn(true)->getMock());
+            ->andReturn($templateInstance);
 
         $this->domainService->shouldReceive('getAllTemplatePaths')
             ->once()
-            ->andReturn([]);
-
-        $this->domainService->shouldReceive('isWooCommerceStatusScreen')
-            ->once()
-            ->andReturn(false);
+            ->andReturn(['/path/to/woocommerce/templates/']);
 
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')
             ->once()
             ->andReturn('woocommerce/');
-
-        $templateMock = Mockery::mock();
-        $templateMock->shouldReceive('getRelativePath')
-            ->with([])
-            ->andReturn('single-product-reviews.php');
-
-        $this->domainService->shouldReceive('createTemplate')
-            ->with($templatePath)
-            ->andReturn($templateMock);
 
         $this->templateFinder->shouldReceive('locate')
             ->once()
@@ -93,14 +80,17 @@ describe('WooCommerce', function () {
     test('returns original template for non-woocommerce templates in reviews', function () {
         $templatePath = '/theme/comments.php';
 
+        // Create a template instance that's not from WooCommerce templates
+        $templateInstance = createTestTemplate('/theme/comments.php');
+
         $this->domainService->shouldReceive('createTemplate')
             ->once()
             ->with($templatePath)
-            ->andReturn(Mockery::mock()->shouldReceive('isWooCommerceTemplate')->with([])->andReturn(false)->getMock());
+            ->andReturn($templateInstance);
 
         $this->domainService->shouldReceive('getAllTemplatePaths')
             ->once()
-            ->andReturn([]);
+            ->andReturn(['/path/to/woocommerce/templates/']);
 
         $result = $this->woocommerce->reviewsTemplate($templatePath);
 
@@ -108,30 +98,23 @@ describe('WooCommerce', function () {
     });
 
     test('can handle template processing for blade templates', function () {
-        $templatePath = '/plugin/templates/single-product.php';
+        $templatePath = '/path/to/woocommerce/templates/single-product.php';
         $themeTemplatePath = '/theme/woocommerce/single-product.blade.php';
         $viewName = 'woocommerce.single-product';
-
-        $this->domainService->shouldReceive('isWooCommerceStatusScreen')
-            ->once()
-            ->andReturn(false);
 
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')
             ->once()
             ->andReturn('woocommerce/');
 
-        $templateMock = Mockery::mock();
-        $templateMock->shouldReceive('getRelativePath')
-            ->with([])
-            ->andReturn('single-product.php');
+        $templateInstance = createTestTemplate($templatePath);
 
         $this->domainService->shouldReceive('createTemplate')
             ->with($templatePath)
-            ->andReturn($templateMock);
+            ->andReturn($templateInstance);
 
         $this->domainService->shouldReceive('getAllTemplatePaths')
             ->once()
-            ->andReturn([]);
+            ->andReturn(['/path/to/woocommerce/templates/']);
 
         $this->templateFinder->shouldReceive('locate')
             ->once()
@@ -169,29 +152,22 @@ describe('WooCommerce', function () {
     });
 
     test('can handle template processing for non-blade templates', function () {
-        $templatePath = '/plugin/templates/single-product.php';
+        $templatePath = '/path/to/woocommerce/templates/single-product.php';
         $themeTemplatePath = '/theme/woocommerce/single-product.php';
-
-        $this->domainService->shouldReceive('isWooCommerceStatusScreen')
-            ->once()
-            ->andReturn(false);
 
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')
             ->once()
             ->andReturn('woocommerce/');
 
-        $templateMock = Mockery::mock();
-        $templateMock->shouldReceive('getRelativePath')
-            ->with([])
-            ->andReturn('single-product.php');
+        $templateInstance = createTestTemplate($templatePath);
 
         $this->domainService->shouldReceive('createTemplate')
             ->with($templatePath)
-            ->andReturn($templateMock);
+            ->andReturn($templateInstance);
 
         $this->domainService->shouldReceive('getAllTemplatePaths')
             ->once()
-            ->andReturn([]);
+            ->andReturn(['/path/to/woocommerce/templates/']);
 
         $this->templateFinder->shouldReceive('locate')
             ->once()
@@ -203,30 +179,32 @@ describe('WooCommerce', function () {
             ->with([$themeTemplatePath])
             ->andReturn($themeTemplatePath);
 
+        $this->templateFinder->shouldReceive('getViewNameFromPath')
+            ->once()
+            ->with($themeTemplatePath)
+            ->andReturn('');
+
         $result = $this->woocommerce->template($templatePath);
 
         expect($result)->toBe($themeTemplatePath);
     });
 
     test('returns original template when no theme template found', function () {
-        $templatePath = '/plugin/templates/single-product.php';
+        $templatePath = '/path/to/woocommerce/templates/single-product.php';
 
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')
             ->once()
             ->andReturn('woocommerce/');
 
-        $templateMock = Mockery::mock();
-        $templateMock->shouldReceive('getRelativePath')
-            ->with([])
-            ->andReturn('single-product.php');
+        $templateInstance = createTestTemplate($templatePath);
 
         $this->domainService->shouldReceive('createTemplate')
             ->with($templatePath)
-            ->andReturn($templateMock);
+            ->andReturn($templateInstance);
 
         $this->domainService->shouldReceive('getAllTemplatePaths')
             ->once()
-            ->andReturn([]);
+            ->andReturn(['/path/to/woocommerce/templates/']);
 
         $this->templateFinder->shouldReceive('locate')
             ->once()
@@ -239,8 +217,7 @@ describe('WooCommerce', function () {
     });
 
     test('returns template path for woocommerce status screen', function () {
-        $templatePath = '/plugin/templates/single-product.php';
-        $themeTemplatePath = '/theme/woocommerce/single-product.php';
+        $templatePath = '/path/to/woocommerce/templates/status.php';
 
         $this->domainService->shouldReceive('isWooCommerceStatusScreen')
             ->once()
@@ -250,59 +227,44 @@ describe('WooCommerce', function () {
             ->once()
             ->andReturn('woocommerce/');
 
-        $templateMock = Mockery::mock();
-        $templateMock->shouldReceive('getRelativePath')
-            ->with([])
-            ->andReturn('single-product.php');
+        $templateInstance = createTestTemplate($templatePath);
 
         $this->domainService->shouldReceive('createTemplate')
             ->with($templatePath)
-            ->andReturn($templateMock);
+            ->andReturn($templateInstance);
 
         $this->domainService->shouldReceive('getAllTemplatePaths')
             ->once()
-            ->andReturn([]);
+            ->andReturn(['/path/to/woocommerce/templates/']);
 
         $this->templateFinder->shouldReceive('locate')
             ->once()
-            ->with('woocommerce/single-product.php')
-            ->andReturn([$themeTemplatePath]);
-
-        $this->adapter->shouldReceive('locateTemplate')
-            ->once()
-            ->with([$themeTemplatePath])
-            ->andReturn($themeTemplatePath);
+            ->with('woocommerce/status.php')
+            ->andReturn(['/theme/woocommerce/status.php']);
 
         $result = $this->woocommerce->template($templatePath);
 
-        expect($result)->toBe($themeTemplatePath);
+        expect($result)->toBe($templatePath);
     });
 
     test('returns original template when view does not exist', function () {
-        $templatePath = '/plugin/templates/single-product.php';
+        $templatePath = '/path/to/woocommerce/templates/single-product.php';
         $themeTemplatePath = '/theme/woocommerce/single-product.blade.php';
         $viewName = 'woocommerce.single-product';
-
-        $this->domainService->shouldReceive('isWooCommerceStatusScreen')
-            ->once()
-            ->andReturn(false);
 
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')
             ->once()
             ->andReturn('woocommerce/');
 
-        $templateMock = Mockery::mock();
-        $templateMock->shouldReceive('getRelativePath')
-            ->with([])
-            ->andReturn('single-product.php');
+        $templateInstance = createTestTemplate($templatePath);
 
         $this->domainService->shouldReceive('createTemplate')
             ->with($templatePath)
-            ->andReturn($templateMock);
+            ->andReturn($templateInstance);
 
         $this->domainService->shouldReceive('getAllTemplatePaths')
             ->once()
-            ->andReturn([]);
+            ->andReturn(['/path/to/woocommerce/templates/']);
 
         $this->templateFinder->shouldReceive('locate')
             ->once()

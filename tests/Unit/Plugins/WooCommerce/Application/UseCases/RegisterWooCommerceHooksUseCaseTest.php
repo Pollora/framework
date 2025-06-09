@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Mockery\MockInterface;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Plugins\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
@@ -41,7 +40,7 @@ describe('RegisterWooCommerceHooksUseCase', function () {
 
     test('registers woocommerce hooks when WC_ABSPATH is defined', function () {
         // Define WC_ABSPATH for this test
-        if (!defined('WC_ABSPATH')) {
+        if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
@@ -82,7 +81,7 @@ describe('RegisterWooCommerceHooksUseCase', function () {
     });
 
     test('registers template filters correctly', function () {
-        if (!defined('WC_ABSPATH')) {
+        if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
@@ -100,7 +99,7 @@ describe('RegisterWooCommerceHooksUseCase', function () {
     });
 
     test('registers setup actions when already in after_setup_theme', function () {
-        if (!defined('WC_ABSPATH')) {
+        if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
@@ -134,7 +133,7 @@ describe('RegisterWooCommerceHooksUseCase', function () {
     });
 
     test('registers setup actions when not in after_setup_theme', function () {
-        if (!defined('WC_ABSPATH')) {
+        if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 

@@ -55,7 +55,7 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
      * Resolve a condition alias to its WordPress function.
      *
      * @param  string  $condition  Condition alias
-     * @return string  Resolved WordPress function name
+     * @return string Resolved WordPress function name
      */
     public function resolveCondition(string $condition): string
     {
@@ -67,7 +67,7 @@ class WordPressConditionManager implements WordPressConditionManagerInterface
     /**
      * Add a new condition alias mapping.
      *
-     * @param  string  $alias     Alias used in routing configuration
+     * @param  string  $alias  Alias used in routing configuration
      * @param  string  $function  WordPress conditional function name
      */
     public function addCondition(string $alias, string $function): void

@@ -2,80 +2,152 @@
 
 declare(strict_types=1);
 
-use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
-use Pollora\Discoverer\Domain\Contracts\ScoutInterface;
-use Pollora\Discoverer\Domain\Models\DiscoveredClass;
+namespace Tests\Unit\Discoverer\Domain\Services;
+
+use PHPUnit\Framework\TestCase;
+use Pollora\Discoverer\Domain\Contracts\ScoutRegistryInterface;
 use Pollora\Discoverer\Domain\Services\DiscoveryService;
 
-beforeEach(function () {
-    // Mock dependencies
-    $this->registry = Mockery::mock(DiscoveryRegistryInterface::class);
-    $this->scout = Mockery::mock(ScoutInterface::class);
+/**
+ * Test suite for DiscoveryService.
+ *
+ * Tests the facade functionality of the DiscoveryService including
+ * static method delegation, registry resolution, and error handling.
+ */
+final class DiscoveryServiceTest extends TestCase
+{
+    private ScoutRegistryInterface $mockRegistry;
 
-    // Service under test
-    $this->service = new DiscoveryService($this->registry, [$this->scout]);
-});
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-afterEach(function () {
-    Mockery::close();
-});
+        $this->mockRegistry = $this->createMock(ScoutRegistryInterface::class);
+        DiscoveryService::setRegistry($this->mockRegistry);
+    }
 
-test('discoverAndRegister method discovers and registers classes from scouts', function () {
-    // Mock configuration
-    $this->scout->shouldReceive('getType')->andReturn('test_type');
-    $this->scout->shouldReceive('discover')->once()->andReturn([
-        'App\\Test\\Class1',
-        'App\\Test\\Class2',
-    ]);
+    protected function tearDown(): void
+    {
+        DiscoveryService::setRegistry(null);
+        parent::tearDown();
+    }
 
-    // Assertions for registering discovered classes
-    $this->registry->shouldReceive('register')
-        ->twice()
-        ->withArgs(function (DiscoveredClass $class) {
-            static $calls = 0;
-            $calls++;
+    public function test_register_delegates_to_registry(): void
+    {
+        $this->mockRegistry
+            ->expects($this->once())
+            ->method('register')
+            ->with('test_scout', 'TestScoutClass');
 
-            if ($calls === 1) {
-                return $class->getClassName() === 'App\\Test\\Class1' &&
-                       $class->getType() === 'test_type';
-            }
+        DiscoveryService::register('test_scout', 'TestScoutClass');
+    }
 
-            if ($calls === 2) {
-                return $class->getClassName() === 'App\\Test\\Class2' &&
-                       $class->getType() === 'test_type';
-            }
+    public function test_scout_delegates_to_registry(): void
+    {
+        $expectedCollection = collect(['TestClass1', 'TestClass2']);
 
-            return false;
-        });
+        $this->mockRegistry
+            ->expects($this->once())
+            ->method('discover')
+            ->with('test_scout')
+            ->willReturn($expectedCollection);
 
-    // Execute the method under test
-    $this->service->discoverAndRegister();
-});
+        $result = DiscoveryService::scout('test_scout');
 
-test('getByType method delegates to registry', function () {
-    $this->registry->shouldReceive('getByType')
-        ->once()
-        ->with('test_type')
-        ->andReturn(['test_result']);
+        $this->assertSame($expectedCollection, $result);
+    }
 
-    expect($this->service->getByType('test_type'))->toBe(['test_result']);
-});
+    public function test_registered_delegates_to_registry(): void
+    {
+        $expectedKeys = ['scout1', 'scout2'];
 
-test('hasDiscovered method delegates to registry', function () {
-    $this->registry->shouldReceive('has')
-        ->once()
-        ->with('App\\Test\\Class1')
-        ->andReturn(true);
+        $this->mockRegistry
+            ->expects($this->once())
+            ->method('getRegistered')
+            ->willReturn($expectedKeys);
 
-    expect($this->service->hasDiscovered('App\\Test\\Class1'))->toBeTrue();
-});
+        $result = DiscoveryService::registered();
 
-test('getAllDiscovered method delegates to registry', function () {
-    $expected = ['type1' => ['class1'], 'type2' => ['class2']];
+        $this->assertEquals($expectedKeys, $result);
+    }
 
-    $this->registry->shouldReceive('all')
-        ->once()
-        ->andReturn($expected);
+    public function test_has_delegates_to_registry(): void
+    {
+        $this->mockRegistry
+            ->expects($this->once())
+            ->method('has')
+            ->with('test_scout')
+            ->willReturn(true);
 
-    expect($this->service->getAllDiscovered())->toBe($expected);
-});
+        $result = DiscoveryService::has('test_scout');
+
+        $this->assertTrue($result);
+    }
+
+    public function test_set_registry_allows_custom_registry(): void
+    {
+        $customRegistry = $this->createMock(ScoutRegistryInterface::class);
+        $customRegistry
+            ->expects($this->once())
+            ->method('getRegistered')
+            ->willReturn(['custom_scout']);
+
+        DiscoveryService::setRegistry($customRegistry);
+
+        $result = DiscoveryService::registered();
+        $this->assertEquals(['custom_scout'], $result);
+    }
+
+    public function test_registry_resolution_with_null_function(): void
+    {
+        DiscoveryService::setRegistry(null);
+
+        // Mock the app() function not being available
+        if (function_exists('app')) {
+            $this->markTestSkipped('Cannot test without app() function in Laravel environment');
+        }
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Laravel application container is not available');
+
+        DiscoveryService::registered();
+    }
+
+    public function test_registry_caching_between_calls(): void
+    {
+        $this->mockRegistry
+            ->expects($this->exactly(2))
+            ->method('getRegistered')
+            ->willReturn(['test']);
+
+        // Multiple calls should use the same registry instance
+        DiscoveryService::registered();
+        DiscoveryService::registered();
+    }
+
+    public function test_registry_reset_with_set_registry_null(): void
+    {
+        // First call establishes registry
+        $this->mockRegistry
+            ->expects($this->once())
+            ->method('getRegistered')
+            ->willReturn(['test']);
+
+        DiscoveryService::registered();
+
+        // Reset registry
+        DiscoveryService::setRegistry(null);
+
+        // New registry after reset
+        $newRegistry = $this->createMock(ScoutRegistryInterface::class);
+        $newRegistry
+            ->expects($this->once())
+            ->method('getRegistered')
+            ->willReturn(['new_test']);
+
+        DiscoveryService::setRegistry($newRegistry);
+
+        $result = DiscoveryService::registered();
+        $this->assertEquals(['new_test'], $result);
+    }
+}

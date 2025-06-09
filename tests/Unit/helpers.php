@@ -1014,3 +1014,73 @@ if (! function_exists('response')) {
         return new \Illuminate\Http\Response($content, $status, $headers);
     }
 }
+
+/**
+ * Create a real Template instance for testing since it's a readonly final class.
+ */
+function createTestTemplate(string $path = '/test/template.php', bool $isBladeTemplate = false): \Pollora\Plugins\WooCommerce\Domain\Models\Template
+{
+    return new \Pollora\Plugins\WooCommerce\Domain\Models\Template($path, basename($path, '.php'), $isBladeTemplate);
+}
+
+/**
+ * Create a mock WooCommerceService for testing.
+ */
+function createMockWooCommerceService(array $templates = []): object
+{
+    $service = Mockery::mock(\Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService::class);
+
+    // Setup default behaviors
+    $service->shouldReceive('getAllTemplatePaths')
+        ->andReturn(['/path/to/woocommerce/templates/'])
+        ->byDefault();
+
+    $service->shouldReceive('getWooCommerceTemplatePath')
+        ->andReturn('woocommerce/')
+        ->byDefault();
+
+    $service->shouldReceive('isWooCommerceStatusScreen')
+        ->withAnyArgs()
+        ->andReturn(false)
+        ->byDefault();
+
+    // Setup template creation
+    foreach ($templates as $path => $template) {
+        $service->shouldReceive('createTemplate')
+            ->with($path)
+            ->andReturn($template);
+    }
+
+    return $service;
+}
+
+/**
+ * Create a mock WordPressWooCommerceAdapter for testing.
+ */
+function createMockWooCommerceAdapter(): object
+{
+    $adapter = Mockery::mock(\Pollora\Plugins\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter::class);
+
+    // Setup default behaviors
+    $adapter->shouldReceive('isAdmin')
+        ->andReturn(false)
+        ->byDefault();
+
+    $adapter->shouldReceive('isDoingAjax')
+        ->andReturn(false)
+        ->byDefault();
+
+    $adapter->shouldReceive('getCurrentScreen')
+        ->andReturn(null)
+        ->byDefault();
+
+    $adapter->shouldReceive('locateTemplate')
+        ->andReturn('')
+        ->byDefault();
+
+    $adapter->shouldReceive('addThemeSupport')
+        ->andReturn(true)
+        ->byDefault();
+
+    return $adapter;
+}

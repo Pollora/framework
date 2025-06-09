@@ -19,8 +19,6 @@ abstract class BaseThemeCommand extends Command
 {
     /**
      * Cached ThemeMetadata instance for the current command run.
-     *
-     * @var ThemeMetadata
      */
     protected ThemeMetadata $themeInfo;
 
@@ -28,7 +26,7 @@ abstract class BaseThemeCommand extends Command
      * Create a new command instance.
      *
      * @param  Repository  $config  The configuration repository
-     * @param  Filesystem  $files   Filesystem instance used for file operations
+     * @param  Filesystem  $files  Filesystem instance used for file operations
      */
     public function __construct(protected Repository $config, protected Filesystem $files)
     {
@@ -79,9 +77,8 @@ abstract class BaseThemeCommand extends Command
     /**
      * Create a file within the theme directory.
      *
-     * @param  string  $path     Path relative to the theme base directory
+     * @param  string  $path  Path relative to the theme base directory
      * @param  string  $content  Optional file contents
-     * @return void
      */
     protected function makeFile(string $path, string $content = ''): void
     {

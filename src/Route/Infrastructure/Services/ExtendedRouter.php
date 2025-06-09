@@ -111,7 +111,7 @@ class ExtendedRouter extends IlluminateRouter
      * Check if an action array is valid for WordPress parameter binding.
      *
      * @param  array  $action  Route action definition
-     * @return bool            True when a callable "uses" entry exists
+     * @return bool True when a callable "uses" entry exists
      */
     private function isValidActionForBinding(array $action): bool
     {
@@ -121,7 +121,7 @@ class ExtendedRouter extends IlluminateRouter
     /**
      * Bind WordPress parameters to a route based on reflection data.
      *
-     * @param  Route                        $route       Route instance to bind
+     * @param  Route  $route  Route instance to bind
      * @param  \ReflectionFunctionAbstract  $reflection  Callable reflection for parameter inspection
      */
     private function bindWordPressParametersToRoute(Route $route, \ReflectionFunctionAbstract $reflection): void
@@ -169,7 +169,7 @@ class ExtendedRouter extends IlluminateRouter
      * Get a method reflection from string format (Class@method).
      *
      * @param  string  $callable  Callable string in Class@method form
-     * @return \ReflectionMethod  Reflection of the specified method
+     * @return \ReflectionMethod Reflection of the specified method
      */
     private function getMethodReflection(string $callable): \ReflectionMethod
     {
@@ -191,9 +191,9 @@ class ExtendedRouter extends IlluminateRouter
     /**
      * Log an error with context if a logger is available.
      *
-     * @param  string     $message    Error message
-     * @param  \Throwable $exception  Exception instance
-     * @param  array      $context    Additional logging context
+     * @param  string  $message  Error message
+     * @param  \Throwable  $exception  Exception instance
+     * @param  array  $context  Additional logging context
      */
     private function logError(string $message, \Throwable $exception, array $context = []): void
     {
@@ -209,7 +209,7 @@ class ExtendedRouter extends IlluminateRouter
      * Wrap a resolver callable to safely catch exceptions.
      *
      * @param  callable  $resolver  Resolver to wrap
-     * @return \Closure  Safe wrapper closure
+     * @return \Closure Safe wrapper closure
      */
     private function createSafeResolver(callable $resolver): \Closure
     {

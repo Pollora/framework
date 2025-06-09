@@ -20,7 +20,7 @@ class RemoveThemeCommand extends BaseThemeCommand
      * Create a new command instance.
      *
      * @param  Repository  $config  The configuration repository
-     * @param  Filesystem  $files   Filesystem instance used for file operations
+     * @param  Filesystem  $files  Filesystem instance used for file operations
      */
     public function __construct(Repository $config, Filesystem $files)
     {
@@ -56,8 +56,6 @@ class RemoveThemeCommand extends BaseThemeCommand
 
     /**
      * Delete the theme directory and its assets.
-     *
-     * @return void
      */
     protected function removeTheme(): void
     {

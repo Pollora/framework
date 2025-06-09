@@ -50,7 +50,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
     public function reviewsTemplate(string $template): string
     {
         $templateObj = $this->domainService->createTemplate($template);
-        
+
         if (! $templateObj->isWooCommerceTemplate($this->domainService->getAllTemplatePaths())) {
             return $template;
         }
@@ -122,7 +122,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
         // Build the theme template path: woocommerce/single-product.php
         $wcTemplatePath = $this->domainService->getWooCommerceTemplatePath();
         $templateObj = $this->domainService->createTemplate($template);
-        $themeTemplate = $wcTemplatePath . $templateObj->getRelativePath($this->domainService->getAllTemplatePaths());
+        $themeTemplate = $wcTemplatePath.$templateObj->getRelativePath($this->domainService->getAllTemplatePaths());
 
         // Use the template finder to locate the template
         $foundTemplates = $this->templateFinder->locate($themeTemplate);

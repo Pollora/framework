@@ -7,7 +7,7 @@ namespace Pollora\Hook\Infrastructure\Providers;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
-use Pollora\Discoverer\Domain\Contracts\DiscoveryRegistryInterface;
+use Pollora\Discoverer\Framework\API\PolloraDiscover;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Hook\UI\Console\ActionMakeCommand;
@@ -63,22 +63,27 @@ class HookServiceProvider extends ServiceProvider
      *
      * Instantiates and registers all hooks discovered by the Discoverer system.
      */
-    public function boot(Application $app, DiscoveryRegistryInterface $registry): void
+    public function boot(Application $app): void
     {
         $this->app = $app;
-        $this->loadHooks($registry);
+        $this->loadHooks();
     }
 
     /**
-     * Load all discovered hooks.
-     *
-     * @param  DiscoveryRegistry  $registry  The discovery registry
+     * Load all discovered hooks using the new discovery system.
      */
-    protected function loadHooks(DiscoveryRegistryInterface $registry): void
+    protected function loadHooks(): void
     {
-        $hooks = $registry->getByType('hook');
-        foreach ($hooks as $hookClass) {
-            $this->registerHook($hookClass->getClassName());
+        try {
+            $hooks = PolloraDiscover::scout('hooks');
+            foreach ($hooks as $hookClass) {
+                $this->registerHook($hookClass);
+            }
+        } catch (\Throwable $e) {
+            // Log error but don't break the application
+            if (function_exists('error_log')) {
+                error_log('Failed to load hooks: '.$e->getMessage());
+            }
         }
     }
 
