@@ -25,9 +25,9 @@
         "php": "^8.2.0",
         "pollora/helper-overrider": "dev-main",
         "illuminate/support": "^12.17",
-        "illuminate/database": "^12.18",
+        "illuminate/database": "^12.0",
         "illuminate/routing": "^12.17",
-        "illuminate/console": "12.18.0",
+        "illuminate/console": "12.x-dev",
         "pollora/entity": "dev-main",
         "watson/rememberable": "^7.0",
         "cweagans/composer-patches": "^1.7",
@@ -39,7 +39,7 @@
         "coduo/php-humanizer": "5.x-dev",
         "nwidart/laravel-modules": "^12.0@dev",
         "symfony/process": "^7.3.0",
-        "illuminate/config": "12.18.0",
+        "illuminate/config": "12.x-dev",
         "laravel/prompts": "^0.3.5@dev"
     },
     "autoload": {
@@ -89,8 +89,8 @@
     },
     "require-dev": {
         "driftingly/rector-laravel": "^1.0",
-        "laravel/pint": "^1.17.3",
-        "pestphp/pest": "^3.7.4",
+        "laravel/pint": "^v1.22.1",
+        "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.0",
         "symfony/var-dumper": "^7.3.0",
         "szepeviktor/phpstan-wordpress": "*",
@@ -123,7 +123,7 @@
         "test:refacto": "rector --dry-run",
         "test:lint": "pint --test",
         "test:types": "phpstan analyse --ansi",
-        "test:unit": "pest",
+        "test:unit": "pest --colors=always --min=100",
         "test": [
             "@test:refacto",
             "@test:lint",
