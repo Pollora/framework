@@ -14,19 +14,19 @@ trait ResolvesLocation
     protected function resolveTargetLocation(): array
     {
         // Priority: custom path > plugin > theme > default app path
-        
+
         if ($this->hasPathOption()) {
             return $this->resolveCustomPath();
         }
-        
+
         if ($this->hasPluginOption()) {
             return $this->resolvePluginLocation();
         }
-        
+
         if ($this->hasThemeOption()) {
             return $this->resolveThemeLocation();
         }
-        
+
         // Default to app path
         return $this->resolveDefaultLocation();
     }
@@ -37,16 +37,16 @@ trait ResolvesLocation
     protected function resolveCustomPath(): array
     {
         $path = $this->resolvePath();
-        
-        if (!$path) {
+
+        if (! $path) {
             throw new InvalidArgumentException('Custom path cannot be empty when --path option is used.');
         }
-        
+
         // Ensure absolute path
-        if (!str_starts_with($path, '/')) {
+        if (! str_starts_with($path, '/')) {
             $path = base_path($path);
         }
-        
+
         return [
             'type' => 'custom',
             'path' => $path,
@@ -60,11 +60,11 @@ trait ResolvesLocation
     protected function resolvePluginLocation(): array
     {
         $plugin = $this->resolvePlugin();
-        
-        if (!$plugin) {
+
+        if (! $plugin) {
             throw new InvalidArgumentException('Plugin name cannot be empty when --plugin option is used.');
         }
-        
+
         // Plugin paths would be resolved by plugin system
         // For now, throw exception as plugin system is not implemented yet
         throw new InvalidArgumentException('Plugin support is not yet implemented.');
@@ -76,23 +76,23 @@ trait ResolvesLocation
     protected function resolveThemeLocation(): array
     {
         $theme = $this->resolveTheme();
-        
-        if (!$theme) {
+
+        if (! $theme) {
             $theme = $this->getActiveTheme();
         }
-        
-        if (!$theme) {
+
+        if (! $theme) {
             throw new InvalidArgumentException('No theme specified and no active theme found.');
         }
-        
+
         // Get theme path from theme system
         $themePath = $this->getThemePath($theme);
-        
+
         return [
             'type' => 'theme',
             'name' => $theme,
             'path' => $themePath,
-            'namespace' => 'Theme\\' . $this->normalizeThemeName($theme),
+            'namespace' => 'Theme\\'.$this->normalizeThemeName($theme),
         ];
     }
 
@@ -115,8 +115,8 @@ trait ResolvesLocation
     {
         // Default themes path, can be overridden
         $themesPath = config('theme.path', base_path('themes'));
-        
-        return rtrim($themesPath, '/') . '/' . $themeName;
+
+        return rtrim($themesPath, '/').'/'.$themeName;
     }
 
     /**
@@ -133,16 +133,16 @@ trait ResolvesLocation
     protected function getResolvedFilePath(array $location, string $className, string $subPath = ''): string
     {
         $basePath = $location['path'];
-        
+
         if ($location['type'] === 'theme') {
             $basePath .= '/app';
         }
-        
+
         if ($subPath) {
-            $basePath .= '/' . trim($subPath, '/');
+            $basePath .= '/'.trim($subPath, '/');
         }
-        
-        return $basePath . '/' . $className . '.php';
+
+        return $basePath.'/'.$className.'.php';
     }
 
     /**
@@ -151,11 +151,11 @@ trait ResolvesLocation
     protected function getResolvedNamespace(array $location, string $subNamespace = ''): string
     {
         $namespace = $location['namespace'];
-        
+
         if ($subNamespace) {
-            $namespace .= '\\' . trim($subNamespace, '\\');
+            $namespace .= '\\'.trim($subNamespace, '\\');
         }
-        
+
         return $namespace;
     }
 }

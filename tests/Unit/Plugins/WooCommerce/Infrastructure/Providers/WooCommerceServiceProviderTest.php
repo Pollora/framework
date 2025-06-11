@@ -5,14 +5,14 @@ declare(strict_types=1);
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Plugins\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
-use Pollora\Plugins\WooCommerce\Domain\Contracts\TemplateResolverInterface;
-use Pollora\Plugins\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
-use Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService;
-use Pollora\Plugins\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
-use Pollora\Plugins\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
-use Pollora\Plugins\WooCommerce\Infrastructure\Services\WooCommerce;
-use Pollora\Plugins\WooCommerce\Infrastructure\Services\WooCommerceTemplateResolver;
+use Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerce;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerceTemplateResolver;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 describe('WooCommerceServiceProvider', function () {
@@ -65,8 +65,8 @@ describe('WooCommerceServiceProvider', function () {
 
         $this->provider->register();
 
-        expect($this->container->has(\Pollora\Plugins\WooCommerce\WooCommerce::class))->toBeTrue();
-        expect($this->container->has(\Pollora\Plugins\WooCommerce\View\WooCommerceTemplateResolver::class))->toBeTrue();
+        expect($this->container->has(\Pollora\ThirdParty\WooCommerce\WooCommerce::class))->toBeTrue();
+        expect($this->container->has(\Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver::class))->toBeTrue();
     });
 
     test('can resolve woocommerce integration service', function () {
@@ -134,7 +134,7 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
         } elseif ($concrete === null) {
             // When no concrete is provided, Laravel auto-resolves the class
             $this->singletons[$abstract] = function ($container) use ($abstract) {
-                return new $abstract();
+                return new $abstract;
             };
         } else {
             $this->services[$abstract] = $concrete;
@@ -205,7 +205,7 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
 
     public function bindIf($abstract, $concrete = null, $shared = false): void
     {
-        if (!$this->bound($abstract)) {
+        if (! $this->bound($abstract)) {
             $this->bind($abstract, $concrete, $shared);
         }
     }
@@ -217,14 +217,14 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
 
     public function scopedIf($abstract, $concrete = null): void
     {
-        if (!$this->bound($abstract)) {
+        if (! $this->bound($abstract)) {
             $this->scoped($abstract, $concrete);
         }
     }
 
     public function singletonIf($abstract, $concrete = null): void
     {
-        if (!$this->bound($abstract)) {
+        if (! $this->bound($abstract)) {
             $this->singleton($abstract, $concrete);
         }
     }
@@ -257,12 +257,12 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
         return isset($this->services[$abstract]);
     }
 
-    public function resolving($abstract, \Closure $callback = null): void
+    public function resolving($abstract, ?\Closure $callback = null): void
     {
         // Simplified implementation
     }
 
-    public function afterResolving($abstract, \Closure $callback = null): void
+    public function afterResolving($abstract, ?\Closure $callback = null): void
     {
         // Simplified implementation
     }

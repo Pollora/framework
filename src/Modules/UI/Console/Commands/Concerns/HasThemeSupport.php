@@ -52,12 +52,12 @@ trait HasThemeSupport
     protected function resolveTheme(): ?string
     {
         $theme = $this->getThemeOption();
-        
+
         if ($theme === '') {
             // Empty string means use current active theme
             return $this->getActiveTheme();
         }
-        
+
         return $theme;
     }
 }

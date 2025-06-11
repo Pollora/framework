@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 
 beforeEach(function () {
-    $this->app = new Container();
+    $this->app = new Container;
 });
 
 it('can create container for auto discovery testing', function () {

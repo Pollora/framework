@@ -75,7 +75,7 @@ function setupWordPressMocks()
 
     WP::$wpFunctions->shouldReceive('get_current_screen')
         ->withAnyArgs()
-        ->andReturn(new WP_Screen())
+        ->andReturn(new WP_Screen)
         ->byDefault();
 
     WP::$wpFunctions->shouldReceive('get_template_directory')
@@ -643,7 +643,7 @@ if (! function_exists('is_admin')) {
 if (! function_exists('get_current_screen')) {
     function get_current_screen()
     {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_current_screen() : new WP_Screen();
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_current_screen() : new WP_Screen;
     }
 }
 
@@ -1049,8 +1049,9 @@ if (! class_exists('WP_Screen')) {
     class WP_Screen
     {
         public $id = 'woocommerce_page_wc-status';
+
         public $base = 'woocommerce_page_wc-status';
-        
+
         public function __construct()
         {
             // Mock implementation
@@ -1069,9 +1070,9 @@ if (! function_exists('response')) {
 /**
  * Create a real Template instance for testing since it's a readonly final class.
  */
-function createTestTemplate(string $path = '/test/template.php', bool $isBladeTemplate = false): \Pollora\Plugins\WooCommerce\Domain\Models\Template
+function createTestTemplate(string $path = '/test/template.php', bool $isBladeTemplate = false): \Pollora\ThirdParty\WooCommerce\Domain\Models\Template
 {
-    return new \Pollora\Plugins\WooCommerce\Domain\Models\Template($path, basename($path, '.php'), $isBladeTemplate);
+    return new \Pollora\ThirdParty\WooCommerce\Domain\Models\Template($path, basename($path, '.php'), $isBladeTemplate);
 }
 
 /**
@@ -1079,7 +1080,7 @@ function createTestTemplate(string $path = '/test/template.php', bool $isBladeTe
  */
 function createMockWooCommerceService(array $templates = []): object
 {
-    $service = Mockery::mock(\Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService::class);
+    $service = Mockery::mock(\Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService::class);
 
     // Setup default behaviors
     $service->shouldReceive('getAllTemplatePaths')
@@ -1110,7 +1111,7 @@ function createMockWooCommerceService(array $templates = []): object
  */
 function createMockWooCommerceAdapter(): object
 {
-    $adapter = Mockery::mock(\Pollora\Plugins\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter::class);
+    $adapter = Mockery::mock(\Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter::class);
 
     // Setup default behaviors
     $adapter->shouldReceive('isAdmin')

@@ -204,7 +204,7 @@ class ThemeManager implements ThemeService
      */
     public function findTheme(string $name): ?ThemeModuleInterface
     {
-        if (!$this->repository) {
+        if (! $this->repository) {
             return null;
         }
 

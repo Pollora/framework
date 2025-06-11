@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\Domain\Contracts;
+namespace Pollora\ThirdParty\WooCommerce\Domain\Contracts;
 
 /**
  * Interface for WooCommerce integration services.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\Domain\Models;
+namespace Pollora\ThirdParty\WooCommerce\Domain\Models;
 
 /**
  * Value object representing a WooCommerce template.

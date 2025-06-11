@@ -16,7 +16,7 @@ use Pollora\Modules\Infrastructure\Services\ModuleManifest;
 
 /**
  * Main service provider for the generic module system.
- * 
+ *
  * This provider follows the nwidart/laravel-modules pattern but adapted for our architecture.
  */
 class ModuleServiceProvider extends ServiceProvider
@@ -25,12 +25,12 @@ class ModuleServiceProvider extends ServiceProvider
     {
         // Register infrastructure provider for generic module functionality
         $this->app->register(InfrastructureModuleServiceProvider::class);
-        
+
         // Register ModuleAutoloader service
         $this->app->singleton(ModuleAutoloader::class, function ($app) {
             return new ModuleAutoloader($app);
         });
-        
+
         // Merge configuration
         $this->mergeConfigFrom(__DIR__.'/config/modules.php', 'modules');
     }
@@ -67,14 +67,14 @@ class ModuleServiceProvider extends ServiceProvider
         // Register and boot modules if a repository is available
         if ($this->app->bound(ModuleRepositoryInterface::class)) {
             $bootstrap = $this->app->make(ModuleBootstrap::class);
-            
+
             // Register modules
             $bootstrap->registerModules();
-            
+
             // Register migrations and translations
             $bootstrap->registerMigrations();
             $bootstrap->registerTranslations();
-            
+
             // Boot modules on next cycle
             $this->app->booted(function () use ($bootstrap) {
                 $bootstrap->bootModules();

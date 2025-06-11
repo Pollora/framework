@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Providers;
 
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
@@ -21,11 +20,11 @@ use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
+use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Domain\Support\ThemeCollection;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 use Pollora\Theme\Infrastructure\Adapters\WordPressThemeDiscovery;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
-use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
@@ -151,7 +150,7 @@ class ThemeServiceProvider extends ServiceProvider
         });
 
         // Register class alias for LaravelThemeModule backward compatibility
-        if (!class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
+        if (! class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
             class_alias(LaravelThemeModule::class, 'Pollora\\Modules\\Domain\\Models\\LaravelThemeModule');
         }
     }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Route\Infrastructure\Services;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(\Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver::class)]
 class WordPressTypeResolverTest extends TestCase

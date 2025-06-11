@@ -54,6 +54,7 @@ class ThemeAutoloader extends ModuleAutoloader
     public function isThemeRegistered(string $themeName): bool
     {
         $namespace = $this->getThemeNamespace($themeName);
+
         return $this->isNamespaceRegistered($namespace);
     }
 }

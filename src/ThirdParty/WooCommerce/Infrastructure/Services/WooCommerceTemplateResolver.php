@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\Infrastructure\Services;
+namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Services;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
-use Pollora\Plugins\WooCommerce\Domain\Contracts\TemplateResolverInterface;
-use Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 /**

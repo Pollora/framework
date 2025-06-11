@@ -17,9 +17,13 @@ use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 class ModuleManifest
 {
     protected Filesystem $files;
+
     protected Collection $paths;
+
     protected ?string $manifestPath;
+
     protected array $manifest = [];
+
     protected static ?Collection $manifestData = null;
 
     public function __construct(
@@ -39,7 +43,7 @@ class ModuleManifest
      */
     public function getProviders(): array
     {
-        if (!empty($this->manifest)) {
+        if (! empty($this->manifest)) {
             return $this->manifest;
         }
 
@@ -84,7 +88,7 @@ class ModuleManifest
                 }
 
                 foreach ($manifest['files'] as $file) {
-                    $filePath = $manifest['module_directory'] . DIRECTORY_SEPARATOR . $file;
+                    $filePath = $manifest['module_directory'].DIRECTORY_SEPARATOR.$file;
                     if (file_exists($filePath)) {
                         include_once $filePath;
                     }
@@ -97,7 +101,7 @@ class ModuleManifest
      */
     public function getModulesData(): Collection
     {
-        if (!empty(self::$manifestData) && !app()->runningUnitTests()) {
+        if (! empty(self::$manifestData) && ! app()->runningUnitTests()) {
             return self::$manifestData;
         }
 
@@ -133,9 +137,9 @@ class ModuleManifest
             })
             ->filter(function ($moduleData) {
                 // Only include modules that have providers or files
-                return !empty($moduleData['providers']) || !empty($moduleData['files']);
+                return ! empty($moduleData['providers']) || ! empty($moduleData['files']);
             })
-            ->sortBy(fn($module) => $module['priority'] ?? 0)
+            ->sortBy(fn ($module) => $module['priority'] ?? 0)
             ->values();
 
         return self::$manifestData;
@@ -154,13 +158,13 @@ class ModuleManifest
      */
     public function write(): void
     {
-        if (!$this->manifestPath) {
+        if (! $this->manifestPath) {
             return;
         }
 
         $this->files->put(
             $this->manifestPath,
-            '<?php return ' . var_export($this->getProviders(), true) . ';'
+            '<?php return '.var_export($this->getProviders(), true).';'
         );
     }
 }

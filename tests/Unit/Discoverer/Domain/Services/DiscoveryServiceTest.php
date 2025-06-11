@@ -103,8 +103,9 @@ final class DiscoveryServiceTest extends TestCase
         DiscoveryService::setRegistry(null);
 
         // Mock the app() function
-        if (!function_exists('app')) {
-            function app() {
+        if (! function_exists('app')) {
+            function app()
+            {
                 throw new \RuntimeException('Failed to resolve scout registry from container: Target [Pollora\Discoverer\Domain\Contracts\ScoutRegistryInterface] is not instantiable.');
             }
         }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 
 beforeEach(function () {
-    $this->app = new Container();
+    $this->app = new Container;
 });
 
 it('can create container for testing', function () {
@@ -18,6 +18,6 @@ it('can create container for testing', function () {
 //
 // The functionality is covered by our Unit tests for:
 // - ModuleAutoloader
-// - ThemeAutoloader  
+// - ThemeAutoloader
 // - ThemeServiceProviderScout
 // - ModuleBootstrap integration

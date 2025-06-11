@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\Infrastructure\Providers;
+namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Providers;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Plugins\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
-use Pollora\Plugins\WooCommerce\Domain\Contracts\TemplateResolverInterface;
-use Pollora\Plugins\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
-use Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService;
-use Pollora\Plugins\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
-use Pollora\Plugins\WooCommerce\Infrastructure\Services\WooCommerce;
-use Pollora\Plugins\WooCommerce\Infrastructure\Services\WooCommerceTemplateResolver;
+use Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerce;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerceTemplateResolver;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 /**
@@ -81,11 +81,11 @@ class WooCommerceServiceProvider extends ServiceProvider
         });
 
         // Maintain backward compatibility by binding the old class name
-        $this->app->singleton(\Pollora\Plugins\WooCommerce\WooCommerce::class, function ($app) {
+        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\WooCommerce::class, function ($app) {
             return $app->make(WooCommerceIntegrationInterface::class);
         });
 
-        $this->app->singleton(\Pollora\Plugins\WooCommerce\View\WooCommerceTemplateResolver::class, function ($app) {
+        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver::class, function ($app) {
             return $app->make(TemplateResolverInterface::class);
         });
     }

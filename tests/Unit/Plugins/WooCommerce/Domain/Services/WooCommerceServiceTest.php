@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Pollora\Plugins\WooCommerce\Domain\Models\Template;
-use Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService;
+use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
+use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
 
 describe('WooCommerceService', function () {
     beforeEach(function () {

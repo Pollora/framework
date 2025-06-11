@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\Domain\Services;
+namespace Pollora\ThirdParty\WooCommerce\Domain\Services;
 
-use Pollora\Plugins\WooCommerce\Domain\Models\Template;
+use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
 
 /**
  * Domain service for WooCommerce business logic.

@@ -97,7 +97,7 @@ final class ThemeServiceProviderScout extends AbstractPolloraScout
      */
     protected function isValidThemeDirectory(string $path): bool
     {
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             return false;
         }
 

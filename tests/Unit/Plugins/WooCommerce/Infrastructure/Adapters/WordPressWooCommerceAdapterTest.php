@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Plugins\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
 
 describe('WordPressWooCommerceAdapter', function () {
     beforeEach(function () {
@@ -126,7 +126,7 @@ describe('WordPressWooCommerceAdapter', function () {
     });
 
     test('can get current screen', function () {
-        $expectedScreen = new WP_Screen();
+        $expectedScreen = new WP_Screen;
         $expectedScreen->id = 'woocommerce_page_wc-status';
 
         setWordPressFunction('get_current_screen', fn () => $expectedScreen);

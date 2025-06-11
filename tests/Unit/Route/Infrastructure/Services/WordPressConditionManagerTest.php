@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Unit\Route\Infrastructure\Services;
 
 use Illuminate\Container\Container;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(\Pollora\Route\Infrastructure\Services\WordPressConditionManager::class)]
 class WordPressConditionManagerTest extends TestCase

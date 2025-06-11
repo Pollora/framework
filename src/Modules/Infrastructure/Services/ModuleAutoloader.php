@@ -28,6 +28,7 @@ use Pollora\Modules\Domain\Contracts\ModuleInterface;
 class ModuleAutoloader
 {
     protected ClassLoader $loader;
+
     protected array $registeredNamespaces = [];
 
     public function __construct(
@@ -71,7 +72,8 @@ class ModuleAutoloader
     protected function buildNamespace(string $moduleName, string $type): string
     {
         $prefix = ucfirst(strtolower($type)); // Theme or Plugin
-        return $prefix . '\\' . $moduleName . '\\';
+
+        return $prefix.'\\'.$moduleName.'\\';
     }
 
     /**
@@ -82,13 +84,13 @@ class ModuleAutoloader
         $basePath = $module->getPath();
 
         // Check for app/ directory (Laravel-style)
-        $appPath = $basePath . '/app';
+        $appPath = $basePath.'/app';
         if (is_dir($appPath)) {
             return $appPath;
         }
 
         // Check for src/ directory
-        $srcPath = $basePath . '/src';
+        $srcPath = $basePath.'/src';
         if (is_dir($srcPath)) {
             return $srcPath;
         }
@@ -101,7 +103,7 @@ class ModuleAutoloader
      */
     protected function addPsr4Namespace(string $namespace, string $path): void
     {
-        if (!isset($this->registeredNamespaces[$namespace])) {
+        if (! isset($this->registeredNamespaces[$namespace])) {
             $this->loader->addPsr4($namespace, $path);
             $this->registeredNamespaces[$namespace] = $path;
         }
@@ -135,13 +137,15 @@ class ModuleAutoloader
             ) {
                 // Bind it to the container for future use
                 $this->app->instance(ClassLoader::class, $function[0]);
+
                 return $function[0];
             }
         }
 
         // Last resort: create a new instance (not recommended in production)
-        $loader = new ClassLoader();
+        $loader = new ClassLoader;
         $this->app->instance(ClassLoader::class, $loader);
+
         return $loader;
     }
 

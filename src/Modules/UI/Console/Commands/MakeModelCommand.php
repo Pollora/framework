@@ -6,15 +6,15 @@ namespace Pollora\Modules\UI\Console\Commands;
 
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
-use Pollora\Modules\UI\Console\Commands\Concerns\HasThemeSupport;
-use Pollora\Modules\UI\Console\Commands\Concerns\HasPluginSupport;
 use Pollora\Modules\UI\Console\Commands\Concerns\HasPathSupport;
+use Pollora\Modules\UI\Console\Commands\Concerns\HasPluginSupport;
+use Pollora\Modules\UI\Console\Commands\Concerns\HasThemeSupport;
 use Pollora\Modules\UI\Console\Commands\Concerns\ResolvesLocation;
 use Symfony\Component\Console\Input\InputOption;
 
 class MakeModelCommand extends GeneratorCommand
 {
-    use HasThemeSupport, HasPluginSupport, HasPathSupport, ResolvesLocation;
+    use HasPathSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation;
 
     /**
      * The name and signature of the console command.
@@ -118,9 +118,9 @@ class MakeModelCommand extends GeneratorCommand
     {
         $fillable = $this->option('fillable');
 
-        if (!is_null($fillable)) {
+        if (! is_null($fillable)) {
             $fillable = collect(explode(',', $fillable))
-                ->map(fn($item) => "'" . trim($item) . "'")
+                ->map(fn ($item) => "'".trim($item)."'")
                 ->implode(', ');
 
             $fillable = "[{$fillable}]";
@@ -171,7 +171,7 @@ class MakeModelCommand extends GeneratorCommand
      */
     protected function makeDirectory($path): string
     {
-        if (!$this->files->isDirectory(dirname($path))) {
+        if (! $this->files->isDirectory(dirname($path))) {
             $this->files->makeDirectory(dirname($path), 0755, true, true);
         }
 

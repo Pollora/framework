@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Discoverer\Framework\API;
 
 use Illuminate\Container\Container;
-use Illuminate\Support\Collection;
 use PHPUnit\Framework\TestCase;
 use Pollora\Discoverer\Domain\Contracts\ScoutRegistryInterface;
 use Pollora\Discoverer\Domain\Services\DiscoveryService;

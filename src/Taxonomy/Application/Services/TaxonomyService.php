@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Taxonomy\Application\Services;
 
-use Pollora\Entity\Domain\Model\Taxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyRegistryInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;

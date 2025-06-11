@@ -6,11 +6,11 @@ namespace Tests\Unit\Route\Infrastructure\Services;
 
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(\Pollora\Route\Infrastructure\Services\ExtendedRouter::class)]
 class ExtendedRouterDependencyInjectionTest extends TestCase

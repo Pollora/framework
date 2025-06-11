@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Support\Facades;
 
-use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Facade;
 
 /**

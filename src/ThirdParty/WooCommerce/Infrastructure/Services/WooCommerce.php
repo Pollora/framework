@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\Infrastructure\Services;
+namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Services;
 
 use Illuminate\Contracts\Container\Container as ContainerContract;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Str;
-use Pollora\Plugins\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
-use Pollora\Plugins\WooCommerce\Domain\Services\WooCommerceService;
-use Pollora\Plugins\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 /**

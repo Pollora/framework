@@ -6,11 +6,11 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
+use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Theme\Application\Services\ThemeManager;
+use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
-use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
-use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 
 beforeEach(function () {
     // Create mock container with config property

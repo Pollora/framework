@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Plugins\WooCommerce\Domain\Models\Template;
+use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
 
 describe('Template', function () {
     test('can be created with basic parameters', function () {

@@ -22,6 +22,7 @@ class ThemeException extends Exception
     public static function missingRequiredFiles(string $themeName, array $files): self
     {
         $filesList = implode(', ', $files);
+
         return new self("Theme '{$themeName}' is missing required files: {$filesList}");
     }
 }

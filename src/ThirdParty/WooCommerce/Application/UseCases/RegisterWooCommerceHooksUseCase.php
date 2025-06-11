@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\Application\UseCases;
+namespace Pollora\ThirdParty\WooCommerce\Application\UseCases;
 
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Plugins\WooCommerce\Domain\Contracts\TemplateResolverInterface;
-use Pollora\Plugins\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
 
 /**
  * Use case for registering WooCommerce hooks and filters.

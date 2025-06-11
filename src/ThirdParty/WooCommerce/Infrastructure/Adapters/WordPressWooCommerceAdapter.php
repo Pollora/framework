@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugins\WooCommerce\Infrastructure\Adapters;
+namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters;
 
 /**
  * Adapter for WordPress WooCommerce-specific functionality.

@@ -13,7 +13,7 @@ use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 
 /**
  * Generic module bootstrap service inspired by nwidart/laravel-modules.
- * 
+ *
  * This service handles the registration and booting of modules.
  */
 class ModuleBootstrap
@@ -38,7 +38,7 @@ class ModuleBootstrap
 
         // Now that autoloading is set up, we can discover and load service providers
         $manifest = $this->app->make(ModuleManifest::class);
-        
+
         // Register service providers using Laravel's ProviderRepository
         (new ProviderRepository($this->app, new Filesystem, $this->getCachedModulePath()))
             ->load($manifest->getProviders());
@@ -64,7 +64,7 @@ class ModuleBootstrap
      */
     public function registerMigrations(): void
     {
-        if (!$this->app['config']->get('modules.auto-discover.migrations', true)) {
+        if (! $this->app['config']->get('modules.auto-discover.migrations', true)) {
             return;
         }
 
@@ -85,17 +85,17 @@ class ModuleBootstrap
      */
     public function registerTranslations(): void
     {
-        if (!$this->app['config']->get('modules.auto-discover.translations', true)) {
+        if (! $this->app['config']->get('modules.auto-discover.translations', true)) {
             return;
         }
 
         $this->app->afterResolving('translator', function ($translator) {
-            if (!$translator instanceof Translator) {
+            if (! $translator instanceof Translator) {
                 return;
             }
 
             foreach ($this->repository->allEnabled() as $module) {
-                $langPath = $module->getPath() . '/languages';
+                $langPath = $module->getPath().'/languages';
                 if (is_dir($langPath)) {
                     $translator->addNamespace($module->getLowerName(), $langPath);
                     $translator->addJsonPath($langPath);

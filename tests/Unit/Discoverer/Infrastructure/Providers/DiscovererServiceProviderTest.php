@@ -6,7 +6,6 @@ namespace Tests\Unit\Discoverer\Infrastructure\Providers;
 
 use Illuminate\Container\Container;
 use Pollora\Discoverer\Domain\Contracts\ScoutRegistryInterface;
-use Pollora\Discoverer\Framework\API\PolloraDiscover;
 use Pollora\Discoverer\Infrastructure\Providers\DiscovererServiceProvider;
 use Pollora\Discoverer\Infrastructure\Registry\ScoutRegistry;
 use Pollora\Discoverer\Scouts\AttributableClassesScout;
