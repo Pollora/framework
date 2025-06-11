@@ -234,7 +234,7 @@ abstract class AbstractPolloraScout extends StructureScout
         // Enable caching only in production environment
         if ($this->shouldUseCache()) {
             $discover = $discover->withCache($this->identifier());
-        };
+        }
 
         return $discover->get();
     }

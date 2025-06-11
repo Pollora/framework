@@ -23,7 +23,7 @@ return [
     |
     */
 
-    'assets_path' => 'themes',
+    'assets_path' => 'resources/assets',
 
     /*
     |--------------------------------------------------------------------------
@@ -38,8 +38,8 @@ return [
     'containerDir' => [
         'assets' => 'assets',
         'lang' => 'lang',
-        'layout' => 'views/layouts',
-        'partial' => 'views/partials',
-        'view' => 'views',
+        'layout' => 'resources/views/layouts',
+        'partial' => 'resources/views/partials',
+        'view' => 'resources/views',
     ],
 ];

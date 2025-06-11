@@ -42,11 +42,11 @@ class WooCommerceTemplateResolver implements TemplateResolverInterface
         $bladeDefaultTemplate = $defaultTemplate->toBladeTemplate();
 
         if ($bladeDefaultTemplate->isBladeTemplate && $bladeDefaultTemplate->path !== $defaultTemplate->path) {
-            $bladeTemplates[] = 'views/'.$bladeDefaultTemplate->path;
+            $bladeTemplates[] = 'resources/views/'.$bladeDefaultTemplate->path;
 
             // Also add the WooCommerce template path version
             $wcPath = $this->domainService->getWooCommerceTemplatePath();
-            $bladeTemplates[] = 'views/'.$wcPath.$bladeDefaultTemplate->path;
+            $bladeTemplates[] = 'resources/views/'.$wcPath.$bladeDefaultTemplate->path;
         }
 
         // Remove duplicates and merge Blade templates at the beginning for priority

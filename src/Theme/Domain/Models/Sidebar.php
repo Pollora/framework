@@ -41,7 +41,7 @@ class Sidebar implements ThemeComponent
      */
     public function registerSidebars(): void
     {
-        $sidebars = (array) ThemeConfig::get('theme.sidebars', []);
+        $sidebars = (array) ThemeConfig::get('sidebars', []);
         $translater = new Translater($sidebars, 'sidebars');
         $sidebars = $translater->translate(['*.name', '*.description']);
 

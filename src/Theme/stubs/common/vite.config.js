@@ -63,7 +63,7 @@ const getThemeConfig = () => ({
     buildDirectory: path.join("build", themeName),
     refresh: [
         ...refreshPaths,
-        'themes/'+themeName+'/views/**',
+        'themes/'+themeName+'/resources/views/**',
     ],
 });
 

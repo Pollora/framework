@@ -121,14 +121,19 @@ describe('WooCommerceServiceProvider', function () {
 });
 
 // Extend TestContainer to support singleton behavior for service provider tests
-class WooCommerceTestContainer extends \TestContainer
+class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Contracts\Container\Container
 {
     private array $singletons = [];
 
-    public function singleton(string $abstract, $concrete = null): void
+    public function singleton($abstract, $concrete = null)
     {
-        if ($concrete instanceof Closure) {
+        if ($concrete instanceof \Closure) {
             $this->singletons[$abstract] = $concrete;
+        } elseif ($concrete === null) {
+            // When no concrete is provided, Laravel auto-resolves the class
+            $this->singletons[$abstract] = function ($container) use ($abstract) {
+                return new $abstract();
+            };
         } else {
             $this->services[$abstract] = $concrete;
         }
@@ -149,8 +154,138 @@ class WooCommerceTestContainer extends \TestContainer
         return parent::get($serviceClass);
     }
 
-    public function make(string $serviceClass): ?object
+    public function make($abstract, array $parameters = [])
     {
-        return $this->get($serviceClass);
+        // Support both Laravel Container interface (mixed $abstract, array $parameters) 
+        // and TestContainer interface (string $serviceClass)
+        if (is_string($abstract)) {
+            return $this->get($abstract);
+        }
+        
+        // Handle other types if needed
+        return null;
+    }
+
+    public function has(string $serviceClass): bool
+    {
+        return isset($this->services[$serviceClass]) || isset($this->singletons[$serviceClass]);
+    }
+
+    // Required by Container interface
+    public function bound($abstract): bool
+    {
+        return $this->has($abstract);
+    }
+
+    public function alias($abstract, $alias): void
+    {
+        // Simplified implementation
+    }
+
+    public function tag($abstracts, $tags): void
+    {
+        // Simplified implementation
+    }
+
+    public function tagged($tag): iterable
+    {
+        return [];
+    }
+
+    public function bind($abstract, $concrete = null, $shared = false): void
+    {
+        if ($shared) {
+            $this->singleton($abstract, $concrete);
+        } else {
+            $this->services[$abstract] = $concrete;
+        }
+    }
+
+    public function bindIf($abstract, $concrete = null, $shared = false): void
+    {
+        if (!$this->bound($abstract)) {
+            $this->bind($abstract, $concrete, $shared);
+        }
+    }
+
+    public function scoped($abstract, $concrete = null): void
+    {
+        $this->singleton($abstract, $concrete);
+    }
+
+    public function scopedIf($abstract, $concrete = null): void
+    {
+        if (!$this->bound($abstract)) {
+            $this->scoped($abstract, $concrete);
+        }
+    }
+
+    public function singletonIf($abstract, $concrete = null): void
+    {
+        if (!$this->bound($abstract)) {
+            $this->singleton($abstract, $concrete);
+        }
+    }
+
+    public function extend($abstract, \Closure $closure): void
+    {
+        // Simplified implementation
+    }
+
+    public function when($concrete): \Illuminate\Contracts\Container\ContextualBindingBuilder
+    {
+        throw new \Exception('when() not implemented in test container');
+    }
+
+    public function factory($abstract): \Closure
+    {
+        return function () use ($abstract) {
+            return $this->make($abstract);
+        };
+    }
+
+    public function flush(): void
+    {
+        $this->services = [];
+        $this->singletons = [];
+    }
+
+    public function resolved($abstract): bool
+    {
+        return isset($this->services[$abstract]);
+    }
+
+    public function resolving($abstract, \Closure $callback = null): void
+    {
+        // Simplified implementation
+    }
+
+    public function afterResolving($abstract, \Closure $callback = null): void
+    {
+        // Simplified implementation
+    }
+
+    public function call($callback, array $parameters = [], $defaultMethod = null)
+    {
+        // Simplified implementation
+        if (is_callable($callback)) {
+            return call_user_func_array($callback, $parameters);
+        }
+        throw new \Exception('call() not fully implemented in test container');
+    }
+
+    public function bindMethod($method, $callback)
+    {
+        // Simplified implementation
+    }
+
+    public function addContextualBinding($concrete, $abstract, $implementation)
+    {
+        // Simplified implementation  
+    }
+
+    public function beforeResolving($abstract, $callback = null)
+    {
+        // Simplified implementation
     }
 }

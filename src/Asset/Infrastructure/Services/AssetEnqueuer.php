@@ -418,6 +418,7 @@ class AssetEnqueuer
         if (! $this->viteManager instanceof ViteManager) {
             throw new AssetException('Vite manager not initialized. Call useVite() first.');
         }
+
         $asset = $this->viteManager->isRunningHot()
             ? $this->viteManager->asset($this->path)
             : $this->viteManager->getAssetUrls([$this->path]);
@@ -442,6 +443,7 @@ class AssetEnqueuer
     protected function getAssetPaths(): array
     {
         if ($this->useVite && ! $this->viteManager->isRunningHot()) {
+
             return $this->path;
         }
 

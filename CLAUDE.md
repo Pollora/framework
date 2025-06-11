@@ -84,6 +84,37 @@ The `Discoverer` module automatically finds and registers components using Spati
 - Registers hooks, post types, taxonomies automatically
 - Enables convention-over-configuration approach
 
+### Dynamic Autoloading System
+The framework provides dynamic PSR-4 autoloading for themes and plugins using fixed namespace conventions:
+
+**Namespace Conventions:**
+- **Themes**: `Theme\{ThemeName}\`
+- **Plugins**: `Plugin\{PluginName}\` (future support)
+
+**Directory Structure:**
+```
+themes/solidarmonde/
+├── app/                          # PSR-4 autoloaded (preferred)
+│   ├── Providers/
+│   │   └── ThemeServiceProvider.php  # Theme\Solidarmonde\Providers\ThemeServiceProvider
+│   ├── Models/
+│   └── Services/
+├── src/                          # PSR-4 autoloaded (fallback)
+└── views/                        # Not autoloaded
+```
+
+**Autoloading Flow:**
+1. `ModuleBootstrap` discovers service providers via `ThemeServiceProviderScout`
+2. `LaravelThemeModule::register()` calls `registerAutoloading()`
+3. `ThemeAutoloader` maps `Theme\{ThemeName}\` to `{theme_path}/app` or `{theme_path}/src`
+4. Classes are now accessible: `Theme\Solidarmonde\Providers\ThemeServiceProvider`
+
+**Integration Points:**
+- `ModuleAutoloader`: Generic base for themes and future plugins
+- `ThemeAutoloader`: Theme-specific implementation
+- `ModuleBootstrap`: Orchestrates autoloading during module registration
+- `ThemeServiceProviderScout`: Discovers providers automatically
+
 ## Key Integration Points
 
 ### WordPress Integration
@@ -134,7 +165,9 @@ Use `testbench.yaml` for Laravel package testing configuration with WordPress in
 ## Important Conventions
 
 ### Namespace Structure
-- All classes under `Pollora\` namespace
+- **Framework classes**: `Pollora\` namespace
+- **Theme classes**: `Theme\{ThemeName}\` namespace (dynamically autoloaded)
+- **Plugin classes**: `Plugin\{PluginName}\` namespace (future support)
 - Module-based organization following DDD patterns
 - Strict interface segregation in Domain contracts
 

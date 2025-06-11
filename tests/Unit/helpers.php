@@ -67,6 +67,22 @@ function setupWordPressMocks()
         ->andReturn(false)
         ->byDefault();
 
+    // WordPress admin functions
+    WP::$wpFunctions->shouldReceive('is_admin')
+        ->withAnyArgs()
+        ->andReturn(false)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('get_current_screen')
+        ->withAnyArgs()
+        ->andReturn(new WP_Screen())
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('get_template_directory')
+        ->withAnyArgs()
+        ->andReturn('/theme')
+        ->byDefault();
+
     WP::$wpFunctions->shouldReceive('WC')
         ->withAnyArgs()
         ->andReturn(null)
@@ -617,6 +633,27 @@ if (! function_exists('WC')) {
     }
 }
 
+if (! function_exists('is_admin')) {
+    function is_admin()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_admin() : false;
+    }
+}
+
+if (! function_exists('get_current_screen')) {
+    function get_current_screen()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_current_screen() : new WP_Screen();
+    }
+}
+
+if (! function_exists('get_template_directory')) {
+    function get_template_directory()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_template_directory() : '/theme';
+    }
+}
+
 // Special WordPress request functions
 if (! function_exists('wp_using_themes')) {
     function wp_using_themes()
@@ -974,9 +1011,9 @@ if (! class_exists('TestContainer')) {
         }
 
         // Added for compatibility with attribute tests
-        public function make(string $serviceClass): ?object
+        public function make($abstract, array $parameters = [])
         {
-            return $this->get($serviceClass);
+            return $this->get($abstract);
         }
 
         public function resolve(string $serviceClass): ?object
@@ -989,7 +1026,7 @@ if (! class_exists('TestContainer')) {
             return isset($this->services[$serviceClass]);
         }
 
-        public function instance(string $abstract, $instance): void
+        public function instance($abstract, $instance)
         {
             $this->services[$abstract] = $instance;
         }
@@ -1000,6 +1037,20 @@ if (! class_exists('TestContainer')) {
 if (! class_exists('WP_Error')) {
     class WP_Error
     {
+        public function __construct()
+        {
+            // Mock implementation
+        }
+    }
+}
+
+// Mock WP_Screen class for WordPress tests
+if (! class_exists('WP_Screen')) {
+    class WP_Screen
+    {
+        public $id = 'woocommerce_page_wc-status';
+        public $base = 'woocommerce_page_wc-status';
+        
         public function __construct()
         {
             // Mock implementation

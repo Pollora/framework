@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
-use Mockery;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
