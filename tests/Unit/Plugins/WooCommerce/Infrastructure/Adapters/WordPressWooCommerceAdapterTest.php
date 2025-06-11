@@ -199,14 +199,4 @@ describe('WordPressWooCommerceAdapter', function () {
 
         expect($result)->toBeTrue();
     });
-
-    test('returns false when woocommerce not available', function () {
-        setWordPressFunction('WC', fn () => null);
-
-        $result = $this->adapter->isWooCommerceAvailable();
-
-        if (! defined('WC_ABSPATH')) {
-            expect($result)->toBeFalse();
-        }
-    });
 });

@@ -6,10 +6,9 @@ namespace Tests\Unit\Route\Infrastructure\Services;
 
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
-/**
- * @covers \Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver
- */
+#[CoversClass(\Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver::class)]
 class WordPressTypeResolverTest extends TestCase
 {
     private WordPressTypeResolver $resolver;

@@ -137,8 +137,6 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
         $method = $reflection->getMethod('registerWpRestRoute');
         $method->setAccessible(true);
 
-        // Should not throw an exception for valid REST route classes
-        $this->expectNotToPerformAssertions();
         $method->invoke($this->provider, TestWpRestRoute::class, $mockProcessor);
     }
 }

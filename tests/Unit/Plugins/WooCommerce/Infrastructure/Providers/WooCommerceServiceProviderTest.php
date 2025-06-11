@@ -125,6 +125,8 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
 {
     private array $singletons = [];
 
+    private array $services = [];
+
     public function singleton($abstract, $concrete = null)
     {
         if ($concrete instanceof \Closure) {
@@ -156,12 +158,12 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
 
     public function make($abstract, array $parameters = [])
     {
-        // Support both Laravel Container interface (mixed $abstract, array $parameters) 
+        // Support both Laravel Container interface (mixed $abstract, array $parameters)
         // and TestContainer interface (string $serviceClass)
         if (is_string($abstract)) {
             return $this->get($abstract);
         }
-        
+
         // Handle other types if needed
         return null;
     }
@@ -281,7 +283,7 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
 
     public function addContextualBinding($concrete, $abstract, $implementation)
     {
-        // Simplified implementation  
+        // Simplified implementation
     }
 
     public function beforeResolving($abstract, $callback = null)

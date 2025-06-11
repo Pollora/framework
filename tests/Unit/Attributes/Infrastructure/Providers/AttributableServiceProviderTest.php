@@ -137,8 +137,6 @@ final class AttributableServiceProviderTest extends BaseTestCase
         $method = $reflection->getMethod('registerAttributableClass');
         $method->setAccessible(true);
 
-        // Should not throw an exception for valid Attributable classes
-        $this->expectNotToPerformAssertions();
         $method->invoke($this->provider, TestAttributableClass::class, $mockProcessor);
     }
 }

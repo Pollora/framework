@@ -7,10 +7,9 @@ namespace Tests\Unit\Route\Infrastructure\Services;
 use Illuminate\Container\Container;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
-/**
- * @covers \Pollora\Route\Infrastructure\Services\WordPressConditionManager
- */
+#[CoversClass(\Pollora\Route\Infrastructure\Services\WordPressConditionManager::class)]
 class WordPressConditionManagerTest extends TestCase
 {
     private WordPressConditionManager $manager;

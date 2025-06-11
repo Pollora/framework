@@ -10,10 +10,9 @@ use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
-/**
- * @covers \Pollora\Route\Infrastructure\Services\ExtendedRouter
- */
+#[CoversClass(\Pollora\Route\Infrastructure\Services\ExtendedRouter::class)]
 class ExtendedRouterDependencyInjectionTest extends TestCase
 {
     private Container $container;
