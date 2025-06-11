@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Domain\Models;
 
-use Pollora\Asset\Domain\Models\AssetFile;
+use Pollora\Asset\Infrastructure\Services\AssetFile;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
@@ -35,7 +35,7 @@ class ThemeInitializer implements ThemeComponent
         protected ContainerInterface $app,
         protected ConfigRepositoryInterface $config
     ) {
-        $this->themeRoot = ThemeConfig::get('theme.base_path');
+        $this->themeRoot = ThemeConfig::get('base_path');
         $this->action = $this->app->get(Action::class);
         $this->filter = $this->app->get(Filter::class);
         $this->wpTheme = $this->app->get(WordPressThemeInterface::class);
@@ -85,7 +85,7 @@ class ThemeInitializer implements ThemeComponent
      */
     public function overrideStylesheetDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
     {
-        return str_replace($themeRootUri, ThemeConfig::get('theme.base_path'), $stylesheetDirUri);
+        return str_replace($themeRootUri, ThemeConfig::get('base_path'), $stylesheetDirUri);
     }
 
     /**
@@ -124,7 +124,7 @@ class ThemeInitializer implements ThemeComponent
      */
     private function registerThemeProvider(): void
     {
-        $providers = (array) ThemeConfig::get('theme.providers', []);
+        $providers = (array) ThemeConfig::get('providers', []);
 
         foreach ($providers as $provider) {
             // Using our specialized container interface
@@ -141,23 +141,6 @@ class ThemeInitializer implements ThemeComponent
         $childTheme = $this->wpTheme->getStylesheet();
 
         $this->getThemeService()->load($childTheme);
-
-        $themeConfigs = [
-            'supports',
-            'menus',
-            'templates',
-            'sidebars',
-            'images',
-            'gutenberg',
-            'providers',
-        ];
-
-        // Using our specialized container interface
-        if (! $this->app->isConfigurationCached()) {
-            foreach ($themeConfigs as $themeConfig) {
-                $this->mergeConfigFrom($this->getThemeService()->path("config/{$themeConfig}.php"), "theme.{$themeConfig}");
-            }
-        }
     }
 
     /**

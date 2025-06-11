@@ -64,11 +64,11 @@ class AssetFile implements AssetFileInterface
     /**
      * Sets the asset container to use.
      *
-     * @param  string  $assetContainer  The container identifier
+     * @param  string  $container  The container identifier
      */
-    public function from(string $assetContainer): static
+    public function from(string $container): static
     {
-        $this->assetContainer = $assetContainer;
+        $this->assetContainer = $container;
 
         return $this;
     }

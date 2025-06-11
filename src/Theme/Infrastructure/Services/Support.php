@@ -46,7 +46,7 @@ class Support implements ThemeComponent
      */
     public function addThemeSupport(): void
     {
-        $supports = ThemeConfig::get('theme.supports', []);
+        $supports = ThemeConfig::get('supports', []);
 
         foreach ($supports as $key => $value) {
             if (is_string($key)) {

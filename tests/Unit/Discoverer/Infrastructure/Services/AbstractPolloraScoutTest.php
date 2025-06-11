@@ -223,13 +223,8 @@ final class AbstractPolloraScoutTest extends BaseTestCase
 
     public function test_should_use_cache_detects_production_environment(): void
     {
-        // Setup mock app with production environment
-        $mockApp = \Mockery::mock();
-        $mockApp->shouldReceive('environment')
-            ->with('production')
-            ->andReturn(true);
-
-        $this->container->instance('app', $mockApp);
+        // Set up ENV variable directly for easier testing
+        $_ENV['APP_ENV'] = 'production';
 
         $scout = new TestConcreteScout($this->container);
 
@@ -240,6 +235,9 @@ final class AbstractPolloraScoutTest extends BaseTestCase
         $result = $method->invoke($scout);
 
         $this->assertTrue($result);
+
+        // Cleanup
+        unset($_ENV['APP_ENV']);
     }
 
     public function test_should_use_cache_detects_development_environment(): void

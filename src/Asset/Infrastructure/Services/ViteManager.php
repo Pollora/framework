@@ -56,13 +56,34 @@ class ViteManager implements ViteManagerInterface
      *
      * @throws AssetException When entrypoints array is empty
      */
+    /**
+     * Gets the URLs for the specified entry points.
+     *
+     * @param  array  $entrypoints  List of entry points to process
+     * @return array Array of asset URLs grouped by type (js/css)
+     *
+     * @throws AssetException When entrypoints array is empty
+     */
     public function getAssetUrls(array $entrypoints): array
     {
-        if ($entrypoints === []) {
+        if (empty($entrypoints)) {
             throw new AssetException('Entry points array cannot be empty.');
         }
 
-        return $this->getViteInstance()->getAssetUrls($entrypoints);
+        $basePath = $this->container()->getBasePath();
+
+        // If basePath is empty or null, no additional processing is needed
+        if (empty($basePath)) {
+            return $this->getViteInstance()->getAssetUrls($entrypoints);
+        }
+
+        // Prefix each entrypoint with the basePath
+        $prefixedEntrypoints = array_map(
+            fn (string $entrypoint): string => $basePath.ltrim($entrypoint, '/'),
+            $entrypoints
+        );
+
+        return $this->getViteInstance()->getAssetUrls($prefixedEntrypoints);
     }
 
     /**
@@ -73,7 +94,7 @@ class ViteManager implements ViteManagerInterface
      */
     public function asset(string $path): string
     {
-        return $this->getViteInstance()->asset($path);
+        return $this->getViteInstance()->asset($this->container()->getBasePath().$path);
     }
 
     /**

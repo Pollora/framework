@@ -60,7 +60,7 @@ class Templates implements ThemeComponent
      */
     public function getThemePageTemplates($postType): array
     {
-        $configPageTemplates = (array) ThemeConfig::get('theme.templates', []);
+        $configPageTemplates = (array) ThemeConfig::get('templates', []);
 
         $pageTemplates = [];
 

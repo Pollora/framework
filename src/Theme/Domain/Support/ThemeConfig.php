@@ -35,6 +35,8 @@ class ThemeConfig
      */
     public static function get(string $key, mixed $default = null): mixed
     {
+        $key = 'theme.'.$key;
+
         if (self::$configRepository === null) {
             throw new \RuntimeException(
                 'ConfigRepository not initialized. Call ThemeConfig::setRepository() before using this class.'

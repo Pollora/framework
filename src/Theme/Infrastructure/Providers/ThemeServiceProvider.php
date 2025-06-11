@@ -16,12 +16,19 @@ use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Theme\Application\Services\ThemeManager;
+use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
 use Pollora\Theme\Domain\Support\ThemeCollection;
 use Pollora\Theme\Domain\Support\ThemeConfig;
+use Pollora\Theme\Infrastructure\Adapters\WordPressThemeDiscovery;
+use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
+use Pollora\Theme\Domain\Models\LaravelThemeModule;
+use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
+use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
 
@@ -45,6 +52,9 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(CollectionServiceProvider::class);
 
+        // Register Modular Theme System
+        $this->app->register(\Pollora\Modules\ModuleServiceProvider::class);
+
         // Initialize utility classes
         $this->initializeUtilityClasses();
 
@@ -54,12 +64,17 @@ class ThemeServiceProvider extends ServiceProvider
             WordPressThemeAdapter::class
         );
 
+        // Register modular theme system services
+        $this->registerModularThemeServices();
+
         // Register ThemeService interface binding
         $this->app->singleton(ThemeService::class, function ($app) {
             return new ThemeManager(
                 $app,
                 $app->get('view')->getFinder(),
-                $app->make('translator')->getLoader()
+                $app->make('translator')->getLoader(),
+                $app->make(ModuleRepositoryInterface::class),
+                $app->make(ThemeDiscoveryInterface::class)
             );
         });
 
@@ -75,6 +90,9 @@ class ThemeServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerComponentServices();
+
+        // Boot modular theme system
+        $this->bootModularThemeSystem();
     }
 
     /**
@@ -99,6 +117,60 @@ class ThemeServiceProvider extends ServiceProvider
     protected function loadHelpers(): void
     {
         // No longer needed as we're using utility classes
+    }
+
+    /**
+     * Register modular theme system services.
+     */
+    protected function registerModularThemeServices(): void
+    {
+        // Register theme parser
+        $this->app->singleton(WordPressThemeParser::class);
+
+        // Register theme discovery service
+        $this->app->singleton(ThemeDiscoveryInterface::class, function ($app) {
+            return new WordPressThemeDiscovery(
+                $app->make(CollectionFactoryInterface::class),
+                $app->make(WordPressThemeParser::class)
+            );
+        });
+
+        // Register theme repository as module repository
+        $this->app->singleton(ModuleRepositoryInterface::class, function ($app) {
+            return new ThemeRepository(
+                $app,
+                $app->make(ThemeDiscoveryInterface::class),
+                $app->make(WordPressThemeParser::class),
+                $app->make(CollectionFactoryInterface::class)
+            );
+        });
+
+        // Register ThemeAutoloader service
+        $this->app->singleton(ThemeAutoloader::class, function ($app) {
+            return new ThemeAutoloader($app);
+        });
+
+        // Register class alias for LaravelThemeModule backward compatibility
+        if (!class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
+            class_alias(LaravelThemeModule::class, 'Pollora\\Modules\\Domain\\Models\\LaravelThemeModule');
+        }
+    }
+
+    /**
+     * Boot modular theme system.
+     */
+    protected function bootModularThemeSystem(): void
+    {
+        // The ModuleServiceProvider now handles registration and booting of modules
+        // We just need to create the @theme() blade directive for backward compatibility
+        if (class_exists('Illuminate\\Support\\Facades\\Blade')) {
+            \Illuminate\Support\Facades\Blade::if('theme', function (string $name) {
+                /** @var ThemeService $themeManager */
+                $themeManager = app(ThemeService::class);
+
+                return $themeManager->hasTheme($name);
+            });
+        }
     }
 
     /**
@@ -222,7 +294,7 @@ class ThemeServiceProvider extends ServiceProvider
             'hot_file' => public_path("{$currentTheme}.hot"),
             'build_directory' => "build/{$currentTheme}",
             'manifest_path' => 'manifest.json',
-            'base_path' => '',
+            'base_path' => 'resources/assets/',
         ]);
 
         // TODO: If needed, implement setDefaultContainer logic in AssetManager

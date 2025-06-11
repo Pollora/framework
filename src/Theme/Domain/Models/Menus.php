@@ -81,7 +81,7 @@ class Menus implements ThemeComponent
      */
     public function registerMenus(): void
     {
-        $menus = (array) ThemeConfig::get('theme.menus', []);
+        $menus = (array) ThemeConfig::get('menus', []);
         $translater = new Translater($menus, 'menus');
         $menus = $translater->translate(['*']);
 

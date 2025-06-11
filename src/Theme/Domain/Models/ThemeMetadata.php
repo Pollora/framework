@@ -42,7 +42,7 @@ class ThemeMetadata
      */
     public function getViewPath(): string
     {
-        return $this->getBasePath().'/views';
+        return $this->getBasePath().'/resources/views';
     }
 
     /**
@@ -113,7 +113,7 @@ class ThemeMetadata
      */
     public function getThemeAppDir(string $subDirectory = ''): string
     {
-        return rtrim($this->getApplicationPath().DIRECTORY_SEPARATOR.'Themes'.DIRECTORY_SEPARATOR.$this->getThemeNamespace()).DIRECTORY_SEPARATOR.$subDirectory;
+        return rtrim($this->getBasePath().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.$subDirectory);
     }
 
     /**

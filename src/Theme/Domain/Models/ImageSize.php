@@ -40,7 +40,7 @@ class ImageSize implements ThemeComponent
      */
     public function addImageSize(): void
     {
-        $images = ThemeConfig::get('theme.images', []);
+        $images = ThemeConfig::get('images', []);
 
         foreach ($images as $name => $sizes) {
             \add_image_size(

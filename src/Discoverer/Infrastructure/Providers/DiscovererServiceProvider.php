@@ -13,6 +13,7 @@ use Pollora\Discoverer\Scouts\AttributableClassesScout;
 use Pollora\Discoverer\Scouts\HookClassesScout;
 use Pollora\Discoverer\Scouts\PostTypeClassesScout;
 use Pollora\Discoverer\Scouts\TaxonomyClassesScout;
+use Pollora\Discoverer\Scouts\ThemeServiceProviderScout;
 use Pollora\Discoverer\Scouts\WpRestRoutesScout;
 
 /**
@@ -34,6 +35,7 @@ final class DiscovererServiceProvider extends ServiceProvider
         'hooks' => HookClassesScout::class,
         'post_types' => PostTypeClassesScout::class,
         'taxonomies' => TaxonomyClassesScout::class,
+        'theme_providers' => ThemeServiceProviderScout::class,
         'wp_rest_routes' => WpRestRoutesScout::class,
     ];
 

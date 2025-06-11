@@ -30,6 +30,7 @@ class AssetFile extends DomainAssetFile implements AssetFileInterface
             Application::getInstance();
             /** @var AssetContainer|null $assetContainer */
             $assetContainer = app(AssetManager::class)->getContainer($this->assetContainer);
+
             if ($assetContainer === null) {
                 return '';
             }

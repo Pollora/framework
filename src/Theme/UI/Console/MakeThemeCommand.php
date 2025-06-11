@@ -166,11 +166,11 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     {
         $dirMapping = $this->config->get('theme.structure', []);
         $this->containerFolder = [
-            'assets' => $dirMapping['assets'] ?? 'assets',
+            'assets' => $dirMapping['assets'] ?? 'resources/assets',
             'lang' => $dirMapping['lang'] ?? 'lang',
-            'layout' => $dirMapping['layouts'] ?? 'views/layouts',
-            'partial' => $dirMapping['partials'] ?? 'views/partials',
-            'view' => $dirMapping['views'] ?? 'views',
+            'layout' => $dirMapping['layouts'] ?? 'resources/views/layouts',
+            'partial' => $dirMapping['partials'] ?? 'resources/views/partials',
+            'view' => $dirMapping['views'] ?? 'resources/views',
         ];
 
         return $this;

@@ -43,7 +43,7 @@ class FrontendController
         $viewName = $this->templateFinder->getViewNameFromPath($templatePath);
 
         if ($viewName && View::exists($viewName)) {
-            return response(View::make($viewName));
+            return response(View::make($viewName), is_404() ? Response::HTTP_NOT_FOUND : Response::HTTP_ACCEPTED);
         }
 
         if (file_exists($templatePath)) {

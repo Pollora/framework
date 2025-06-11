@@ -99,7 +99,7 @@ final class DiscovererServiceProviderTest extends BaseTestCase
         $this->provider->boot();
 
         // Verify all scouts are registered
-        $expectedScouts = ['attributable', 'hooks', 'post_types', 'taxonomies', 'wp_rest_routes'];
+        $expectedScouts = ['attributable', 'hooks', 'post_types', 'taxonomies', 'theme_providers', 'wp_rest_routes'];
         $registeredScouts = $registry->getRegistered();
 
         foreach ($expectedScouts as $scoutKey) {
@@ -109,7 +109,7 @@ final class DiscovererServiceProviderTest extends BaseTestCase
             );
         }
 
-        $this->assertCount(5, $registeredScouts);
+        $this->assertCount(6, $registeredScouts);
 
         // Clean up
         \Pollora\Discoverer\Domain\Services\DiscoveryService::setRegistry(null);
