@@ -10,6 +10,10 @@ trait ResolvesLocation
 {
     /**
      * Resolve the target location for file generation.
+     * Priority: custom path > plugin > theme > default app path
+     * 
+     * @return array{type: string, path: string, namespace: string, name?: string}
+     * @throws InvalidArgumentException When location parameters are invalid
      */
     protected function resolveTargetLocation(): array
     {
@@ -33,6 +37,9 @@ trait ResolvesLocation
 
     /**
      * Resolve custom path location.
+     * 
+     * @return array{type: string, path: string, namespace: string}
+     * @throws InvalidArgumentException When custom path is empty
      */
     protected function resolveCustomPath(): array
     {
@@ -56,6 +63,9 @@ trait ResolvesLocation
 
     /**
      * Resolve plugin location.
+     * 
+     * @return array{type: string, path: string, namespace: string, name: string}
+     * @throws InvalidArgumentException When plugin is not found or support not implemented
      */
     protected function resolvePluginLocation(): array
     {
@@ -72,6 +82,9 @@ trait ResolvesLocation
 
     /**
      * Resolve theme location.
+     * 
+     * @return array{type: string, path: string, namespace: string, name: string}
+     * @throws InvalidArgumentException When theme is not found
      */
     protected function resolveThemeLocation(): array
     {
@@ -98,6 +111,8 @@ trait ResolvesLocation
 
     /**
      * Resolve default app location.
+     * 
+     * @return array{type: string, path: string, namespace: string}
      */
     protected function resolveDefaultLocation(): array
     {
@@ -110,6 +125,9 @@ trait ResolvesLocation
 
     /**
      * Get theme path for a given theme name.
+     * 
+     * @param string $themeName The theme name
+     * @return string The theme path
      */
     protected function getThemePath(string $themeName): string
     {
@@ -121,6 +139,9 @@ trait ResolvesLocation
 
     /**
      * Normalize theme name for namespace.
+     * 
+     * @param string $themeName The theme name to normalize
+     * @return string The normalized theme name for namespace
      */
     protected function normalizeThemeName(string $themeName): string
     {
@@ -129,6 +150,11 @@ trait ResolvesLocation
 
     /**
      * Get the resolved file path based on location and class type.
+     * 
+     * @param array $location The location information
+     * @param string $className The class name
+     * @param string $subPath Optional subdirectory path
+     * @return string The complete file path
      */
     protected function getResolvedFilePath(array $location, string $className, string $subPath = ''): string
     {
@@ -147,6 +173,10 @@ trait ResolvesLocation
 
     /**
      * Get the resolved namespace based on location and class type.
+     * 
+     * @param array $location The location information
+     * @param string $subNamespace Optional sub-namespace
+     * @return string The complete namespace
      */
     protected function getResolvedNamespace(array $location, string $subNamespace = ''): string
     {

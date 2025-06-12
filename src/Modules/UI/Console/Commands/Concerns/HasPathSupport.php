@@ -9,17 +9,21 @@ use Symfony\Component\Console\Input\InputOption;
 trait HasPathSupport
 {
     /**
-     * Get the console command options.
+     * Get the console command options for path support.
+     * 
+     * @return array The path-related command options
      */
-    protected function getOptions(): array
+    protected function getPathOptions(): array
     {
-        return array_merge(parent::getOptions() ?? [], [
+        return [
             ['path', null, InputOption::VALUE_OPTIONAL, 'The custom path to generate the class in'],
-        ]);
+        ];
     }
 
     /**
      * Get the custom path from option.
+     * 
+     * @return string|null The custom path if specified
      */
     protected function getPathOption(): ?string
     {
@@ -28,6 +32,8 @@ trait HasPathSupport
 
     /**
      * Check if custom path option is specified.
+     * 
+     * @return bool True if path option is set
      */
     protected function hasPathOption(): bool
     {
@@ -36,6 +42,8 @@ trait HasPathSupport
 
     /**
      * Resolve custom path.
+     * 
+     * @return string|null The resolved custom path
      */
     protected function resolvePath(): ?string
     {

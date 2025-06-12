@@ -9,12 +9,16 @@ use Illuminate\Support\Str;
 use Pollora\Modules\UI\Console\Commands\Concerns\HasPathSupport;
 use Pollora\Modules\UI\Console\Commands\Concerns\HasPluginSupport;
 use Pollora\Modules\UI\Console\Commands\Concerns\HasThemeSupport;
+use Pollora\Modules\UI\Console\Commands\Concerns\HasNameSupport;
 use Pollora\Modules\UI\Console\Commands\Concerns\ResolvesLocation;
+use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Symfony\Component\Console\Input\InputOption;
 
 class MakeModelCommand extends GeneratorCommand
 {
-    use HasPathSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation;
+    use HasNameSupport, HasPathSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation;
+
+    protected ThemeDiscoveryInterface $discovery;
 
     /**
      * The name and signature of the console command.
@@ -99,22 +103,24 @@ class MakeModelCommand extends GeneratorCommand
     }
 
     /**
-     * Build the class with the given name.
+     * Replace the namespace for the given stub.
      */
-    protected function buildClass($name): string
+    protected function replaceNamespace(&$stub, $name): static
     {
-        $stub = $this->files->get($this->getStub());
+        // Call parent to handle standard namespace replacement
+        parent::replaceNamespace($stub, $name);
 
-        return $this->replaceNamespace($stub, $name)
-            ->replaceClass($stub, $name)
-            ->replaceFillable($stub)
-            ->replaceModel($stub, $name);
+        // Apply our custom replacements
+        $stub = $this->replaceFillable($stub);
+        $stub = $this->replaceModel($stub, $name);
+
+        return $this;
     }
 
     /**
      * Replace the fillable for the given stub.
      */
-    protected function replaceFillable(string &$stub): static
+    protected function replaceFillable(string $stub): string
     {
         $fillable = $this->option('fillable');
 
@@ -128,15 +134,13 @@ class MakeModelCommand extends GeneratorCommand
             $fillable = '[]';
         }
 
-        $stub = str_replace(['{{ fillable }}', '{{fillable}}'], $fillable, $stub);
-
-        return $this;
+        return str_replace(['{{ fillable }}', '{{fillable}}'], $fillable, $stub);
     }
 
     /**
      * Replace the model for the given stub.
      */
-    protected function replaceModel(string &$stub, string $name): static
+    protected function replaceModel(string $stub, string $name): string
     {
         $model = class_basename($name);
         $table = Str::snake(Str::pluralStudly($model));
@@ -144,7 +148,7 @@ class MakeModelCommand extends GeneratorCommand
         $stub = str_replace(['{{ model }}', '{{model}}'], $model, $stub);
         $stub = str_replace(['{{ table }}', '{{table}}'], $table, $stub);
 
-        return $this;
+        return $stub;
     }
 
     /**
@@ -152,18 +156,16 @@ class MakeModelCommand extends GeneratorCommand
      */
     protected function getOptions(): array
     {
-        return array_merge(parent::getOptions(), [
-            ['fillable', 'f', InputOption::VALUE_OPTIONAL, 'The fillable attributes'],
-            ['pivot', 'p', InputOption::VALUE_NONE, 'Indicates if the generated model should be a custom intermediate table model'],
-        ]);
-    }
-
-    /**
-     * Get the class name input (uses GeneratorCommand's built-in name argument).
-     */
-    protected function getNameInput(): string
-    {
-        return trim($this->argument('name'));
+        return array_merge(
+            parent::getOptions(),
+            $this->getPathOptions(),
+            $this->getPluginOptions(),
+            $this->getThemeOptions(),
+            [
+                ['fillable', 'f', InputOption::VALUE_OPTIONAL, 'The fillable attributes'],
+                ['pivot', 'p', InputOption::VALUE_NONE, 'Indicates if the generated model should be a custom intermediate table model'],
+            ]
+        );
     }
 
     /**

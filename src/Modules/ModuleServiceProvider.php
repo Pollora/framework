@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Modules;
 
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Pollora\Discoverer\Scouts\ThemeServiceProviderScout;
@@ -35,7 +36,7 @@ class ModuleServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/config/modules.php', 'modules');
     }
 
-    public function boot(): void
+    public function boot(Router $router): void
     {
         // Register ModuleManifest service
         $this->app->singleton(ModuleManifest::class, function ($app) {
@@ -57,10 +58,11 @@ class ModuleServiceProvider extends ServiceProvider
         });
 
         // Register ModuleBootstrap service
-        $this->app->singleton(ModuleBootstrap::class, function ($app) {
+        $this->app->singleton(ModuleBootstrap::class, function ($app) use ($router) {
             return new ModuleBootstrap(
                 $app,
-                $app->make(ModuleRepositoryInterface::class)
+                $app->make(ModuleRepositoryInterface::class),
+                $router
             );
         });
 
@@ -74,6 +76,9 @@ class ModuleServiceProvider extends ServiceProvider
             // Register migrations and translations
             $bootstrap->registerMigrations();
             $bootstrap->registerTranslations();
+
+            $bootstrap->registerRoutes($router);
+
 
             // Boot modules on next cycle
             $this->app->booted(function () use ($bootstrap) {
