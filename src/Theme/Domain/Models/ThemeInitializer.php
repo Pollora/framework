@@ -40,7 +40,8 @@ class ThemeInitializer implements ThemeComponent
         $this->filter = $this->app->get(Filter::class);
         $this->wpTheme = $this->app->get(WordPressThemeInterface::class);
 
-        $this->filter->add('stylesheet_directory', $this->overrideStylesheetDirectory(...), 90, 3);
+        $this->filter->add('template_directory', $this->overrideThemeDirectory(...), 90, 3);
+        $this->filter->add('stylesheet_directory', $this->overrideThemeDirectory(...), 90, 3);
     }
 
     /**
@@ -83,7 +84,7 @@ class ThemeInitializer implements ThemeComponent
     /**
      * Override the stylesheet directory URI
      */
-    public function overrideStylesheetDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
+    public function overrideThemeDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
     {
         return str_replace($themeRootUri, ThemeConfig::get('base_path'), $stylesheetDirUri);
     }
@@ -171,7 +172,6 @@ class ThemeInitializer implements ThemeComponent
     {
         $this->filter->add('theme_file_uri', function ($path): string {
             $relativePath = $this->getRelativePath($path);
-
             return (string) (new AssetFile($relativePath))->from('theme');
         });
     }
