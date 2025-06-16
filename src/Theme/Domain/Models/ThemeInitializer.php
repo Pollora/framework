@@ -32,9 +32,10 @@ class ThemeInitializer implements ThemeComponent
      * Create a new theme initializer
      */
     public function __construct(
-        protected ContainerInterface $app,
+        protected ContainerInterface        $app,
         protected ConfigRepositoryInterface $config
-    ) {
+    )
+    {
         $this->themeRoot = ThemeConfig::get('base_path');
         $this->action = $this->app->get(Action::class);
         $this->filter = $this->app->get(Filter::class);
@@ -42,6 +43,9 @@ class ThemeInitializer implements ThemeComponent
 
         $this->filter->add('template_directory', $this->overrideThemeDirectory(...), 90, 3);
         $this->filter->add('stylesheet_directory', $this->overrideThemeDirectory(...), 90, 3);
+        // Handle custom theme roots.
+        $this->filter->add('pre_option_stylesheet_root', $this->resetThemeRootOption(...));
+        $this->filter->add('pre_option_template_root', $this->resetThemeRootOption(...));
     }
 
     /**
@@ -90,6 +94,14 @@ class ThemeInitializer implements ThemeComponent
     }
 
     /**
+     * Force template and stylesheet root to be false when called from the database
+     */
+    protected function resetThemeRootOption(string|bool $path): bool
+    {
+        return false;
+    }
+
+    /**
      * Initialize the theme
      */
     private function initializeTheme(): void
@@ -102,7 +114,7 @@ class ThemeInitializer implements ThemeComponent
 
         // Use the interface to get theme directories
         $directories = $this->wpTheme->getThemeDirectories();
-        if (! empty($directories)) {
+        if (!empty($directories)) {
             if (isset($GLOBALS['wp_theme_directories'])) {
                 $GLOBALS['wp_theme_directories'] = array_merge(
                     $GLOBALS['wp_theme_directories'],
@@ -117,7 +129,7 @@ class ThemeInitializer implements ThemeComponent
         $this->wp_theme = $this->wpTheme->getTheme();
 
         // Use our specialized container interface
-        $this->app->bindShared('wp.theme', fn () => $this->wp_theme);
+        $this->app->bindShared('wp.theme', fn() => $this->wp_theme);
     }
 
     /**
@@ -125,7 +137,7 @@ class ThemeInitializer implements ThemeComponent
      */
     private function registerThemeProvider(): void
     {
-        $providers = (array) ThemeConfig::get('providers', []);
+        $providers = (array)ThemeConfig::get('providers', []);
 
         foreach ($providers as $provider) {
             // Using our specialized container interface
@@ -159,7 +171,7 @@ class ThemeInitializer implements ThemeComponent
     protected function mergeConfigFrom($path, $key): void
     {
         $config = $this->app->getConfig($key, []);
-        if (! file_exists($path)) {
+        if (!file_exists($path)) {
             return;
         }
         $this->app->setConfig($key, array_merge(require $path, $config));
@@ -172,7 +184,7 @@ class ThemeInitializer implements ThemeComponent
     {
         $this->filter->add('theme_file_uri', function ($path): string {
             $relativePath = $this->getRelativePath($path);
-            return (string) (new AssetFile($relativePath))->from('theme');
+            return (string)(new AssetFile($relativePath))->from('theme');
         });
     }
 
