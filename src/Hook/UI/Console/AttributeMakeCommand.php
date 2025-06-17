@@ -6,44 +6,54 @@ declare(strict_types=1);
 
 namespace Pollora\Hook\UI\Console;
 
-use Illuminate\Console\GeneratorCommand;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Pollora\Attributes\Action;
 use Pollora\Attributes\Filter;
+use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
- * Class AttributeMakeCommand
- *
- * Abstract class for creating and updating hook attributes.
+ * Command to generate a new hook attribute class.
+ * This command creates a new hook attribute class in the specified location (app, theme, or plugin).
  */
-abstract class AttributeMakeCommand extends GeneratorCommand
+class AttributeMakeCommand extends AbstractGeneratorCommand
 {
     /**
-     * The type of the attribute.
+     * The name and signature of the console command.
      *
      * @var string
      */
-    protected $type;
+    protected $name = 'pollora:make-hook';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Create a new hook attribute class';
+
+    /**
+     * The type of class being generated.
+     *
+     * @var string
+     */
+    protected $type = 'Hook';
+
+    /**
+     * The subpath where the class should be generated.
+     *
+     * @var string
+     */
+    protected string $subPath = 'Cms/Hooks';
 
     /**
      * Get the stub file for the generator.
      */
     protected function getStub(): string
     {
-        return $this->resolveStubPath('/stubs/hook-attribute.stub');
-    }
-
-    /**
-     * Resolve the fully-qualified path to the stub.
-     */
-    protected function resolveStubPath(string $stub): string
-    {
-        $customPath = config('stubs.path', base_path('stubs')).$stub;
-
-        return file_exists($customPath) ? $customPath : __DIR__.$stub;
+        return file_get_contents(__DIR__.'/stubs/hook-attribute.stub');
     }
 
     /**
@@ -53,7 +63,8 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return $rootNamespace.'\\Cms\\Hooks';
+        $location = $this->resolveTargetLocation();
+        return $this->getResolvedNamespace($location, 'Cms\\Hooks');
     }
 
     /**
@@ -63,21 +74,27 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected function buildClass($name): string
     {
-        $stub = parent::buildClass($name);
+        $stub = $this->getStub();
 
+        // Get the namespace
+        $namespace = $this->getDefaultNamespace($this->rootNamespace());
+
+        // Replace namespace in stub
+        $stub = str_replace(
+            ['{{ namespace }}', '{{namespace}}'],
+            $namespace,
+            $stub
+        );
+
+        // Replace class name in stub
+        $stub = str_replace(
+            ['{{ class }}', '{{class}}'],
+            class_basename($name),
+            $stub
+        );
+
+        // Make other replacements
         return $this->makeReplacements($stub);
-    }
-
-    /**
-     * Get the console command options.
-     */
-    protected function getOptions(): array
-    {
-        return [
-            ['force', 'f', InputOption::VALUE_NONE, 'Create the class even if the hook already exists'],
-            ['hook', null, InputOption::VALUE_OPTIONAL, 'The WordPress hook to use', 'init'],
-            ['priority', null, InputOption::VALUE_OPTIONAL, 'The hook priority', 10],
-        ];
     }
 
     /**
@@ -91,8 +108,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
         $path = $this->getSourceFilePath();
         $this->getNameInput();
-
-        if ($this->alreadyExists($path)) {
+        if (File::exists($path)) {
             $this->updateExistingFile($path);
             $this->components->info(sprintf('%s [%s] updated successfully.', $this->type, $path));
 
@@ -100,6 +116,17 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         }
 
         return parent::handle();
+    }
+
+    /**
+     * Get the source file path for the generated class.
+     */
+    protected function getSourceFilePath(): string
+    {
+        $location = $this->resolveTargetLocation();
+        $className = $this->getNameInput();
+
+        return $this->getResolvedFilePath($location, $className, 'Cms/Hooks');
     }
 
     /**
@@ -119,7 +146,8 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected function updateExistingFile(string $path): void
     {
-        $stub = $this->getUpdateStub();
+        $stubPath = $this->getUpdateStub();
+        $stub = File::get($stubPath);
 
         $hook = $this->getDefaultOption('hook');
         $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', (string) $hook));
@@ -129,7 +157,7 @@ abstract class AttributeMakeCommand extends GeneratorCommand
         // Ensure all required attribute imports are present
         $existingContent = $this->ensureAttributeImports($existingContent);
 
-        $content = $this->makeReplacements(File::get($stub));
+        $content = $this->makeReplacements($stub);
 
         if (preg_match("/public function {$hookMethodName}\(/", $existingContent)) {
             $this->error("The method '{$hookMethodName}' already exists in the file '{$path}'.");
@@ -145,10 +173,6 @@ abstract class AttributeMakeCommand extends GeneratorCommand
 
     /**
      * Ensure all required attribute imports are present in the file content.
-     *
-     * This method checks for the presence of all necessary attribute imports
-     * and adds them if they are missing. It maintains the existing imports
-     * while adding any new ones that are required.
      */
     protected function ensureAttributeImports(string $content): string
     {
@@ -200,25 +224,22 @@ abstract class AttributeMakeCommand extends GeneratorCommand
      */
     protected function getUpdateStub(): string
     {
-        return $this->resolveStubPath('/stubs/hook-attribute-update.stub');
+        return __DIR__.'/stubs/hook-attribute-update.stub';
     }
 
     /**
-     * Get the source file path for the generated class.
+     * Get the console command options.
      */
-    protected function getSourceFilePath(): string
+    protected function getOptions(): array
     {
-        return app_path('Cms/Hooks/'.$this->getNameInput().'.php');
-    }
-
-    /**
-     * Determine if the file already exists.
-     *
-     * @param  string  $rawName
-     */
-    protected function alreadyExists($rawName): bool
-    {
-        return File::exists($rawName);
+        return array_merge(
+            parent::getOptions(),
+            [
+                ['force', 'f', InputOption::VALUE_NONE, 'Create the class even if the hook already exists'],
+                ['hook', null, InputOption::VALUE_OPTIONAL, 'The hook to use'],
+                ['priority', null, InputOption::VALUE_OPTIONAL, 'The hook priority', 10],
+            ]
+        );
     }
 
     /**

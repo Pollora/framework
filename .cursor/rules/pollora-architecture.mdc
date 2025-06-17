@@ -1,0 +1,43 @@
+---
+description: Pollora Framework - Domain-Driven Design Architecture
+alwaysApply: true
+---
+
+# Pollora DDD Architecture Standards
+
+## Strict Module Structure
+Always follow the DDD module structure for new components:
+
+```
+src/[Module]/
+├── Application/Services/     # Application layer - use cases and orchestration
+├── Domain/
+│   ├── Contracts/           # Interfaces and contracts
+│   ├── Models/             # Domain entities and value objects
+│   ├── Services/           # Domain services and business logic
+│   └── Exceptions/         # Domain-specific exceptions
+├── Infrastructure/
+│   ├── Providers/          # Service providers for DI container
+│   ├── Repositories/       # Data persistence implementations
+│   ├── Services/           # Infrastructure services (external concerns)
+│   └── Adapters/          # Adapters for external systems
+└── UI/
+    ├── Console/           # Artisan commands
+    └── Http/             # HTTP controllers and middleware
+```
+
+## Layer Responsibilities
+- **Domain**: Business logic, entities, contracts - NO external dependencies
+- **Application**: Use cases, orchestration - depends only on Domain
+- **Infrastructure**: Technical implementations, databases, external APIs
+- **UI**: Controllers, commands, presentation logic
+
+## Namespace Conventions
+- Framework classes: `Pollora\[Module]\[Layer]\`
+- Theme classes: `Theme\{ThemeName}\` (dynamically autoloaded)
+- Plugin classes: `Plugin\{PluginName}\` (future support)
+
+## Service Provider Registration
+- Each module MUST have a dedicated service provider
+- Register in dependency order within `PolloraServiceProvider`
+- WordPress services registered AFTER Laravel core services

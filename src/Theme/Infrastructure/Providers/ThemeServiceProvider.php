@@ -16,6 +16,7 @@ use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
+use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -52,7 +53,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->register(CollectionServiceProvider::class);
 
         // Register Modular Theme System
-        $this->app->register(\Pollora\Modules\ModuleServiceProvider::class);
+        $this->app->register(ModuleServiceProvider::class);
 
         // Initialize utility classes
         $this->initializeUtilityClasses();

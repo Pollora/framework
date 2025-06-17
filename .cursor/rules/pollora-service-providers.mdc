@@ -1,0 +1,54 @@
+---
+description: Pollora Framework - Service Provider Patterns
+globs: ["**/*ServiceProvider.php", "**/Providers/**/*.php"]
+alwaysApply: false
+---
+
+# Service Provider Standards
+
+## Service Provider Structure
+Always follow this pattern for service providers:
+
+```php
+<?php
+
+namespace Pollora\[Module]\Infrastructure\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class [Module]ServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        // Bind interfaces to implementations
+        // Register singletons
+        // Merge config files
+    }
+
+    public function boot(): void
+    {
+        // Publish assets
+        // Register routes
+        // Load views
+        // Boot WordPress integration
+    }
+}
+```
+
+## Best Practices
+- Use `register()` for binding interfaces and registering services
+- Use `boot()` for initialization that depends on other services
+- Always bind interfaces in the Domain/Contracts to Infrastructure implementations
+- WordPress integration should happen in `boot()` method
+- Service providers should be stateless
+- Use container binding for dependency injection, not direct instantiation
+
+## Laravel Container Integration
+- Bind interfaces to concrete implementations: `$this->app->bind(ContractInterface::class, ConcreteImplementation::class)`
+- Use singletons for stateless services: `$this->app->singleton()`
+- Tag related services: `$this->app->tag([...], 'tag-name')`
+
+## WordPress Integration
+- WordPress hooks registration happens in service provider `boot()` method
+- Use Laravel's service container within WordPress hooks
+- Ensure WordPress is loaded before accessing WordPress functions

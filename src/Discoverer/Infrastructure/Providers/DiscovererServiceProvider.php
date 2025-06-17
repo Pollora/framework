@@ -61,6 +61,7 @@ final class DiscovererServiceProvider extends ServiceProvider
      */
     private function registerScoutRegistry(): void
     {
+        // @TODO use dependency injection for scout registries
         $this->app->singleton(ScoutRegistryInterface::class, function (Container $app): ScoutRegistry {
             return new ScoutRegistry($app);
         });
@@ -71,6 +72,7 @@ final class DiscovererServiceProvider extends ServiceProvider
      */
     private function registerCoreScouts(): void
     {
+        // @TODO use dependency injection for scout classes
         foreach ($this->coreScouts as $scoutClass) {
             $this->app->singleton($scoutClass, function (Container $app) use ($scoutClass): object {
                 return new $scoutClass($app);

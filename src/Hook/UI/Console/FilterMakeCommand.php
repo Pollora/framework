@@ -10,7 +10,9 @@ namespace Pollora\Hook\UI\Console;
  * Class FilterMakeCommand
  *
  * Command to create a new filter hook class (feature UI layer).
- * Relocated from Commands/FilterMakeCommand.php as part of Hexagonal refactor.
+ * Supports generation in different locations (app, theme, plugin) through traits.
+ * 
+ * @package Pollora\Hook\UI\Console
  */
 class FilterMakeCommand extends AttributeMakeCommand
 {

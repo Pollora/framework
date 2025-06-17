@@ -8,7 +8,9 @@ namespace Pollora\Hook\UI\Console;
  * Class ActionMakeCommand
  *
  * Command to create a new action hook class (feature UI layer).
- * Relocated from Commands/ActionMakeCommand.php as part of Hexagonal refactor.
+ * Supports generation in different locations (app, theme, plugin) through traits.
+ * 
+ * @package Pollora\Hook\UI\Console
  */
 class ActionMakeCommand extends AttributeMakeCommand
 {

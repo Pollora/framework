@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Modules\UI\Console\Commands\Concerns;
+namespace Pollora\Foundation\Console\Commands\Concerns;
 
 trait HasNameSupport
 {
@@ -15,4 +15,4 @@ trait HasNameSupport
     {
         return trim($this->argument('name'));
     }
-}
+} 

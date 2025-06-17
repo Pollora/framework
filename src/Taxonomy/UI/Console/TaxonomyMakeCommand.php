@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Taxonomy\UI\Console;
 
-use Illuminate\Console\GeneratorCommand;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -15,7 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
  * This command creates a new PHP class that implements the Taxonomy interface
  * and is configured with PHP attributes for WordPress custom taxonomy registration.
  */
-class TaxonomyMakeCommand extends GeneratorCommand
+class TaxonomyMakeCommand extends AbstractGeneratorCommand
 {
     /**
      * The console command name.
@@ -39,40 +38,18 @@ class TaxonomyMakeCommand extends GeneratorCommand
     protected $type = 'Taxonomy';
 
     /**
+     * The subpath where the class should be generated.
+     *
+     * @var string
+     */
+    protected string $subPath = 'Cms/Taxonomies';
+
+    /**
      * Get the stub file for the generator.
      */
     protected function getStub(): string
     {
         return __DIR__.'/stubs/taxonomy.stub';
-    }
-
-    /**
-     * Get the default namespace for the class.
-     *
-     * @param  string  $rootNamespace
-     */
-    protected function getDefaultNamespace($rootNamespace): string
-    {
-        return $rootNamespace.'\Cms\Taxonomies';
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @throws FileNotFoundException
-     */
-    public function handle(): ?bool
-    {
-        // Create the directory if it doesn't exist
-        $directory = app_path('Cms/Taxonomies');
-        if (! is_dir($directory)) {
-            if (! mkdir($directory, 0755, true) && ! is_dir($directory)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $directory));
-            }
-            $this->components->info(sprintf('Directory [%s] created successfully.', $directory));
-        }
-
-        return parent::handle();
     }
 
     /**
@@ -90,10 +67,13 @@ class TaxonomyMakeCommand extends GeneratorCommand
      */
     protected function getOptions(): array
     {
-        return [
-            ['post-type', 'p', InputOption::VALUE_OPTIONAL, 'The post type to associate with this taxonomy (deprecated, use --object-type instead)', 'post'],
-            ['object-type', 'o', InputOption::VALUE_OPTIONAL, 'The post types to associate with this taxonomy (comma-separated)', null],
-        ];
+        return array_merge(
+            parent::getOptions(),
+            [
+                ['post-type', 'p', InputOption::VALUE_OPTIONAL, 'The post type to associate with this taxonomy (deprecated, use --object-type instead)', 'post'],
+                ['object-type', 'o', InputOption::VALUE_OPTIONAL, 'The post types to associate with this taxonomy (comma-separated)', null],
+            ]
+        );
     }
 
     /**

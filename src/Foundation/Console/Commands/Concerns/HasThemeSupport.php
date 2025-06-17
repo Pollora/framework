@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Modules\UI\Console\Commands\Concerns;
+namespace Pollora\Foundation\Console\Commands\Concerns;
 
 use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -48,7 +48,10 @@ trait HasThemeSupport
      */
     protected function getActiveTheme(): ?string
     {
-        $this->discovery = app(ThemeDiscoveryInterface::class);
+        if (! property_exists($this, 'discovery') || $this->discovery === null) {
+            $this->discovery = app(ThemeDiscoveryInterface::class);
+        }
+
         $activeTheme = $this->discovery?->getActiveTheme();
 
         if ($activeTheme) {

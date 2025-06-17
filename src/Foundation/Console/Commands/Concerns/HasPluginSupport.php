@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Modules\UI\Console\Commands\Concerns;
+namespace Pollora\Foundation\Console\Commands\Concerns;
 
 use Symfony\Component\Console\Input\InputOption;
 
@@ -49,4 +49,4 @@ trait HasPluginSupport
     {
         return $this->getPluginOption();
     }
-}
+} 

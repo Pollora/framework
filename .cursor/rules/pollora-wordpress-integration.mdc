@@ -1,0 +1,60 @@
+---
+description: Pollora Framework - WordPress-Laravel Integration Bridge
+globs: ["**/WordPress/**/*.php", "**/Bootstrap/**/*.php", "**/Template/**/*.php"]
+alwaysApply: false
+---
+
+# WordPress-Laravel Integration
+
+## Bootstrap Process
+The `WordPress\Bootstrap` class is the critical bridge:
+- Manages WordPress constants and configuration
+- Handles database configuration mapping
+- Controls WordPress initialization flow
+- Manages URL schemes and routing
+
+## WordPress Integration Points
+
+### Database Bridge
+Laravel database config automatically maps to WordPress constants:
+```php
+// Laravel config maps to WordPress
+DB_HOST → WordPress DB_HOST
+DB_NAME → WordPress DB_NAME
+DB_USER → WordPress DB_USER
+DB_PASSWORD → WordPress DB_PASSWORD
+```
+
+### Authentication Integration
+- Custom Laravel guards for WordPress authentication
+- WordPress-compatible password hashing
+- User session management bridge
+
+### Template System
+- Blade templates with WordPress template hierarchy
+- `TemplateHierarchy` module for template resolution
+- Support for both Blade and PHP templates
+
+### Asset Management
+- Vite integration with HMR support
+- Automatic WordPress script/style enqueuing
+- Asset containers for theme-specific resources
+
+## WordPress Compatibility
+- Patches applied to WordPress core for Laravel compatibility
+- Custom function renaming to avoid conflicts (`__` function, `wp_mail`)
+- Conditional WordPress loading (console vs web environment)
+
+## Best Practices
+- Always check if WordPress is loaded before using WordPress functions
+- Use Laravel's service container within WordPress hooks
+- Prefer Laravel patterns (facades, dependency injection) over global WordPress functions
+- WordPress hooks should be registered in service provider `boot()` method
+- Use `app()` helper to resolve services within WordPress contexts
+- Environment-aware constant definition for WordPress configuration
+
+## Events System
+Comprehensive WordPress event dispatching:
+- Core WordPress events (posts, users, comments)
+- Plugin-specific events (WooCommerce, Gravity Forms, Yoast SEO)
+- Custom application events through Laravel's event system

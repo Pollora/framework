@@ -1,0 +1,68 @@
+---
+description: Pollora Framework - PHP 8 Attributes for Declarative Configuration
+globs: ["**/*.php"]
+alwaysApply: false
+---
+
+# Attribute-Driven Configuration
+
+## Available Attributes
+Use these PHP 8 attributes for declarative configuration:
+
+### WordPress Integration
+```php
+#[PostType(
+    name: 'custom_post',
+    args: ['public' => true, 'supports' => ['title', 'editor']]
+)]
+class CustomPost {}
+
+#[Taxonomy(
+    name: 'custom_taxonomy',
+    postTypes: ['post', 'custom_post'],
+    args: ['hierarchical' => true]
+)]
+class CustomTaxonomy {}
+
+#[Action(
+    hook: 'init',
+    priority: 10,
+    acceptedArgs: 1
+)]
+public function initMethod() {}
+
+#[Filter(
+    hook: 'the_content',
+    priority: 10,
+    acceptedArgs: 1
+)]
+public function filterContent(string $content): string {}
+```
+
+### Scheduling & REST API
+```php
+#[Schedule(
+    cron: '0 0 * * *',
+    method: 'dailyTask'
+)]
+class ScheduledTask {}
+
+#[WpRestRoute(
+    endpoint: '/custom/v1/data',
+    methods: ['GET', 'POST']
+)]
+public function handleRestRequest() {}
+```
+
+## Best Practices
+- Use attributes instead of manual hook registration
+- Place attributes directly above the class or method they configure
+- Keep attribute parameters declarative and simple
+- The Discovery system will automatically find and register these attributes
+- Prefer convention over configuration where possible
+
+## Discovery System
+- Classes with attributes are automatically discovered by `Discoverer` module
+- No manual registration needed for attributed classes
+- Follows convention-over-configuration approach
+- Attributes are processed during service provider boot phase

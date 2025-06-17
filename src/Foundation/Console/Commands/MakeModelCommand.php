@@ -2,52 +2,45 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Modules\UI\Console\Commands;
+namespace Pollora\Foundation\Console\Commands;
 
-use Illuminate\Console\GeneratorCommand;
+use Pollora\Console\AbstractGeneratorCommand;
 use Illuminate\Support\Str;
-use Pollora\Modules\UI\Console\Commands\Concerns\HasPathSupport;
-use Pollora\Modules\UI\Console\Commands\Concerns\HasPluginSupport;
-use Pollora\Modules\UI\Console\Commands\Concerns\HasThemeSupport;
-use Pollora\Modules\UI\Console\Commands\Concerns\HasNameSupport;
-use Pollora\Modules\UI\Console\Commands\Concerns\ResolvesLocation;
-use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Symfony\Component\Console\Input\InputOption;
 
-class MakeModelCommand extends GeneratorCommand
+/**
+ * Command to generate a new Eloquent model class.
+ * This command creates a new model class in the specified location (app, theme, plugin, or module).
+ */
+class MakeModelCommand extends AbstractGeneratorCommand
 {
-    use HasNameSupport, HasPathSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation;
-
-    protected ThemeDiscoveryInterface $discovery;
-
     /**
      * The name and signature of the console command.
+     *
+     * @var string
      */
     protected $name = 'pollora:make-model';
 
     /**
      * The console command description.
+     *
+     * @var string
      */
     protected $description = 'Create a new Eloquent model class';
 
     /**
      * The type of class being generated.
+     *
+     * @var string
      */
     protected $type = 'Model';
 
     /**
-     * Execute the console command.
+     * The subpath where the class should be generated.
+     *
+     * @var string
      */
-    public function handle(): ?bool
-    {
-        // Get location info
-        $location = $this->resolveTargetLocation();
-
-        // Show where the file will be created
-        $this->info("Creating model in {$location['type']}: {$location['path']}");
-
-        return parent::handle();
-    }
+    protected string $subPath = 'Models';
 
     /**
      * Get the stub file for the generator.
@@ -69,37 +62,6 @@ class MakeModelCommand extends GeneratorCommand
         return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
             ? $customPath
             : __DIR__.$stub;
-    }
-
-    /**
-     * Get the destination class path.
-     */
-    protected function getPath($name): string
-    {
-        $location = $this->resolveTargetLocation();
-        $className = str_replace($this->getNamespace($name).'\\', '', $name);
-
-        return $this->getResolvedFilePath($location, $className, 'Models');
-    }
-
-    /**
-     * Get the default namespace for the class.
-     */
-    protected function getDefaultNamespace($rootNamespace): string
-    {
-        $location = $this->resolveTargetLocation();
-
-        return $this->getResolvedNamespace($location, 'Models');
-    }
-
-    /**
-     * Get the root namespace for the class.
-     */
-    protected function rootNamespace(): string
-    {
-        $location = $this->resolveTargetLocation();
-
-        return $location['namespace'];
     }
 
     /**
@@ -158,25 +120,10 @@ class MakeModelCommand extends GeneratorCommand
     {
         return array_merge(
             parent::getOptions(),
-            $this->getPathOptions(),
-            $this->getPluginOptions(),
-            $this->getThemeOptions(),
             [
                 ['fillable', 'f', InputOption::VALUE_OPTIONAL, 'The fillable attributes'],
                 ['pivot', 'p', InputOption::VALUE_NONE, 'Indicates if the generated model should be a custom intermediate table model'],
             ]
         );
     }
-
-    /**
-     * Create the directory if it doesn't exist.
-     */
-    protected function makeDirectory($path): string
-    {
-        if (! $this->files->isDirectory(dirname($path))) {
-            $this->files->makeDirectory(dirname($path), 0755, true, true);
-        }
-
-        return $path;
-    }
-}
+} 

@@ -6,6 +6,7 @@ namespace Pollora\Discoverer\Scouts;
 
 use Pollora\Attributes\Attributable;
 use Pollora\Discoverer\Infrastructure\Services\AbstractPolloraScout;
+use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Spatie\StructureDiscoverer\Discover;
 
 /**
@@ -25,18 +26,5 @@ final class AttributableClassesScout extends AbstractPolloraScout
         return $discover
             ->classes()
             ->implementing(Attributable::class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function getDefaultDirectories(): array
-    {
-        $paths = parent::getDefaultDirectories();
-
-        // Add plugin paths for WordPress environments
-        $paths = array_merge($paths, $this->getPluginPaths());
-
-        return array_unique(array_filter($paths));
     }
 }

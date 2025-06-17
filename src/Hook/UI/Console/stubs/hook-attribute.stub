@@ -9,6 +9,6 @@ class {{ class }} implements Hooks
     #[{{ hookType }}('{{ hook }}'{{ priority }})]
     public function {{ hookMethodName }}({{ arg }}){{ returnType }}
     {
-        // Code is executed on the "{{ hook }}" WordPress action only.{{ return }}
+        // Code is executed on the "{{ hook }}" WordPress {{ hookType }} only.{{ return }}
     }
 }

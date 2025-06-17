@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\PostType\UI\Console;
 
-use Illuminate\Console\GeneratorCommand;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 /**
@@ -14,7 +13,7 @@ use Symfony\Component\Console\Input\InputArgument;
  * This command creates a new PHP class that implements the PostType interface
  * and is configured with PHP attributes for WordPress custom post type registration.
  */
-class PostTypeMakeCommand extends GeneratorCommand
+class PostTypeMakeCommand extends AbstractGeneratorCommand
 {
     /**
      * The console command name.
@@ -38,41 +37,18 @@ class PostTypeMakeCommand extends GeneratorCommand
     protected $type = 'PostType';
 
     /**
+     * The subpath where the class should be generated.
+     *
+     * @var string
+     */
+    protected string $subPath = 'Cms/PostTypes';
+
+    /**
      * Get the stub file for the generator.
      */
     protected function getStub(): string
     {
         return __DIR__.'/stubs/posttype.stub';
-    }
-
-    /**
-     * Get the default namespace for the class.
-     *
-     * @param  string  $rootNamespace
-     */
-    protected function getDefaultNamespace($rootNamespace): string
-    {
-        return $rootNamespace.'\Cms\PostTypes';
-    }
-
-    /**
-     * Execute the console command.
-     *
-     *
-     * @throws FileNotFoundException
-     */
-    public function handle(): ?bool
-    {
-        // Create the directory if it doesn't exist
-        $directory = app_path('Cms/PostTypes');
-        if (! is_dir($directory)) {
-            if (! mkdir($directory, 0755, true) && ! is_dir($directory)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $directory));
-            }
-            $this->components->info(sprintf('Directory [%s] created successfully.', $directory));
-        }
-
-        return parent::handle();
     }
 
     /**

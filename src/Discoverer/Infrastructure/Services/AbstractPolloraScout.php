@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Discoverer\Infrastructure\Services;
 
 use Illuminate\Container\Container;
+use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 use Spatie\StructureDiscoverer\Discover;
 use Spatie\StructureDiscoverer\StructureScout;
@@ -79,9 +80,29 @@ abstract class AbstractPolloraScout extends StructureScout
     {
         return array_filter([
             $this->getAppPath(),
+            ...$this->getExtraModulePaths(),
             ...$this->getModulePaths(),
-            // Theme paths are added later via lazy loading in getValidDirectories()
         ]);
+    }
+
+    protected function getExtraModulePaths(): array
+    {
+        $paths = [];
+
+        // Get theme directories from the module repository
+        if ($this->container->bound(ModuleRepositoryInterface::class)) {
+            try {
+                $repository = $this->container->make(ModuleRepositoryInterface::class);
+                foreach ($repository->allEnabled() as $module) {
+                    $modulePath = $module->getPath();
+                    $paths[] = $modulePath.'/app';
+                }
+            } catch (\Exception $e) {
+                // Silently continue if repository is not available
+            }
+        }
+
+        return array_unique(array_filter($paths));
     }
 
     /**
@@ -131,14 +152,6 @@ abstract class AbstractPolloraScout extends StructureScout
             $modules = $this->container->make('modules');
 
             $paths = [];
-
-            // Add base modules path
-            if (method_exists($modules, 'getPath')) {
-                $basePath = $modules->getPath();
-                if ($basePath && is_dir($basePath)) {
-                    $paths[] = $basePath;
-                }
-            }
 
             // Add individual enabled module paths
             foreach ($modules->allEnabled() as $module) {

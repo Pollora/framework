@@ -24,7 +24,8 @@ use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
-use Pollora\Modules\ModuleServiceProvider;
+use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
+use Pollora\Foundation\Providers\ArtisanServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeAttributeServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
@@ -69,6 +70,7 @@ class PolloraServiceProvider extends ServiceProvider
     {
         // Generic service providers
         $this->app->register(ConsoleServiceProvider::class);
+        $this->app->register(ArtisanServiceProvider::class);
         $this->app->register(DebugServiceProvider::class);
         $this->app->register(DiscovererServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);

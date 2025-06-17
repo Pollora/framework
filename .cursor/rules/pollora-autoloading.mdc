@@ -1,0 +1,53 @@
+---
+description: Pollora Framework - Dynamic Autoloading System
+globs: ["themes/**/app/**/*.php", "themes/**/src/**/*.php", "plugins/**/app/**/*.php"]
+alwaysApply: false
+---
+
+# Dynamic Autoloading System
+
+## Namespace Conventions
+**Fixed namespace patterns** for automatic PSR-4 autoloading:
+
+### Themes
+- **Namespace**: `Theme\{ThemeName}\`
+- **Directory**: `themes/{theme-name}/app/` (preferred) or `themes/{theme-name}/src/` (fallback)
+
+Example:
+```php
+// File: themes/solidarmonde/app/Providers/ThemeServiceProvider.php
+namespace Theme\Solidarmonde\Providers;
+
+class ThemeServiceProvider extends ServiceProvider {}
+```
+
+### Plugins (Future Support)
+- **Namespace**: `Plugin\{PluginName}\`
+- **Directory**: `plugins/{plugin-name}/app/` or `plugins/{plugin-name}/src/`
+
+## Directory Structure
+```
+themes/solidarmonde/
+├── app/                          # PSR-4 autoloaded (preferred)
+│   ├── Providers/
+│   │   └── ThemeServiceProvider.php
+│   ├── Models/
+│   ├── Services/
+│   └── Controllers/
+├── src/                          # PSR-4 autoloaded (fallback)
+└── views/                        # NOT autoloaded
+```
+
+## Autoloading Flow
+1. `ModuleBootstrap` discovers service providers
+2. `ThemeServiceProviderScout` scans for providers
+3. `LaravelThemeModule::register()` calls `registerAutoloading()`
+4. `ThemeAutoloader` maps namespaces to directories
+5. Classes become accessible with proper namespace
+
+## Best Practices
+- Use `app/` directory for new themes (preferred over `src/`)
+- Follow PSR-4 standards for class naming
+- Service providers are automatically discovered
+- No manual composer.json modifications needed
+- Namespace must match theme/plugin directory name (PascalCase)

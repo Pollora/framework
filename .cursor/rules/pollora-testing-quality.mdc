@@ -1,0 +1,52 @@
+---
+description: Pollora Framework - Testing & Code Quality Standards
+globs: ["**/tests/**/*.php", "**/*Test.php"]
+alwaysApply: false
+---
+
+# Testing & Quality Standards
+
+## Required Quality Standards
+- **Test Coverage**: 100% test coverage required (`--min=100`)
+- **Static Analysis**: PHPStan level 5 with WordPress and Laravel extensions
+- **Code Style**: Laravel Pint for PHP formatting
+- **Refactoring**: Rector with Laravel-specific rules
+
+## Test Organization
+Tests organized by architectural layer:
+```
+tests/
+├── Unit/           # Domain logic and services
+├── Feature/        # Integration testing across layers
+└── Scouts/         # Discovery system component testing
+```
+
+## Development Commands
+```bash
+# Run all quality checks
+ddev exec --dir /var/www/html/vendor/pollora/framework composer test
+
+# Individual commands
+ddev exec --dir /var/www/html/vendor/pollora/framework composer test:unit      # PHPUnit with 100% coverage
+ddev exec --dir /var/www/html/vendor/pollora/framework composer test:types     # PHPStan static analysis
+ddev exec --dir /var/www/html/vendor/pollora/framework composer test:lint      # Code formatting check
+ddev exec --dir /var/www/html/vendor/pollora/framework composer test:refacto   # Refactoring rules check (dry-run)
+
+# Fix issues
+ddev exec --dir /var/www/html/vendor/pollora/framework composer lint           # Fix code formatting
+ddev exec --dir /var/www/html/vendor/pollora/framework composer refacto        # Apply refactoring rules
+```
+
+## Test Structure
+- Unit tests for Domain layer (pure business logic)
+- Feature tests for Application layer (use cases)
+- Integration tests for Infrastructure layer
+- Use Laravel's TestCase with WordPress integration via testbench.yaml
+
+## Best Practices
+- Test behavior, not implementation
+- Follow AAA pattern (Arrange, Act, Assert)
+- Use meaningful test method names
+- Mock external dependencies in unit tests
+- Use factories for test data creation
+- Test edge cases and error conditions
