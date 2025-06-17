@@ -8,7 +8,7 @@ use Illuminate\View\ViewFinderInterface;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Theme\Application\Services\ThemeManager;
-use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
+use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
@@ -23,10 +23,10 @@ beforeEach(function () {
     $this->viewFinder = Mockery::mock(ViewFinderInterface::class);
     $this->localeLoader = Mockery::mock(Loader::class);
     $this->moduleRepository = Mockery::mock(ModuleRepositoryInterface::class);
-    $this->themeDiscovery = Mockery::mock(ThemeDiscoveryInterface::class);
+    $this->themeRegistrar = Mockery::mock(ThemeRegistrarInterface::class);
     $this->consoleDetectionService = Mockery::mock(ConsoleDetectionService::class);
     $this->consoleDetectionService->shouldReceive('isConsole')->andReturn(true);
-    $this->themeManager = new ThemeManager($this->app, $this->viewFinder, $this->localeLoader, $this->moduleRepository, $this->themeDiscovery, $this->consoleDetectionService);
+    $this->themeManager = new ThemeManager($this->app, $this->viewFinder, $this->localeLoader, $this->moduleRepository, $this->themeRegistrar, $this->consoleDetectionService);
 });
 
 test('loads a valid theme', function () {
@@ -40,12 +40,12 @@ test('loads a valid theme', function () {
     $app->shouldReceive('has')->withAnyArgs()->andReturn(true);
     $app->shouldReceive('bind')->withAnyArgs()->andReturnNull();
     $moduleRepository = Mockery::mock(ModuleRepositoryInterface::class);
-    $themeDiscovery = Mockery::mock(ThemeDiscoveryInterface::class);
+    $themeRegistrar = Mockery::mock(ThemeRegistrarInterface::class);
     $consoleDetectionService = Mockery::mock(ConsoleDetectionService::class);
     $consoleDetectionService->shouldReceive('isConsole')->andReturn(true);
     $manager = Mockery::mock(
         ThemeManager::class,
-        [$app, $this->viewFinder, $this->localeLoader, $moduleRepository, $themeDiscovery, $consoleDetectionService]
+        [$app, $this->viewFinder, $this->localeLoader, $moduleRepository, $themeRegistrar, $consoleDetectionService]
     )->makePartial();
     $manager->shouldAllowMockingProtectedMethods();
     $themeMetadata = Mockery::mock(ThemeMetadata::class);
@@ -76,12 +76,12 @@ test('throws an exception if theme directory does not exist', function () {
     $app->shouldReceive('has')->withAnyArgs()->andReturn(true);
     $app->shouldReceive('bind')->withAnyArgs()->andReturnNull();
     $moduleRepository = Mockery::mock(ModuleRepositoryInterface::class);
-    $themeDiscovery = Mockery::mock(ThemeDiscoveryInterface::class);
+    $themeRegistrar = Mockery::mock(ThemeRegistrarInterface::class);
     $consoleDetectionService = Mockery::mock(ConsoleDetectionService::class);
     $consoleDetectionService->shouldReceive('isConsole')->andReturn(false);
     $manager = Mockery::mock(
         ThemeManager::class,
-        [$app, $this->viewFinder, $this->localeLoader, $moduleRepository, $themeDiscovery, $consoleDetectionService]
+        [$app, $this->viewFinder, $this->localeLoader, $moduleRepository, $themeRegistrar, $consoleDetectionService]
     )->makePartial();
     $manager->shouldAllowMockingProtectedMethods();
     $themeMetadata = Mockery::mock(ThemeMetadata::class);

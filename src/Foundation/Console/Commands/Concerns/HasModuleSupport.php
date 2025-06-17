@@ -36,7 +36,7 @@ trait HasModuleSupport
     /**
      * Check if the command is generating in a module.
      */
-    protected function isGeneratingInModule(): bool
+    protected function hasModuleOption(): bool
     {
         return $this->getModuleName() !== null;
     }
@@ -86,9 +86,9 @@ trait HasModuleSupport
     /**
      * Get the module configuration.
      */
-    protected function getModuleConfig(): array
+    protected function resolveModuleLocation(): array
     {
-        if (!$this->isGeneratingInModule()) {
+        if (!$this->hasModuleOption()) {
             return [];
         }
 

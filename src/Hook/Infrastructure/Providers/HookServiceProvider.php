@@ -66,7 +66,7 @@ class HookServiceProvider extends ServiceProvider
     public function boot(Application $app): void
     {
         $this->app = $app;
-        $this->loadHooks();
+        //$this->loadHooks();
     }
 
     /**
@@ -76,7 +76,7 @@ class HookServiceProvider extends ServiceProvider
     {
         try {
             $hooks = PolloraDiscover::scout('hooks');
-            //  dd($hooks);
+
             foreach ($hooks as $hookClass) {
                 $this->registerHook($hookClass);
             }

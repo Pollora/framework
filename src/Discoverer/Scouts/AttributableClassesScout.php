@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Discoverer\Scouts;
 
 use Pollora\Attributes\Attributable;
+use Pollora\Discoverer\Domain\Contracts\HandlerScoutInterface;
 use Pollora\Discoverer\Infrastructure\Services\AbstractPolloraScout;
-use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
+use Pollora\Discoverer\Scouts\Concerns\HandleAttributable;
 use Spatie\StructureDiscoverer\Discover;
 
 /**
@@ -16,8 +17,9 @@ use Spatie\StructureDiscoverer\Discover;
  * that implement the Attributable interface, enabling automatic processing
  * of PHP 8 attributes for framework features.
  */
-final class AttributableClassesScout extends AbstractPolloraScout
+final class AttributableClassesScout extends AbstractPolloraScout implements HandlerScoutInterface
 {
+    use HandleAttributable;
     /**
      * {@inheritDoc}
      */

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Pollora\Foundation\Console\Commands\Concerns;
 
-use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
+use Illuminate\Support\Str;
+use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Symfony\Component\Console\Input\InputOption;
+use InvalidArgumentException;
 
 trait HasThemeSupport
 {
@@ -48,17 +50,66 @@ trait HasThemeSupport
      */
     protected function getActiveTheme(): ?string
     {
-        if (! property_exists($this, 'discovery') || $this->discovery === null) {
-            $this->discovery = app(ThemeDiscoveryInterface::class);
+        if (! property_exists($this, 'registrar') || $this->registrar === null) {
+            $this->registrar = app(ThemeRegistrarInterface::class);
         }
 
-        $activeTheme = $this->discovery?->getActiveTheme();
+        $activeTheme = $this->registrar?->getActiveTheme();
 
         if ($activeTheme) {
             return $activeTheme->getName();
         }
 
         return null;
+    }
+
+    /**
+     * Get theme path for a given theme name.
+     *
+     * @param string $themeName The theme name
+     * @return string The theme path
+     */
+    protected function getThemePath(string $themeName): string
+    {
+        // Default themes path, can be overridden
+        $themesPath = config('theme.path', base_path('themes'));
+
+        return rtrim($themesPath, '/') . '/' .$themeName;
+    }
+
+    /**
+     * Normalize theme name for namespace.
+     *
+     * @param string $themeName The theme name to normalize
+     * @return string The normalized theme name for namespace
+     */
+    protected function normalizeThemeName(string $themeName): string
+    {
+        return str_replace(['-', '_', ' '], '', ucwords($themeName, '-_ '));
+    }
+
+    /**
+     * Get the module namespace.
+     */
+    protected function getThemeNamespace(string $themeName): string
+    {
+        return 'Theme\\'.$this->normalizeThemeName($themeName);
+    }
+
+    /**
+     * Get the module source path.
+     */
+    protected function getThemeSourcePath(string $themeName): string
+    {
+        return $this->getThemePath($themeName).'/app';
+    }
+
+    /**
+     * Get the module source namespace.
+     */
+    protected function getThemeSourceNamespace(string $themeName): string
+    {
+        return $this->getThemeNamespace($themeName).'\\';
     }
 
     /**
@@ -76,5 +127,40 @@ trait HasThemeSupport
         }
 
         return $theme;
+    }
+
+    /**
+     * Resolve theme location.
+     *
+     * @return array{type: string, path: string, namespace: string, name: string}
+     * @throws InvalidArgumentException When theme is not found
+     */
+    protected function resolveThemeLocation(): array
+    {
+        $theme = $this->resolveTheme();
+
+        if (! $theme) {
+            $theme = $this->getActiveTheme();
+        }
+
+
+        if (! $theme) {
+            throw new InvalidArgumentException('No theme specified and no active theme found.');
+        }
+
+        // Get theme path from theme system
+        $themePath = $this->getThemePath($theme);
+
+        if (! is_dir($themePath)) {
+            throw new InvalidArgumentException("Theme directory not found: {$themePath}");
+        }
+
+        return [
+            'type' => 'theme',
+            'path' => $this->getThemePath($theme),
+            'namespace' => 'Theme\\'.$this->normalizeThemeName($theme),
+            'source_path' => $this->getThemeSourcePath($theme),
+            'source_namespace' => $this->getThemeSourceNamespace($theme),
+        ];
     }
 }

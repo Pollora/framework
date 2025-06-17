@@ -6,7 +6,7 @@ namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
-use Pollora\Discoverer\Scouts\ThemeServiceProviderScout;
+use Pollora\Discoverer\Scouts\ServiceProviderScout;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 
 /**
@@ -31,7 +31,7 @@ class ModuleManifest
         array $paths,
         string $manifestPath,
         protected ModuleRepositoryInterface $repository,
-        protected ?ThemeServiceProviderScout $scout = null
+        protected ?ServiceProviderScout $scout = null
     ) {
         $this->files = $files;
         $this->paths = collect($paths);

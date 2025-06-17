@@ -10,11 +10,18 @@ use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 
-class ThemeInitializer implements ThemeComponent
+/**
+ * Theme initializer for self-registered themes.
+ *
+ * This version works with themes that register themselves via functions.php
+ * instead of relying on automatic discovery and database queries.
+ */
+class SelfRegisteredThemeInitializer implements ThemeComponent
 {
     protected $themeRoot;
 
@@ -28,8 +35,10 @@ class ThemeInitializer implements ThemeComponent
 
     protected WordPressThemeInterface $wpTheme;
 
+    protected ThemeRegistrarInterface $registrar;
+
     /**
-     * Create a new theme initializer
+     * Create a new self-registered theme initializer
      */
     public function __construct(
         protected ContainerInterface        $app,
@@ -40,9 +49,10 @@ class ThemeInitializer implements ThemeComponent
         $this->action = $this->app->get(Action::class);
         $this->filter = $this->app->get(Filter::class);
         $this->wpTheme = $this->app->get(WordPressThemeInterface::class);
+        $this->registrar = $this->app->get(ThemeRegistrarInterface::class);
 
-        $this->filter->add('template_directory', $this->overrideThemeDirectory(...), 90, 3);
-        $this->filter->add('stylesheet_directory', $this->overrideThemeDirectory(...), 90, 3);
+        //$this->filter->add('template_directory', $this->overrideThemeDirectory(...), 90, 3);
+       // $this->filter->add('stylesheet_directory', $this->overrideThemeDirectory(...), 90, 3);
         // Handle custom theme roots.
         $this->filter->add('pre_option_stylesheet_root', $this->resetThemeRootOption(...));
         $this->filter->add('pre_option_template_root', $this->resetThemeRootOption(...));
@@ -70,7 +80,7 @@ class ThemeInitializer implements ThemeComponent
     }
 
     /**
-     * Register the theme
+     * Register the theme initializer
      */
     public function register(): void
     {
@@ -90,7 +100,15 @@ class ThemeInitializer implements ThemeComponent
      */
     public function overrideThemeDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
     {
-        return str_replace($themeRootUri, ThemeConfig::get('base_path'), $stylesheetDirUri);
+        // Get the active theme from the registrar
+        $activeTheme = $this->registrar->getActiveTheme();
+
+        if ($activeTheme) {
+            return str_replace($themeRootUri, $activeTheme->getPath(), $stylesheetDirUri);
+        }
+
+        // No fallback - theme must be self-registered
+        return $stylesheetDirUri;
     }
 
     /**
@@ -106,24 +124,28 @@ class ThemeInitializer implements ThemeComponent
      */
     private function initializeTheme(): void
     {
-        // Use the interface instead of direct function call
-        $this->wpTheme->registerThemeDirectory($this->themeRoot);
+        // Get the active theme from the registrar
+        $activeTheme = $this->registrar->getActiveTheme();
 
-        $this->setThemes();
+        if ($activeTheme) {
+            // Use the registered theme's path
+            $this->themeRoot = $activeTheme->getPath();
+
+            // Register theme directory with WordPress
+            $this->wpTheme->registerThemeDirectory(dirname($this->themeRoot));
+
+            // Set up theme metadata
+            $this->setThemes($activeTheme->getName());
+        } else {
+            // No theme registered - this is expected behavior
+            // Themes must register themselves via functions.php
+            return;
+        }
+
         $this->registerThemeProvider();
 
-        // Use the interface to get theme directories
-        $directories = $this->wpTheme->getThemeDirectories();
-        if (!empty($directories)) {
-            if (isset($GLOBALS['wp_theme_directories'])) {
-                $GLOBALS['wp_theme_directories'] = array_merge(
-                    $GLOBALS['wp_theme_directories'],
-                    $directories
-                );
-            } else {
-                $GLOBALS['wp_theme_directories'] = $directories;
-            }
-        }
+        // Theme directories are now registered centrally in ThemeServiceProvider
+        // No need to manage $GLOBALS['wp_theme_directories'] here
 
         // Use the interface to get the theme instance
         $this->wp_theme = $this->wpTheme->getTheme();
@@ -148,12 +170,14 @@ class ThemeInitializer implements ThemeComponent
     /**
      * Set up themes
      */
-    public function setThemes(): void
+    public function setThemes(?string $themeName = null): void
     {
-        // Use the interface instead of direct function call
-        $childTheme = $this->wpTheme->getStylesheet();
+        // Theme name is required for self-registered themes
+        if (!$themeName) {
+            throw new \RuntimeException('Theme name is required for self-registered themes.');
+        }
 
-        $this->getThemeService()->load($childTheme);
+        $this->getThemeService()->load($themeName);
     }
 
     /**

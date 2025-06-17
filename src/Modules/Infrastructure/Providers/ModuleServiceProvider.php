@@ -6,14 +6,16 @@ namespace Pollora\Modules\Infrastructure\Providers;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Pollora\Discoverer\Scouts\ThemeServiceProviderScout;
+use Pollora\Discoverer\Scouts\ServiceProviderScout;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
-use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider as InfrastructureModuleServiceProvider;
+use Pollora\Modules\Domain\Contracts\OnDemandDiscoveryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Modules\Infrastructure\Services\ModuleBootstrap;
 use Pollora\Modules\Infrastructure\Services\ModuleManifest;
+use Pollora\Modules\Infrastructure\Services\OnDemandDiscoveryService;
 
 /**
  * Main service provider for the generic module system.
@@ -29,18 +31,32 @@ class ModuleServiceProvider extends ServiceProvider
             return new ModuleAutoloader($app);
         });
 
+        // Register OnDemandDiscoveryService
+        $this->app->singleton(OnDemandDiscoveryService::class, function ($app) {
+            return new OnDemandDiscoveryService($app);
+        });
+
+        // Register interface binding
+        $this->app->bind(OnDemandDiscoveryInterface::class, OnDemandDiscoveryService::class);
+
+        // Register alias for easier access
+        $this->app->alias(OnDemandDiscoveryService::class, 'modules.discovery');
+
         // Merge configuration
         $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');
     }
 
     public function boot(Router $router): void
     {
+        // Load helper functions
+        $this->loadHelperFunctions();
+
         // Register ModuleManifest service
         $this->app->singleton(ModuleManifest::class, function ($app) {
             // Try to get the scout for provider discovery
             $scout = null;
             try {
-                $scout = new ThemeServiceProviderScout($app);
+                $scout = new ServiceProviderScout($app);
             } catch (\Exception $e) {
                 // Continue without scout if it fails
             }
@@ -70,18 +86,31 @@ class ModuleServiceProvider extends ServiceProvider
             // Register modules
             $bootstrap->registerModules();
 
-            // Register migrations and translations
-            $bootstrap->registerMigrations();
-            $bootstrap->registerTranslations();
-
-            $bootstrap->registerRoutes();
-
-
             // Boot modules on next cycle
             $this->app->booted(function () use ($bootstrap) {
+
                 $bootstrap->bootModules();
+                // Register migrations and translations
+                $bootstrap->registerMigrations();
+                $bootstrap->registerTranslations();
+
+                // Register module routes
+                $bootstrap->registerRoutes();
+
+                // Fire event to notify that module routes have been registered
+                // This allows other services (like RouteServiceProvider) to register
+                // their fallback routes after all module routes are in place
+                Event::dispatch('modules.routes.registered');
             });
         }
+    }
+
+    /**
+     * Load helper functions.
+     */
+    protected function loadHelperFunctions(): void
+    {
+        require_once __DIR__.'/../../UI/Helpers/discovery_functions.php';
     }
 
     /**

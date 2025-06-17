@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Discoverer\Scouts;
 
 use Pollora\Discoverer\Infrastructure\Services\AbstractPolloraScout;
+use Pollora\Discoverer\Scouts\Concerns\HandleAttributable;
 use Pollora\WpRest\AbstractWpRestRoute;
 use Spatie\StructureDiscoverer\Discover;
 
@@ -17,6 +18,7 @@ use Spatie\StructureDiscoverer\Discover;
  */
 final class WpRestRoutesScout extends AbstractPolloraScout
 {
+    use HandleAttributable;
     /**
      * {@inheritDoc}
      */

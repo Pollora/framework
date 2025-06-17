@@ -55,7 +55,7 @@ class ModuleAutoloader
      */
     public function registerTheme(ModuleInterface $module): void
     {
-        $this->registerModule($module, 'theme');
+        $this->registerModule($module);
     }
 
     /**

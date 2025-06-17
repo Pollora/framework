@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Route\Infrastructure\Providers;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
@@ -77,8 +78,23 @@ class RouteServiceProvider extends ServiceProvider
         $this->registerWpMatchMacro();
         $this->registerWpMacro();
 
-        $this->app->booted(function (): void {
+        // Listen for the modules.routes.registered event to register fallback route
+        Event::listen('modules.routes.registered', function () {
             $this->bootFallbackRoute();
+        });
+
+        // Fallback: if no modules are present, register the fallback route after boot
+        $this->app->booted(function (): void {
+            // Only register if the event hasn't been fired yet
+            if (!$this->app->bound('route.fallback.registered')) {
+                // Set a small delay to allow any potential module routes to be registered
+                $this->app->afterResolving('router', function () {
+                    if (!$this->app->bound('route.fallback.registered')) {
+                        $this->bootFallbackRoute();
+                        $this->app->instance('route.fallback.registered', true);
+                    }
+                });
+            }
         });
     }
 
@@ -144,9 +160,15 @@ class RouteServiceProvider extends ServiceProvider
 
     /**
      * Register the WordPress fallback route after all other routes.
+     *
+     * This method is called after module routes have been registered to ensure
+     * it doesn't interfere with module route registration.
      */
     protected function bootFallbackRoute(): void
     {
+        // Mark that the fallback route is being registered
+        $this->app->instance('route.fallback.registered', true);
+
         // Add a catch-all route for WordPress templates (excluding API routes)
         Route::any('{any}', [FrontendController::class, 'handle'])
             ->where('any', '^(?!api/).*')

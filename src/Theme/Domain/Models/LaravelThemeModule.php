@@ -11,6 +11,11 @@ use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 
 class LaravelThemeModule extends ThemeModule
 {
+    /**
+     * Configurations that are delayed until WordPress is ready for translations.
+     */
+    protected array $delayedConfigs = [];
+
     public function __construct(
         string $name,
         string $path,
@@ -37,7 +42,6 @@ class LaravelThemeModule extends ThemeModule
      */
     public function register(): void
     {
-        $this->registerAutoloading();
         $this->registerAliases();
         $this->registerFiles();
         $this->registerTranslations();
@@ -58,7 +62,7 @@ class LaravelThemeModule extends ThemeModule
     /**
      * Register theme autoloading using fixed namespace convention.
      */
-    protected function registerAutoloading(): void
+    public function registerAutoloading(): void
     {
         if ($this->app->bound(ThemeAutoloader::class)) {
             $autoloader = $this->app->make(ThemeAutoloader::class);
@@ -113,14 +117,36 @@ class LaravelThemeModule extends ThemeModule
     {
         $configPath = $this->getPath().'/config';
 
-        if (is_dir($configPath)) {
-            $configFiles = glob($configPath.'/*.php');
+        if (!is_dir($configPath)) {
+            return;
+        }
 
-            foreach ($configFiles as $configFile) {
-                $configName = basename($configFile, '.php');
-                $key = 'theme.'.$configName;
+        $configFiles = glob($configPath.'/*.php');
+        $translationDependentConfigs = ['menus.php', 'sidebars.php', 'templates.php'];
 
-                $this->app['config']->set($key, require $configFile);
+        foreach ($configFiles as $configFile) {
+            $configName = basename($configFile, '.php');
+            $key = 'theme.'.$configName;
+            $fileName = basename($configFile);
+
+            // Delay loading of configs that use translations until WordPress is ready
+            if (in_array($fileName, $translationDependentConfigs, true)) {
+                // Use WordPress hook to delay loading until translations are available
+                if (function_exists('add_action')) {
+                    add_action('init', function () use ($configFile, $key) {
+                        if (file_exists($configFile)) {
+                            $this->app['config']->set($key, require $configFile);
+                        }
+                    });
+                } else {
+                    // Fallback: store for later loading
+                    $this->delayedConfigs[$key] = $configFile;
+                }
+            } else {
+                // Load immediately for configs that don't use translations
+                if (file_exists($configFile)) {
+                    $this->app['config']->set($key, require $configFile);
+                }
             }
         }
     }
@@ -153,7 +179,7 @@ class LaravelThemeModule extends ThemeModule
      * Find the main service provider for this theme.
      *
      * This method is kept for compatibility with ModuleManifest but
-     * provider discovery is now primarily handled by ThemeServiceProviderScout.
+     * provider discovery is now primarily handled by ServiceProviderScout.
      */
     public function findMainServiceProvider(): ?string
     {

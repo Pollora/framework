@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Pollora\Taxonomy\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Attributes\AttributeProcessor;
-use Pollora\Discoverer\Framework\API\PolloraDiscover;
-use Pollora\Taxonomy\Application\Services\TaxonomyService;
-use Pollora\Taxonomy\Domain\Models\AbstractTaxonomy;
 
 /**
  * Service provider for attribute-based taxonomy registration.
  *
- * This provider processes taxonomies discovered by the Discoverer system
- * and registers them with WordPress following hexagonal architecture principles.
+ * @deprecated This provider is now handled automatically by the Discoverer system.
+ * The TaxonomyClassesScout now implements HandlerScoutInterface and processes
+ * discovered taxonomies automatically. This provider is kept for backward compatibility
+ * but can be removed in future versions.
+ *
+ * @see \Pollora\Discoverer\Scouts\TaxonomyClassesScout
  */
 class TaxonomyAttributeServiceProvider extends ServiceProvider
 {
@@ -23,71 +23,18 @@ class TaxonomyAttributeServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // No registration needed as the main service provider handles it
+        // No registration needed - handled by the Discoverer system
     }
 
     /**
      * Bootstrap services.
      *
-     * Processes discovered taxonomies and registers them with WordPress.
+     * @deprecated Taxonomies are now processed automatically by the Discoverer system
      */
     public function boot(): void
     {
-        $this->registerTaxonomies();
-    }
-
-    /**
-     * Register all taxonomies using the new discovery system.
-     */
-    protected function registerTaxonomies(): void
-    {
-        try {
-            $taxonomyClasses = PolloraDiscover::scout('taxonomies');
-
-            if ($taxonomyClasses->isEmpty()) {
-                return;
-            }
-
-            $processor = new AttributeProcessor($this->app);
-
-            foreach ($taxonomyClasses as $taxonomyClass) {
-                $this->registerTaxonomy($taxonomyClass, $processor);
-            }
-        } catch (\Throwable $e) {
-            // Log error but don't break the application
-            if (function_exists('error_log')) {
-                error_log('Failed to load taxonomies: '.$e->getMessage());
-            }
-        }
-    }
-
-    /**
-     * Register a single taxonomy with WordPress.
-     *
-     * @param  string  $taxonomyClass  The fully qualified class name of the taxonomy
-     * @param  AttributeProcessor  $processor  The attribute processor
-     */
-    protected function registerTaxonomy(
-        string $taxonomyClass,
-        AttributeProcessor $processor
-    ): void {
-        $taxonomyService = $this->app->make(TaxonomyService::class);
-        $taxonomyInstance = $this->app->make($taxonomyClass);
-
-        if (! $taxonomyInstance instanceof AbstractTaxonomy) {
-            return;
-        }
-
-        // Process attributes
-        $processor->process($taxonomyInstance);
-
-        // Get taxonomy properties
-        $slug = $taxonomyInstance->getSlug();
-        $objectType = $taxonomyInstance->getObjectType();
-        $singular = $taxonomyInstance->getName();
-        $plural = $taxonomyInstance->getPluralName();
-        $args = $taxonomyInstance->getArgs();
-
-        $taxonomyService->register($slug, $objectType, $singular, $plural, $args);
+        // Taxonomies are now automatically discovered and processed
+        // by the TaxonomyClassesScout through the Discoverer system.
+        // No manual processing needed here.
     }
 }

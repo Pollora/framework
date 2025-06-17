@@ -36,6 +36,17 @@ interface ScoutRegistryInterface
     public function discover(string $key): Collection;
 
     /**
+     * Execute discovery and automatically handle discovered classes if the scout implements HandlerScoutInterface.
+     *
+     * @param  string  $key  The scout key to use for discovery
+     * @return Collection<int, string> Collection of discovered class names
+     *
+     * @throws \InvalidArgumentException When the scout key is not found
+     * @throws \RuntimeException When discovery or handling fails
+     */
+    public function discoverAndHandle(string $key): Collection;
+
+    /**
      * Get all registered scout keys.
      *
      * @return array<string> Array of registered scout keys

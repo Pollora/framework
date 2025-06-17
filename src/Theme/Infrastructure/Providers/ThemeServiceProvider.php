@@ -18,13 +18,13 @@ use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
-use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
+use Pollora\Theme\Application\Services\ThemeRegistrar;
+use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Domain\Support\ThemeCollection;
 use Pollora\Theme\Domain\Support\ThemeConfig;
-use Pollora\Theme\Infrastructure\Adapters\WordPressThemeDiscovery;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
@@ -64,6 +64,14 @@ class ThemeServiceProvider extends ServiceProvider
             WordPressThemeAdapter::class
         );
 
+        // Register theme registrar for self-registration
+        $this->app->singleton(ThemeRegistrarInterface::class, function ($app) {
+            return new ThemeRegistrar(
+                $app->make(\Pollora\Theme\Domain\Contracts\ContainerInterface::class),
+                $app->make(WordPressThemeParser::class)
+            );
+        });
+
         // Register modular theme system services
         $this->registerModularThemeServices();
 
@@ -74,7 +82,7 @@ class ThemeServiceProvider extends ServiceProvider
                 $app->get('view')->getFinder(),
                 $app->make('translator')->getLoader(),
                 $app->make(ModuleRepositoryInterface::class),
-                $app->make(ThemeDiscoveryInterface::class)
+                $app->make(ThemeRegistrarInterface::class)
             );
         });
 
@@ -89,6 +97,15 @@ class ThemeServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // Register theme directories early for WordPress theme discovery
+        $this->registerThemeDirectories();
+
+        // Load theme helper functions
+        $this->loadThemeHelpers();
+
+        // Register console commands
+        $this->registerCommands();
+
         $this->registerComponentServices();
 
         // Boot modular theme system
@@ -127,19 +144,12 @@ class ThemeServiceProvider extends ServiceProvider
         // Register theme parser
         $this->app->singleton(WordPressThemeParser::class);
 
-        // Register theme discovery service
-        $this->app->singleton(ThemeDiscoveryInterface::class, function ($app) {
-            return new WordPressThemeDiscovery(
-                $app->make(CollectionFactoryInterface::class),
-                $app->make(WordPressThemeParser::class)
-            );
-        });
+
 
         // Register theme repository as module repository
         $this->app->singleton(ModuleRepositoryInterface::class, function ($app) {
             return new ThemeRepository(
                 $app,
-                $app->make(ThemeDiscoveryInterface::class),
                 $app->make(WordPressThemeParser::class),
                 $app->make(CollectionFactoryInterface::class)
             );
@@ -186,9 +196,14 @@ class ThemeServiceProvider extends ServiceProvider
             return new RemoveThemeCommand($app->make('config'), $app->make('files'));
         });
 
+        $this->app->singleton('theme.status', function ($app) {
+            return new \Pollora\Theme\UI\Console\Commands\ThemeStatusCommand();
+        });
+
         $this->commands([
             'theme.generator',
             'theme.remover',
+            'theme.status',
         ]);
     }
 
@@ -335,6 +350,17 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
+     * Load theme helper functions.
+     */
+    protected function loadThemeHelpers(): void
+    {
+        $helpersPath = __DIR__ . '/../../UI/Helpers/theme_functions.php';
+        if (file_exists($helpersPath)) {
+            require_once $helpersPath;
+        }
+    }
+
+    /**
      * Get the Blade directives.
      */
     public function directives(): Collection
@@ -388,5 +414,29 @@ class ThemeServiceProvider extends ServiceProvider
     public function registerThemeConfig(string $path, string $key): void
     {
         $this->mergeConfigFrom($path, $key);
+    }
+
+    /**
+     * Register theme directories early for WordPress theme discovery.
+     *
+     * This must be done before WordPress scans for themes, so we register
+     * the custom theme directory globally.
+     */
+    protected function registerThemeDirectories(): void
+    {
+        // Get the base theme path from configuration
+        $baseThemePath = ThemeConfig::get('base_path');
+
+        if ($baseThemePath && is_dir($baseThemePath)) {
+            // Register the custom theme directory with WordPress
+            if (!isset($GLOBALS['wp_theme_directories'])) {
+                $GLOBALS['wp_theme_directories'] = [];
+            }
+
+            // Add our custom theme directory if not already present
+            if (!in_array($baseThemePath, $GLOBALS['wp_theme_directories'], true)) {
+                $GLOBALS['wp_theme_directories'][] = $baseThemePath;
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DummyNamespace;
 
 use Pollora\PostType\Domain\Models\AbstractPostType;
+use Pollora\Attributes\PostType\PublicPostType;
 use Pollora\Attributes\PostType\PubliclyQueryable;
 use Pollora\Attributes\PostType\HasArchive;
 use Pollora\Attributes\PostType\Supports;
@@ -16,10 +17,11 @@ use Pollora\Attributes\PostType\MenuIcon;
  * This class defines the DummyName custom post type using PHP attributes
  * for WordPress registration.
  */
+#[PublicPostType]
 #[PubliclyQueryable]
 #[HasArchive]
 #[Supports(['title', 'editor', 'thumbnail'])]
 #[MenuIcon('dashicons-admin-post')]
 class DummyClass extends AbstractPostType
 {
-} 
+}

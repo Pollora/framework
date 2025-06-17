@@ -19,5 +19,5 @@ it('can create container for testing', function () {
 // The functionality is covered by our Unit tests for:
 // - ModuleAutoloader
 // - ThemeAutoloader
-// - ThemeServiceProviderScout
+// - ServiceProviderScout
 // - ModuleBootstrap integration

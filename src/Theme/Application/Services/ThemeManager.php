@@ -11,8 +11,8 @@ use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
-use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
+use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
@@ -35,7 +35,7 @@ class ThemeManager implements ThemeService
         protected ViewFinderInterface $viewFinder,
         protected ?Loader $localeLoader,
         protected ?ModuleRepositoryInterface $repository = null,
-        protected ?ThemeDiscoveryInterface $discovery = null,
+        protected ?ThemeRegistrarInterface $registrar = null,
         ?ConsoleDetectionService $consoleDetectionService = null
     ) {
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
@@ -218,7 +218,7 @@ class ThemeManager implements ThemeService
      */
     public function getActiveTheme(): ?ThemeModuleInterface
     {
-        return $this->discovery?->getActiveTheme();
+        return $this->registrar?->getActiveTheme();
     }
 
     /**
@@ -234,7 +234,7 @@ class ThemeManager implements ThemeService
      */
     public function isThemeActive(string $name): bool
     {
-        return $this->discovery?->isThemeActive($name) ?? false;
+        return $this->registrar?->isThemeActive($name) ?? false;
     }
 
     /**

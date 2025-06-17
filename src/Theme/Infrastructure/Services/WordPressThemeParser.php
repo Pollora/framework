@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Services;
 
-use Pollora\Models\Option;
+
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;
@@ -54,27 +54,11 @@ class WordPressThemeParser
 
         $theme->setHeaders($headers);
 
-        // Determine if theme is active
-        $activeTheme = Option::where('option_name', 'stylesheet')->value('option_value');
-        $theme->setEnabled($activeTheme === $name);
+        // With the new self-registration system, themes are enabled when they register themselves
+        // This method is now primarily used for parsing theme metadata
+        $theme->setEnabled(false); // Will be set to true when theme registers itself
 
         return $theme;
-    }
-
-    /**
-     * Validate theme directory structure.
-     */
-    public function validateThemeDirectory(string $path): bool
-    {
-        $requiredFiles = ['style.css', 'index.php'];
-
-        foreach ($requiredFiles as $file) {
-            if (! file_exists($path.'/'.$file)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**

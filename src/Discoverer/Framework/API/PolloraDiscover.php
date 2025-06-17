@@ -22,6 +22,9 @@ use Pollora\Discoverer\Domain\Services\DiscoveryService;
  * // Execute discovery
  * $classes = PolloraDiscover::scout('my_scout');
  *
+ * // Execute discovery and handle automatically
+ * $classes = PolloraDiscover::scoutAndHandle('my_scout');
+ *
  * // Check if scout exists
  * if (PolloraDiscover::has('my_scout')) {
  *     // ...
@@ -55,6 +58,20 @@ final class PolloraDiscover
     public static function scout(string $key): Collection
     {
         return DiscoveryService::scout($key);
+    }
+
+    /**
+     * Execute discovery and automatically handle discovered classes if the scout implements HandlerScoutInterface.
+     *
+     * @param  string  $key  The scout key to use for discovery
+     * @return Collection<int, string> Collection of discovered class names
+     *
+     * @throws \InvalidArgumentException When the scout key is not found
+     * @throws \RuntimeException When discovery or handling fails
+     */
+    public static function scoutAndHandle(string $key): Collection
+    {
+        return DiscoveryService::scoutAndHandle($key);
     }
 
     /**

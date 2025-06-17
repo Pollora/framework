@@ -10,10 +10,18 @@ use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Domain\Exceptions\ModuleException;
-use Pollora\Theme\Domain\Contracts\ThemeDiscoveryInterface;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
+use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 
+/**
+ * Theme repository implementation for the modular theme system.
+ *
+ * This repository integrates with the new self-registration system where themes
+ * register themselves via their functions.php file through the ThemeRegistrarInterface.
+ * It automatically synchronizes with the registrar to provide access to active themes
+ * through the standard ModuleRepositoryInterface contract.
+ */
 class ThemeRepository implements ModuleRepositoryInterface
 {
     protected array $cachedThemes = [];
@@ -22,7 +30,6 @@ class ThemeRepository implements ModuleRepositoryInterface
 
     public function __construct(
         protected Container $app,
-        protected ThemeDiscoveryInterface $discovery,
         protected WordPressThemeParser $themeParser,
         protected CollectionFactoryInterface $collectionFactory
     ) {}
@@ -134,6 +141,30 @@ class ThemeRepository implements ModuleRepositoryInterface
         return count($this->all());
     }
 
+    /**
+     * Force synchronization with the theme registrar.
+     *
+     * This method forces a reload of themes from the registrar service,
+     * ensuring that any newly registered themes are immediately available
+     * in the repository.
+     *
+     * @return static
+     */
+    public function syncWithRegistrar(): static
+    {
+        $this->loadThemes(true);
+        return $this;
+    }
+
+    /**
+     * Load themes from the registrar service.
+     *
+     * With the new self-registration system, themes register themselves via their functions.php file
+     * through the ThemeRegistrarInterface. This method retrieves the active theme from the registrar
+     * and ensures it's available through the repository interface.
+     *
+     * @param bool $forceReload Whether to force a reload even if cache is already loaded
+     */
     protected function loadThemes(bool $forceReload = false): void
     {
         if ($this->cacheLoaded && ! $forceReload) {
@@ -142,25 +173,40 @@ class ThemeRepository implements ModuleRepositoryInterface
 
         $this->cachedThemes = [];
 
-        if ($forceReload) {
-            $this->discovery->resetCache();
-        }
+        // Get the active theme from the registrar if available
+        if ($this->app->bound(ThemeRegistrarInterface::class)) {
+            try {
+                /** @var ThemeRegistrarInterface $registrar */
+                $registrar = $this->app->make(ThemeRegistrarInterface::class);
+                $activeTheme = $registrar->getActiveTheme();
 
-        $discoveredThemes = $this->discovery->discoverThemes();
-
-        /** @var ThemeModuleInterface $theme */
-        foreach ($discoveredThemes as $theme) {
-            $this->cachedThemes[strtolower($theme->getName())] = $theme;
+                if ($activeTheme instanceof ThemeModuleInterface) {
+                    $lowerName = $activeTheme->getLowerName();
+                    $this->cachedThemes[$lowerName] = $activeTheme;
+                }
+            } catch (\Exception $e) {
+                // Log error but don't break the repository functionality
+                if (function_exists('error_log')) {
+                    error_log('Failed to load active theme from registrar: ' . $e->getMessage());
+                }
+            }
         }
 
         $this->cacheLoaded = true;
     }
 
+    /**
+     * Reset the internal cache.
+     *
+     * This method is called by the ThemeRegistrar when a new theme is registered
+     * to ensure synchronization between the registrar and repository.
+     *
+     * @return static
+     */
     public function resetCache(): static
     {
         $this->cacheLoaded = false;
         $this->cachedThemes = [];
-        $this->discovery->resetCache();
 
         return $this;
     }

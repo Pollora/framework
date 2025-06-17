@@ -8,9 +8,9 @@ use Illuminate\Contracts\Foundation\Application;
 use Pollora\BlockPattern\UI\PatternComponent;
 use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\Menus;
+use Pollora\Theme\Domain\Models\SelfRegisteredThemeInitializer;
 use Pollora\Theme\Domain\Models\Sidebar;
 use Pollora\Theme\Domain\Models\Templates;
-use Pollora\Theme\Domain\Models\ThemeInitializer;
 use Pollora\Theme\Infrastructure\Services\Support;
 
 /**
@@ -23,7 +23,7 @@ class ThemeComponentProvider
      * Order matters - components are registered in the order defined here.
      */
     protected array $components = [
-        ThemeInitializer::class,
+        SelfRegisteredThemeInitializer::class,
         PatternComponent::class,
         Menus::class,
         Support::class,

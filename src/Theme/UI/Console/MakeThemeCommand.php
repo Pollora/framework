@@ -16,7 +16,6 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
 use Pollora\Support\NpmRunner;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
-
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 

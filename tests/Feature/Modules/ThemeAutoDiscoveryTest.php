@@ -15,7 +15,7 @@ it('can create container for auto discovery testing', function () {
 // Note: This test previously used Orchestra\Testbench\TestCase and tested services that have been refactored:
 // - ThemeManifest is now ModuleManifest
 // - ThemeManager has been moved to Theme module
-// - Auto-discovery is now handled by ThemeServiceProviderScout
+// - Auto-discovery is now handled by ServiceProviderScout
 //
 // The current auto-discovery functionality is tested in:
 // - tests/Unit/Theme/Infrastructure/Services/ThemeAutoloaderIntegrationTest.php
