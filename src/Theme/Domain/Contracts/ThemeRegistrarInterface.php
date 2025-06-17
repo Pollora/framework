@@ -20,7 +20,7 @@ interface ThemeRegistrarInterface
      * @param array $themeData Optional theme metadata
      * @return ThemeModuleInterface The registered theme module
      */
-    public function registerActiveTheme(string $themeName, string $themePath, array $themeData = []): ThemeModuleInterface;
+    public function register(): ThemeModuleInterface;
 
     /**
      * Get the currently registered active theme.
@@ -41,4 +41,4 @@ interface ThemeRegistrarInterface
      * Reset the active theme registration.
      */
     public function resetActiveTheme(): void;
-} 
+}

@@ -14,10 +14,7 @@ use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Psr\Container\ContainerInterface;
 
 /**
- * Application service for theme self-registration.
- *
- * This service allows themes to register themselves as active,
- * providing a more explicit and database-free approach to theme management.
+ * Simplified theme self-registration service.
  */
 class ThemeRegistrar implements ThemeRegistrarInterface
 {
@@ -30,38 +27,28 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
     /**
      * Register a theme as the active theme.
-     *
-     * This method is called from the theme's functions.php file to declare
-     * itself as the active theme, eliminating the need for database queries.
      */
-    public function registerActiveTheme(string $themeName, string $themePath, array $themeData = []): ThemeModuleInterface
+    public function register(): ThemeModuleInterface
     {
+        $themeName = get_stylesheet();
+        $themePath = get_stylesheet_directory();
+
         // Parse theme headers if not provided
-        if (empty($themeData)) {
-            $styleCssPath = rtrim($themePath, '/') . '/style.css';
-            $themeData = $this->themeParser->parseThemeHeaders($styleCssPath);
-        }
+        $styleCssPath = rtrim($themePath, '/') . '/style.css';
+        $themeData = $this->themeParser->parseThemeHeaders($styleCssPath);
+
 
         // Create the theme module
-        if ($this->app->has('app') && method_exists($this->app->get('app'), 'make')) {
-            $theme = new LaravelThemeModule($themeName, $themePath, $this->app->get('app'));
-        } else {
-            $theme = new LaravelThemeModule($themeName, $themePath, $this->app);
-        }
-
+        $theme = $this->createThemeModule($themeName, $themePath);
         $theme->registerAutoloading();
-
-        // Set theme headers and mark as enabled/active
         $theme->setHeaders($themeData);
         $theme->setEnabled(true);
 
         // Register as the active theme
         $this->activeTheme = $theme;
 
-        // Invalidate theme repository cache to ensure synchronization
+        // Invalidate repository cache and discover structures
         $this->invalidateRepositoryCache();
-
-        // Perform on-demand discovery for the theme
         $this->discoverThemeStructures($theme);
 
         // Register and boot the theme
@@ -72,39 +59,42 @@ class ThemeRegistrar implements ThemeRegistrarInterface
     }
 
     /**
-     * Invalidate the theme repository cache when a new theme is registered.
-     *
-     * This ensures that the repository will reload themes and include
-     * the newly registered active theme in its collections.
+     * Create theme module instance.
+     */
+    protected function createThemeModule(string $themeName, string $themePath): LaravelThemeModule
+    {
+        if ($this->app->has('app') && method_exists($this->app->get('app'), 'make')) {
+            return new LaravelThemeModule($themeName, $themePath, $this->app->get('app'));
+        }
+
+        return new LaravelThemeModule($themeName, $themePath, $this->app);
+    }
+
+    /**
+     * Invalidate the theme repository cache.
      */
     protected function invalidateRepositoryCache(): void
     {
-        if ($this->app->has(ModuleRepositoryInterface::class)) {
-            try {
-                $repository = $this->app->get(ModuleRepositoryInterface::class);
-                
-                // Only reset cache if it's a ThemeRepository instance
-                if ($repository instanceof ThemeRepository) {
-                    $repository->resetCache();
-                }
-            } catch (\Exception $e) {
-                // Log error but don't break theme registration
-                if (function_exists('error_log')) {
-                    error_log('Failed to invalidate theme repository cache: ' . $e->getMessage());
-                }
+        if (!$this->app->has(ModuleRepositoryInterface::class)) {
+            return;
+        }
+
+        try {
+            $repository = $this->app->get(ModuleRepositoryInterface::class);
+
+            if ($repository instanceof ThemeRepository) {
+                $repository->resetCache();
             }
+        } catch (\Exception $e) {
+            $this->logError('Failed to invalidate theme repository cache: ' . $e->getMessage());
         }
     }
 
     /**
      * Perform on-demand discovery for theme structures.
-     *
-     * This method uses the OnDemandDiscoveryService to discover and process
-     * all discoverable structures within the theme directory.
      */
     protected function discoverThemeStructures(ThemeModuleInterface $theme): void
     {
-        // Only proceed if the discovery service is available
         if (!$this->app->has(OnDemandDiscoveryInterface::class)) {
             return;
         }
@@ -112,40 +102,28 @@ class ThemeRegistrar implements ThemeRegistrarInterface
         try {
             $discoveryService = $this->app->get(OnDemandDiscoveryInterface::class);
 
-            // Discover all structures in the theme
             $discoveryService->discoverTheme($theme->getPath(), function ($structure, $scoutType, $themePath) use ($theme) {
                 $this->processDiscoveredStructure($structure, $scoutType, $theme);
             });
         } catch (\Exception $e) {
-            // Log error but don't break theme registration
-            if (function_exists('error_log')) {
-                error_log("Theme discovery error for {$theme->getName()}: " . $e->getMessage());
-            }
+            $this->logError("Theme discovery error for {$theme->getName()}: " . $e->getMessage());
         }
     }
 
     /**
      * Process a discovered structure for the theme.
-     *
-     * @param mixed $structure The discovered structure
-     * @param string $scoutType The type of scout that discovered it
-     * @param ThemeModuleInterface $theme The theme being processed
      */
     protected function processDiscoveredStructure($structure, string $scoutType, ThemeModuleInterface $theme): void
     {
-        // For now, we just log the discovery
-        // In the future, this could trigger automatic registration
-        if (function_exists('error_log') && defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("Discovered {$scoutType} in theme {$theme->getName()}: " .
-                     (is_object($structure) && method_exists($structure, 'getFqn') ? $structure->getFqn() : 'unknown'));
+        if (!$this->isDebugMode()) {
+            return;
         }
 
-        // TODO: Add specific processing based on scout type
-        // For example:
-        // - Service providers could be automatically registered
-        // - Post types could be automatically registered
-        // - Hooks could be automatically instantiated
-        // - etc.
+        $structureInfo = is_object($structure) && method_exists($structure, 'getFqn')
+            ? $structure->getFqn()
+            : 'unknown';
+
+        $this->logError("Discovered {$scoutType} in theme {$theme->getName()}: {$structureInfo}");
     }
 
     /**
@@ -161,11 +139,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     public function isThemeActive(string $themeName): bool
     {
-        if ($this->activeTheme === null) {
-            return false;
-        }
-
-        return $this->activeTheme->getLowerName() === strtolower($themeName);
+        return $this->activeTheme?->getLowerName() === strtolower($themeName);
     }
 
     /**
@@ -174,8 +148,24 @@ class ThemeRegistrar implements ThemeRegistrarInterface
     public function resetActiveTheme(): void
     {
         $this->activeTheme = null;
-        
-        // Also invalidate repository cache when resetting
         $this->invalidateRepositoryCache();
+    }
+
+    /**
+     * Check if debug mode is enabled.
+     */
+    protected function isDebugMode(): bool
+    {
+        return defined('WP_DEBUG') && WP_DEBUG;
+    }
+
+    /**
+     * Log error message.
+     */
+    protected function logError(string $message): void
+    {
+        if (function_exists('error_log')) {
+            error_log($message);
+        }
     }
 }

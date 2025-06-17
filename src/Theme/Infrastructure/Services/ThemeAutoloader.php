@@ -8,8 +8,8 @@ use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Theme\Domain\Models\ThemeModule;
 
 /**
- * Theme-specific autoloader service.
- *
+ * Simplified theme autoloader service.
+ * 
  * Handles autoloading for themes using the fixed namespace convention:
  * Theme\{ThemeName}\
  */
@@ -21,7 +21,6 @@ class ThemeAutoloader extends ModuleAutoloader
     public function registerThemeModule(ThemeModule $theme): void
     {
         $this->registerTheme($theme);
-        // Ensure the namespace is registered immediately
         $this->register();
     }
 
@@ -36,7 +35,6 @@ class ThemeAutoloader extends ModuleAutoloader
             }
         }
 
-        // Register all namespaces at once
         $this->register();
     }
 
@@ -54,7 +52,6 @@ class ThemeAutoloader extends ModuleAutoloader
     public function isThemeRegistered(string $themeName): bool
     {
         $namespace = $this->getThemeNamespace($themeName);
-
         return $this->isNamespaceRegistered($namespace);
     }
 }

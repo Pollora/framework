@@ -45,7 +45,14 @@ class ThemeInitializer implements ThemeComponent
         protected ConfigRepositoryInterface $config
     )
     {
-        $this->themeRoot = ThemeConfig::get('base_path');
+        // Get theme root safely - use fallback if ThemeConfig is not initialized yet
+        try {
+            $this->themeRoot = ThemeConfig::get('path', base_path('themes'));
+        } catch (\RuntimeException $e) {
+            // Fallback if ThemeConfig is not initialized yet
+            $this->themeRoot = base_path('themes');
+        }
+        
         $this->action = $this->app->get(Action::class);
         $this->filter = $this->app->get(Filter::class);
         $this->wpTheme = $this->app->get(WordPressThemeInterface::class);

@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Providers;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
-use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
@@ -29,42 +26,106 @@ use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
+use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
 
 /**
- * Provide extra blade directives to aid in WordPress view development.
+ * Simplified Theme Service Provider with clear responsibilities.
  */
 class ThemeServiceProvider extends ServiceProvider
 {
-    use IncludesFiles;
-
     /**
-     * Registers the theme.
-     *
-     * This method initializes various components of the theme such as
-     * the theme initializer, menus, support options, sidebar, pattern,
-     * templates, and image size settings.
+     * Register theme services.
      */
     public function register(): void
     {
-        // Register Config and Collection providers
-        $this->app->register(ConfigServiceProvider::class);
-        $this->app->register(CollectionServiceProvider::class);
+        // Register core dependencies first
+        $this->registerCoreDependencies();
 
-        // Register Modular Theme System
-        $this->app->register(ModuleServiceProvider::class);
-
-        // Initialize utility classes
+        // Initialize utility classes immediately after dependencies are registered
         $this->initializeUtilityClasses();
 
-        // Register WordPress theme interface binding
-        $this->app->singleton(
-            WordPressThemeInterface::class,
-            WordPressThemeAdapter::class
-        );
+        // Register theme-specific services
+        $this->registerThemeServices();
 
-        // Register theme registrar for self-registration
+        // Register console commands
+        $this->registerCommands();
+    }
+
+    /**
+     * Boot theme services.
+     */
+    public function boot(): void
+    {
+        // Register theme directories for WordPress
+        $this->registerThemeDirectories();
+
+        // Register theme components
+        $this->registerThemeComponents();
+
+        // Setup theme boot process
+        $this->setupThemeBoot();
+    }
+
+    /**
+     * Register core dependencies.
+     */
+    protected function registerCoreDependencies(): void
+    {
+        $this->app->register(ConfigServiceProvider::class);
+        $this->app->register(CollectionServiceProvider::class);
+        $this->app->register(ModuleServiceProvider::class);
+
+        // Load theme configuration early
+        $this->loadThemeConfiguration();
+    }
+
+    /**
+     * Initialize utility classes with their dependencies.
+     * This must be called early in the register phase.
+     */
+    protected function initializeUtilityClasses(): void
+    {
+        // Initialize ThemeConfig immediately with the config repository
+        if ($this->app->bound(ConfigRepositoryInterface::class)) {
+            $config = $this->app->make(ConfigRepositoryInterface::class);
+            ThemeConfig::setRepository($config);
+        } else {
+            // If not bound yet, use a callback for when it becomes available
+            $this->app->afterResolving(ConfigRepositoryInterface::class, function (ConfigRepositoryInterface $config) {
+                ThemeConfig::setRepository($config);
+            });
+        }
+
+        // Initialize ThemeCollection
+        if ($this->app->bound(CollectionFactoryInterface::class)) {
+            $factory = $this->app->make(CollectionFactoryInterface::class);
+            ThemeCollection::setFactory($factory);
+        } else {
+            $this->app->afterResolving(CollectionFactoryInterface::class, function (CollectionFactoryInterface $factory) {
+                ThemeCollection::setFactory($factory);
+            });
+        }
+    }
+
+    /**
+     * Register theme-specific services.
+     */
+    protected function registerThemeServices(): void
+    {
+        // Register domain container interface
+        $this->app->singleton(\Pollora\Theme\Domain\Contracts\ContainerInterface::class, function ($app) {
+            return $this->createDomainContainer($app);
+        });
+
+        // WordPress theme interface
+        $this->app->singleton(WordPressThemeInterface::class, WordPressThemeAdapter::class);
+
+        // Theme parser
+        $this->app->singleton(WordPressThemeParser::class);
+
+        // Theme registrar for self-registration
         $this->app->singleton(ThemeRegistrarInterface::class, function ($app) {
             return new ThemeRegistrar(
                 $app->make(\Pollora\Theme\Domain\Contracts\ContainerInterface::class),
@@ -72,10 +133,19 @@ class ThemeServiceProvider extends ServiceProvider
             );
         });
 
-        // Register modular theme system services
-        $this->registerModularThemeServices();
+        // Theme repository
+        $this->app->singleton(ModuleRepositoryInterface::class, function ($app) {
+            return new ThemeRepository(
+                $app,
+                $app->make(WordPressThemeParser::class),
+                $app->make(CollectionFactoryInterface::class)
+            );
+        });
 
-        // Register ThemeService interface binding
+        // Theme autoloader
+        $this->app->singleton(ThemeAutoloader::class);
+
+        // Theme service
         $this->app->singleton(ThemeService::class, function ($app) {
             return new ThemeManager(
                 $app,
@@ -86,105 +156,145 @@ class ThemeServiceProvider extends ServiceProvider
             );
         });
 
-        // Also register theme alias for backward compatibility
-        $this->app->singleton('theme', function ($app) {
-            return $app->make(ThemeService::class);
-        });
+        // Backward compatibility alias
+        $this->app->singleton('theme', fn($app) => $app->make(ThemeService::class));
 
-        // Register remaining services
-        $this->registerCommands();
-    }
-
-    public function boot()
-    {
-        // Register theme directories early for WordPress theme discovery
-        $this->registerThemeDirectories();
-
-        // Load theme helper functions
-        $this->loadThemeHelpers();
-
-        // Register console commands
-        $this->registerCommands();
-
-        $this->registerComponentServices();
-
-        // Boot modular theme system
-        $this->bootModularThemeSystem();
-    }
-
-    /**
-     * Initialize the utility classes with their respective dependencies.
-     */
-    protected function initializeUtilityClasses(): void
-    {
-        // Initialize ThemeConfig
-        $this->app->afterResolving(ConfigRepositoryInterface::class, function (ConfigRepositoryInterface $config) {
-            ThemeConfig::setRepository($config);
-        });
-
-        // Initialize ThemeCollection
-        $this->app->afterResolving(CollectionFactoryInterface::class, function (CollectionFactoryInterface $factory) {
-            ThemeCollection::setFactory($factory);
-        });
-    }
-
-    /**
-     * Load helper functions.
-     */
-    protected function loadHelpers(): void
-    {
-        // No longer needed as we're using utility classes
-    }
-
-    /**
-     * Register modular theme system services.
-     */
-    protected function registerModularThemeServices(): void
-    {
-        // Register theme parser
-        $this->app->singleton(WordPressThemeParser::class);
-
-
-
-        // Register theme repository as module repository
-        $this->app->singleton(ModuleRepositoryInterface::class, function ($app) {
-            return new ThemeRepository(
-                $app,
-                $app->make(WordPressThemeParser::class),
-                $app->make(CollectionFactoryInterface::class)
-            );
-        });
-
-        // Register ThemeAutoloader service
-        $this->app->singleton(ThemeAutoloader::class, function ($app) {
-            return new ThemeAutoloader($app);
-        });
-
-        // Register class alias for LaravelThemeModule backward compatibility
-        if (! class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
+        // Class alias for backward compatibility
+        if (!class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
             class_alias(LaravelThemeModule::class, 'Pollora\\Modules\\Domain\\Models\\LaravelThemeModule');
         }
     }
 
     /**
-     * Boot modular theme system.
+     * Register theme directories for WordPress discovery.
      */
-    protected function bootModularThemeSystem(): void
+    protected function registerThemeDirectories(): void
     {
-        // The ModuleServiceProvider now handles registration and booting of modules
-        // We just need to create the @theme() blade directive for backward compatibility
+        try {
+            $baseThemePath = ThemeConfig::get('path', base_path('themes'));
+        } catch (\RuntimeException $e) {
+            // Fallback if ThemeConfig is not initialized yet
+            $baseThemePath = base_path('themes');
+        }
+
+        if ($baseThemePath && is_dir($baseThemePath)) {
+            if (!isset($GLOBALS['wp_theme_directories'])) {
+                $GLOBALS['wp_theme_directories'] = [];
+            }
+
+            if (!in_array($baseThemePath, $GLOBALS['wp_theme_directories'], true)) {
+                $GLOBALS['wp_theme_directories'][] = $baseThemePath;
+            }
+        }
+    }
+
+    /**
+     * Register theme components.
+     */
+    protected function registerThemeComponents(): void
+    {
+        $this->app->singleton(ThemeComponentProvider::class, function ($app) {
+            return new ThemeComponentProvider($app);
+        });
+
+        $this->app->make(ThemeComponentProvider::class)->register();
+    }
+
+    /**
+     * Setup theme boot process.
+     */
+    protected function setupThemeBoot(): void
+    {
+        /** @var Action $action */
+        $action = $this->app->make(Action::class);
+        $action->add('after_setup_theme', [$this, 'bootTheme']);
+
+        // Setup Blade directive for theme checking
         if (class_exists('Illuminate\\Support\\Facades\\Blade')) {
-            \Illuminate\Support\Facades\Blade::if('theme', function (string $name) {
+            Blade::if('theme', function (string $name) {
                 /** @var ThemeService $themeManager */
                 $themeManager = app(ThemeService::class);
-
                 return $themeManager->hasTheme($name);
             });
         }
     }
 
     /**
-     * Register the console commands
+     * Boot theme after WordPress is ready.
+     */
+    public function bootTheme(): void
+    {
+        /** @var ThemeService $themeService */
+        $themeService = $this->app->make(ThemeService::class);
+
+        if (!$themeService->theme()) {
+            return;
+        }
+
+        // Load theme include files
+        $this->loadThemeIncludes($themeService);
+
+        // Setup asset management
+        $this->setupAssetManagement($themeService);
+
+        // Register Blade directives
+        $this->registerBladeDirectives();
+    }
+
+    /**
+     * Load theme include files.
+     */
+    protected function loadThemeIncludes(ThemeService $themeService): void
+    {
+        $themeInclude = $themeService->theme()->getThemeIncDir();
+
+        if (is_dir($themeInclude)) {
+            $this->loadFilesRecursively($themeInclude);
+        }
+    }
+
+    /**
+     * Setup asset management for the active theme.
+     */
+    protected function setupAssetManagement(ThemeService $themeService): void
+    {
+        $currentTheme = $themeService->active();
+
+        if ($currentTheme) {
+            $this->app->make(AssetManager::class)->addContainer('theme', [
+                'hot_file' => public_path("{$currentTheme}.hot"),
+                'build_directory' => "build/{$currentTheme}",
+                'manifest_path' => 'manifest.json',
+                'base_path' => 'resources/assets/',
+            ]);
+        }
+    }
+
+    /**
+     * Load theme configuration.
+     */
+    protected function loadThemeConfiguration(): void
+    {
+        $this->mergeConfigFrom(__DIR__.'/../../config/theme.php', 'theme');
+    }
+
+    /**
+     * Register Blade directives.
+     */
+    protected function registerBladeDirectives(): void
+    {
+        $directivesPath = __DIR__.'/../Services/Directives.php';
+        if (file_exists($directivesPath)) {
+            $directives = require $directivesPath;
+
+            foreach ($directives as $name => $directive) {
+                Blade::directive($name, $directive);
+            }
+        }
+    }
+
+    /**
+     * Register console commands.
      */
     protected function registerCommands(): void
     {
@@ -197,7 +307,7 @@ class ThemeServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton('theme.status', function ($app) {
-            return new \Pollora\Theme\UI\Console\Commands\ThemeStatusCommand();
+            return new ThemeStatusCommand();
         });
 
         $this->commands([
@@ -208,235 +318,67 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register component provider
-     */
-    protected function registerComponentServices(): void
-    {
-        // Register our domain container interface to Laravel's application
-        $this->app->singleton(
-            \Pollora\Theme\Domain\Contracts\ContainerInterface::class,
-            function ($app) {
-                // Return a very simple container implementation that delegates to Laravel
-                return new class($app) implements \Pollora\Theme\Domain\Contracts\ContainerInterface
-                {
-                    public function __construct(protected $app) {}
-
-                    public function get(string $id): mixed
-                    {
-                        return $this->app->make($id);
-                    }
-
-                    public function has(string $id): bool
-                    {
-                        return $this->app->bound($id);
-                    }
-
-                    public function registerProvider(string|object $provider): void
-                    {
-                        $this->app->register($provider);
-                    }
-
-                    public function bindShared(string $abstract, mixed $concrete): void
-                    {
-                        $this->app->singleton($abstract, $concrete);
-                    }
-
-                    public function isConfigurationCached(): bool
-                    {
-                        return false; // Always assume configs need to be loaded
-                    }
-
-                    public function getConfig(string $key, mixed $default = null): mixed
-                    {
-                        return $this->app['config']->get($key, $default);
-                    }
-
-                    public function setConfig(string $key, mixed $value): void
-                    {
-                        $this->app['config']->set($key, $value);
-                    }
-                };
-            }
-        );
-
-        $this->app->singleton(
-            \Pollora\Theme\Infrastructure\Services\ComponentFactory::class,
-            function ($app) {
-                return new \Pollora\Theme\Infrastructure\Services\ComponentFactory($app);
-            }
-        );
-
-        $this->app->singleton(ThemeComponentProvider::class, function ($app) {
-            return new ThemeComponentProvider(
-                $app
-            );
-        });
-
-        // Register component provider
-        $this->app->make(ThemeComponentProvider::class)->register();
-
-        // Register theme setup action
-        /** @var Action $action */
-        $action = $this->app->make(Action::class);
-
-        if ($action !== null) {
-            $action->add('after_setup_theme', [$this, 'bootTheme']);
-        }
-    }
-
-    /**
-     * Perform post-registration booting of services.
-     */
-    public function bootTheme(): void
-    {
-        /** @var ThemeService $themeService */
-        $themeService = $this->app->make(ThemeService::class);
-
-        if (! $themeService->theme()) {
-            return;
-        }
-
-        $themeInclude = $themeService->theme()->getThemeIncDir();
-
-        if (File::exists($themeInclude) && File::isDirectory($themeInclude)) {
-            // Load all PHP files in the theme's include directory
-            $this->loadFilesFrom($themeInclude);
-        }
-
-        $currentTheme = $themeService->active();
-
-        $this->app->make(AssetManager::class)->addContainer('theme', [
-            'hot_file' => public_path("{$currentTheme}.hot"),
-            'build_directory' => "build/{$currentTheme}",
-            'manifest_path' => 'manifest.json',
-            'base_path' => 'resources/assets/',
-        ]);
-
-        // TODO: If needed, implement setDefaultContainer logic in AssetManager
-
-        $this->loadConfigurations();
-
-        $this->directives()
-            ->each(function ($directive, $function): void {
-                Blade::directive($function, $directive);
-            });
-    }
-
-    /**
      * Load all PHP files from a directory recursively.
-     *
-     * @param  string  $directory  The directory to load files from
      */
-    protected function loadFilesFrom(string $directory): void
+    protected function loadFilesRecursively(string $directory): void
     {
-        if (! File::isDirectory($directory)) {
+        if (!is_dir($directory)) {
             return;
         }
 
-        foreach (File::files($directory) as $file) {
-            if ($file->getExtension() === 'php') {
-                require_once $file->getPathname();
-            }
+        foreach (glob($directory . '/*.php') as $file) {
+            require_once $file;
         }
 
-        foreach (File::directories($directory) as $subDir) {
-            $this->loadFilesFrom($subDir);
-        }
-    }
-
-    protected function loadConfigurations(): void
-    {
-        $this->mergeConfigFrom(__DIR__.'/../../config/theme.php', 'theme');
-    }
-
-    /**
-     * Load theme helper functions.
-     */
-    protected function loadThemeHelpers(): void
-    {
-        $helpersPath = __DIR__ . '/../../UI/Helpers/theme_functions.php';
-        if (file_exists($helpersPath)) {
-            require_once $helpersPath;
+        foreach (glob($directory . '/*', GLOB_ONLYDIR) as $subDir) {
+            $this->loadFilesRecursively($subDir);
         }
     }
 
     /**
-     * Get the Blade directives.
+     * Create domain container adapter.
      */
-    public function directives(): Collection
+    protected function createDomainContainer($app): \Pollora\Theme\Domain\Contracts\ContainerInterface
     {
-        $directiveCollection = ThemeCollection::make(['Directives']);
+        return new class($app) implements \Pollora\Theme\Domain\Contracts\ContainerInterface
+        {
+            public function __construct(protected $app) {}
 
-        if ($directiveCollection instanceof Collection) {
-            return $directiveCollection->flatMap(function ($directive) {
-                if (file_exists($directives = __DIR__.'/'.$directive.'.php')) {
-                    return require $directives;
-                }
-            });
-        }
-
-        // Fallback if the returned instance is not a Laravel Collection
-        return collect(['Directives'])
-            ->flatMap(function ($directive) {
-                if (file_exists($directives = __DIR__.'/'.$directive.'.php')) {
-                    return require $directives;
-                }
-            });
-    }
-
-    /**
-     * Register a service provider.
-     *
-     * @param  string  $provider  The class or interface name of the service provider.
-     */
-    public function registerProvider($provider): void
-    {
-        $this->app->register($provider);
-    }
-
-    /**
-     * Bind a singleton instance to the container.
-     */
-    public function singleton($abstract, $concrete): void
-    {
-        $this->app->singleton($abstract, $concrete);
-    }
-
-    /**
-     * Registers a theme configuration file.
-     *
-     * This method reads and merges the configuration settings from a theme
-     * configuration file into the application's configuration.
-     *
-     * @param  string  $path  The path to the theme configuration file.
-     * @param  string  $key  The configuration key to use for the merged settings.
-     */
-    public function registerThemeConfig(string $path, string $key): void
-    {
-        $this->mergeConfigFrom($path, $key);
-    }
-
-    /**
-     * Register theme directories early for WordPress theme discovery.
-     *
-     * This must be done before WordPress scans for themes, so we register
-     * the custom theme directory globally.
-     */
-    protected function registerThemeDirectories(): void
-    {
-        // Get the base theme path from configuration
-        $baseThemePath = ThemeConfig::get('base_path');
-
-        if ($baseThemePath && is_dir($baseThemePath)) {
-            // Register the custom theme directory with WordPress
-            if (!isset($GLOBALS['wp_theme_directories'])) {
-                $GLOBALS['wp_theme_directories'] = [];
+            public function get(string $id): mixed
+            {
+                return $this->app->make($id);
             }
 
-            // Add our custom theme directory if not already present
-            if (!in_array($baseThemePath, $GLOBALS['wp_theme_directories'], true)) {
-                $GLOBALS['wp_theme_directories'][] = $baseThemePath;
+            public function has(string $id): bool
+            {
+                return $this->app->bound($id);
             }
-        }
+
+            public function registerProvider(string|object $provider): void
+            {
+                $this->app->register($provider);
+            }
+
+            public function bindShared(string $abstract, mixed $concrete): void
+            {
+                $this->app->singleton($abstract, $concrete);
+            }
+
+            public function isConfigurationCached(): bool
+            {
+                return false;
+            }
+
+            public function getConfig(string $key, mixed $default = null): mixed
+            {
+                return $this->app['config']->get($key, $default);
+            }
+
+            public function setConfig(string $key, mixed $value): void
+            {
+                $this->app['config']->set($key, $value);
+            }
+        };
     }
 }
+
