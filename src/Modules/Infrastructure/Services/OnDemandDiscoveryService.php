@@ -17,11 +17,6 @@ use Pollora\Modules\Domain\Contracts\OnDemandDiscoveryInterface;
  */
 class OnDemandDiscoveryService implements OnDemandDiscoveryInterface
 {
-    /**
-     * Cache for discovered structures per path to avoid re-scanning.
-     */
-    private array $discoveryCache = [];
-
     public function __construct(
         protected Container $container
     ) {}
@@ -32,8 +27,8 @@ class OnDemandDiscoveryService implements OnDemandDiscoveryInterface
     public function discoverInPath(string $path, string $scoutClass): void
     {
         // Validate scout class
-        if (!is_subclass_of($scoutClass, AbstractPolloraScout::class)) {
-            throw new \InvalidArgumentException("Scout class must extend AbstractPolloraScout");
+        if (! is_subclass_of($scoutClass, AbstractPolloraScout::class)) {
+            throw new \InvalidArgumentException('Scout class must extend AbstractPolloraScout');
         }
 
         // Create scout instance with specific directory
@@ -46,36 +41,12 @@ class OnDemandDiscoveryService implements OnDemandDiscoveryInterface
     /**
      * {@inheritDoc}
      */
-    public function discoverAllInPath(string $path): void
+    public function discoverModule(string $path): void
     {
         $scoutClasses = $this->getAvailableScouts();
-        foreach ($scoutClasses as $scoutType => $scoutClass) {
+        foreach ($scoutClasses as $scoutClass) {
             $this->discoverInPath($path, $scoutClass);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function discoverModule(string $modulePath, ?callable $processor = null): void
-    {
-        $this->discoverAllInPath($modulePath);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function discoverTheme(string $themePath, ?callable $processor = null): void
-    {
-        $this->discoverModule($themePath, $processor);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function discoverPlugin(string $pluginPath, ?callable $processor = null): void
-    {
-        $this->discoverModule($pluginPath, $processor);
     }
 
     /**
@@ -93,27 +64,5 @@ class OnDemandDiscoveryService implements OnDemandDiscoveryInterface
             'wp_rest_routes' => \Pollora\Discoverer\Scouts\WpRestRoutesScout::class,
             'attributable_classes' => \Pollora\Discoverer\Scouts\AttributableClassesScout::class,
         ];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function clearCache(): void
-    {
-        $this->discoveryCache = [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function clearCacheForPath(string $path): void
-    {
-        $pathHash = md5($path);
-
-        foreach (array_keys($this->discoveryCache) as $cacheKey) {
-            if (str_contains($cacheKey, $pathHash)) {
-                unset($this->discoveryCache[$cacheKey]);
-            }
-        }
     }
 }

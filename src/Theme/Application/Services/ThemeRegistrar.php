@@ -102,9 +102,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
         try {
             $discoveryService = $this->app->get(OnDemandDiscoveryInterface::class);
 
-            $discoveryService->discoverTheme($theme->getPath(), function ($structure, $scoutType, $themePath) use ($theme) {
-                $this->processDiscoveredStructure($structure, $scoutType, $theme);
-            });
+            $discoveryService->discoverModule($theme->getPath());
         } catch (\Exception $e) {
             $this->logError("Theme discovery error for {$theme->getName()}: " . $e->getMessage());
         }

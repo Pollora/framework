@@ -41,10 +41,9 @@ class ThemeInitializer implements ThemeComponent
      * Create a new self-registered theme initializer
      */
     public function __construct(
-        protected ContainerInterface        $app,
+        protected ContainerInterface $app,
         protected ConfigRepositoryInterface $config
-    )
-    {
+    ) {
         // Get theme root safely - use fallback if ThemeConfig is not initialized yet
         try {
             $this->themeRoot = ThemeConfig::get('path', base_path('themes'));
@@ -52,14 +51,14 @@ class ThemeInitializer implements ThemeComponent
             // Fallback if ThemeConfig is not initialized yet
             $this->themeRoot = base_path('themes');
         }
-        
+
         $this->action = $this->app->get(Action::class);
         $this->filter = $this->app->get(Filter::class);
         $this->wpTheme = $this->app->get(WordPressThemeInterface::class);
         $this->registrar = $this->app->get(ThemeRegistrarInterface::class);
 
-        //$this->filter->add('template_directory', $this->overrideThemeDirectory(...), 90, 3);
-       // $this->filter->add('stylesheet_directory', $this->overrideThemeDirectory(...), 90, 3);
+        // $this->filter->add('template_directory', $this->overrideThemeDirectory(...), 90, 3);
+        // $this->filter->add('stylesheet_directory', $this->overrideThemeDirectory(...), 90, 3);
         // Handle custom theme roots.
         $this->filter->add('pre_option_stylesheet_root', $this->resetThemeRootOption(...));
         $this->filter->add('pre_option_template_root', $this->resetThemeRootOption(...));
@@ -91,11 +90,8 @@ class ThemeInitializer implements ThemeComponent
      */
     public function register(): void
     {
+        // @TODO clean
         $this->action->add('after_setup_theme', function (): void {
-            // Use the interface instead of direct function call
-            if ($this->wpTheme->isInstalling()) {
-                return;
-            }
             $this->initializeTheme();
         }, 1);
 
@@ -104,6 +100,7 @@ class ThemeInitializer implements ThemeComponent
 
     /**
      * Override the stylesheet directory URI
+     * @TODO : clean
      */
     public function overrideThemeDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
     {
@@ -158,7 +155,7 @@ class ThemeInitializer implements ThemeComponent
         $this->wp_theme = $this->wpTheme->getTheme();
 
         // Use our specialized container interface
-        $this->app->bindShared('wp.theme', fn() => $this->wp_theme);
+        $this->app->bindShared('wp.theme', fn () => $this->wp_theme);
     }
 
     /**
@@ -166,7 +163,7 @@ class ThemeInitializer implements ThemeComponent
      */
     private function registerThemeProvider(): void
     {
-        $providers = (array)ThemeConfig::get('providers', []);
+        $providers = (array) ThemeConfig::get('providers', []);
 
         foreach ($providers as $provider) {
             // Using our specialized container interface
@@ -180,7 +177,7 @@ class ThemeInitializer implements ThemeComponent
     public function setThemes(?string $themeName = null): void
     {
         // Theme name is required for self-registered themes
-        if (!$themeName) {
+        if (! $themeName) {
             throw new \RuntimeException('Theme name is required for self-registered themes.');
         }
 
@@ -202,7 +199,7 @@ class ThemeInitializer implements ThemeComponent
     protected function mergeConfigFrom($path, $key): void
     {
         $config = $this->app->getConfig($key, []);
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             return;
         }
         $this->app->setConfig($key, array_merge(require $path, $config));
@@ -211,11 +208,12 @@ class ThemeInitializer implements ThemeComponent
     /**
      * Override the theme URI
      */
-    protected function overrideThemeUri(): void
+    public function overrideThemeUri(): void
     {
         $this->filter->add('theme_file_uri', function ($path): string {
             $relativePath = $this->getRelativePath($path);
-            return (string)(new AssetFile($relativePath))->from('theme');
+
+            return (string) (new AssetFile($relativePath))->from('theme');
         });
     }
 
