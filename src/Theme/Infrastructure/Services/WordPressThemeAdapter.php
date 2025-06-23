@@ -15,9 +15,9 @@ use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
  */
 class WordPressThemeAdapter implements WordPressThemeInterface
 {
-    public const string DEFAULT_THEME_NAME = 'default';
+    public const DEFAULT_THEME_NAME = 'default';
 
-    public const string DEFAULT_URI = '/';
+    public const DEFAULT_URI = '/';
 
     /**
      * Check if WordPress is in installation mode.
