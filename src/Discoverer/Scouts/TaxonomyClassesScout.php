@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Discoverer\Scouts;
 
-use Illuminate\Support\Collection;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Domain\Contracts\HandlerScoutInterface;
 use Pollora\Discoverer\Infrastructure\Services\AbstractPolloraScout;
@@ -84,6 +83,10 @@ final class TaxonomyClassesScout extends AbstractPolloraScout implements Handler
         $singular = $taxonomyInstance->getName();
         $plural = $taxonomyInstance->getPluralName();
         $args = $taxonomyInstance->getArgs();
+
+        if (isset($args['label']) && isset($args['labels']['menu_name'])) {
+            $args['labels']['menu_name'] = $args['label'];
+        }
 
         $taxonomyService->register($slug, $objectType, $singular, $plural, $args);
     }

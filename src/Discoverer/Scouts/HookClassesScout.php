@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Discoverer\Scouts;
 
-use Illuminate\Support\Collection;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Domain\Contracts\HandlerScoutInterface;
 use Pollora\Discoverer\Infrastructure\Services\AbstractPolloraScout;

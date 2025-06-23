@@ -57,47 +57,4 @@ class HookServiceProvider extends ServiceProvider
             ]);
         }
     }
-
-    /**
-     * Bootstrap hook services.
-     *
-     * Instantiates and registers all hooks discovered by the Discoverer system.
-     */
-    public function boot(Application $app): void
-    {
-        $this->app = $app;
-        //$this->loadHooks();
-    }
-
-    /**
-     * Load all discovered hooks using the new discovery system.
-     */
-    protected function loadHooks(): void
-    {
-        try {
-            $hooks = PolloraDiscover::scout('hooks');
-
-            foreach ($hooks as $hookClass) {
-                $this->registerHook($hookClass);
-            }
-        } catch (\Throwable $e) {
-            // Log error but don't break the application
-            if (function_exists('error_log')) {
-                error_log('Failed to load hooks: '.$e->getMessage());
-            }
-        }
-    }
-
-    /**
-     * Register an individual hook class.
-     *
-     * Creates an instance of the hook class and registers its 'register' method
-     * as a WordPress action if the method exists.
-     *
-     * @param  string  $hookClass  The fully qualified class name of the hook to register
-     */
-    protected function registerHook(string $hookClass): void
-    {
-        $this->app->make($hookClass);
-    }
 }

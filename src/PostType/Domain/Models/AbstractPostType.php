@@ -136,11 +136,11 @@ abstract class AbstractPostType implements PostTypeAttributeInterface
     public function getArgs(): array
     {
         return array_merge(
-            $this->attributeArgs,
             $this->withArgs(),
             [
                 'labels' => $this->getLabels(),
-            ]
+            ],
+            $this->attributeArgs,
         );
     }
 }

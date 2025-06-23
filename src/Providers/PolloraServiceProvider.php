@@ -27,12 +27,10 @@ use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
-use Pollora\PostType\Infrastructure\Providers\PostTypeAttributeServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
-use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyAttributeServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
@@ -80,10 +78,8 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ViewServiceProvider::class);
 
         $this->app->register(TaxonomyServiceProvider::class);
-        $this->app->register(TaxonomyAttributeServiceProvider::class);
 
         $this->app->register(PostTypeServiceProvider::class);
-        $this->app->register(PostTypeAttributeServiceProvider::class);
 
         // WordPress REST API
         $this->app->register(WpRestAttributeServiceProvider::class);

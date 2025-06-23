@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Discoverer\Scouts;
 
-use Illuminate\Support\Collection;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discoverer\Domain\Contracts\HandlerScoutInterface;
 use Pollora\Discoverer\Infrastructure\Services\AbstractPolloraScout;
@@ -49,6 +48,7 @@ final class PostTypeClassesScout extends AbstractPolloraScout implements Handler
             foreach ($discoveredClasses as $postTypeClass) {
                 $this->registerPostType($postTypeClass, $processor, $postTypeService);
             }
+
         } catch (\Throwable $e) {
             // Log error but don't break the application
             if (function_exists('error_log')) {
@@ -83,6 +83,10 @@ final class PostTypeClassesScout extends AbstractPolloraScout implements Handler
         $singular = $postTypeInstance->getName();
         $plural = $postTypeInstance->getPluralName();
         $args = $postTypeInstance->getArgs();
+
+        if (isset($args['label']) && isset($args['labels']['menu_name'])) {
+            $args['labels']['menu_name'] = $args['label'];
+        }
 
         $postTypeService->register($slug, $singular, $plural, $args);
     }

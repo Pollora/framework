@@ -23,7 +23,7 @@
     ],
     "require": {
         "php": "^8.2.0",
-        "pollora/helper-overrider": "dev-main",
+        "../helper-overrider": "dev-main",
         "illuminate/support": "^12.18",
         "illuminate/database": "^12.19",
         "illuminate/routing": "^12.19",
