@@ -63,9 +63,13 @@ class WooCommerce implements WooCommerceIntegrationInterface
      */
     public function template(string $template, string $templateName = ''): string
     {
-        // Locate any matching template within the theme
-        $themeTemplate = $this->locateThemeTemplate($templateName ?: $template);
+        // Determine the template to locate, giving priority to the full path
+        $templateToLocate = $this->determineTemplateToLocate($template, $templateName);
 
+        // Locate any matching template within the theme
+        $themeTemplate = $this->locateThemeTemplate($templateToLocate);
+
+        // If no theme template was found, return the original template
         if (! $themeTemplate) {
             return $template;
         }
@@ -93,6 +97,34 @@ class WooCommerce implements WooCommerceIntegrationInterface
 
         // Create and return the loader file path
         return $this->viewFactory->make($viewName)->makeLoader();
+    }
+
+    /**
+     * Determines which template to use, giving priority to the full path.
+     *
+     * @param  string  $template  The full template path
+     * @param  string  $templateName  The template name (may be partial)
+     * @return string The resolved template to locate
+     */
+    private function determineTemplateToLocate(string $template, string $templateName): string
+    {
+        // Priority 1: If $template contains a path (relative or absolute), use it
+        if (str_contains($template, '/') || str_ends_with($template, '.php')) {
+            return $template;
+        }
+
+        // Priority 2: Use $templateName if it looks like a full filename
+        if (! empty($templateName) && (str_contains($templateName, '/') || str_ends_with($templateName, '.php'))) {
+            return $templateName;
+        }
+
+        // Priority 3: If $templateName is provided and $template looks like just a file name
+        if (! empty($templateName) && ! str_contains($template, '/')) {
+            return $templateName;
+        }
+
+        // Fallback: use $template as is
+        return $template;
     }
 
     /**
