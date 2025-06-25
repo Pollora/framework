@@ -6,6 +6,7 @@ namespace Pollora\Route\Domain\Models;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route as IlluminateRoute;
+use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
 
 /**
  * Extended Route class with WordPress condition support.
@@ -31,6 +32,11 @@ class Route extends IlluminateRoute
      * @var array<mixed>
      */
     protected array $conditionParameters = [];
+
+    /**
+     * Condition resolver instance for resolving condition aliases.
+     */
+    protected ?ConditionResolverInterface $conditionResolver = null;
 
     /**
      * Set whether this is a WordPress route.
@@ -65,10 +71,34 @@ class Route extends IlluminateRoute
     }
 
     /**
-     * Get the WordPress condition.
+     * Get the resolved WordPress condition function name.
+     *
+     * This method returns the WordPress condition function name, resolving
+     * any condition aliases through the injected condition resolver if available.
+     * If no resolver is available, returns the raw condition string.
+     *
+     * The method supports both condition aliases (e.g., 'single', 'page') and
+     * direct WordPress function names (e.g., 'is_single', 'is_page'). When a
+     * condition resolver is available, aliases are automatically resolved to
+     * their corresponding WordPress function names.
+     *
+     * @return string The resolved WordPress condition function name
+     *
+     * @example
+     * // With resolver available:
+     * $route->setCondition('single');
+     * $route->getCondition(); // Returns 'is_single'
+     *
+     * // Without resolver or direct function name:
+     * $route->setCondition('is_single');
+     * $route->getCondition(); // Returns 'is_single'
      */
     public function getCondition(): string
     {
+        if ($this->conditionResolver !== null) {
+            return $this->conditionResolver->resolveCondition($this->condition);
+        }
+
         return $this->condition;
     }
 
@@ -101,6 +131,23 @@ class Route extends IlluminateRoute
     public function getConditionParameters(): array
     {
         return $this->conditionParameters;
+    }
+
+    /**
+     * Set the condition resolver instance.
+     *
+     * This method allows injection of a condition resolver that can translate
+     * condition aliases to actual WordPress function names. The resolver is
+     * used by the getCondition method to provide resolved condition names.
+     *
+     * @param  ConditionResolverInterface  $resolver  The condition resolver instance
+     * @return $this
+     */
+    public function setConditionResolver(ConditionResolverInterface $resolver): self
+    {
+        $this->conditionResolver = $resolver;
+
+        return $this;
     }
 
     /**

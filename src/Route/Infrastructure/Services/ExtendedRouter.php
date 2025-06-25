@@ -47,17 +47,24 @@ class ExtendedRouter extends IlluminateRouter
     }
 
     /**
-     * Create a new Route object.
+     * Create a new Route object with condition resolver injection.
      *
-     * @param  array|string  $methods
-     * @param  string  $uri
-     * @param  mixed  $action
+     * This method creates a new Route instance and automatically injects
+     * the condition resolver to enable WordPress condition alias resolution
+     * within the domain layer. This ensures that routes can resolve condition
+     * aliases without depending on infrastructure services directly.
+     *
+     * @param  array|string  $methods  HTTP methods for the route
+     * @param  string  $uri  Route URI pattern
+     * @param  mixed  $action  Route action (controller, closure, etc.)
+     * @return Route The configured route instance with condition resolver
      */
     public function newRoute($methods, $uri, $action): Route
     {
         return (new Route($methods, $uri, $action))
             ->setRouter($this)
-            ->setContainer($this->container);
+            ->setContainer($this->container)
+            ->setConditionResolver($this->conditionManager);
     }
 
     /**

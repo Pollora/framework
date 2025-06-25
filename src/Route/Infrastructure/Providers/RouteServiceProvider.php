@@ -12,6 +12,7 @@ use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
 use Pollora\Route\Infrastructure\Middleware\WordPressBodyClass;
 use Pollora\Route\Infrastructure\Middleware\WordPressHeaders;
 use Pollora\Route\Infrastructure\Middleware\WordPressShutdown;
+use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
@@ -41,9 +42,14 @@ class RouteServiceProvider extends ServiceProvider
         // Register the WordPress type resolver
         $this->app->singleton(WordPressTypeResolverInterface::class, WordPressTypeResolver::class);
 
-        // Register the condition manager
+        // Register the condition manager (implements both interfaces)
         $this->app->singleton(WordPressConditionManagerInterface::class, function ($app) {
             return new WordPressConditionManager($app);
+        });
+
+        // Bind the domain interface to the same instance
+        $this->app->bind(ConditionResolverInterface::class, function ($app) {
+            return $app->make(WordPressConditionManagerInterface::class);
         });
 
         // Override the default router with our extended version

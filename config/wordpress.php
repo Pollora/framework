@@ -6,12 +6,14 @@ return [
     /**
      * WordPress route conditions.
      *
-     * Maps WordPress conditional tags to route URIs.
+     * Maps WordPress conditional functions to their route aliases.
+     * Key = WordPress function name, Value = alias(es) for routing.
+     * Multiple aliases can be defined as an array.
      * These conditions are used by Route::wordpress() and Route::wp() methods.
      */
     'conditions' => [
         // Error and special pages
-        'is_404' => '404',
+        'is_404' => ['404', 'not_found'],
         'is_search' => 'search',
         'is_paged' => 'paged',
 
