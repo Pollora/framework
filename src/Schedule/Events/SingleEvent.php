@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Scheduler\Events;
+namespace Pollora\Schedule\Events;
 
 /**
  * Class for handling one-time WordPress cron events.

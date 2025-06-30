@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Scheduler\Jobs;
+namespace Pollora\Schedule\Jobs;
 
-use Pollora\Scheduler\Contracts\JobDispatcherInterface;
+use Pollora\Schedule\Contracts\JobDispatcherInterface;
 
 /**
  * Class for dispatching WordPress cron jobs to Laravel queue.

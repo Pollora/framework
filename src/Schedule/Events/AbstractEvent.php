@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Scheduler\Events;
+namespace Pollora\Schedule\Events;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
-use Pollora\Scheduler\Contracts\EventInterface;
-use Pollora\Scheduler\Jobs\JobDispatcher;
+use Pollora\Schedule\Contracts\EventInterface;
+use Pollora\Schedule\Jobs\JobDispatcher;
 
 /**
  * Abstract base class for WordPress scheduled events.

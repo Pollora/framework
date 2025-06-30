@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Scheduler\Contracts;
+namespace Pollora\Schedule\Contracts;
 
 /**
  * Interface for WordPress scheduled events.

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Scheduler;
+namespace Pollora\Schedule;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Scheduler\Contracts\SchedulerInterface;
+use Pollora\Schedule\Contracts\SchedulerInterface;
 
 /**
  * Service provider for WordPress cron scheduler functionality.
@@ -82,6 +82,6 @@ class SchedulerServiceProvider extends ServiceProvider
         }
 
         $schedule = $this->app->make(Schedule::class);
-        \Pollora\Scheduler\Events\RecurringEvent::scheduleAllEvents($schedule);
+        \Pollora\Schedule\Events\RecurringEvent::scheduleAllEvents($schedule);
     }
 }

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Scheduler;
+namespace Pollora\Schedule;
 
 use Illuminate\Support\Facades\DB;
-use Pollora\Scheduler\Contracts\SchedulerInterface;
-use Pollora\Scheduler\Events\AbstractEvent;
-use Pollora\Scheduler\Events\RecurringEvent;
-use Pollora\Scheduler\Events\SingleEvent;
+use Pollora\Schedule\Contracts\SchedulerInterface;
+use Pollora\Schedule\Events\AbstractEvent;
+use Pollora\Schedule\Events\RecurringEvent;
+use Pollora\Schedule\Events\SingleEvent;
 use WP_Error;
 
 /**
