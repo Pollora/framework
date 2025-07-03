@@ -9,8 +9,8 @@ if (!function_exists('pollora_discover_module')) {
      * Discover structures in a module directory (generic).
      *
      * @param string $modulePath The module directory path
-     * @param callable|null $processor Optional processor function for each discovered structure
-     * @return array<string, array> Results grouped by scout type
+     * @param callable|null $processor Optional processor function (unused in new system)
+     * @return array<string, array> Results grouped by discovery type
      */
     function pollora_discover_module(string $modulePath, ?callable $processor = null): array
     {
@@ -20,7 +20,8 @@ if (!function_exists('pollora_discover_module')) {
 
         try {
             $discoveryService = app(OnDemandDiscoveryInterface::class);
-            return $discoveryService->discoverModule($modulePath, $processor);
+            $discoveryService->discoverModule($modulePath);
+            return $discoveryService->discoverAllInPath($modulePath);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_module error: ' . $e->getMessage());
@@ -35,8 +36,8 @@ if (!function_exists('pollora_discover_theme')) {
      * Discover structures in a theme directory.
      *
      * @param string $themePath The theme directory path
-     * @param callable|null $processor Optional processor function for each discovered structure
-     * @return array<string, array> Results grouped by scout type
+     * @param callable|null $processor Optional processor function (unused in new system)
+     * @return array<string, array> Results grouped by discovery type
      */
     function pollora_discover_theme(string $themePath, ?callable $processor = null): array
     {
@@ -46,7 +47,8 @@ if (!function_exists('pollora_discover_theme')) {
 
         try {
             $discoveryService = app(OnDemandDiscoveryInterface::class);
-            return $discoveryService->discoverTheme($themePath, $processor);
+            $discoveryService->discoverTheme($themePath);
+            return $discoveryService->discoverAllInPath($themePath);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_theme error: ' . $e->getMessage());
@@ -61,8 +63,8 @@ if (!function_exists('pollora_discover_plugin')) {
      * Discover structures in a plugin directory.
      *
      * @param string $pluginPath The plugin directory path
-     * @param callable|null $processor Optional processor function for each discovered structure
-     * @return array<string, array> Results grouped by scout type
+     * @param callable|null $processor Optional processor function (unused in new system)
+     * @return array<string, array> Results grouped by discovery type
      */
     function pollora_discover_plugin(string $pluginPath, ?callable $processor = null): array
     {
@@ -72,7 +74,8 @@ if (!function_exists('pollora_discover_plugin')) {
 
         try {
             $discoveryService = app(OnDemandDiscoveryInterface::class);
-            return $discoveryService->discoverPlugin($pluginPath, $processor);
+            $discoveryService->discoverPlugin($pluginPath);
+            return $discoveryService->discoverAllInPath($pluginPath);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_plugin error: ' . $e->getMessage());
@@ -87,7 +90,7 @@ if (!function_exists('pollora_discover_in_path')) {
      * Discover structures in a specific path using a scout class.
      *
      * @param string $path The path to explore
-     * @param string $scoutClass The scout class to use
+     * @param string $scoutClass The scout class to use (legacy support)
      * @return array Array of discovered structures
      */
     function pollora_discover_in_path(string $path, string $scoutClass): array
@@ -98,7 +101,8 @@ if (!function_exists('pollora_discover_in_path')) {
 
         try {
             $discoveryService = app(OnDemandDiscoveryInterface::class);
-            return $discoveryService->discoverInPath($path, $scoutClass);
+            $discoveryService->discoverInPath($path, $scoutClass);
+            return $discoveryService->discoverAllInPath($path);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_in_path error: ' . $e->getMessage());
@@ -113,7 +117,7 @@ if (!function_exists('pollora_discover_all_in_path')) {
      * Discover all structure types in a given path.
      *
      * @param string $path The path to explore
-     * @return array<string, array> Results grouped by scout type
+     * @return array<string, array> Results grouped by discovery type
      */
     function pollora_discover_all_in_path(string $path): array
     {

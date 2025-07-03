@@ -28,12 +28,19 @@ class ExtendedRouterTest extends TestCase
         // Mock config
         $config = $this->createMock(\Illuminate\Config\Repository::class);
         $config->method('get')
-            ->with('wordpress.routing.conditions', $this->anything())
-            ->willReturn([
-                'single' => 'is_single',
-                'page' => 'is_page',
-                'category' => 'is_category',
-            ]);
+            ->willReturnCallback(function ($key, $default = null) {
+                if ($key === 'wordpress.conditions') {
+                    return [
+                        'is_single' => 'single',
+                        'is_page' => 'page',
+                        'is_category' => 'category',
+                    ];
+                }
+                if ($key === 'wordpress.plugin_conditions') {
+                    return [];
+                }
+                return $default;
+            });
 
         $this->container->instance('config', $config);
 

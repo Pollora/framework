@@ -49,23 +49,8 @@ class PostTypeService implements PostTypeServiceInterface
      */
     public function register(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object
     {
-        // Use the factory to create the post type
-        $postType = $this->factory->make($slug, $singular, $plural, $args);
-
-        // Register the post type with the registry
-        $this->registry->register($postType);
-
-        return $postType;
-    }
-
-    /**
-     * Register a post type instance.
-     *
-     * @param  object  $postType  The post type instance to register
-     */
-    public function registerInstance(object $postType): void
-    {
-        $this->registry->register($postType);
+        // The factory creates and registers the post type (pollora/entity handles register_post_type)
+        return $this->factory->make($slug, $singular, $plural, $args);
     }
 
     /**

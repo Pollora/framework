@@ -106,7 +106,7 @@ class WordPressConditionManager implements WordPressConditionManagerInterface, C
     public function addCondition(string $alias, string $function): void
     {
         $this->ensureConditionsLoaded();
-        $this->conditions[$alias] = $function;
+        $this->conditions[$function] = $alias;
     }
 
     /**

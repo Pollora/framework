@@ -34,20 +34,27 @@ class WordPressRouteResolutionTest extends TestCase
         $this->container = new Container;
         $dispatcher = $this->createMock(Dispatcher::class);
 
-        // Mock config for WordPress routing conditions
+        // Mock config for WordPress routing conditions - using the new format
         $config = $this->createMock(\Illuminate\Config\Repository::class);
         $config->method('get')
-            ->with('wordpress.routing.conditions', $this->anything())
-            ->willReturn([
-                'front' => 'is_front_page',
-                'home' => 'is_home',
-                'page' => 'is_page',
-                'single' => 'is_single',
-                'author' => 'is_author',
-                'archive' => 'is_category',
-                'template' => 'is_page_template',
-                '404' => 'is_404',
-            ]);
+            ->willReturnCallback(function ($key, $default = null) {
+                if ($key === 'wordpress.conditions') {
+                    return [
+                        'is_front_page' => 'front',
+                        'is_home' => 'home',
+                        'is_page' => 'page',
+                        'is_single' => 'single',
+                        'is_author' => 'author',
+                        'is_category' => 'archive',
+                        'is_page_template' => 'template',
+                        'is_404' => ['404', 'not_found'],
+                    ];
+                }
+                if ($key === 'wordpress.plugin_conditions') {
+                    return [];
+                }
+                return $default;
+            });
 
         $this->container->instance('config', $config);
         $this->router = new ExtendedRouter($dispatcher, $this->container);
@@ -88,7 +95,7 @@ class WordPressRouteResolutionTest extends TestCase
         $this->assertEquals('is_author', $this->router->resolveCondition('author'));
         $this->assertEquals('is_category', $this->router->resolveCondition('archive'));
         $this->assertEquals('is_page_template', $this->router->resolveCondition('template'));
-        $this->assertEquals('404', $this->router->resolveCondition('404'));
+        $this->assertEquals('is_404', $this->router->resolveCondition('404'));
 
         // Test that direct WordPress function names pass through unchanged
         $this->assertEquals('is_singular', $this->router->resolveCondition('is_singular'));
@@ -172,15 +179,15 @@ class WordPressRouteResolutionTest extends TestCase
 
     public function test_404_route_condition(): void
     {
-        // Test the 404 route - it doesn't have a default alias so returns as-is
+        // Test the 404 route - it now has an alias configured
         $resolvedCondition = $this->router->resolveCondition('404');
 
-        // '404' is not in default conditions, so returns as-is
-        $this->assertEquals('404', $resolvedCondition);
+        // '404' should resolve to 'is_404' based on our configuration
+        $this->assertEquals('is_404', $resolvedCondition);
 
         // Create route with '404' condition
         $route = $this->createWordPressRoute('404');
-        $this->assertEquals('404', $route->getCondition());
+        $this->assertEquals('is_404', $route->getCondition());
         $this->assertTrue($route->isWordPressRoute());
     }
 

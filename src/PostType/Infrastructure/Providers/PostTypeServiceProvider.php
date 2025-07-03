@@ -14,6 +14,8 @@ use Pollora\PostType\Infrastructure\Adapters\WordPressPostTypeRegistry;
 use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
 use Pollora\PostType\Infrastructure\Repositories\PostTypeRepository;
 use Pollora\PostType\UI\Console\PostTypeMakeCommand;
+use Pollora\PostType\Infrastructure\Services\PostTypeDiscovery;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 
 /**
  * Service provider for post type functionality.
@@ -52,6 +54,13 @@ class PostTypeServiceProvider extends ServiceProvider
             return $app->make(PostTypeServiceInterface::class);
         });
 
+        // Register PostType Discovery
+        $this->app->singleton(PostTypeDiscovery::class, function ($app) {
+            return new PostTypeDiscovery(
+                $app->make(PostTypeServiceInterface::class)
+            );
+        });
+
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -74,6 +83,9 @@ class PostTypeServiceProvider extends ServiceProvider
 
         // Register post types from configuration
         $this->registerConfiguredPostTypes();
+        
+        // Register PostType discovery with the discovery engine
+        $this->registerPostTypeDiscovery();
     }
 
     /**
@@ -102,6 +114,20 @@ class PostTypeServiceProvider extends ServiceProvider
             $args = $config['args'] ?? [];
 
             $postTypeService->register($slug, $singular, $plural, $args);
+        }
+    }
+
+    /**
+     * Register PostType discovery with the discovery engine.
+     */
+    private function registerPostTypeDiscovery(): void
+    {
+        if ($this->app->bound(DiscoveryEngineInterface::class)) {
+            /** @var DiscoveryEngineInterface $engine */
+            $engine = $this->app->make(DiscoveryEngineInterface::class);
+            $postTypeDiscovery = $this->app->make(PostTypeDiscovery::class);
+            
+            $engine->addDiscovery('post_types', $postTypeDiscovery);
         }
     }
 }

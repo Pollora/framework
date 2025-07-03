@@ -26,6 +26,7 @@ class WordPressPostTypeRegistry implements PostTypeRegistryInterface
         $args = $this->preparePostTypeArgs($postType);
         $slug = method_exists($postType, 'getSlug') ? $postType->getSlug() : '';
 
+
         if (empty($slug)) {
             return false;
         }

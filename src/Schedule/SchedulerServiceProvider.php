@@ -84,4 +84,12 @@ class SchedulerServiceProvider extends ServiceProvider
         $schedule = $this->app->make(Schedule::class);
         \Pollora\Schedule\Events\RecurringEvent::scheduleAllEvents($schedule);
     }
+
+    /**
+     * Check if we're running in an Orchestra test environment.
+     */
+    private function isOrchastraTest(): bool
+    {
+        return defined('LARAVEL_START') && class_exists('\Orchestra\Testbench\TestCase');
+    }
 }

@@ -44,11 +44,18 @@ class LazyConfigLoadingTest extends TestCase
         // Now bind the config service (simulating Laravel config being loaded later)
         $config = $this->createMock(\Illuminate\Config\Repository::class);
         $config->method('get')
-            ->with('wordpress.routing.conditions', [])
-            ->willReturn([
-                'custom' => 'is_custom_condition',
-                'special' => 'is_special_condition',
-            ]);
+            ->willReturnCallback(function ($key, $default = null) {
+                if ($key === 'wordpress.conditions') {
+                    return [
+                        'is_custom_condition' => 'custom',
+                        'is_special_condition' => 'special',
+                    ];
+                }
+                if ($key === 'wordpress.plugin_conditions') {
+                    return [];
+                }
+                return $default;
+            });
 
         $container->instance('config', $config);
 
@@ -71,12 +78,19 @@ class LazyConfigLoadingTest extends TestCase
 
         $router = new ExtendedRouter($dispatcher, $container);
 
-        // Mock config that should only be called once
+        // Mock config - expects to be called exactly twice (once for conditions, once for plugin_conditions)
         $config = $this->createMock(\Illuminate\Config\Repository::class);
-        $config->expects($this->once())
+        $config->expects($this->exactly(2))
             ->method('get')
-            ->with('wordpress.routing.conditions', [])
-            ->willReturn(['test' => 'is_test']);
+            ->willReturnCallback(function ($key, $default = null) {
+                if ($key === 'wordpress.conditions') {
+                    return ['is_test' => 'test'];
+                }
+                if ($key === 'wordpress.plugin_conditions') {
+                    return [];
+                }
+                return $default;
+            });
 
         $container->instance('config', $config);
 
@@ -119,11 +133,18 @@ class LazyConfigLoadingTest extends TestCase
         // Mock config with limited conditions to test merge behavior
         $config = $this->createMock(\Illuminate\Config\Repository::class);
         $config->method('get')
-            ->with('wordpress.routing.conditions', [])
-            ->willReturn([
-                'front' => 'is_front_page',
-                'custom' => 'is_custom_condition',
-            ]);
+            ->willReturnCallback(function ($key, $default = null) {
+                if ($key === 'wordpress.conditions') {
+                    return [
+                        'is_front_page' => 'front',
+                        'is_custom_condition' => 'custom',
+                    ];
+                }
+                if ($key === 'wordpress.plugin_conditions') {
+                    return [];
+                }
+                return $default;
+            });
 
         $container->instance('config', $config);
 

@@ -49,11 +49,4 @@ interface PostTypeServiceInterface
      * @return array<string, mixed> The registered post types
      */
     public function getRegistered(): array;
-
-    /**
-     * Register a post type instance.
-     *
-     * @param  object  $postType  The post type instance to register
-     */
-    public function registerInstance(object $postType): void;
 }

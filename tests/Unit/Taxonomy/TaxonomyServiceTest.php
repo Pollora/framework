@@ -23,19 +23,13 @@ test('register calls make on factory', function () {
     $singular = 'Test Taxonomy';
     $plural = 'Test Taxonomies';
 
-    // Configure the mock factory
+    // Configure the mock factory - register method should only call the factory to create the taxonomy
+    // (pollora/entity handles the WordPress registration automatically)
     $this->mockFactory
         ->shouldReceive('make')
         ->with($slug, $objectType, $singular, $plural)
         ->once()
         ->andReturn($this->mockTaxonomy);
-
-    // Configure the mock registry
-    $this->mockRegistry
-        ->shouldReceive('register')
-        ->with($this->mockTaxonomy)
-        ->once()
-        ->andReturn(true);
 
     // Call the method under test
     $result = $this->taxonomyService->register($slug, $objectType, $singular, $plural);

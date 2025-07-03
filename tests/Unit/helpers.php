@@ -54,7 +54,12 @@ function setupWordPressMocks()
 
     WP::$wpFunctions->shouldReceive('get_stylesheet_directory')
         ->withAnyArgs()
-        ->andReturn('/theme/child')
+        ->andReturn('/path/to/theme')
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('get_stylesheet')
+        ->withAnyArgs()
+        ->andReturn('test-theme')
         ->byDefault();
 
     WP::$wpFunctions->shouldReceive('wp_doing_ajax')
@@ -608,7 +613,7 @@ if (! function_exists('is_child_theme')) {
 if (! function_exists('get_stylesheet_directory')) {
     function get_stylesheet_directory()
     {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_stylesheet_directory() : '/theme/child';
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_stylesheet_directory() : '/path/to/theme';
     }
 }
 
@@ -967,6 +972,13 @@ if (! function_exists('sanitize_key')) {
     }
 }
 
+if (! function_exists('wp_parse_args')) {
+    function wp_parse_args($args, $defaults = [])
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_parse_args($args, $defaults) : array_merge($defaults, (array) $args);
+    }
+}
+
 if (! function_exists('get_file_data')) {
     function get_file_data($file, $default_headers = [])
     {
@@ -1135,4 +1147,12 @@ function createMockWooCommerceAdapter(): object
         ->byDefault();
 
     return $adapter;
+}
+
+// Add missing WordPress theme functions
+if (! function_exists('get_stylesheet')) {
+    function get_stylesheet()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_stylesheet() : 'test-theme';
+    }
 }

@@ -19,7 +19,7 @@ use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
-use Pollora\Discoverer\Infrastructure\Providers\DiscovererServiceProvider;
+use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
@@ -29,6 +29,7 @@ use Pollora\Foundation\Providers\ArtisanServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
+use Pollora\Schedule\SchedulerDiscoveryServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
@@ -70,7 +71,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ConsoleServiceProvider::class);
         $this->app->register(ArtisanServiceProvider::class);
         $this->app->register(DebugServiceProvider::class);
-        $this->app->register(DiscovererServiceProvider::class);
+        $this->app->register(DiscoveryServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
         $this->app->register(AttributesServiceProvider::class);
@@ -111,6 +112,7 @@ class PolloraServiceProvider extends ServiceProvider
         if (config('wordpress.use_laravel_scheduler', false)) {
             $this->app->register(SchedulerServiceProvider::class);
         }
+        $this->app->register(SchedulerDiscoveryServiceProvider::class);
         $this->app->singleton(JobDispatcher::class, fn ($app): JobDispatcher => new JobDispatcher($app->make(Dispatcher::class)));
 
         // Authentication service provider

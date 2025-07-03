@@ -6,8 +6,10 @@ namespace Pollora\WpRest\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
-use Pollora\Discoverer\Framework\API\PolloraDiscover;
+use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\WpRest\AbstractWpRestRoute;
+use Pollora\WpRest\Infrastructure\Services\WpRestDiscovery;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 
 /**
  * Service provider for attribute-based WordPress REST API route registration.
@@ -22,7 +24,8 @@ class WpRestAttributeServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // No registration needed as the main service provider handles it
+        // Register WpRest Discovery
+        $this->app->singleton(WpRestDiscovery::class);
     }
 
     /**
@@ -33,6 +36,9 @@ class WpRestAttributeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerWpRestRoutes();
+        
+        // Register WpRest discovery with the discovery engine
+        $this->registerWpRestDiscovery();
     }
 
     /**
@@ -41,16 +47,27 @@ class WpRestAttributeServiceProvider extends ServiceProvider
     protected function registerWpRestRoutes(): void
     {
         try {
-            $wpRestRoutes = PolloraDiscover::scout('wp_rest_routes');
+            /** @var DiscoveryManager $discoveryManager */
+            $discoveryManager = $this->app->make(DiscoveryManager::class);
 
-            if ($wpRestRoutes->isEmpty()) {
+            // Check if wp_rest_routes discovery is available
+            if (!$discoveryManager->hasDiscovery('wp_rest_routes')) {
+                return;
+            }
+
+            $wpRestRouteItems = $discoveryManager->getDiscoveredItems('wp_rest_routes');
+
+            if (empty($wpRestRouteItems)) {
                 return;
             }
 
             $processor = new AttributeProcessor($this->app);
 
-            foreach ($wpRestRoutes as $wpRestRouteClass) {
-                $this->registerWpRestRoute($wpRestRouteClass, $processor);
+            foreach ($wpRestRouteItems as $wpRestRouteItem) {
+                $wpRestRouteClass = $wpRestRouteItem['class'] ?? null;
+                if ($wpRestRouteClass) {
+                    $this->registerWpRestRoute($wpRestRouteClass, $processor);
+                }
             }
         } catch (\Throwable $e) {
             // Log error but don't break the application
@@ -79,5 +96,19 @@ class WpRestAttributeServiceProvider extends ServiceProvider
         // Process attributes - this will handle the registration automatically
         // through the AttributableHookTrait and the rest_api_init hook
         $processor->process($wpRestRouteInstance);
+    }
+
+    /**
+     * Register WpRest discovery with the discovery engine.
+     */
+    private function registerWpRestDiscovery(): void
+    {
+        if ($this->app->bound(DiscoveryEngineInterface::class)) {
+            /** @var DiscoveryEngineInterface $engine */
+            $engine = $this->app->make(DiscoveryEngineInterface::class);
+            $wpRestDiscovery = $this->app->make(WpRestDiscovery::class);
+            
+            $engine->addDiscovery('wp_rest_routes', $wpRestDiscovery);
+        }
     }
 }
