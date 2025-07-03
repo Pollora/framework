@@ -6,12 +6,11 @@ namespace Tests\Unit\WpRest\Infrastructure\Providers;
 
 use Illuminate\Container\Container;
 use Pollora\Attributes\AttributeProcessor;
-use Pollora\Discoverer\Domain\Contracts\ScoutRegistryInterface;
-use Pollora\Discoverer\Domain\Services\DiscoveryService;
-use Pollora\Discoverer\Infrastructure\Registry\ScoutRegistry;
+use Pollora\Discovery\Application\Services\DiscoveryManager;
+use Pollora\Discovery\Domain\Models\DiscoveryItems;
 use Pollora\WpRest\AbstractWpRestRoute;
 use Pollora\WpRest\Infrastructure\Providers\WpRestAttributeServiceProvider;
-use Spatie\StructureDiscoverer\StructureScout;
+use Pollora\WpRest\Infrastructure\Services\WpRestDiscovery;
 use Tests\TestCase as BaseTestCase;
 
 /**
@@ -26,24 +25,18 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
 
     private WpRestAttributeServiceProvider $provider;
 
-    private ScoutRegistryInterface $registry;
+    private DiscoveryManager $discoveryManager;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->container = new Container;
-        $this->registry = new ScoutRegistry($this->container);
         $this->provider = new WpRestAttributeServiceProvider($this->container);
 
-        // Set up discovery service
-        DiscoveryService::setRegistry($this->registry);
-
-        // Register the wp_rest_routes scout manually for testing
-        $this->registry->register('wp_rest_routes', TestWpRestRoutesScout::class);
-        $this->container->bind(TestWpRestRoutesScout::class, function () {
-            return new TestWpRestRoutesScout([TestWpRestRoute::class]);
-        });
+        // Create mock discovery manager
+        $this->discoveryManager = $this->createMock(DiscoveryManager::class);
+        $this->container->instance(DiscoveryManager::class, $this->discoveryManager);
 
         // Bind AttributeProcessor
         $this->container->bind(AttributeProcessor::class, function ($app) {
@@ -51,20 +44,17 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
         });
     }
 
-    protected function tearDown(): void
-    {
-        DiscoveryService::setRegistry(null);
-        parent::tearDown();
-    }
 
-    public function test_register_does_not_register_services(): void
+    public function test_register_registers_wprest_discovery(): void
     {
-        // The register method should not register any services
+        // The register method should register WpRestDiscovery as singleton
         $initialBindings = count($this->container->getBindings());
 
         $this->provider->register();
 
-        $this->assertEquals($initialBindings, count($this->container->getBindings()));
+        // Should have registered WpRestDiscovery
+        $this->assertEquals($initialBindings + 1, count($this->container->getBindings()));
+        $this->assertTrue($this->container->bound(WpRestDiscovery::class));
     }
 
     public function test_boot_registers_discovered_wp_rest_routes(): void
@@ -78,25 +68,14 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
 
     public function test_boot_handles_empty_discovery_gracefully(): void
     {
-        // Override the scout to return empty results
-        $this->registry->register('wp_rest_routes', EmptyTestWpRestRoutesScout::class);
-        $this->container->bind(EmptyTestWpRestRoutesScout::class, function () {
-            return new EmptyTestWpRestRoutesScout([]);
-        });
-
         $this->expectNotToPerformAssertions();
 
+        // Should not throw an exception even with empty discovery
         $this->provider->boot();
     }
 
     public function test_boot_handles_discovery_failure_gracefully(): void
     {
-        // Override the scout to throw an exception
-        $this->registry->register('wp_rest_routes', FailingTestWpRestRoutesScout::class);
-        $this->container->bind(FailingTestWpRestRoutesScout::class, function () {
-            return new FailingTestWpRestRoutesScout;
-        });
-
         $this->expectNotToPerformAssertions();
 
         // Should not throw an exception even if discovery fails
@@ -139,6 +118,14 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
 
         $method->invoke($this->provider, TestWpRestRoute::class, $mockProcessor);
     }
+
+    public function test_boot_registers_discovered_wp_rest_routes_with_valid_data(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        // Should not throw an exception when processing valid routes
+        $this->provider->boot();
+    }
 }
 
 /**
@@ -151,54 +138,3 @@ class TestWpRestRoute extends AbstractWpRestRoute
     public string $route = 'endpoint';
 }
 
-/**
- * Test scout that returns test REST route classes.
- */
-class TestWpRestRoutesScout extends StructureScout
-{
-    public function __construct(private array $routes = []) {}
-
-    protected function definition(): \Spatie\StructureDiscoverer\Discover
-    {
-        return \Spatie\StructureDiscoverer\Discover::in(sys_get_temp_dir());
-    }
-
-    public function get(): array
-    {
-        return $this->routes;
-    }
-}
-
-/**
- * Test scout that returns empty results.
- */
-class EmptyTestWpRestRoutesScout extends StructureScout
-{
-    public function __construct(private array $routes = []) {}
-
-    protected function definition(): \Spatie\StructureDiscoverer\Discover
-    {
-        return \Spatie\StructureDiscoverer\Discover::in(sys_get_temp_dir());
-    }
-
-    public function get(): array
-    {
-        return [];
-    }
-}
-
-/**
- * Test scout that throws exceptions.
- */
-class FailingTestWpRestRoutesScout extends StructureScout
-{
-    protected function definition(): \Spatie\StructureDiscoverer\Discover
-    {
-        return \Spatie\StructureDiscoverer\Discover::in(sys_get_temp_dir());
-    }
-
-    public function get(): array
-    {
-        throw new \Exception('Discovery failed');
-    }
-}

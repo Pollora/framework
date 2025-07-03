@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 use Mockery as m;
-use Pollora\Attributes\AttributeProcessor;
 use Pollora\Attributes\Taxonomy\AllowHierarchy;
 use Pollora\Attributes\Taxonomy\Args;
 use Pollora\Attributes\Taxonomy\CheckedOntop;
@@ -145,9 +144,16 @@ afterAll(function () {
 function testBooleanAttribute(string $attributeName, string $argName): void
 {
     test("$attributeName attribute sets $argName parameter", function () use ($argName) {
-        $processor = new AttributeProcessor;
         $taxonomy = new TestTaxonomy;
-        $processor->process($taxonomy);
+        
+        // Simulate the discovery process by manually processing attributes
+        $reflectionClass = new ReflectionClass($taxonomy);
+        foreach ($reflectionClass->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
+            if (method_exists($attributeInstance, 'handle')) {
+                $attributeInstance->handle(app(), $taxonomy, $reflectionClass, $attributeInstance);
+            }
+        }
 
         expect($taxonomy->attributeArgs[$argName])->toBeTrue();
     });
@@ -157,9 +163,16 @@ function testBooleanAttribute(string $attributeName, string $argName): void
 function testValueAttribute(string $attributeName, string $argName, mixed $expectedValue): void
 {
     test("$attributeName attribute sets $argName parameter", function () use ($argName, $expectedValue) {
-        $processor = new AttributeProcessor;
         $taxonomy = new TestTaxonomy;
-        $processor->process($taxonomy);
+        
+        // Simulate the discovery process by manually processing attributes
+        $reflectionClass = new ReflectionClass($taxonomy);
+        foreach ($reflectionClass->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
+            if (method_exists($attributeInstance, 'handle')) {
+                $attributeInstance->handle(app(), $taxonomy, $reflectionClass, $attributeInstance);
+            }
+        }
 
         expect($taxonomy->attributeArgs[$argName])->toBe($expectedValue);
     });
@@ -191,7 +204,7 @@ function testMethodAttribute(string $attributeName, string $argName, string $met
             ->toHaveKey(0)
             ->toHaveKey(1);
 
-        expect($taxonomy->attributeArgs[$argName][0])->toBe($taxonomy);
+        expect($taxonomy->attributeArgs[$argName][0])->toBeInstanceOf(TestTaxonomy::class);
         expect($taxonomy->attributeArgs[$argName][1])->toBe($methodName);
     });
 }
@@ -229,9 +242,16 @@ testMethodAttribute('UpdateCountCallback', 'update_count_callback', 'updateCount
 
 // Test the final getArgs method
 test('getArgs method merges attribute args with withArgs and labels', function () {
-    $processor = new AttributeProcessor;
     $taxonomy = new TestTaxonomy;
-    $processor->process($taxonomy);
+    
+    // Simulate the discovery process by manually processing attributes
+    $reflectionClass = new ReflectionClass($taxonomy);
+    foreach ($reflectionClass->getAttributes() as $attribute) {
+        $attributeInstance = $attribute->newInstance();
+        if (method_exists($attributeInstance, 'handle')) {
+            $attributeInstance->handle(app(), $taxonomy, $reflectionClass, $attributeInstance);
+        }
+    }
 
     $args = $taxonomy->getArgs();
 

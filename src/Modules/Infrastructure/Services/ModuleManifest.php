@@ -6,7 +6,6 @@ namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
-use Pollora\Discoverer\Scouts\ServiceProviderScout;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 
 /**
@@ -31,7 +30,7 @@ class ModuleManifest
         array $paths,
         string $manifestPath,
         protected ModuleRepositoryInterface $repository,
-        protected ?ServiceProviderScout $scout = null
+        protected ?object $scout = null // Legacy parameter, unused
     ) {
         $this->files = $files;
         $this->paths = collect($paths);
@@ -66,12 +65,9 @@ class ModuleManifest
 
         $providers = array_merge($providers, $moduleProviders);
 
-        // Get providers from scout if available (these need autoloading to be already set up)
-        // The scout discovery is done lazily here after autoloading is configured
-        if ($this->scout) {
-            $scoutProviders = $this->scout->get();
-            $providers = array_merge($providers, $scoutProviders);
-        }
+        // Legacy scout discovery is no longer used
+        // Provider discovery is now handled through the new Discovery system
+        // in the appropriate service providers
 
         return array_unique($providers);
     }

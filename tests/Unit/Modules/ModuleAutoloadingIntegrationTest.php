@@ -68,7 +68,8 @@ it('integrates autoloader with theme module registration', function () {
         protected function registerFiles(): void {}
     };
 
-    // Register the theme (this should set up autoloading)
+    // Register the theme autoloading and module (mimicking ThemeRegistrar behavior)
+    $theme->registerAutoloading();
     $theme->register();
 
     // Verify that the autoloader was used

@@ -51,23 +51,8 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
      */
     public function register(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object
     {
-        // Use the factory to create the taxonomy
-        $taxonomy = $this->factory->make($slug, $objectType, $singular, $plural);
-
-        // Register the taxonomy with the registry
-        $this->registry->register($taxonomy);
-
-        return $taxonomy;
-    }
-
-    /**
-     * Register a taxonomy instance.
-     *
-     * @param  object  $taxonomy  The taxonomy instance to register
-     */
-    public function registerInstance(object $taxonomy): void
-    {
-        $this->registry->register($taxonomy);
+        // The factory creates and registers the taxonomy (pollora/entity handles register_taxonomy)
+        return $this->factory->make($slug, $objectType, $singular, $plural);
     }
 
     /**
@@ -89,5 +74,46 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
     public function getRegistered(): array
     {
         return $this->registry->getAll();
+    }
+
+    /**
+     * Register a taxonomy from a class with Taxonomy attribute.
+     *
+     * @param string $className The fully qualified class name
+     * @return object|null The registered taxonomy instance or null if failed
+     */
+    public function registerFromClass(string $className): ?object
+    {
+        try {
+            // Check if class exists
+            if (!class_exists($className)) {
+                return null;
+            }
+
+            $reflection = new \ReflectionClass($className);
+
+            // Find Taxonomy attribute
+            $taxonomyAttributes = $reflection->getAttributes(\Pollora\Attributes\Taxonomy::class);
+
+            if (empty($taxonomyAttributes)) {
+                return null;
+            }
+
+            // Get the first Taxonomy attribute instance
+            $taxonomyAttribute = $taxonomyAttributes[0]->newInstance();
+
+            // Extract data from the attribute
+            $slug = $taxonomyAttribute->getSlug($className);
+            $objectType = $taxonomyAttribute->getObjectType() ?? ['post'];
+            $singular = $taxonomyAttribute->getSingular($className);
+            $plural = $taxonomyAttribute->getPlural($className);
+
+            // Register the taxonomy
+            return $this->register($slug, $objectType, $singular, $plural);
+
+        } catch (\Throwable $e) {
+            // Return null on any error
+            return null;
+        }
     }
 }

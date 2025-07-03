@@ -23,18 +23,13 @@ test('register calls make on factory', function () {
 
     $mockPostType = new \stdClass;
 
-    // Configure the mock - register method should call the factory to create the post type
+    // Configure the mock - register method should only call the factory to create the post type
+    // (pollora/entity handles the WordPress registration automatically)
     $this->mockFactory
         ->shouldReceive('make')
         ->with($slug, $singular, $plural, $args)
         ->once()
         ->andReturn($mockPostType);
-
-    // Configure the mock - register method should also call the registry to register the post type
-    $this->mockRegistry
-        ->shouldReceive('register')
-        ->with($mockPostType)
-        ->once();
 
     // Call the method under test
     $result = $this->postTypeService->register($slug, $singular, $plural, $args);

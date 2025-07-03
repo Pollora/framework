@@ -14,6 +14,8 @@ use Pollora\Taxonomy\Infrastructure\Adapters\WordPressTaxonomyRegistry;
 use Pollora\Taxonomy\Infrastructure\Factories\TaxonomyFactory;
 use Pollora\Taxonomy\Infrastructure\Repositories\TaxonomyRepository;
 use Pollora\Taxonomy\UI\Console\TaxonomyMakeCommand;
+use Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 
 /**
  * Service provider for taxonomy functionality.
@@ -52,6 +54,13 @@ class TaxonomyServiceProvider extends ServiceProvider
             return $app->make(TaxonomyServiceInterface::class);
         });
 
+        // Register Taxonomy Discovery
+        $this->app->singleton(TaxonomyDiscovery::class, function ($app) {
+            return new TaxonomyDiscovery(
+                $app->make(TaxonomyServiceInterface::class)
+            );
+        });
+
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -74,6 +83,9 @@ class TaxonomyServiceProvider extends ServiceProvider
 
         // Register taxonomies from configuration
         $this->registerConfiguredTaxonomies();
+        
+        // Register Taxonomy discovery with the discovery engine
+        $this->registerTaxonomyDiscovery();
     }
 
     /**
@@ -112,5 +124,19 @@ class TaxonomyServiceProvider extends ServiceProvider
     private function registerConfiguredTaxonomies(): void
     {
         $this->registerTaxonomies();
+    }
+
+    /**
+     * Register Taxonomy discovery with the discovery engine.
+     */
+    private function registerTaxonomyDiscovery(): void
+    {
+        if ($this->app->bound(DiscoveryEngineInterface::class)) {
+            /** @var DiscoveryEngineInterface $engine */
+            $engine = $this->app->make(DiscoveryEngineInterface::class);
+            $taxonomyDiscovery = $this->app->make(TaxonomyDiscovery::class);
+            
+            $engine->addDiscovery('taxonomies', $taxonomyDiscovery);
+        }
     }
 }

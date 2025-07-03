@@ -9,7 +9,6 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Pollora\Discoverer\Scouts\ServiceProviderScout;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Domain\Contracts\OnDemandDiscoveryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
@@ -53,20 +52,12 @@ class ModuleServiceProvider extends ServiceProvider
 
         // Register ModuleManifest service
         $this->app->singleton(ModuleManifest::class, function ($app) {
-            // Try to get the scout for provider discovery
-            $scout = null;
-            try {
-                $scout = new ServiceProviderScout($app);
-            } catch (\Exception $e) {
-                // Continue without scout if it fails
-            }
-
             return new ModuleManifest(
                 new Filesystem,
                 $this->getModulePaths(),
                 $this->getCachedModulePath(),
                 $app->make(ModuleRepositoryInterface::class),
-                $scout
+                null // No longer using legacy scout
             );
         });
 

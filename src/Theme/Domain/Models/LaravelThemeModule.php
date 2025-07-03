@@ -75,6 +75,11 @@ class LaravelThemeModule extends ThemeModule
      */
     protected function registerAliases(): void
     {
+        // Skip alias registration if AliasLoader is not available (e.g., in tests)
+        if (!class_exists(AliasLoader::class)) {
+            return;
+        }
+
         $loader = AliasLoader::getInstance();
         $aliases = $this->getAliases();
 
