@@ -33,7 +33,7 @@ class Sidebar implements ThemeComponent
 
     public function register(): void
     {
-        $this->action->add('after_setup_theme', $this->registerSidebars(...), 1);
+        $this->action->add('widgets_init', $this->registerSidebars(...), 1);
     }
 
     /**
