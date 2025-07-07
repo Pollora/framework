@@ -6,7 +6,7 @@ namespace Tests\Unit\Theme;
 
 use PHPUnit\Framework\TestCase;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
-use Pollora\Theme\Domain\Contracts\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 
@@ -45,6 +45,9 @@ class ThemeRegistrarTest extends TestCase
                 ['app', true],
                 [\Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface::class, false],
                 [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false],
+                [\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, false],
+                [\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, false],
+                [\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, false],
             ]);
 
         $mockApp = $this->createMock(\Illuminate\Container\Container::class);
@@ -152,6 +155,9 @@ class ThemeRegistrarTest extends TestCase
                 ['app', true],
                 [\Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface::class, false],
                 [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false],
+                [\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, false],
+                [\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, false],
+                [\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, false],
             ]);
 
         $mockApp = $this->createMock(\Illuminate\Container\Container::class);
