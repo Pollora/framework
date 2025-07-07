@@ -95,7 +95,7 @@ class Route extends IlluminateRoute
      */
     public function getCondition(): string
     {
-        if ($this->conditionResolver !== null) {
+        if ($this->conditionResolver instanceof \Pollora\Route\Domain\Contracts\ConditionResolverInterface) {
             return $this->conditionResolver->resolveCondition($this->condition);
         }
 
@@ -107,7 +107,7 @@ class Route extends IlluminateRoute
      */
     public function hasCondition(): bool
     {
-        return ! empty($this->condition);
+        return $this->condition !== '' && $this->condition !== '0';
     }
 
     /**

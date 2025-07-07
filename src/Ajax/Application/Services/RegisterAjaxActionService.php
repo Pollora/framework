@@ -12,15 +12,10 @@ use Pollora\Ajax\Domain\Models\AjaxAction;
  */
 class RegisterAjaxActionService
 {
-    private AjaxActionRegistrarInterface $registrar;
-
     /**
      * RegisterAjaxActionService constructor.
      */
-    public function __construct(AjaxActionRegistrarInterface $registrar)
-    {
-        $this->registrar = $registrar;
-    }
+    public function __construct(private readonly AjaxActionRegistrarInterface $registrar) {}
 
     /**
      * Register the given AjaxAction using the domain port.

@@ -46,7 +46,7 @@ class PostTypeFactory implements PostTypeFactoryInterface
         $postType = EntityPostType::make($slug, $singular, $plural);
 
         // Apply additional arguments if provided
-        if (! empty($args)) {
+        if ($args !== []) {
             $postType->setRawArgs($args);
         }
 

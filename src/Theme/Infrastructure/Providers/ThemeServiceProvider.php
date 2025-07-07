@@ -10,7 +10,6 @@ use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
-use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
@@ -89,7 +88,7 @@ class ThemeServiceProvider extends ServiceProvider
             ThemeConfig::setRepository($config);
         } else {
             // If not bound yet, use a callback for when it becomes available
-            $this->app->afterResolving(ConfigRepositoryInterface::class, function (ConfigRepositoryInterface $config) {
+            $this->app->afterResolving(ConfigRepositoryInterface::class, function (ConfigRepositoryInterface $config): void {
                 ThemeConfig::setRepository($config);
             });
         }
@@ -99,7 +98,7 @@ class ThemeServiceProvider extends ServiceProvider
             $factory = $this->app->make(CollectionFactoryInterface::class);
             ThemeCollection::setFactory($factory);
         } else {
-            $this->app->afterResolving(CollectionFactoryInterface::class, function (CollectionFactoryInterface $factory) {
+            $this->app->afterResolving(CollectionFactoryInterface::class, function (CollectionFactoryInterface $factory): void {
                 ThemeCollection::setFactory($factory);
             });
         }
@@ -111,9 +110,7 @@ class ThemeServiceProvider extends ServiceProvider
     protected function registerThemeServices(): void
     {
         // Register domain container interface
-        $this->app->singleton(ContainerInterface::class, function ($app) {
-            return $this->createDomainContainer($app);
-        });
+        $this->app->singleton(ContainerInterface::class, fn ($app): \Pollora\Theme\Domain\Contracts\ContainerInterface => $this->createDomainContainer($app));
 
         // WordPress theme interface
         $this->app->singleton(WordPressThemeInterface::class, WordPressThemeAdapter::class);
@@ -122,36 +119,30 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressThemeParser::class);
 
         // Theme registrar for self-registration
-        $this->app->singleton(ThemeRegistrarInterface::class, function ($app) {
-            return new ThemeRegistrar(
-                $app->make(ContainerInterface::class),
-                $app->make(WordPressThemeParser::class)
-            );
-        });
+        $this->app->singleton(ThemeRegistrarInterface::class, fn ($app): \Pollora\Theme\Application\Services\ThemeRegistrar => new ThemeRegistrar(
+            $app->make(ContainerInterface::class),
+            $app->make(WordPressThemeParser::class)
+        ));
 
         // Theme repository (deprecated - themes now use self-registration)
         // Kept for backward compatibility only
-        $this->app->singleton('theme.repository', function ($app) {
-            return new ThemeRepository(
-                $app,
-                $app->make(WordPressThemeParser::class),
-                $app->make(CollectionFactoryInterface::class)
-            );
-        });
+        $this->app->singleton('theme.repository', fn ($app): \Pollora\Theme\Infrastructure\Repositories\ThemeRepository => new ThemeRepository(
+            $app,
+            $app->make(WordPressThemeParser::class),
+            $app->make(CollectionFactoryInterface::class)
+        ));
 
         // Theme autoloader
         $this->app->singleton(ThemeAutoloader::class);
 
         // Theme service
-        $this->app->singleton(ThemeService::class, function ($app) {
-            return new ThemeManager(
-                $app,
-                $app->get('view')->getFinder(),
-                $app->make('translator')->getLoader(),
-                $app->bound('theme.repository') ? $app->make('theme.repository') : null,
-                $app->make(ThemeRegistrarInterface::class)
-            );
-        });
+        $this->app->singleton(ThemeService::class, fn ($app): \Pollora\Theme\Application\Services\ThemeManager => new ThemeManager(
+            $app,
+            $app->get('view')->getFinder(),
+            $app->make('translator')->getLoader(),
+            $app->bound('theme.repository') ? $app->make('theme.repository') : null,
+            $app->make(ThemeRegistrarInterface::class)
+        ));
 
         // Backward compatibility alias
         $this->app->singleton('theme', fn ($app) => $app->make(ThemeService::class));
@@ -169,7 +160,7 @@ class ThemeServiceProvider extends ServiceProvider
     {
         try {
             $baseThemePath = ThemeConfig::get('path', base_path('themes'));
-        } catch (\RuntimeException $e) {
+        } catch (\RuntimeException) {
             // Fallback if ThemeConfig is not initialized yet
             $baseThemePath = base_path('themes');
         }
@@ -191,7 +182,7 @@ class ThemeServiceProvider extends ServiceProvider
     protected function setupThemeBoot(): void
     {
         // Setup Blade directive for theme checking
-        if (class_exists('Illuminate\\Support\\Facades\\Blade')) {
+        if (class_exists(\Illuminate\Support\Facades\Blade::class)) {
             Blade::if('theme', function (string $name) {
                 /** @var ThemeService $themeManager */
                 $themeManager = app(ThemeService::class);
@@ -214,17 +205,11 @@ class ThemeServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        $this->app->singleton('theme.generator', function ($app) {
-            return new MakeThemeCommand($app->make('config'), $app->make('files'));
-        });
+        $this->app->singleton('theme.generator', fn ($app): \Pollora\Theme\UI\Console\MakeThemeCommand => new MakeThemeCommand($app->make('config'), $app->make('files')));
 
-        $this->app->singleton('theme.remover', function ($app) {
-            return new RemoveThemeCommand($app->make('config'), $app->make('files'));
-        });
+        $this->app->singleton('theme.remover', fn ($app): \Pollora\Theme\UI\Console\RemoveThemeCommand => new RemoveThemeCommand($app->make('config'), $app->make('files')));
 
-        $this->app->singleton('theme.status', function ($app) {
-            return new ThemeStatusCommand;
-        });
+        $this->app->singleton('theme.status', fn ($app): \Pollora\Theme\UI\Console\Commands\ThemeStatusCommand => new ThemeStatusCommand);
 
         $this->commands([
             'theme.generator',

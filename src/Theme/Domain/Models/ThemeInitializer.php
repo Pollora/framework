@@ -47,7 +47,7 @@ class ThemeInitializer implements ThemeComponent
         // Get theme root safely - use fallback if ThemeConfig is not initialized yet
         try {
             $this->themeRoot = ThemeConfig::get('path', base_path('themes'));
-        } catch (\RuntimeException $e) {
+        } catch (\RuntimeException) {
             // Fallback if ThemeConfig is not initialized yet
             $this->themeRoot = base_path('themes');
         }
@@ -69,7 +69,7 @@ class ThemeInitializer implements ThemeComponent
      */
     protected function getThemeService(): ThemeService
     {
-        if ($this->themeService === null) {
+        if (! $this->themeService instanceof \Pollora\Theme\Domain\Contracts\ThemeService) {
             $this->themeService = $this->app->get(ThemeService::class);
 
             // Fallback to 'theme' binding if ThemeService interface isn't registered yet
@@ -108,7 +108,7 @@ class ThemeInitializer implements ThemeComponent
         // Get the active theme from the registrar
         $activeTheme = $this->registrar->getActiveTheme();
 
-        if ($activeTheme) {
+        if ($activeTheme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
             return str_replace($themeRootUri, $activeTheme->getPath(), $stylesheetDirUri);
         }
 
@@ -132,7 +132,7 @@ class ThemeInitializer implements ThemeComponent
         // Get the active theme from the registrar
         $activeTheme = $this->registrar->getActiveTheme();
 
-        if ($activeTheme) {
+        if ($activeTheme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
             // Use the registered theme's path
             $this->themeRoot = $activeTheme->getPath();
 
@@ -156,7 +156,7 @@ class ThemeInitializer implements ThemeComponent
         $this->wp_theme = $this->wpTheme->getTheme();
 
         // Use our specialized container interface
-        $this->app->bindShared('wp.theme', fn () => $this->wp_theme);
+        $this->app->bindShared('wp.theme', fn (): object => $this->wp_theme);
     }
 
     /**
@@ -178,7 +178,7 @@ class ThemeInitializer implements ThemeComponent
     public function setThemes(?string $themeName = null): void
     {
         // Theme name is required for self-registered themes
-        if (! $themeName) {
+        if ($themeName === null || $themeName === '' || $themeName === '0') {
             throw new \RuntimeException('Theme name is required for self-registered themes.');
         }
 
@@ -197,7 +197,7 @@ class ThemeInitializer implements ThemeComponent
     /**
      * Merge configuration from a file
      */
-    protected function mergeConfigFrom($path, $key): void
+    protected function mergeConfigFrom($path, string $key): void
     {
         $config = $this->app->getConfig($key, []);
         if (! file_exists($path)) {

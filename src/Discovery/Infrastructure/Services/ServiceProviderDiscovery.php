@@ -89,7 +89,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
             if (class_exists($fullClassName)) {
                 return is_subclass_of($fullClassName, ServiceProvider::class);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // If class cannot be loaded, skip it
             return false;
         }

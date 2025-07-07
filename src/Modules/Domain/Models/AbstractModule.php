@@ -7,7 +7,7 @@ namespace Pollora\Modules\Domain\Models;
 use Illuminate\Support\Str;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 
-abstract class AbstractModule implements ModuleInterface
+abstract class AbstractModule implements \Stringable, ModuleInterface
 {
     protected array $metadata = [];
 

@@ -22,9 +22,9 @@ class BlockCategoryService implements BlockCategoryServiceInterface
      * Create a new block category service instance.
      */
     public function __construct(
-        private ConfigRepositoryInterface $config,
-        private CollectionFactoryInterface $collectionFactory,
-        private BlockCategoryRegistrarInterface $registrar
+        private readonly ConfigRepositoryInterface $config,
+        private readonly CollectionFactoryInterface $collectionFactory,
+        private readonly BlockCategoryRegistrarInterface $registrar
     ) {}
 
     /**

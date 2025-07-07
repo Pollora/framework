@@ -44,7 +44,7 @@ class WordPressPatternDataExtractor implements PatternDataExtractorInterface
      * Create a new WordPress pattern data extractor instance.
      */
     public function __construct(
-        private CollectionFactoryInterface $collectionFactory
+        private readonly CollectionFactoryInterface $collectionFactory
     ) {}
 
     /**

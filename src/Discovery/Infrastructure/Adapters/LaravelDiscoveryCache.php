@@ -16,7 +16,7 @@ use Pollora\Discovery\Domain\Models\DiscoveryItems;
  * Implementation of discovery cache using Laravel's cache system.
  * Provides persistent caching of discovery results to improve performance.
  */
-final class LaravelDiscoveryCache implements DiscoveryCacheInterface
+final readonly class LaravelDiscoveryCache implements DiscoveryCacheInterface
 {
     /**
      * Cache key prefix for discovery items
@@ -36,9 +36,9 @@ final class LaravelDiscoveryCache implements DiscoveryCacheInterface
      * @param  int  $defaultTtl  Default time-to-live in seconds
      */
     public function __construct(
-        private readonly CacheRepository $cache,
-        private readonly string $prefix = self::CACHE_PREFIX,
-        private readonly int $defaultTtl = self::DEFAULT_TTL
+        private CacheRepository $cache,
+        private string $prefix = self::CACHE_PREFIX,
+        private int $defaultTtl = self::DEFAULT_TTL
     ) {}
 
     /**
@@ -76,7 +76,7 @@ final class LaravelDiscoveryCache implements DiscoveryCacheInterface
      */
     public function put(string $key, DiscoveryItemsInterface $items, ?int $ttl = null): bool
     {
-        $ttl = $ttl ?? $this->defaultTtl;
+        $ttl ??= $this->defaultTtl;
         $serializedItems = $items->__serialize();
 
         return $this->cache->put($this->prefixKey($key), $serializedItems, $ttl);

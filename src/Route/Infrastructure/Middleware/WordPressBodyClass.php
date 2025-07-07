@@ -17,11 +17,6 @@ use Pollora\Route\Domain\Models\Route;
 class WordPressBodyClass
 {
     /**
-     * Create a new body class middleware instance.
-     */
-    public function __construct() {}
-
-    /**
      * Handle the incoming request.
      *
      * Adds a filter to modify the WordPress body classes based on the current route.
@@ -86,7 +81,7 @@ class WordPressBodyClass
         }
 
         return array_filter(array_map(
-            fn ($token) => match ($token[0]) {
+            fn ($token): string|false => match ($token[0]) {
                 'variable' => $this->handleVariableToken($token, $route),
                 'text' => $this->sanitizeClass($token[1]),
                 default => false,
@@ -128,6 +123,6 @@ class WordPressBodyClass
         }
 
         // Fallback sanitization
-        return strtolower(preg_replace('/[^a-zA-Z0-9\-_]/', '-', trim($text)));
+        return strtolower((string) preg_replace('/[^a-zA-Z0-9\-_]/', '-', trim($text)));
     }
 }

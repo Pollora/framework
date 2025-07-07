@@ -18,8 +18,8 @@ class PatternCategory
      * @param  array<string, mixed>  $attributes  Additional attributes for the category
      */
     public function __construct(
-        private string $slug,
-        private array $attributes = []
+        private readonly string $slug,
+        private readonly array $attributes = []
     ) {}
 
     /**

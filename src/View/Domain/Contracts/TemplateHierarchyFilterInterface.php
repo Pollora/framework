@@ -37,5 +37,5 @@ interface TemplateHierarchyFilterInterface
      * @param  string  $postType  Current post type
      * @return array<string, string> Extended templates list
      */
-    public function extendThemeTemplates(array $templates, $theme, $post, string $postType): array;
+    public function extendThemeTemplates(array $templates, mixed $theme, mixed $post, string $postType): array;
 }

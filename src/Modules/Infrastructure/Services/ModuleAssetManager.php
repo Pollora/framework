@@ -17,6 +17,7 @@ use Pollora\Foundation\Support\IncludesFiles;
 class ModuleAssetManager
 {
     use IncludesFiles;
+
     public function __construct(
         protected Container $app
     ) {}
@@ -91,7 +92,6 @@ class ModuleAssetManager
         }
     }
 
-
     /**
      * Register module specific Blade directives from a directives file.
      */
@@ -106,7 +106,7 @@ class ModuleAssetManager
         try {
             $directives = require $directivesPath;
 
-            if (is_array($directives) && class_exists('Illuminate\\Support\\Facades\\Blade')) {
+            if (is_array($directives) && class_exists(\Illuminate\Support\Facades\Blade::class)) {
                 foreach ($directives as $name => $directive) {
                     \Illuminate\Support\Facades\Blade::directive($name, $directive);
                 }

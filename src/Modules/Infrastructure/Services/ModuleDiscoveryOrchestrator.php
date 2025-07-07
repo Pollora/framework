@@ -109,7 +109,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
      */
     protected function getLaravelModuleDiscovery(): LaravelModuleDiscovery
     {
-        if ($this->laravelModuleDiscovery === null) {
+        if (! $this->laravelModuleDiscovery instanceof \Pollora\Modules\Infrastructure\Services\LaravelModuleDiscovery) {
             $this->laravelModuleDiscovery = new LaravelModuleDiscovery($this->container);
         }
 

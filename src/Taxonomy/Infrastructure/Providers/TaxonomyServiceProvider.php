@@ -35,31 +35,23 @@ class TaxonomyServiceProvider extends ServiceProvider
         $this->app->singleton(TaxonomyRegistryInterface::class, WordPressTaxonomyRegistry::class);
 
         // Register the repository
-        $this->app->singleton(TaxonomyRepositoryInterface::class, function ($app) {
-            return new TaxonomyRepository(
-                $app->make(TaxonomyRegistryInterface::class)
-            );
-        });
+        $this->app->singleton(TaxonomyRepositoryInterface::class, fn ($app): \Pollora\Taxonomy\Infrastructure\Repositories\TaxonomyRepository => new TaxonomyRepository(
+            $app->make(TaxonomyRegistryInterface::class)
+        ));
 
         // Register the TaxonomyService with interface binding
-        $this->app->singleton(TaxonomyServiceInterface::class, function ($app) {
-            return new TaxonomyService(
-                $app->make(TaxonomyFactoryInterface::class),
-                $app->make(TaxonomyRegistryInterface::class)
-            );
-        });
+        $this->app->singleton(TaxonomyServiceInterface::class, fn ($app): \Pollora\Taxonomy\Application\Services\TaxonomyService => new TaxonomyService(
+            $app->make(TaxonomyFactoryInterface::class),
+            $app->make(TaxonomyRegistryInterface::class)
+        ));
 
         // Also bind concrete class for backward compatibility
-        $this->app->singleton(TaxonomyService::class, function ($app) {
-            return $app->make(TaxonomyServiceInterface::class);
-        });
+        $this->app->singleton(TaxonomyService::class, fn ($app) => $app->make(TaxonomyServiceInterface::class));
 
         // Register Taxonomy Discovery
-        $this->app->singleton(TaxonomyDiscovery::class, function ($app) {
-            return new TaxonomyDiscovery(
-                $app->make(TaxonomyServiceInterface::class)
-            );
-        });
+        $this->app->singleton(TaxonomyDiscovery::class, fn ($app): \Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery => new TaxonomyDiscovery(
+            $app->make(TaxonomyServiceInterface::class)
+        ));
 
         // Register commands
         if ($this->app->runningInConsole()) {

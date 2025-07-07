@@ -52,7 +52,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     public function applyLaravelModules(): void
     {
-        if (empty($this->discoveredModules)) {
+        if ($this->discoveredModules === []) {
             return;
         }
 
@@ -104,7 +104,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
             foreach ($enabledModules as $module) {
                 $moduleResults = $this->discoverAndReturnModule($module);
-                if (! empty($moduleResults)) {
+                if ($moduleResults !== []) {
                     $results[$module->getName()] = $moduleResults;
                 }
             }
@@ -141,7 +141,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     protected function isLaravelModulesAvailable(): bool
     {
-        return interface_exists('\Nwidart\Modules\Contracts\RepositoryInterface') &&
+        return interface_exists(\Nwidart\Modules\Contracts\RepositoryInterface::class) &&
                $this->container->bound('modules');
     }
 
@@ -196,13 +196,12 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
         try {
             // Get a fresh engine instance from container (with all discoveries registered)
             $engine = $this->container->make(DiscoveryEngineInterface::class);
-            
+
             // Clear any existing locations to avoid accumulation
             $engine->clearLocations();
 
             $location = new DirectoryLocation($appPath);
             $engine->addLocation($location)->discover();
-
 
             // Store engine for later application
             $this->discoveredModules[$module->getName()] = [

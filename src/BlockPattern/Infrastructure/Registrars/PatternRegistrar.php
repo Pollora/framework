@@ -52,10 +52,6 @@ class PatternRegistrar
 
         $themes = $this->getThemes();
 
-        if (empty($themes)) {
-            return;
-        }
-
         foreach ($themes as $theme) {
             if (! method_exists($theme, 'get_stylesheet_directory')) {
                 continue;

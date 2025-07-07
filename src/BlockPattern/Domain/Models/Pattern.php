@@ -26,16 +26,16 @@ class Pattern
      * @param  int|null  $viewportWidth  Optional viewport width
      */
     public function __construct(
-        private string $slug,
-        private string $title,
-        private string $content,
-        private ?string $description = null,
-        private ?array $categories = null,
-        private ?array $keywords = null,
-        private ?array $blockTypes = null,
-        private ?array $postTypes = null,
-        private ?bool $inserter = null,
-        private ?int $viewportWidth = null
+        private readonly string $slug,
+        private readonly string $title,
+        private readonly string $content,
+        private readonly ?string $description = null,
+        private readonly ?array $categories = null,
+        private readonly ?array $keywords = null,
+        private readonly ?array $blockTypes = null,
+        private readonly ?array $postTypes = null,
+        private readonly ?bool $inserter = null,
+        private readonly ?int $viewportWidth = null
     ) {}
 
     /**

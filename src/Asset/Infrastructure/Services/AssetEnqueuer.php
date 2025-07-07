@@ -159,7 +159,7 @@ class AssetEnqueuer
         }
         $container = $this->assetManager->getContainer($containerName);
 
-        if (! $container) {
+        if (! $container instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer) {
             throw new \RuntimeException("Asset container '{$containerName}' not found. Make sure you have added it via AssetManager::addContainer().");
         }
         $this->container = $container;
@@ -193,7 +193,7 @@ class AssetEnqueuer
             return $this;
         }
 
-        if (! $this->container) {
+        if (! $this->container instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer) {
             throw new \RuntimeException("No asset container defined before useVite(). Use ->container('theme') before ->useVite().");
         }
         $this->useVite = true;
@@ -362,7 +362,7 @@ class AssetEnqueuer
                 if ($this->needToLoadViteClient()) {
                     $this->loadViteClient($hook);
                 }
-                app(HookAction::class)->add($hook, [$this, 'enqueueStyleOrScript'], 99);
+                app(HookAction::class)->add($hook, $this->enqueueStyleOrScript(...), 99);
             }
         } catch (\Throwable $e) {
             Log::error('Error in AssetEnqueuer::__destruct', ['error' => $e->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
@@ -523,7 +523,7 @@ class AssetEnqueuer
         if (str_contains($path, '://')) {
             return $path;
         }
-        $basePath = $this->container ? $this->container->getBasePath() : '';
+        $basePath = $this->container instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer ? $this->container->getBasePath() : '';
         $fullPath = $basePath.'/'.ltrim($path, '/');
 
         return home_url($fullPath);

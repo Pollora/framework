@@ -12,21 +12,16 @@ use Pollora\Application\Domain\Contracts\ConsoleDetectorInterface;
 class LaravelConsoleDetector implements ConsoleDetectorInterface
 {
     /**
-     * The Laravel application instance.
-     *
-     * @var \Illuminate\Contracts\Foundation\Application
-     */
-    protected $app;
-
-    /**
      * Constructor.
      *
      * @param  \Illuminate\Contracts\Foundation\Application  $app
      */
-    public function __construct($app)
-    {
-        $this->app = $app;
-    }
+    public function __construct(
+        /**
+         * The Laravel application instance.
+         */
+        protected $app
+    ) {}
 
     /**
      * {@inheritdoc}

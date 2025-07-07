@@ -19,5 +19,5 @@ interface Filter extends HookInterface
      * @param  mixed  ...$args  Additional arguments
      * @return mixed The filtered value
      */
-    public function apply(string $hook, mixed $value, ...$args): mixed;
+    public function apply(string $hook, mixed $value, mixed ...$args): mixed;
 }

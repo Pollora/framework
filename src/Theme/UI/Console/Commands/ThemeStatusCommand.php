@@ -48,7 +48,7 @@ class ThemeStatusCommand extends Command
     {
         $registeredTheme = $registrar->getActiveTheme();
 
-        if ($registeredTheme) {
+        if ($registeredTheme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
             $this->info('✓ Self-registered theme found:');
             $this->line("  Name: {$registeredTheme->getName()}");
             $this->line("  Path: {$registeredTheme->getPath()}");

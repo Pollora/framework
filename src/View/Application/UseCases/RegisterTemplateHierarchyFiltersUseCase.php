@@ -32,7 +32,7 @@ class RegisterTemplateHierarchyFiltersUseCase
         // Main template resolution filter
         $this->filter->add(
             'template_include',
-            [$this->hierarchyFilter, 'resolveTemplateInclude'],
+            $this->hierarchyFilter->resolveTemplateInclude(...),
             100
         );
 
@@ -61,7 +61,7 @@ class RegisterTemplateHierarchyFiltersUseCase
         foreach ($hierarchyFilters as $filterName) {
             $this->filter->add(
                 $filterName,
-                [$this->hierarchyFilter, 'extendTemplateHierarchy'],
+                $this->hierarchyFilter->extendTemplateHierarchy(...),
                 10
             );
         }
@@ -69,7 +69,7 @@ class RegisterTemplateHierarchyFiltersUseCase
         // Theme templates filter
         $this->filter->add(
             'theme_templates',
-            [$this->hierarchyFilter, 'extendThemeTemplates'],
+            $this->hierarchyFilter->extendThemeTemplates(...),
             100,
             4
         );

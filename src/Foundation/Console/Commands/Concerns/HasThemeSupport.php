@@ -39,7 +39,11 @@ trait HasThemeSupport
      */
     protected function hasThemeOption(): bool
     {
-        return $this->option('theme') !== null || $this->input->hasParameterOption(['--theme']);
+        if ($this->option('theme') !== null) {
+            return true;
+        }
+
+        return (bool) $this->input->hasParameterOption(['--theme']);
     }
 
     /**

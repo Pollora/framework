@@ -96,7 +96,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
 
             try {
                 // Process the complete post type configuration
-                $this->processPostType($className, $postTypeAttribute);
+                $this->processPostType($className);
             } catch (\Throwable $e) {
                 // Log the error but continue with other post types
                 error_log("Failed to register PostType from class {$className}: ".$e->getMessage());
@@ -114,16 +114,15 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * 4. Registering the final post type through the service
      *
      * @param  string  $className  The fully qualified class name
-     * @param  object  $postTypeAttribute  The Spatie DiscoveredAttribute instance
      */
-    private function processPostType(string $className, object $postTypeAttribute): void
+    private function processPostType(string $className): void
     {
         try {
             // Use reflection to get the PostType attribute instance
             $reflectionClass = new ReflectionClass($className);
             $postTypeAttributes = $reflectionClass->getAttributes(PostType::class);
 
-            if (empty($postTypeAttributes)) {
+            if ($postTypeAttributes === []) {
                 return;
             }
 
@@ -132,7 +131,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
             $postType = $postTypeAttributes[0]->newInstance();
 
             // Build base post type configuration using the new configuration class
-            $config = $this->buildBaseConfiguration($reflectionClass, $className, $postType);
+            $config = $this->buildBaseConfiguration($className, $postType);
 
             // Process class-level attributes
             $config = $this->processClassLevelAttributes($reflectionClass, $className, $config);
@@ -144,7 +143,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
             $this->processAdditionalArgs($className, $config);
 
             // Register the post type through the service on the init hook
-            add_action('init', function () use ($config) {
+            add_action('init', function () use ($config): void {
                 $this->postTypeService->register(
                     $config->getSlug(),
                     $config->getName(),
@@ -163,16 +162,15 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * Extracts slug, singular name, and plural name from the PostType attribute,
      * applying auto-generation logic when values are not explicitly provided.
      *
-     * @param  ReflectionClass  $reflectionClass  The reflection class
      * @param  string  $className  The class name for auto-generation
      * @param  PostType  $postType  The PostType attribute instance
      * @return PostTypeConfiguration The base configuration
      */
-    private function buildBaseConfiguration(ReflectionClass $reflectionClass, string $className, PostType $postType): PostTypeConfiguration
+    private function buildBaseConfiguration(string $className, PostType $postType): PostTypeConfiguration
     {
         $slug = $this->generateSlug($className, $postType->slug);
         $singular = $this->generateSingular($className, $postType->singular);
-        $plural = $this->generatePlural($className, $postType->plural, $singular);
+        $plural = $this->generatePlural($postType->plural, $singular);
 
         $initialArgs = [
             'labels' => $this->generateLabels($singular, $plural),
@@ -224,7 +222,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
             foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
                 foreach ($method->getAttributes() as $attribute) {
                     // Process all method-level attributes that have a handle method
-                    $this->processMethodAttribute($className, $method, $attribute, $config);
+                    $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
         } catch (\ReflectionException $e) {
@@ -260,13 +258,11 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * Handles method-level attributes like AdminCol and RegisterMetaBoxCb by
      * creating appropriate callback configurations.
      *
-     * @param  string  $className  The class name
      * @param  ReflectionMethod  $method  The method with the attribute
      * @param  \ReflectionAttribute  $attribute  The attribute to process
      * @param  PostTypeConfiguration  $config  The current configuration
      */
     private function processMethodAttribute(
-        string $className,
         ReflectionMethod $method,
         \ReflectionAttribute $attribute,
         PostTypeConfiguration $config
@@ -301,7 +297,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
                 if (method_exists($instance, 'withArgs')) {
                     $additionalArgs = $instance->withArgs();
 
-                    if (is_array($additionalArgs) && ! empty($additionalArgs)) {
+                    if (is_array($additionalArgs) && $additionalArgs !== []) {
                         $config->mergeArgs($additionalArgs);
                     }
                 }
@@ -351,12 +347,11 @@ final class PostTypeDiscovery implements DiscoveryInterface
     /**
      * Generate a plural name from singular name and attribute value.
      *
-     * @param  string  $className  The class name
      * @param  string|null  $attributePlural  The plural name from the attribute
      * @param  string  $singular  The singular name
      * @return string The generated plural name
      */
-    private function generatePlural(string $className, ?string $attributePlural, string $singular): string
+    private function generatePlural(?string $attributePlural, string $singular): string
     {
         if ($attributePlural !== null) {
             return $attributePlural;

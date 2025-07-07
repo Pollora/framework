@@ -23,9 +23,7 @@ class SchedulerDiscoveryServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register Schedule Discovery
-        $this->app->singleton(ScheduleDiscovery::class, function () {
-            return new ScheduleDiscovery;
-        });
+        $this->app->singleton(ScheduleDiscovery::class, fn (): \Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery => new ScheduleDiscovery);
     }
 
     /**

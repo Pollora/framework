@@ -18,8 +18,6 @@ class DebugServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(DebugDetectorInterface::class, function ($app) {
-            return new LaravelDebugDetector($app);
-        });
+        $this->app->singleton(DebugDetectorInterface::class, fn ($app): \Pollora\Application\Infrastructure\Services\LaravelDebugDetector => new LaravelDebugDetector($app));
     }
 }

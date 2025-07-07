@@ -16,40 +16,14 @@ use Pollora\PostType\Domain\Contracts\PostTypeAttributeInterface;
 class PostTypeConfiguration implements PostTypeAttributeInterface
 {
     /**
-     * The post type slug.
-     */
-    private string $slug;
-
-    /**
-     * The singular name of the post type.
-     */
-    private string $singular;
-
-    /**
-     * The plural name of the post type.
-     */
-    private string $plural;
-
-    /**
-     * The WordPress registration arguments.
-     */
-    public array $attributeArgs = [];
-
-    /**
      * Create a new PostType configuration.
      *
      * @param  string  $slug  The post type slug
      * @param  string  $singular  The singular name
      * @param  string  $plural  The plural name
-     * @param  array<string, mixed>  $initialArgs  Initial arguments
+     * @param  array<string, mixed>  $attributeArgs  Initial arguments
      */
-    public function __construct(string $slug, string $singular, string $plural, array $initialArgs = [])
-    {
-        $this->slug = $slug;
-        $this->singular = $singular;
-        $this->plural = $plural;
-        $this->attributeArgs = $initialArgs;
-    }
+    public function __construct(private readonly string $slug, private readonly string $singular, private readonly string $plural, public array $attributeArgs = []) {}
 
     /**
      * Get the post type slug.

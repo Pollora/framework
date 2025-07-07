@@ -21,11 +21,7 @@ use Psr\Log\LoggerInterface;
  */
 class ExtendedRouter extends IlluminateRouter
 {
-    private WordPressConditionManagerInterface $conditionManager;
-
-    private WordPressTypeResolverInterface $typeResolver;
-
-    private ?LoggerInterface $logger;
+    private readonly WordPressConditionManagerInterface $conditionManager;
 
     /**
      * Create a new extended router instance.
@@ -34,14 +30,12 @@ class ExtendedRouter extends IlluminateRouter
         Dispatcher $events,
         ?Container $container = null,
         ?WordPressConditionManagerInterface $conditionManager = null,
-        ?WordPressTypeResolverInterface $typeResolver = null,
-        ?LoggerInterface $logger = null
+        private readonly WordPressTypeResolverInterface $typeResolver = new Resolvers\WordPressTypeResolver,
+        private readonly ?LoggerInterface $logger = null
     ) {
         parent::__construct($events, $container);
 
         $this->conditionManager = $conditionManager ?? $this->createDefaultConditionManager();
-        $this->typeResolver = $typeResolver ?? new Resolvers\WordPressTypeResolver;
-        $this->logger = $logger;
 
         $this->registerWordPressTypesInContainer();
     }
@@ -98,7 +92,7 @@ class ExtendedRouter extends IlluminateRouter
             }
 
             $reflection = $this->getCallableReflection($action['uses']);
-            if (! $reflection) {
+            if (! $reflection instanceof \ReflectionFunctionAbstract) {
                 return $route;
             }
 
@@ -135,8 +129,10 @@ class ExtendedRouter extends IlluminateRouter
     {
         foreach ($reflection->getParameters() as $parameter) {
             $type = $parameter->getType();
-
-            if (! $type || $type->isBuiltin()) {
+            if (! $type) {
+                continue;
+            }
+            if ($type->isBuiltin()) {
                 continue;
             }
 
@@ -155,7 +151,7 @@ class ExtendedRouter extends IlluminateRouter
      * @param  mixed  $callable  The callable to reflect
      * @return \ReflectionFunctionAbstract|null Reflection object or null on failure
      */
-    protected function getCallableReflection($callable): ?\ReflectionFunctionAbstract
+    protected function getCallableReflection(string $callable): ?\ReflectionFunctionAbstract
     {
         try {
             return match (true) {
@@ -204,7 +200,7 @@ class ExtendedRouter extends IlluminateRouter
      */
     private function logError(string $message, \Throwable $exception, array $context = []): void
     {
-        if (! $this->logger) {
+        if (! $this->logger instanceof \Psr\Log\LoggerInterface) {
             return;
         }
 
@@ -244,11 +240,11 @@ class ExtendedRouter extends IlluminateRouter
         }
 
         $typesToRegister = [
-            'WP_Post' => fn () => $this->typeResolver->resolvePost(),
-            'WP_Term' => fn () => $this->typeResolver->resolveTerm(),
-            'WP_User' => fn () => $this->typeResolver->resolveUser(),
-            'WP_Query' => fn () => $this->typeResolver->resolveQuery(),
-            'WP' => fn () => $this->typeResolver->resolveWP(),
+            'WP_Post' => fn (): ?\WP_Post => $this->typeResolver->resolvePost(),
+            'WP_Term' => fn (): ?\WP_Term => $this->typeResolver->resolveTerm(),
+            'WP_User' => fn (): ?\WP_User => $this->typeResolver->resolveUser(),
+            'WP_Query' => fn (): ?\WP_Query => $this->typeResolver->resolveQuery(),
+            'WP' => fn (): ?\WP => $this->typeResolver->resolveWP(),
         ];
 
         foreach ($typesToRegister as $type => $resolver) {

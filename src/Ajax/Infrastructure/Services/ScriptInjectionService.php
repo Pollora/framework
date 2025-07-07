@@ -18,7 +18,7 @@ class ScriptInjectionService
      */
     public function registerAjaxUrlScript(): void
     {
-        $this->action->add('wp_head', function () {
+        $this->action->add('wp_head', function (): void {
             echo '<script type="text/javascript">var Pollora = { ajaxurl: "'.esc_url(admin_url('admin-ajax.php')).'" };</script>';
         }, 1);
     }

@@ -18,7 +18,7 @@ class PatternCategoryRegistrar
      * Constructor.
      */
     public function __construct(
-        private ConfigRepositoryInterface $config
+        private readonly ConfigRepositoryInterface $config
     ) {}
 
     /**

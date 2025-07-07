@@ -66,7 +66,7 @@ trait HasPathSupport
         }
 
         // Ensure absolute path
-        if (! str_starts_with($path, '/')) {
+        if (! str_starts_with((string) $path, '/')) {
             $path = base_path($path);
         }
 

@@ -30,11 +30,11 @@ class PatternService implements PatternServiceInterface
      * Create a new pattern service instance.
      */
     public function __construct(
-        private ConfigRepositoryInterface $config,
-        private ThemeProviderInterface $themeProvider,
-        private PatternDataExtractorInterface $dataExtractor,
-        private PatternCategoryRegistrarInterface $categoryRegistrar,
-        private PatternRegistrarInterface $patternRegistrar
+        private readonly ConfigRepositoryInterface $config,
+        private readonly ThemeProviderInterface $themeProvider,
+        private readonly PatternDataExtractorInterface $dataExtractor,
+        private readonly PatternCategoryRegistrarInterface $categoryRegistrar,
+        private readonly PatternRegistrarInterface $patternRegistrar
     ) {}
 
     /**
@@ -124,7 +124,7 @@ class PatternService implements PatternServiceInterface
         $content = $this->dataExtractor->getContent($file);
 
         // Skip if content is empty
-        if (empty($content)) {
+        if ($content === null || $content === '' || $content === '0') {
             return;
         }
 

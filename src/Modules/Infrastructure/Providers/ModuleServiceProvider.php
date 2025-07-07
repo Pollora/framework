@@ -26,14 +26,10 @@ class ModuleServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register ModuleAutoloader service
-        $this->app->singleton(ModuleAutoloader::class, function ($app) {
-            return new ModuleAutoloader($app);
-        });
+        $this->app->singleton(ModuleAutoloader::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleAutoloader => new ModuleAutoloader($app));
 
         // Register ModuleDiscoveryOrchestrator
-        $this->app->singleton(ModuleDiscoveryOrchestrator::class, function ($app) {
-            return new ModuleDiscoveryOrchestrator($app);
-        });
+        $this->app->singleton(ModuleDiscoveryOrchestrator::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator => new ModuleDiscoveryOrchestrator($app));
 
         // Register interface binding
         $this->app->bind(ModuleDiscoveryOrchestratorInterface::class, ModuleDiscoveryOrchestrator::class);
@@ -42,20 +38,14 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->alias(ModuleDiscoveryOrchestrator::class, 'modules.discovery');
 
         // Register new generic module services
-        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, function ($app) {
-            return new \Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader(
-                $app,
-                $app->make(\Pollora\Config\Domain\Contracts\ConfigRepositoryInterface::class)
-            );
-        });
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader => new \Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader(
+            $app,
+            $app->make(\Pollora\Config\Domain\Contracts\ConfigRepositoryInterface::class)
+        ));
 
-        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, function ($app) {
-            return new \Pollora\Modules\Infrastructure\Services\ModuleComponentManager($app);
-        });
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleComponentManager => new \Pollora\Modules\Infrastructure\Services\ModuleComponentManager($app));
 
-        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, function ($app) {
-            return new \Pollora\Modules\Infrastructure\Services\ModuleAssetManager($app);
-        });
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleAssetManager => new \Pollora\Modules\Infrastructure\Services\ModuleAssetManager($app));
 
         // Merge configuration
         $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');
@@ -67,30 +57,26 @@ class ModuleServiceProvider extends ServiceProvider
         $this->loadHelperFunctions();
 
         // Legacy services kept for compatibility but simplified
-        $this->app->singleton(ModuleManifest::class, function ($app) {
-            return new ModuleManifest(
-                new Filesystem,
-                $this->getModulePaths(),
-                $this->getCachedModulePath(),
-                $app->make(ModuleRepositoryInterface::class),
-                null // No longer using legacy scout
-            );
-        });
+        $this->app->singleton(ModuleManifest::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleManifest => new ModuleManifest(
+            new Filesystem,
+            $this->getModulePaths(),
+            $this->getCachedModulePath(),
+            $app->make(ModuleRepositoryInterface::class),
+            null // No longer using legacy scout
+        ));
 
-        $this->app->singleton(ModuleBootstrap::class, function ($app) use ($router) {
-            return new ModuleBootstrap(
-                $app,
-                $app->make(ModuleRepositoryInterface::class),
-                $router
-            );
-        });
+        $this->app->singleton(ModuleBootstrap::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleBootstrap => new ModuleBootstrap(
+            $app,
+            $app->make(ModuleRepositoryInterface::class),
+            $router
+        ));
 
         // Discover Laravel modules but don't apply yet
         $this->discoverLaravelModules();
         $this->applyLaravelModules();
 
         // Setup Laravel Module discovery only
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
 
             // Fire event to notify that modules are ready
             Event::dispatch('modules.routes.registered');

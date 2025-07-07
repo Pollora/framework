@@ -95,7 +95,7 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
             // Find Taxonomy attribute
             $taxonomyAttributes = $reflection->getAttributes(\Pollora\Attributes\Taxonomy::class);
 
-            if (empty($taxonomyAttributes)) {
+            if ($taxonomyAttributes === []) {
                 return null;
             }
 
@@ -111,7 +111,7 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
             // Register the taxonomy
             return $this->register($slug, $objectType, $singular, $plural);
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Return null on any error
             return null;
         }

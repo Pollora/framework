@@ -16,21 +16,16 @@ use Pollora\Container\Domain\ServiceLocator;
 class ContainerServiceLocator implements ServiceLocator
 {
     /**
-     * The dependency injection container instance.
-     *
-     * @var mixed
-     */
-    private $container;
-
-    /**
      * Create a new service locator instance.
      *
      * @param  mixed  $container  The dependency injection container
      */
-    public function __construct($container)
-    {
-        $this->container = $container;
-    }
+    public function __construct(
+        /**
+         * The dependency injection container instance.
+         */
+        private mixed $container
+    ) {}
 
     /**
      * Resolve a service from the container.
@@ -53,7 +48,7 @@ class ContainerServiceLocator implements ServiceLocator
         if (is_object($this->container) && method_exists($this->container, 'get')) {
             try {
                 return $this->container->get($serviceClass);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 return null;
             }
         }

@@ -85,7 +85,7 @@ final class HookDiscovery implements DiscoveryInterface
                     ]);
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Skip classes that can't be reflected
             // This might happen for classes with missing dependencies
             return;

@@ -15,7 +15,7 @@ use Pollora\Collection\Domain\Contracts\CollectionInterface;
  */
 class LaravelCollectionAdapter implements CollectionInterface
 {
-    private LaravelCollection $laravelCollection;
+    private readonly LaravelCollection $laravelCollection;
 
     /**
      * Create a new LaravelCollectionAdapter instance.

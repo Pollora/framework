@@ -25,12 +25,10 @@ class BlockCategoryRegistrar implements BlockCategoryRegistrarInterface
         }
 
         if (function_exists('add_filter')) {
-            \add_filter('block_categories_all', function (array $existingCategories) use ($categories): array {
-                return array_merge(
-                    $existingCategories,
-                    $categories->values()->all()
-                );
-            });
+            \add_filter('block_categories_all', fn (array $existingCategories): array => array_merge(
+                $existingCategories,
+                $categories->values()->all()
+            ));
         }
     }
 }

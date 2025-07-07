@@ -86,7 +86,7 @@ class MakeModelCommand extends AbstractGeneratorCommand
 
         if (! is_null($fillable)) {
             $fillable = collect(explode(',', $fillable))
-                ->map(fn ($item) => "'".trim($item)."'")
+                ->map(fn ($item): string => "'".trim($item)."'")
                 ->implode(', ');
 
             $fillable = "[{$fillable}]";
@@ -106,9 +106,8 @@ class MakeModelCommand extends AbstractGeneratorCommand
         $table = Str::snake(Str::pluralStudly($model));
 
         $stub = str_replace(['{{ model }}', '{{model}}'], $model, $stub);
-        $stub = str_replace(['{{ table }}', '{{table}}'], $table, $stub);
 
-        return $stub;
+        return str_replace(['{{ table }}', '{{table}}'], $table, $stub);
     }
 
     /**

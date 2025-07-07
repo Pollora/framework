@@ -35,31 +35,23 @@ class PostTypeServiceProvider extends ServiceProvider
         $this->app->singleton(PostTypeRegistryInterface::class, WordPressPostTypeRegistry::class);
 
         // Register the repository
-        $this->app->singleton(PostTypeRepositoryInterface::class, function ($app) {
-            return new PostTypeRepository(
-                $app->make(PostTypeRegistryInterface::class)
-            );
-        });
+        $this->app->singleton(PostTypeRepositoryInterface::class, fn ($app): \Pollora\PostType\Infrastructure\Repositories\PostTypeRepository => new PostTypeRepository(
+            $app->make(PostTypeRegistryInterface::class)
+        ));
 
         // Register the PostTypeService with interface binding
-        $this->app->singleton(PostTypeServiceInterface::class, function ($app) {
-            return new PostTypeService(
-                $app->make(PostTypeFactoryInterface::class),
-                $app->make(PostTypeRegistryInterface::class)
-            );
-        });
+        $this->app->singleton(PostTypeServiceInterface::class, fn ($app): \Pollora\PostType\Application\Services\PostTypeService => new PostTypeService(
+            $app->make(PostTypeFactoryInterface::class),
+            $app->make(PostTypeRegistryInterface::class)
+        ));
 
         // Also bind concrete class for backward compatibility
-        $this->app->singleton(PostTypeService::class, function ($app) {
-            return $app->make(PostTypeServiceInterface::class);
-        });
+        $this->app->singleton(PostTypeService::class, fn ($app) => $app->make(PostTypeServiceInterface::class));
 
         // Register PostType Discovery
-        $this->app->singleton(PostTypeDiscovery::class, function ($app) {
-            return new PostTypeDiscovery(
-                $app->make(PostTypeServiceInterface::class)
-            );
-        });
+        $this->app->singleton(PostTypeDiscovery::class, fn ($app): \Pollora\PostType\Infrastructure\Services\PostTypeDiscovery => new PostTypeDiscovery(
+            $app->make(PostTypeServiceInterface::class)
+        ));
 
         // Register commands
         if ($this->app->runningInConsole()) {

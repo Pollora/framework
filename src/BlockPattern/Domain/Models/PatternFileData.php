@@ -18,7 +18,7 @@ class PatternFileData
      * @param  array<string, string|null>  $headers  Extracted headers from the file
      */
     public function __construct(
-        private string $file,
+        private readonly string $file,
         private array $headers
     ) {}
 
@@ -57,6 +57,6 @@ class PatternFileData
      */
     public function isValid(): bool
     {
-        return ! empty($this->headers['slug']) && ! empty($this->headers['title']);
+        return ! empty($this->headers['slug']) && (isset($this->headers['title']) && ($this->headers['title'] !== '' && $this->headers['title'] !== '0'));
     }
 }

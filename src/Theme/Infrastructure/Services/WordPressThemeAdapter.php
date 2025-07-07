@@ -37,13 +37,13 @@ class WordPressThemeAdapter implements WordPressThemeInterface
      */
     public function registerThemeDirectory(string $path): bool
     {
-        if (empty($path) || ! $this->isFunctionAvailable('register_theme_directory')) {
+        if ($path === '' || $path === '0' || ! $this->isFunctionAvailable('register_theme_directory')) {
             return false;
         }
 
         // Ensure the path is properly formatted and exists
         $sanitizedPath = $this->sanitizePath($path);
-        if (! $sanitizedPath || ! is_dir($sanitizedPath)) {
+        if ($sanitizedPath === null || $sanitizedPath === '' || $sanitizedPath === '0' || ! is_dir($sanitizedPath)) {
             return false;
         }
 
@@ -73,8 +73,8 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         try {
             $stylesheet = \get_stylesheet();
 
-            return ! empty($stylesheet) ? $stylesheet : self::DEFAULT_THEME_NAME;
-        } catch (\Throwable $e) {
+            return empty($stylesheet) ? self::DEFAULT_THEME_NAME : $stylesheet;
+        } catch (\Throwable) {
             return self::DEFAULT_THEME_NAME;
         }
     }
@@ -93,8 +93,8 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         try {
             $template = \get_template();
 
-            return ! empty($template) ? $template : self::DEFAULT_THEME_NAME;
-        } catch (\Throwable $e) {
+            return empty($template) ? self::DEFAULT_THEME_NAME : $template;
+        } catch (\Throwable) {
             return self::DEFAULT_THEME_NAME;
         }
     }
@@ -116,7 +116,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
 
             // Verify we got a valid theme object
             return $theme instanceof \WP_Theme ? $theme : $this->createFallbackThemeObject();
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return $this->createFallbackThemeObject();
         }
     }
@@ -132,33 +132,33 @@ class WordPressThemeAdapter implements WordPressThemeInterface
 
         // Check for WP_CONTENT_DIR constant
         if (defined('WP_CONTENT_DIR') && ! empty(WP_CONTENT_DIR)) {
-            $themesDir = rtrim(WP_CONTENT_DIR, '/\\').'/themes';
+            $themesDir = rtrim((string) WP_CONTENT_DIR, '/\\').'/themes';
             if (is_dir($themesDir)) {
                 $directories[] = $themesDir;
             }
         }
 
         // Fallback: try to get from WordPress functions if available
-        if (empty($directories) && $this->isFunctionAvailable('get_theme_root')) {
+        if ($directories === [] && $this->isFunctionAvailable('get_theme_root')) {
             try {
                 $themeRoot = \get_theme_root();
                 if (! empty($themeRoot) && is_dir($themeRoot)) {
                     $directories[] = $themeRoot;
                 }
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // Silent fallback
             }
         }
 
         // Additional fallback: check common WordPress installation paths
-        if (empty($directories)) {
+        if ($directories === []) {
             $commonPaths = [
                 ABSPATH.'wp-content/themes' ?? '',
                 __DIR__.'/../../../../../wp-content/themes',
             ];
 
             foreach ($commonPaths as $path) {
-                if (! empty($path) && is_dir($path)) {
+                if (is_dir($path)) {
                     $directories[] = $path;
                     break;
                 }
@@ -187,7 +187,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
 
             // Ensure trailing slash for consistency
             return rtrim($uri, '/').'/';
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return self::DEFAULT_URI;
         }
     }
@@ -200,7 +200,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
      */
     private function isFunctionAvailable(string $functionName): bool
     {
-        return ! empty($functionName) &&
+        return $functionName !== '' && $functionName !== '0' &&
             function_exists($functionName) &&
             is_callable($functionName);
     }
@@ -213,7 +213,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
      */
     private function sanitizePath(string $path): ?string
     {
-        if (empty($path)) {
+        if ($path === '' || $path === '0') {
             return null;
         }
 
@@ -261,7 +261,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
              */
             public function get(string $key, $default = '')
             {
-                if (empty($key)) {
+                if ($key === '' || $key === '0') {
                     return $default;
                 }
 

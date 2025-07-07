@@ -17,11 +17,11 @@ class ResolvedTemplate
         private readonly string $filePath,
         private readonly bool $isBlade
     ) {
-        if (empty($templateName)) {
+        if ($templateName === '' || $templateName === '0') {
             throw new \InvalidArgumentException('Template name cannot be empty');
         }
 
-        if (empty($filePath)) {
+        if ($filePath === '' || $filePath === '0') {
             throw new \InvalidArgumentException('File path cannot be empty');
         }
     }

@@ -42,7 +42,7 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
         $taxonomy = EntityTaxonomy::make($slug, $objectType, $singular, $plural);
 
         // Apply additional arguments if provided
-        if (! empty($args)) {
+        if ($args !== []) {
             $taxonomy->setRawArgs($args);
         }
 

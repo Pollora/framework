@@ -12,19 +12,11 @@ use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 class DebugService
 {
     /**
-     * The debug detector implementation.
-     */
-    private DebugDetectorInterface $debugDetector;
-
-    /**
      * Constructor.
      *
      * @param  DebugDetectorInterface  $debugDetector  The debug detector implementation
      */
-    public function __construct(DebugDetectorInterface $debugDetector)
-    {
-        $this->debugDetector = $debugDetector;
-    }
+    public function __construct(private readonly DebugDetectorInterface $debugDetector) {}
 
     /**
      * Check if the application is in debug mode.

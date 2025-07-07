@@ -18,17 +18,11 @@ use Psr\Container\ContainerInterface;
  */
 class Sidebar implements ThemeComponent
 {
-    protected ContainerInterface $app;
-
     protected Action $action;
 
-    protected ConfigRepositoryInterface $config;
-
-    public function __construct(ContainerInterface $app, ConfigRepositoryInterface $config)
+    public function __construct(protected ContainerInterface $app, protected ConfigRepositoryInterface $config)
     {
-        $this->app = $app;
         $this->action = $this->app->get(Action::class);
-        $this->config = $config;
     }
 
     public function register(): void

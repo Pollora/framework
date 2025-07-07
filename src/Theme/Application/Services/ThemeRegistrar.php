@@ -37,7 +37,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
         $themePath = get_stylesheet_directory();
 
         // Parse theme headers if not provided
-        $styleCssPath = rtrim($themePath, '/').'/style.css';
+        $styleCssPath = rtrim((string) $themePath, '/').'/style.css';
         $themeData = $this->themeParser->parseThemeHeaders($styleCssPath);
 
         // Create the theme module
@@ -193,8 +193,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             $configLoader->loadModuleConfiguration(
                 $theme->getPath(),
-                'theme', // module type
-                $theme->getLowerName()
+                'theme'
             );
         } catch (\Exception $e) {
             $this->logError('Failed to load theme configuration: '.$e->getMessage());
