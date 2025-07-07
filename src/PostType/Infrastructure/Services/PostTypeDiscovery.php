@@ -24,18 +24,15 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  * Handles both class-level attributes (like HasArchive, Supports, MenuIcon) and method-level
  * attributes (like AdminCol, RegisterMetaBoxCb) by aggregating all configuration into a
  * complete WordPress post type registration.
- *
- * @package Pollora\PostType\Infrastructure\Services
  */
 final class PostTypeDiscovery implements DiscoveryInterface
 {
     use IsDiscovery;
 
-
     /**
      * Create a new PostType discovery service.
      *
-     * @param PostTypeServiceInterface $postTypeService The post type service for registration
+     * @param  PostTypeServiceInterface  $postTypeService  The post type service for registration
      */
     public function __construct(
         private readonly PostTypeServiceInterface $postTypeService
@@ -50,7 +47,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
     public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
     {
         // Only process classes
-        if (!$structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
             return;
         }
 
@@ -102,7 +99,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
                 $this->processPostType($className, $postTypeAttribute);
             } catch (\Throwable $e) {
                 // Log the error but continue with other post types
-                error_log("Failed to register PostType from class {$className}: " . $e->getMessage());
+                error_log("Failed to register PostType from class {$className}: ".$e->getMessage());
             }
         }
     }
@@ -116,10 +113,8 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * 3. Processing method-level attributes for callbacks
      * 4. Registering the final post type through the service
      *
-     * @param string $className The fully qualified class name
-     * @param object $postTypeAttribute The Spatie DiscoveredAttribute instance
-     *
-     * @return void
+     * @param  string  $className  The fully qualified class name
+     * @param  object  $postTypeAttribute  The Spatie DiscoveredAttribute instance
      */
     private function processPostType(string $className, object $postTypeAttribute): void
     {
@@ -158,7 +153,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
                 );
             });
         } catch (\ReflectionException $e) {
-            error_log("Failed to process PostType for class {$className}: " . $e->getMessage());
+            error_log("Failed to process PostType for class {$className}: ".$e->getMessage());
         }
     }
 
@@ -168,10 +163,9 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * Extracts slug, singular name, and plural name from the PostType attribute,
      * applying auto-generation logic when values are not explicitly provided.
      *
-     * @param ReflectionClass $reflectionClass The reflection class
-     * @param string $className The class name for auto-generation
-     * @param PostType $postType The PostType attribute instance
-     *
+     * @param  ReflectionClass  $reflectionClass  The reflection class
+     * @param  string  $className  The class name for auto-generation
+     * @param  PostType  $postType  The PostType attribute instance
      * @return PostTypeConfiguration The base configuration
      */
     private function buildBaseConfiguration(ReflectionClass $reflectionClass, string $className, PostType $postType): PostTypeConfiguration
@@ -193,10 +187,9 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * Scans the class for all known PostType sub-attributes and processes them
      * to build the complete arguments array for WordPress post type registration.
      *
-     * @param ReflectionClass $reflectionClass The reflection class
-     * @param string $className The class name to process
-     * @param PostTypeConfiguration $config The current configuration
-     *
+     * @param  ReflectionClass  $reflectionClass  The reflection class
+     * @param  string  $className  The class name to process
+     * @param  PostTypeConfiguration  $config  The current configuration
      * @return PostTypeConfiguration The updated configuration
      */
     private function processClassLevelAttributes(ReflectionClass $reflectionClass, string $className, PostTypeConfiguration $config): PostTypeConfiguration
@@ -208,7 +201,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
                 }
             }
         } catch (\ReflectionException $e) {
-            error_log("Failed to process class-level attributes for {$className}: " . $e->getMessage());
+            error_log("Failed to process class-level attributes for {$className}: ".$e->getMessage());
         }
 
         return $config;
@@ -220,10 +213,9 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * Scans all public methods of the class for method-level attributes like
      * AdminCol and RegisterMetaBoxCb, building the appropriate callback configurations.
      *
-     * @param ReflectionClass $reflectionClass The reflection class
-     * @param string $className The class name to process
-     * @param PostTypeConfiguration $config The current configuration
-     *
+     * @param  ReflectionClass  $reflectionClass  The reflection class
+     * @param  string  $className  The class name to process
+     * @param  PostTypeConfiguration  $config  The current configuration
      * @return PostTypeConfiguration The updated configuration
      */
     private function processMethodLevelAttributes(ReflectionClass $reflectionClass, string $className, PostTypeConfiguration $config): PostTypeConfiguration
@@ -236,7 +228,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
                 }
             }
         } catch (\ReflectionException $e) {
-            error_log("Failed to process method-level attributes for {$className}: " . $e->getMessage());
+            error_log("Failed to process method-level attributes for {$className}: ".$e->getMessage());
         }
 
         return $config;
@@ -248,11 +240,9 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * Takes an attribute instance and applies its configuration to the post type args.
      * Uses the attribute class name to determine the appropriate processing logic.
      *
-     * @param ReflectionClass $reflectionClass The reflection class
-     * @param \ReflectionAttribute $attribute The attribute to process
-     * @param PostTypeConfiguration $config The current configuration
-     *
-     * @return void
+     * @param  ReflectionClass  $reflectionClass  The reflection class
+     * @param  \ReflectionAttribute  $attribute  The attribute to process
+     * @param  PostTypeConfiguration  $config  The current configuration
      */
     private function processClassAttribute(ReflectionClass $reflectionClass, \ReflectionAttribute $attribute, PostTypeConfiguration $config): void
     {
@@ -270,12 +260,10 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * Handles method-level attributes like AdminCol and RegisterMetaBoxCb by
      * creating appropriate callback configurations.
      *
-     * @param string $className The class name
-     * @param ReflectionMethod $method The method with the attribute
-     * @param \ReflectionAttribute $attribute The attribute to process
-     * @param PostTypeConfiguration $config The current configuration
-     *
-     * @return void
+     * @param  string  $className  The class name
+     * @param  ReflectionMethod  $method  The method with the attribute
+     * @param  \ReflectionAttribute  $attribute  The attribute to process
+     * @param  PostTypeConfiguration  $config  The current configuration
      */
     private function processMethodAttribute(
         string $className,
@@ -297,10 +285,8 @@ final class PostTypeDiscovery implements DiscoveryInterface
      * If the class has a withArgs method, it will be called to get additional
      * arguments that should be merged into the post type configuration.
      *
-     * @param string $className The class name to process
-     * @param PostTypeConfiguration $config The current configuration
-     *
-     * @return void
+     * @param  string  $className  The class name to process
+     * @param  PostTypeConfiguration  $config  The current configuration
      */
     private function processAdditionalArgs(string $className, PostTypeConfiguration $config): void
     {
@@ -315,23 +301,22 @@ final class PostTypeDiscovery implements DiscoveryInterface
                 if (method_exists($instance, 'withArgs')) {
                     $additionalArgs = $instance->withArgs();
 
-                    if (is_array($additionalArgs) && !empty($additionalArgs)) {
+                    if (is_array($additionalArgs) && ! empty($additionalArgs)) {
                         $config->mergeArgs($additionalArgs);
                     }
                 }
             }
         } catch (\ReflectionException|\Throwable $e) {
             // Log the error but continue - additional args are optional
-            error_log("Failed to process additional args for {$className}: " . $e->getMessage());
+            error_log("Failed to process additional args for {$className}: ".$e->getMessage());
         }
     }
 
     /**
      * Generate a post type slug from class name and attribute value.
      *
-     * @param string $className The class name
-     * @param string|null $attributeSlug The slug from the attribute
-     *
+     * @param  string  $className  The class name
+     * @param  string|null  $attributeSlug  The slug from the attribute
      * @return string The generated slug
      */
     private function generateSlug(string $className, ?string $attributeSlug): string
@@ -346,9 +331,8 @@ final class PostTypeDiscovery implements DiscoveryInterface
     /**
      * Generate a singular name from class name and attribute value.
      *
-     * @param string $className The class name
-     * @param string|null $attributeSingular The singular name from the attribute
-     *
+     * @param  string  $className  The class name
+     * @param  string|null  $attributeSingular  The singular name from the attribute
      * @return string The generated singular name
      */
     private function generateSingular(string $className, ?string $attributeSingular): string
@@ -367,10 +351,9 @@ final class PostTypeDiscovery implements DiscoveryInterface
     /**
      * Generate a plural name from singular name and attribute value.
      *
-     * @param string $className The class name
-     * @param string|null $attributePlural The plural name from the attribute
-     * @param string $singular The singular name
-     *
+     * @param  string  $className  The class name
+     * @param  string|null  $attributePlural  The plural name from the attribute
+     * @param  string  $singular  The singular name
      * @return string The generated plural name
      */
     private function generatePlural(string $className, ?string $attributePlural, string $singular): string
@@ -385,9 +368,8 @@ final class PostTypeDiscovery implements DiscoveryInterface
     /**
      * Generate WordPress labels array from singular and plural names.
      *
-     * @param string $singular The singular name
-     * @param string $plural The plural name
-     *
+     * @param  string  $singular  The singular name
+     * @param  string  $plural  The plural name
      * @return array<string, string> The labels array
      */
     private function generateLabels(string $singular, string $plural): array

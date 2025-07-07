@@ -23,7 +23,7 @@ afterEach(function () {
 
 test('TaxonomyMakeCommand generates correct slug from class name', function () {
     // Skip if command doesn't exist yet
-    if (!class_exists(TaxonomyMakeCommand::class)) {
+    if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
     }
 
@@ -38,7 +38,7 @@ test('TaxonomyMakeCommand generates correct slug from class name', function () {
 
 test('TaxonomyMakeCommand generates correct singular name from class name', function () {
     // Skip if command doesn't exist yet
-    if (!class_exists(TaxonomyMakeCommand::class)) {
+    if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
     }
 
@@ -53,7 +53,7 @@ test('TaxonomyMakeCommand generates correct singular name from class name', func
 
 test('TaxonomyMakeCommand generates correct plural name from class name', function () {
     // Skip if command doesn't exist yet
-    if (!class_exists(TaxonomyMakeCommand::class)) {
+    if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
     }
 
@@ -72,7 +72,7 @@ test('TaxonomyMakeCommand generates correct plural name from class name', functi
 
 test('TaxonomyMakeCommand generates default object type for taxonomy', function () {
     // Skip if command doesn't exist yet
-    if (!class_exists(TaxonomyMakeCommand::class)) {
+    if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
     }
 
@@ -92,7 +92,7 @@ test('TaxonomyMakeCommand generates default object type for taxonomy', function 
 
 test('TaxonomyMakeCommand handles hierarchical flag correctly', function () {
     // Skip if command doesn't exist yet
-    if (!class_exists(TaxonomyMakeCommand::class)) {
+    if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
     }
 

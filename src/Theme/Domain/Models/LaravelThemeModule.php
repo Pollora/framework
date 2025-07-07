@@ -76,7 +76,7 @@ class LaravelThemeModule extends ThemeModule
     protected function registerAliases(): void
     {
         // Skip alias registration if AliasLoader is not available (e.g., in tests)
-        if (!class_exists(AliasLoader::class)) {
+        if (! class_exists(AliasLoader::class)) {
             return;
         }
 
@@ -122,7 +122,7 @@ class LaravelThemeModule extends ThemeModule
     {
         $configPath = $this->getPath().'/config';
 
-        if (!is_dir($configPath)) {
+        if (! is_dir($configPath)) {
             return;
         }
 

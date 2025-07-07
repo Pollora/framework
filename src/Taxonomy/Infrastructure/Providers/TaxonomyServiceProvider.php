@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Taxonomy\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Taxonomy\Application\Services\TaxonomyService;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyRegistryInterface;
@@ -13,9 +14,8 @@ use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 use Pollora\Taxonomy\Infrastructure\Adapters\WordPressTaxonomyRegistry;
 use Pollora\Taxonomy\Infrastructure\Factories\TaxonomyFactory;
 use Pollora\Taxonomy\Infrastructure\Repositories\TaxonomyRepository;
-use Pollora\Taxonomy\UI\Console\TaxonomyMakeCommand;
 use Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
+use Pollora\Taxonomy\UI\Console\TaxonomyMakeCommand;
 
 /**
  * Service provider for taxonomy functionality.
@@ -83,7 +83,7 @@ class TaxonomyServiceProvider extends ServiceProvider
 
         // Register taxonomies from configuration
         $this->registerConfiguredTaxonomies();
-        
+
         // Register Taxonomy discovery with the discovery engine
         $this->registerTaxonomyDiscovery();
     }
@@ -135,7 +135,7 @@ class TaxonomyServiceProvider extends ServiceProvider
             /** @var DiscoveryEngineInterface $engine */
             $engine = $this->app->make(DiscoveryEngineInterface::class);
             $taxonomyDiscovery = $this->app->make(TaxonomyDiscovery::class);
-            
+
             $engine->addDiscovery('taxonomies', $taxonomyDiscovery);
         }
     }

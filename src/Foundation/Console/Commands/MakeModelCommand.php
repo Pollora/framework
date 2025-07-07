@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Foundation\Console\Commands;
 
-use Pollora\Console\AbstractGeneratorCommand;
 use Illuminate\Support\Str;
+use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
@@ -37,8 +37,6 @@ class MakeModelCommand extends AbstractGeneratorCommand
 
     /**
      * The subpath where the class should be generated.
-     *
-     * @var string
      */
     protected string $subPath = 'Models';
 
@@ -126,4 +124,4 @@ class MakeModelCommand extends AbstractGeneratorCommand
             ]
         );
     }
-} 
+}

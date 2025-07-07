@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Integration test for the theme self-registration system.
- * 
+ *
  * This test is currently disabled because it requires WordPress functions
  * to be available (get_stylesheet, get_stylesheet_directory).
  * The ThemeRegistrar::register() method depends on these functions.

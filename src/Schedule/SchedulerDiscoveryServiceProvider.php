@@ -6,10 +6,8 @@ namespace Pollora\Schedule;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Hook\Infrastructure\Services\Filter;
-use Pollora\Schedule\Contracts\SchedulerInterface;
-use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
+use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
 
 /**
  * Service provider for WordPress cron scheduler functionality.
@@ -26,7 +24,7 @@ class SchedulerDiscoveryServiceProvider extends ServiceProvider
     {
         // Register Schedule Discovery
         $this->app->singleton(ScheduleDiscovery::class, function () {
-            return new ScheduleDiscovery();
+            return new ScheduleDiscovery;
         });
     }
 

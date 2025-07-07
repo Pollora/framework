@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Services;
 
-
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;

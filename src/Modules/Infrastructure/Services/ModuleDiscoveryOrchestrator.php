@@ -9,7 +9,6 @@ use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
-use Pollora\Modules\Infrastructure\Services\LaravelModuleDiscovery;
 
 /**
  * Module Discovery Orchestrator Service
@@ -31,7 +30,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
      */
     public function discover(string $path): void
     {
-        if (!is_dir($path) || !$this->container->bound(DiscoveryEngineInterface::class)) {
+        if (! is_dir($path) || ! $this->container->bound(DiscoveryEngineInterface::class)) {
             return;
         }
 
@@ -43,7 +42,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
             $engine->addLocation($location)->discover()->apply();
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for path {$path}: " . $e->getMessage());
+                error_log("Discovery error for path {$path}: ".$e->getMessage());
             }
         }
     }
@@ -53,7 +52,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
      */
     public function discoverAndReturn(string $path): array
     {
-        if (!is_dir($path) || !$this->container->bound(DiscoveryManager::class)) {
+        if (! is_dir($path) || ! $this->container->bound(DiscoveryManager::class)) {
             return [];
         }
 
@@ -62,11 +61,13 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
             $manager = $this->container->make(DiscoveryManager::class);
 
             $location = new DirectoryLocation($path);
+
             return $manager->discoverAllInLocation($location);
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for path {$path}: " . $e->getMessage());
+                error_log("Discovery error for path {$path}: ".$e->getMessage());
             }
+
             return [];
         }
     }

@@ -22,8 +22,6 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  * as WordPress hooks. This discovery class scans for methods that have
  * the #[Action] or #[Filter] attributes and processes them through the
  * Hook services for registration.
- *
- * @package Pollora\Hook\Infrastructure\Services
  */
 final class HookDiscovery implements DiscoveryInterface
 {
@@ -32,8 +30,8 @@ final class HookDiscovery implements DiscoveryInterface
     /**
      * Create a new Hook discovery
      *
-     * @param ActionContract $actionService The action service for hook registration
-     * @param FilterContract $filterService The filter service for hook registration
+     * @param  ActionContract  $actionService  The action service for hook registration
+     * @param  FilterContract  $filterService  The filter service for hook registration
      */
     public function __construct(
         private readonly ActionContract $actionService,
@@ -49,7 +47,7 @@ final class HookDiscovery implements DiscoveryInterface
     public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
     {
         // Only process classes
-        if (!$structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
             return;
         }
 
@@ -138,7 +136,7 @@ final class HookDiscovery implements DiscoveryInterface
             } catch (\Throwable $e) {
                 // Log the error but continue with other hooks
                 // In a production environment, you might want to use a proper logger
-                error_log("Failed to register {$hookType} hook from method {$className}::{$methodName}: " . $e->getMessage());
+                error_log("Failed to register {$hookType} hook from method {$className}::{$methodName}: ".$e->getMessage());
             }
         }
     }

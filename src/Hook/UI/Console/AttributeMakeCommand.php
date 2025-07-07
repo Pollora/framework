@@ -43,8 +43,6 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
 
     /**
      * The subpath where the class should be generated.
-     *
-     * @var string
      */
     protected string $subPath = 'Cms/Hooks';
 
@@ -64,6 +62,7 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
     protected function getDefaultNamespace($rootNamespace): string
     {
         $location = $this->resolveTargetLocation();
+
         return $this->getResolvedNamespace($location, 'Cms\\Hooks');
     }
 

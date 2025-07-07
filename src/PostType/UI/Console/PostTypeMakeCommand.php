@@ -38,8 +38,6 @@ class PostTypeMakeCommand extends AbstractGeneratorCommand
 
     /**
      * The subpath where the class should be generated.
-     *
-     * @var string
      */
     protected string $subPath = 'Cms/PostTypes';
 

@@ -108,10 +108,10 @@ describe('Method attribute', function () {
  * Integration tests with discovery system
  */
 describe('WpRestRoute with Discovery System', function () {
-    
+
     // Mock class for testing without implementing Attributable
     beforeEach(function () {
-        if (!class_exists('MockAPIController')) {
+        if (! class_exists('MockAPIController')) {
             eval('
                 #[Pollora\Attributes\WpRestRoute("api/v2", "/mock/(?P<id>\\\\d+)")]
                 class MockAPIController {
@@ -131,10 +131,11 @@ describe('WpRestRoute with Discovery System', function () {
 
     test('handles classes that do not implement Attributable', function () {
         // Test that our wrapper system works with regular classes
-        $controller = new MockAPIController();
-        
+        $controller = new MockAPIController;
+
         // Simulate the discovery system creating an Attributable wrapper
-        $wrapper = new class('api/v2', '/mock/(?P<id>\\d+)', null) implements Attributable {
+        $wrapper = new class('api/v2', '/mock/(?P<id>\\d+)', null) implements Attributable
+        {
             private mixed $realInstance = null;
 
             public function __construct(
@@ -143,10 +144,12 @@ describe('WpRestRoute with Discovery System', function () {
                 public readonly ?string $classPermission = null
             ) {}
 
-            public function getRealInstance(): mixed {
+            public function getRealInstance(): mixed
+            {
                 if ($this->realInstance === null) {
-                    $this->realInstance = new MockAPIController();
+                    $this->realInstance = new MockAPIController;
                 }
+
                 return $this->realInstance;
             }
         };
@@ -159,7 +162,8 @@ describe('WpRestRoute with Discovery System', function () {
 
     test('Method attribute can handle wrapper with real instance', function () {
         // Create wrapper like the discovery system does
-        $wrapper = new class('api/v2', '/mock/(?P<id>\\d+)', null) implements Attributable {
+        $wrapper = new class('api/v2', '/mock/(?P<id>\\d+)', null) implements Attributable
+        {
             private mixed $realInstance = null;
 
             public function __construct(
@@ -168,16 +172,18 @@ describe('WpRestRoute with Discovery System', function () {
                 public readonly ?string $classPermission = null
             ) {}
 
-            public function getRealInstance(): mixed {
+            public function getRealInstance(): mixed
+            {
                 if ($this->realInstance === null) {
-                    $this->realInstance = new MockAPIController();
+                    $this->realInstance = new MockAPIController;
                 }
+
                 return $this->realInstance;
             }
         };
 
         $method = new Method('GET');
-        
+
         // Test that handleRequest would work (we can't easily test the private method directly)
         expect($wrapper->getRealInstance())->toBeInstanceOf(MockAPIController::class);
         expect(method_exists($wrapper, 'getRealInstance'))->toBeTrue();
@@ -185,14 +191,14 @@ describe('WpRestRoute with Discovery System', function () {
 
     test('extracts route arguments correctly', function () {
         $method = new Method('GET');
-        
+
         // Use reflection to test the private method
         $reflection = new ReflectionClass($method);
         $extractMethod = $reflection->getMethod('extractArgsFromRoute');
         $extractMethod->setAccessible(true);
-        
+
         $args = $extractMethod->invoke($method, '/test/(?P<id>\\d+)/(?P<slug>[a-z-]+)');
-        
+
         expect($args)->toHaveKey('id');
         expect($args)->toHaveKey('slug');
         expect($args['id'])->toHaveKey('validate_callback');

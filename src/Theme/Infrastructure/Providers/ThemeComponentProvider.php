@@ -49,7 +49,7 @@ class ThemeComponentProvider
     protected function registerComponent(string $component): void
     {
         try {
-            if (!$this->app->bound($component)) {
+            if (! $this->app->bound($component)) {
                 $this->app->singleton($component);
             }
 
@@ -58,7 +58,7 @@ class ThemeComponentProvider
         } catch (\Throwable $e) {
             if (env('APP_DEBUG', false)) {
                 throw new \RuntimeException(
-                    "Failed to register component {$component}: " . $e->getMessage(),
+                    "Failed to register component {$component}: ".$e->getMessage(),
                     0,
                     $e
                 );
@@ -66,7 +66,7 @@ class ThemeComponentProvider
 
             // Log error but continue in production
             if (function_exists('error_log')) {
-                error_log("Theme component registration failed: {$component} - " . $e->getMessage());
+                error_log("Theme component registration failed: {$component} - ".$e->getMessage());
             }
         }
     }
@@ -76,7 +76,7 @@ class ThemeComponentProvider
      */
     public function addComponent(string $componentClass): self
     {
-        if (!in_array($componentClass, $this->components)) {
+        if (! in_array($componentClass, $this->components)) {
             $this->components[] = $componentClass;
         }
 

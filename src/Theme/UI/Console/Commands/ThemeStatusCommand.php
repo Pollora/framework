@@ -52,7 +52,7 @@ class ThemeStatusCommand extends Command
             $this->info('✓ Self-registered theme found:');
             $this->line("  Name: {$registeredTheme->getName()}");
             $this->line("  Path: {$registeredTheme->getPath()}");
-            $this->line("  Enabled: " . ($registeredTheme->isEnabled() ? 'Yes' : 'No'));
+            $this->line('  Enabled: '.($registeredTheme->isEnabled() ? 'Yes' : 'No'));
 
             $this->displayThemeHeaders($registeredTheme);
         } else {
@@ -64,17 +64,17 @@ class ThemeStatusCommand extends Command
 
     protected function displayThemeHeaders($theme): void
     {
-        if (!method_exists($theme, 'getHeaders')) {
+        if (! method_exists($theme, 'getHeaders')) {
             return;
         }
 
         $headers = $theme->getHeaders();
 
-        if (!empty($headers['Name'])) {
+        if (! empty($headers['Name'])) {
             $this->line("  Display Name: {$headers['Name']}");
         }
 
-        if (!empty($headers['Version'])) {
+        if (! empty($headers['Version'])) {
             $this->line("  Version: {$headers['Version']}");
         }
     }
@@ -111,12 +111,12 @@ class ThemeStatusCommand extends Command
 
     protected function displayWordPressInfo(): void
     {
-        if (!function_exists('get_stylesheet') || !function_exists('get_template_directory')) {
+        if (! function_exists('get_stylesheet') || ! function_exists('get_template_directory')) {
             return;
         }
 
         $this->info('WordPress theme info:');
-        $this->line("  Stylesheet: " . get_stylesheet());
-        $this->line("  Template Directory: " . get_template_directory());
+        $this->line('  Stylesheet: '.get_stylesheet());
+        $this->line('  Template Directory: '.get_template_directory());
     }
 }

@@ -54,6 +54,7 @@ trait HasPluginSupport
      * Resolve plugin location.
      *
      * @return array{type: string, path: string, namespace: string, name: string}
+     *
      * @throws InvalidArgumentException When plugin is not found or support not implemented
      */
     protected function resolvePluginLocation(): array

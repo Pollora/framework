@@ -15,9 +15,9 @@ interface ThemeRegistrarInterface
     /**
      * Register a theme as the active theme.
      *
-     * @param string $themeName The name of the theme
-     * @param string $themePath The path to the theme directory
-     * @param array $themeData Optional theme metadata
+     * @param  string  $themeName  The name of the theme
+     * @param  string  $themePath  The path to the theme directory
+     * @param  array  $themeData  Optional theme metadata
      * @return ThemeModuleInterface The registered theme module
      */
     public function register(): ThemeModuleInterface;
@@ -32,7 +32,7 @@ interface ThemeRegistrarInterface
     /**
      * Check if a theme is registered as active.
      *
-     * @param string $themeName The theme name to check
+     * @param  string  $themeName  The theme name to check
      * @return bool True if the theme is active
      */
     public function isThemeActive(string $themeName): bool;

@@ -15,8 +15,6 @@ use Pollora\Discovery\Domain\Models\DiscoveryItems;
  *
  * Implementation of discovery cache using Laravel's cache system.
  * Provides persistent caching of discovery results to improve performance.
- *
- * @package Pollora\Discovery\Infrastructure\Adapters
  */
 final class LaravelDiscoveryCache implements DiscoveryCacheInterface
 {
@@ -33,9 +31,9 @@ final class LaravelDiscoveryCache implements DiscoveryCacheInterface
     /**
      * Create a new Laravel discovery cache
      *
-     * @param CacheRepository $cache The Laravel cache repository
-     * @param string $prefix Optional cache key prefix
-     * @param int $defaultTtl Default time-to-live in seconds
+     * @param  CacheRepository  $cache  The Laravel cache repository
+     * @param  string  $prefix  Optional cache key prefix
+     * @param  int  $defaultTtl  Default time-to-live in seconds
      */
     public function __construct(
         private readonly CacheRepository $cache,
@@ -64,8 +62,9 @@ final class LaravelDiscoveryCache implements DiscoveryCacheInterface
 
         // Unserialize the cached data
         if (is_array($cached)) {
-            $items = new DiscoveryItems();
+            $items = new DiscoveryItems;
             $items->__unserialize($cached);
+
             return $items;
         }
 
@@ -108,7 +107,7 @@ final class LaravelDiscoveryCache implements DiscoveryCacheInterface
     {
         // Create a deterministic key based on discovery and locations
         $locationPaths = [];
-        
+
         foreach ($locations as $location) {
             if ($location instanceof DiscoveryLocationInterface) {
                 $locationPaths[] = $location->getPath();
@@ -128,12 +127,11 @@ final class LaravelDiscoveryCache implements DiscoveryCacheInterface
     /**
      * Add prefix to cache key
      *
-     * @param string $key The original key
-     *
+     * @param  string  $key  The original key
      * @return string The prefixed key
      */
     private function prefixKey(string $key): string
     {
-        return $this->prefix . $key;
+        return $this->prefix.$key;
     }
 }

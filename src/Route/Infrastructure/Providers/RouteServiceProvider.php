@@ -8,11 +8,11 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
 use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
 use Pollora\Route\Infrastructure\Middleware\WordPressBodyClass;
 use Pollora\Route\Infrastructure\Middleware\WordPressHeaders;
 use Pollora\Route\Infrastructure\Middleware\WordPressShutdown;
-use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
@@ -92,10 +92,10 @@ class RouteServiceProvider extends ServiceProvider
         // Fallback: if no modules are present, register the fallback route after boot
         $this->app->booted(function (): void {
             // Only register if the event hasn't been fired yet
-            if (!$this->app->bound('route.fallback.registered')) {
+            if (! $this->app->bound('route.fallback.registered')) {
                 // Set a small delay to allow any potential module routes to be registered
                 $this->app->afterResolving('router', function () {
-                    if (!$this->app->bound('route.fallback.registered')) {
+                    if (! $this->app->bound('route.fallback.registered')) {
                         $this->bootFallbackRoute();
                         $this->app->instance('route.fallback.registered', true);
                     }

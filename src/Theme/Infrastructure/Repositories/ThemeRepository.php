@@ -147,12 +147,11 @@ class ThemeRepository implements ModuleRepositoryInterface
      * This method forces a reload of themes from the registrar service,
      * ensuring that any newly registered themes are immediately available
      * in the repository.
-     *
-     * @return static
      */
     public function syncWithRegistrar(): static
     {
         $this->loadThemes(true);
+
         return $this;
     }
 
@@ -163,7 +162,7 @@ class ThemeRepository implements ModuleRepositoryInterface
      * through the ThemeRegistrarInterface. This method retrieves the active theme from the registrar
      * and ensures it's available through the repository interface.
      *
-     * @param bool $forceReload Whether to force a reload even if cache is already loaded
+     * @param  bool  $forceReload  Whether to force a reload even if cache is already loaded
      */
     protected function loadThemes(bool $forceReload = false): void
     {
@@ -187,7 +186,7 @@ class ThemeRepository implements ModuleRepositoryInterface
             } catch (\Exception $e) {
                 // Log error but don't break the repository functionality
                 if (function_exists('error_log')) {
-                    error_log('Failed to load active theme from registrar: ' . $e->getMessage());
+                    error_log('Failed to load active theme from registrar: '.$e->getMessage());
                 }
             }
         }
@@ -200,8 +199,6 @@ class ThemeRepository implements ModuleRepositoryInterface
      *
      * This method is called by the ThemeRegistrar when a new theme is registered
      * to ensure synchronization between the registrar and repository.
-     *
-     * @return static
      */
     public function resetCache(): static
     {

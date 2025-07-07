@@ -88,7 +88,7 @@ trait HasModuleSupport
      */
     protected function resolveModuleLocation(): array
     {
-        if (!$this->hasModuleOption()) {
+        if (! $this->hasModuleOption()) {
             return [];
         }
 

@@ -113,7 +113,7 @@ it('processor creates AutoAttributable wrapper automatically', function () {
     $context = $processor->processClass(SimpleEventClass::class);
 
     expect($context)->toBeInstanceOf(\Pollora\Attributes\Contracts\AttributeContextInterface::class);
-    
+
     // L'instance originale doit être wrappée dans AutoAttributable
     $originalInstance = $context->getOriginalInstance();
     expect($originalInstance)->toBeInstanceOf(AutoAttributable::class);
