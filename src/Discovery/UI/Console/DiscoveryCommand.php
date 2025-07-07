@@ -6,6 +6,7 @@ namespace Pollora\Discovery\UI\Console;
 
 use Illuminate\Console\Command;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
+use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
 /**
  * Discovery Console Command
@@ -35,9 +36,10 @@ final class DiscoveryCommand extends Command
      * Execute the console command
      *
      * @param  DiscoveryManager  $discoveryManager  The discovery manager
+     * @param  ModuleDiscoveryOrchestratorInterface  $moduleOrchestrator  The module discovery orchestrator
      * @return int Command exit code
      */
-    public function handle(DiscoveryManager $discoveryManager): int
+    public function handle(DiscoveryManager $discoveryManager, ModuleDiscoveryOrchestratorInterface $moduleOrchestrator): int
     {
         $this->info('Starting Pollora Discovery Process...');
 
@@ -75,10 +77,16 @@ final class DiscoveryCommand extends Command
                 $this->info('Running all discoveries...');
                 $discoveryManager->run();
                 $this->info('✓ All discoveries completed');
+                
+                // Also run Laravel module discovery
+                $this->info('Running Laravel module discovery...');
+                $moduleOrchestrator->discoverLaravelModules();
+                $moduleOrchestrator->applyLaravelModules();
+                $this->info('✓ Laravel modules discovered and applied');
             }
 
             // Show summary
-            $this->showDiscoverySummary($discoveryManager);
+            $this->showDiscoverySummary($discoveryManager, $moduleOrchestrator);
 
             $this->info('Discovery process completed successfully!');
 
@@ -99,22 +107,46 @@ final class DiscoveryCommand extends Command
      * Show summary of all discoveries and their discovered items
      *
      * @param  DiscoveryManager  $discoveryManager  The discovery manager
+     * @param  ModuleDiscoveryOrchestratorInterface  $moduleOrchestrator  The module discovery orchestrator
      */
-    private function showDiscoverySummary(DiscoveryManager $discoveryManager): void
+    private function showDiscoverySummary(DiscoveryManager $discoveryManager, ModuleDiscoveryOrchestratorInterface $moduleOrchestrator): void
     {
         $this->info('');
         $this->info('Discovery Summary:');
         $this->info('═════════════════');
 
         $discoveries = $discoveryManager->getDiscoveries();
-
+        $moduleResults = $moduleOrchestrator->discoverAndReturnLaravelModules();
+        
+        // Aggregate results from main discoveries and module discoveries
+        $totals = [];
+        
+        // Count items from main discovery manager
         foreach ($discoveries as $identifier => $discovery) {
             $itemCount = count($discoveryManager->getDiscoveredItems($identifier));
-            $this->line("• {$identifier}: {$itemCount} items");
+            $totals[$identifier] = ($totals[$identifier] ?? 0) + $itemCount;
+        }
+        
+        // Count items from Laravel modules
+        foreach ($moduleResults as $moduleName => $moduleDiscoveries) {
+            foreach ($moduleDiscoveries as $identifier => $items) {
+                $itemCount = is_array($items) ? count($items) : 0;
+                $totals[$identifier] = ($totals[$identifier] ?? 0) + $itemCount;
+            }
+        }
+
+        // Display aggregated results
+        foreach ($totals as $identifier => $totalCount) {
+            $this->line("• {$identifier}: {$totalCount} items");
         }
 
         $locations = $discoveryManager->getLocations();
+        $moduleCount = count($moduleResults);
+        
         $this->info('');
         $this->info("Scanned {$locations->count()} discovery locations");
+        if ($moduleCount > 0) {
+            $this->info("Scanned {$moduleCount} Laravel modules");
+        }
     }
 }

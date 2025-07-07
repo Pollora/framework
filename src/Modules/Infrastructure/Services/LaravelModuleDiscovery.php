@@ -193,13 +193,16 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
         if (! is_dir($appPath) || ! $this->container->bound(DiscoveryEngineInterface::class)) {
             return;
         }
-
         try {
-            /** @var DiscoveryEngineInterface $engine */
+            // Get a fresh engine instance from container (with all discoveries registered)
             $engine = $this->container->make(DiscoveryEngineInterface::class);
+            
+            // Clear any existing locations to avoid accumulation
+            $engine->clearLocations();
 
             $location = new DirectoryLocation($appPath);
             $engine->addLocation($location)->discover();
+
 
             // Store engine for later application
             $this->discoveredModules[$module->getName()] = [
