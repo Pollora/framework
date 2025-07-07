@@ -85,16 +85,15 @@ class ModuleServiceProvider extends ServiceProvider
             );
         });
 
+        // Discover Laravel modules but don't apply yet
+        $this->discoverLaravelModules();
+        $this->applyLaravelModules();
+
         // Setup Laravel Module discovery only
         $this->app->booted(function () {
-            // Discover Laravel modules but don't apply yet
-            $this->discoverLaravelModules();
 
             // Fire event to notify that modules are ready
             Event::dispatch('modules.routes.registered');
-
-            // Schedule application after WordPress is ready
-            $this->scheduleWordPressReadyApplication();
         });
     }
 
@@ -120,18 +119,6 @@ class ModuleServiceProvider extends ServiceProvider
     protected function getCachedModulePath(): string
     {
         return Str::replaceLast('services.php', 'modules.php', $this->app->getCachedServicesPath());
-    }
-
-    /**
-     * Schedule Laravel module application to happen after WordPress is loaded.
-     */
-    protected function scheduleWordPressReadyApplication(): void
-    {
-        // Use WordPress 'wp_loaded' hook to ensure WordPress functions are available
-        // This hook fires after WordPress is fully loaded but before any headers are sent
-        add_action('wp_loaded', function () {
-            $this->applyLaravelModules();
-        });
     }
 
     /**
