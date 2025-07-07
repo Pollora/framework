@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DummyNamespace;
 
-use Pollora\Taxonomy\Domain\Models\AbstractTaxonomy;
 use Pollora\Attributes\Taxonomy\ShowTagcloud;
 use Pollora\Attributes\Taxonomy\ShowInQuickEdit;
 use Pollora\Attributes\Taxonomy\ShowAdminColumn;
@@ -24,6 +23,6 @@ use Pollora\Attributes\Taxonomy\ObjectType;
 #[Hierarchical]
 #[ShowInRest]
 #[ObjectType(['DummyPostType'])]
-class DummyClass extends AbstractTaxonomy
+class DummyClass
 {
 }

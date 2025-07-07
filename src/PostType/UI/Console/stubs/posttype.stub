@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DummyNamespace;
 
-use Pollora\PostType\Domain\Models\AbstractPostType;
 use Pollora\Attributes\PostType\PublicPostType;
 use Pollora\Attributes\PostType\PubliclyQueryable;
 use Pollora\Attributes\PostType\HasArchive;
@@ -22,6 +21,6 @@ use Pollora\Attributes\PostType\MenuIcon;
 #[HasArchive]
 #[Supports(['title', 'editor', 'thumbnail'])]
 #[MenuIcon('dashicons-admin-post')]
-class DummyClass extends AbstractPostType
+class DummyClass
 {
 }

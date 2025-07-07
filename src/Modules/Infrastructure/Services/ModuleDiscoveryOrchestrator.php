@@ -14,7 +14,7 @@ use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
  * Module Discovery Orchestrator Service
  *
  * This service orchestrates the discovery of structures in modules, themes and plugins.
- * It provides a simplified interface over the Discovery system, allowing discovery 
+ * It provides a simplified interface over the Discovery system, allowing discovery
  * to be triggered at the moment a module, theme or plugin is registered.
  */
 class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterface
@@ -35,7 +35,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
         try {
             /** @var DiscoveryEngineInterface $engine */
             $engine = $this->container->make(DiscoveryEngineInterface::class);
-            
+
             $location = new DirectoryLocation($path);
             $engine->addLocation($location)->discover()->apply();
         } catch (\Throwable $e) {
@@ -57,7 +57,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
         try {
             /** @var DiscoveryManager $manager */
             $manager = $this->container->make(DiscoveryManager::class);
-            
+
             $location = new DirectoryLocation($path);
             return $manager->discoverAllInLocation($location);
         } catch (\Throwable $e) {
