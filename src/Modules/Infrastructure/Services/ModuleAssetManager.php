@@ -6,6 +6,7 @@ namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Container\Container;
 use Pollora\Asset\Application\Services\AssetManager;
+use Pollora\Foundation\Support\IncludesFiles;
 
 /**
  * Generic module asset manager.
@@ -15,6 +16,7 @@ use Pollora\Asset\Application\Services\AssetManager;
  */
 class ModuleAssetManager
 {
+    use IncludesFiles;
     public function __construct(
         protected Container $app
     ) {}
@@ -78,34 +80,17 @@ class ModuleAssetManager
     }
 
     /**
-     * Load module include files recursively.
+     * Load module include files from app/inc directory.
      */
     public function loadModuleIncludes(string $modulePath): void
     {
-        $includeDirectory = $modulePath.'/inc';
+        $includeDirectory = $modulePath.'/app/inc';
 
         if (is_dir($includeDirectory)) {
-            $this->loadFilesRecursively($includeDirectory);
+            $this->includes($includeDirectory);
         }
     }
 
-    /**
-     * Load all PHP files from a directory recursively.
-     */
-    protected function loadFilesRecursively(string $directory): void
-    {
-        if (! is_dir($directory)) {
-            return;
-        }
-
-        foreach (glob($directory.'/*.php') as $file) {
-            require_once $file;
-        }
-
-        foreach (glob($directory.'/*', GLOB_ONLYDIR) as $subDir) {
-            $this->loadFilesRecursively($subDir);
-        }
-    }
 
     /**
      * Register module specific Blade directives from a directives file.
