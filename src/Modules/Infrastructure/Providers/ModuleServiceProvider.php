@@ -77,6 +77,10 @@ class ModuleServiceProvider extends ServiceProvider
             // Register modules
             $bootstrap->registerModules();
 
+
+            // Discover Laravel modules but don't apply yet
+            $this->discoverLaravelModules();
+
             // Boot modules on next cycle
             $this->app->booted(function () use ($bootstrap) {
 
@@ -92,6 +96,9 @@ class ModuleServiceProvider extends ServiceProvider
                 // This allows other services (like RouteServiceProvider) to register
                 // their fallback routes after all module routes are in place
                 Event::dispatch('modules.routes.registered');
+
+                // Schedule application after WordPress is ready
+                $this->scheduleWordPressReadyApplication();
             });
         }
     }
@@ -118,5 +125,65 @@ class ModuleServiceProvider extends ServiceProvider
     protected function getCachedModulePath(): string
     {
         return Str::replaceLast('services.php', 'modules.php', $this->app->getCachedServicesPath());
+    }
+
+    /**
+     * Schedule Laravel module application to happen after WordPress is loaded.
+     */
+    protected function scheduleWordPressReadyApplication(): void
+    {
+        // Use WordPress 'wp_loaded' hook to ensure WordPress functions are available
+        // This hook fires after WordPress is fully loaded but before any headers are sent
+        add_action('wp_loaded', function () {
+            $this->applyLaravelModules();
+        });
+    }
+
+    /**
+     * Discover Laravel modules using nwidart/laravel-modules (discovery only, no apply).
+     */
+    protected function discoverLaravelModules(): void
+    {
+        if (!$this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleDiscoveryOrchestratorInterface $orchestrator */
+            $orchestrator = $this->app->make(ModuleDiscoveryOrchestratorInterface::class);
+
+            // Check if orchestrator has Laravel module discovery capability
+            if (method_exists($orchestrator, 'discoverLaravelModules')) {
+                $orchestrator->discoverLaravelModules();
+            }
+        } catch (\Throwable $e) {
+            if (function_exists('error_log')) {
+                error_log("Laravel Module discovery error in ModuleServiceProvider: " . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Apply discovered Laravel modules.
+     */
+    protected function applyLaravelModules(): void
+    {
+        if (!$this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleDiscoveryOrchestratorInterface $orchestrator */
+            $orchestrator = $this->app->make(ModuleDiscoveryOrchestratorInterface::class);
+
+            // Check if orchestrator has Laravel module application capability
+            if (method_exists($orchestrator, 'applyLaravelModules')) {
+                $orchestrator->applyLaravelModules();
+            }
+        } catch (\Throwable $e) {
+            if (function_exists('error_log')) {
+                error_log("Laravel Module apply error in ModuleServiceProvider: " . $e->getMessage());
+            }
+        }
     }
 }

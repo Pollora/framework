@@ -9,6 +9,7 @@ use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Infrastructure\Services\LaravelModuleDiscovery;
 
 /**
  * Module Discovery Orchestrator Service
@@ -19,6 +20,8 @@ use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
  */
 class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterface
 {
+    protected ?LaravelModuleDiscovery $laravelModuleDiscovery = null;
+
     public function __construct(
         protected Container $container
     ) {}
@@ -66,5 +69,49 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
             }
             return [];
         }
+    }
+
+    /**
+     * Discover all enabled Laravel modules from nwidart/laravel-modules.
+     */
+    public function discoverLaravelModules(): void
+    {
+        $this->getLaravelModuleDiscovery()->discoverLaravelModules();
+    }
+
+    /**
+     * Apply all discovered Laravel modules.
+     */
+    public function applyLaravelModules(): void
+    {
+        $this->getLaravelModuleDiscovery()->applyLaravelModules();
+    }
+
+    /**
+     * Discover a specific Laravel module by name.
+     */
+    public function discoverLaravelModule(string $moduleName): void
+    {
+        $this->getLaravelModuleDiscovery()->discoverLaravelModule($moduleName);
+    }
+
+    /**
+     * Get all enabled Laravel modules and their discovery data.
+     */
+    public function discoverAndReturnLaravelModules(): array
+    {
+        return $this->getLaravelModuleDiscovery()->discoverAndReturnLaravelModules();
+    }
+
+    /**
+     * Get or create the Laravel module discovery service.
+     */
+    protected function getLaravelModuleDiscovery(): LaravelModuleDiscovery
+    {
+        if ($this->laravelModuleDiscovery === null) {
+            $this->laravelModuleDiscovery = new LaravelModuleDiscovery($this->container);
+        }
+
+        return $this->laravelModuleDiscovery;
     }
 }
