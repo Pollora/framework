@@ -54,6 +54,7 @@ class LazyConfigLoadingTest extends TestCase
                 if ($key === 'wordpress.plugin_conditions') {
                     return [];
                 }
+
                 return $default;
             });
 
@@ -89,6 +90,7 @@ class LazyConfigLoadingTest extends TestCase
                 if ($key === 'wordpress.plugin_conditions') {
                     return [];
                 }
+
                 return $default;
             });
 
@@ -143,6 +145,7 @@ class LazyConfigLoadingTest extends TestCase
                 if ($key === 'wordpress.plugin_conditions') {
                     return [];
                 }
+
                 return $default;
             });
 

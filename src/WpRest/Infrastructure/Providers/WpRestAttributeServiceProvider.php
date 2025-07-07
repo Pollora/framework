@@ -7,9 +7,9 @@ namespace Pollora\WpRest\Infrastructure\Providers;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\WpRest\AbstractWpRestRoute;
 use Pollora\WpRest\Infrastructure\Services\WpRestDiscovery;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 
 /**
  * Service provider for attribute-based WordPress REST API route registration.
@@ -36,7 +36,7 @@ class WpRestAttributeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerWpRestRoutes();
-        
+
         // Register WpRest discovery with the discovery engine
         $this->registerWpRestDiscovery();
     }
@@ -51,7 +51,7 @@ class WpRestAttributeServiceProvider extends ServiceProvider
             $discoveryManager = $this->app->make(DiscoveryManager::class);
 
             // Check if wp_rest_routes discovery is available
-            if (!$discoveryManager->hasDiscovery('wp_rest_routes')) {
+            if (! $discoveryManager->hasDiscovery('wp_rest_routes')) {
                 return;
             }
 
@@ -107,7 +107,7 @@ class WpRestAttributeServiceProvider extends ServiceProvider
             /** @var DiscoveryEngineInterface $engine */
             $engine = $this->app->make(DiscoveryEngineInterface::class);
             $wpRestDiscovery = $this->app->make(WpRestDiscovery::class);
-            
+
             $engine->addDiscovery('wp_rest_routes', $wpRestDiscovery);
         }
     }

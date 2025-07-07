@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Foundation\Console\Commands\Concerns;
 
-use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Symfony\Component\Console\Input\InputOption;
-use InvalidArgumentException;
 
 trait HasThemeSupport
 {
@@ -66,7 +65,7 @@ trait HasThemeSupport
     /**
      * Get theme path for a given theme name.
      *
-     * @param string $themeName The theme name
+     * @param  string  $themeName  The theme name
      * @return string The theme path
      */
     protected function getThemePath(string $themeName): string
@@ -74,13 +73,13 @@ trait HasThemeSupport
         // Default themes path, can be overridden
         $themesPath = config('theme.path', base_path('themes'));
 
-        return rtrim($themesPath, '/') . '/' .$themeName;
+        return rtrim($themesPath, '/').'/'.$themeName;
     }
 
     /**
      * Normalize theme name for namespace.
      *
-     * @param string $themeName The theme name to normalize
+     * @param  string  $themeName  The theme name to normalize
      * @return string The normalized theme name for namespace
      */
     protected function normalizeThemeName(string $themeName): string
@@ -133,6 +132,7 @@ trait HasThemeSupport
      * Resolve theme location.
      *
      * @return array{type: string, path: string, namespace: string, name: string}
+     *
      * @throws InvalidArgumentException When theme is not found
      */
     protected function resolveThemeLocation(): array
@@ -142,7 +142,6 @@ trait HasThemeSupport
         if (! $theme) {
             $theme = $this->getActiveTheme();
         }
-
 
         if (! $theme) {
             throw new InvalidArgumentException('No theme specified and no active theme found.');

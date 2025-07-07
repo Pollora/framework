@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
-use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
+use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
+use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
+use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;
@@ -34,9 +37,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
         $themePath = get_stylesheet_directory();
 
         // Parse theme headers if not provided
-        $styleCssPath = rtrim($themePath, '/') . '/style.css';
+        $styleCssPath = rtrim($themePath, '/').'/style.css';
         $themeData = $this->themeParser->parseThemeHeaders($styleCssPath);
-
 
         // Create the theme module
         $theme = $this->createThemeModule($themeName, $themePath);
@@ -50,6 +52,15 @@ class ThemeRegistrar implements ThemeRegistrarInterface
         // Invalidate repository cache and discover structures
         $this->invalidateRepositoryCache();
         $this->discoverThemeStructures($theme);
+
+        // Load theme configuration
+        $this->loadThemeConfiguration($theme);
+
+        // Setup theme components
+        $this->setupThemeComponents($theme);
+
+        // Setup theme assets and includes
+        $this->setupThemeAssets($theme);
 
         // Register and boot the theme
         $theme->register();
@@ -75,7 +86,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     protected function invalidateRepositoryCache(): void
     {
-        if (!$this->app->has(ModuleRepositoryInterface::class)) {
+        if (! $this->app->has(ModuleRepositoryInterface::class)) {
             return;
         }
 
@@ -86,7 +97,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
                 $repository->resetCache();
             }
         } catch (\Exception $e) {
-            $this->logError('Failed to invalidate theme repository cache: ' . $e->getMessage());
+            $this->logError('Failed to invalidate theme repository cache: '.$e->getMessage());
         }
     }
 
@@ -95,7 +106,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     protected function discoverThemeStructures(ThemeModuleInterface $theme): void
     {
-        if (!$this->app->has(ModuleDiscoveryOrchestratorInterface::class)) {
+        if (! $this->app->has(ModuleDiscoveryOrchestratorInterface::class)) {
             return;
         }
 
@@ -104,7 +115,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             $discoveryService->discover($theme->getPath());
         } catch (\Exception $e) {
-            $this->logError("Theme discovery error for {$theme->getName()}: " . $e->getMessage());
+            $this->logError("Theme discovery error for {$theme->getName()}: ".$e->getMessage());
         }
     }
 
@@ -113,7 +124,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     protected function processDiscoveredStructure($structure, string $scoutType, ThemeModuleInterface $theme): void
     {
-        if (!$this->isDebugMode()) {
+        if (! $this->isDebugMode()) {
             return;
         }
 
@@ -164,6 +175,92 @@ class ThemeRegistrar implements ThemeRegistrarInterface
     {
         if (function_exists('error_log')) {
             error_log($message);
+        }
+    }
+
+    /**
+     * Load theme-specific configuration.
+     */
+    protected function loadThemeConfiguration(ThemeModuleInterface $theme): void
+    {
+        if (! $this->app->has(ModuleConfigurationLoader::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleConfigurationLoader $configLoader */
+            $configLoader = $this->app->get(ModuleConfigurationLoader::class);
+
+            $configLoader->loadModuleConfiguration(
+                $theme->getPath(),
+                'theme', // module type
+                $theme->getLowerName()
+            );
+        } catch (\Exception $e) {
+            $this->logError('Failed to load theme configuration: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Setup theme-specific components.
+     */
+    protected function setupThemeComponents(ThemeModuleInterface $theme): void
+    {
+        if (! $this->app->has(ModuleComponentManager::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleComponentManager $componentManager */
+            $componentManager = $this->app->get(ModuleComponentManager::class);
+
+            // Define theme-specific components
+            $themeComponents = [
+                \Pollora\Theme\Domain\Models\ThemeInitializer::class,
+                \Pollora\BlockPattern\UI\PatternComponent::class,
+                \Pollora\Theme\Domain\Models\Menus::class,
+                \Pollora\Theme\Infrastructure\Services\Support::class,
+                \Pollora\Theme\Domain\Models\Sidebar::class,
+                \Pollora\Theme\Domain\Models\Templates::class,
+                \Pollora\Theme\Domain\Models\ImageSize::class,
+            ];
+
+            $moduleId = 'theme.'.$theme->getLowerName();
+
+            $componentManager->registerModuleComponents($moduleId, $themeComponents);
+            $componentManager->initializeModuleComponents($moduleId);
+        } catch (\Exception $e) {
+            $this->logError('Failed to setup theme components: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Setup theme assets and includes.
+     */
+    protected function setupThemeAssets(ThemeModuleInterface $theme): void
+    {
+        if (! $this->app->has(ModuleAssetManager::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleAssetManager $assetManager */
+            $assetManager = $this->app->get(ModuleAssetManager::class);
+
+            // Setup asset management (theme always uses 'theme' as container name)
+            $assetManager->setupModuleAssets(
+                $theme->getLowerName(),
+                $theme->getPath(),
+                'theme'
+            );
+
+            // Load theme includes
+            $assetManager->loadModuleIncludes($theme->getPath());
+
+            // Register Blade directives
+            $assetManager->registerModuleBladeDirectives($theme->getPath());
+        } catch (\Exception $e) {
+            $this->logError('Failed to setup theme assets: '.$e->getMessage());
         }
     }
 }

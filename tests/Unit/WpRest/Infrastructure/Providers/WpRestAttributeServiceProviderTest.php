@@ -7,7 +7,6 @@ namespace Tests\Unit\WpRest\Infrastructure\Providers;
 use Illuminate\Container\Container;
 use Pollora\Attributes\AttributeProcessor;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
-use Pollora\Discovery\Domain\Models\DiscoveryItems;
 use Pollora\WpRest\AbstractWpRestRoute;
 use Pollora\WpRest\Infrastructure\Providers\WpRestAttributeServiceProvider;
 use Pollora\WpRest\Infrastructure\Services\WpRestDiscovery;
@@ -43,7 +42,6 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
             return new AttributeProcessor($app);
         });
     }
-
 
     public function test_register_registers_wprest_discovery(): void
     {
@@ -137,4 +135,3 @@ class TestWpRestRoute extends AbstractWpRestRoute
 
     public string $route = 'endpoint';
 }
-

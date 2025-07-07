@@ -43,11 +43,11 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
     /**
      * Create a new Taxonomy configuration.
      *
-     * @param string $slug The taxonomy slug
-     * @param string $singular The singular name
-     * @param string $plural The plural name
-     * @param string|array $objectType The post type(s) this taxonomy applies to
-     * @param array<string, mixed> $initialArgs Initial arguments
+     * @param  string  $slug  The taxonomy slug
+     * @param  string  $singular  The singular name
+     * @param  string  $plural  The plural name
+     * @param  string|array  $objectType  The post type(s) this taxonomy applies to
+     * @param  array<string, mixed>  $initialArgs  Initial arguments
      */
     public function __construct(string $slug, string $singular, string $plural, string|array $objectType, array $initialArgs = [])
     {
@@ -109,8 +109,8 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
     /**
      * Set a specific argument value.
      *
-     * @param string $key The argument key
-     * @param mixed $value The argument value
+     * @param  string  $key  The argument key
+     * @param  mixed  $value  The argument value
      */
     public function setArg(string $key, mixed $value): void
     {
@@ -120,8 +120,8 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
     /**
      * Get a specific argument value.
      *
-     * @param string $key The argument key
-     * @param mixed $default The default value if key doesn't exist
+     * @param  string  $key  The argument key
+     * @param  mixed  $default  The default value if key doesn't exist
      */
     public function getArg(string $key, mixed $default = null): mixed
     {
@@ -131,7 +131,7 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
     /**
      * Merge additional arguments into the configuration.
      *
-     * @param array<string, mixed> $args Arguments to merge
+     * @param  array<string, mixed>  $args  Arguments to merge
      */
     public function mergeArgs(array $args): void
     {

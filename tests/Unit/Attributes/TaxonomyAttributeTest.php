@@ -145,7 +145,7 @@ function testBooleanAttribute(string $attributeName, string $argName): void
 {
     test("$attributeName attribute sets $argName parameter", function () use ($argName) {
         $taxonomy = new TestTaxonomy;
-        
+
         // Simulate the discovery process by manually processing attributes
         $reflectionClass = new ReflectionClass($taxonomy);
         foreach ($reflectionClass->getAttributes() as $attribute) {
@@ -164,7 +164,7 @@ function testValueAttribute(string $attributeName, string $argName, mixed $expec
 {
     test("$attributeName attribute sets $argName parameter", function () use ($argName, $expectedValue) {
         $taxonomy = new TestTaxonomy;
-        
+
         // Simulate the discovery process by manually processing attributes
         $reflectionClass = new ReflectionClass($taxonomy);
         foreach ($reflectionClass->getAttributes() as $attribute) {
@@ -243,7 +243,7 @@ testMethodAttribute('UpdateCountCallback', 'update_count_callback', 'updateCount
 // Test the final getArgs method
 test('getArgs method merges attribute args with withArgs and labels', function () {
     $taxonomy = new TestTaxonomy;
-    
+
     // Simulate the discovery process by manually processing attributes
     $reflectionClass = new ReflectionClass($taxonomy);
     foreach ($reflectionClass->getAttributes() as $attribute) {

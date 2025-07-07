@@ -11,8 +11,6 @@ namespace Pollora\Hook\UI\Console;
  *
  * Command to create a new filter hook class (feature UI layer).
  * Supports generation in different locations (app, theme, plugin) through traits.
- * 
- * @package Pollora\Hook\UI\Console
  */
 class FilterMakeCommand extends AttributeMakeCommand
 {

@@ -44,7 +44,7 @@ class ThemeConfig
                     'ConfigRepository not initialized. Call ThemeConfig::setRepository() before using this class.'
                 );
             }
-            
+
             // Return the default value if repository is not initialized
             return $default;
         }

@@ -9,12 +9,12 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Modules\Infrastructure\Services\ModuleBootstrap;
-use Pollora\Modules\Infrastructure\Services\ModuleManifest;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
+use Pollora\Modules\Infrastructure\Services\ModuleManifest;
 
 /**
  * Main service provider for the generic module system.
@@ -41,6 +41,22 @@ class ModuleServiceProvider extends ServiceProvider
         // Register alias for easier access
         $this->app->alias(ModuleDiscoveryOrchestrator::class, 'modules.discovery');
 
+        // Register new generic module services
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, function ($app) {
+            return new \Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader(
+                $app,
+                $app->make(\Pollora\Config\Domain\Contracts\ConfigRepositoryInterface::class)
+            );
+        });
+
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, function ($app) {
+            return new \Pollora\Modules\Infrastructure\Services\ModuleComponentManager($app);
+        });
+
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, function ($app) {
+            return new \Pollora\Modules\Infrastructure\Services\ModuleAssetManager($app);
+        });
+
         // Merge configuration
         $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');
     }
@@ -50,7 +66,7 @@ class ModuleServiceProvider extends ServiceProvider
         // Load helper functions
         $this->loadHelperFunctions();
 
-        // Register ModuleManifest service
+        // Legacy services kept for compatibility but simplified
         $this->app->singleton(ModuleManifest::class, function ($app) {
             return new ModuleManifest(
                 new Filesystem,
@@ -61,7 +77,6 @@ class ModuleServiceProvider extends ServiceProvider
             );
         });
 
-        // Register ModuleBootstrap service
         $this->app->singleton(ModuleBootstrap::class, function ($app) use ($router) {
             return new ModuleBootstrap(
                 $app,
@@ -70,37 +85,17 @@ class ModuleServiceProvider extends ServiceProvider
             );
         });
 
-        // Register and boot modules if a repository is available
-        if ($this->app->bound(ModuleRepositoryInterface::class)) {
-            $bootstrap = $this->app->make(ModuleBootstrap::class);
-
-            // Register modules
-            $bootstrap->registerModules();
-
-
+        // Setup Laravel Module discovery only
+        $this->app->booted(function () {
             // Discover Laravel modules but don't apply yet
             $this->discoverLaravelModules();
 
-            // Boot modules on next cycle
-            $this->app->booted(function () use ($bootstrap) {
+            // Fire event to notify that modules are ready
+            Event::dispatch('modules.routes.registered');
 
-                $bootstrap->bootModules();
-                // Register migrations and translations
-                $bootstrap->registerMigrations();
-                $bootstrap->registerTranslations();
-
-                // Register module routes
-                $bootstrap->registerRoutes();
-
-                // Fire event to notify that module routes have been registered
-                // This allows other services (like RouteServiceProvider) to register
-                // their fallback routes after all module routes are in place
-                Event::dispatch('modules.routes.registered');
-
-                // Schedule application after WordPress is ready
-                $this->scheduleWordPressReadyApplication();
-            });
-        }
+            // Schedule application after WordPress is ready
+            $this->scheduleWordPressReadyApplication();
+        });
     }
 
     /**
@@ -144,7 +139,7 @@ class ModuleServiceProvider extends ServiceProvider
      */
     protected function discoverLaravelModules(): void
     {
-        if (!$this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
+        if (! $this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
             return;
         }
 
@@ -158,7 +153,7 @@ class ModuleServiceProvider extends ServiceProvider
             }
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Laravel Module discovery error in ModuleServiceProvider: " . $e->getMessage());
+                error_log('Laravel Module discovery error in ModuleServiceProvider: '.$e->getMessage());
             }
         }
     }
@@ -168,7 +163,7 @@ class ModuleServiceProvider extends ServiceProvider
      */
     protected function applyLaravelModules(): void
     {
-        if (!$this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
+        if (! $this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
             return;
         }
 
@@ -182,7 +177,7 @@ class ModuleServiceProvider extends ServiceProvider
             }
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Laravel Module apply error in ModuleServiceProvider: " . $e->getMessage());
+                error_log('Laravel Module apply error in ModuleServiceProvider: '.$e->getMessage());
             }
         }
     }

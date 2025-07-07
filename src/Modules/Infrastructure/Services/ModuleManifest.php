@@ -11,7 +11,8 @@ use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 /**
  * Generic module manifest service inspired by nwidart/laravel-modules.
  *
- * This service discovers and manages module metadata from various sources.
+ * This service is now simplified and only handles Laravel Module (nwidart) specific tasks.
+ * Regular themes and plugins now use the self-registration system.
  */
 class ModuleManifest
 {
@@ -39,106 +40,48 @@ class ModuleManifest
 
     /**
      * Get the current module manifest (service providers).
+     *
+     * This method is now deprecated as Laravel modules handle their own service providers.
      */
     public function getProviders(): array
     {
-        if (! empty($this->manifest)) {
-            return $this->manifest;
-        }
-
-        return $this->manifest = $this->build();
+        // Legacy method - Laravel modules handle their own service providers
+        // through nwidart/laravel-modules package
+        return [];
     }
 
     /**
      * Build the manifest and write it to disk.
+     *
+     * This method is now deprecated as Laravel modules handle their own manifest.
      */
     public function build(): array
     {
-        $providers = [];
-
-        // Get providers from modules data first (these don't need autoloading)
-        $moduleProviders = $this->getModulesData()
-            ->pluck('providers')
-            ->flatten()
-            ->filter()
-            ->toArray();
-
-        $providers = array_merge($providers, $moduleProviders);
-
-        // Legacy scout discovery is no longer used
-        // Provider discovery is now handled through the new Discovery system
-        // in the appropriate service providers
-
-        return array_unique($providers);
+        // Legacy method - Laravel modules handle their own manifest
+        // through nwidart/laravel-modules package
+        return [];
     }
 
     /**
      * Register module files.
+     *
+     * This method is now deprecated as modules handle their own files.
      */
     public function registerFiles(): void
     {
-        $this->getModulesData()
-            ->each(function (array $manifest) {
-                if (empty($manifest['files'])) {
-                    return;
-                }
-
-                foreach ($manifest['files'] as $file) {
-                    $filePath = $manifest['module_directory'].DIRECTORY_SEPARATOR.$file;
-                    if (file_exists($filePath)) {
-                        include_once $filePath;
-                    }
-                }
-            });
+        // Legacy method - Laravel modules handle their own files
+        // through nwidart/laravel-modules package
     }
 
     /**
      * Get modules data from repository and metadata.
+     *
+     * This method is now deprecated as modules use self-registration.
      */
     public function getModulesData(): Collection
     {
-        if (! empty(self::$manifestData) && ! app()->runningUnitTests()) {
-            return self::$manifestData;
-        }
-
-        self::$manifestData = collect($this->repository->allEnabled())
-            ->map(function ($module) {
-                $moduleData = [
-                    'name' => $module->getName(),
-                    'module_directory' => $module->getPath(),
-                    'providers' => [],
-                    'files' => [],
-                    'priority' => $module->get('priority', 0),
-                ];
-
-                // Try to get providers from module metadata
-                if (method_exists($module, 'getProviders')) {
-                    $moduleData['providers'] = $module->getProviders();
-                }
-
-                // Try to get files from module metadata
-                if (method_exists($module, 'getFiles')) {
-                    $moduleData['files'] = $module->getFiles();
-                }
-
-                // Try to discover main service provider if not already defined
-                if (empty($moduleData['providers']) && method_exists($module, 'findMainServiceProvider')) {
-                    $mainProvider = $module->findMainServiceProvider();
-                    if ($mainProvider) {
-                        $moduleData['providers'][] = $mainProvider;
-                    }
-                }
-
-                return $moduleData;
-            })
-            ->filter(function ($moduleData) {
-                // Only include modules that have providers or files
-                return ! empty($moduleData['providers']) || ! empty($moduleData['files']);
-            })
-            ->sortBy(fn ($module) => $module['priority'] ?? 0)
-            ->values();
-
-        return self::$manifestData;
+        // Legacy method - modules now use self-registration
+        return collect([]);
     }
 
     /**
@@ -151,16 +94,12 @@ class ModuleManifest
 
     /**
      * Write the manifest to cache file.
+     *
+     * This method is now deprecated as Laravel modules handle their own caching.
      */
     public function write(): void
     {
-        if (! $this->manifestPath) {
-            return;
-        }
-
-        $this->files->put(
-            $this->manifestPath,
-            '<?php return '.var_export($this->getProviders(), true).';'
-        );
+        // Legacy method - Laravel modules handle their own caching
+        // through nwidart/laravel-modules package
     }
 }

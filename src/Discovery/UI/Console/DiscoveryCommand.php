@@ -12,8 +12,6 @@ use Pollora\Discovery\Application\Services\DiscoveryManager;
  *
  * Provides CLI commands for managing the discovery system including
  * running discovery, clearing caches, and inspecting discovered items.
- *
- * @package Pollora\Discovery\UI\Console
  */
 final class DiscoveryCommand extends Command
 {
@@ -36,8 +34,7 @@ final class DiscoveryCommand extends Command
     /**
      * Execute the console command
      *
-     * @param DiscoveryManager $discoveryManager The discovery manager
-     *
+     * @param  DiscoveryManager  $discoveryManager  The discovery manager
      * @return int Command exit code
      */
     public function handle(DiscoveryManager $discoveryManager): int
@@ -54,21 +51,22 @@ final class DiscoveryCommand extends Command
 
             // Run specific discovery or all discoveries
             $specificDiscovery = $this->option('discovery');
-            
+
             if ($specificDiscovery) {
                 $this->info("Running discovery: {$specificDiscovery}");
-                
-                if (!$discoveryManager->hasDiscovery($specificDiscovery)) {
+
+                if (! $discoveryManager->hasDiscovery($specificDiscovery)) {
                     $this->error("Discovery '{$specificDiscovery}' not found!");
+
                     return self::FAILURE;
                 }
 
                 // Run only discovery phase for inspection
                 $discoveryManager->discover();
                 $items = $discoveryManager->getDiscoveredItems($specificDiscovery);
-                
-                $this->info("Found " . count($items) . " items for '{$specificDiscovery}'");
-                
+
+                $this->info('Found '.count($items)." items for '{$specificDiscovery}'");
+
                 if ($this->confirm('Apply discovered items?', true)) {
                     $discoveryManager->apply();
                     $this->info('✓ Discovery applied');
@@ -83,11 +81,12 @@ final class DiscoveryCommand extends Command
             $this->showDiscoverySummary($discoveryManager);
 
             $this->info('Discovery process completed successfully!');
+
             return self::SUCCESS;
 
         } catch (\Throwable $e) {
-            $this->error('Discovery process failed: ' . $e->getMessage());
-            
+            $this->error('Discovery process failed: '.$e->getMessage());
+
             if ($this->getOutput()->isVerbose()) {
                 $this->error($e->getTraceAsString());
             }
@@ -99,9 +98,7 @@ final class DiscoveryCommand extends Command
     /**
      * Show summary of all discoveries and their discovered items
      *
-     * @param DiscoveryManager $discoveryManager The discovery manager
-     *
-     * @return void
+     * @param  DiscoveryManager  $discoveryManager  The discovery manager
      */
     private function showDiscoverySummary(DiscoveryManager $discoveryManager): void
     {
@@ -110,7 +107,7 @@ final class DiscoveryCommand extends Command
         $this->info('═════════════════');
 
         $discoveries = $discoveryManager->getDiscoveries();
-        
+
         foreach ($discoveries as $identifier => $discovery) {
             $itemCount = count($discoveryManager->getDiscoveredItems($identifier));
             $this->line("• {$identifier}: {$itemCount} items");

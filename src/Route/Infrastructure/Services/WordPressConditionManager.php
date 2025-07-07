@@ -21,7 +21,7 @@ use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInt
  * - Custom conditions from Laravel configuration
  * - Plugin-specific conditions (WooCommerce, etc.)
  */
-class WordPressConditionManager implements WordPressConditionManagerInterface, ConditionResolverInterface
+class WordPressConditionManager implements ConditionResolverInterface, WordPressConditionManagerInterface
 {
     /**
      * Registered WordPress conditions mapped to their aliases.

@@ -11,7 +11,7 @@ declare(strict_types=1);
  */
 
 // Ensure Pollora framework is loaded
-if (!function_exists('pollora_register_theme')) {
+if (! function_exists('pollora_register_theme')) {
     return;
 }
 
@@ -21,6 +21,6 @@ try {
 } catch (Exception $e) {
     // Log error but don't break the site
     if (function_exists('error_log')) {
-        error_log('Failed to register %theme_name% theme: ' . $e->getMessage());
+        error_log('Failed to register %theme_name% theme: '.$e->getMessage());
     }
-} 
+}

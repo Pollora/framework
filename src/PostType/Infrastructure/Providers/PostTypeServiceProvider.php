@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\PostType\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 use Pollora\PostType\Domain\Contracts\PostTypeRegistryInterface;
@@ -13,9 +14,8 @@ use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
 use Pollora\PostType\Infrastructure\Adapters\WordPressPostTypeRegistry;
 use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
 use Pollora\PostType\Infrastructure\Repositories\PostTypeRepository;
-use Pollora\PostType\UI\Console\PostTypeMakeCommand;
 use Pollora\PostType\Infrastructure\Services\PostTypeDiscovery;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
+use Pollora\PostType\UI\Console\PostTypeMakeCommand;
 
 /**
  * Service provider for post type functionality.
@@ -83,7 +83,7 @@ class PostTypeServiceProvider extends ServiceProvider
 
         // Register post types from configuration
         $this->registerConfiguredPostTypes();
-        
+
         // Register PostType discovery with the discovery engine
         $this->registerPostTypeDiscovery();
     }
@@ -126,7 +126,7 @@ class PostTypeServiceProvider extends ServiceProvider
             /** @var DiscoveryEngineInterface $engine */
             $engine = $this->app->make(DiscoveryEngineInterface::class);
             $postTypeDiscovery = $this->app->make(PostTypeDiscovery::class);
-            
+
             $engine->addDiscovery('post_types', $postTypeDiscovery);
         }
     }

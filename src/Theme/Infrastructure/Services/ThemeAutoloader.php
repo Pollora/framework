@@ -9,7 +9,7 @@ use Pollora\Theme\Domain\Models\ThemeModule;
 
 /**
  * Simplified theme autoloader service.
- * 
+ *
  * Handles autoloading for themes using the fixed namespace convention:
  * Theme\{ThemeName}\
  */
@@ -52,6 +52,7 @@ class ThemeAutoloader extends ModuleAutoloader
     public function isThemeRegistered(string $themeName): bool
     {
         $namespace = $this->getThemeNamespace($themeName);
+
         return $this->isNamespaceRegistered($namespace);
     }
 }

@@ -38,10 +38,10 @@ class PostTypeConfiguration implements PostTypeAttributeInterface
     /**
      * Create a new PostType configuration.
      *
-     * @param string $slug The post type slug
-     * @param string $singular The singular name
-     * @param string $plural The plural name
-     * @param array<string, mixed> $initialArgs Initial arguments
+     * @param  string  $slug  The post type slug
+     * @param  string  $singular  The singular name
+     * @param  string  $plural  The plural name
+     * @param  array<string, mixed>  $initialArgs  Initial arguments
      */
     public function __construct(string $slug, string $singular, string $plural, array $initialArgs = [])
     {
@@ -86,8 +86,8 @@ class PostTypeConfiguration implements PostTypeAttributeInterface
     /**
      * Set a specific argument value.
      *
-     * @param string $key The argument key
-     * @param mixed $value The argument value
+     * @param  string  $key  The argument key
+     * @param  mixed  $value  The argument value
      */
     public function setArg(string $key, mixed $value): void
     {
@@ -97,8 +97,8 @@ class PostTypeConfiguration implements PostTypeAttributeInterface
     /**
      * Get a specific argument value.
      *
-     * @param string $key The argument key
-     * @param mixed $default The default value if key doesn't exist
+     * @param  string  $key  The argument key
+     * @param  mixed  $default  The default value if key doesn't exist
      */
     public function getArg(string $key, mixed $default = null): mixed
     {
@@ -108,7 +108,7 @@ class PostTypeConfiguration implements PostTypeAttributeInterface
     /**
      * Merge additional arguments into the configuration.
      *
-     * @param array<string, mixed> $args Arguments to merge
+     * @param  array<string, mixed>  $args  Arguments to merge
      */
     public function mergeArgs(array $args): void
     {

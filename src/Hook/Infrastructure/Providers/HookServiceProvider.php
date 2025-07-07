@@ -7,14 +7,14 @@ namespace Pollora\Hook\Infrastructure\Providers;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Infrastructure\Services\HookDiscovery;
 use Pollora\Hook\UI\Console\ActionMakeCommand;
 use Pollora\Hook\UI\Console\FilterMakeCommand;
-use Pollora\Hook\Infrastructure\Services\HookDiscovery;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 
 /**
  * Service provider for Hook feature (Infrastructure layer).
@@ -53,7 +53,7 @@ class HookServiceProvider extends ServiceProvider
         // Bind concrete classes
         $this->app->singleton(Action::class);
         $this->app->singleton(Filter::class);
-        
+
         // Bind interfaces to implementations
         $this->app->bind(ActionContract::class, Action::class);
         $this->app->bind(FilterContract::class, Filter::class);
@@ -92,7 +92,7 @@ class HookServiceProvider extends ServiceProvider
             /** @var DiscoveryEngineInterface $engine */
             $engine = $this->app->make(DiscoveryEngineInterface::class);
             $hookDiscovery = $this->app->make(HookDiscovery::class);
-            
+
             $engine->addDiscovery('hooks', $hookDiscovery);
         }
     }

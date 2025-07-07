@@ -6,16 +6,15 @@ namespace Pollora\Theme\Infrastructure\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
+use Pollora\Theme\Domain\Contracts\ContainerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
@@ -61,10 +60,7 @@ class ThemeServiceProvider extends ServiceProvider
         // Register theme directories for WordPress
         $this->registerThemeDirectories();
 
-        // Register theme components
-        $this->registerThemeComponents();
-
-        // Setup theme boot process
+        // Setup theme boot process (simplified)
         $this->setupThemeBoot();
     }
 
@@ -115,7 +111,7 @@ class ThemeServiceProvider extends ServiceProvider
     protected function registerThemeServices(): void
     {
         // Register domain container interface
-        $this->app->singleton(\Pollora\Theme\Domain\Contracts\ContainerInterface::class, function ($app) {
+        $this->app->singleton(ContainerInterface::class, function ($app) {
             return $this->createDomainContainer($app);
         });
 
@@ -128,13 +124,14 @@ class ThemeServiceProvider extends ServiceProvider
         // Theme registrar for self-registration
         $this->app->singleton(ThemeRegistrarInterface::class, function ($app) {
             return new ThemeRegistrar(
-                $app->make(\Pollora\Theme\Domain\Contracts\ContainerInterface::class),
+                $app->make(ContainerInterface::class),
                 $app->make(WordPressThemeParser::class)
             );
         });
 
-        // Theme repository
-        $this->app->singleton(ModuleRepositoryInterface::class, function ($app) {
+        // Theme repository (deprecated - themes now use self-registration)
+        // Kept for backward compatibility only
+        $this->app->singleton('theme.repository', function ($app) {
             return new ThemeRepository(
                 $app,
                 $app->make(WordPressThemeParser::class),
@@ -151,16 +148,16 @@ class ThemeServiceProvider extends ServiceProvider
                 $app,
                 $app->get('view')->getFinder(),
                 $app->make('translator')->getLoader(),
-                $app->make(ModuleRepositoryInterface::class),
+                $app->bound('theme.repository') ? $app->make('theme.repository') : null,
                 $app->make(ThemeRegistrarInterface::class)
             );
         });
 
         // Backward compatibility alias
-        $this->app->singleton('theme', fn($app) => $app->make(ThemeService::class));
+        $this->app->singleton('theme', fn ($app) => $app->make(ThemeService::class));
 
         // Class alias for backward compatibility
-        if (!class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
+        if (! class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
             class_alias(LaravelThemeModule::class, 'Pollora\\Modules\\Domain\\Models\\LaravelThemeModule');
         }
     }
@@ -178,26 +175,14 @@ class ThemeServiceProvider extends ServiceProvider
         }
 
         if ($baseThemePath && is_dir($baseThemePath)) {
-            if (!isset($GLOBALS['wp_theme_directories'])) {
+            if (! isset($GLOBALS['wp_theme_directories'])) {
                 $GLOBALS['wp_theme_directories'] = [];
             }
 
-            if (!in_array($baseThemePath, $GLOBALS['wp_theme_directories'], true)) {
+            if (! in_array($baseThemePath, $GLOBALS['wp_theme_directories'], true)) {
                 $GLOBALS['wp_theme_directories'][] = $baseThemePath;
             }
         }
-    }
-
-    /**
-     * Register theme components.
-     */
-    protected function registerThemeComponents(): void
-    {
-        $this->app->singleton(ThemeComponentProvider::class, function ($app) {
-            return new ThemeComponentProvider($app);
-        });
-
-        $this->app->make(ThemeComponentProvider::class)->register();
     }
 
     /**
@@ -205,68 +190,14 @@ class ThemeServiceProvider extends ServiceProvider
      */
     protected function setupThemeBoot(): void
     {
-        /** @var Action $action */
-        $action = $this->app->make(Action::class);
-        $action->add('after_setup_theme', [$this, 'bootTheme']);
-
         // Setup Blade directive for theme checking
         if (class_exists('Illuminate\\Support\\Facades\\Blade')) {
             Blade::if('theme', function (string $name) {
                 /** @var ThemeService $themeManager */
                 $themeManager = app(ThemeService::class);
+
                 return $themeManager->hasTheme($name);
             });
-        }
-    }
-
-    /**
-     * Boot theme after WordPress is ready.
-     */
-    public function bootTheme(): void
-    {
-        /** @var ThemeService $themeService */
-        $themeService = $this->app->make(ThemeService::class);
-
-        if (!$themeService->theme()) {
-            return;
-        }
-
-        // Load theme include files
-        $this->loadThemeIncludes($themeService);
-
-        // Setup asset management
-        $this->setupAssetManagement($themeService);
-
-        // Register Blade directives
-        $this->registerBladeDirectives();
-    }
-
-    /**
-     * Load theme include files.
-     */
-    protected function loadThemeIncludes(ThemeService $themeService): void
-    {
-        $themeInclude = $themeService->theme()->getThemeIncDir();
-
-        if (is_dir($themeInclude)) {
-            $this->loadFilesRecursively($themeInclude);
-        }
-    }
-
-    /**
-     * Setup asset management for the active theme.
-     */
-    protected function setupAssetManagement(ThemeService $themeService): void
-    {
-        $currentTheme = $themeService->active();
-
-        if ($currentTheme) {
-            $this->app->make(AssetManager::class)->addContainer('theme', [
-                'hot_file' => public_path("{$currentTheme}.hot"),
-                'build_directory' => "build/{$currentTheme}",
-                'manifest_path' => 'manifest.json',
-                'base_path' => 'resources/assets/',
-            ]);
         }
     }
 
@@ -276,21 +207,6 @@ class ThemeServiceProvider extends ServiceProvider
     protected function loadThemeConfiguration(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/theme.php', 'theme');
-    }
-
-    /**
-     * Register Blade directives.
-     */
-    protected function registerBladeDirectives(): void
-    {
-        $directivesPath = __DIR__.'/../Services/Directives.php';
-        if (file_exists($directivesPath)) {
-            $directives = require $directivesPath;
-
-            foreach ($directives as $name => $directive) {
-                Blade::directive($name, $directive);
-            }
-        }
     }
 
     /**
@@ -307,7 +223,7 @@ class ThemeServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton('theme.status', function ($app) {
-            return new ThemeStatusCommand();
+            return new ThemeStatusCommand;
         });
 
         $this->commands([
@@ -318,29 +234,11 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load all PHP files from a directory recursively.
-     */
-    protected function loadFilesRecursively(string $directory): void
-    {
-        if (!is_dir($directory)) {
-            return;
-        }
-
-        foreach (glob($directory . '/*.php') as $file) {
-            require_once $file;
-        }
-
-        foreach (glob($directory . '/*', GLOB_ONLYDIR) as $subDir) {
-            $this->loadFilesRecursively($subDir);
-        }
-    }
-
-    /**
      * Create domain container adapter.
      */
-    protected function createDomainContainer($app): \Pollora\Theme\Domain\Contracts\ContainerInterface
+    protected function createDomainContainer($app): ContainerInterface
     {
-        return new class($app) implements \Pollora\Theme\Domain\Contracts\ContainerInterface
+        return new class($app) implements ContainerInterface
         {
             public function __construct(protected $app) {}
 
@@ -381,4 +279,3 @@ class ThemeServiceProvider extends ServiceProvider
         };
     }
 }
-

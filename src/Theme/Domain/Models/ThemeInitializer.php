@@ -100,6 +100,7 @@ class ThemeInitializer implements ThemeComponent
 
     /**
      * Override the stylesheet directory URI
+     *
      * @TODO : clean
      */
     public function overrideThemeDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string

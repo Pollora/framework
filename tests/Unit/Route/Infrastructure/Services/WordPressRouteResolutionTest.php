@@ -53,6 +53,7 @@ class WordPressRouteResolutionTest extends TestCase
                 if ($key === 'wordpress.plugin_conditions') {
                     return [];
                 }
+
                 return $default;
             });
 

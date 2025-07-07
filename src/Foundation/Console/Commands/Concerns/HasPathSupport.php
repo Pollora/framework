@@ -50,11 +50,11 @@ trait HasPathSupport
         return $this->getPathOption();
     }
 
-
     /**
      * Resolve custom path location.
      *
      * @return array{type: string, path: string, namespace: string}
+     *
      * @throws InvalidArgumentException When custom path is empty
      */
     protected function resolveCustomPath(): array

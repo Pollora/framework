@@ -17,8 +17,6 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  * and collects them for automatic registration with the application.
  * This enables modules to have their service providers automatically
  * discovered and registered without manual configuration.
- *
- * @package Pollora\Discovery\Infrastructure\Services
  */
 final class ServiceProviderDiscovery implements DiscoveryInterface
 {
@@ -33,7 +31,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
     public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
     {
         // Only process classes
-        if (!$structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
             return;
         }
 
@@ -43,13 +41,13 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
         }
 
         // Check if class extends ServiceProvider
-        if (!$this->extendsServiceProvider($structure)) {
+        if (! $this->extendsServiceProvider($structure)) {
             return;
         }
 
         // Collect the class for registration
         $this->getItems()->add($location, [
-            'class' => $structure->namespace . '\\' . $structure->name,
+            'class' => $structure->namespace.'\\'.$structure->name,
             'structure' => $structure,
         ]);
     }
@@ -69,16 +67,13 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
                 $this->registerServiceProvider($className);
             } catch (\Throwable $e) {
                 // Log the error but continue with other service providers
-                error_log("Failed to register service provider {$className}: " . $e->getMessage());
+                error_log("Failed to register service provider {$className}: ".$e->getMessage());
             }
         }
     }
 
     /**
      * Check if a discovered class extends ServiceProvider
-     *
-     * @param \Spatie\StructureDiscoverer\Data\DiscoveredClass $structure
-     * @return bool
      */
     private function extendsServiceProvider(\Spatie\StructureDiscoverer\Data\DiscoveredClass $structure): bool
     {
@@ -88,8 +83,8 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
         }
 
         // Check if it extends any class that extends ServiceProvider
-        $fullClassName = $structure->namespace . '\\' . $structure->name;
-        
+        $fullClassName = $structure->namespace.'\\'.$structure->name;
+
         try {
             if (class_exists($fullClassName)) {
                 return is_subclass_of($fullClassName, ServiceProvider::class);
@@ -105,30 +100,29 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
     /**
      * Register a service provider with the application
      *
-     * @param string $className The fully qualified class name
-     * @return void
+     * @param  string  $className  The fully qualified class name
      */
     private function registerServiceProvider(string $className): void
     {
         try {
             // Only register if not already registered
-            if (!$this->isServiceProviderRegistered($className)) {
+            if (! $this->isServiceProviderRegistered($className)) {
                 app()->register($className);
             }
         } catch (\Throwable $e) {
-            error_log("Failed to register service provider {$className}: " . $e->getMessage());
+            error_log("Failed to register service provider {$className}: ".$e->getMessage());
         }
     }
 
     /**
      * Check if a service provider is already registered
      *
-     * @param string $className The service provider class name
-     * @return bool
+     * @param  string  $className  The service provider class name
      */
     private function isServiceProviderRegistered(string $className): bool
     {
         $loadedProviders = app()->getLoadedProviders();
+
         return isset($loadedProviders[$className]);
     }
 

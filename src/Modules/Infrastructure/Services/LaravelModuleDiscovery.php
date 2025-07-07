@@ -30,7 +30,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     public function discoverLaravelModules(): void
     {
-        if (!$this->isLaravelModulesAvailable()) {
+        if (! $this->isLaravelModulesAvailable()) {
             return;
         }
 
@@ -42,7 +42,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             }
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Laravel Module discovery error: " . $e->getMessage());
+                error_log('Laravel Module discovery error: '.$e->getMessage());
             }
         }
     }
@@ -62,7 +62,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             }
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Laravel Module apply error: " . $e->getMessage());
+                error_log('Laravel Module apply error: '.$e->getMessage());
             }
         }
     }
@@ -72,7 +72,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     public function discoverLaravelModule(string $moduleName): void
     {
-        if (!$this->isLaravelModulesAvailable()) {
+        if (! $this->isLaravelModulesAvailable()) {
             return;
         }
 
@@ -83,7 +83,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             }
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Laravel Module discovery error for {$moduleName}: " . $e->getMessage());
+                error_log("Laravel Module discovery error for {$moduleName}: ".$e->getMessage());
             }
         }
     }
@@ -93,7 +93,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     public function discoverAndReturnLaravelModules(): array
     {
-        if (!$this->isLaravelModulesAvailable()) {
+        if (! $this->isLaravelModulesAvailable()) {
             return [];
         }
 
@@ -104,13 +104,13 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
             foreach ($enabledModules as $module) {
                 $moduleResults = $this->discoverAndReturnModule($module);
-                if (!empty($moduleResults)) {
+                if (! empty($moduleResults)) {
                     $results[$module->getName()] = $moduleResults;
                 }
             }
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Laravel Module discovery error: " . $e->getMessage());
+                error_log('Laravel Module discovery error: '.$e->getMessage());
             }
         }
 
@@ -153,11 +153,13 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
         try {
             /** @var RepositoryInterface $repository */
             $repository = $this->container->make('modules');
+
             return $repository->allEnabled();
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Error getting enabled modules: " . $e->getMessage());
+                error_log('Error getting enabled modules: '.$e->getMessage());
             }
+
             return [];
         }
     }
@@ -170,11 +172,13 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
         try {
             /** @var RepositoryInterface $repository */
             $repository = $this->container->make('modules');
+
             return $repository->find($name);
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Error finding module {$name}: " . $e->getMessage());
+                error_log("Error finding module {$name}: ".$e->getMessage());
             }
+
             return null;
         }
     }
@@ -184,9 +188,9 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     protected function discoverModuleOnly($module): void
     {
-        $appPath = $module->getPath() . '/app';
+        $appPath = $module->getPath().'/app';
 
-        if (!is_dir($appPath) || !$this->container->bound(DiscoveryEngineInterface::class)) {
+        if (! is_dir($appPath) || ! $this->container->bound(DiscoveryEngineInterface::class)) {
             return;
         }
 
@@ -196,16 +200,16 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
             $location = new DirectoryLocation($appPath);
             $engine->addLocation($location)->discover();
-            
+
             // Store engine for later application
             $this->discoveredModules[$module->getName()] = [
                 'module' => $module,
                 'engine' => $engine,
-                'path' => $appPath
+                'path' => $appPath,
             ];
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for module {$module->getName()}: " . $e->getMessage());
+                error_log("Discovery error for module {$module->getName()}: ".$e->getMessage());
             }
         }
     }
@@ -216,7 +220,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
     protected function discoverModule($module): void
     {
         $this->discoverModuleOnly($module);
-        
+
         // Apply immediately for backward compatibility
         if (isset($this->discoveredModules[$module->getName()])) {
             $this->discoveredModules[$module->getName()]['engine']->apply();
@@ -228,9 +232,9 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     protected function discoverAndReturnModule($module): array
     {
-        $appPath = $module->getPath() . '/app';
+        $appPath = $module->getPath().'/app';
 
-        if (!is_dir($appPath) || !$this->container->bound(DiscoveryManager::class)) {
+        if (! is_dir($appPath) || ! $this->container->bound(DiscoveryManager::class)) {
             return [];
         }
 
@@ -239,11 +243,13 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             $manager = $this->container->make(DiscoveryManager::class);
 
             $location = new DirectoryLocation($appPath);
+
             return $manager->discoverAllInLocation($location);
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for module {$module->getName()}: " . $e->getMessage());
+                error_log("Discovery error for module {$module->getName()}: ".$e->getMessage());
             }
+
             return [];
         }
     }

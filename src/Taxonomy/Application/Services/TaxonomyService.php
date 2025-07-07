@@ -79,14 +79,14 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
     /**
      * Register a taxonomy from a class with Taxonomy attribute.
      *
-     * @param string $className The fully qualified class name
+     * @param  string  $className  The fully qualified class name
      * @return object|null The registered taxonomy instance or null if failed
      */
     public function registerFromClass(string $className): ?object
     {
         try {
             // Check if class exists
-            if (!class_exists($className)) {
+            if (! class_exists($className)) {
                 return null;
             }
 

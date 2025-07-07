@@ -19,4 +19,20 @@ class LaravelConfigRepository implements ConfigRepositoryInterface
     {
         return Config::get($key, $default);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function set(string $key, mixed $value): void
+    {
+        Config::set($key, $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function has(string $key): bool
+    {
+        return Config::has($key);
+    }
 }

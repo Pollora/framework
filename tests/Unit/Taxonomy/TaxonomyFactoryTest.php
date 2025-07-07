@@ -121,7 +121,7 @@ test('make applies additional arguments when provided', function () {
     expect($result)
         ->toBeObject()
         ->and($result->getSlug())->toBe($slug);
-    
+
     // Note: Testing args application requires WordPress functions to be available
     // The factory creation succeeds, which validates the main functionality
     expect($result->getObjectType())->toBe($objectType);

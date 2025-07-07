@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Modules\Domain\Models;
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 

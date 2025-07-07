@@ -20,15 +20,11 @@ use Pollora\Discovery\UI\Console\DiscoveryCommand;
  * - Discovery engine
  * - Discovery cache implementations
  * - Core discovery classes for framework features
- *
- * @package Pollora\Discovery\Infrastructure\Providers
  */
 final class DiscoveryServiceProvider extends ServiceProvider
 {
     /**
      * Register services in the container
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -39,8 +35,6 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap services after all providers have been registered
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -64,19 +58,14 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
     /**
      * Register the discovery engine
-     *
-     * @return void
      */
     private function registerDiscoveryEngine(): void
     {
         $this->app->singleton(DiscoveryEngineInterface::class, DiscoveryEngine::class);
     }
 
-
     /**
      * Register the discovery manager
-     *
-     * @return void
      */
     private function registerDiscoveryManager(): void
     {
@@ -87,11 +76,8 @@ final class DiscoveryServiceProvider extends ServiceProvider
         });
     }
 
-
     /**
      * Setup the discovery engine with core discoveries and locations
-     *
-     * @return void
      */
     private function setupDiscoveryEngine(): void
     {
@@ -109,9 +95,6 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
     /**
      * Register core discovery classes
-     *
-     * @param DiscoveryEngineInterface $engine
-     * @return void
      */
     private function registerCoreDiscoveries(DiscoveryEngineInterface $engine): void
     {
@@ -121,15 +104,13 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
     /**
      * Register console commands
-     *
-     * @return void
      */
     private function registerConsoleCommands(): void
     {
         if ($this->app->runningInConsole()) {
             $this->app->singleton(DiscoveryCommand::class);
             $this->app->singleton(DiscoveryClearCommand::class);
-            
+
             $this->commands([
                 DiscoveryCommand::class,
                 DiscoveryClearCommand::class,
@@ -139,9 +120,6 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
     /**
      * Add default discovery locations for Laravel application
-     *
-     * @param DiscoveryEngineInterface $engine
-     * @return void
      */
     private function addDefaultDiscoveryLocations(DiscoveryEngineInterface $engine): void
     {
@@ -153,9 +131,9 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
         // Add other common Laravel directories
         $basePath = $this->app->basePath();
-        
+
         // Add app directory if different from above
-        $appDir = $basePath . '/app';
+        $appDir = $basePath.'/app';
         if (is_dir($appDir) && $appDir !== $appPath) {
             $engine->addLocation(new \Pollora\Discovery\Domain\Models\DirectoryLocation($appDir, 'App'));
         }

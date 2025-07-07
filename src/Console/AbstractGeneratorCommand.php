@@ -6,11 +6,11 @@ namespace Pollora\Console;
 
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Pollora\Foundation\Console\Commands\Concerns\HasModuleSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasNameSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasPathSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasPluginSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasThemeSupport;
-use Pollora\Foundation\Console\Commands\Concerns\HasModuleSupport;
 use Pollora\Foundation\Console\Commands\Concerns\ResolvesLocation;
 
 /**
@@ -19,7 +19,7 @@ use Pollora\Foundation\Console\Commands\Concerns\ResolvesLocation;
  */
 abstract class AbstractGeneratorCommand extends GeneratorCommand
 {
-    use HasNameSupport, HasPathSupport, HasPluginSupport, HasThemeSupport, HasModuleSupport, ResolvesLocation;
+    use HasModuleSupport, HasNameSupport, HasPathSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation;
 
     /**
      * The subpath where the class should be generated.

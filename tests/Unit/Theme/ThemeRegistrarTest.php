@@ -16,7 +16,9 @@ use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 class ThemeRegistrarTest extends TestCase
 {
     private ThemeRegistrar $registrar;
+
     private ContainerInterface $container;
+
     private WordPressThemeParser $parser;
 
     protected function setUp(): void
@@ -25,7 +27,7 @@ class ThemeRegistrarTest extends TestCase
 
         $this->container = $this->createMock(ContainerInterface::class);
         $this->parser = $this->createMock(WordPressThemeParser::class);
-        
+
         $this->registrar = new ThemeRegistrar($this->container, $this->parser);
     }
 
@@ -42,7 +44,7 @@ class ThemeRegistrarTest extends TestCase
             ->willReturnMap([
                 ['app', true],
                 [\Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface::class, false],
-                [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false]
+                [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false],
             ]);
 
         $mockApp = $this->createMock(\Illuminate\Container\Container::class);
@@ -65,7 +67,7 @@ class ThemeRegistrarTest extends TestCase
     {
         // Arrange
         $this->setupMocksForRegistration();
-        
+
         // Act
         $registeredTheme = $this->registrar->register();
         $activeTheme = $this->registrar->getActiveTheme();
@@ -90,7 +92,7 @@ class ThemeRegistrarTest extends TestCase
 
         // Act
         $this->registrar->register();
-        
+
         // Assert
         $this->assertTrue($this->registrar->isThemeActive('test-theme'));
         $this->assertTrue($this->registrar->isThemeActive('TEST-THEME')); // Case insensitive
@@ -107,12 +109,12 @@ class ThemeRegistrarTest extends TestCase
     {
         // Arrange
         $this->setupMocksForRegistration();
-        
+
         $this->registrar->register();
-        
+
         // Act
         $this->registrar->resetActiveTheme();
-        
+
         // Assert
         $this->assertNull($this->registrar->getActiveTheme());
         $this->assertFalse($this->registrar->isThemeActive('test-theme'));
@@ -149,7 +151,7 @@ class ThemeRegistrarTest extends TestCase
             ->willReturnMap([
                 ['app', true],
                 [\Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface::class, false],
-                [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false]
+                [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false],
             ]);
 
         $mockApp = $this->createMock(\Illuminate\Container\Container::class);
@@ -158,4 +160,4 @@ class ThemeRegistrarTest extends TestCase
             ->with('app')
             ->willReturn($mockApp);
     }
-} 
+}

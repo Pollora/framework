@@ -11,8 +11,6 @@ use Pollora\Discovery\Application\Services\DiscoveryManager;
  * Discovery Clear Command
  *
  * Console command for clearing discovery caches.
- *
- * @package Pollora\Discovery\UI\Console
  */
 final class DiscoveryClearCommand extends Command
 {
@@ -33,22 +31,23 @@ final class DiscoveryClearCommand extends Command
     /**
      * Execute the console command
      *
-     * @param DiscoveryManager $discoveryManager The discovery manager
-     *
+     * @param  DiscoveryManager  $discoveryManager  The discovery manager
      * @return int Command exit code
      */
     public function handle(DiscoveryManager $discoveryManager): int
     {
         try {
             $this->info('Clearing discovery caches...');
-            
+
             $discoveryManager->clearCache();
-            
+
             $this->info('✓ Discovery caches cleared successfully');
+
             return self::SUCCESS;
 
         } catch (\Throwable $e) {
-            $this->error('Failed to clear discovery caches: ' . $e->getMessage());
+            $this->error('Failed to clear discovery caches: '.$e->getMessage());
+
             return self::FAILURE;
         }
     }

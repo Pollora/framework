@@ -283,14 +283,6 @@ class ThemeManager implements ThemeService
     }
 
     /**
-     * Boot all themes.
-     */
-    public function bootThemes(): void
-    {
-        $this->repository?->boot();
-    }
-
-    /**
      * Get theme count.
      */
     public function getThemeCount(): int
