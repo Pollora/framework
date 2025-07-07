@@ -294,20 +294,20 @@ class PluginRegistrar
             /** @var ModuleComponentManager $componentManager */
             $componentManager = $this->app->get(ModuleComponentManager::class);
 
-            // Define plugin-specific components
+            // Only register components that can be automatically instantiated
+            // Domain entities like PostType, Taxonomy, etc. should not be registered
+            // as they require specific constructor parameters
             $pluginComponents = [
-                \Pollora\PostType\Domain\Models\PostType::class,
-                \Pollora\Taxonomy\Domain\Models\Taxonomy::class,
-                \Pollora\Schedule\Domain\Models\Schedule::class,
-                \Pollora\WpRest\Domain\Models\WpRestRoute::class,
-                \Pollora\Hook\Domain\Models\Action::class,
-                \Pollora\Hook\Domain\Models\Filter::class,
+                // Add service classes here that can be auto-instantiated if needed
+                // Example: \Plugin\MyPlugin\Services\ExampleService::class,
             ];
 
             $moduleId = 'plugin.'.$plugin->getLowerName();
 
-            $componentManager->registerModuleComponents($moduleId, $pluginComponents);
-            $componentManager->initializeModuleComponents($moduleId);
+            if (!empty($pluginComponents)) {
+                $componentManager->registerModuleComponents($moduleId, $pluginComponents);
+                $componentManager->initializeModuleComponents($moduleId);
+            }
         } catch (\Exception $e) {
             $this->logError('Failed to setup plugin components: '.$e->getMessage());
         }
