@@ -42,7 +42,7 @@ class ThemeRegistrarTest extends TestCase
             ->willReturnMap([
                 ['app', true],
                 [\Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface::class, false],
-                [\Pollora\Modules\Domain\Contracts\OnDemandDiscoveryInterface::class, false]
+                [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false]
             ]);
 
         $mockApp = $this->createMock(\Illuminate\Container\Container::class);
@@ -149,7 +149,7 @@ class ThemeRegistrarTest extends TestCase
             ->willReturnMap([
                 ['app', true],
                 [\Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface::class, false],
-                [\Pollora\Modules\Domain\Contracts\OnDemandDiscoveryInterface::class, false]
+                [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false]
             ]);
 
         $mockApp = $this->createMock(\Illuminate\Container\Container::class);

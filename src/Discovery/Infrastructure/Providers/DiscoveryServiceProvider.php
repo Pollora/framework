@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryEngine;
+use Pollora\Discovery\Infrastructure\Services\ServiceProviderDiscovery;
 use Pollora\Discovery\UI\Console\DiscoveryClearCommand;
 use Pollora\Discovery\UI\Console\DiscoveryCommand;
 
@@ -99,10 +100,23 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
         // Cache is now handled natively by Spatie's Discover class
 
-        // Discoveries are now registered by their respective service providers
+        // Register core discovery classes
+        $this->registerCoreDiscoveries($engine);
 
         // Add default Laravel app paths for discovery
         $this->addDefaultDiscoveryLocations($engine);
+    }
+
+    /**
+     * Register core discovery classes
+     *
+     * @param DiscoveryEngineInterface $engine
+     * @return void
+     */
+    private function registerCoreDiscoveries(DiscoveryEngineInterface $engine): void
+    {
+        // Register ServiceProviderDiscovery
+        $engine->addDiscovery('service_providers', ServiceProviderDiscovery::class);
     }
 
     /**

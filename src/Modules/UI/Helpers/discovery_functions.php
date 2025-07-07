@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Modules\Domain\Contracts\OnDemandDiscoveryInterface;
+use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
 if (!function_exists('pollora_discover_module')) {
     /**
@@ -14,14 +14,13 @@ if (!function_exists('pollora_discover_module')) {
      */
     function pollora_discover_module(string $modulePath, ?callable $processor = null): array
     {
-        if (!function_exists('app') || !app()->bound(OnDemandDiscoveryInterface::class)) {
+        if (!function_exists('app') || !app()->bound(ModuleDiscoveryOrchestratorInterface::class)) {
             return [];
         }
 
         try {
-            $discoveryService = app(OnDemandDiscoveryInterface::class);
-            $discoveryService->discoverModule($modulePath);
-            return $discoveryService->discoverAllInPath($modulePath);
+            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            return $discoveryService->discoverAndReturn($modulePath);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_module error: ' . $e->getMessage());
@@ -41,14 +40,13 @@ if (!function_exists('pollora_discover_theme')) {
      */
     function pollora_discover_theme(string $themePath, ?callable $processor = null): array
     {
-        if (!function_exists('app') || !app()->bound(OnDemandDiscoveryInterface::class)) {
+        if (!function_exists('app') || !app()->bound(ModuleDiscoveryOrchestratorInterface::class)) {
             return [];
         }
 
         try {
-            $discoveryService = app(OnDemandDiscoveryInterface::class);
-            $discoveryService->discoverTheme($themePath);
-            return $discoveryService->discoverAllInPath($themePath);
+            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            return $discoveryService->discoverAndReturn($themePath);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_theme error: ' . $e->getMessage());
@@ -68,14 +66,13 @@ if (!function_exists('pollora_discover_plugin')) {
      */
     function pollora_discover_plugin(string $pluginPath, ?callable $processor = null): array
     {
-        if (!function_exists('app') || !app()->bound(OnDemandDiscoveryInterface::class)) {
+        if (!function_exists('app') || !app()->bound(ModuleDiscoveryOrchestratorInterface::class)) {
             return [];
         }
 
         try {
-            $discoveryService = app(OnDemandDiscoveryInterface::class);
-            $discoveryService->discoverPlugin($pluginPath);
-            return $discoveryService->discoverAllInPath($pluginPath);
+            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            return $discoveryService->discoverAndReturn($pluginPath);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_plugin error: ' . $e->getMessage());
@@ -87,22 +84,21 @@ if (!function_exists('pollora_discover_plugin')) {
 
 if (!function_exists('pollora_discover_in_path')) {
     /**
-     * Discover structures in a specific path using a scout class.
+     * Discover structures in a specific path.
      *
      * @param string $path The path to explore
-     * @param string $scoutClass The scout class to use (legacy support)
+     * @param string $scoutClass The scout class to use (legacy support - ignored)
      * @return array Array of discovered structures
      */
-    function pollora_discover_in_path(string $path, string $scoutClass): array
+    function pollora_discover_in_path(string $path, string $scoutClass = ''): array
     {
-        if (!function_exists('app') || !app()->bound(OnDemandDiscoveryInterface::class)) {
+        if (!function_exists('app') || !app()->bound(ModuleDiscoveryOrchestratorInterface::class)) {
             return [];
         }
 
         try {
-            $discoveryService = app(OnDemandDiscoveryInterface::class);
-            $discoveryService->discoverInPath($path, $scoutClass);
-            return $discoveryService->discoverAllInPath($path);
+            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            return $discoveryService->discoverAndReturn($path);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_in_path error: ' . $e->getMessage());
@@ -121,13 +117,13 @@ if (!function_exists('pollora_discover_all_in_path')) {
      */
     function pollora_discover_all_in_path(string $path): array
     {
-        if (!function_exists('app') || !app()->bound(OnDemandDiscoveryInterface::class)) {
+        if (!function_exists('app') || !app()->bound(ModuleDiscoveryOrchestratorInterface::class)) {
             return [];
         }
 
         try {
-            $discoveryService = app(OnDemandDiscoveryInterface::class);
-            return $discoveryService->discoverAllInPath($path);
+            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            return $discoveryService->discoverAndReturn($path);
         } catch (Exception $e) {
             if (function_exists('error_log')) {
                 error_log('pollora_discover_all_in_path error: ' . $e->getMessage());
