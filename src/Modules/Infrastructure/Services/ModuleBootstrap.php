@@ -42,6 +42,7 @@ class ModuleBootstrap
      * Register all enabled modules in the application.
      *
      * This method performs the following operations:
+     * 0. Registers autoloading for Laravel modules (nwidart/laravel-modules)
      * 1. Registers autoloading for each enabled module
      * 2. Discovers and loads service providers using Laravel's ProviderRepository
      * 3. Registers additional module files
