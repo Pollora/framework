@@ -162,7 +162,9 @@ class ViteManager implements ViteManagerInterface
         ViteFacade::macro('getAssetUrls', function (array $entrypoints) use ($viteManager) {
             /** @var Vite $this */
             $buildDirectory = $viteManager->container()->getBuildDirectory();
+
             $manifest = $this->manifest($buildDirectory);
+
             $assets = collect($entrypoints)
                 ->map(fn ($entrypoint) => $manifest[$entrypoint] ?? null)
                 ->filter()

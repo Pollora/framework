@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Plugin\%plugin_namespace%\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+/**
+ * Plugin service provider for %plugin_name%.
+ *
+ * This service provider is automatically discovered and registered by the Pollora Modules system.
+ * Views, routes, translations, migrations, etc. are automatically handled by the framework.
+ * Use this provider only for custom service registrations specific to your plugin.
+ */
+class PluginServiceProvider extends ServiceProvider
+{
+    /**
+     * Register plugin services.
+     *
+     * @return void
+     */
+    public function register(): void
+    {
+        // Register your custom plugin services here
+        // Example:
+        // $this->app->singleton(CustomService::class, function ($app) {
+        //     return new CustomService();
+        // });
+    }
+
+    /**
+     * Bootstrap plugin services.
+     *
+     * @return void
+     */
+    public function boot(): void
+    {
+        // Add your custom bootstrap logic here
+        // Note: Views, routes, translations, assets are automatically handled by the Modules system
+        
+        // Example of custom boot logic:
+        // $this->registerCustomValidationRules();
+        // $this->extendExistingServices();
+    }
+}

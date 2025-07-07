@@ -11,6 +11,7 @@ use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Foundation\Support\IncludesFiles;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
+use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -94,7 +95,18 @@ class ThemeManager implements ThemeService
 
     protected function registerThemeDirectories(ThemeMetadata $theme): void
     {
-        $this->viewFinder->addLocation($theme->getViewPath());
+        // Use the mutualized module asset manager for view registration
+        if ($this->app->bound(ModuleAssetManager::class)) {
+            $moduleAssetManager = $this->app->make(ModuleAssetManager::class);
+            $moduleAssetManager->registerModuleViewPaths(
+                $theme->getBasePath(),
+                'theme',
+                $theme->getName()
+            );
+        } else {
+            // Fallback to direct registration if ModuleAssetManager is not available
+            $this->viewFinder->addLocation($theme->getViewPath());
+        }
     }
 
     public function getAvailableThemes(): array
