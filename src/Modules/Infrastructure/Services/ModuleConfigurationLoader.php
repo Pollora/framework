@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Modules\Infrastructure\Services;
 
-use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\Container;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
+use Pollora\Hook\Domain\Contracts\Action;
 
 /**
  * Generic module configuration loader.
@@ -15,42 +16,26 @@ use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
  */
 class ModuleConfigurationLoader
 {
+    protected \Pollora\Hook\Domain\Contracts\Action $actionService;
+
     public function __construct(
         protected Container $app,
         protected ConfigRepositoryInterface $configRepository
-    ) {}
+    ) {
+        $this->action = $this->app->get(Action::class);
+    }
 
     /**
      * Load all configuration files from a module's config directory.
      *
      * @param  string  $modulePath  The path to the module
      * @param  string  $moduleType  The type of module (theme, plugin, etc.)
-     * @param  string  $moduleName  The name of the module
      */
-    public function loadModuleConfiguration(string $modulePath, string $moduleType, string $moduleName): void
+    public function loadModuleConfiguration(string $modulePath, string $moduleType): void
     {
-        $configPath = $modulePath.'/config';
-
-        if (! is_dir($configPath)) {
-            return;
-        }
-
-        foreach (glob($configPath.'/*.php') as $configFile) {
-            $configName = basename($configFile, '.php');
-            $configKey = "{$moduleType}.{$configName}";
-
-            try {
-                $configData = require $configFile;
-
-                if (is_array($configData)) {
-                    $this->configRepository->set($configKey, $configData);
-                }
-            } catch (\Throwable $e) {
-                if (function_exists('error_log')) {
-                    error_log("Failed to load {$moduleType} config {$configFile}: ".$e->getMessage());
-                }
-            }
-        }
+        $this->action->add('after_setup_theme', function () use ($modulePath, $moduleType) {
+            $this->loadConfigurationFiles($modulePath, $moduleType);
+        });
     }
 
     /**
@@ -58,7 +43,7 @@ class ModuleConfigurationLoader
      */
     public function getModuleConfig(string $moduleType, string $key, mixed $default = null): mixed
     {
-        return $this->configRepository->get("{$moduleType}.{$key}", $default);
+        return $this->configRepository->get($this->buildConfigKey($moduleType, $key), $default);
     }
 
     /**
@@ -66,7 +51,7 @@ class ModuleConfigurationLoader
      */
     public function setModuleConfig(string $moduleType, string $key, mixed $value): void
     {
-        $this->configRepository->set("{$moduleType}.{$key}", $value);
+        $this->configRepository->set($this->buildConfigKey($moduleType, $key), $value);
     }
 
     /**
@@ -74,6 +59,51 @@ class ModuleConfigurationLoader
      */
     public function hasModuleConfig(string $moduleType, string $key): bool
     {
-        return $this->configRepository->has("{$moduleType}.{$key}");
+        return $this->configRepository->has($this->buildConfigKey($moduleType, $key));
+    }
+
+    /**
+     * Load all configuration files from the module's config directory.
+     */
+    private function loadConfigurationFiles(string $modulePath, string $moduleType): void
+    {
+        $configPath = $modulePath . '/config';
+
+        if (!is_dir($configPath)) {
+            return;
+        }
+
+        $configFiles = glob($configPath . '/*.php') ?: [];
+
+        foreach ($configFiles as $configFile) {
+            $this->loadSingleConfigFile($configFile, $moduleType);
+        }
+    }
+
+    /**
+     * Load a single configuration file.
+     */
+    private function loadSingleConfigFile(string $configFile, string $moduleType): void
+    {
+        $configName = basename($configFile, '.php');
+        $configKey = $this->buildConfigKey($moduleType, $configName);
+
+        try {
+            $configData = require $configFile;
+
+            if (is_array($configData)) {
+                $this->configRepository->set($configKey, $configData);
+            }
+        } catch (\Throwable $e) {
+            error_log("Failed to load {$moduleType} config {$configFile}: ".$e->getMessage());
+        }
+    }
+
+    /**
+     * Build the configuration key for a module.
+     */
+    private function buildConfigKey(string $moduleType, string $key): string
+    {
+        return "{$moduleType}.{$key}";
     }
 }
