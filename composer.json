@@ -89,7 +89,7 @@
     },
     "require-dev": {
         "driftingly/rector-laravel": "^1.0",
-        "laravel/pint": "^v1.22.1",
+        "laravel/pint": "^v1.23.0",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.0",
         "symfony/var-dumper": "^7.3.1",
