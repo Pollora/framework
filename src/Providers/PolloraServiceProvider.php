@@ -34,6 +34,7 @@ use Pollora\Scheduler\Jobs\JobDispatcher;
 use Pollora\Scheduler\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
+use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
 use Pollora\ThirdParty\WpRocket\WpRocketServiceProvider;
 use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
@@ -98,6 +99,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(RewriteServiceProvider::class);
         $this->app->register(PageServiceProvider::class);
         $this->app->register(ThemeServiceProvider::class);
+        $this->app->register(PluginServiceProvider::class);
         $this->app->register(AssetServiceProvider::class);
         $this->app->register(AjaxServiceProvider::class);
         $this->app->register(ConfigServiceProvider::class);

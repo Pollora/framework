@@ -355,9 +355,11 @@ class AssetEnqueuer
     {
         try {
             $this->hooks = $this->hooks !== [] ? $this->hooks : ['wp_enqueue_scripts'];
+
             if ($this->useVite) {
                 $this->configureViteAssets();
             }
+
             foreach ($this->hooks as $hook) {
                 if ($this->needToLoadViteClient()) {
                     $this->loadViteClient($hook);

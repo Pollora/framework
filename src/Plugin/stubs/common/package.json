@@ -1,0 +1,29 @@
+{
+    "name": "%plugin_slug%",
+    "version": "%plugin_version%",
+    "description": "%plugin_description%",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4.0.0",
+        "@tailwindcss/vite": "^4.0.0",
+        "laravel-vite-plugin": "^1.0.0",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^4.0.0",
+        "vite": "^6.0.0"
+    },
+    "dependencies": {},
+    "keywords": [
+        "wordpress",
+        "plugin",
+        "pollora",
+        "%plugin_slug%"
+    ],
+    "author": "%plugin_author%",
+    "license": "GPL-2.0+"
+}
