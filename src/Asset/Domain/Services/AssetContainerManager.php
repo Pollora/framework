@@ -16,19 +16,11 @@ use Pollora\Asset\Domain\Models\Asset;
 class AssetContainerManager
 {
     /**
-     * The asset repository instance.
-     */
-    private AssetRepositoryInterface $repository;
-
-    /**
      * Initializes the container manager with a repository implementation.
      *
      * @param  AssetRepositoryInterface  $repository  The asset repository
      */
-    public function __construct(AssetRepositoryInterface $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(private readonly AssetRepositoryInterface $repository) {}
 
     /**
      * Registers an asset in the repository.

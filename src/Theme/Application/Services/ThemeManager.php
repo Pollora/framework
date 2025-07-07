@@ -20,6 +20,8 @@ use Psr\Container\ContainerInterface;
 
 class ThemeManager implements ThemeService
 {
+    public $discovery;
+
     use IncludesFiles;
 
     protected array $config;
@@ -204,7 +206,7 @@ class ThemeManager implements ThemeService
      */
     public function findTheme(string $name): ?ThemeModuleInterface
     {
-        if (! $this->repository) {
+        if (! $this->repository instanceof \Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface) {
             return null;
         }
 
@@ -244,7 +246,7 @@ class ThemeManager implements ThemeService
     {
         $theme = $this->findTheme($name);
 
-        if (! $theme) {
+        if (! $theme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
             throw ThemeException::notFound($name);
         }
 
@@ -297,7 +299,7 @@ class ThemeManager implements ThemeService
     {
         $theme = $this->findTheme($name);
 
-        if (! $theme) {
+        if (! $theme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
             return [
                 'valid' => false,
                 'errors' => ['Theme not found'],
@@ -321,7 +323,7 @@ class ThemeManager implements ThemeService
         }
 
         return [
-            'valid' => empty($errors),
+            'valid' => $errors === [],
             'errors' => $errors,
         ];
     }

@@ -66,14 +66,14 @@ class ViteManager implements ViteManagerInterface
      */
     public function getAssetUrls(array $entrypoints): array
     {
-        if (empty($entrypoints)) {
+        if ($entrypoints === []) {
             throw new AssetException('Entry points array cannot be empty.');
         }
 
         $basePath = $this->container()->getBasePath();
 
         // If basePath is empty or null, no additional processing is needed
-        if (empty($basePath)) {
+        if ($basePath === '' || $basePath === '0') {
             return $this->getViteInstance()->getAssetUrls($entrypoints);
         }
 

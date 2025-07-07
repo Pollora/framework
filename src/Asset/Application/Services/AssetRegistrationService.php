@@ -16,19 +16,11 @@ use Pollora\Asset\Domain\Services\AssetContainerManager;
 class AssetRegistrationService
 {
     /**
-     * The asset container manager instance.
-     */
-    private AssetContainerManager $manager;
-
-    /**
      * Initializes the registration service with the container manager.
      *
      * @param  AssetContainerManager  $manager  The asset container manager
      */
-    public function __construct(AssetContainerManager $manager)
-    {
-        $this->manager = $manager;
-    }
+    public function __construct(private readonly AssetContainerManager $manager) {}
 
     /**
      * Registers a new asset in the container manager.

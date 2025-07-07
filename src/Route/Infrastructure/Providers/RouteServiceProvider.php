@@ -43,14 +43,10 @@ class RouteServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressTypeResolverInterface::class, WordPressTypeResolver::class);
 
         // Register the condition manager (implements both interfaces)
-        $this->app->singleton(WordPressConditionManagerInterface::class, function ($app) {
-            return new WordPressConditionManager($app);
-        });
+        $this->app->singleton(WordPressConditionManagerInterface::class, fn ($app): \Pollora\Route\Infrastructure\Services\WordPressConditionManager => new WordPressConditionManager($app));
 
         // Bind the domain interface to the same instance
-        $this->app->bind(ConditionResolverInterface::class, function ($app) {
-            return $app->make(WordPressConditionManagerInterface::class);
-        });
+        $this->app->bind(ConditionResolverInterface::class, fn ($app) => $app->make(WordPressConditionManagerInterface::class));
 
         // Override the default router with our extended version
         $this->app->extend('router', function ($router, Application $app): ExtendedRouter {
@@ -85,7 +81,7 @@ class RouteServiceProvider extends ServiceProvider
         $this->registerWpMacro();
 
         // Listen for the modules.routes.registered event to register fallback route
-        Event::listen('modules.routes.registered', function () {
+        Event::listen('modules.routes.registered', function (): void {
             $this->bootFallbackRoute();
         });
 
@@ -94,7 +90,7 @@ class RouteServiceProvider extends ServiceProvider
             // Only register if the event hasn't been fired yet
             if (! $this->app->bound('route.fallback.registered')) {
                 // Set a small delay to allow any potential module routes to be registered
-                $this->app->afterResolving('router', function () {
+                $this->app->afterResolving('router', function (): void {
                     if (! $this->app->bound('route.fallback.registered')) {
                         $this->bootFallbackRoute();
                         $this->app->instance('route.fallback.registered', true);
@@ -120,7 +116,7 @@ class RouteServiceProvider extends ServiceProvider
 
             // Create a unique URI for the route
             $uri = $condition;
-            if (! empty($args) && count($args) > 1) {
+            if (count($args) > 1) {
                 // Hash the parameters to ensure uniqueness
                 $paramHash = md5(serialize(array_slice($args, 0, -1)));
                 $uri .= '_'.$paramHash;

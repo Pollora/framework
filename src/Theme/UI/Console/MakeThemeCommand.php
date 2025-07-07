@@ -3,7 +3,7 @@
 /**
  * Class MakeThemeCommand
  *
- * Artisan command to scaffold a new theme directory structure, optionally copy a source folder,
+ * Artisan command to scaffold a new theme directory structure by downloading from GitHub repository,
  * perform string replacements, run npm install/build, and optionally set the theme as the active WordPress theme.
  */
 declare(strict_types=1);
@@ -14,6 +14,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
+use Pollora\Modules\Infrastructure\Services\ModuleDownloader;
 use Pollora\Support\NpmRunner;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
@@ -27,14 +28,14 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      *
      * @var string
      */
-    protected $signature = 'pollora:make-theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--source= : Source folder to copy into the new theme} {--force : Force create theme with same name}';
+    protected $signature = 'pollora:make-theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create theme with same name}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate theme structure with the ability to copy an existing folder and replace strings';
+    protected $description = 'Generate theme structure by downloading from GitHub repository';
 
     /**
      * List of file extensions considered as text for replacements.
@@ -74,11 +75,15 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return self::FAILURE;
         }
 
-        $this->setupContainerFolders()
-            ->generateThemeStructure();
+        $this->setupContainerFolders();
 
-        if ($this->option('source')) {
-            $this->copySourceFolder();
+        $repository = $this->promptForRepository();
+
+        if ($repository !== null && $repository !== '' && $repository !== '0') {
+            $this->downloadFromRepository($repository);
+        } else {
+            // Use default repository instead of local stubs
+            $this->downloadFromRepository('pollora/theme-default');
         }
 
         $this->info("Theme \"{$this->theme->getName()}\" created successfully.");
@@ -177,7 +182,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
-     * Generate theme structure.
+     * Generate theme structure from stubs.
      */
     protected function generateThemeStructure(): void
     {
@@ -185,22 +190,64 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
-     * Copy source folder.
+     * Download theme from GitHub repository.
      */
-    protected function copySourceFolder(): void
+    protected function downloadFromRepository(string $repository): void
     {
-        $sourcePath = $this->option('source');
-        if (! File::isDirectory($sourcePath)) {
-            $this->error("The specified source folder does not exist: {$sourcePath}");
+        $version = $this->option('repo-version');
 
-            return;
+        try {
+            $downloader = new ModuleDownloader($repository);
+
+            if ($version) {
+                $downloader->setVersion($version);
+            }
+
+            $this->info("Downloading theme from {$repository}".($version ? " (version: {$version})" : '').'...');
+
+            $extractedPath = $downloader->downloadAndExtract($this->getThemesPath());
+
+            // Move contents from extracted folder to theme folder
+            $this->moveExtractedTheme($extractedPath);
+
+            $this->info('Theme downloaded and extracted successfully.');
+
+        } catch (\Exception $e) {
+            $this->error("Failed to download theme: {$e->getMessage()}");
+
+            // Fallback to generating structure if download fails
+            $this->warn('Falling back to generating default theme structure...');
+            $this->generateThemeStructure();
         }
-
-        $destinationPath = $this->theme->getBasePath();
-        $this->info("Copying contents from {$sourcePath} to {$destinationPath}");
-        $this->copyDirectory($sourcePath, $destinationPath);
-        $this->info('Source folder contents copied successfully.');
     }
+
+    /**
+     * Move extracted theme contents to the proper theme directory.
+     */
+    protected function moveExtractedTheme(string $extractedPath): void
+    {
+        $targetPath = $this->theme->getBasePath();
+
+        // Ensure target directory exists
+        $this->ensureDirectoryExists($targetPath);
+
+        // Move all contents from extracted path to target path with replacements
+        $this->copyDirectoryWithReplacements($extractedPath, $targetPath);
+
+        // Clean up the extracted directory
+        $this->removeDirectory(dirname($extractedPath));
+    }
+
+    /**
+     * Remove directory recursively.
+     */
+    protected function removeDirectory(string $path): void
+    {
+        if (is_dir($path)) {
+            File::deleteDirectory($path);
+        }
+    }
+
 
     /**
      * Copy directory.
@@ -215,6 +262,22 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         foreach (File::allFiles($source) as $item) {
             $this->processFile($item, $destination);
+        }
+    }
+
+    /**
+     * Copy directory with replacements applied to all files.
+     *
+     * @param  string  $source
+     */
+    protected function copyDirectoryWithReplacements($source, string $destination): void
+    {
+        if (! File::isDirectory($destination)) {
+            File::makeDirectory($destination, 0755, true);
+        }
+
+        foreach (File::allFiles($source) as $item) {
+            $this->processFileWithReplacements($item, $destination);
         }
     }
 
@@ -234,6 +297,26 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             $this->copyDirectory($item->getRealPath(), $targetInfo['path']);
         } else {
             $this->handleFileCopy($item, $targetInfo['path']);
+        }
+    }
+
+    /**
+     * Process file with replacements.
+     *
+     * @param  object  $item
+     */
+    protected function processFileWithReplacements($item, string $destination): void
+    {
+        $relativePath = $item->getRelativePath();
+        $targetInfo = $this->getTargetPathInfo($item, $destination, $relativePath);
+
+        $this->ensureDirectoryExists($targetInfo['dir']);
+
+        if ($item->isDir()) {
+            $this->copyDirectoryWithReplacements($item->getRealPath(), $targetInfo['path']);
+        } else {
+            // Always copy with replacements for downloaded files
+            $this->copyFileWithReplacements($item->getRealPath(), $targetInfo['path']);
         }
     }
 
@@ -402,6 +485,44 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
+     * Prompt for repository if not provided.
+     */
+    protected function promptForRepository(): ?string
+    {
+        if ($this->option('repository')) {
+            return $this->option('repository');
+        }
+
+        $useRepository = select(
+            label: 'How would you like to create the theme?',
+            options: [
+                'repository' => 'Download from GitHub repository',
+                'default' => 'Use default theme template',
+            ],
+            default: 'default'
+        );
+
+        if ($useRepository === 'repository') {
+            return text(
+                label: 'Enter the GitHub repository (owner/repo format):',
+                placeholder: 'pollora/theme-default',
+                validate: function ($value): ?string {
+                    if (empty($value)) {
+                        return 'Repository is required';
+                    }
+                    if (! str_contains($value, '/')) {
+                        return 'Repository must be in owner/repo format';
+                    }
+
+                    return null;
+                }
+            );
+        }
+
+        return null;
+    }
+
+    /**
      * Validate value.
      */
     protected function validateValue(string $value): ?string
@@ -419,7 +540,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      */
     protected function getTemplatePath(string $templateName): string
     {
-        return realpath(__DIR__.'/../stubs/'.$templateName);
+        return realpath(__DIR__.'/../../stubs/'.$templateName);
     }
 
     /**

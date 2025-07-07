@@ -69,11 +69,9 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     private function registerDiscoveryManager(): void
     {
-        $this->app->singleton(DiscoveryManager::class, function ($app) {
-            return new DiscoveryManager(
-                engine: $app->make(DiscoveryEngineInterface::class)
-            );
-        });
+        $this->app->singleton(DiscoveryManager::class, fn ($app): \Pollora\Discovery\Application\Services\DiscoveryManager => new DiscoveryManager(
+            engine: $app->make(DiscoveryEngineInterface::class)
+        ));
     }
 
     /**

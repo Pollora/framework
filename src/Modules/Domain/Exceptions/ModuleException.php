@@ -26,7 +26,7 @@ class ModuleException extends Exception
     public static function cannotEnable(string $name, string $reason = ''): static
     {
         $message = "Cannot enable module [{$name}]";
-        if ($reason) {
+        if ($reason !== '' && $reason !== '0') {
             $message .= ": {$reason}";
         }
 
@@ -36,7 +36,7 @@ class ModuleException extends Exception
     public static function cannotDisable(string $name, string $reason = ''): static
     {
         $message = "Cannot disable module [{$name}]";
-        if ($reason) {
+        if ($reason !== '' && $reason !== '0') {
             $message .= ": {$reason}";
         }
 

@@ -146,7 +146,7 @@ class ThemeMetadata
     public function getPathForItem(string|array|null $pathParts = null): string
     {
         $pathParts = $this->wrapInArray($pathParts);
-        $folders = empty($pathParts) ? '' : implode('/', $pathParts);
+        $folders = $pathParts === [] ? '' : implode('/', $pathParts);
 
         return $this->getBasePath().'/'.$folders;
     }

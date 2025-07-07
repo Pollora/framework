@@ -18,16 +18,6 @@ use Pollora\Asset\Infrastructure\Services\AssetFile;
 class AssetManager
 {
     /**
-     * Service for registering assets.
-     */
-    private AssetRegistrationService $registrationService;
-
-    /**
-     * Service for retrieving assets.
-     */
-    private AssetRetrievalService $retrievalService;
-
-    /**
      * List of registered asset containers.
      *
      * @var array<string, AssetContainer>
@@ -45,13 +35,7 @@ class AssetManager
      * @param  AssetRegistrationService  $registrationService  Service for registering assets
      * @param  AssetRetrievalService  $retrievalService  Service for retrieving assets
      */
-    public function __construct(
-        AssetRegistrationService $registrationService,
-        AssetRetrievalService $retrievalService
-    ) {
-        $this->registrationService = $registrationService;
-        $this->retrievalService = $retrievalService;
-    }
+    public function __construct(AssetRegistrationService $registrationService, private readonly AssetRetrievalService $retrievalService) {}
 
     /**
      * Factory method: returns an AssetEnqueuer (builder) for fluent asset management and enqueueing.
@@ -127,7 +111,7 @@ class AssetManager
      */
     public function getDefaultContainer(): ?AssetContainer
     {
-        return $this->defaultContainer ? $this->getContainer($this->defaultContainer) : null;
+        return $this->defaultContainer !== null && $this->defaultContainer !== '' && $this->defaultContainer !== '0' ? $this->getContainer($this->defaultContainer) : null;
     }
 
     /**

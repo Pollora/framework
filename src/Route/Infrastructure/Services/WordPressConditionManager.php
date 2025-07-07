@@ -37,19 +37,11 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
     private bool $loaded = false;
 
     /**
-     * Laravel container instance for optional config access.
-     */
-    private ?Container $container;
-
-    /**
      * Create a new condition manager instance.
      *
      * @param  Container|null  $container  Optional service container
      */
-    public function __construct(?Container $container = null)
-    {
-        $this->container = $container;
-    }
+    public function __construct(private readonly ?Container $container = null) {}
 
     /**
      * Get all registered conditions as alias => function mappings.
@@ -87,8 +79,8 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
             if (is_string($aliases) && $aliases === $condition) {
                 return $wpFunction;
             }
-            // Handle multiple aliases (array)
-            elseif (is_array($aliases) && in_array($condition, $aliases, true)) {
+            // Handle single alias (string)
+            if (is_array($aliases) && in_array($condition, $aliases, true)) {
                 return $wpFunction;
             }
         }
@@ -196,7 +188,7 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
 
                 // Load plugin-specific conditions
                 $pluginConditions = $config->get('wordpress.plugin_conditions', []);
-                foreach ($pluginConditions as $pluginName => $conditions) {
+                foreach ($pluginConditions as $conditions) {
                     if (is_array($conditions)) {
                         $this->conditions = array_replace($this->conditions, $conditions);
                     }

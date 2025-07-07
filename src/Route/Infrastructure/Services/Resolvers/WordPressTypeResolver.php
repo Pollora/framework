@@ -22,11 +22,11 @@ class WordPressTypeResolver implements WordPressTypeResolverInterface
     public function __construct()
     {
         $this->resolvers = [
-            'WP_Post' => [$this, 'resolvePost'],
-            'WP_Term' => [$this, 'resolveTerm'],
-            'WP_User' => [$this, 'resolveUser'],
-            'WP_Query' => [$this, 'resolveQuery'],
-            'WP' => [$this, 'resolveWP'],
+            'WP_Post' => $this->resolvePost(...),
+            'WP_Term' => $this->resolveTerm(...),
+            'WP_User' => $this->resolveUser(...),
+            'WP_Query' => $this->resolveQuery(...),
+            'WP' => $this->resolveWP(...),
         ];
     }
 

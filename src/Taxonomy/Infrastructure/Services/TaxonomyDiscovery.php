@@ -95,7 +95,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
 
             try {
                 // Process the complete taxonomy configuration
-                $this->processTaxonomy($className, $taxonomyAttribute);
+                $this->processTaxonomy($className);
             } catch (\Throwable $e) {
                 // Log the error but continue with other taxonomies
                 error_log("Failed to register Taxonomy from class {$className}: ".$e->getMessage());
@@ -113,16 +113,15 @@ final class TaxonomyDiscovery implements DiscoveryInterface
      * 4. Registering the final taxonomy through the service
      *
      * @param  string  $className  The fully qualified class name
-     * @param  object  $taxonomyAttribute  The Spatie DiscoveredAttribute instance
      */
-    private function processTaxonomy(string $className, object $taxonomyAttribute): void
+    private function processTaxonomy(string $className): void
     {
         try {
             // Use reflection to get the Taxonomy attribute instance
             $reflectionClass = new ReflectionClass($className);
             $taxonomyAttributes = $reflectionClass->getAttributes(Taxonomy::class);
 
-            if (empty($taxonomyAttributes)) {
+            if ($taxonomyAttributes === []) {
                 return;
             }
 
@@ -131,7 +130,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
             $taxonomy = $taxonomyAttributes[0]->newInstance();
 
             // Build base taxonomy configuration using the new configuration class
-            $config = $this->buildBaseConfiguration($reflectionClass, $className, $taxonomy);
+            $config = $this->buildBaseConfiguration($className, $taxonomy);
 
             // Process class-level attributes
             $config = $this->processClassLevelAttributes($reflectionClass, $className, $config);
@@ -143,7 +142,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
             $this->processAdditionalArgs($className, $config);
 
             // Register the taxonomy through the service on the init hook
-            add_action('init', function () use ($config) {
+            add_action('init', function () use ($config): void {
                 $this->taxonomyService->register(
                     $config->getSlug(),
                     $config->getObjectType(),
@@ -163,16 +162,15 @@ final class TaxonomyDiscovery implements DiscoveryInterface
      * Extracts slug, singular name, plural name, and object type from the Taxonomy attribute,
      * applying auto-generation logic when values are not explicitly provided.
      *
-     * @param  ReflectionClass  $reflectionClass  The reflection class
      * @param  string  $className  The class name for auto-generation
      * @param  Taxonomy  $taxonomy  The Taxonomy attribute instance
      * @return TaxonomyConfiguration The base configuration
      */
-    private function buildBaseConfiguration(ReflectionClass $reflectionClass, string $className, Taxonomy $taxonomy): TaxonomyConfiguration
+    private function buildBaseConfiguration(string $className, Taxonomy $taxonomy): TaxonomyConfiguration
     {
         $slug = $this->generateSlug($className, $taxonomy->slug);
         $singular = $this->generateSingular($className, $taxonomy->singular);
-        $plural = $this->generatePlural($className, $taxonomy->plural, $singular);
+        $plural = $this->generatePlural($taxonomy->plural, $singular);
         $objectType = $taxonomy->objectType ?? ['post'];
 
         $initialArgs = [
@@ -225,7 +223,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
             foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
                 foreach ($method->getAttributes() as $attribute) {
                     // Process all method-level attributes that have a handle method
-                    $this->processMethodAttribute($className, $method, $attribute, $config);
+                    $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
         } catch (\ReflectionException $e) {
@@ -261,13 +259,11 @@ final class TaxonomyDiscovery implements DiscoveryInterface
      * Handles method-level attributes like MetaBoxCb and UpdateCountCallback by
      * creating appropriate callback configurations.
      *
-     * @param  string  $className  The class name
      * @param  ReflectionMethod  $method  The method with the attribute
      * @param  \ReflectionAttribute  $attribute  The attribute to process
      * @param  TaxonomyConfiguration  $config  The current configuration
      */
     private function processMethodAttribute(
-        string $className,
         ReflectionMethod $method,
         \ReflectionAttribute $attribute,
         TaxonomyConfiguration $config
@@ -302,7 +298,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
                 if (method_exists($instance, 'withArgs')) {
                     $additionalArgs = $instance->withArgs();
 
-                    if (is_array($additionalArgs) && ! empty($additionalArgs)) {
+                    if (is_array($additionalArgs) && $additionalArgs !== []) {
                         $config->mergeArgs($additionalArgs);
                     }
                 }
@@ -352,12 +348,11 @@ final class TaxonomyDiscovery implements DiscoveryInterface
     /**
      * Generate a plural name from singular name and attribute value.
      *
-     * @param  string  $className  The class name
      * @param  string|null  $attributePlural  The plural name from the attribute
      * @param  string  $singular  The singular name
      * @return string The generated plural name
      */
-    private function generatePlural(string $className, ?string $attributePlural, string $singular): string
+    private function generatePlural(?string $attributePlural, string $singular): string
     {
         if ($attributePlural !== null) {
             return $attributePlural;

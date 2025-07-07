@@ -16,47 +16,15 @@ use Pollora\Taxonomy\Domain\Contracts\TaxonomyAttributeInterface;
 class TaxonomyConfiguration implements TaxonomyAttributeInterface
 {
     /**
-     * The taxonomy slug.
-     */
-    private string $slug;
-
-    /**
-     * The singular name of the taxonomy.
-     */
-    private string $singular;
-
-    /**
-     * The plural name of the taxonomy.
-     */
-    private string $plural;
-
-    /**
-     * The object type(s) this taxonomy applies to.
-     */
-    private string|array $objectType;
-
-    /**
-     * The WordPress registration arguments.
-     */
-    public array $attributeArgs = [];
-
-    /**
      * Create a new Taxonomy configuration.
      *
      * @param  string  $slug  The taxonomy slug
      * @param  string  $singular  The singular name
      * @param  string  $plural  The plural name
      * @param  string|array  $objectType  The post type(s) this taxonomy applies to
-     * @param  array<string, mixed>  $initialArgs  Initial arguments
+     * @param  array<string, mixed>  $attributeArgs  Initial arguments
      */
-    public function __construct(string $slug, string $singular, string $plural, string|array $objectType, array $initialArgs = [])
-    {
-        $this->slug = $slug;
-        $this->singular = $singular;
-        $this->plural = $plural;
-        $this->objectType = $objectType;
-        $this->attributeArgs = $initialArgs;
-    }
+    public function __construct(private readonly string $slug, private readonly string $singular, private readonly string $plural, private string|array $objectType, public array $attributeArgs = []) {}
 
     /**
      * Get the taxonomy slug.

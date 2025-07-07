@@ -13,33 +13,13 @@ namespace Pollora\Asset\Domain\Models;
 class Asset
 {
     /**
-     * The unique name or handle of the asset.
-     */
-    private string $name;
-
-    /**
-     * The file path or URL to the asset.
-     */
-    private string $path;
-
-    /**
-     * Additional attributes for the asset (type, version, dependencies, etc.).
-     */
-    private array $attributes;
-
-    /**
      * Initializes a new asset instance.
      *
      * @param  string  $name  The unique name or handle of the asset
      * @param  string  $path  The file path or URL to the asset
      * @param  array  $attributes  Additional attributes (optional)
      */
-    public function __construct(string $name, string $path, array $attributes = [])
-    {
-        $this->name = $name;
-        $this->path = $path;
-        $this->attributes = $attributes;
-    }
+    public function __construct(private readonly string $name, private readonly string $path, private readonly array $attributes = []) {}
 
     /**
      * Gets the asset's unique name or handle.

@@ -17,34 +17,27 @@ use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 class FileSystemTemplateFinder implements TemplateFinderInterface
 {
     /**
-     * The Laravel ViewFinder instance.
-     */
-    protected ViewFinderInterface $finder;
-
-    /**
-     * The Filesystem instance.
-     */
-    protected Filesystem $files;
-
-    /**
      * Base path for theme in which views are located.
      */
     protected ?string $path = null;
 
     /**
-     * Custom base path if provided.
-     */
-    protected string $customPath;
-
-    /**
      * Create new FileSystemTemplateFinder instance.
      */
-    public function __construct(ViewFinderInterface $finder, Filesystem $files, string $path = '')
-    {
-        $this->finder = $finder;
-        $this->files = $files;
-        $this->customPath = $path;
-    }
+    public function __construct(
+        /**
+         * The Laravel ViewFinder instance.
+         */
+        protected ViewFinderInterface $finder,
+        /**
+         * The Filesystem instance.
+         */
+        protected Filesystem $files,
+        /**
+         * Custom base path if provided.
+         */
+        protected string $customPath = ''
+    ) {}
 
     /**
      * Get the theme base path, lazy-loaded to avoid early WordPress function calls.
@@ -70,7 +63,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
     public function locate($templateNames): array
     {
         if (is_array($templateNames)) {
-            return array_merge(...array_map([$this, 'locate'], $templateNames));
+            return array_merge(...array_map($this->locate(...), $templateNames));
         }
 
         // Convert PHP template to Blade template
@@ -86,11 +79,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
             $bladePath = $path.DIRECTORY_SEPARATOR.$bladeTemplate;
             if (file_exists($bladePath)) {
                 $themePath = $this->getThemePath();
-                if ($themePath) {
-                    $found[] = $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $bladePath);
-                } else {
-                    $found[] = $bladeTemplate;
-                }
+                $found[] = $themePath !== '' && $themePath !== '0' ? $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $bladePath) : $bladeTemplate;
             }
 
             // Check for original file if different from Blade
@@ -98,11 +87,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
                 $originalPath = $path.DIRECTORY_SEPARATOR.$templateNames;
                 if (file_exists($originalPath)) {
                     $themePath = $this->getThemePath();
-                    if ($themePath) {
-                        $found[] = $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $originalPath);
-                    } else {
-                        $found[] = $templateNames;
-                    }
+                    $found[] = $themePath !== '' && $themePath !== '0' ? $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $originalPath) : $templateNames;
                 }
             }
         }
@@ -115,7 +100,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
      */
     public function exists(string $templateName): bool
     {
-        return ! empty($this->locate($templateName));
+        return $this->locate($templateName) !== [];
     }
 
     /**
@@ -126,12 +111,12 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
         $themePath = $this->getThemePath();
 
         // Remove the base path to get relative path
-        $viewName = $themePath ? str_replace($themePath, '', $filePath) : $filePath;
+        $viewName = $themePath !== '' && $themePath !== '0' ? str_replace($themePath, '', $filePath) : $filePath;
         $viewName = trim($viewName, '/\\');
 
         // Remove view directory prefixes
         foreach ($this->finder->getPaths() as $viewPath) {
-            if ($themePath) {
+            if ($themePath !== '' && $themePath !== '0') {
                 $relativePath = $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $viewPath);
                 if (str_starts_with($viewName, $relativePath)) {
                     $viewName = substr($viewName, strlen($relativePath));
@@ -145,7 +130,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
         $viewName = str_replace(['/', '\\'], '.', $viewName);
         $viewName = preg_replace('/\.(blade\.)?php$/', '', $viewName);
 
-        return $viewName ?: null;
+        return $viewName !== '' && $viewName !== '0' && $viewName !== [] ? $viewName : null;
     }
 
     /**
@@ -153,10 +138,8 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
      */
     public function getBladeTemplates(array $templates): array
     {
-        return array_map(function ($template) {
-            return str_ends_with($template, '.php') && ! str_ends_with($template, '.blade.php')
-                ? str_replace('.php', '.blade.php', $template)
-                : $template;
-        }, $templates);
+        return array_map(fn ($template): string|array => str_ends_with($template, '.php') && ! str_ends_with($template, '.blade.php')
+            ? str_replace('.php', '.blade.php', $template)
+            : $template, $templates);
     }
 }

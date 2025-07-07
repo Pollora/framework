@@ -92,19 +92,21 @@ class WordPressThemeParser
 
         // Remove comment markers
         $content = preg_replace('/^\/\*\s*|\s*\*\/$/', '', $headerBlock);
-        $content = preg_replace('/^\s*\*\s?/m', '', $content);
+        $content = preg_replace('/^\s*\*\s?/m', '', (string) $content);
 
         // Split into lines and parse each header
-        $lines = explode("\n", $content);
+        $lines = explode("\n", (string) $content);
 
         foreach ($lines as $line) {
             $line = trim($line);
-
-            if (empty($line)) {
+            if ($line === '') {
+                continue;
+            }
+            if ($line === '0') {
                 continue;
             }
 
-            if (strpos($line, ':') !== false) {
+            if (str_contains($line, ':')) {
                 [$key, $value] = explode(':', $line, 2);
                 $headers[trim($key)] = trim($value);
             }

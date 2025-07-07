@@ -53,7 +53,7 @@ class RegisterWooCommerceHooksUseCase
         // Hook into WooCommerce's template loader files filter
         $this->filter->add(
             'woocommerce_template_loader_files',
-            [$this->templateResolver, 'extendTemplateLoaderFiles'],
+            $this->templateResolver->extendTemplateLoaderFiles(...),
             10,
             2
         );
@@ -61,32 +61,32 @@ class RegisterWooCommerceHooksUseCase
         // Hook into various WooCommerce template filters
         $this->filter->add(
             'woocommerce_locate_template',
-            [$this->woocommerceIntegration, 'template'],
+            $this->woocommerceIntegration->template(...),
             10,
             2
         );
 
         $this->filter->add(
             'woocommerce_locate_core_template',
-            [$this->woocommerceIntegration, 'template'],
+            $this->woocommerceIntegration->template(...),
             10,
             2
         );
 
         $this->filter->add(
             'wc_get_template_part',
-            [$this->woocommerceIntegration, 'template']
+            $this->woocommerceIntegration->template(...)
         );
 
         $this->filter->add(
             'wc_get_template',
-            [$this->woocommerceIntegration, 'template'],
+            $this->woocommerceIntegration->template(...),
             1000
         );
 
         $this->filter->add(
             'comments_template',
-            [$this->woocommerceIntegration, 'reviewsTemplate'],
+            $this->woocommerceIntegration->reviewsTemplate(...),
             11
         );
     }
@@ -105,7 +105,7 @@ class RegisterWooCommerceHooksUseCase
         } else {
             $this->action->add(
                 'after_setup_theme',
-                [$this->woocommerceIntegration, 'addThemeSupport']
+                $this->woocommerceIntegration->addThemeSupport(...)
             );
         }
     }

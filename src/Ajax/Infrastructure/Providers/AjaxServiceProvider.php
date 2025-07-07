@@ -17,9 +17,9 @@ class AjaxServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(AjaxActionRegistrarInterface::class, WordPressAjaxActionRegistrar::class);
-        $this->app->singleton(RegisterAjaxActionService::class, fn ($app) => new RegisterAjaxActionService($app->make(AjaxActionRegistrarInterface::class)));
-        $this->app->singleton('wp.ajax', fn ($app) => new AjaxFactory($app->make(RegisterAjaxActionService::class)));
-        $this->app->singleton(ScriptInjectionService::class, fn ($app) => new ScriptInjectionService($app->make(Action::class)));
+        $this->app->singleton(RegisterAjaxActionService::class, fn ($app): \Pollora\Ajax\Application\Services\RegisterAjaxActionService => new RegisterAjaxActionService($app->make(AjaxActionRegistrarInterface::class)));
+        $this->app->singleton('wp.ajax', fn ($app): \Pollora\Ajax\Infrastructure\Services\AjaxFactory => new AjaxFactory($app->make(RegisterAjaxActionService::class)));
+        $this->app->singleton(ScriptInjectionService::class, fn ($app): \Pollora\Ajax\Infrastructure\Services\ScriptInjectionService => new ScriptInjectionService($app->make(Action::class)));
     }
 
     public function boot(): void

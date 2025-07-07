@@ -138,7 +138,7 @@ class LaravelThemeModule extends ThemeModule
             if (in_array($fileName, $translationDependentConfigs, true)) {
                 // Use WordPress hook to delay loading until translations are available
                 if (function_exists('add_action')) {
-                    add_action('init', function () use ($configFile, $key) {
+                    add_action('init', function () use ($configFile, $key): void {
                         if (file_exists($configFile)) {
                             $this->app['config']->set($key, require $configFile);
                         }
@@ -147,11 +147,9 @@ class LaravelThemeModule extends ThemeModule
                     // Fallback: store for later loading
                     $this->delayedConfigs[$key] = $configFile;
                 }
-            } else {
+            } elseif (file_exists($configFile)) {
                 // Load immediately for configs that don't use translations
-                if (file_exists($configFile)) {
-                    $this->app['config']->set($key, require $configFile);
-                }
+                $this->app['config']->set($key, require $configFile);
             }
         }
     }
@@ -298,6 +296,6 @@ class LaravelThemeModule extends ThemeModule
      */
     public function getExtraPath(string $path): string
     {
-        return $this->getPath().($path ? '/'.trim($path, '/') : '');
+        return $this->getPath().($path !== '' && $path !== '0' ? '/'.trim($path, '/') : '');
     }
 }

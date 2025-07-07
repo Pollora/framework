@@ -96,7 +96,7 @@ class ThemeModule extends AbstractModule implements ThemeModuleInterface
 
     public function isChildTheme(): bool
     {
-        return ! empty($this->getParentTheme());
+        return $this->getParentTheme() !== null && $this->getParentTheme() !== '' && $this->getParentTheme() !== '0';
     }
 
     public function getParentTheme(): ?string

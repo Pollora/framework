@@ -27,7 +27,7 @@ interface SchedulerInterface
      * @param  mixed  $value  Current option value
      * @return array Cron jobs array
      */
-    public function preOptionCron($value): array;
+    public function preOptionCron(mixed $value): array;
 
     /**
      * Filter event scheduling.
@@ -37,7 +37,7 @@ interface SchedulerInterface
      * @param  bool  $wp_error  Whether to return WP_Error on failure
      * @return mixed Scheduled event or error
      */
-    public function preScheduleEvent($pre, object $event, bool $wp_error);
+    public function preScheduleEvent(mixed $pre, object $event, bool $wp_error);
 
     /**
      * Filter event rescheduling.
@@ -47,7 +47,7 @@ interface SchedulerInterface
      * @param  bool  $wp_error  Whether to return WP_Error on failure
      * @return mixed Rescheduled event or error
      */
-    public function preRescheduleEvent($pre, object $event, bool $wp_error);
+    public function preRescheduleEvent(mixed $pre, object $event, bool $wp_error);
 
     /**
      * Filter event unscheduling.
@@ -59,7 +59,7 @@ interface SchedulerInterface
      * @param  bool  $wp_error  Whether to return WP_Error on failure
      * @return mixed Unschedule result or error
      */
-    public function preUnscheduleEvent($pre, int $timestamp, string $hook, array $args, bool $wp_error);
+    public function preUnscheduleEvent(mixed $pre, int $timestamp, string $hook, array $args, bool $wp_error);
 
     /**
      * Filter scheduled hook clearing.
@@ -70,7 +70,7 @@ interface SchedulerInterface
      * @param  bool  $wp_error  Whether to return WP_Error on failure
      * @return mixed Clear result or error
      */
-    public function preClearScheduledHook($pre, string $hook, ?array $args, bool $wp_error);
+    public function preClearScheduledHook(mixed $pre, string $hook, ?array $args, bool $wp_error);
 
     /**
      * Filter hook unscheduling.
@@ -80,7 +80,7 @@ interface SchedulerInterface
      * @param  bool  $wp_error  Whether to return WP_Error on failure
      * @return mixed Unschedule result or error
      */
-    public function preUnscheduleHook($pre, string $hook, bool $wp_error);
+    public function preUnscheduleHook(mixed $pre, string $hook, bool $wp_error);
 
     /**
      * Filter scheduled event retrieval.
@@ -91,7 +91,7 @@ interface SchedulerInterface
      * @param  int|null  $timestamp  Event timestamp
      * @return mixed Scheduled event or false
      */
-    public function preGetScheduledEvent($pre, string $hook, array $args, ?int $timestamp);
+    public function preGetScheduledEvent(mixed $pre, string $hook, array $args, ?int $timestamp);
 
     /**
      * Filter ready cron jobs retrieval.
@@ -99,5 +99,5 @@ interface SchedulerInterface
      * @param  mixed  $pre  Current filtered value
      * @return array Ready cron jobs
      */
-    public function preGetReadyCronJobs($pre): array;
+    public function preGetReadyCronJobs(mixed $pre): array;
 }

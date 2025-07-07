@@ -14,19 +14,11 @@ use Pollora\Application\Application\Services\DebugService;
 class DebugController extends Controller
 {
     /**
-     * @var DebugService The debug service
-     */
-    private DebugService $debugService;
-
-    /**
      * Constructor.
      *
      * @param  DebugService  $debugService  The debug service
      */
-    public function __construct(DebugService $debugService)
-    {
-        $this->debugService = $debugService;
-    }
+    public function __construct(private readonly DebugService $debugService) {}
 
     /**
      * Get the current debug status.

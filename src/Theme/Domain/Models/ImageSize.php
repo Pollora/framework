@@ -32,7 +32,7 @@ class ImageSize implements ThemeComponent
 
     public function register(): void
     {
-        $this->action->add('after_setup_theme', [$this, 'addImageSize']);
+        $this->action->add('after_setup_theme', $this->addImageSize(...));
     }
 
     /**

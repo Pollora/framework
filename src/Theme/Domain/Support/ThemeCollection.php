@@ -35,7 +35,7 @@ class ThemeCollection
      */
     public static function make(array $items = []): CollectionInterface
     {
-        if (self::$collectionFactory === null) {
+        if (! self::$collectionFactory instanceof \Pollora\Collection\Domain\Contracts\CollectionFactoryInterface) {
             throw new \RuntimeException(
                 'CollectionFactory not initialized. Call ThemeCollection::setFactory() before using this class.'
             );

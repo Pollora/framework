@@ -16,11 +16,6 @@ use Pollora\Asset\Domain\Contracts\AssetFileInterface;
 class AssetFile implements AssetFileInterface
 {
     /**
-     * The asset file name or relative path.
-     */
-    protected string $filename;
-
-    /**
      * The asset container identifier.
      */
     protected string $assetContainer = 'theme';
@@ -36,10 +31,7 @@ class AssetFile implements AssetFileInterface
      * @param  string  $filename  The file name or relative path
      * @param  string  $content  Optional file content
      */
-    public function __construct(string $filename)
-    {
-        $this->filename = $filename;
-    }
+    public function __construct(protected string $filename) {}
 
     /**
      * Gets the asset file name or path.

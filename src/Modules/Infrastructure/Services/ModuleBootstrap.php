@@ -75,17 +75,6 @@ class ModuleBootstrap
     }
 
     /**
-     * Check if auto-discovery is enabled for a specific feature.
-     *
-     * @param  string  $feature  The feature name (migrations, translations, routes, etc.)
-     * @return bool True if auto-discovery is enabled for the feature
-     */
-    private function isAutoDiscoveryEnabled(string $feature): bool
-    {
-        return $this->app['config']->get("modules.auto-discover.{$feature}", true);
-    }
-
-    /**
      * Get the cached module path for service provider caching.
      *
      * This path is used by Laravel's ProviderRepository to cache

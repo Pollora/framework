@@ -30,8 +30,6 @@ class AjaxAction
 
     private string $userType = self::BOTH_USERS;
 
-    private ?RegisterAjaxActionService $registerService;
-
     /**
      * AjaxAction constructor.
      *
@@ -50,12 +48,11 @@ class AjaxAction
          * @var callable|string $callback The callback to execute.
          */
         private readonly mixed $callback,
-        ?RegisterAjaxActionService $registerService = null
+        private readonly ?RegisterAjaxActionService $registerService = null
     ) {
-        if (empty($this->name) || empty($this->callback)) {
+        if ($this->name === '' || $this->name === '0' || empty($this->callback)) {
             throw new InvalidAjaxActionException('Action and callback must be provided.');
         }
-        $this->registerService = $registerService;
     }
 
     /**
@@ -149,7 +146,7 @@ class AjaxAction
      */
     public function __destruct()
     {
-        if ($this->registerService) {
+        if ($this->registerService instanceof \Pollora\Ajax\Application\Services\RegisterAjaxActionService) {
             $this->registerService->execute($this);
         }
     }

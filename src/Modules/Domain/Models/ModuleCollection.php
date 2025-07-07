@@ -14,9 +14,7 @@ class ModuleCollection extends Collection
      */
     public function getByStatus(bool $status): static
     {
-        return $this->filter(function (ModuleInterface $module) use ($status) {
-            return $module->isEnabled() === $status;
-        });
+        return $this->filter(fn (ModuleInterface $module): bool => $module->isEnabled() === $status);
     }
 
     /**
@@ -40,7 +38,7 @@ class ModuleCollection extends Collection
      */
     public function ordered(string $direction = 'asc'): static
     {
-        return $this->sort(function (ModuleInterface $a, ModuleInterface $b) use ($direction) {
+        return $this->sort(function (ModuleInterface $a, ModuleInterface $b) use ($direction): int {
             $priorityA = (int) $a->get('priority', 0);
             $priorityB = (int) $b->get('priority', 0);
 
@@ -61,9 +59,7 @@ class ModuleCollection extends Collection
      */
     public function findByName(string $name): ?ModuleInterface
     {
-        return $this->first(function (ModuleInterface $module) use ($name) {
-            return strtolower($module->getName()) === strtolower($name);
-        });
+        return $this->first(fn (ModuleInterface $module): bool => strtolower($module->getName()) === strtolower($name));
     }
 
     /**
@@ -71,7 +67,7 @@ class ModuleCollection extends Collection
      */
     public function hasByName(string $name): bool
     {
-        return $this->findByName($name) !== null;
+        return $this->findByName($name) instanceof \Pollora\Modules\Domain\Contracts\ModuleInterface;
     }
 
     /**
@@ -79,15 +75,13 @@ class ModuleCollection extends Collection
      */
     public function toThemeArray(): array
     {
-        return $this->mapWithKeys(function (ModuleInterface $module) {
-            return [
-                $module->getLowerName() => [
-                    'name' => $module->getName(),
-                    'description' => $module->getDescription(),
-                    'path' => $module->getPath(),
-                    'enabled' => $module->isEnabled(),
-                ],
-            ];
-        })->toArray();
+        return $this->mapWithKeys(fn (ModuleInterface $module) => [
+            $module->getLowerName() => [
+                'name' => $module->getName(),
+                'description' => $module->getDescription(),
+                'path' => $module->getPath(),
+                'enabled' => $module->isEnabled(),
+            ],
+        ])->toArray();
     }
 }

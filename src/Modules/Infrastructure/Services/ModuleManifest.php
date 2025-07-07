@@ -16,26 +16,20 @@ use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
  */
 class ModuleManifest
 {
-    protected Filesystem $files;
-
     protected Collection $paths;
-
-    protected ?string $manifestPath;
 
     protected array $manifest = [];
 
     protected static ?Collection $manifestData = null;
 
     public function __construct(
-        Filesystem $files,
+        protected Filesystem $files,
         array $paths,
-        string $manifestPath,
+        protected ?string $manifestPath,
         protected ModuleRepositoryInterface $repository,
         protected ?object $scout = null // Legacy parameter, unused
     ) {
-        $this->files = $files;
         $this->paths = collect($paths);
-        $this->manifestPath = $manifestPath;
     }
 
     /**

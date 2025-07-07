@@ -12,17 +12,12 @@ use Symfony\Component\Process\Process;
  */
 class NpmRunner
 {
-    protected string $workingDirectory;
-
     /**
      * Instantiate NpmRunner with the specified working directory.
      *
      * @param  string  $workingDirectory  Path to the directory where npm commands will be executed.
      */
-    public function __construct(string $workingDirectory)
-    {
-        $this->workingDirectory = $workingDirectory;
-    }
+    public function __construct(protected string $workingDirectory) {}
 
     /**
      * Run `npm install` in the working directory.
@@ -59,7 +54,7 @@ class NpmRunner
     {
         $process = new Process($command, $this->workingDirectory);
         $process->setTimeout(300); // 5 minutes by precaution
-        $process->run(function ($type, $buffer) {
+        $process->run(function ($type, $buffer): void {
             echo $buffer; // or use a logger here if needed
         });
 

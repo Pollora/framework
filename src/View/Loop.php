@@ -79,7 +79,7 @@ class Loop
      * @param  int|\WP_Post  $post
      * @return string The excerpt of the current post.
      */
-    public function excerpt($post = null)
+    public function excerpt($post = null): mixed
     {
         return $this->filter->apply('the_excerpt', get_the_excerpt($post));
     }

@@ -18,8 +18,6 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(ConsoleDetectorInterface::class, function ($app) {
-            return new LaravelConsoleDetector($app);
-        });
+        $this->app->singleton(ConsoleDetectorInterface::class, fn ($app): \Pollora\Application\Infrastructure\Services\LaravelConsoleDetector => new LaravelConsoleDetector($app));
     }
 }

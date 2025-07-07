@@ -240,7 +240,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
      * @param  mixed  $value  Unused
      * @return mixed
      */
-    public function handlePreSetSiteTransientUpdatePlugins($value)
+    public function handlePreSetSiteTransientUpdatePlugins(mixed $value)
     {
         $pluginsToDelete = get_option('pollora_plugins_to_delete');
         if (! filter_input(INPUT_POST, 'verify-delete') || ! $pluginsToDelete) {

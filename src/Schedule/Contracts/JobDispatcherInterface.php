@@ -18,5 +18,5 @@ interface JobDispatcherInterface
      * @param  mixed  $job  The job to dispatch
      * @return int The dispatched job ID
      */
-    public function dispatch($job): int;
+    public function dispatch(mixed $job): int;
 }

@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Services;
 
-use Illuminate\Contracts\View\Factory as ViewFactory;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
-use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 /**
  * Infrastructure implementation of WooCommerce template resolver.
@@ -18,8 +16,6 @@ use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 class WooCommerceTemplateResolver implements TemplateResolverInterface
 {
     public function __construct(
-        private readonly TemplateFinderInterface $templateFinder,
-        private readonly ViewFactory $viewFactory,
         private readonly WooCommerceService $domainService
     ) {}
 
@@ -28,7 +24,7 @@ class WooCommerceTemplateResolver implements TemplateResolverInterface
      */
     public function extendTemplateLoaderFiles(array $templates, string $defaultFile): array
     {
-        if (! $defaultFile) {
+        if ($defaultFile === '' || $defaultFile === '0') {
             return $templates;
         }
 

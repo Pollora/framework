@@ -60,7 +60,7 @@ class ThemeRepository implements ModuleRepositoryInterface
     {
         $module = $this->find($name);
 
-        if ($module === null) {
+        if (! $module instanceof \Pollora\Modules\Domain\Contracts\ModuleInterface) {
             throw ModuleException::notFound($name);
         }
 
@@ -69,14 +69,12 @@ class ThemeRepository implements ModuleRepositoryInterface
 
     public function has(string $name): bool
     {
-        return $this->find($name) !== null;
+        return $this->find($name) instanceof \Pollora\Modules\Domain\Contracts\ModuleInterface;
     }
 
     public function getByStatus(bool $status): array
     {
-        return array_filter($this->all(), function (ModuleInterface $module) use ($status) {
-            return $module->isEnabled() === $status;
-        });
+        return array_filter($this->all(), fn (ModuleInterface $module): bool => $module->isEnabled() === $status);
     }
 
     public function allEnabled(): array
@@ -93,7 +91,7 @@ class ThemeRepository implements ModuleRepositoryInterface
     {
         $themes = $this->allEnabled();
 
-        uasort($themes, function (ModuleInterface $a, ModuleInterface $b) use ($direction) {
+        uasort($themes, function (ModuleInterface $a, ModuleInterface $b) use ($direction): int {
             $priorityA = (int) $a->get('priority', 0);
             $priorityB = (int) $b->get('priority', 0);
 

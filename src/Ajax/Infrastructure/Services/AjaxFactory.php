@@ -12,15 +12,10 @@ use Pollora\Ajax\Domain\Models\AjaxAction;
  */
 class AjaxFactory
 {
-    private RegisterAjaxActionService $registerService;
-
     /**
      * AjaxFactory constructor.
      */
-    public function __construct(RegisterAjaxActionService $registerService)
-    {
-        $this->registerService = $registerService;
-    }
+    public function __construct(private readonly RegisterAjaxActionService $registerService) {}
 
     /**
      * Create a new AjaxAction instance for the given action and callback.

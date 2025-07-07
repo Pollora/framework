@@ -61,33 +61,22 @@ class WooCommerceServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressWooCommerceAdapter::class);
 
         // Register the main WooCommerce integration implementation
-        $this->app->singleton(WooCommerceIntegrationInterface::class, function ($app) {
-            return new WooCommerce(
-                $app,
-                $app->make(TemplateFinderInterface::class),
-                $app->make(ViewFactory::class),
-                $app->make(WooCommerceService::class),
-                $app->make(WordPressWooCommerceAdapter::class)
-            );
-        });
+        $this->app->singleton(WooCommerceIntegrationInterface::class, fn ($app): \Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerce => new WooCommerce(
+            $app->make(TemplateFinderInterface::class),
+            $app->make(ViewFactory::class),
+            $app->make(WooCommerceService::class),
+            $app->make(WordPressWooCommerceAdapter::class)
+        ));
 
         // Register the template resolver implementation
-        $this->app->singleton(TemplateResolverInterface::class, function ($app) {
-            return new WooCommerceTemplateResolver(
-                $app->make(TemplateFinderInterface::class),
-                $app->make(ViewFactory::class),
-                $app->make(WooCommerceService::class)
-            );
-        });
+        $this->app->singleton(TemplateResolverInterface::class, fn ($app): \Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerceTemplateResolver => new WooCommerceTemplateResolver(
+            $app->make(WooCommerceService::class)
+        ));
 
         // Maintain backward compatibility by binding the old class name
-        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\WooCommerce::class, function ($app) {
-            return $app->make(WooCommerceIntegrationInterface::class);
-        });
+        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\WooCommerce::class, fn ($app) => $app->make(WooCommerceIntegrationInterface::class));
 
-        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver::class, function ($app) {
-            return $app->make(TemplateResolverInterface::class);
-        });
+        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver::class, fn ($app) => $app->make(TemplateResolverInterface::class));
     }
 
     /**
@@ -95,14 +84,12 @@ class WooCommerceServiceProvider extends ServiceProvider
      */
     private function registerApplicationServices(): void
     {
-        $this->app->singleton(RegisterWooCommerceHooksUseCase::class, function ($app) {
-            return new RegisterWooCommerceHooksUseCase(
-                $app->make(Action::class),
-                $app->make(Filter::class),
-                $app->make(WooCommerceIntegrationInterface::class),
-                $app->make(TemplateResolverInterface::class)
-            );
-        });
+        $this->app->singleton(RegisterWooCommerceHooksUseCase::class, fn ($app): \Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase => new RegisterWooCommerceHooksUseCase(
+            $app->make(Action::class),
+            $app->make(Filter::class),
+            $app->make(WooCommerceIntegrationInterface::class),
+            $app->make(TemplateResolverInterface::class)
+        ));
     }
 
     /**

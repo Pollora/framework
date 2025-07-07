@@ -229,7 +229,7 @@ if (! function_exists('pollora_list_module_routes')) {
 
                 // Check if this might be a module route
                 $action = $route->getActionName();
-                if (str_contains($action, 'Modules\\') || str_contains($route->uri(), 'wishlist')) {
+                if (str_contains((string) $action, 'Modules\\') || str_contains((string) $route->uri(), 'wishlist')) {
                     $moduleRoutes[] = [
                         'uri' => $route->uri(),
                         'methods' => $route->methods(),
@@ -240,7 +240,7 @@ if (! function_exists('pollora_list_module_routes')) {
                 }
             }
 
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Silently fail
         }
 

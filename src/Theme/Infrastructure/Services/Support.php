@@ -38,7 +38,7 @@ class Support implements ThemeComponent
      */
     public function register(): void
     {
-        $this->action->add('after_setup_theme', [$this, 'addThemeSupport'], 1);
+        $this->action->add('after_setup_theme', $this->addThemeSupport(...), 1);
     }
 
     /**

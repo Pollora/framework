@@ -30,7 +30,7 @@ class WordPressShutdown
 
         // Register a shutdown function to ensure WordPress cleanup
         if (function_exists('wp_ob_end_flush_all')) {
-            register_shutdown_function(function () {
+            register_shutdown_function(function (): void {
                 // Clean up any output buffers WordPress might have opened
                 if (function_exists('wp_ob_end_flush_all')) {
                     wp_ob_end_flush_all();

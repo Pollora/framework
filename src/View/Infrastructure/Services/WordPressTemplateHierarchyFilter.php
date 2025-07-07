@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\View\Infrastructure\Services;
 
 use Illuminate\Support\Str;
-use Pollora\Filesystem\Filesystem;
 use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 use Pollora\View\Domain\Contracts\TemplateHierarchyFilterInterface;
@@ -21,8 +20,7 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
 {
     public function __construct(
         private readonly TemplateFinderInterface $templateFinder,
-        private readonly ResolveBladeTemplateUseCase $resolveBladeTemplateUseCase,
-        private readonly Filesystem $files
+        private readonly ResolveBladeTemplateUseCase $resolveBladeTemplateUseCase
     ) {}
 
     /**
@@ -60,10 +58,10 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
      */
     public function extendThemeTemplates(array $templates, $theme, $post, string $postType): array
     {
-        $textDomain = method_exists($theme, 'load_textdomain') && $theme->load_textdomain()
-            ? $theme->get('TextDomain')
-            : '';
-        $bladeTemplates = $this->getBladeThemeTemplates($postType, $textDomain);
+        if (method_exists($theme, 'load_textdomain') && $theme->load_textdomain()) {
+            $theme->get('TextDomain');
+        }
+        $bladeTemplates = $this->getBladeThemeTemplates($postType);
 
         return array_merge($templates, $bladeTemplates);
     }
@@ -85,7 +83,7 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
             if ($template) {
                 $pages = array_filter(
                     $templates,
-                    fn ($file) => str_contains($file, $template)
+                    fn ($file): bool => str_contains($file, (string) $template)
                 );
 
                 $templates = array_diff($templates, $pages);
@@ -94,9 +92,7 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
 
         // Group templates by base name to avoid duplicates
         return collect([...$pages, ...$files, ...$templates])
-            ->groupBy(function ($item) {
-                return Str::of($item)->afterLast('/')->before('.');
-            })
+            ->groupBy(fn ($item) => Str::of($item)->afterLast('/')->before('.'))
             ->flatten()
             ->toArray();
     }
@@ -105,10 +101,9 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
      * Get Blade theme templates with Template Name headers.
      *
      * @param  string  $postType  Post type to get templates for
-     * @param  string  $textDomain  Theme text domain for translations
      * @return array<string, string>
      */
-    private function getBladeThemeTemplates(string $postType = '', string $textDomain = ''): array
+    private function getBladeThemeTemplates(string $postType = ''): array
     {
         // Check cache first
         if (function_exists('wp_cache_get')) {

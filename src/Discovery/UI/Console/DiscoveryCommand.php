@@ -77,7 +77,7 @@ final class DiscoveryCommand extends Command
                 $this->info('Running all discoveries...');
                 $discoveryManager->run();
                 $this->info('✓ All discoveries completed');
-                
+
                 // Also run Laravel module discovery
                 $this->info('Running Laravel module discovery...');
                 $moduleOrchestrator->discoverLaravelModules();
@@ -117,18 +117,18 @@ final class DiscoveryCommand extends Command
 
         $discoveries = $discoveryManager->getDiscoveries();
         $moduleResults = $moduleOrchestrator->discoverAndReturnLaravelModules();
-        
+
         // Aggregate results from main discoveries and module discoveries
         $totals = [];
-        
+
         // Count items from main discovery manager
         foreach ($discoveries as $identifier => $discovery) {
             $itemCount = count($discoveryManager->getDiscoveredItems($identifier));
             $totals[$identifier] = ($totals[$identifier] ?? 0) + $itemCount;
         }
-        
+
         // Count items from Laravel modules
-        foreach ($moduleResults as $moduleName => $moduleDiscoveries) {
+        foreach ($moduleResults as $moduleDiscoveries) {
             foreach ($moduleDiscoveries as $identifier => $items) {
                 $itemCount = is_array($items) ? count($items) : 0;
                 $totals[$identifier] = ($totals[$identifier] ?? 0) + $itemCount;
@@ -142,7 +142,7 @@ final class DiscoveryCommand extends Command
 
         $locations = $discoveryManager->getLocations();
         $moduleCount = count($moduleResults);
-        
+
         $this->info('');
         $this->info("Scanned {$locations->count()} discovery locations");
         if ($moduleCount > 0) {

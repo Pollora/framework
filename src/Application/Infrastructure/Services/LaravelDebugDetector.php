@@ -13,19 +13,11 @@ use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 class LaravelDebugDetector implements DebugDetectorInterface
 {
     /**
-     * The Laravel application instance.
-     */
-    private Application $app;
-
-    /**
      * Constructor.
      *
      * @param  Application  $app  The Laravel application instance
      */
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
-    }
+    public function __construct(private Application $app) {}
 
     /**
      * Determine if the application is in debug mode.

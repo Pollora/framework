@@ -41,14 +41,6 @@ abstract class AbstractHook implements HookInterface
     protected static array $reflectionCache = [];
 
     /**
-     * Initialize a new hook instance.
-     */
-    public function __construct()
-    {
-        $this->hooks = [];
-    }
-
-    /**
      * Add one or multiple hooks with a callback.
      *
      * @param  string|array  $hooks  Hook name or array of hook names
@@ -101,7 +93,7 @@ abstract class AbstractHook implements HookInterface
                 fn (array $item): bool => ! ($item['priority'] === $priority && $this->compareCallbacks($item['callback'], $callback))
             ));
             // Update or remove the hook entry
-            if (empty($filteredCallbacks)) {
+            if ($filteredCallbacks === []) {
                 unset($this->hooks[$hook]);
             } else {
                 $this->hooks[$hook] = $filteredCallbacks;
@@ -151,7 +143,7 @@ abstract class AbstractHook implements HookInterface
             // Compare objects/classes
             if (is_object($regObject) && is_string($reqObject)) {
                 // Case where the registered callback has an object but the request has a class
-                return $regObject instanceof $reqObject || get_class($regObject) === $reqObject;
+                return $regObject instanceof $reqObject || $regObject::class === $reqObject;
             }
 
             if (is_string($regObject) && is_string($reqObject)) {
@@ -161,7 +153,7 @@ abstract class AbstractHook implements HookInterface
 
             if (is_object($regObject) && is_object($reqObject)) {
                 // Case where both are objects
-                return get_class($regObject) === get_class($reqObject);
+                return $regObject::class === $reqObject::class;
             }
         }
 
@@ -328,7 +320,7 @@ abstract class AbstractHook implements HookInterface
             $method = $callback[1];
 
             if (is_object($object)) {
-                return get_class($object).'::'.$method.'@'.spl_object_id($object);
+                return $object::class.'::'.$method.'@'.spl_object_id($object);
             }
 
             return $object.'::'.$method;

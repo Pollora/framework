@@ -6,9 +6,9 @@ namespace Tests\Unit\Theme;
 
 use PHPUnit\Framework\TestCase;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
-use Psr\Container\ContainerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
+use Psr\Container\ContainerInterface;
 
 /**
  * Test suite for the theme self-registration system.

@@ -17,5 +17,5 @@ interface Action extends HookInterface
      * @param  string  $hook  The action hook name
      * @param  mixed  ...$args  Additional arguments
      */
-    public function do(string $hook, ...$args): self;
+    public function do(string $hook, mixed ...$args): self;
 }

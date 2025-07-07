@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Services;
 
-use Illuminate\Contracts\Container\Container as ContainerContract;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Str;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
@@ -21,7 +20,6 @@ use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 class WooCommerce implements WooCommerceIntegrationInterface
 {
     public function __construct(
-        private readonly ContainerContract $app,
         private readonly TemplateFinderInterface $templateFinder,
         private readonly ViewFactory $viewFactory,
         private readonly WooCommerceService $domainService,
@@ -70,7 +68,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
         $themeTemplate = $this->locateThemeTemplate($templateToLocate);
 
         // If no theme template was found, return the original template
-        if (! $themeTemplate) {
+        if ($themeTemplate === '' || $themeTemplate === '0') {
             return $template;
         }
 
@@ -91,7 +89,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
         // We have a Blade template, get the view name and create a loader
         $viewName = $this->getViewNameFromTemplate($themeTemplate);
 
-        if (! $viewName || ! $this->viewFactory->exists($viewName)) {
+        if ($viewName === null || $viewName === '' || $viewName === '0' || ! $this->viewFactory->exists($viewName)) {
             return $themeTemplate;
         }
 
@@ -114,12 +112,12 @@ class WooCommerce implements WooCommerceIntegrationInterface
         }
 
         // Priority 2: Use $templateName if it looks like a full filename
-        if (! empty($templateName) && (str_contains($templateName, '/') || str_ends_with($templateName, '.php'))) {
+        if ($templateName !== '' && $templateName !== '0' && (str_contains($templateName, '/') || str_ends_with($templateName, '.php'))) {
             return $templateName;
         }
 
         // Priority 3: If $templateName is provided and $template looks like just a file name
-        if (! empty($templateName) && ! str_contains($template, '/')) {
+        if ($templateName !== '' && $templateName !== '0' && ! str_contains($template, '/')) {
             return $templateName;
         }
 
@@ -136,7 +134,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
     protected function getViewNameFromTemplate(string $templatePath): ?string
     {
         $realPath = realpath($templatePath);
-        if (! $realPath) {
+        if ($realPath === '' || $realPath === '0' || $realPath === false) {
             return null;
         }
 
@@ -160,7 +158,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
         $foundTemplates = $this->templateFinder->locate($themeTemplate);
 
         // Return the first found template (Blade templates are prioritized in the finder)
-        if (! empty($foundTemplates)) {
+        if ($foundTemplates !== []) {
             return $this->adapter->locateTemplate($foundTemplates);
         }
 

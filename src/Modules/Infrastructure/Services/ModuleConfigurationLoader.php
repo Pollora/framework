@@ -16,6 +16,8 @@ use Pollora\Hook\Domain\Contracts\Action;
  */
 class ModuleConfigurationLoader
 {
+    public $action;
+
     protected \Pollora\Hook\Domain\Contracts\Action $actionService;
 
     public function __construct(
@@ -33,7 +35,7 @@ class ModuleConfigurationLoader
      */
     public function loadModuleConfiguration(string $modulePath, string $moduleType): void
     {
-        $this->action->add('after_setup_theme', function () use ($modulePath, $moduleType) {
+        $this->action->add('after_setup_theme', function () use ($modulePath, $moduleType): void {
             $this->loadConfigurationFiles($modulePath, $moduleType);
         });
     }
@@ -67,13 +69,13 @@ class ModuleConfigurationLoader
      */
     private function loadConfigurationFiles(string $modulePath, string $moduleType): void
     {
-        $configPath = $modulePath . '/config';
+        $configPath = $modulePath.'/config';
 
-        if (!is_dir($configPath)) {
+        if (! is_dir($configPath)) {
             return;
         }
 
-        $configFiles = glob($configPath . '/*.php') ?: [];
+        $configFiles = glob($configPath.'/*.php') ?: [];
 
         foreach ($configFiles as $configFile) {
             $this->loadSingleConfigFile($configFile, $moduleType);

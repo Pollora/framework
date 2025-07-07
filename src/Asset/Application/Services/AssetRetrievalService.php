@@ -16,19 +16,11 @@ use Pollora\Asset\Domain\Services\AssetContainerManager;
 class AssetRetrievalService
 {
     /**
-     * The asset container manager instance.
-     */
-    private AssetContainerManager $manager;
-
-    /**
      * Initializes the retrieval service with the container manager.
      *
      * @param  AssetContainerManager  $manager  The asset container manager
      */
-    public function __construct(AssetContainerManager $manager)
-    {
-        $this->manager = $manager;
-    }
+    public function __construct(private readonly AssetContainerManager $manager) {}
 
     /**
      * Retrieves a single asset by name.
