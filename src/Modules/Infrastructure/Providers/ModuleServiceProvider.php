@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
-use Pollora\Modules\Domain\Contracts\OnDemandDiscoveryInterface;
+use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Modules\Infrastructure\Services\ModuleBootstrap;
 use Pollora\Modules\Infrastructure\Services\ModuleManifest;
-use Pollora\Modules\Infrastructure\Services\OnDemandDiscoveryService;
+use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
 
 /**
  * Main service provider for the generic module system.
@@ -30,16 +30,16 @@ class ModuleServiceProvider extends ServiceProvider
             return new ModuleAutoloader($app);
         });
 
-        // Register OnDemandDiscoveryService
-        $this->app->singleton(OnDemandDiscoveryService::class, function ($app) {
-            return new OnDemandDiscoveryService($app);
+        // Register ModuleDiscoveryOrchestrator
+        $this->app->singleton(ModuleDiscoveryOrchestrator::class, function ($app) {
+            return new ModuleDiscoveryOrchestrator($app);
         });
 
         // Register interface binding
-        $this->app->bind(OnDemandDiscoveryInterface::class, OnDemandDiscoveryService::class);
+        $this->app->bind(ModuleDiscoveryOrchestratorInterface::class, ModuleDiscoveryOrchestrator::class);
 
         // Register alias for easier access
-        $this->app->alias(OnDemandDiscoveryService::class, 'modules.discovery');
+        $this->app->alias(ModuleDiscoveryOrchestrator::class, 'modules.discovery');
 
         // Merge configuration
         $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');

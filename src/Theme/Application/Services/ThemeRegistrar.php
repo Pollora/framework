@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\Application\Services;
 
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
-use Pollora\Modules\Domain\Contracts\OnDemandDiscoveryInterface;
+use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;
@@ -95,14 +95,14 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     protected function discoverThemeStructures(ThemeModuleInterface $theme): void
     {
-        if (!$this->app->has(OnDemandDiscoveryInterface::class)) {
+        if (!$this->app->has(ModuleDiscoveryOrchestratorInterface::class)) {
             return;
         }
 
         try {
-            $discoveryService = $this->app->get(OnDemandDiscoveryInterface::class);
+            $discoveryService = $this->app->get(ModuleDiscoveryOrchestratorInterface::class);
 
-            $discoveryService->discoverModule($theme->getPath());
+            $discoveryService->discover($theme->getPath());
         } catch (\Exception $e) {
             $this->logError("Theme discovery error for {$theme->getName()}: " . $e->getMessage());
         }
