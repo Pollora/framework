@@ -14,6 +14,8 @@ use Illuminate\Config\Repository;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
+use Pollora\Console\Concerns\PromptsForMissingOption;
+use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
 use Pollora\Modules\Infrastructure\Services\ModuleDownloader;
 use Pollora\Support\NpmRunner;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
@@ -21,14 +23,15 @@ use Pollora\Theme\Domain\Models\ThemeMetadata;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
-class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput
+class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
+    use PromptsForMissingOption;
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'pollora:make-theme {name} {theme_author} {theme_author_uri} {theme_uri} {theme_description} {theme_version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create theme with same name}';
+    protected $signature = 'pollora:make-theme {name} {--theme-author= : Theme author name} {--theme-author-uri= : Theme author URI} {--theme-uri= : Theme URI} {--theme-description= : Theme description} {--theme-version= : Theme version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create theme with same name}';
 
     /**
      * The console command description.
@@ -436,12 +439,48 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     {
         return [
             '%theme_name%' => $this->theme->getName(),
-            '%theme_author%' => $this->argument('theme_author'),
-            '%theme_author_uri%' => $this->argument('theme_author_uri'),
-            '%theme_uri%' => $this->argument('theme_uri'),
-            '%theme_description%' => $this->argument('theme_description'),
-            '%theme_version%' => $this->argument('theme_version'),
+            '%theme_author%' => $this->option('theme-author'),
+            '%theme_author_uri%' => $this->option('theme-author-uri'),
+            '%theme_uri%' => $this->option('theme-uri'),
+            '%theme_description%' => $this->option('theme-description'),
+            '%theme_version%' => $this->option('theme-version'),
             '%theme_namespace%' => $this->theme->getThemeNamespace(),
+        ];
+    }
+
+    /**
+     * Prompt for missing options using the returned questions.
+     *
+     * @return array
+     */
+    protected function promptForMissingOptionsUsing(): array
+    {
+        return [
+            'theme-author' => [
+                'label' => 'What is the author of the new theme?',
+                'default' => 'Pollora',
+                'validation' => 'required'
+            ],
+            'theme-author-uri' => [
+                'label' => 'What is the URL of the theme author?',
+                'default' => 'https://pollora.dev',
+                'validation' => 'required|url'
+            ],
+            'theme-uri' => [
+                'label' => 'What is the URL of the theme?',
+                'default' => 'https://pollora.dev',
+                'validation' => 'required|url'
+            ],
+            'theme-description' => [
+                'label' => 'What is the description of the new theme?',
+                'default' => 'A new theme using Pollora Framework',
+                'validation' => 'required'
+            ],
+            'theme-version' => [
+                'label' => 'What is the version of the theme?',
+                'default' => '1.0',
+                'validation' => 'required'
+            ],
         ];
     }
 
@@ -455,31 +494,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
                 label: 'What is a name of the new theme?',
                 default: 'default',
                 validate: fn ($value): ?string => $this->validateValue($value)
-            ),
-            'theme_author' => fn (): string => text(
-                label: 'What is the author of the new theme?',
-                default: 'Pollora',
-                validate: 'required'
-            ),
-            'theme_author_uri' => fn (): string => text(
-                label: 'What is the URL of the theme author?',
-                default: 'https://pollora.dev',
-                validate: 'required|url'
-            ),
-            'theme_description' => fn (): string => text(
-                label: 'What is the description of the new theme?',
-                default: 'A new theme using Pollora Framework',
-                validate: 'required'
-            ),
-            'theme_uri' => fn (): string => text(
-                label: 'What is the URL of the theme?',
-                default: 'https://pollora.dev',
-                validate: 'required|url'
-            ),
-            'theme_version' => fn (): string => text(
-                label: 'What is the version of the theme?',
-                default: '1.0',
-                validate: 'required'
             ),
         ];
     }
