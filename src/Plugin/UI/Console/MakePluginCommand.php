@@ -9,6 +9,8 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
+use Pollora\Console\Concerns\PromptsForMissingOption;
+use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
 use Pollora\Modules\Infrastructure\Services\ModuleDownloader;
 use Pollora\Plugin\Domain\Models\PluginMetadata;
 use Pollora\Support\NpmRunner;
@@ -23,14 +25,15 @@ use function Laravel\Prompts\text;
  * performing string replacements, running npm install/build, and setting up
  * the plugin structure following WordPress and Laravel conventions.
  */
-class MakePluginCommand extends Command implements PromptsForMissingInput
+class MakePluginCommand extends Command implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
+    use PromptsForMissingOption;
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'pollora:make-plugin {name} {plugin_author} {plugin_author_uri} {plugin_uri} {plugin_description} {plugin_version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create plugin with same name}';
+    protected $signature = 'pollora:make-plugin {name} {--plugin-author= : Plugin author name} {--plugin-author-uri= : Plugin author URI} {--plugin-uri= : Plugin URI} {--plugin-description= : Plugin description} {--plugin-version= : Plugin version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create plugin with same name}';
 
     /**
      * The console command description.
@@ -136,7 +139,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput
             if (function_exists('activate_plugin')) {
                 $pluginBasename = $this->plugin->getBasename();
                 $result = activate_plugin($pluginBasename);
-                
+
                 if (is_wp_error($result)) {
                     $this->warn('Unable to activate the plugin: '.$result->get_error_message());
                 } else {
@@ -366,7 +369,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput
     {
         $targetDir = $destination.($relativePath !== '' && $relativePath !== '0' ? '/'.$relativePath : '');
         $filename = $item->getFilename();
-        
+
         // Apply placeholder replacements to filename
         $replacements = $this->getReplacements();
         $filename = str_replace(
@@ -374,7 +377,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput
             array_values($replacements),
             $filename
         );
-        
+
         $targetPath = $targetDir.'/'.$filename;
         $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
 
@@ -494,17 +497,17 @@ class MakePluginCommand extends Command implements PromptsForMissingInput
     {
         $pluginName = $this->plugin->getName();
         $functionName = $this->sanitizeForPhpFunction($pluginName);
-        
+
         return [
             '%plugin_name%' => $pluginName,
             '%plugin_function_name%' => $functionName,
             '%PLUGIN_FUNCTION_NAME%' => strtoupper($functionName),
             '%PLUGIN_NAME%' => strtoupper($functionName),
-            '%plugin_author%' => $this->argument('plugin_author'),
-            '%plugin_author_uri%' => $this->argument('plugin_author_uri'),
-            '%plugin_uri%' => $this->argument('plugin_uri'),
-            '%plugin_description%' => $this->argument('plugin_description'),
-            '%plugin_version%' => $this->argument('plugin_version'),
+            '%plugin_author%' => $this->option('plugin-author'),
+            '%plugin_author_uri%' => $this->option('plugin-author-uri'),
+            '%plugin_uri%' => $this->option('plugin-uri'),
+            '%plugin_description%' => $this->option('plugin-description'),
+            '%plugin_version%' => $this->option('plugin-version'),
             '%plugin_namespace%' => $this->plugin->getPluginNamespace(),
             '%plugin_slug%' => $this->plugin->getSlug(),
             '%plugin_basename%' => $this->plugin->getBasename(),
@@ -522,19 +525,55 @@ class MakePluginCommand extends Command implements PromptsForMissingInput
         // Convert to lowercase and replace non-alphanumeric characters with underscores
         $sanitized = strtolower($pluginName);
         $sanitized = preg_replace('/[^a-z0-9_]/', '_', $sanitized);
-        
+
         // Remove multiple consecutive underscores
         $sanitized = preg_replace('/_+/', '_', $sanitized);
-        
+
         // Remove leading/trailing underscores
         $sanitized = trim($sanitized, '_');
-        
+
         // Ensure it doesn't start with a number by prefixing with underscore
         if (preg_match('/^[0-9]/', $sanitized)) {
             $sanitized = '_' . $sanitized;
         }
-        
+
         return $sanitized;
+    }
+
+    /**
+     * Prompt for missing options using the returned questions.
+     *
+     * @return array
+     */
+    protected function promptForMissingOptionsUsing(): array
+    {
+        return [
+            'plugin-author' => [
+                'label' => 'What is the author of the new plugin?',
+                'default' => 'Pollora',
+                'validation' => 'required'
+            ],
+            'plugin-author-uri' => [
+                'label' => 'What is the URL of the plugin author?',
+                'default' => 'https://pollora.dev',
+                'validation' => 'required|url'
+            ],
+            'plugin-uri' => [
+                'label' => 'What is the URL of the plugin?',
+                'default' => 'https://pollora.dev',
+                'validation' => 'required|url'
+            ],
+            'plugin-description' => [
+                'label' => 'What is the description of the new plugin?',
+                'default' => 'A new plugin using Pollora Framework',
+                'validation' => 'required'
+            ],
+            'plugin-version' => [
+                'label' => 'What is the version of the plugin?',
+                'default' => '1.0.0',
+                'validation' => 'required'
+            ],
+        ];
     }
 
     /**
@@ -549,31 +588,6 @@ class MakePluginCommand extends Command implements PromptsForMissingInput
                 label: 'What is the name of the new plugin?',
                 default: 'default-plugin',
                 validate: fn ($value): ?string => $this->validateValue($value)
-            ),
-            'plugin_author' => fn (): string => text(
-                label: 'What is the author of the new plugin?',
-                default: 'Pollora',
-                validate: 'required'
-            ),
-            'plugin_author_uri' => fn (): string => text(
-                label: 'What is the URL of the plugin author?',
-                default: 'https://pollora.dev',
-                validate: 'required|url'
-            ),
-            'plugin_description' => fn (): string => text(
-                label: 'What is the description of the new plugin?',
-                default: 'A new plugin using Pollora Framework',
-                validate: 'required'
-            ),
-            'plugin_uri' => fn (): string => text(
-                label: 'What is the URL of the plugin?',
-                default: 'https://pollora.dev',
-                validate: 'required|url'
-            ),
-            'plugin_version' => fn (): string => text(
-                label: 'What is the version of the plugin?',
-                default: '1.0.0',
-                validate: 'required'
             ),
         ];
     }
