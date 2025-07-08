@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DummyNamespace;
 
+use Pollora\Attributes\Taxonomy;
 use Pollora\Attributes\Taxonomy\ShowTagcloud;
 use Pollora\Attributes\Taxonomy\ShowInQuickEdit;
 use Pollora\Attributes\Taxonomy\ShowAdminColumn;
@@ -17,6 +18,7 @@ use Pollora\Attributes\Taxonomy\ObjectType;
  * This class defines the DummyName custom taxonomy using PHP attributes
  * for WordPress registration.
  */
+#[Taxonomy]
 #[ShowTagcloud]
 #[ShowInQuickEdit]
 #[ShowAdminColumn]

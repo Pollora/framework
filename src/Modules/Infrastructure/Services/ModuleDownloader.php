@@ -265,6 +265,7 @@ class ModuleDownloader
     protected function findExtractedFolder(string $extractPath): string
     {
         $contents = scandir($extractPath);
+
         $subfolder = collect($contents)
             ->filter(fn ($item): bool => $item !== '.' && $item !== '..' && is_dir($extractPath.'/'.$item))
             ->first();

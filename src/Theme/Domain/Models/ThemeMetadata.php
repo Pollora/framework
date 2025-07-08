@@ -113,7 +113,7 @@ class ThemeMetadata
      */
     public function getThemeAppDir(string $subDirectory = ''): string
     {
-        return rtrim($this->getBasePath().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.$subDirectory);
+        return rtrim($this->getBasePath().DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR.$subDirectory);
     }
 
     /**
