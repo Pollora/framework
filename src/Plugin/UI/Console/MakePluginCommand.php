@@ -33,7 +33,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
      *
      * @var string
      */
-    protected $signature = 'pollora:make-plugin {name} {--plugin-author= : Plugin author name} {--plugin-author-uri= : Plugin author URI} {--plugin-uri= : Plugin URI} {--plugin-description= : Plugin description} {--plugin-version= : Plugin version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create plugin with same name}';
+    protected $signature = 'pollora:make-plugin {name} {--plugin-author= : Plugin author name} {--plugin-author-uri= : Plugin author URI} {--plugin-uri= : Plugin URI} {--plugin-description= : Plugin description} {--plugin-version= : Plugin version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--asset= : Include asset files (JS/CSS) with ViteJS compilation (true/false)} {--force : Force create plugin with same name}';
 
     /**
      * The console command description.
@@ -48,6 +48,19 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
      * @var array<int, string>
      */
     protected $textExtensions = ['php', 'js', 'css', 'html', 'htm', 'xml', 'txt', 'md', 'json', 'yaml', 'yml', 'svg', 'twig', 'blade.php', 'stub'];
+
+    /**
+     * List of files and directories to exclude when --asset is false.
+     *
+     * @var array<int, string>
+     */
+    protected $assetFilesToExclude = [
+        'vite.config.js',
+        'tailwind.config.js',
+        'postcss.config.mjs',
+        'app/Providers/AssetServiceProvider.stub',
+        'resources/assets/',
+    ];
 
     /**
      * The PluginMetadata instance representing the plugin being created.
@@ -107,8 +120,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
         $this->info("Plugin \"{$this->plugin->getName()}\" created successfully.");
 
-        // Run npm install and npm run build in the plugin directory
-        if (is_dir($this->plugin->getBasePath())) {
+        // Run npm install and npm run build in the plugin directory only if assets are enabled
+        if ($this->shouldIncludeAssets() && is_dir($this->plugin->getBasePath())) {
             $this->info('Running npm install and npm run build in '.$this->plugin->getBasePath().' ...');
             try {
                 (new NpmRunner($this->plugin->getBasePath()))
@@ -119,6 +132,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
                 $this->error('npm install or build failed: '.$e->getMessage());
                 // Continue script even if npm fails
             }
+        } elseif (! $this->shouldIncludeAssets()) {
+            $this->info('Assets disabled, skipping npm install/build.');
         } else {
             $this->info('No plugin directory found at '.$this->plugin->getBasePath().', skipping npm install/build.');
         }
@@ -292,6 +307,9 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         }
 
         foreach (File::allFiles($source) as $item) {
+            if ($this->shouldExcludeAssetFile($item)) {
+                continue;
+            }
             $this->processFileWithReplacements($item, $destination);
         }
     }
@@ -489,6 +507,59 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     }
 
     /**
+     * Check if asset file should be excluded based on --asset option.
+     *
+     * @param object $item File item
+     * @return bool True if file should be excluded
+     */
+    protected function shouldExcludeAssetFile($item): bool
+    {
+        if ($this->shouldIncludeAssets()) {
+            return false;
+        }
+
+        $relativePath = $item->getRelativePathname();
+        
+        foreach ($this->assetFilesToExclude as $excludePattern) {
+            if (str_ends_with($excludePattern, '/')) {
+                // Directory pattern
+                if (str_starts_with($relativePath, $excludePattern)) {
+                    return true;
+                }
+            } else {
+                // File pattern
+                if ($relativePath === $excludePattern || str_ends_with($relativePath, '/' . $excludePattern)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if assets should be included based on --asset option.
+     *
+     * @return bool True if assets should be included
+     */
+    protected function shouldIncludeAssets(): bool
+    {
+        $assetOption = $this->option('asset');
+        
+        if ($assetOption === null) {
+            return false; // Default to false if not specified
+        }
+        
+        // Handle string values
+        if (is_string($assetOption)) {
+            return in_array(strtolower($assetOption), ['true', '1', 'yes', 'on']);
+        }
+        
+        // Handle boolean values
+        return (bool) $assetOption;
+    }
+
+    /**
      * Get replacements.
      *
      * @return array Replacement mappings
@@ -572,6 +643,15 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
                 'label' => 'What is the version of the plugin?',
                 'default' => '1.0.0',
                 'validation' => 'required'
+            ],
+            'asset' => [
+                'label' => 'Do you want to include asset files (JS/CSS) with ViteJS compilation?',
+                'type' => 'select',
+                'options' => [
+                    'false' => 'No (minimal plugin)',
+                    'true' => 'Yes (with ViteJS, Tailwind CSS, etc.)'
+                ],
+                'default' => 'false'
             ],
         ];
     }

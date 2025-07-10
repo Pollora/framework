@@ -11,6 +11,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
 /**
@@ -18,6 +20,22 @@ use function Laravel\Prompts\text;
  *
  * This trait works similarly to Laravel's PromptsForMissingInput trait
  * but specifically handles missing command options instead of arguments.
+ *
+ * Supported prompt types:
+ * - 'text' (default): Text input with validation
+ * - 'confirm': Yes/No confirmation prompt
+ * - 'select': Selection from predefined options
+ *
+ * Configuration format:
+ * [
+ *     'option-name' => [
+ *         'label' => 'Prompt message',
+ *         'type' => 'confirm|select|text',
+ *         'default' => mixed,
+ *         'validation' => 'required|url|...',
+ *         'options' => [] // For select type only
+ *     ]
+ * ]
  */
 trait PromptsForMissingOption
 {
@@ -75,18 +93,33 @@ trait PromptsForMissingOption
                     $label = $configuration['label'] ?? $configuration[0] ?? 'What is the ' . str_replace('-', ' ', $optionName) . '?';
                     $default = $configuration['default'] ?? $configuration[1] ?? '';
                     $validation = $configuration['validation'] ?? $configuration[2] ?? null;
+                    $type = $configuration['type'] ?? 'text';
+                    $options = $configuration['options'] ?? [];
                 } else {
                     // Handle string configuration (just the label)
                     $label = $configuration;
                     $default = '';
                     $validation = null;
+                    $type = 'text';
+                    $options = [];
                 }
 
-                $answer = text(
-                    label: $label,
-                    default: $default,
-                    validate: $this->buildValidationClosure($validation, $optionName)
-                );
+                $answer = match ($type) {
+                    'confirm' => confirm(
+                        label: $label,
+                        default: $default
+                    ),
+                    'select' => select(
+                        label: $label,
+                        options: $options,
+                        default: $default
+                    ),
+                    default => text(
+                        label: $label,
+                        default: $default,
+                        validate: $this->buildValidationClosure($validation, $optionName)
+                    )
+                };
 
                 $input->setOption($optionName, $option->isArray() ? [$answer] : $answer);
             })
