@@ -42,15 +42,13 @@ class PluginListCommand extends Command
 
     /**
      * Plugin manager instance.
-     *
-     * @var PluginManager
      */
     protected PluginManager $pluginManager;
 
     /**
      * Create a new command instance.
      *
-     * @param PluginManager $pluginManager Plugin manager
+     * @param  PluginManager  $pluginManager  Plugin manager
      */
     public function __construct(PluginManager $pluginManager)
     {
@@ -70,6 +68,7 @@ class PluginListCommand extends Command
 
             if (empty($plugins)) {
                 $this->info('No plugins found matching the criteria.');
+
                 return self::SUCCESS;
             }
 
@@ -85,6 +84,7 @@ class PluginListCommand extends Command
 
         } catch (\Exception $e) {
             $this->error("Error listing plugins: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }
@@ -116,7 +116,7 @@ class PluginListCommand extends Command
     /**
      * Apply filters to the plugin collection.
      *
-     * @param \Pollora\Plugin\Domain\Support\PluginCollection $collection Plugin collection
+     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
      * @return \Pollora\Plugin\Domain\Support\PluginCollection Filtered collection
      */
     protected function applyFilters($collection)
@@ -155,15 +155,15 @@ class PluginListCommand extends Command
     /**
      * Apply search to the plugin collection.
      *
-     * @param \Pollora\Plugin\Domain\Support\PluginCollection $collection Plugin collection
-     * @param string $search Search term
+     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
+     * @param  string  $search  Search term
      * @return \Pollora\Plugin\Domain\Support\PluginCollection Filtered collection
      */
     protected function applySearch($collection, string $search)
     {
         return $collection->filter(function (PluginModuleInterface $plugin) use ($search): bool {
             $searchLower = strtolower($search);
-            
+
             return str_contains(strtolower($plugin->getName()), $searchLower) ||
                    str_contains(strtolower($plugin->getDescription()), $searchLower) ||
                    str_contains(strtolower($plugin->getAuthor()), $searchLower);
@@ -173,7 +173,7 @@ class PluginListCommand extends Command
     /**
      * Apply sorting to the plugin collection.
      *
-     * @param \Pollora\Plugin\Domain\Support\PluginCollection $collection Plugin collection
+     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
      * @return \Pollora\Plugin\Domain\Support\PluginCollection Sorted collection
      */
     protected function applySorting($collection)
@@ -198,6 +198,7 @@ class PluginListCommand extends Command
                 if ($plugin->isEnabled()) {
                     return 'enabled';
                 }
+
                 return 'inactive';
             }, SORT_REGULAR, $direction === 'desc'),
             default => $collection->sortByName($direction),
@@ -207,13 +208,12 @@ class PluginListCommand extends Command
     /**
      * Output plugins as table.
      *
-     * @param array $plugins Plugin modules
-     * @return void
+     * @param  array  $plugins  Plugin modules
      */
     protected function outputAsTable(array $plugins): void
     {
         $this->displaySummary($plugins);
-        
+
         $headers = ['Name', 'Version', 'Author', 'Status', 'Text Domain'];
         $rows = [];
 
@@ -233,8 +233,7 @@ class PluginListCommand extends Command
     /**
      * Output plugins as list.
      *
-     * @param array $plugins Plugin modules
-     * @return void
+     * @param  array  $plugins  Plugin modules
      */
     protected function outputAsList(array $plugins): void
     {
@@ -243,15 +242,15 @@ class PluginListCommand extends Command
         foreach ($plugins as $plugin) {
             $status = $this->getStatusBadge($plugin);
             $this->line("• <info>{$plugin->getName()}</info> <comment>v{$plugin->getVersion()}</comment> - {$status}");
-            
+
             if ($plugin->getDescription()) {
                 $this->line("  {$plugin->getDescription()}");
             }
-            
+
             if ($plugin->getAuthor()) {
                 $this->line("  <fg=gray>By: {$plugin->getAuthor()}</fg=gray>");
             }
-            
+
             $this->newLine();
         }
     }
@@ -259,8 +258,7 @@ class PluginListCommand extends Command
     /**
      * Output plugins as JSON.
      *
-     * @param array $plugins Plugin modules
-     * @return void
+     * @param  array  $plugins  Plugin modules
      */
     protected function outputAsJson(array $plugins): void
     {
@@ -294,8 +292,7 @@ class PluginListCommand extends Command
     /**
      * Display summary information.
      *
-     * @param array $plugins Plugin modules
-     * @return void
+     * @param  array  $plugins  Plugin modules
      */
     protected function displaySummary(array $plugins): void
     {
@@ -304,20 +301,20 @@ class PluginListCommand extends Command
         $enabled = count(array_filter($plugins, fn (PluginModuleInterface $plugin): bool => $plugin->isEnabled()));
         $networkWide = count(array_filter($plugins, fn (PluginModuleInterface $plugin): bool => $plugin->isNetworkWide()));
 
-        $this->info("Plugin Summary");
+        $this->info('Plugin Summary');
         $this->line("Total: {$total} | Active: {$active} | Enabled: {$enabled} | Network-wide: {$networkWide}");
-        
+
         if ($filters = $this->getActiveFiltersText()) {
             $this->line("Filters: {$filters}");
         }
-        
+
         $this->newLine();
     }
 
     /**
      * Get status badge for plugin.
      *
-     * @param PluginModuleInterface $plugin Plugin module
+     * @param  PluginModuleInterface  $plugin  Plugin module
      * @return string Status badge
      */
     protected function getStatusBadge(PluginModuleInterface $plugin): string
@@ -379,7 +376,7 @@ class PluginListCommand extends Command
     protected function getActiveFiltersText(): string
     {
         $filters = $this->getActiveFilters();
-        
+
         return implode(', ', $filters);
     }
 }

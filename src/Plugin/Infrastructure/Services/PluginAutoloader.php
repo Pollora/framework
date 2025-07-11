@@ -12,7 +12,7 @@ use Pollora\Plugin\Domain\Models\PluginModule;
  *
  * Handles autoloading for plugins using the fixed namespace convention:
  * Plugin\{PluginName}\
- * 
+ *
  * This service extends the generic ModuleAutoloader to provide plugin-specific
  * autoloading functionality, mapping plugin namespaces to their source directories
  * following PSR-4 standards.
@@ -22,8 +22,7 @@ class PluginAutoloader extends ModuleAutoloader
     /**
      * Register autoloading for a plugin module.
      *
-     * @param PluginModule $plugin Plugin module to register
-     * @return void
+     * @param  PluginModule  $plugin  Plugin module to register
      */
     public function registerPluginModule(PluginModule $plugin): void
     {
@@ -34,8 +33,7 @@ class PluginAutoloader extends ModuleAutoloader
     /**
      * Register autoloading for multiple plugins.
      *
-     * @param array $plugins Array of plugin modules
-     * @return void
+     * @param  array  $plugins  Array of plugin modules
      */
     public function registerPlugins(array $plugins): void
     {
@@ -51,7 +49,7 @@ class PluginAutoloader extends ModuleAutoloader
     /**
      * Get the expected namespace for a plugin.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return string Expected namespace
      */
     public function getPluginNamespace(string $pluginName): string
@@ -62,7 +60,7 @@ class PluginAutoloader extends ModuleAutoloader
     /**
      * Check if a plugin namespace is registered.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return bool True if namespace is registered
      */
     public function isPluginRegistered(string $pluginName): bool
@@ -89,8 +87,7 @@ class PluginAutoloader extends ModuleAutoloader
     /**
      * Unregister a plugin namespace.
      *
-     * @param string $pluginName Plugin name
-     * @return void
+     * @param  string  $pluginName  Plugin name
      */
     public function unregisterPlugin(string $pluginName): void
     {
@@ -101,18 +98,19 @@ class PluginAutoloader extends ModuleAutoloader
     /**
      * Register autoloading for a specific plugin by name and path.
      *
-     * @param string $pluginName Plugin name
-     * @param string $pluginPath Plugin path
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $pluginPath  Plugin path
      * @return bool True if registration was successful
      */
     public function registerPluginByPath(string $pluginName, string $pluginPath): bool
     {
         $namespace = $this->getPluginNamespace($pluginName);
-        
+
         // Check for app/ directory (Laravel-style)
         $appPath = rtrim($pluginPath, '/').'/app';
         if (is_dir($appPath)) {
             $this->addPsr4Namespace($namespace, $appPath);
+
             return true;
         }
 
@@ -120,6 +118,7 @@ class PluginAutoloader extends ModuleAutoloader
         $srcPath = rtrim($pluginPath, '/').'/src';
         if (is_dir($srcPath)) {
             $this->addPsr4Namespace($namespace, $srcPath);
+
             return true;
         }
 
@@ -129,49 +128,49 @@ class PluginAutoloader extends ModuleAutoloader
     /**
      * Get plugin source path by plugin name.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return string|null Plugin source path or null if not found
      */
     public function getPluginSourcePath(string $pluginName): ?string
     {
         $namespace = $this->getPluginNamespace($pluginName);
-        
+
         return $this->registeredNamespaces[$namespace] ?? null;
     }
 
     /**
      * Check if plugin has autoloadable source directory.
      *
-     * @param string $pluginPath Plugin path
+     * @param  string  $pluginPath  Plugin path
      * @return bool True if plugin has autoloadable source directory
      */
     public function hasAutoloadableSource(string $pluginPath): bool
     {
         $pluginPath = rtrim($pluginPath, '/');
-        
+
         return is_dir($pluginPath.'/app') || is_dir($pluginPath.'/src');
     }
 
     /**
      * Get the autoloadable source directory for a plugin path.
      *
-     * @param string $pluginPath Plugin path
+     * @param  string  $pluginPath  Plugin path
      * @return string|null Source directory path or null if not found
      */
     public function getAutoloadableSourcePath(string $pluginPath): ?string
     {
         $pluginPath = rtrim($pluginPath, '/');
-        
+
         // Prefer app/ directory
         if (is_dir($pluginPath.'/app')) {
             return $pluginPath.'/app';
         }
-        
+
         // Fallback to src/ directory
         if (is_dir($pluginPath.'/src')) {
             return $pluginPath.'/src';
         }
-        
+
         return null;
     }
 }

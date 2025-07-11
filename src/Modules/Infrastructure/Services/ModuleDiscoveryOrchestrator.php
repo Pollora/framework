@@ -21,6 +21,8 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
 {
     protected ?LaravelModuleDiscovery $laravelModuleDiscovery = null;
 
+    protected ?FrameworkModuleDiscovery $frameworkModuleDiscovery = null;
+
     public function __construct(
         protected Container $container
     ) {}
@@ -105,6 +107,42 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
     }
 
     /**
+     * Discover all framework modules from the src/ directory.
+     */
+    public function discoverFrameworkModules(): void
+    {
+        $this->getFrameworkModuleDiscovery()->discoverFrameworkModules();
+    }
+
+    /**
+     * Apply all discovered framework modules.
+     */
+    public function applyFrameworkModules(): void
+    {
+        $this->getFrameworkModuleDiscovery()->applyFrameworkModules();
+    }
+
+    /**
+     * Discover a specific framework module by name.
+     *
+     * @param  string  $moduleName  Name of the framework module to discover
+     */
+    public function discoverFrameworkModule(string $moduleName): void
+    {
+        $this->getFrameworkModuleDiscovery()->discoverFrameworkModule($moduleName);
+    }
+
+    /**
+     * Get all framework modules and their discovery data.
+     *
+     * @return array<string, array<string, mixed>> Array of module names and their discovery results
+     */
+    public function discoverAndReturnFrameworkModules(): array
+    {
+        return $this->getFrameworkModuleDiscovery()->discoverAndReturnFrameworkModules();
+    }
+
+    /**
      * Get or create the Laravel module discovery service.
      */
     protected function getLaravelModuleDiscovery(): LaravelModuleDiscovery
@@ -114,5 +152,17 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
         }
 
         return $this->laravelModuleDiscovery;
+    }
+
+    /**
+     * Get or create the framework module discovery service.
+     */
+    protected function getFrameworkModuleDiscovery(): FrameworkModuleDiscovery
+    {
+        if (! $this->frameworkModuleDiscovery instanceof \Pollora\Modules\Infrastructure\Services\FrameworkModuleDiscovery) {
+            $this->frameworkModuleDiscovery = new FrameworkModuleDiscovery($this->container);
+        }
+
+        return $this->frameworkModuleDiscovery;
     }
 }

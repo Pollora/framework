@@ -20,17 +20,15 @@ class LaravelPluginModule extends PluginModule
 {
     /**
      * Configurations that are delayed until WordPress is ready for translations.
-     *
-     * @var array
      */
     protected array $delayedConfigs = [];
 
     /**
      * Create a new LaravelPluginModule instance.
      *
-     * @param string $name Plugin name
-     * @param string $path Plugin path
-     * @param Container $app Laravel application container
+     * @param  string  $name  Plugin name
+     * @param  string  $path  Plugin path
+     * @param  Container  $app  Laravel application container
      */
     public function __construct(
         string $name,
@@ -57,8 +55,6 @@ class LaravelPluginModule extends PluginModule
 
     /**
      * Register the plugin's service providers.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -72,8 +68,6 @@ class LaravelPluginModule extends PluginModule
 
     /**
      * Boot the plugin.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -83,8 +77,6 @@ class LaravelPluginModule extends PluginModule
 
     /**
      * Register plugin autoloading using fixed namespace convention.
-     *
-     * @return void
      */
     public function registerAutoloading(): void
     {
@@ -96,8 +88,6 @@ class LaravelPluginModule extends PluginModule
 
     /**
      * Register plugin aliases.
-     *
-     * @return void
      */
     protected function registerAliases(): void
     {
@@ -116,8 +106,6 @@ class LaravelPluginModule extends PluginModule
 
     /**
      * Register plugin files.
-     *
-     * @return void
      */
     protected function registerFiles(): void
     {
@@ -133,8 +121,6 @@ class LaravelPluginModule extends PluginModule
 
     /**
      * Register plugin translations.
-     *
-     * @return void
      */
     protected function registerTranslations(): void
     {
@@ -147,8 +133,6 @@ class LaravelPluginModule extends PluginModule
 
     /**
      * Register plugin configuration.
-     *
-     * @return void
      */
     protected function registerConfig(): void
     {
@@ -356,7 +340,7 @@ class LaravelPluginModule extends PluginModule
     /**
      * Get extra path for plugin directory structure.
      *
-     * @param string $path Path to append
+     * @param  string  $path  Path to append
      * @return string Full path
      */
     public function getExtraPath(string $path): string

@@ -13,7 +13,9 @@ use Pollora\Plugin\Domain\Models\PluginModule;
 class PluginModuleTest extends TestCase
 {
     private PluginModule $pluginModule;
+
     private string $pluginName;
+
     private string $pluginPath;
 
     protected function setUp(): void
@@ -214,7 +216,7 @@ class PluginModuleTest extends TestCase
     public function test_it_can_set_active_status(): void
     {
         $this->assertFalse($this->pluginModule->isActive());
-        
+
         $result = $this->pluginModule->setActive(true);
         $this->assertTrue($this->pluginModule->isActive());
         $this->assertSame($this->pluginModule, $result);
@@ -226,7 +228,7 @@ class PluginModuleTest extends TestCase
     public function test_it_can_set_enabled_status(): void
     {
         $this->assertFalse($this->pluginModule->isEnabled());
-        
+
         $result = $this->pluginModule->setEnabled(true);
         $this->assertTrue($this->pluginModule->isEnabled());
         $this->assertSame($this->pluginModule, $result);

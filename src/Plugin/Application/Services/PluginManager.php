@@ -36,32 +36,26 @@ class PluginManager
 
     /**
      * Plugin configuration.
-     *
-     * @var array
      */
     protected array $config;
 
     /**
      * Current plugin instance.
-     *
-     * @var PluginMetadata|null
      */
     protected ?PluginMetadata $plugin = null;
 
     /**
      * Console detection service.
-     *
-     * @var ConsoleDetectionService
      */
     protected ConsoleDetectionService $consoleDetectionService;
 
     /**
      * Create a new PluginManager instance.
      *
-     * @param ContainerInterface $app Application container
-     * @param Translator|null $localeLoader Translation loader
-     * @param ModuleRepositoryInterface|null $repository Module repository
-     * @param ConsoleDetectionService|null $consoleDetectionService Console detection service
+     * @param  ContainerInterface  $app  Application container
+     * @param  Translator|null  $localeLoader  Translation loader
+     * @param  ModuleRepositoryInterface|null  $repository  Module repository
+     * @param  ConsoleDetectionService|null  $consoleDetectionService  Console detection service
      */
     public function __construct(
         protected ContainerInterface $app,
@@ -87,8 +81,8 @@ class PluginManager
      *
      * This method exists primarily to make testing easier.
      *
-     * @param string $pluginName Plugin name
-     * @param string $pluginsPath Plugins base path
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $pluginsPath  Plugins base path
      * @return PluginMetadata Plugin metadata instance
      */
     protected function createPluginMetadata(string $pluginName, string $pluginsPath): PluginMetadata
@@ -99,8 +93,8 @@ class PluginManager
     /**
      * Load a plugin by name.
      *
-     * @param string $pluginName Plugin name
-     * @return void
+     * @param  string  $pluginName  Plugin name
+     *
      * @throws PluginException When plugin name is empty or directory not found
      */
     public function load(string $pluginName): void
@@ -144,7 +138,7 @@ class PluginManager
             $pluginInfo = new PluginMetadata($entry, $path);
 
             // Check if it's a valid plugin directory with a main plugin file
-            return is_dir($pluginInfo->getBasePath()) && 
+            return is_dir($pluginInfo->getBasePath()) &&
                    file_exists($pluginInfo->getMainFilePath());
         });
     }
@@ -177,15 +171,15 @@ class PluginManager
         }
 
         $activePlugins = get_option('active_plugins', []);
-        
+
         return ! empty($activePlugins) ? $activePlugins[0] : false;
     }
 
     /**
      * Get plugin path with optional subpath.
      *
-     * @param string $pluginName Plugin name
-     * @param string $path Optional subpath
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $path  Optional subpath
      * @return string Full plugin path
      */
     public function path(string $pluginName, string $path = ''): string
@@ -196,8 +190,8 @@ class PluginManager
     /**
      * Get plugin application path.
      *
-     * @param string $pluginName Plugin name
-     * @param string $path Optional subpath
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $path  Optional subpath
      * @return string Plugin application path
      */
     public function getPluginAppPath(string $pluginName, string $path = ''): string
@@ -273,7 +267,7 @@ class PluginManager
     public function getActivePlugins(): array
     {
         $allPlugins = $this->getAllPluginsAsArray();
-        
+
         return array_filter($allPlugins, function (PluginModuleInterface $plugin): bool {
             return $plugin->isActive();
         });
@@ -287,7 +281,7 @@ class PluginManager
     public function getInactivePlugins(): array
     {
         $allPlugins = $this->getAllPluginsAsArray();
-        
+
         return array_filter($allPlugins, function (PluginModuleInterface $plugin): bool {
             return ! $plugin->isActive();
         });
@@ -296,7 +290,7 @@ class PluginManager
     /**
      * Find plugin module by name.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return PluginModuleInterface|null Plugin module or null if not found
      */
     public function findPlugin(string $name): ?PluginModuleInterface
@@ -313,7 +307,7 @@ class PluginManager
     /**
      * Check if plugin exists.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return bool True if plugin exists
      */
     public function hasPlugin(string $name): bool
@@ -324,34 +318,34 @@ class PluginManager
     /**
      * Check if plugin is active.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return bool True if plugin is active
      */
     public function isPluginActive(string $name): bool
     {
         $plugin = $this->findPlugin($name);
-        
+
         return $plugin?->isActive() ?? false;
     }
 
     /**
      * Activate a plugin.
      *
-     * @param string $name Plugin name
-     * @return void
+     * @param  string  $name  Plugin name
+     *
      * @throws PluginException When plugin cannot be activated
      */
     public function activatePlugin(string $name): void
     {
         $plugin = $this->findPlugin($name);
-        
+
         if (! $plugin instanceof PluginModuleInterface) {
             throw PluginException::pluginNotFound($name);
         }
 
         try {
             $plugin->activate();
-            
+
             // Call WordPress activation hook if available
             if (function_exists('do_action')) {
                 do_action('activate_plugin', $plugin->getBasename());
@@ -364,21 +358,21 @@ class PluginManager
     /**
      * Deactivate a plugin.
      *
-     * @param string $name Plugin name
-     * @return void
+     * @param  string  $name  Plugin name
+     *
      * @throws PluginException When plugin cannot be deactivated
      */
     public function deactivatePlugin(string $name): void
     {
         $plugin = $this->findPlugin($name);
-        
+
         if (! $plugin instanceof PluginModuleInterface) {
             throw PluginException::pluginNotFound($name);
         }
 
         try {
             $plugin->deactivate();
-            
+
             // Call WordPress deactivation hook if available
             if (function_exists('do_action')) {
                 do_action('deactivate_plugin', $plugin->getBasename());
@@ -391,8 +385,9 @@ class PluginManager
     /**
      * Get plugin information.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return array Plugin information
+     *
      * @throws PluginException When plugin is not found
      */
     public function getPluginInfo(string $name): array
@@ -437,8 +432,6 @@ class PluginManager
 
     /**
      * Register all plugins.
-     *
-     * @return void
      */
     public function registerPlugins(): void
     {
@@ -458,7 +451,7 @@ class PluginManager
     /**
      * Validate plugin structure.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return array Validation result
      */
     public function validatePlugin(string $name): array
@@ -498,8 +491,6 @@ class PluginManager
 
     /**
      * Reset plugin cache.
-     *
-     * @return void
      */
     public function resetCache(): void
     {
@@ -522,14 +513,14 @@ class PluginManager
     /**
      * Enable a plugin.
      *
-     * @param string $name Plugin name
-     * @return void
+     * @param  string  $name  Plugin name
+     *
      * @throws PluginException When plugin cannot be enabled
      */
     public function enablePlugin(string $name): void
     {
         $plugin = $this->findPlugin($name);
-        
+
         if (! $plugin instanceof PluginModuleInterface) {
             throw PluginException::pluginNotFound($name);
         }
@@ -540,14 +531,14 @@ class PluginManager
     /**
      * Disable a plugin.
      *
-     * @param string $name Plugin name
-     * @return void
+     * @param  string  $name  Plugin name
+     *
      * @throws PluginException When plugin cannot be disabled
      */
     public function disablePlugin(string $name): void
     {
         $plugin = $this->findPlugin($name);
-        
+
         if (! $plugin instanceof PluginModuleInterface) {
             throw PluginException::pluginNotFound($name);
         }
@@ -563,7 +554,7 @@ class PluginManager
     public function getNetworkWidePlugins(): array
     {
         $allPlugins = $this->getAllPluginsAsArray();
-        
+
         return array_filter($allPlugins, function (PluginModuleInterface $plugin): bool {
             return $plugin->isNetworkWide();
         });
@@ -577,7 +568,7 @@ class PluginManager
     public function getSingleSitePlugins(): array
     {
         $allPlugins = $this->getAllPluginsAsArray();
-        
+
         return array_filter($allPlugins, function (PluginModuleInterface $plugin): bool {
             return ! $plugin->isNetworkWide();
         });

@@ -125,10 +125,9 @@ class ModuleAssetManager
     /**
      * Register module view paths with Laravel's view finder.
      *
-     * @param string $modulePath Path to the module
-     * @param string $moduleType Type of module (theme, plugin, etc.)
-     * @param string|null $moduleSlug Optional slug for the module
-     * @return void
+     * @param  string  $modulePath  Path to the module
+     * @param  string  $moduleType  Type of module (theme, plugin, etc.)
+     * @param  string|null  $moduleSlug  Optional slug for the module
      */
     public function registerModuleViewPaths(string $modulePath, string $moduleType, ?string $moduleSlug = null): void
     {
@@ -147,7 +146,7 @@ class ModuleAssetManager
 
             // Register main view paths
             $viewPaths = $this->getModuleViewPaths($modulePath, $moduleType);
-            
+
             foreach ($viewPaths as $viewPath) {
                 if (is_dir($viewPath)) {
                     $viewFinder->addLocation($viewPath);
@@ -169,8 +168,8 @@ class ModuleAssetManager
     /**
      * Get all possible view paths for a module.
      *
-     * @param string $modulePath Path to the module
-     * @param string $moduleType Type of module (theme, plugin, etc.)
+     * @param  string  $modulePath  Path to the module
+     * @param  string  $moduleType  Type of module (theme, plugin, etc.)
      * @return array Array of view paths
      */
     protected function getModuleViewPaths(string $modulePath, string $moduleType): array

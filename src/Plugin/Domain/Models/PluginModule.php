@@ -17,22 +17,16 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
 {
     /**
      * Plugin headers from the main plugin file.
-     *
-     * @var array
      */
     protected array $pluginHeaders = [];
 
     /**
      * Plugin activation status.
-     *
-     * @var bool
      */
     protected bool $active = false;
 
     /**
      * Boot the plugin module.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -41,8 +35,6 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
 
     /**
      * Register the plugin module.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -71,8 +63,6 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
 
     /**
      * Enable the plugin.
-     *
-     * @return void
      */
     public function enable(): void
     {
@@ -81,8 +71,6 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
 
     /**
      * Disable the plugin.
-     *
-     * @return void
      */
     public function disable(): void
     {
@@ -254,8 +242,6 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
 
     /**
      * Activate the plugin.
-     *
-     * @return void
      */
     public function activate(): void
     {
@@ -264,8 +250,6 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
 
     /**
      * Deactivate the plugin.
-     *
-     * @return void
      */
     public function deactivate(): void
     {
@@ -295,8 +279,7 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
     /**
      * Set plugin headers.
      *
-     * @param array $headers Plugin headers array
-     * @return static
+     * @param  array  $headers  Plugin headers array
      */
     public function setHeaders(array $headers): static
     {
@@ -313,8 +296,7 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
     /**
      * Set plugin active status.
      *
-     * @param bool $active Active status
-     * @return static
+     * @param  bool  $active  Active status
      */
     public function setActive(bool $active): static
     {
@@ -326,8 +308,7 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
     /**
      * Set plugin enabled status.
      *
-     * @param bool $enabled Enabled status
-     * @return static
+     * @param  bool  $enabled  Enabled status
      */
     public function setEnabled(bool $enabled): static
     {
@@ -363,7 +344,7 @@ class PluginModule extends AbstractModule implements PluginModuleInterface
     /**
      * Normalize plugin name to be PSR-4 compliant.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return string Normalized plugin name
      */
     protected function normalizePluginName(string $pluginName): string

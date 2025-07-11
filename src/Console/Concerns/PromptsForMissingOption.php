@@ -41,10 +41,6 @@ trait PromptsForMissingOption
 {
     /**
      * Interact with the user before validating the input.
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return void
      */
     protected function interact(InputInterface $input, OutputInterface $output): void
     {
@@ -57,10 +53,6 @@ trait PromptsForMissingOption
 
     /**
      * Prompt the user for any missing options.
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return void
      */
     protected function promptForMissingOptions(InputInterface $input, OutputInterface $output): void
     {
@@ -85,12 +77,13 @@ trait PromptsForMissingOption
                 if ($configuration instanceof Closure) {
                     $value = $configuration();
                     $input->setOption($optionName, $option->isArray() ? [$value] : $value);
+
                     return;
                 }
 
                 // Handle array configuration [label, default, validation]
                 if (is_array($configuration)) {
-                    $label = $configuration['label'] ?? $configuration[0] ?? 'What is the ' . str_replace('-', ' ', $optionName) . '?';
+                    $label = $configuration['label'] ?? $configuration[0] ?? 'What is the '.str_replace('-', ' ', $optionName).'?';
                     $default = $configuration['default'] ?? $configuration[1] ?? '';
                     $validation = $configuration['validation'] ?? $configuration[2] ?? null;
                     $type = $configuration['type'] ?? 'text';
@@ -133,9 +126,7 @@ trait PromptsForMissingOption
     /**
      * Build validation closure from string or existing closure.
      *
-     * @param mixed $validation
-     * @param string $optionName
-     * @return Closure|null
+     * @param  mixed  $validation
      */
     protected function buildValidationClosure($validation, string $optionName): ?Closure
     {
@@ -152,7 +143,7 @@ trait PromptsForMissingOption
                         return "The {$optionName} is required.";
                     }
 
-                    if ($rule === 'url' && !empty($value) && !filter_var($value, FILTER_VALIDATE_URL)) {
+                    if ($rule === 'url' && ! empty($value) && ! filter_var($value, FILTER_VALIDATE_URL)) {
                         return "The {$optionName} must be a valid URL.";
                     }
                 }
@@ -166,8 +157,6 @@ trait PromptsForMissingOption
 
     /**
      * Prompt for missing input options using the returned questions.
-     *
-     * @return array
      */
     protected function promptForMissingOptionsUsing(): array
     {
@@ -176,10 +165,6 @@ trait PromptsForMissingOption
 
     /**
      * Perform actions after the user was prompted for missing options.
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return void
      */
     protected function afterPromptingForMissingOptions(InputInterface $input, OutputInterface $output): void
     {

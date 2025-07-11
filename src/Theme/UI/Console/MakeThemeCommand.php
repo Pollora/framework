@@ -26,6 +26,7 @@ use function Laravel\Prompts\text;
 class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
     use PromptsForMissingOption;
+
     /**
      * The name and signature of the console command.
      *
@@ -251,7 +252,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
     }
 
-
     /**
      * Copy directory.
      *
@@ -450,8 +450,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     /**
      * Prompt for missing options using the returned questions.
-     *
-     * @return array
      */
     protected function promptForMissingOptionsUsing(): array
     {
@@ -459,27 +457,27 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             'theme-author' => [
                 'label' => 'What is the author of the new theme?',
                 'default' => 'Pollora',
-                'validation' => 'required'
+                'validation' => 'required',
             ],
             'theme-author-uri' => [
                 'label' => 'What is the URL of the theme author?',
                 'default' => 'https://pollora.dev',
-                'validation' => 'required|url'
+                'validation' => 'required|url',
             ],
             'theme-uri' => [
                 'label' => 'What is the URL of the theme?',
                 'default' => 'https://pollora.dev',
-                'validation' => 'required|url'
+                'validation' => 'required|url',
             ],
             'theme-description' => [
                 'label' => 'What is the description of the new theme?',
                 'default' => 'A new theme using Pollora Framework',
-                'validation' => 'required'
+                'validation' => 'required',
             ],
             'theme-version' => [
                 'label' => 'What is the version of the theme?',
                 'default' => '1.0',
-                'validation' => 'required'
+                'validation' => 'required',
             ],
         ];
     }

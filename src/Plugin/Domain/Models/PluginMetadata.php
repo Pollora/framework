@@ -14,16 +14,14 @@ class PluginMetadata
 {
     /**
      * Plugin configuration array.
-     *
-     * @var array
      */
     protected array $config = [];
 
     /**
      * Create a new PluginMetadata instance.
      *
-     * @param string $name Plugin name
-     * @param string $basePath Base path where plugins are located
+     * @param  string  $name  Plugin name
+     * @param  string  $basePath  Base path where plugins are located
      */
     public function __construct(
         protected string $name,
@@ -92,8 +90,6 @@ class PluginMetadata
 
     /**
      * Load plugin configuration.
-     *
-     * @return void
      */
     public function loadConfiguration(): void
     {
@@ -118,7 +114,7 @@ class PluginMetadata
     /**
      * Get the plugin's application directory.
      *
-     * @param string $subDirectory Optional subdirectory within the plugin's app directory
+     * @param  string  $subDirectory  Optional subdirectory within the plugin's app directory
      * @return string The full path to the plugin's app directory
      */
     public function getPluginAppDir(string $subDirectory = ''): string
@@ -129,7 +125,7 @@ class PluginMetadata
     /**
      * Get the full path to a plugin application file.
      *
-     * @param string $file The file name
+     * @param  string  $file  The file name
      * @return string The full file path
      */
     public function getPluginAppFile(string $file): string
@@ -150,7 +146,7 @@ class PluginMetadata
     /**
      * Get the path for a specific item within the plugin.
      *
-     * @param string|array|null $pathParts A single path segment or an array of segments
+     * @param  string|array|null  $pathParts  A single path segment or an array of segments
      * @return string The resolved full path
      */
     public function getPathForItem(string|array|null $pathParts = null): string
@@ -259,7 +255,7 @@ class PluginMetadata
     /**
      * Convert a string to StudlyCase format.
      *
-     * @param string $value Input string
+     * @param  string  $value  Input string
      * @return string StudlyCase formatted string
      */
     protected function studlify(string $value): string
@@ -272,7 +268,7 @@ class PluginMetadata
     /**
      * Wrap a value in an array if it's not already an array.
      *
-     * @param mixed $value Value to wrap
+     * @param  mixed  $value  Value to wrap
      * @return array Wrapped value
      */
     protected function wrapInArray(mixed $value): array
