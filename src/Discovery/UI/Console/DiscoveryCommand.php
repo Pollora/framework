@@ -33,6 +33,13 @@ final class DiscoveryCommand extends Command
     protected $description = 'Run the discovery process to find and register framework components';
 
     /**
+     * Discovery counts collected before applying
+     *
+     * @var array<string, int>
+     */
+    private array $discoveryCounts = [];
+
+    /**
      * Execute the console command
      *
      * @param  DiscoveryManager  $discoveryManager  The discovery manager
@@ -75,14 +82,35 @@ final class DiscoveryCommand extends Command
                 }
             } else {
                 $this->info('Running all discoveries...');
-                $discoveryManager->run();
-                $this->info('✓ All discoveries completed');
+                
+                // Run discovery phase only to collect counts before applying
+                $discoveryManager->discover();
+                $this->info('✓ Discovery phase completed');
+                
+                // Collect counts before applying
+                $discoveryCounts = [];
+                foreach ($discoveryManager->getDiscoveries() as $identifier => $discovery) {
+                    $discoveryCounts[$identifier] = count($discoveryManager->getDiscoveredItems($identifier));
+                }
+                
+                // Now apply all discoveries
+                $discoveryManager->apply();
+                $this->info('✓ All discoveries applied');
 
                 // Also run Laravel module discovery
                 $this->info('Running Laravel module discovery...');
                 $moduleOrchestrator->discoverLaravelModules();
                 $moduleOrchestrator->applyLaravelModules();
                 $this->info('✓ Laravel modules discovered and applied');
+
+                // Also run framework module discovery (for app/ directory)
+                $this->info('Running framework module discovery...');
+                $moduleOrchestrator->discoverFrameworkModules();
+                $moduleOrchestrator->applyFrameworkModules();
+                $this->info('✓ Framework modules discovered and applied');
+                
+                // Store counts for summary
+                $this->discoveryCounts = $discoveryCounts;
             }
 
             // Show summary
@@ -117,18 +145,27 @@ final class DiscoveryCommand extends Command
 
         $discoveries = $discoveryManager->getDiscoveries();
         $moduleResults = $moduleOrchestrator->discoverAndReturnLaravelModules();
+        $frameworkResults = $moduleOrchestrator->discoverAndReturnFrameworkModules();
 
         // Aggregate results from main discoveries and module discoveries
         $totals = [];
 
-        // Count items from main discovery manager
+        // Count items from main discovery manager (use stored counts if available)
         foreach ($discoveries as $identifier => $discovery) {
-            $itemCount = count($discoveryManager->getDiscoveredItems($identifier));
+            $itemCount = $this->discoveryCounts[$identifier] ?? count($discoveryManager->getDiscoveredItems($identifier));
             $totals[$identifier] = ($totals[$identifier] ?? 0) + $itemCount;
         }
 
         // Count items from Laravel modules
         foreach ($moduleResults as $moduleDiscoveries) {
+            foreach ($moduleDiscoveries as $identifier => $items) {
+                $itemCount = is_array($items) ? count($items) : 0;
+                $totals[$identifier] = ($totals[$identifier] ?? 0) + $itemCount;
+            }
+        }
+
+        // Count items from framework modules (app/ directory)
+        foreach ($frameworkResults as $moduleDiscoveries) {
             foreach ($moduleDiscoveries as $identifier => $items) {
                 $itemCount = is_array($items) ? count($items) : 0;
                 $totals[$identifier] = ($totals[$identifier] ?? 0) + $itemCount;
@@ -142,11 +179,15 @@ final class DiscoveryCommand extends Command
 
         $locations = $discoveryManager->getLocations();
         $moduleCount = count($moduleResults);
+        $frameworkCount = count($frameworkResults);
 
         $this->info('');
         $this->info("Scanned {$locations->count()} discovery locations");
         if ($moduleCount > 0) {
             $this->info("Scanned {$moduleCount} Laravel modules");
+        }
+        if ($frameworkCount > 0) {
+            $this->info("Scanned {$frameworkCount} framework modules");
         }
     }
 }

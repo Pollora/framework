@@ -75,6 +75,10 @@ class ModuleServiceProvider extends ServiceProvider
         $this->discoverLaravelModules();
         $this->applyLaravelModules();
 
+        // Discover framework modules
+        $this->discoverFrameworkModules();
+        $this->applyFrameworkModules();
+
         // Setup Laravel Module discovery only
         $this->app->booted(function (): void {
 
@@ -151,6 +155,54 @@ class ModuleServiceProvider extends ServiceProvider
         } catch (\Throwable $e) {
             if (function_exists('error_log')) {
                 error_log('Laravel Module apply error in ModuleServiceProvider: '.$e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Discover framework modules from the src/ directory (discovery only, no apply).
+     */
+    protected function discoverFrameworkModules(): void
+    {
+        if (! $this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleDiscoveryOrchestratorInterface $orchestrator */
+            $orchestrator = $this->app->make(ModuleDiscoveryOrchestratorInterface::class);
+
+            // Check if orchestrator has framework module discovery capability
+            if (method_exists($orchestrator, 'discoverFrameworkModules')) {
+                $orchestrator->discoverFrameworkModules();
+            }
+        } catch (\Throwable $e) {
+            if (function_exists('error_log')) {
+                error_log('Framework Module discovery error in ModuleServiceProvider: '.$e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Apply discovered framework modules.
+     */
+    protected function applyFrameworkModules(): void
+    {
+        if (! $this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleDiscoveryOrchestratorInterface $orchestrator */
+            $orchestrator = $this->app->make(ModuleDiscoveryOrchestratorInterface::class);
+
+            // Check if orchestrator has framework module application capability
+            if (method_exists($orchestrator, 'applyFrameworkModules')) {
+                $orchestrator->applyFrameworkModules();
+            }
+        } catch (\Throwable $e) {
+            if (function_exists('error_log')) {
+                error_log('Framework Module apply error in ModuleServiceProvider: '.$e->getMessage());
             }
         }
     }

@@ -39,15 +39,13 @@ class PluginStatusCommand extends Command
 
     /**
      * Plugin manager instance.
-     *
-     * @var PluginManager
      */
     protected PluginManager $pluginManager;
 
     /**
      * Create a new command instance.
      *
-     * @param PluginManager $pluginManager Plugin manager
+     * @param  PluginManager  $pluginManager  Plugin manager
      */
     public function __construct(PluginManager $pluginManager)
     {
@@ -74,7 +72,7 @@ class PluginStatusCommand extends Command
     /**
      * Show details for a specific plugin.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return int Command exit code
      */
     protected function showPluginDetails(string $pluginName): int
@@ -84,6 +82,7 @@ class PluginStatusCommand extends Command
 
             if (! $plugin instanceof PluginModuleInterface) {
                 $this->error("Plugin '{$pluginName}' not found.");
+
                 return self::FAILURE;
             }
 
@@ -91,6 +90,7 @@ class PluginStatusCommand extends Command
 
             if ($this->option('json')) {
                 $this->line(json_encode($info, JSON_PRETTY_PRINT));
+
                 return self::SUCCESS;
             }
 
@@ -100,6 +100,7 @@ class PluginStatusCommand extends Command
 
         } catch (\Exception $e) {
             $this->error("Error retrieving plugin information: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }
@@ -116,11 +117,13 @@ class PluginStatusCommand extends Command
 
             if (empty($plugins)) {
                 $this->info('No plugins found matching the criteria.');
+
                 return self::SUCCESS;
             }
 
             if ($this->option('json')) {
                 $this->outputPluginsAsJson($plugins);
+
                 return self::SUCCESS;
             }
 
@@ -136,6 +139,7 @@ class PluginStatusCommand extends Command
 
         } catch (\Exception $e) {
             $this->error("Error retrieving plugins: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }
@@ -171,8 +175,7 @@ class PluginStatusCommand extends Command
     /**
      * Display plugin details.
      *
-     * @param array $info Plugin information
-     * @return void
+     * @param  array  $info  Plugin information
      */
     protected function displayPluginDetails(array $info): void
     {
@@ -206,8 +209,7 @@ class PluginStatusCommand extends Command
     /**
      * Display plugins summary.
      *
-     * @param array $plugins Plugin modules
-     * @return void
+     * @param  array  $plugins  Plugin modules
      */
     protected function displayPluginsSummary(array $plugins): void
     {
@@ -215,7 +217,7 @@ class PluginStatusCommand extends Command
         $activePlugins = count(array_filter($plugins, fn (PluginModuleInterface $plugin): bool => $plugin->isActive()));
         $enabledPlugins = count(array_filter($plugins, fn (PluginModuleInterface $plugin): bool => $plugin->isEnabled()));
 
-        $this->info("Plugin Summary");
+        $this->info('Plugin Summary');
         $this->newLine();
         $this->line("Total Plugins: {$totalPlugins}");
         $this->line("Active Plugins: {$activePlugins}");
@@ -226,8 +228,7 @@ class PluginStatusCommand extends Command
     /**
      * Display plugins in table format.
      *
-     * @param array $plugins Plugin modules
-     * @return void
+     * @param  array  $plugins  Plugin modules
      */
     protected function displayPluginsTable(array $plugins): void
     {
@@ -253,8 +254,7 @@ class PluginStatusCommand extends Command
     /**
      * Display plugins with detailed information.
      *
-     * @param array $plugins Plugin modules
-     * @return void
+     * @param  array  $plugins  Plugin modules
      */
     protected function displayPluginsDetailed(array $plugins): void
     {
@@ -267,8 +267,7 @@ class PluginStatusCommand extends Command
     /**
      * Display plugin card with key information.
      *
-     * @param PluginModuleInterface $plugin Plugin module
-     * @return void
+     * @param  PluginModuleInterface  $plugin  Plugin module
      */
     protected function displayPluginCard(PluginModuleInterface $plugin): void
     {
@@ -281,11 +280,11 @@ class PluginStatusCommand extends Command
         $this->line("Author: {$plugin->getAuthor()}");
         $this->line("Status: {$status}");
         $this->line("Description: {$plugin->getDescription()}");
-        
+
         if ($plugin->getPluginUri()) {
             $this->line("Plugin URI: {$plugin->getPluginUri()}");
         }
-        
+
         $this->line("Path: {$plugin->getPath()}");
         $this->line(str_repeat('-', 60));
     }
@@ -293,8 +292,7 @@ class PluginStatusCommand extends Command
     /**
      * Output plugins as JSON.
      *
-     * @param array $plugins Plugin modules
-     * @return void
+     * @param  array  $plugins  Plugin modules
      */
     protected function outputPluginsAsJson(array $plugins): void
     {
@@ -324,7 +322,7 @@ class PluginStatusCommand extends Command
     /**
      * Get status text for plugin.
      *
-     * @param array $info Plugin information
+     * @param  array  $info  Plugin information
      * @return string Status text
      */
     protected function getStatusText(array $info): string

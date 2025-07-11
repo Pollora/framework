@@ -31,23 +31,19 @@ class PluginRepository implements ModuleRepositoryInterface
 
     /**
      * Cache status flag.
-     *
-     * @var bool
      */
     protected bool $cached = false;
 
     /**
      * Plugins base path.
-     *
-     * @var string
      */
     protected string $pluginsPath;
 
     /**
      * Create a new PluginRepository instance.
      *
-     * @param Container $app Application container
-     * @param WordPressPluginParser $parser Plugin parser service
+     * @param  Container  $app  Application container
+     * @param  WordPressPluginParser  $parser  Plugin parser service
      */
     public function __construct(
         protected Container $app,
@@ -112,7 +108,7 @@ class PluginRepository implements ModuleRepositoryInterface
     public function toCollection(): CollectionInterface
     {
         $collection = new PluginCollection($this->all());
-        
+
         return new LaravelCollectionAdapter($collection);
     }
 
@@ -129,38 +125,39 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Find a plugin module by name.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return PluginModuleInterface|null Plugin module or null if not found
      */
     public function find(string $name): ?PluginModuleInterface
     {
         $plugins = $this->all();
-        
+
         return $plugins[strtolower($name)] ?? null;
     }
 
     /**
      * Find a plugin module by name or throw exception.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return PluginModuleInterface Plugin module
+     *
      * @throws \Exception When plugin is not found
      */
     public function findOrFail(string $name): PluginModuleInterface
     {
         $plugin = $this->find($name);
-        
+
         if (! $plugin instanceof PluginModuleInterface) {
             throw new \Exception("Plugin '{$name}' not found");
         }
-        
+
         return $plugin;
     }
 
     /**
      * Check if a plugin module exists.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return bool True if plugin exists
      */
     public function has(string $name): bool
@@ -179,6 +176,7 @@ class PluginRepository implements ModuleRepositoryInterface
 
         if (! is_dir($this->pluginsPath)) {
             $this->cached = true;
+
             return $this->plugins;
         }
 
@@ -203,8 +201,6 @@ class PluginRepository implements ModuleRepositoryInterface
 
     /**
      * Register all plugin modules.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -221,8 +217,6 @@ class PluginRepository implements ModuleRepositoryInterface
 
     /**
      * Boot all plugin modules.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -239,8 +233,6 @@ class PluginRepository implements ModuleRepositoryInterface
 
     /**
      * Reset the plugin cache.
-     *
-     * @return void
      */
     public function resetCache(): void
     {
@@ -256,7 +248,7 @@ class PluginRepository implements ModuleRepositoryInterface
     protected function getPluginDirectories(): array
     {
         $directories = [];
-        
+
         if (! is_dir($this->pluginsPath)) {
             return $directories;
         }
@@ -272,7 +264,7 @@ class PluginRepository implements ModuleRepositoryInterface
             }
 
             $pluginPath = $this->pluginsPath.'/'.$item;
-            
+
             if (! is_dir($pluginPath)) {
                 continue;
             }
@@ -290,8 +282,8 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Create a plugin module instance.
      *
-     * @param string $pluginName Plugin name
-     * @param string $pluginPath Plugin path
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $pluginPath  Plugin path
      * @return PluginModuleInterface|null Plugin module or null if creation failed
      */
     protected function createPluginModule(string $pluginName, string $pluginPath): ?PluginModuleInterface
@@ -317,6 +309,7 @@ class PluginRepository implements ModuleRepositoryInterface
             return $plugin;
         } catch (\Exception $e) {
             $this->logError("Failed to create plugin module '{$pluginName}': {$e->getMessage()}");
+
             return null;
         }
     }
@@ -324,7 +317,7 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Check if a plugin is active in WordPress.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return bool True if plugin is active
      */
     protected function isPluginActive(string $pluginName): bool
@@ -334,7 +327,7 @@ class PluginRepository implements ModuleRepositoryInterface
         }
 
         $pluginBasename = $pluginName.'/'.$pluginName.'.php';
-        
+
         return is_plugin_active($pluginBasename);
     }
 
@@ -357,9 +350,8 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Add a plugin module to the repository.
      *
-     * @param string $name Plugin name
-     * @param PluginModuleInterface $plugin Plugin module
-     * @return void
+     * @param  string  $name  Plugin name
+     * @param  PluginModuleInterface  $plugin  Plugin module
      */
     public function add(string $name, PluginModuleInterface $plugin): void
     {
@@ -369,25 +361,26 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Remove a plugin module from the repository.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return bool True if plugin was removed, false if not found
      */
     public function remove(string $name): bool
     {
         $key = strtolower($name);
-        
+
         if (isset($this->plugins[$key])) {
             unset($this->plugins[$key]);
+
             return true;
         }
-        
+
         return false;
     }
 
     /**
      * Get plugins by status.
      *
-     * @param bool $status Plugin enabled status
+     * @param  bool  $status  Plugin enabled status
      * @return array<string, PluginModuleInterface> Filtered plugin modules
      */
     public function getByStatus(bool $status): array
@@ -400,7 +393,7 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Get plugins by custom status.
      *
-     * @param string $status Plugin status (active, inactive, enabled, disabled)
+     * @param  string  $status  Plugin status (active, inactive, enabled, disabled)
      * @return array<string, PluginModuleInterface> Filtered plugin modules
      */
     public function getByCustomStatus(string $status): array
@@ -419,24 +412,24 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Get ordered plugins.
      *
-     * @param string $direction Sort direction (asc or desc)
+     * @param  string  $direction  Sort direction (asc or desc)
      * @return array<string, PluginModuleInterface> Ordered plugin modules
      */
     public function getOrdered(string $direction = 'asc'): array
     {
         $plugins = $this->all();
-        
+
         if ($direction === 'desc') {
             return array_reverse($plugins, true);
         }
-        
+
         return $plugins;
     }
 
     /**
      * Get plugins by author.
      *
-     * @param string $author Author name
+     * @param  string  $author  Author name
      * @return array<string, PluginModuleInterface> Plugins by author
      */
     public function getByAuthor(string $author): array
@@ -449,7 +442,7 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Get plugins by text domain.
      *
-     * @param string $textDomain Text domain
+     * @param  string  $textDomain  Text domain
      * @return array<string, PluginModuleInterface> Plugins with matching text domain
      */
     public function getByTextDomain(string $textDomain): array
@@ -462,13 +455,13 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Search plugins by name or description.
      *
-     * @param string $query Search query
+     * @param  string  $query  Search query
      * @return array<string, PluginModuleInterface> Matching plugins
      */
     public function search(string $query): array
     {
         $query = strtolower($query);
-        
+
         return array_filter($this->all(), function (PluginModuleInterface $plugin) use ($query): bool {
             return str_contains(strtolower($plugin->getName()), $query) ||
                    str_contains(strtolower($plugin->getDescription()), $query);
@@ -478,8 +471,7 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Log error message.
      *
-     * @param string $message Error message
-     * @return void
+     * @param  string  $message  Error message
      */
     protected function logError(string $message): void
     {

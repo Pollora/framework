@@ -13,7 +13,9 @@ use Pollora\Plugin\Domain\Models\PluginMetadata;
 class PluginMetadataTest extends TestCase
 {
     private PluginMetadata $pluginMetadata;
+
     private string $pluginName;
+
     private string $basePath;
 
     protected function setUp(): void

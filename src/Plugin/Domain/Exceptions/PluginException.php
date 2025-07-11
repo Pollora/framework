@@ -20,10 +20,10 @@ class PluginException extends Exception
     /**
      * Create a new plugin exception for activation failures.
      *
-     * @param string $pluginName Plugin name
-     * @param string $reason Reason for activation failure
-     * @param int $code Error code
-     * @param Exception|null $previous Previous exception
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $reason  Reason for activation failure
+     * @param  int  $code  Error code
+     * @param  Exception|null  $previous  Previous exception
      * @return static
      */
     public static function activationFailed(string $pluginName, string $reason, int $code = 0, ?Exception $previous = null): self
@@ -34,10 +34,10 @@ class PluginException extends Exception
     /**
      * Create a new plugin exception for deactivation failures.
      *
-     * @param string $pluginName Plugin name
-     * @param string $reason Reason for deactivation failure
-     * @param int $code Error code
-     * @param Exception|null $previous Previous exception
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $reason  Reason for deactivation failure
+     * @param  int  $code  Error code
+     * @param  Exception|null  $previous  Previous exception
      * @return static
      */
     public static function deactivationFailed(string $pluginName, string $reason, int $code = 0, ?Exception $previous = null): self
@@ -48,10 +48,10 @@ class PluginException extends Exception
     /**
      * Create a new plugin exception for configuration errors.
      *
-     * @param string $pluginName Plugin name
-     * @param string $configIssue Configuration issue description
-     * @param int $code Error code
-     * @param Exception|null $previous Previous exception
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $configIssue  Configuration issue description
+     * @param  int  $code  Error code
+     * @param  Exception|null  $previous  Previous exception
      * @return static
      */
     public static function configurationError(string $pluginName, string $configIssue, int $code = 0, ?Exception $previous = null): self
@@ -62,10 +62,10 @@ class PluginException extends Exception
     /**
      * Create a new plugin exception for dependency conflicts.
      *
-     * @param string $pluginName Plugin name
-     * @param string $dependencyIssue Dependency issue description
-     * @param int $code Error code
-     * @param Exception|null $previous Previous exception
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $dependencyIssue  Dependency issue description
+     * @param  int  $code  Error code
+     * @param  Exception|null  $previous  Previous exception
      * @return static
      */
     public static function dependencyConflict(string $pluginName, string $dependencyIssue, int $code = 0, ?Exception $previous = null): self
@@ -76,10 +76,10 @@ class PluginException extends Exception
     /**
      * Create a new plugin exception for file system errors.
      *
-     * @param string $pluginName Plugin name
-     * @param string $fileSystemIssue File system issue description
-     * @param int $code Error code
-     * @param Exception|null $previous Previous exception
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $fileSystemIssue  File system issue description
+     * @param  int  $code  Error code
+     * @param  Exception|null  $previous  Previous exception
      * @return static
      */
     public static function fileSystemError(string $pluginName, string $fileSystemIssue, int $code = 0, ?Exception $previous = null): self
@@ -90,9 +90,9 @@ class PluginException extends Exception
     /**
      * Create a new plugin exception for plugin not found errors.
      *
-     * @param string $pluginName Plugin name
-     * @param int $code Error code
-     * @param Exception|null $previous Previous exception
+     * @param  string  $pluginName  Plugin name
+     * @param  int  $code  Error code
+     * @param  Exception|null  $previous  Previous exception
      * @return static
      */
     public static function pluginNotFound(string $pluginName, int $code = 0, ?Exception $previous = null): self
@@ -103,10 +103,10 @@ class PluginException extends Exception
     /**
      * Create a new plugin exception for invalid plugin structure.
      *
-     * @param string $pluginName Plugin name
-     * @param string $structureIssue Structure issue description
-     * @param int $code Error code
-     * @param Exception|null $previous Previous exception
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $structureIssue  Structure issue description
+     * @param  int  $code  Error code
+     * @param  Exception|null  $previous  Previous exception
      * @return static
      */
     public static function invalidStructure(string $pluginName, string $structureIssue, int $code = 0, ?Exception $previous = null): self

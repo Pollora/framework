@@ -15,8 +15,6 @@ class WordPressPluginParser
 {
     /**
      * Standard WordPress plugin headers.
-     *
-     * @var array
      */
     protected array $defaultHeaders = [
         'Name' => 'Plugin Name',
@@ -39,7 +37,7 @@ class WordPressPluginParser
     /**
      * Parse plugin headers from a plugin main file.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return array Parsed plugin headers
      */
     public function parsePluginHeaders(string $pluginFile): array
@@ -64,14 +62,14 @@ class WordPressPluginParser
     /**
      * Parse plugin headers with custom headers.
      *
-     * @param string $pluginFile Path to the plugin main file
-     * @param array $extraHeaders Additional headers to parse
+     * @param  string  $pluginFile  Path to the plugin main file
+     * @param  array  $extraHeaders  Additional headers to parse
      * @return array Parsed plugin headers including custom headers
      */
     public function parsePluginHeadersWithExtra(string $pluginFile, array $extraHeaders = []): array
     {
         $headers = array_merge($this->defaultHeaders, $extraHeaders);
-        
+
         if (! file_exists($pluginFile)) {
             return [];
         }
@@ -92,9 +90,9 @@ class WordPressPluginParser
     /**
      * Get file data (similar to WordPress get_file_data function).
      *
-     * @param string $file Path to the file
-     * @param array $defaultHeaders Headers to extract
-     * @param string $context Context for the operation
+     * @param  string  $file  Path to the file
+     * @param  array  $defaultHeaders  Headers to extract
+     * @param  string  $context  Context for the operation
      * @return array Extracted file data
      */
     protected function getFileData(string $file, array $defaultHeaders, string $context = ''): array
@@ -127,7 +125,7 @@ class WordPressPluginParser
     /**
      * Clean up header value.
      *
-     * @param string $value Header value to clean
+     * @param  string  $value  Header value to clean
      * @return string Cleaned header value
      */
     protected function cleanupHeaderValue(string $value): string
@@ -138,20 +136,20 @@ class WordPressPluginParser
     /**
      * Parse boolean value from string.
      *
-     * @param string $value String value to parse
+     * @param  string  $value  String value to parse
      * @return bool Parsed boolean value
      */
     protected function parseBooleanValue(string $value): bool
     {
         $value = strtolower(trim($value));
-        
+
         return in_array($value, ['true', '1', 'yes', 'on'], true);
     }
 
     /**
      * Validate plugin main file structure.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return array Validation result with errors if any
      */
     public function validatePluginFile(string $pluginFile): array
@@ -160,6 +158,7 @@ class WordPressPluginParser
 
         if (! file_exists($pluginFile)) {
             $errors[] = 'Plugin main file does not exist';
+
             return [
                 'valid' => false,
                 'errors' => $errors,
@@ -173,7 +172,7 @@ class WordPressPluginParser
 
         // Parse headers and check for required ones
         $headers = $this->parsePluginHeaders($pluginFile);
-        
+
         if (empty($headers['Name'])) {
             $errors[] = 'Plugin Name header is missing';
         }
@@ -203,19 +202,19 @@ class WordPressPluginParser
     /**
      * Extract plugin slug from plugin file path.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return string Plugin slug
      */
     public function extractPluginSlug(string $pluginFile): string
     {
         $dirname = dirname($pluginFile);
         $pluginDir = basename($dirname);
-        
+
         // If plugin is in a subdirectory, use that as the slug
         if ($pluginDir !== '.' && $pluginDir !== '') {
             return $pluginDir;
         }
-        
+
         // Otherwise, use filename without extension
         return basename($pluginFile, '.php');
     }
@@ -223,7 +222,7 @@ class WordPressPluginParser
     /**
      * Extract plugin basename from plugin file path.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return string Plugin basename (directory/file.php)
      */
     public function extractPluginBasename(string $pluginFile): string
@@ -231,7 +230,7 @@ class WordPressPluginParser
         $dirname = dirname($pluginFile);
         $pluginDir = basename($dirname);
         $fileName = basename($pluginFile);
-        
+
         return $pluginDir.'/'.$fileName;
     }
 
@@ -248,65 +247,65 @@ class WordPressPluginParser
     /**
      * Check if file contains valid plugin headers.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return bool True if file contains valid plugin headers
      */
     public function hasValidPluginHeaders(string $pluginFile): bool
     {
         $headers = $this->parsePluginHeaders($pluginFile);
-        
+
         return ! empty($headers['Name']);
     }
 
     /**
      * Parse version from plugin headers.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return string|null Plugin version or null if not found
      */
     public function parseVersion(string $pluginFile): ?string
     {
         $headers = $this->parsePluginHeaders($pluginFile);
-        
+
         return $headers['Version'] ?? null;
     }
 
     /**
      * Parse text domain from plugin headers.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return string|null Plugin text domain or null if not found
      */
     public function parseTextDomain(string $pluginFile): ?string
     {
         $headers = $this->parsePluginHeaders($pluginFile);
-        
+
         return $headers['TextDomain'] ?? null;
     }
 
     /**
      * Parse required WordPress version from plugin headers.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return string|null Required WordPress version or null if not found
      */
     public function parseRequiredWpVersion(string $pluginFile): ?string
     {
         $headers = $this->parsePluginHeaders($pluginFile);
-        
+
         return $headers['RequiresWP'] ?? null;
     }
 
     /**
      * Parse required PHP version from plugin headers.
      *
-     * @param string $pluginFile Path to the plugin main file
+     * @param  string  $pluginFile  Path to the plugin main file
      * @return string|null Required PHP version or null if not found
      */
     public function parseRequiredPhpVersion(string $pluginFile): ?string
     {
         $headers = $this->parsePluginHeaders($pluginFile);
-        
+
         return $headers['RequiresPHP'] ?? null;
     }
 }

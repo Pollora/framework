@@ -11,9 +11,9 @@ use Pollora\Plugin\Application\Services\PluginRegistrar;
 use Pollora\Plugin\Infrastructure\Repositories\PluginRepository;
 use Pollora\Plugin\Infrastructure\Services\PluginAutoloader;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
-use Pollora\Plugin\UI\Console\MakePluginCommand;
-use Pollora\Plugin\UI\Console\Commands\PluginStatusCommand;
 use Pollora\Plugin\UI\Console\Commands\PluginListCommand;
+use Pollora\Plugin\UI\Console\Commands\PluginStatusCommand;
+use Pollora\Plugin\UI\Console\MakePluginCommand;
 
 /**
  * Plugin service provider.
@@ -26,8 +26,6 @@ class PluginServiceProvider extends ServiceProvider
 {
     /**
      * Register plugin services.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -41,8 +39,6 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Boot plugin services.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -52,8 +48,6 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Register plugin autoloader service.
-     *
-     * @return void
      */
     protected function registerPluginAutoloader(): void
     {
@@ -64,20 +58,16 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Register plugin parser service.
-     *
-     * @return void
      */
     protected function registerPluginParser(): void
     {
         $this->app->singleton(WordPressPluginParser::class, function ($app): WordPressPluginParser {
-            return new WordPressPluginParser();
+            return new WordPressPluginParser;
         });
     }
 
     /**
      * Register plugin repository.
-     *
-     * @return void
      */
     protected function registerPluginRepository(): void
     {
@@ -96,8 +86,6 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Register plugin manager service.
-     *
-     * @return void
      */
     protected function registerPluginManager(): void
     {
@@ -115,8 +103,6 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Register plugin registrar service.
-     *
-     * @return void
      */
     protected function registerPluginRegistrar(): void
     {
@@ -133,8 +119,6 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Register plugin console commands.
-     *
-     * @return void
      */
     protected function registerPluginCommands(): void
     {
@@ -149,14 +133,12 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Register plugin configuration.
-     *
-     * @return void
      */
     protected function registerPluginConfiguration(): void
     {
         // Merge plugin configuration if config file exists
         $configPath = __DIR__.'/../../config/plugin.php';
-        
+
         if (file_exists($configPath)) {
             $this->mergeConfigFrom($configPath, 'plugin');
         }
@@ -164,15 +146,13 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Boot plugin autoloader.
-     *
-     * @return void
      */
     protected function bootPluginAutoloader(): void
     {
         // Boot the autoloader to register any existing plugins
         if ($this->app->bound(PluginAutoloader::class)) {
             $autoloader = $this->app->make(PluginAutoloader::class);
-            
+
             // Register autoloader if not already registered
             $autoloader->register();
         }
@@ -180,8 +160,6 @@ class PluginServiceProvider extends ServiceProvider
 
     /**
      * Get the services provided by the provider.
-     *
-     * @return array
      */
     public function provides(): array
     {

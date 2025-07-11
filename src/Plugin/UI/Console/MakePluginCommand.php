@@ -28,6 +28,7 @@ use function Laravel\Prompts\text;
 class MakePluginCommand extends Command implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
     use PromptsForMissingOption;
+
     /**
      * The name and signature of the console command.
      *
@@ -64,30 +65,24 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
     /**
      * The PluginMetadata instance representing the plugin being created.
-     *
-     * @var PluginMetadata
      */
     protected PluginMetadata $plugin;
 
     /**
      * Configuration repository.
-     *
-     * @var Repository
      */
     protected Repository $config;
 
     /**
      * Filesystem instance.
-     *
-     * @var Filesystem
      */
     protected Filesystem $files;
 
     /**
      * Create a new command instance.
      *
-     * @param Repository $config Configuration repository
-     * @param Filesystem $files Filesystem instance
+     * @param  Repository  $config  Configuration repository
+     * @param  Filesystem  $files  Filesystem instance
      */
     public function __construct(Repository $config, Filesystem $files)
     {
@@ -178,6 +173,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         $message = $this->validateValue($this->argument('name'));
         if ($message !== null && $message !== '' && $message !== '0') {
             $this->error($message);
+
             return false;
         }
 
@@ -218,8 +214,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Download plugin from GitHub repository.
      *
-     * @param string $repository Repository name
-     * @return void
+     * @param  string  $repository  Repository name
      */
     protected function downloadFromRepository(string $repository): void
     {
@@ -253,8 +248,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Move extracted plugin contents to the proper plugin directory.
      *
-     * @param string $extractedPath Extracted path
-     * @return void
+     * @param  string  $extractedPath  Extracted path
      */
     protected function moveExtractedPlugin(string $extractedPath): void
     {
@@ -272,8 +266,6 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
     /**
      * Generate plugin structure from stubs.
-     *
-     * @return void
      */
     protected function generatePluginStructure(): void
     {
@@ -283,8 +275,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Remove directory recursively.
      *
-     * @param string $path Directory path
-     * @return void
+     * @param  string  $path  Directory path
      */
     protected function removeDirectory(string $path): void
     {
@@ -296,9 +287,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Copy directory with replacements applied to all files.
      *
-     * @param string $source Source directory
-     * @param string $destination Destination directory
-     * @return void
+     * @param  string  $source  Source directory
+     * @param  string  $destination  Destination directory
      */
     protected function copyDirectoryWithReplacements(string $source, string $destination): void
     {
@@ -317,9 +307,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Copy directory.
      *
-     * @param string $source Source directory
-     * @param string $destination Destination directory
-     * @return void
+     * @param  string  $source  Source directory
+     * @param  string  $destination  Destination directory
      */
     protected function copyDirectory(string $source, string $destination): void
     {
@@ -335,9 +324,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Process file with replacements.
      *
-     * @param object $item File item
-     * @param string $destination Destination directory
-     * @return void
+     * @param  object  $item  File item
+     * @param  string  $destination  Destination directory
      */
     protected function processFileWithReplacements($item, string $destination): void
     {
@@ -357,9 +345,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Process file.
      *
-     * @param object $item File item
-     * @param string $destination Destination directory
-     * @return void
+     * @param  object  $item  File item
+     * @param  string  $destination  Destination directory
      */
     protected function processFile($item, string $destination): void
     {
@@ -378,9 +365,9 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Get target path info.
      *
-     * @param object $item File item
-     * @param string $destination Destination directory
-     * @param string $relativePath Relative path
+     * @param  object  $item  File item
+     * @param  string  $destination  Destination directory
+     * @param  string  $relativePath  Relative path
      * @return array Target path information
      */
     protected function getTargetPathInfo($item, string $destination, string $relativePath): array
@@ -416,9 +403,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Handle file copy.
      *
-     * @param object $item File item
-     * @param string $targetPath Target path
-     * @return void
+     * @param  object  $item  File item
+     * @param  string  $targetPath  Target path
      */
     protected function handleFileCopy($item, string $targetPath): void
     {
@@ -435,8 +421,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Ensure directory exists.
      *
-     * @param string $directory Directory path
-     * @return void
+     * @param  string  $directory  Directory path
      */
     protected function ensureDirectoryExists(string $directory): void
     {
@@ -448,9 +433,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Copy file with replacements.
      *
-     * @param string $sourcePath Source file path
-     * @param string $destinationPath Destination file path
-     * @return void
+     * @param  string  $sourcePath  Source file path
+     * @param  string  $destinationPath  Destination file path
      */
     protected function copyFileWithReplacements(string $sourcePath, string $destinationPath): void
     {
@@ -478,8 +462,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Check if file is text file.
      *
-     * @param string $filePath File path
-     * @param string $extension File extension
+     * @param  string  $filePath  File path
+     * @param  string  $extension  File extension
      * @return bool True if file is text file
      */
     protected function isTextFile(string $filePath, string $extension): bool
@@ -509,7 +493,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Check if asset file should be excluded based on --asset option.
      *
-     * @param object $item File item
+     * @param  object  $item  File item
      * @return bool True if file should be excluded
      */
     protected function shouldExcludeAssetFile($item): bool
@@ -519,7 +503,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         }
 
         $relativePath = $item->getRelativePathname();
-        
+
         foreach ($this->assetFilesToExclude as $excludePattern) {
             if (str_ends_with($excludePattern, '/')) {
                 // Directory pattern
@@ -528,7 +512,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
                 }
             } else {
                 // File pattern
-                if ($relativePath === $excludePattern || str_ends_with($relativePath, '/' . $excludePattern)) {
+                if ($relativePath === $excludePattern || str_ends_with($relativePath, '/'.$excludePattern)) {
                     return true;
                 }
             }
@@ -545,16 +529,16 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     protected function shouldIncludeAssets(): bool
     {
         $assetOption = $this->option('asset');
-        
+
         if ($assetOption === null) {
             return false; // Default to false if not specified
         }
-        
+
         // Handle string values
         if (is_string($assetOption)) {
             return in_array(strtolower($assetOption), ['true', '1', 'yes', 'on']);
         }
-        
+
         // Handle boolean values
         return (bool) $assetOption;
     }
@@ -588,7 +572,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Sanitize plugin name for use in PHP function names.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return string Sanitized function name
      */
     protected function sanitizeForPhpFunction(string $pluginName): string
@@ -605,7 +589,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
         // Ensure it doesn't start with a number by prefixing with underscore
         if (preg_match('/^[0-9]/', $sanitized)) {
-            $sanitized = '_' . $sanitized;
+            $sanitized = '_'.$sanitized;
         }
 
         return $sanitized;
@@ -613,8 +597,6 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
     /**
      * Prompt for missing options using the returned questions.
-     *
-     * @return array
      */
     protected function promptForMissingOptionsUsing(): array
     {
@@ -622,36 +604,36 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
             'plugin-author' => [
                 'label' => 'What is the author of the new plugin?',
                 'default' => 'Pollora',
-                'validation' => 'required'
+                'validation' => 'required',
             ],
             'plugin-author-uri' => [
                 'label' => 'What is the URL of the plugin author?',
                 'default' => 'https://pollora.dev',
-                'validation' => 'required|url'
+                'validation' => 'required|url',
             ],
             'plugin-uri' => [
                 'label' => 'What is the URL of the plugin?',
                 'default' => 'https://pollora.dev',
-                'validation' => 'required|url'
+                'validation' => 'required|url',
             ],
             'plugin-description' => [
                 'label' => 'What is the description of the new plugin?',
                 'default' => 'A new plugin using Pollora Framework',
-                'validation' => 'required'
+                'validation' => 'required',
             ],
             'plugin-version' => [
                 'label' => 'What is the version of the plugin?',
                 'default' => '1.0.0',
-                'validation' => 'required'
+                'validation' => 'required',
             ],
             'asset' => [
                 'label' => 'Do you want to include asset files (JS/CSS) with ViteJS compilation?',
                 'type' => 'select',
                 'options' => [
                     'false' => 'No (minimal plugin)',
-                    'true' => 'Yes (with ViteJS, Tailwind CSS, etc.)'
+                    'true' => 'Yes (with ViteJS, Tailwind CSS, etc.)',
                 ],
-                'default' => 'false'
+                'default' => 'false',
             ],
         ];
     }
@@ -715,7 +697,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Validate value.
      *
-     * @param string $value Value to validate
+     * @param  string  $value  Value to validate
      * @return string|null Error message or null if valid
      */
     protected function validateValue(string $value): ?string
@@ -731,7 +713,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Get template path.
      *
-     * @param string $templateName Template name
+     * @param  string  $templateName  Template name
      * @return string Template path
      */
     protected function getTemplatePath(string $templateName): string
@@ -742,7 +724,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     /**
      * Make plugin metadata instance.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return PluginMetadata Plugin metadata
      */
     protected function makePlugin(string $name): PluginMetadata

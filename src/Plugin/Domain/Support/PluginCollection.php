@@ -66,7 +66,7 @@ class PluginCollection extends Collection
     /**
      * Sort plugins by name.
      *
-     * @param string $direction Sort direction ('asc' or 'desc')
+     * @param  string  $direction  Sort direction ('asc' or 'desc')
      * @return static Sorted collection
      */
     public function sortByName(string $direction = 'asc'): static
@@ -79,7 +79,7 @@ class PluginCollection extends Collection
     /**
      * Find a plugin by name.
      *
-     * @param string $name Plugin name
+     * @param  string  $name  Plugin name
      * @return PluginModuleInterface|null Plugin module or null if not found
      */
     public function findByName(string $name): ?PluginModuleInterface
@@ -92,7 +92,7 @@ class PluginCollection extends Collection
     /**
      * Find a plugin by slug.
      *
-     * @param string $slug Plugin slug
+     * @param  string  $slug  Plugin slug
      * @return PluginModuleInterface|null Plugin module or null if not found
      */
     public function findBySlug(string $slug): ?PluginModuleInterface

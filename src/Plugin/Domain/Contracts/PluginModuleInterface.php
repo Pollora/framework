@@ -115,15 +115,11 @@ interface PluginModuleInterface extends ModuleInterface
 
     /**
      * Activate the plugin.
-     *
-     * @return void
      */
     public function activate(): void;
 
     /**
      * Deactivate the plugin.
-     *
-     * @return void
      */
     public function deactivate(): void;
 

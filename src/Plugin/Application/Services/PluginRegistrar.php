@@ -34,8 +34,8 @@ class PluginRegistrar
     /**
      * Create a new PluginRegistrar instance.
      *
-     * @param ContainerInterface $app Application container
-     * @param WordPressPluginParser $pluginParser Plugin parser service
+     * @param  ContainerInterface  $app  Application container
+     * @param  WordPressPluginParser  $pluginParser  Plugin parser service
      */
     public function __construct(
         protected ContainerInterface $app,
@@ -45,8 +45,8 @@ class PluginRegistrar
     /**
      * Register a plugin by name and path.
      *
-     * @param string $pluginName Plugin name
-     * @param string $pluginPath Plugin path
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $pluginPath  Plugin path
      * @return PluginModuleInterface Registered plugin module
      */
     public function register(string $pluginName, string $pluginPath): PluginModuleInterface
@@ -87,7 +87,7 @@ class PluginRegistrar
     /**
      * Register multiple plugins from an array.
      *
-     * @param array $plugins Array of plugin names and paths
+     * @param  array  $plugins  Array of plugin names and paths
      * @return array<string, PluginModuleInterface> Registered plugin modules
      */
     public function registerMultiple(array $plugins): array
@@ -130,7 +130,7 @@ class PluginRegistrar
     /**
      * Get a registered plugin by name.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return PluginModuleInterface|null Plugin module or null if not found
      */
     public function getRegisteredPlugin(string $pluginName): ?PluginModuleInterface
@@ -151,7 +151,7 @@ class PluginRegistrar
     /**
      * Check if a plugin is registered.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return bool True if plugin is registered
      */
     public function isPluginRegistered(string $pluginName): bool
@@ -162,7 +162,7 @@ class PluginRegistrar
     /**
      * Unregister a plugin.
      *
-     * @param string $pluginName Plugin name
+     * @param  string  $pluginName  Plugin name
      * @return bool True if plugin was unregistered, false if not found
      */
     public function unregister(string $pluginName): bool
@@ -181,8 +181,6 @@ class PluginRegistrar
 
     /**
      * Reset all registered plugins.
-     *
-     * @return void
      */
     public function resetRegisteredPlugins(): void
     {
@@ -197,8 +195,8 @@ class PluginRegistrar
     /**
      * Create plugin module instance.
      *
-     * @param string $pluginName Plugin name
-     * @param string $pluginPath Plugin path
+     * @param  string  $pluginName  Plugin name
+     * @param  string  $pluginPath  Plugin path
      * @return LaravelPluginModule Plugin module instance
      */
     protected function createPluginModule(string $pluginName, string $pluginPath): LaravelPluginModule
@@ -212,8 +210,6 @@ class PluginRegistrar
 
     /**
      * Invalidate the plugin repository cache.
-     *
-     * @return void
      */
     protected function invalidateRepositoryCache(): void
     {
@@ -235,8 +231,7 @@ class PluginRegistrar
     /**
      * Perform on-demand discovery for plugin structures.
      *
-     * @param PluginModuleInterface $plugin Plugin module
-     * @return void
+     * @param  PluginModuleInterface  $plugin  Plugin module
      */
     protected function discoverPluginStructures(PluginModuleInterface $plugin): void
     {
@@ -256,8 +251,7 @@ class PluginRegistrar
     /**
      * Load plugin-specific configuration.
      *
-     * @param PluginModuleInterface $plugin Plugin module
-     * @return void
+     * @param  PluginModuleInterface  $plugin  Plugin module
      */
     protected function loadPluginConfiguration(PluginModuleInterface $plugin): void
     {
@@ -281,8 +275,7 @@ class PluginRegistrar
     /**
      * Setup plugin-specific components.
      *
-     * @param PluginModuleInterface $plugin Plugin module
-     * @return void
+     * @param  PluginModuleInterface  $plugin  Plugin module
      */
     protected function setupPluginComponents(PluginModuleInterface $plugin): void
     {
@@ -304,7 +297,7 @@ class PluginRegistrar
 
             $moduleId = 'plugin.'.$plugin->getLowerName();
 
-            if (!empty($pluginComponents)) {
+            if (! empty($pluginComponents)) {
                 $componentManager->registerModuleComponents($moduleId, $pluginComponents);
                 $componentManager->initializeModuleComponents($moduleId);
             }
@@ -316,8 +309,7 @@ class PluginRegistrar
     /**
      * Setup plugin assets and includes.
      *
-     * @param PluginModuleInterface $plugin Plugin module
-     * @return void
+     * @param  PluginModuleInterface  $plugin  Plugin module
      */
     protected function setupPluginAssets(PluginModuleInterface $plugin): void
     {
@@ -361,7 +353,7 @@ class PluginRegistrar
     /**
      * Get registered plugins by status.
      *
-     * @param string $status Plugin status (active, inactive, enabled, disabled)
+     * @param  string  $status  Plugin status (active, inactive, enabled, disabled)
      * @return array<string, PluginModuleInterface> Filtered plugin modules
      */
     public function getRegisteredPluginsByStatus(string $status): array
@@ -390,8 +382,7 @@ class PluginRegistrar
     /**
      * Log error message.
      *
-     * @param string $message Error message
-     * @return void
+     * @param  string  $message  Error message
      */
     protected function logError(string $message): void
     {
