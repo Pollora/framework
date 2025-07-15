@@ -114,7 +114,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
             $this->downloadFromRepository('pollora/plugin-default');
         }
 
-        $this->info("Plugin \"{$this->plugin->getName()}\" created successfully.");
+        $msg = 'Plugin %s created successfully at %s';
+        $this->info(sprintf($msg, $this->plugin->getName(), $this->plugin->getBasePath()));
 
         // Run npm install and npm run build in the plugin directory only if assets are enabled
         if ($this->shouldIncludeAssets() && is_dir($this->plugin->getBasePath())) {
