@@ -75,7 +75,7 @@ trait HasPluginSupport
             return '';
         }
 
-        return 'Plugins\\'.Str::studly($pluginOpt);
+        return 'Plugin\\'.Str::studly($pluginOpt);
     }
 
     protected function getPluginSourcePath(): string
