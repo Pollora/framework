@@ -19,7 +19,7 @@ use Pollora\Foundation\Console\Commands\Concerns\ResolvesLocation;
  */
 abstract class AbstractGeneratorCommand extends GeneratorCommand
 {
-    use HasModuleSupport, HasNameSupport, HasPathSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation;
+    use HasPathSupport, HasModuleSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation, HasNameSupport;
 
     /**
      * The subpath where the class should be generated.
