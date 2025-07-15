@@ -98,7 +98,7 @@ class LocalEnvironmentDetector
      *
      * @return bool True if Laradock environment is detected
      */
-    private function isLaradock(): bool
+    public static function isLaradock(): bool
     {
         return ! (in_array(getenv('LARADOCK_PHP_VERSION'), ['', '0'], true) || getenv('LARADOCK_PHP_VERSION') === [] || getenv('LARADOCK_PHP_VERSION') === false);
     }
