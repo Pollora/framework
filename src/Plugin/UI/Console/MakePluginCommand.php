@@ -34,7 +34,17 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
      *
      * @var string
      */
-    protected $signature = 'pollora:make-plugin {name} {--plugin-author= : Plugin author name} {--plugin-author-uri= : Plugin author URI} {--plugin-uri= : Plugin URI} {--plugin-description= : Plugin description} {--plugin-version= : Plugin version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--asset= : Include asset files (JS/CSS) with ViteJS compilation (true/false)} {--force : Force create plugin with same name}';
+    protected $signature = 'pollora:make-plugin {name}
+    {--plugin-author= : Plugin author name}
+    {--plugin-author-uri= : Plugin author URI}
+    {--plugin-uri= : Plugin URI}
+    {--plugin-description= : Plugin description}
+    {--plugin-version= : Plugin version}
+    {--repository= : GitHub repository to download (owner/repo format)}
+    {--repo-version= : Specific version/tag to download}
+    {--asset= : Include asset files (JS/CSS) with ViteJS compilation (true/false)}
+    {--activate-plugin= : Activate the plugin after creation (yes/no)}
+    {--force : Force create plugin with same name}';
 
     /**
      * The console command description.
@@ -136,15 +146,20 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         }
 
         // Prompt to activate this plugin
-        $shouldActivate = select(
-            label: 'Do you want to activate "'.$this->plugin->getName().'" plugin?',
-            options: [
-                'yes' => 'Yes',
-                'no' => 'No',
-            ],
-            default: 'yes',
-            hint: 'Selecting "Yes" will activate this plugin in WordPress.'
-        );
+        $shouldActivate = $this->option('activate-plugin');
+        if ($shouldActivate === null) {
+            $shouldActivate = select(
+                label: 'Do you want to activate "' . $this->plugin->getName() . '" plugin?',
+                options: [
+                    'yes' => 'Yes',
+                    'no' => 'No',
+                ],
+                default: 'yes',
+                hint: 'Selecting "Yes" will activate this plugin in WordPress.'
+            );
+        } else {
+            $shouldActivate = $this->shouldActivate() ? 'yes' : 'no';
+        }
 
         if ($shouldActivate === 'yes') {
             // Activate the plugin in WordPress (update the active_plugins option)
@@ -197,10 +212,11 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
         $this->error("Plugin \"{$name}\" already exists.");
         if ($this->option('force')) {
-            return true;
+            return $this->confirm("Are you sure you want to override \"{$name}\" plugin folder?");
+        } else {
+            return false;
         }
 
-        return $this->confirm("Are you sure you want to override \"{$name}\" plugin folder?");
     }
 
     /**
@@ -545,6 +561,23 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         return (bool) $assetOption;
     }
 
+    protected function shouldActivate(): bool
+    {
+        $activateOption = $this->option('activate-plugin');
+
+        if ($activateOption === null) {
+            return true; // Default to true if not specified
+        }
+
+        // Handle string values
+        if (is_string($activateOption)) {
+            return in_array(strtolower($activateOption), ['true', '1', 'yes', 'on']);
+        }
+
+        // Handle boolean values
+        return (bool) $activateOption;
+    }
+
     /**
      * Get replacements.
      *
@@ -627,6 +660,15 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
                 'label' => 'What is the version of the plugin?',
                 'default' => '1.0.0',
                 'validation' => 'required',
+            ],
+            'activate-plugin' => [
+                'label' => 'Do you want to activate the plugin after creation?',
+                'type' => 'select',
+                'options' => [
+                    'yes' => 'Yes',
+                    'no' => 'No',
+                ],
+                'default' => 'yes',
             ],
             'asset' => [
                 'label' => 'Do you want to include asset files (JS/CSS) with ViteJS compilation?',
