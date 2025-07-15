@@ -59,6 +59,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         'vite.config.js',
         'tailwind.config.js',
         'postcss.config.mjs',
+        'package.json',
         'app/Providers/AssetServiceProvider.stub',
         'resources/assets/',
     ];
