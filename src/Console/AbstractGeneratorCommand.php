@@ -76,9 +76,9 @@ abstract class AbstractGeneratorCommand extends GeneratorCommand
             $path = str_replace('/', '\\', $path);
         }
 
-        $this->components->info(sprintf('%s [%s] created successfully.', $info, $path));
+        $this->components->success(sprintf('%s [%s] created successfully.', $info, $path));
 
-        return true;
+        return null;
     }
 
     /**
