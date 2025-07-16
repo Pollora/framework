@@ -142,15 +142,12 @@ final class PostTypeDiscovery implements DiscoveryInterface
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config);
 
-            // Register the post type through the service on the init hook
-            add_action('init', function () use ($config): void {
-                $this->postTypeService->register(
-                    $config->getSlug(),
-                    $config->getName(),
-                    $config->getPluralName(),
-                    $config->getArgs()
-                );
-            });
+            $this->postTypeService->register(
+                $config->getSlug(),
+                $config->getName(),
+                $config->getPluralName(),
+                $config->getArgs()
+            );
         } catch (\ReflectionException $e) {
             error_log("Failed to process PostType for class {$className}: ".$e->getMessage());
         }
@@ -321,7 +318,8 @@ final class PostTypeDiscovery implements DiscoveryInterface
             return $attributeSlug;
         }
 
-        return Str::kebab(class_basename($className));
+        $slug = Str::kebab(class_basename($className));
+        return substr($slug, 0, 20);
     }
 
     /**
