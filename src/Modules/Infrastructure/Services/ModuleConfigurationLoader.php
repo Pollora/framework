@@ -37,7 +37,7 @@ class ModuleConfigurationLoader
     {
         $this->action->add('after_setup_theme', function () use ($modulePath, $moduleType): void {
             $this->loadConfigurationFiles($modulePath, $moduleType);
-        });
+        }, 1);
     }
 
     /**
