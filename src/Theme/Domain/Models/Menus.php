@@ -63,7 +63,7 @@ class Menus implements ThemeComponent
      */
     public function register(): void
     {
-        $this->action->add('after_setup_theme', $this->registerMenus(...), 1);
+        $this->action->add('after_setup_theme', $this->registerMenus(...), 20);
         $this->filter->add('nav_menu_link_attributes', $this->handleLinkAttributes(...), 10, 4);
         $this->filter->add('nav_menu_item_attributes', $this->handleItemAttributes(...), 10, 4);
         $this->filter->add('nav_menu_submenu_attributes', $this->handleSubmenuAttributes(...), 10, 3);
