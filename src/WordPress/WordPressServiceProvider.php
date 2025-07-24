@@ -58,7 +58,7 @@ class WordPressServiceProvider extends ServiceProvider
         if ($this->consoleDetectionService->isConsole()) {
             $this->publishes([
                 __DIR__.'/../../config/wordpress.php' => config_path('wordpress.php'),
-            ], 'wp-config');
+            ], 'wordpress');
 
             $this->commands([
                 LaunchPadSetupCommand::class,
