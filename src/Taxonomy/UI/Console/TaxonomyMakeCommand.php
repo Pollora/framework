@@ -16,6 +16,9 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class TaxonomyMakeCommand extends AbstractGeneratorCommand
 {
+    const OBJECT_TYPE_OPTION = 'object-type';
+    const POST_TYPE_OPTION = 'post-type';
+
     /**
      * The console command name.
      *
@@ -68,8 +71,8 @@ class TaxonomyMakeCommand extends AbstractGeneratorCommand
         return array_merge(
             parent::getOptions(),
             [
-                ['post-type', 'p', InputOption::VALUE_OPTIONAL, 'The post type to associate with this taxonomy (deprecated, use --object-type instead)', 'post'],
-                ['object-type', 'o', InputOption::VALUE_OPTIONAL, 'The post types to associate with this taxonomy (comma-separated)', null],
+                [static::POST_TYPE_OPTION, 'p', InputOption::VALUE_OPTIONAL, 'The post type to associate with this taxonomy (deprecated, use --object-type instead)', 'post'],
+                [static::OBJECT_TYPE_OPTION, 'o', InputOption::VALUE_OPTIONAL, 'The post types to associate with this taxonomy (comma-separated)', null],
             ]
         );
     }
@@ -103,7 +106,7 @@ class TaxonomyMakeCommand extends AbstractGeneratorCommand
     protected function getObjectTypes(): string
     {
         // Check if object-type option is provided
-        if ($objectType = $this->option('object-type')) {
+        if ($objectType = $this->option(static::OBJECT_TYPE_OPTION)) {
             // Split by comma and trim each value
             $types = array_map('trim', explode(',', $objectType));
 
@@ -112,7 +115,7 @@ class TaxonomyMakeCommand extends AbstractGeneratorCommand
         }
 
         // Fallback to post-type option
-        return "['".$this->option('post-type')."']";
+        return "['".$this->option(static::POST_TYPE_OPTION)."']";
     }
 
     /**

@@ -10,6 +10,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 trait HasThemeSupport
 {
+    const THEME_OPTION = 'theme';
+    
     /**
      * Get the console command options for theme support.
      *
@@ -18,7 +20,7 @@ trait HasThemeSupport
     protected function getThemeOptions(): array
     {
         return [
-            ['theme', null, InputOption::VALUE_OPTIONAL, 'The theme to generate the class in'],
+            [static::THEME_OPTION, null, InputOption::VALUE_OPTIONAL, 'The theme to generate the class in'],
         ];
     }
 
@@ -29,7 +31,7 @@ trait HasThemeSupport
      */
     protected function getThemeOption(): ?string
     {
-        return $this->option('theme');
+        return $this->option(static::THEME_OPTION);
     }
 
     /**
@@ -39,11 +41,11 @@ trait HasThemeSupport
      */
     protected function hasThemeOption(): bool
     {
-        if ($this->option('theme') !== null) {
+        if ($this->option(static::THEME_OPTION) !== null) {
             return true;
         }
 
-        return (bool) $this->input->hasParameterOption(['--theme']);
+        return (bool) $this->input->hasParameterOption(['--'.static::THEME_OPTION]);
     }
 
     /**

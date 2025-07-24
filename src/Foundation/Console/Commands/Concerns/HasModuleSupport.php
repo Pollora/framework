@@ -13,6 +13,8 @@ use Symfony\Component\Console\Input\InputOption;
  */
 trait HasModuleSupport
 {
+    const MODULE_OPTION = 'module';
+
     /**
      * Get the module options for the command.
      *
@@ -21,7 +23,7 @@ trait HasModuleSupport
     protected function getModuleOptions(): array
     {
         return [
-            ['module', 'm', InputOption::VALUE_OPTIONAL, 'The module where the class should be generated'],
+            [static::MODULE_OPTION, null, InputOption::VALUE_OPTIONAL, 'The module where the class should be generated'],
         ];
     }
 
@@ -30,7 +32,7 @@ trait HasModuleSupport
      */
     protected function getModuleName(): ?string
     {
-        return $this->option('module');
+        return $this->option(static::MODULE_OPTION);
     }
 
     /**

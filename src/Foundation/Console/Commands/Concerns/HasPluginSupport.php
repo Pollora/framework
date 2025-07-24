@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Pollora\Foundation\Console\Commands\Concerns;
 
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
 trait HasPluginSupport
 {
+    const PLUGIN_OPTION = 'plugin';
+
     /**
      * Get the console command options for plugin support.
      *
@@ -16,7 +19,7 @@ trait HasPluginSupport
     protected function getPluginOptions(): array
     {
         return [
-            ['plugin', null, InputOption::VALUE_OPTIONAL, 'The plugin to generate the class in'],
+            [static::PLUGIN_OPTION, null, InputOption::VALUE_OPTIONAL, 'The plugin to generate the class in'],
         ];
     }
 
@@ -27,7 +30,7 @@ trait HasPluginSupport
      */
     protected function getPluginOption(): ?string
     {
-        return $this->option('plugin');
+        return $this->option(static::PLUGIN_OPTION);
     }
 
     /**
@@ -37,7 +40,7 @@ trait HasPluginSupport
      */
     protected function hasPluginOption(): bool
     {
-        return $this->option('plugin') !== null;
+        return $this->option(static::PLUGIN_OPTION) !== null;
     }
 
     /**
@@ -48,6 +51,41 @@ trait HasPluginSupport
     protected function resolvePlugin(): ?string
     {
         return $this->getPluginOption();
+    }
+
+    /**
+     * Resolve plugin name.
+     *
+     * @return string|null The resolved plugin name
+     */
+    protected function getPluginPath(): string
+    {
+        $pluginOpt = $this->resolvePlugin();
+        if ($pluginOpt === null) {
+            return '';
+        }
+
+        return WP_PLUGIN_DIR.DIRECTORY_SEPARATOR.$pluginOpt;
+    }
+
+    protected function getPluginNamespace()
+    {
+        $pluginOpt = $this->resolvePlugin();
+        if ($pluginOpt === null) {
+            return '';
+        }
+
+        return 'Plugin\\'.Str::studly($pluginOpt);
+    }
+
+    protected function getPluginSourcePath(): string
+    {
+        return $this->getPluginPath().'/app';
+    }
+
+    protected function getPluginSourceNamespace(): string
+    {
+        return $this->getPluginNamespace().'\\';
     }
 
     /**
@@ -65,8 +103,14 @@ trait HasPluginSupport
             throw new InvalidArgumentException('Plugin name cannot be empty when --plugin option is used.');
         }
 
-        // Plugin paths would be resolved by plugin system
-        // For now, throw exception as plugin system is not implemented yet
-        throw new InvalidArgumentException('Plugin support is not yet implemented.');
+        $location = [
+            'type' => 'plugin',
+            'path' => $this->getPluginPath(),
+            'namespace' => $this->getPluginNamespace(),
+            'source_path' => $this->getPluginSourcePath(),
+            'source_namespace' => $this->getPluginSourceNamespace(),
+        ];
+
+        return $location;
     }
 }

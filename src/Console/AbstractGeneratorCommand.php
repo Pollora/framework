@@ -19,7 +19,7 @@ use Pollora\Foundation\Console\Commands\Concerns\ResolvesLocation;
  */
 abstract class AbstractGeneratorCommand extends GeneratorCommand
 {
-    use HasModuleSupport, HasNameSupport, HasPathSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation;
+    use HasPathSupport, HasModuleSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation, HasNameSupport;
 
     /**
      * The subpath where the class should be generated.
@@ -76,9 +76,9 @@ abstract class AbstractGeneratorCommand extends GeneratorCommand
             $path = str_replace('/', '\\', $path);
         }
 
-        $this->components->info(sprintf('%s [%s] created successfully.', $info, $path));
+        $this->components->success(sprintf('%s [%s] created successfully.', $info, $path));
 
-        return true;
+        return null;
     }
 
     /**

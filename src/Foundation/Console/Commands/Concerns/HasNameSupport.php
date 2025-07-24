@@ -6,6 +6,8 @@ namespace Pollora\Foundation\Console\Commands\Concerns;
 
 trait HasNameSupport
 {
+    const NAME_OPTION = 'name';
+
     /**
      * Get the class name input.
      *
@@ -13,6 +15,6 @@ trait HasNameSupport
      */
     protected function getNameInput(): string
     {
-        return trim($this->argument('name'));
+        return trim($this->argument(static::NAME_OPTION));
     }
 }
