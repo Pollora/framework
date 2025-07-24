@@ -319,6 +319,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
         }
 
         $slug = Str::kebab(class_basename($className));
+
         return substr($slug, 0, 20);
     }
 

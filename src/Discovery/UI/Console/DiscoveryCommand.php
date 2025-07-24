@@ -82,17 +82,17 @@ final class DiscoveryCommand extends Command
                 }
             } else {
                 $this->info('Running all discoveries...');
-                
+
                 // Run discovery phase only to collect counts before applying
                 $discoveryManager->discover();
                 $this->info('✓ Discovery phase completed');
-                
+
                 // Collect counts before applying
                 $discoveryCounts = [];
                 foreach ($discoveryManager->getDiscoveries() as $identifier => $discovery) {
                     $discoveryCounts[$identifier] = count($discoveryManager->getDiscoveredItems($identifier));
                 }
-                
+
                 // Now apply all discoveries
                 $discoveryManager->apply();
                 $this->info('✓ All discoveries applied');
@@ -108,7 +108,7 @@ final class DiscoveryCommand extends Command
                 $moduleOrchestrator->discoverFrameworkModules();
                 $moduleOrchestrator->applyFrameworkModules();
                 $this->info('✓ Framework modules discovered and applied');
-                
+
                 // Store counts for summary
                 $this->discoveryCounts = $discoveryCounts;
             }

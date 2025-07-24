@@ -41,7 +41,7 @@ class WordPressMailServiceProvider extends ServiceProvider
         $enableMailHandling = $this->app['config']->get('wordpress.enable_mail_handling', true);
 
         // Only override wp_mail if it doesn't exist and mail handling is enabled
-        if (!$enableMailHandling || function_exists('wp_mail')) {
+        if (! $enableMailHandling || function_exists('wp_mail')) {
             return;
         }
 
