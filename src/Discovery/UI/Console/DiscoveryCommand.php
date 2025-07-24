@@ -21,7 +21,7 @@ final class DiscoveryCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'discovery:run 
+    protected $signature = 'discovery:run
                             {--clear-cache : Clear discovery cache before running}
                             {--discovery= : Run only specific discovery (optional)}';
 

@@ -141,6 +141,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config);
 
+            // Register the taxonomy
             $this->taxonomyService->register(
                 $config->getSlug(),
                 $config->getObjectType(),
@@ -148,6 +149,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
                 $config->getPluralName(),
                 $config->getArgs()
             );
+
         } catch (\ReflectionException $e) {
             error_log("Failed to process Taxonomy for class {$className}: ".$e->getMessage());
         }

@@ -142,12 +142,14 @@ final class PostTypeDiscovery implements DiscoveryInterface
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config);
 
+            // Register the post type
             $this->postTypeService->register(
                 $config->getSlug(),
                 $config->getName(),
                 $config->getPluralName(),
                 $config->getArgs()
             );
+
         } catch (\ReflectionException $e) {
             error_log("Failed to process PostType for class {$className}: ".$e->getMessage());
         }
