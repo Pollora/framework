@@ -323,8 +323,8 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     protected function addModuleDiscoveryLocations(DiscoveryEngineInterface $engine, string $moduleName, string $modulePath): void
     {
-            $location = new DirectoryLocation($modulePath, 'App');
-            $engine->addLocation($location);
+        $location = new DirectoryLocation($modulePath, 'App');
+        $engine->addLocation($location);
     }
 
     /**

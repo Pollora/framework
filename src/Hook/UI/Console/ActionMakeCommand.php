@@ -17,7 +17,7 @@ class ActionMakeCommand extends AttributeMakeCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-action';
+    protected $name = 'pollora:make-action {name}';
 
     /**
      * The console command description.

@@ -19,7 +19,7 @@ class FilterMakeCommand extends AttributeMakeCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-filter';
+    protected $name = 'pollora:make-filter {name}';
 
     /**
      * The console command description.
