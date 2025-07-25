@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Mail;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Hook\Infrastructure\Services\Filter;
 
 /**
  * Class WordPressMailServiceProvider
@@ -32,7 +33,7 @@ class WordPressMailServiceProvider extends ServiceProvider
      * Uses the 'pre_wp_mail' filter introduced in WordPress 5.7.0 to handle mail
      * sending through Laravel's mail system while maintaining WordPress compatibility.
      */
-    public function boot(): void
+    public function boot(Filter $filter): void
     {
         // Check if mail handling is enabled in the config (defaults to true if not set)
         $enableMailHandling = $this->app['config']->get('wordpress.enable_mail_handling', true);
@@ -43,17 +44,17 @@ class WordPressMailServiceProvider extends ServiceProvider
         }
 
         // Register the pre_wp_mail filter to intercept mail sending
-        add_filter('pre_wp_mail', function ($null, $atts) {
+        $filter->add('pre_wp_mail', function ($null, $atts) {
             // Extract mail parameters from the attributes array
             $to = $atts['to'] ?? '';
             $subject = $atts['subject'] ?? '';
             $message = $atts['message'] ?? '';
             $headers = $atts['headers'] ?? '';
             $attachments = $atts['attachments'] ?? [];
-            
+
             // Send mail using our custom mailer
             $result = $this->app->make('wp.mail')->send($to, $subject, $message, $headers, $attachments);
-            
+
             // Return true if mail was sent successfully, false otherwise
             return $result !== null;
         }, 10, 2);
