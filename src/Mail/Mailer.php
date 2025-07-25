@@ -16,6 +16,8 @@ use Pollora\Hook\Infrastructure\Services\Filter;
  *
  * Handles email sending functionality using Laravel's mail system.
  * Provides WordPress-compatible mail sending interface with support for attachments.
+ * 
+ * This class is used by the WordPress mail filter system when mail handling is enabled.
  */
 class Mailer
 {
@@ -48,18 +50,68 @@ class Mailer
         string|array $headers = '',
         array $attachments = []
     ): ?SentMessage {
-        $values = $this->filter->apply('wp_mail', [$to, $subject, $message, $headers, $attachments]);
-        [$to, $subject, $message, $headers, $attachments] = $values;
+        // Apply the wp_mail filter to allow other plugins to modify the mail data
+        // This maintains compatibility with WordPress plugins that hook into wp_mail
+        $filtered = $this->filter->apply('wp_mail', compact('to', 'subject', 'message', 'headers', 'attachments'));
+        
+        // Extract the filtered values
+        $to = $filtered['to'] ?? $to;
+        $subject = $filtered['subject'] ?? $subject;
+        $message = $filtered['message'] ?? $message;
+        $headers = $filtered['headers'] ?? $headers;
+        $attachments = $filtered['attachments'] ?? $attachments;
 
         try {
-            return Mail::html($message, function (Message $mail) use ($to, $subject, $attachments): void {
+            return Mail::html($message, function (Message $mail) use ($to, $subject, $headers, $attachments): void {
                 $mail->to($to)
                     ->subject($subject);
+                
+                // Process headers if provided
+                $this->processHeaders($mail, $headers);
 
+                // Add attachments if any
                 $this->addAttachments($mail, $attachments);
             });
         } catch (\Throwable) {
             return null;
+        }
+    }
+
+    /**
+     * Process email headers and apply them to the message.
+     *
+     * @param  Message  $mail  The email message instance
+     * @param  string|array  $headers  Headers to process
+     * @return void
+     */
+    private function processHeaders(Message $mail, string|array $headers): void
+    {
+        if (empty($headers)) {
+            return;
+        }
+
+        // Convert string headers to array
+        if (!is_array($headers)) {
+            $headers = explode("\n", str_replace(["\r\n", "\r"], "\n", $headers));
+        }
+
+        foreach ($headers as $header) {
+            $header = trim($header);
+            if (empty($header)) {
+                continue;
+            }
+
+            // Process common email headers
+            if (preg_match('/^CC: (.+)$/i', $header, $matches)) {
+                $mail->cc($matches[1]);
+            } elseif (preg_match('/^BCC: (.+)$/i', $header, $matches)) {
+                $mail->bcc($matches[1]);
+            } elseif (preg_match('/^From: (.+)$/i', $header, $matches)) {
+                $mail->from($matches[1]);
+            } elseif (preg_match('/^Reply-To: (.+)$/i', $header, $matches)) {
+                $mail->replyTo($matches[1]);
+            }
+            // Other headers could be added as needed
         }
     }
 
@@ -71,6 +123,7 @@ class Mailer
      *
      * @param  Message  $mail  The email message instance
      * @param  array|string  $attachments  List of file paths to attach
+     * @return void
      */
     private function addAttachments(Message $mail, array|string $attachments): void
     {
