@@ -11,7 +11,6 @@
 /node_modules
 
 global_rules.md
-.windsurfrules
 build
 claude
 framework.code-workspace

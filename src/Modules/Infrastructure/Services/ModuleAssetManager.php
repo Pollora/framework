@@ -125,6 +125,11 @@ class ModuleAssetManager
     /**
      * Register module view paths with Laravel's view finder.
      *
+     * Registers view paths for modules with priority handling to ensure module
+     * views (including error views) take precedence over framework defaults.
+     * Error views from modules will be discovered before Laravel's built-in
+     * error views, allowing modules to provide custom error pages.
+     *
      * @param  string  $modulePath  Path to the module
      * @param  string  $moduleType  Type of module (theme, plugin, etc.)
      * @param  string|null  $moduleSlug  Optional slug for the module
@@ -144,12 +149,13 @@ class ModuleAssetManager
                 return;
             }
 
-            // Register main view paths
+            // Register main view paths with priority for module views
             $viewPaths = $this->getModuleViewPaths($modulePath, $moduleType);
 
             foreach ($viewPaths as $viewPath) {
                 if (is_dir($viewPath)) {
-                    $viewFinder->addLocation($viewPath);
+                    // Add module views with high priority (prepend to search paths)
+                    $this->registerViewPathWithPriority($viewFinder, $viewPath);
                 }
             }
 
@@ -194,5 +200,51 @@ class ModuleAssetManager
         }
 
         return $paths;
+    }
+
+    /**
+     * Register a view path with high priority for module views.
+     *
+     * Adds the module view path to the beginning of the view finder's path list,
+     * ensuring module views (including error views) are discovered before
+     * framework defaults. This enables modules to override default error pages.
+     *
+     * @param  ViewFinderInterface  $viewFinder  The view finder instance
+     * @param  string  $viewPath  Path to add with high priority
+     */
+    protected function registerViewPathWithPriority(ViewFinderInterface $viewFinder, string $viewPath): void
+    {
+        try {
+            // Get current paths to preserve order
+            $currentPaths = $viewFinder->getPaths();
+            
+            // Check if path is already registered to avoid duplicates
+            if (! in_array($viewPath, $currentPaths, true)) {
+                // Add the new path at the beginning for high priority
+                $newPaths = array_merge([$viewPath], $currentPaths);
+                
+                // Use reflection to set the paths directly since there's no public method
+                $reflection = new \ReflectionClass($viewFinder);
+                
+                if ($reflection->hasProperty('paths')) {
+                    $pathsProperty = $reflection->getProperty('paths');
+                    $pathsProperty->setAccessible(true);
+                    $pathsProperty->setValue($viewFinder, $newPaths);
+                } else {
+                    // Fallback to standard addLocation if reflection fails
+                    $viewFinder->addLocation($viewPath);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Fallback to standard registration if priority registration fails
+            try {
+                $viewFinder->addLocation($viewPath);
+            } catch (\Throwable) {
+                // Silent fail to prevent breaking the application
+                if (function_exists('error_log')) {
+                    error_log("Failed to register view path with priority: {$viewPath}");
+                }
+            }
+        }
     }
 }

@@ -21,6 +21,7 @@ use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
+use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
@@ -29,6 +30,7 @@ use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
 use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
+use Pollora\Providers\QueryServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\SchedulerDiscoveryServiceProvider;
 use Pollora\Scheduler\Jobs\JobDispatcher;
@@ -78,6 +80,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(AttributesServiceProvider::class);
         $this->app->register(AttributableServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
+        $this->app->register(ExceptionServiceProvider::class);
 
         $this->app->register(TaxonomyServiceProvider::class);
 
