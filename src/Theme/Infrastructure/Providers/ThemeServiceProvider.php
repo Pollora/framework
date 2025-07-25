@@ -334,8 +334,6 @@ class ThemeServiceProvider extends ServiceProvider
             return $path;
         }
 
-        $baseThemePath = $this->getBaseThemePath();
-
         // Clear cached WordPress options to force rescan
         delete_option('stylesheet_root');
         delete_option('template_root');
