@@ -41,7 +41,7 @@ class ModuleAwareErrorViewResolver
      * @param  Throwable  $exception  The exception that triggered the error
      * @param  Request  $request  The current HTTP request
      * @param  int  $statusCode  HTTP status code for the error
-     * @return string|null  The resolved view name, null if no view found
+     * @return string|null The resolved view name, null if no view found
      */
     public function resolveErrorView(Throwable $exception, Request $request, int $statusCode): ?string
     {
@@ -64,7 +64,7 @@ class ModuleAwareErrorViewResolver
      *
      * @param  int  $statusCode  HTTP status code for the error
      * @param  Throwable  $exception  The exception that triggered the error
-     * @return array<int, string>  Array of view names to attempt resolving
+     * @return array<int, string> Array of view names to attempt resolving
      */
     protected function getErrorViewCandidates(int $statusCode, Throwable $exception): array
     {
@@ -90,7 +90,7 @@ class ModuleAwareErrorViewResolver
      * status code views are not available.
      *
      * @param  int  $statusCode  HTTP status code for the error
-     * @return array<int, string>  Array of fallback view names
+     * @return array<int, string> Array of fallback view names
      */
     protected function getCommonErrorViewCandidates(int $statusCode): array
     {
@@ -114,7 +114,7 @@ class ModuleAwareErrorViewResolver
      * modules to provide specialized error views for specific exception types.
      *
      * @param  Throwable  $exception  The exception that triggered the error
-     * @return array<int, string>  Array of exception-based view names
+     * @return array<int, string> Array of exception-based view names
      */
     protected function getExceptionSpecificCandidates(Throwable $exception): array
     {
@@ -147,7 +147,7 @@ class ModuleAwareErrorViewResolver
      * Transforms exception class names into view-friendly kebab-case format.
      *
      * @param  string  $input  PascalCase string to convert
-     * @return string  kebab-case formatted string
+     * @return string kebab-case formatted string
      */
     protected function convertToKebabCase(string $input): string
     {
@@ -157,7 +157,7 @@ class ModuleAwareErrorViewResolver
 
         // Insert hyphens before uppercase letters (except the first)
         $kebabCase = preg_replace('/(?<!^)[A-Z]/', '-$0', $input);
-        
+
         if ($kebabCase === null) {
             return '';
         }
@@ -172,7 +172,7 @@ class ModuleAwareErrorViewResolver
      * more semantic view names.
      *
      * @param  string  $exceptionName  Original exception class name
-     * @return string  Clean name without common suffixes
+     * @return string Clean name without common suffixes
      */
     protected function removeCommonSuffixes(string $exceptionName): string
     {
@@ -197,13 +197,13 @@ class ModuleAwareErrorViewResolver
      * all module-registered view paths, not just the default application paths.
      *
      * @param  string  $viewName  Name of the view to check
-     * @return bool  True if the view exists in any registered path
+     * @return bool True if the view exists in any registered path
      */
     public function viewExistsInModules(string $viewName): bool
     {
         try {
             $viewFinder = $this->viewFactory->getFinder();
-            
+
             if (! $viewFinder instanceof ViewFinderInterface) {
                 return false;
             }
@@ -211,7 +211,7 @@ class ModuleAwareErrorViewResolver
             // Laravel's exists() method already checks all registered paths
             // including those registered by modules via ModuleAssetManager
             return $this->viewFactory->exists($viewName);
-            
+
         } catch (Throwable) {
             return false;
         }
@@ -225,7 +225,7 @@ class ModuleAwareErrorViewResolver
      *
      * @param  int  $statusCode  HTTP status code for the error
      * @param  Throwable  $exception  The exception that triggered the error
-     * @return array<string, mixed>  Debug information array
+     * @return array<string, mixed> Debug information array
      */
     public function getDebugInfo(int $statusCode, Throwable $exception): array
     {

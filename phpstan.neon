@@ -6,34 +6,9 @@ parameters:
     treatPhpDocTypesAsCertain: false
     paths:
         - src/
-    includes:
-    - vendor/szepeviktor/phpstan-wordpress/extension.neon
-
-    noModelMake: false
-
-    noEnvCallsOutsideOfConfig: true
-
-    databaseMigrationsPath:
-        - ../../../database/migrations
-
-    universalObjectCratesClasses:
-        - WP_Post
-        - wpdb
-
-    scanFiles:
-        - ../../../_ide_helper.php
-        - ../../../.phpstorm.meta.php
-
-    scanDirectories:
-          - ../../../public/cms
-          - ../../laravel/framework
-          - ../entity
-          - ../wordpress-args
 
     # Level 9 is the highest level
     level: 5
-    excludePaths:
-        - ../../laravel/framework/Illuminate/Foundation/helpers.php
 #    ignoreErrors:
 #        - '#PHPDoc tag @var#'
 #

@@ -9,8 +9,8 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
 use Pollora\Exceptions\Infrastructure\Services\ModuleAwareErrorViewResolver;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Test suite for ModuleAwareErrorViewResolver.
@@ -21,7 +21,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class ModuleAwareErrorViewResolverTest extends TestCase
 {
     protected ModuleAwareErrorViewResolver $resolver;
+
     protected Container $container;
+
     protected ViewFactory $viewFactory;
 
     protected function setUp(): void
@@ -30,7 +32,7 @@ class ModuleAwareErrorViewResolverTest extends TestCase
 
         $this->container = $this->createMock(Container::class);
         $this->viewFactory = $this->createMock(ViewFactory::class);
-        
+
         $this->resolver = new ModuleAwareErrorViewResolver(
             $this->container,
             $this->viewFactory
@@ -48,7 +50,7 @@ class ModuleAwareErrorViewResolverTest extends TestCase
         $this->viewFactory
             ->expects($this->any())
             ->method('exists')
-            ->willReturnCallback(fn($view) => $view === 'errors.404');
+            ->willReturnCallback(fn ($view) => $view === 'errors.404');
 
         $result = $this->resolver->resolveErrorView($exception, $request, 404);
 
@@ -84,7 +86,7 @@ class ModuleAwareErrorViewResolverTest extends TestCase
         $this->viewFactory
             ->expects($this->any())
             ->method('exists')
-            ->willReturnCallback(fn($view) => $view === 'errors.4xx');
+            ->willReturnCallback(fn ($view) => $view === 'errors.4xx');
 
         $result = $this->resolver->resolveErrorView($exception, $request, 403);
 
@@ -102,7 +104,7 @@ class ModuleAwareErrorViewResolverTest extends TestCase
         $this->viewFactory
             ->expects($this->any())
             ->method('exists')
-            ->willReturnCallback(fn($view) => $view === 'errors.not-found-http');
+            ->willReturnCallback(fn ($view) => $view === 'errors.not-found-http');
 
         $result = $this->resolver->resolveErrorView($exception, $request, 404);
 

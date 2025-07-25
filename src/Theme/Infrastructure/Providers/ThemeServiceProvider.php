@@ -10,6 +10,7 @@ use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
+use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
@@ -20,15 +21,14 @@ use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Domain\Support\ThemeCollection;
 use Pollora\Theme\Domain\Support\ThemeConfig;
+use Pollora\Theme\Infrastructure\Adapters\DomainContainerAdapter;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
-use Pollora\Theme\Infrastructure\Adapters\DomainContainerAdapter;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
-use Pollora\Hook\Domain\Contracts\Filter;
 
 /**
  * Theme Service Provider with clear separation of concerns.
@@ -38,16 +38,14 @@ use Pollora\Hook\Domain\Contracts\Filter;
  * - Using adapters to bridge domain and infrastructure concerns
  * - Maintaining clean separation between layers
  *
- * @package Pollora\Theme\Infrastructure\Providers
  * @author  Pollora Team
+ *
  * @since   1.0.0
  */
 class ThemeServiceProvider extends ServiceProvider
 {
     /**
      * WordPress filter instance for theme-related hooks.
-     *
-     * @var Filter
      */
     private Filter $filter;
 
@@ -59,8 +57,6 @@ class ThemeServiceProvider extends ServiceProvider
      * 2. Utility classes initialization
      * 3. Theme-specific services
      * 4. Console commands
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -73,8 +69,7 @@ class ThemeServiceProvider extends ServiceProvider
     /**
      * Boot theme services and setup WordPress integration.
      *
-     * @param Filter $filter WordPress filter instance for hooks
-     * @return void
+     * @param  Filter  $filter  WordPress filter instance for hooks
      */
     public function boot(Filter $filter): void
     {
@@ -87,8 +82,6 @@ class ThemeServiceProvider extends ServiceProvider
      * Register core dependencies required by the theme system.
      *
      * Registers external service providers and loads theme configuration.
-     *
-     * @return void
      */
     private function registerCoreDependencies(): void
     {
@@ -110,8 +103,6 @@ class ThemeServiceProvider extends ServiceProvider
      *
      * This must be called early in the register phase to ensure
      * static utility classes have access to their dependencies.
-     *
-     * @return void
      */
     private function initializeUtilityClasses(): void
     {
@@ -123,8 +114,6 @@ class ThemeServiceProvider extends ServiceProvider
      * Initialize ThemeConfig utility with config repository.
      *
      * Uses immediate binding if available, or deferred resolution callback.
-     *
-     * @return void
      */
     private function initializeThemeConfig(): void
     {
@@ -142,8 +131,6 @@ class ThemeServiceProvider extends ServiceProvider
      * Initialize ThemeCollection utility with collection factory.
      *
      * Uses immediate binding if available, or deferred resolution callback.
-     *
-     * @return void
      */
     private function initializeThemeCollection(): void
     {
@@ -164,8 +151,6 @@ class ThemeServiceProvider extends ServiceProvider
      * - Core services (Container, Registrar, Autoloader, Manager)
      * - WordPress-specific services
      * - Backward compatibility aliases
-     *
-     * @return void
      */
     private function registerThemeServices(): void
     {
@@ -179,13 +164,11 @@ class ThemeServiceProvider extends ServiceProvider
      *
      * All services are registered through their domain interfaces
      * to maintain proper dependency inversion.
-     *
-     * @return void
      */
     private function registerCoreServices(): void
     {
         // Domain container adapter - bridges domain and Laravel container
-        $this->app->singleton(ContainerInterface::class, fn($app) => $this->createDomainContainer($app));
+        $this->app->singleton(ContainerInterface::class, fn ($app) => $this->createDomainContainer($app));
 
         // Theme registrar for self-registration pattern
         $this->app->singleton(ThemeRegistrarInterface::class, function ($app) {
@@ -214,8 +197,6 @@ class ThemeServiceProvider extends ServiceProvider
      * Register WordPress-specific services and adapters.
      *
      * These services handle the integration with WordPress theme system.
-     *
-     * @return void
      */
     private function registerWordPressServices(): void
     {
@@ -239,16 +220,14 @@ class ThemeServiceProvider extends ServiceProvider
      * Register backward compatibility aliases and class mappings.
      *
      * Ensures existing code continues to work after refactoring.
-     *
-     * @return void
      */
     private function registerBackwardCompatibility(): void
     {
         // Legacy service alias
-        $this->app->singleton('theme', fn($app) => $app->make(ThemeService::class));
+        $this->app->singleton('theme', fn ($app) => $app->make(ThemeService::class));
 
         // Legacy class alias for module system
-        if (!class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
+        if (! class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
             class_alias(LaravelThemeModule::class, 'Pollora\\Modules\\Domain\\Models\\LaravelThemeModule');
         }
     }
@@ -258,8 +237,6 @@ class ThemeServiceProvider extends ServiceProvider
      *
      * Integrates custom theme paths with WordPress theme system
      * and sets up necessary WordPress hooks.
-     *
-     * @return void
      */
     private function registerThemeDirectories(): void
     {
@@ -292,7 +269,7 @@ class ThemeServiceProvider extends ServiceProvider
     /**
      * Validate if the given path is a valid theme directory.
      *
-     * @param string|null $path Path to validate
+     * @param  string|null  $path  Path to validate
      * @return bool True if path exists and is a directory
      */
     private function isValidThemeDirectory(?string $path): bool
@@ -305,16 +282,15 @@ class ThemeServiceProvider extends ServiceProvider
      *
      * Ensures the directory is not duplicated in the global array.
      *
-     * @param string $path Theme directory path to add
-     * @return void
+     * @param  string  $path  Theme directory path to add
      */
     private function addToGlobalThemeDirectories(string $path): void
     {
-        if (!isset($GLOBALS['wp_theme_directories'])) {
+        if (! isset($GLOBALS['wp_theme_directories'])) {
             $GLOBALS['wp_theme_directories'] = [];
         }
 
-        if (!in_array($path, $GLOBALS['wp_theme_directories'], true)) {
+        if (! in_array($path, $GLOBALS['wp_theme_directories'], true)) {
             $GLOBALS['wp_theme_directories'][] = $path;
         }
     }
@@ -325,7 +301,7 @@ class ThemeServiceProvider extends ServiceProvider
      * Forces template and stylesheet root to be false when the path
      * doesn't exist, ensuring WordPress rescans for theme directories.
      *
-     * @param string|bool $path Current theme root path from database
+     * @param  string|bool  $path  Current theme root path from database
      * @return string|bool Original path if exists, false otherwise
      */
     private function resetThemeRootOption(string|bool $path): string|bool
@@ -345,8 +321,6 @@ class ThemeServiceProvider extends ServiceProvider
      * Setup theme boot process and integrations.
      *
      * Registers Blade directives and other framework integrations.
-     *
-     * @return void
      */
     private function setupThemeBoot(): void
     {
@@ -357,18 +331,17 @@ class ThemeServiceProvider extends ServiceProvider
      * Register custom Blade directives for theme functionality.
      *
      * Adds the @theme directive for checking theme existence in templates.
-     *
-     * @return void
      */
     private function registerBladeDirectives(): void
     {
-        if (!class_exists(\Illuminate\Support\Facades\Blade::class)) {
+        if (! class_exists(\Illuminate\Support\Facades\Blade::class)) {
             return;
         }
 
         Blade::if('theme', function (string $name) {
             /** @var ThemeService $themeManager */
             $themeManager = app(ThemeService::class);
+
             return $themeManager->hasTheme($name);
         });
     }
@@ -377,12 +350,10 @@ class ThemeServiceProvider extends ServiceProvider
      * Load theme configuration from config file.
      *
      * Merges the theme configuration into the application config.
-     *
-     * @return void
      */
     private function loadThemeConfiguration(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../../config/theme.php', 'theme');
+        $this->mergeConfigFrom(__DIR__.'/../../config/theme.php', 'theme');
     }
 
     /**
@@ -390,8 +361,6 @@ class ThemeServiceProvider extends ServiceProvider
      *
      * Registers artisan commands for creating, removing, and checking
      * theme status in development environment.
-     *
-     * @return void
      */
     private function registerCommands(): void
     {
@@ -403,7 +372,7 @@ class ThemeServiceProvider extends ServiceProvider
                 return new RemoveThemeCommand($app->make('config'), $app->make('files'));
             },
             'theme.status' => function ($app) {
-                return new ThemeStatusCommand();
+                return new ThemeStatusCommand;
             },
         ];
 
@@ -420,7 +389,7 @@ class ThemeServiceProvider extends ServiceProvider
      * Factory method to create the adapter that bridges the domain
      * container interface with Laravel's container implementation.
      *
-     * @param mixed $app Laravel application container
+     * @param  mixed  $app  Laravel application container
      * @return ContainerInterface Domain container adapter instance
      */
     private function createDomainContainer($app): ContainerInterface

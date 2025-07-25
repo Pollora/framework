@@ -27,14 +27,14 @@ use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
+use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
 use Pollora\Permalink\RewriteServiceProvider;
 use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
-use Pollora\Providers\QueryServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
+use Pollora\Schedule\Jobs\JobDispatcher;
 use Pollora\Schedule\SchedulerDiscoveryServiceProvider;
-use Pollora\Scheduler\Jobs\JobDispatcher;
-use Pollora\Scheduler\SchedulerServiceProvider;
+use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
@@ -91,6 +91,7 @@ class PolloraServiceProvider extends ServiceProvider
 
         // Shared modules
         $this->app->register(CollectionServiceProvider::class);
+        $this->app->register(OptionServiceProvider::class);
 
         // Block features
         $this->app->register(BlockCategoryServiceProvider::class);

@@ -62,6 +62,29 @@ function setupWordPressMocks()
         ->andReturn('test-theme')
         ->byDefault();
 
+    // Mock WordPress option functions
+    WP::$wpFunctions->shouldReceive('get_option')
+        ->withAnyArgs()
+        ->andReturnUsing(function ($option, $default = false) {
+            return $default;
+        })
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('add_option')
+        ->withAnyArgs()
+        ->andReturn(true)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('update_option')
+        ->withAnyArgs()
+        ->andReturn(true)
+        ->byDefault();
+
+    WP::$wpFunctions->shouldReceive('delete_option')
+        ->withAnyArgs()
+        ->andReturn(true)
+        ->byDefault();
+
     WP::$wpFunctions->shouldReceive('wp_doing_ajax')
         ->withAnyArgs()
         ->andReturn(false)
@@ -1154,5 +1177,34 @@ if (! function_exists('get_stylesheet')) {
     function get_stylesheet()
     {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_stylesheet() : 'test-theme';
+    }
+}
+
+// WordPress option functions
+if (! function_exists('get_option')) {
+    function get_option($option, $default = false)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_option($option, $default) : $default;
+    }
+}
+
+if (! function_exists('add_option')) {
+    function add_option($option, $value, $deprecated = '', $autoload = 'yes')
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->add_option($option, $value, $deprecated, $autoload) : true;
+    }
+}
+
+if (! function_exists('update_option')) {
+    function update_option($option, $value, $autoload = null)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->update_option($option, $value, $autoload) : true;
+    }
+}
+
+if (! function_exists('delete_option')) {
+    function delete_option($option)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->delete_option($option) : true;
     }
 }

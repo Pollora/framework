@@ -16,7 +16,7 @@ use Pollora\Hook\Infrastructure\Services\Filter;
  *
  * Handles email sending functionality using Laravel's mail system.
  * Provides WordPress-compatible mail sending interface with support for attachments.
- * 
+ *
  * This class is used by the WordPress mail filter system when mail handling is enabled.
  */
 class Mailer
@@ -53,7 +53,7 @@ class Mailer
         // Apply the wp_mail filter to allow other plugins to modify the mail data
         // This maintains compatibility with WordPress plugins that hook into wp_mail
         $filtered = $this->filter->apply('wp_mail', compact('to', 'subject', 'message', 'headers', 'attachments'));
-        
+
         // Extract the filtered values
         $to = $filtered['to'] ?? $to;
         $subject = $filtered['subject'] ?? $subject;
@@ -65,7 +65,7 @@ class Mailer
             return Mail::html($message, function (Message $mail) use ($to, $subject, $headers, $attachments): void {
                 $mail->to($to)
                     ->subject($subject);
-                
+
                 // Process headers if provided
                 $this->processHeaders($mail, $headers);
 
@@ -82,7 +82,6 @@ class Mailer
      *
      * @param  Message  $mail  The email message instance
      * @param  string|array  $headers  Headers to process
-     * @return void
      */
     private function processHeaders(Message $mail, string|array $headers): void
     {
@@ -91,7 +90,7 @@ class Mailer
         }
 
         // Convert string headers to array
-        if (!is_array($headers)) {
+        if (! is_array($headers)) {
             $headers = explode("\n", str_replace(["\r\n", "\r"], "\n", $headers));
         }
 
@@ -123,7 +122,6 @@ class Mailer
      *
      * @param  Message  $mail  The email message instance
      * @param  array|string  $attachments  List of file paths to attach
-     * @return void
      */
     private function addAttachments(Message $mail, array|string $attachments): void
     {

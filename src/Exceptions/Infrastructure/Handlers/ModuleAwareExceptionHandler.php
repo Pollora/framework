@@ -46,7 +46,7 @@ class ModuleAwareExceptionHandler extends Handler
     public function __construct(Container $container)
     {
         parent::__construct($container);
-        
+
         // Initialize the module-aware error view resolver
         $this->initializeErrorViewResolver();
     }
@@ -68,7 +68,7 @@ class ModuleAwareExceptionHandler extends Handler
             } catch (Throwable $e) {
                 // Log error but don't fail - fall back to default behavior
                 if (function_exists('error_log')) {
-                    error_log('Failed to initialize ModuleAwareErrorViewResolver: ' . $e->getMessage());
+                    error_log('Failed to initialize ModuleAwareErrorViewResolver: '.$e->getMessage());
                 }
             }
         }
@@ -82,7 +82,7 @@ class ModuleAwareExceptionHandler extends Handler
      *
      * @param  Request  $request  The HTTP request that triggered the exception
      * @param  Throwable  $e  The exception to render
-     * @return SymfonyResponse  The HTTP response for the exception
+     * @return SymfonyResponse The HTTP response for the exception
      */
     public function render($request, Throwable $e): SymfonyResponse
     {
@@ -106,13 +106,13 @@ class ModuleAwareExceptionHandler extends Handler
      *
      * @param  HttpExceptionInterface  $e  The HTTP exception to render
      * @param  Request  $request  The HTTP request that triggered the exception
-     * @return Response|null  HTTP response if module view found, null otherwise
+     * @return Response|null HTTP response if module view found, null otherwise
      */
     protected function renderHttpExceptionWithModuleViews(HttpExceptionInterface $e, Request $request): ?Response
     {
         // Ensure error view resolver is initialized
         $this->initializeErrorViewResolver();
-        
+
         if (! isset($this->errorViewResolver)) {
             return null;
         }
@@ -134,9 +134,9 @@ class ModuleAwareExceptionHandler extends Handler
         } catch (Throwable $renderException) {
             // Log rendering error but don't fail - fall back to default behavior
             if (function_exists('error_log')) {
-                error_log('Failed to render module error view: ' . $renderException->getMessage());
+                error_log('Failed to render module error view: '.$renderException->getMessage());
             }
-            
+
             return null;
         }
     }
@@ -150,7 +150,7 @@ class ModuleAwareExceptionHandler extends Handler
      * @param  HttpExceptionInterface  $exception  The HTTP exception
      * @param  Request  $request  The HTTP request
      * @param  int  $statusCode  The HTTP status code
-     * @return array<string, mixed>  View data array
+     * @return array<string, mixed> View data array
      */
     protected function prepareErrorViewData(HttpExceptionInterface $exception, Request $request, int $statusCode): array
     {
@@ -184,7 +184,7 @@ class ModuleAwareExceptionHandler extends Handler
      *
      * @param  HttpExceptionInterface  $exception  The HTTP exception
      * @param  int  $statusCode  The HTTP status code
-     * @return string  User-friendly error message
+     * @return string User-friendly error message
      */
     protected function getErrorMessage(HttpExceptionInterface $exception, int $statusCode): string
     {
@@ -196,7 +196,7 @@ class ModuleAwareExceptionHandler extends Handler
         } catch (Throwable) {
             // Silent fail
         }
-        
+
         if ($exceptionMessage !== '' && $debug) {
             return $exceptionMessage;
         }
@@ -219,7 +219,7 @@ class ModuleAwareExceptionHandler extends Handler
      * exception reporting configuration.
      *
      * @param  Throwable  $e  The exception to check
-     * @return bool  True if the exception should be reported
+     * @return bool True if the exception should be reported
      */
     public function shouldReport(Throwable $e): bool
     {
@@ -240,7 +240,7 @@ class ModuleAwareExceptionHandler extends Handler
      * specific exceptions should be reported.
      *
      * @param  Throwable  $e  The exception to check
-     * @return bool|null  True/false for module decision, null for default behavior
+     * @return bool|null True/false for module decision, null for default behavior
      */
     protected function shouldReportForModules(Throwable $e): ?bool
     {
@@ -252,13 +252,13 @@ class ModuleAwareExceptionHandler extends Handler
             } catch (Throwable) {
                 return null;
             }
-            
+
             if (empty($reportingRules)) {
                 return null;
             }
 
             $exceptionClass = get_class($e);
-            
+
             foreach ($reportingRules as $rule) {
                 if (isset($rule['exception']) && $rule['exception'] === $exceptionClass) {
                     return $rule['report'] ?? null;
@@ -266,7 +266,7 @@ class ModuleAwareExceptionHandler extends Handler
             }
 
             return null;
-            
+
         } catch (Throwable) {
             return null;
         }
@@ -280,7 +280,7 @@ class ModuleAwareExceptionHandler extends Handler
      *
      * @param  Throwable  $exception  The exception that triggered the error
      * @param  Request  $request  The HTTP request
-     * @return array<string, mixed>  Debug information array
+     * @return array<string, mixed> Debug information array
      */
     public function getErrorViewDebugInfo(Throwable $exception, Request $request): array
     {
@@ -294,13 +294,13 @@ class ModuleAwareExceptionHandler extends Handler
         }
 
         $this->initializeErrorViewResolver();
-        
+
         if (! isset($this->errorViewResolver)) {
             return ['error' => 'ModuleAwareErrorViewResolver not available'];
         }
 
-        $statusCode = $exception instanceof HttpExceptionInterface 
-            ? $exception->getStatusCode() 
+        $statusCode = $exception instanceof HttpExceptionInterface
+            ? $exception->getStatusCode()
             : 500;
 
         return $this->errorViewResolver->getDebugInfo($statusCode, $exception);
@@ -313,7 +313,7 @@ class ModuleAwareExceptionHandler extends Handler
      * HTML content across different Laravel versions.
      *
      * @param  Request  $request  The HTTP request to check
-     * @return bool  True if the request expects HTML content
+     * @return bool True if the request expects HTML content
      */
     protected function shouldRenderHtmlResponse(Request $request): bool
     {

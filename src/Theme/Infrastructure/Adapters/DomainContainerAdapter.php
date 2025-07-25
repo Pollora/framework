@@ -19,8 +19,8 @@ use Pollora\Theme\Domain\Contracts\ContainerInterface;
  * Laravel equivalents, ensuring proper encapsulation and
  * dependency inversion compliance.
  *
- * @package Pollora\Theme\Infrastructure\Adapters
  * @author  Pollora Team
+ *
  * @since   1.0.0
  *
  * @implements ContainerInterface
@@ -37,7 +37,7 @@ class DomainContainerAdapter implements ContainerInterface
     /**
      * Create a new domain container adapter.
      *
-     * @param mixed $app Laravel application container
+     * @param  mixed  $app  Laravel application container
      */
     public function __construct(mixed $app)
     {
@@ -51,11 +51,11 @@ class DomainContainerAdapter implements ContainerInterface
      * container resolution mechanism. Supports both class
      * names and abstract bindings.
      *
-     * @param string $id Service identifier (class name or binding key)
+     * @param  string  $id  Service identifier (class name or binding key)
      * @return mixed Resolved service instance
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     *         When the service cannot be resolved
+     *                                                                    When the service cannot be resolved
      */
     public function get(string $id): mixed
     {
@@ -68,7 +68,7 @@ class DomainContainerAdapter implements ContainerInterface
      * Determines whether a service identifier has been
      * registered in the Laravel container.
      *
-     * @param string $id Service identifier to check
+     * @param  string  $id  Service identifier to check
      * @return bool True if the service is bound, false otherwise
      */
     public function has(string $id): bool
@@ -83,8 +83,7 @@ class DomainContainerAdapter implements ContainerInterface
      * dynamically. Accepts both provider class names and
      * instantiated provider objects.
      *
-     * @param string|object $provider Service provider class name or instance
-     * @return void
+     * @param  string|object  $provider  Service provider class name or instance
      *
      * @throws \InvalidArgumentException When provider is invalid
      */
@@ -100,9 +99,8 @@ class DomainContainerAdapter implements ContainerInterface
      * and cached for subsequent requests. Supports both concrete
      * implementations and factory callbacks.
      *
-     * @param string $abstract Abstract service identifier
-     * @param mixed $concrete Concrete implementation or factory callback
-     * @return void
+     * @param  string  $abstract  Abstract service identifier
+     * @param  mixed  $concrete  Concrete implementation or factory callback
      */
     public function bindShared(string $abstract, mixed $concrete): void
     {
@@ -130,8 +128,8 @@ class DomainContainerAdapter implements ContainerInterface
      * the domain interface. Supports dot notation for nested
      * configuration values.
      *
-     * @param string $key Configuration key (supports dot notation)
-     * @param mixed $default Default value if configuration key not found
+     * @param  string  $key  Configuration key (supports dot notation)
+     * @param  mixed  $default  Default value if configuration key not found
      * @return mixed Configuration value or default
      *
      * @example
@@ -150,9 +148,8 @@ class DomainContainerAdapter implements ContainerInterface
      * Changes are not persisted to configuration files and only
      * affect the current request lifecycle.
      *
-     * @param string $key Configuration key (supports dot notation)
-     * @param mixed $value Value to set
-     * @return void
+     * @param  string  $key  Configuration key (supports dot notation)
+     * @param  mixed  $value  Value to set
      *
      * @example
      * $container->setConfig('theme.active', 'my-theme');

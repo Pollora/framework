@@ -217,15 +217,15 @@ class ModuleAssetManager
         try {
             // Get current paths to preserve order
             $currentPaths = $viewFinder->getPaths();
-            
+
             // Check if path is already registered to avoid duplicates
             if (! in_array($viewPath, $currentPaths, true)) {
                 // Add the new path at the beginning for high priority
                 $newPaths = array_merge([$viewPath], $currentPaths);
-                
+
                 // Use reflection to set the paths directly since there's no public method
                 $reflection = new \ReflectionClass($viewFinder);
-                
+
                 if ($reflection->hasProperty('paths')) {
                     $pathsProperty = $reflection->getProperty('paths');
                     $pathsProperty->setAccessible(true);

@@ -61,7 +61,7 @@ class ExceptionServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleAwareErrorViewResolver::class, function ($app) {
             /** @var \Illuminate\Contracts\View\Factory $viewFactory */
             $viewFactory = $app->make('view');
-            
+
             return new ModuleAwareErrorViewResolver($app, $viewFactory);
         });
     }
@@ -88,7 +88,7 @@ class ExceptionServiceProvider extends ServiceProvider
     protected function mergeExceptionConfiguration(): void
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/exceptions.php',
+            __DIR__.'/../config/exceptions.php',
             'pollora.exceptions'
         );
     }
@@ -103,7 +103,7 @@ class ExceptionServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/exceptions.php' => config_path('pollora/exceptions.php'),
+                __DIR__.'/../config/exceptions.php' => config_path('pollora/exceptions.php'),
             ], 'pollora-exceptions');
         }
     }
@@ -114,7 +114,7 @@ class ExceptionServiceProvider extends ServiceProvider
      * Returns an array of service names that this provider registers,
      * used by Laravel for deferred service provider loading.
      *
-     * @return array<int, string>  Array of provided service names
+     * @return array<int, string> Array of provided service names
      */
     public function provides(): array
     {
