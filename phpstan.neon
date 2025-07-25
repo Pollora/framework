@@ -1,5 +1,6 @@
 includes:
-    - vendor/larastan/larastan/extension.neon
+    # Commenting out the Larastan include since it's not installed
+    # - vendor/larastan/larastan/extension.neon
 
 parameters:
     treatPhpDocTypesAsCertain: false
