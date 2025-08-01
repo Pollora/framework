@@ -64,6 +64,9 @@ class ThemeServiceProvider extends ServiceProvider
         $this->initializeUtilityClasses();
         $this->registerThemeServices();
         $this->registerCommands();
+
+
+
     }
 
     /**
@@ -76,6 +79,12 @@ class ThemeServiceProvider extends ServiceProvider
         $this->filter = $filter;
         $this->registerThemeDirectories();
         $this->setupThemeBoot();
+
+
+        add_action('after_setup_theme', function () {
+            //   dd(get_theme_roots());
+        });
+
     }
 
     /**
@@ -244,10 +253,85 @@ class ThemeServiceProvider extends ServiceProvider
 
         // Hook into WordPress option system to reset theme root when needed
         $this->filter->add('option_stylesheet_root', $this->resetThemeRootOption(...), PHP_INT_MAX);
+        $this->filter->add('site_transient_theme_roots', $this->handleThemeRootsTransient(...), PHP_INT_MAX);
 
         if ($this->isValidThemeDirectory($baseThemePath)) {
             $this->addToGlobalThemeDirectories($baseThemePath);
         }
+    }
+
+    /**
+     * Handle the site_transient_theme_roots filter.
+     *
+     * Normalizes theme roots by fixing invalid paths and updates
+     * the transient only when necessary.
+     *
+     * @param array|bool $roots Theme roots array from WordPress
+     * @return array Normalized theme roots
+     */
+    private function handleThemeRootsTransient(array|bool $roots): array|bool
+    {
+        if (!$roots) {
+            return $roots;
+        }
+
+        $updatedRoots = $this->normalizeThemeRoots($roots);
+
+        if ($updatedRoots !== $roots) {
+            set_site_transient('theme_roots', $updatedRoots);
+        }
+
+        return $updatedRoots;
+    }
+
+    /**
+     * Normalize theme roots by fixing invalid paths.
+     *
+     * @param array $roots Theme roots array from WordPress
+     * @return array Normalized theme roots
+     */
+    private function normalizeThemeRoots(array $roots): array
+    {
+        $normalizedRoots = [];
+
+        foreach ($roots as $themeSlug => $themePath) {
+            $normalizedRoots[$themeSlug] = $this->resolveThemePath($themePath);
+        }
+
+        return $normalizedRoots;
+    }
+
+    /**
+     * Resolve theme path to a valid directory.
+     *
+     * @param string $themePath Original theme path
+     * @return string Valid theme directory path
+     */
+    private function resolveThemePath(string $themePath): string
+    {
+        // Si le chemin existe déjà, on le garde
+        if (file_exists($themePath)) {
+            return $themePath;
+        }
+
+        // Si c'est un chemin WordPress standard, utiliser le répertoire par défaut
+        if ($this->isWordPressThemePath($themePath)) {
+            return WP_CONTENT_DIR . '/themes';
+        }
+
+        // Sinon, utiliser notre répertoire de base
+        return $this->getBaseThemePath();
+    }
+
+    /**
+     * Check if the theme path is a WordPress standard theme path.
+     *
+     * @param string $themePath Path to check
+     * @return bool True if it's a WordPress theme path
+     */
+    private function isWordPressThemePath(string $themePath): bool
+    {
+        return str_contains($themePath, '/content/themes/');
     }
 
     /**
@@ -259,11 +343,8 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function getBaseThemePath(): string
     {
-        try {
-            return ThemeConfig::get('path', base_path('themes'));
-        } catch (\RuntimeException) {
-            return base_path('themes');
-        }
+        return base_path('themes');
+
     }
 
     /**
