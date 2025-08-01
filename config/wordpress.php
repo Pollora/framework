@@ -50,6 +50,15 @@ return [
     ],
 
     /**
+     * Theme configuration.
+     *
+     * Controls whether Pollora framework should use the default WordPress theme directory.
+     * When enabled (true), Pollora will use the default WordPress theme directory.
+     * When disabled (false), Pollora will use the custom theme directory (./themes).
+     */
+    'use_default_wp_theme_directory' => false,
+
+    /**
      * Mail handling configuration.
      *
      * Controls whether Pollora framework should handle WordPress mail functionality.

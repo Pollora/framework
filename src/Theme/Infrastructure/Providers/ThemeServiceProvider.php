@@ -286,13 +286,7 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function addToGlobalThemeDirectories(string $path): void
     {
-        if (! isset($GLOBALS['wp_theme_directories'])) {
-            $GLOBALS['wp_theme_directories'] = [];
-        }
-
-        if (! in_array($path, $GLOBALS['wp_theme_directories'], true)) {
-            $GLOBALS['wp_theme_directories'][] = $path;
-        }
+        $GLOBALS['wp_theme_directories'] = [$path];
     }
 
     /**
