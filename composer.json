@@ -92,7 +92,7 @@
         "laravel/pint": "^v1.24.0",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
-        "symfony/var-dumper": "^7.3.1",
+        "symfony/var-dumper": "^7.3.2",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^11.5",
