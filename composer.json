@@ -88,7 +88,7 @@
         }
     },
     "require-dev": {
-        "driftingly/rector-laravel": "^1.0",
+        "driftingly/rector-laravel": "^2.0",
         "laravel/pint": "^v1.24.0",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
