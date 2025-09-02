@@ -29,7 +29,7 @@ interface ThemeService
     /**
      * Get the active theme name
      */
-    public function active(): string|bool;
+    public function active(): ?string;
 
     /**
      * Get the theme metadata object
@@ -39,7 +39,7 @@ interface ThemeService
     /**
      * Get the parent theme name
      */
-    public function parent(): string;
+    public function parent(): ?string;
 
     /**
      * Get all parent themes

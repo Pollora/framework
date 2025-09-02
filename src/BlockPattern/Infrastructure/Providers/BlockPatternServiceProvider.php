@@ -10,11 +10,10 @@ use Pollora\BlockPattern\Domain\Contracts\PatternCategoryRegistrarInterface;
 use Pollora\BlockPattern\Domain\Contracts\PatternDataExtractorInterface;
 use Pollora\BlockPattern\Domain\Contracts\PatternRegistrarInterface;
 use Pollora\BlockPattern\Domain\Contracts\PatternServiceInterface;
-use Pollora\BlockPattern\Domain\Contracts\ThemeProviderInterface;
 use Pollora\BlockPattern\Infrastructure\Adapters\WordPressPatternDataExtractor;
 use Pollora\BlockPattern\Infrastructure\Registrars\WordPressPatternCategoryRegistrar;
 use Pollora\BlockPattern\Infrastructure\Registrars\WordPressPatternRegistrar;
-use Pollora\BlockPattern\Infrastructure\Services\WordPressThemeProvider;
+use Pollora\Hook\Domain\Contracts\Action;
 
 /**
  * Service provider for BlockPattern feature bindings.
@@ -32,7 +31,6 @@ class BlockPatternServiceProvider extends ServiceProvider
         $this->app->bind(PatternDataExtractorInterface::class, WordPressPatternDataExtractor::class);
         $this->app->bind(PatternCategoryRegistrarInterface::class, WordPressPatternCategoryRegistrar::class);
         $this->app->bind(PatternRegistrarInterface::class, WordPressPatternRegistrar::class);
-        $this->app->bind(ThemeProviderInterface::class, WordPressThemeProvider::class);
 
         // Bind application interfaces to application implementations
         $this->app->bind(PatternServiceInterface::class, PatternService::class);
@@ -43,7 +41,10 @@ class BlockPatternServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Trigger the application service to register patterns and categories
-        $this->app->make(PatternServiceInterface::class)->registerAll();
+        $action = $this->app->get(Action::class);
+        $action->add('init', function () {
+            // Trigger the application service to register patterns and categories
+            $this->app->make(PatternServiceInterface::class)->registerAll();
+        });
     }
 }

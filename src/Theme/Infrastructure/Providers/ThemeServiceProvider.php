@@ -65,8 +65,6 @@ class ThemeServiceProvider extends ServiceProvider
         $this->registerThemeServices();
         $this->registerCommands();
 
-
-
     }
 
     /**
@@ -79,7 +77,6 @@ class ThemeServiceProvider extends ServiceProvider
         $this->filter = $filter;
         $this->registerThemeDirectories();
         $this->setupThemeBoot();
-
 
         add_action('after_setup_theme', function () {
             //   dd(get_theme_roots());
@@ -266,12 +263,12 @@ class ThemeServiceProvider extends ServiceProvider
      * Normalizes theme roots by fixing invalid paths and updates
      * the transient only when necessary.
      *
-     * @param array|bool $roots Theme roots array from WordPress
+     * @param  array|bool  $roots  Theme roots array from WordPress
      * @return array Normalized theme roots
      */
     private function handleThemeRootsTransient(array|bool $roots): array|bool
     {
-        if (!$roots) {
+        if (! $roots) {
             return $roots;
         }
 
@@ -287,7 +284,7 @@ class ThemeServiceProvider extends ServiceProvider
     /**
      * Normalize theme roots by fixing invalid paths.
      *
-     * @param array $roots Theme roots array from WordPress
+     * @param  array  $roots  Theme roots array from WordPress
      * @return array Normalized theme roots
      */
     private function normalizeThemeRoots(array $roots): array
@@ -304,7 +301,7 @@ class ThemeServiceProvider extends ServiceProvider
     /**
      * Resolve theme path to a valid directory.
      *
-     * @param string $themePath Original theme path
+     * @param  string  $themePath  Original theme path
      * @return string Valid theme directory path
      */
     private function resolveThemePath(string $themePath): string
@@ -316,7 +313,7 @@ class ThemeServiceProvider extends ServiceProvider
 
         // Si c'est un chemin WordPress standard, utiliser le répertoire par défaut
         if ($this->isWordPressThemePath($themePath)) {
-            return WP_CONTENT_DIR . '/themes';
+            return WP_CONTENT_DIR.'/themes';
         }
 
         // Sinon, utiliser notre répertoire de base
@@ -326,7 +323,7 @@ class ThemeServiceProvider extends ServiceProvider
     /**
      * Check if the theme path is a WordPress standard theme path.
      *
-     * @param string $themePath Path to check
+     * @param  string  $themePath  Path to check
      * @return bool True if it's a WordPress theme path
      */
     private function isWordPressThemePath(string $themePath): bool

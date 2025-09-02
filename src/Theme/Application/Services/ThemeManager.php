@@ -19,20 +19,67 @@ use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 use Psr\Container\ContainerInterface;
 
+/**
+ * Theme management service implementation.
+ *
+ * This service handles theme loading, registration, and management operations
+ * within the Pollora framework. It integrates with Laravel's service container
+ * and WordPress theme system to provide a unified theme management interface.
+ *
+ * Key responsibilities:
+ * - Load and register theme configurations
+ * - Manage theme hierarchy (parent/child themes)
+ * - Register view paths and namespaces
+ * - Handle theme asset management integration
+ * - Provide theme information and validation
+ *
+ * @since 1.0.0
+ */
 class ThemeManager implements ThemeService
 {
+    /**
+     * Theme discovery service instance.
+     *
+     * @var mixed
+     */
     public $discovery;
 
     use IncludesFiles;
 
+    /**
+     * Theme configuration array.
+     *
+     * @var array<string, mixed>
+     */
     protected array $config;
 
+    /**
+     * Collection of parent themes in the hierarchy.
+     *
+     * @var array<ThemeMetadata>
+     */
     protected array $parentThemes = [];
 
+    /**
+     * Current active theme metadata.
+     */
     protected ?ThemeMetadata $theme = null;
 
+    /**
+     * Console detection service for environment checks.
+     */
     protected ConsoleDetectionService $consoleDetectionService;
 
+    /**
+     * Create a new theme manager instance.
+     *
+     * @param  ContainerInterface  $app  Application container
+     * @param  ViewFinderInterface  $viewFinder  Laravel view finder for template resolution
+     * @param  Loader|null  $localeLoader  Translation loader for theme localization
+     * @param  ModuleRepositoryInterface|null  $repository  Module repository for theme management
+     * @param  ThemeRegistrarInterface|null  $registrar  Theme registration service
+     * @param  ConsoleDetectionService|null  $consoleDetectionService  Console environment detection
+     */
     public function __construct(
         protected ContainerInterface $app,
         protected ViewFinderInterface $viewFinder,
@@ -44,20 +91,36 @@ class ThemeManager implements ThemeService
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
     }
 
+    /**
+     * Get the current theme manager instance.
+     *
+     * @return ThemeManager Current instance
+     */
     public function instance(): ThemeManager
     {
         return $this;
     }
 
     /**
-     * Create a ThemeMetadata instance
+     * Create a ThemeMetadata instance.
      *
-     * This method exists primarily to make testing easier
+     * This method exists primarily to make testing easier by allowing
+     * mocking of the ThemeMetadata creation process.
+     *
+     * @param  string  $themeName  Name of the theme
+     * @param  string  $themesPath  Path to themes directory
+     * @return ThemeMetadata New theme metadata instance
      */
     protected function createThemeMetadata(string $themeName, string $themesPath): ThemeMetadata
     {
         return new ThemeMetadata($themeName, $themesPath);
     }
+
+    /*
+    protected function ()
+    {
+
+    }*/
 
     public function load(string $themeName): void
     {
@@ -133,17 +196,21 @@ class ThemeManager implements ThemeService
         return rtrim((string) $this->app['config']->get('theme.path', base_path('themes')), '/');
     }
 
-    public function active(): string|bool
+    public function active(): ?string
     {
         if (! function_exists('get_stylesheet')) {
-            return false;
+            return null;
         }
 
         return get_stylesheet();
     }
 
-    public function parent(): string
+    public function parent(): ?string
     {
+        if (! function_exists('get_template')) {
+            return null;
+        }
+
         return get_template();
     }
 
