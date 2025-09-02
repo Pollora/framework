@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Pollora\BlockPattern\Domain\Contracts\PatternDataExtractorInterface;
 use Pollora\BlockPattern\Domain\Models\PatternFileData;
+use Pollora\BlockPattern\Domain\Support\PatternConstants;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 
 /**
@@ -18,28 +19,6 @@ use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
  */
 class WordPressPatternDataExtractor implements PatternDataExtractorInterface
 {
-    /**
-     * File extension for pattern files.
-     */
-    private const PATTERN_FILE_EXTENSION = '.blade.php';
-
-    /**
-     * Default headers to extract from pattern files.
-     *
-     * @var array<string, string>
-     */
-    protected array $defaultHeaders = [
-        'title' => 'Title',
-        'slug' => 'Slug',
-        'description' => 'Description',
-        'viewportWidth' => 'Viewport Width',
-        'categories' => 'Categories',
-        'keywords' => 'Keywords',
-        'blockTypes' => 'Block Types',
-        'postTypes' => 'Post Types',
-        'inserter' => 'Inserter',
-    ];
-
     /**
      * Create a new WordPress pattern data extractor instance.
      */
@@ -55,7 +34,7 @@ class WordPressPatternDataExtractor implements PatternDataExtractorInterface
         $headers = [];
 
         if (function_exists('get_file_data')) {
-            $headers = \get_file_data($file, $this->defaultHeaders);
+            $headers = \get_file_data($file, PatternConstants::DEFAULT_HEADERS);
         }
 
         return new PatternFileData($file, $headers);
@@ -70,17 +49,16 @@ class WordPressPatternDataExtractor implements PatternDataExtractorInterface
 
         return $this->collectionFactory->make($patternData)
             ->map(function ($value, $key) use ($theme) {
-                $arrayProperties = ['categories', 'keywords', 'blockTypes', 'postTypes'];
-                if (in_array($key, $arrayProperties, true)) {
+                if (in_array($key, PatternConstants::ARRAY_PROPERTIES, true)) {
                     return $value ? explode(',', $value) : null;
                 }
-                if ($key === 'viewportWidth') {
+                if (in_array($key, PatternConstants::INTEGER_PROPERTIES, true)) {
                     return $value ? (int) $value : null;
                 }
-                if ($key === 'inserter') {
-                    return $value ? in_array(strtolower($value), ['yes', 'true']) : null;
+                if (in_array($key, PatternConstants::BOOLEAN_PROPERTIES, true)) {
+                    return $value ? in_array(strtolower($value), PatternConstants::TRUE_VALUES, true) : null;
                 }
-                if (in_array($key, ['title', 'description'])) {
+                if (in_array($key, PatternConstants::TRANSLATABLE_PROPERTIES, true)) {
                     if (! function_exists('translate_with_gettext_context') || ! method_exists($theme, 'get')) {
                         return $value;
                     }
@@ -106,7 +84,7 @@ class WordPressPatternDataExtractor implements PatternDataExtractorInterface
      */
     public function getContent(string $file): ?string
     {
-        $viewName = Str::replaceLast(self::PATTERN_FILE_EXTENSION, '', Str::after($file, 'views/'));
+        $viewName = Str::replaceLast(PatternConstants::PATTERN_FILE_EXTENSION, '', Str::after($file, 'views/'));
 
         return View::exists($viewName) ? View::make($viewName)->render() : null;
     }
