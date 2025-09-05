@@ -151,7 +151,7 @@ class ExtendedRouter extends IlluminateRouter
      * @param  mixed  $callable  The callable to reflect
      * @return \ReflectionFunctionAbstract|null Reflection object or null on failure
      */
-    protected function getCallableReflection(string $callable): ?\ReflectionFunctionAbstract
+    protected function getCallableReflection(mixed $callable): ?\ReflectionFunctionAbstract
     {
         try {
             return match (true) {
