@@ -90,10 +90,12 @@ trait QueryTrait
             throw new \RuntimeException('The WordPress core functions are not available. Ensure WordPress is loaded.');
         }
 
-        $this->action->do('template_redirect');
-
         // Initialize WordPress for the current request
         wp();
+
+        if (wp_using_themes()) {
+            $this->action->do('template_redirect');
+        }
 
         // Handle special request types that should bypass Laravel routing
         if (is_robots()) {
