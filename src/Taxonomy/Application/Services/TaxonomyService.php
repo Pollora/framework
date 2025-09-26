@@ -36,7 +36,7 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
      */
     public function create(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object
     {
-        return $this->factory->make($slug, $objectType, $singular, $plural);
+        return $this->factory->make($slug, $objectType, $singular, $plural, $args);
     }
 
     /**
@@ -52,7 +52,7 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
     public function register(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object
     {
         // The factory creates and registers the taxonomy (pollora/entity handles register_taxonomy)
-        return $this->factory->make($slug, $objectType, $singular, $plural);
+        return $this->factory->make($slug, $objectType, $singular, $plural, $args);
     }
 
     /**
