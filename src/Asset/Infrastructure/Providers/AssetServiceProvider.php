@@ -11,6 +11,7 @@ use Pollora\Asset\Application\Services\AssetRetrievalService;
 use Pollora\Asset\Domain\Contracts\AssetRepositoryInterface;
 use Pollora\Asset\Infrastructure\Repositories\InMemoryAssetRepository;
 use Pollora\Asset\Infrastructure\Services\AssetEnqueuer;
+use Pollora\Asset\Infrastructure\Services\RootAssetManager;
 
 /**
  * Laravel service provider for asset management services and bindings.
@@ -33,5 +34,16 @@ class AssetServiceProvider extends ServiceProvider
             $app->make(AssetRetrievalService::class)
         ));
         $this->app->bind(AssetEnqueuer::class, fn ($app): \Pollora\Asset\Infrastructure\Services\AssetEnqueuer => new AssetEnqueuer($app));
+        $this->app->singleton(RootAssetManager::class, fn ($app): \Pollora\Asset\Infrastructure\Services\RootAssetManager => new RootAssetManager(
+            $app->make(AssetManager::class)
+        ));
+    }
+
+    /**
+     * Bootstrap services after all providers have been registered.
+     */
+    public function boot(): void
+    {
+        $this->app->make(RootAssetManager::class)->registerRootAssets();
     }
 }
