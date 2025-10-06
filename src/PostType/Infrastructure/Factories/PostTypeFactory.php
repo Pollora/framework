@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pollora\PostType\Infrastructure\Factories;
 
 use Illuminate\Support\Str;
-use Pollora\Entity\PostType as EntityPostType;
+use Pollora\Entity\Adapter\Out\WordPress\PostTypeRegistryAdapter;
+use Pollora\Entity\Application\Service\EntityRegistrationService;
+use Pollora\Entity\Domain\Model\PostType as EntityPostType;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 
 /**
@@ -42,13 +44,19 @@ class PostTypeFactory implements PostTypeFactoryInterface
             $plural = $this->generatePluralName($singular);
         }
 
-        // Create the Entity PostType instance
-        $postType = EntityPostType::make($slug, $singular, $plural);
+        // Create the Entity PostType instance directly (without auto-registration)
+        $postType = new EntityPostType($slug, $singular, $plural);
+        $postType->init();
 
         // Apply additional arguments if provided
         if ($args !== []) {
             $postType->setRawArgs($args);
         }
+
+        // Register with WordPress using the entity registration service
+        $registry = new PostTypeRegistryAdapter;
+        $registrationService = new EntityRegistrationService($registry);
+        $registrationService->registerEntity($postType);
 
         return $postType;
     }

@@ -23,6 +23,7 @@ trait QueryTrait
      * and that a connection can be established.
      *
      * @return bool True if database is configured, false otherwise
+     * @throws Exception
      */
     public function isDatabaseConfigured(): bool
     {
@@ -38,11 +39,7 @@ trait QueryTrait
             return false;
         }
 
-        try {
-            DB::connection()->getPdo();
-        } catch (\Exception) {
-            return false;
-        }
+        DB::connection()->getPdo();
 
         return true;
     }
@@ -90,10 +87,12 @@ trait QueryTrait
             throw new \RuntimeException('The WordPress core functions are not available. Ensure WordPress is loaded.');
         }
 
-        $this->action->do('template_redirect');
-
         // Initialize WordPress for the current request
         wp();
+
+        if (wp_using_themes()) {
+            $this->action->do('template_redirect');
+        }
 
         // Handle special request types that should bypass Laravel routing
         if (is_robots()) {

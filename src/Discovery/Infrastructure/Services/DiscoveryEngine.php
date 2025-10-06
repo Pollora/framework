@@ -6,6 +6,7 @@ namespace Pollora\Discovery\Infrastructure\Services;
 
 use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
+use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoversPathInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
@@ -17,6 +18,7 @@ use Pollora\Discovery\Domain\Models\DiscoveryItems;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
+use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
 use SplFileInfo;
 
@@ -34,6 +36,13 @@ use SplFileInfo;
  */
 final class DiscoveryEngine implements DiscoveryEngineInterface
 {
+    /**
+     * Static cache for discovered structures to avoid repeated scans
+     *
+     * @var array<string, mixed>
+     */
+    private static array $structuresCache = [];
+
     /**
      * Collection of discovery locations
      *
@@ -54,7 +63,8 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
      * @param  Container  $container  The service container for dependency injection
      */
     public function __construct(
-        private readonly Container $container
+        private readonly Container $container,
+        private readonly DebugDetectorInterface $debugDetector
     ) {
         $this->locations = new Collection;
         $this->discoveries = new Collection;
@@ -212,13 +222,22 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
             // Use Spatie's native caching with a cache identifier based on location and discovery type
             $cacheId = 'discovery_'.$discovery->getIdentifier().'_'.md5($location->getPath());
 
-            $discoveredStructures = Discover::in($location->getPath())
-                ->full()
-                ->withCache(
-                    $cacheId,
-                    new LaravelDiscoverCacheDriver
-                )
-                ->get();
+            // Check if we already have the structures cached in memory
+            if (isset(self::$structuresCache[$cacheId])) {
+                $discoveredStructures = self::$structuresCache[$cacheId];
+            } else {
+                // Discover and cache the structures
+                $discoveredStructures = Discover::in($location->getPath())
+                    ->full()
+                    ->withCache(
+                        $cacheId,
+                        $this->debugDetector->isDebugMode() ? new NullDiscoverCacheDriver : new LaravelDiscoverCacheDriver
+                    )
+                    ->get();
+
+                // Cache the results in memory for future use
+                self::$structuresCache[$cacheId] = $discoveredStructures;
+            }
 
             foreach ($discoveredStructures as $structure) {
                 $discovery->discover($location, $structure);
@@ -255,6 +274,14 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
         $this->locations = new Collection;
 
         return $this;
+    }
+
+    /**
+     * Clear the static structures cache
+     */
+    public static function clearStructuresCache(): void
+    {
+        self::$structuresCache = [];
     }
 
     /**

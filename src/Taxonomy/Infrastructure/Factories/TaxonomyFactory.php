@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Taxonomy\Infrastructure\Factories;
 
 use Illuminate\Support\Str;
-use Pollora\Entity\Taxonomy as EntityTaxonomy;
+use Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter;
+use Pollora\Entity\Application\Service\EntityRegistrationService;
+use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 
 /**
@@ -38,13 +40,19 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
             $plural = $this->generatePluralName($singular);
         }
 
-        // Create the EntityTaxonomy instance
-        $taxonomy = EntityTaxonomy::make($slug, $objectType, $singular, $plural);
+        // Create the EntityTaxonomy instance directly (without auto-registration)
+        $taxonomy = new EntityTaxonomy($slug, $objectType, $singular, $plural);
+        $taxonomy->init();
 
         // Apply additional arguments if provided
         if ($args !== []) {
             $taxonomy->setRawArgs($args);
         }
+
+        // Register with WordPress using the entity registration service
+        $registry = new TaxonomyRegistryAdapter;
+        $registrationService = new EntityRegistrationService($registry);
+        $registrationService->registerEntity($taxonomy);
 
         return $taxonomy;
     }

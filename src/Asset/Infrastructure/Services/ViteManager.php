@@ -170,7 +170,18 @@ class ViteManager implements ViteManagerInterface
                 ->filter()
                 ->reduce(function (array $assets, $chunk) use ($buildDirectory) {
                     /** @var Vite $this */
-                    $assets['js'][] = $this->assetPath("{$buildDirectory}/{$chunk['file']}");
+                    $file = $chunk['file'];
+                    $filePath = $this->assetPath("{$buildDirectory}/{$file}");
+                    
+                    // Determine file type based on extension
+                    $extension = pathinfo($file, PATHINFO_EXTENSION);
+                    if ($extension === 'css') {
+                        $assets['css'][] = $filePath;
+                    } else {
+                        $assets['js'][] = $filePath;
+                    }
+                    
+                    // Add additional CSS files
                     foreach ($chunk['css'] ?? [] as $css) {
                         $assets['css'][] = $this->assetPath("{$buildDirectory}/{$css}");
                     }

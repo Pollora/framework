@@ -90,7 +90,7 @@ class PatternService implements PatternServiceInterface
 
         $theme = $this->themeService->theme();
 
-        if (! function_exists('get_stylesheet_directory')) {
+        if (! function_exists('get_stylesheet_directory') || ! $theme) {
             return;
         }
 
