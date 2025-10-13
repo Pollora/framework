@@ -39,7 +39,7 @@
         "coduo/php-humanizer": "5.0.2",
         "nwidart/laravel-modules": "^12.0@dev",
         "symfony/process": "^7.3.4",
-        "illuminate/config": "^12.32",
+        "illuminate/config": "^12.33",
         "laravel/prompts": "^0.3.7@dev"
     },
     "autoload": {
