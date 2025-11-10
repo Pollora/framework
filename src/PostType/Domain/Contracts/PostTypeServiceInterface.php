@@ -20,9 +20,10 @@ interface PostTypeServiceInterface
      * @param  string|null  $singular  The singular label for the post type
      * @param  string|null  $plural  The plural label for the post type
      * @param  array<string, mixed>  $args  Additional arguments
+     * @param  int $priority Declaration priority
      * @return object The created post type instance
      */
-    public function create(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object;
+    public function create(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object;
 
     /**
      * Register a post type with the system.
@@ -31,9 +32,10 @@ interface PostTypeServiceInterface
      * @param  string|null  $singular  The singular label for the post type
      * @param  string|null  $plural  The plural label for the post type
      * @param  array<string, mixed>  $args  Additional arguments
+     * @param  int $priority Declaration priority
      * @return object The registered post type instance
      */
-    public function register(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object;
+    public function register(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object;
 
     /**
      * Check if a post type exists.

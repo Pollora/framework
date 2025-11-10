@@ -23,7 +23,7 @@ interface TaxonomyServiceInterface
      * @param  array<string, mixed>  $args  Additional arguments
      * @return object The created post type instance
      */
-    public function create(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object;
+    public function create(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object;
 
     /**
      * Register a post type with the system.
@@ -34,7 +34,7 @@ interface TaxonomyServiceInterface
      * @param  array<string, mixed>  $args  Additional arguments
      * @return object The registered post type instance
      */
-    public function register(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object;
+    public function register(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object;
 
     /**
      * Check if a post type exists.

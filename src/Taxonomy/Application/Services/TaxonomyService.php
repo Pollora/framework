@@ -32,11 +32,12 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
      * @param  string|null  $singular  The singular label for the taxonomy
      * @param  string|null  $plural  The plural label for the taxonomy
      * @param  array<string, mixed>  $args  Additional arguments
+     * @param  int $priority Declaration priority
      * @return object The created taxonomy instance
      */
-    public function create(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object
+    public function create(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object
     {
-        return $this->factory->make($slug, $objectType, $singular, $plural, $args);
+        return $this->factory->make($slug, $objectType, $singular, $plural, $args, $priority);
     }
 
     /**
@@ -47,12 +48,13 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
      * @param  string|null  $singular  The singular label for the taxonomy
      * @param  string|null  $plural  The plural label for the taxonomy
      * @param  array<string, mixed>  $args  Additional arguments
+     * @param int $priority Declaration priority
      * @return object The registered taxonomy instance
      */
-    public function register(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): object
+    public function register(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object
     {
         // The factory creates and registers the taxonomy (pollora/entity handles register_taxonomy)
-        return $this->factory->make($slug, $objectType, $singular, $plural, $args);
+        return $this->factory->make($slug, $objectType, $singular, $plural, $args, $priority);
     }
 
     /**

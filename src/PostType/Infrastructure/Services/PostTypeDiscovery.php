@@ -147,7 +147,8 @@ final class PostTypeDiscovery implements DiscoveryInterface
                 $config->getSlug(),
                 $config->getName(),
                 $config->getPluralName(),
-                $config->getArgs()
+                $config->getArgs(),
+                $config->getPriority()
             );
 
         } catch (\ReflectionException $e) {

@@ -31,11 +31,12 @@ class PostTypeService implements PostTypeServiceInterface
      * @param  string|null  $singular  The singular label for the post type
      * @param  string|null  $plural  The plural label for the post type
      * @param  array<string, mixed>  $args  Additional arguments
+     * @param  int $priority Declaration priority
      * @return object The created post type instance
      */
-    public function create(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object
+    public function create(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object
     {
-        return $this->factory->make($slug, $singular, $plural, $args);
+        return $this->factory->make($slug, $singular, $plural, $args, $priority);
     }
 
     /**
@@ -45,12 +46,13 @@ class PostTypeService implements PostTypeServiceInterface
      * @param  string|null  $singular  The singular label for the post type
      * @param  string|null  $plural  The plural label for the post type
      * @param  array<string, mixed>  $args  Additional arguments
+     * @param  int $priority Declaration priority
      * @return object The registered post type instance
      */
-    public function register(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object
+    public function register(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object
     {
         // The factory creates and registers the post type (pollora/entity handles register_post_type)
-        return $this->factory->make($slug, $singular, $plural, $args);
+        return $this->factory->make($slug, $singular, $plural, $args, $priority);
     }
 
     /**
