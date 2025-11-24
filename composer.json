@@ -95,7 +95,7 @@
         "symfony/var-dumper": "^7.3.5",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
-        "symplify/vendor-patches": "^11.5",
+        "symplify/vendor-patches": "^12.0",
         "mockery/mockery": "2.0.x-dev"
     },
     "autoload-dev": {
