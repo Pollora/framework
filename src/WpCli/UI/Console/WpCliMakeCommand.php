@@ -45,10 +45,6 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
      */
     protected function getStub(): string
     {
-        if ($this->option('subcommands')) {
-            return file_get_contents(__DIR__ . '/stubs/wp-cli-subcommands.stub');
-        }
-
         return file_get_contents(__DIR__ . '/stubs/wp-cli-simple.stub');
     }
 
