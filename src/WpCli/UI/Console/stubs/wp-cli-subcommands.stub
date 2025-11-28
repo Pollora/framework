@@ -1,0 +1,137 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Pollora\Attributes\WpCli;
+use Pollora\Attributes\WpCli\Command;
+use WP_CLI;
+
+/**
+ * {{ description }}
+ */
+#[WpCli('{{ description }}')]
+class {{ class }}
+{
+    /**
+     * Create a new item.
+     *
+     * ## OPTIONS
+     *
+     * <name>
+     * : The name of the item to create.
+     *
+     * [--description=<description>]
+     * : Optional description for the item.
+     *
+     * ## EXAMPLES
+     *
+     *     wp {{ commandName }} create "My Item" --description="A sample item"
+     *
+     * @param array $arguments Positional arguments passed to the command
+     * @param array $options Named options passed to the command
+     * @return void
+     */
+    #[Command('Create a new item')]
+    public function create(array $arguments, array $options): void
+    {
+        $name = $arguments[0] ?? null;
+        $description = $options['description'] ?? 'No description provided';
+
+        if (!$name) {
+            WP_CLI::error('Item name is required.');
+            return;
+        }
+
+        // Add your create logic here
+        WP_CLI::success("Item '{$name}' created successfully with description: {$description}");
+    }
+
+    /**
+     * List all items.
+     *
+     * ## OPTIONS
+     *
+     * [--limit=<number>]
+     * : Maximum number of items to show.
+     *
+     * [--format=<format>]
+     * : Output format (table, json, csv, yaml).
+     * ---
+     * default: table
+     * options:
+     *   - table
+     *   - json
+     *   - csv
+     *   - yaml
+     * ---
+     *
+     * ## EXAMPLES
+     *
+     *     wp {{ commandName }} list --limit=10 --format=json
+     *
+     * @param array $arguments Positional arguments passed to the command
+     * @param array $options Named options passed to the command
+     * @return void
+     */
+    #[Command('List all items')]
+    public function list(array $arguments, array $options): void
+    {
+        $limit = isset($options['limit']) ? (int)$options['limit'] : 10;
+        $format = $options['format'] ?? 'table';
+
+        // Sample data - replace with your actual data source
+        $items = [
+            ['ID' => 1, 'Name' => 'Sample Item 1', 'Description' => 'First sample item'],
+            ['ID' => 2, 'Name' => 'Sample Item 2', 'Description' => 'Second sample item'],
+            ['ID' => 3, 'Name' => 'Sample Item 3', 'Description' => 'Third sample item'],
+        ];
+
+        // Apply limit
+        $items = array_slice($items, 0, $limit);
+
+        // Output in requested format
+        WP_CLI\Utils\format_items($format, $items, ['ID', 'Name', 'Description']);
+    }
+
+    /**
+     * Delete an item.
+     *
+     * ## OPTIONS
+     *
+     * <id>
+     * : The ID of the item to delete.
+     *
+     * [--force]
+     * : Skip confirmation prompt.
+     *
+     * ## EXAMPLES
+     *
+     *     wp {{ commandName }} delete 123
+     *     wp {{ commandName }} delete 123 --force
+     *
+     * @param array $arguments Positional arguments passed to the command
+     * @param array $options Named options passed to the command
+     * @return void
+     */
+    #[Command('Delete an item')]
+    public function delete(array $arguments, array $options): void
+    {
+        $id = $arguments[0] ?? null;
+        $force = isset($options['force']);
+
+        if (!$id) {
+            WP_CLI::error('Item ID is required.');
+            return;
+        }
+
+        // Confirmation prompt unless --force is used
+        if (!$force) {
+            WP_CLI::confirm("Are you sure you want to delete item {$id}?");
+        }
+
+        // Add your delete logic here
+        WP_CLI::success("Item {$id} deleted successfully.");
+    }
+}
