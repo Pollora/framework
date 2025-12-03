@@ -7,7 +7,10 @@ namespace Pollora\Discovery\Infrastructure\Providers;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryEngine;
+use Pollora\Discovery\Infrastructure\Services\InstancePool;
+use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Pollora\Discovery\Infrastructure\Services\ServiceProviderDiscovery;
 use Pollora\Discovery\UI\Console\DiscoveryClearCommand;
 use Pollora\Discovery\UI\Console\DiscoveryCommand;
@@ -28,6 +31,7 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->registerOptimizedServices();
         $this->registerDiscoveryEngine();
         $this->registerDiscoveryManager();
         $this->registerConsoleCommands();
@@ -51,17 +55,38 @@ final class DiscoveryServiceProvider extends ServiceProvider
         return [
             DiscoveryEngineInterface::class,
             DiscoveryManager::class,
+            ReflectionCacheInterface::class,
+            InstancePool::class,
             DiscoveryCommand::class,
             DiscoveryClearCommand::class,
         ];
     }
 
     /**
-     * Register the discovery engine
+     * Register optimized services for discovery performance
+     */
+    private function registerOptimizedServices(): void
+    {
+        // Register reflection cache as singleton for maximum efficiency
+        $this->app->singleton(ReflectionCacheInterface::class, ReflectionCache::class);
+        
+        // Register instance pool as singleton to maintain state across discoveries
+        $this->app->singleton(InstancePool::class);
+    }
+
+    /**
+     * Register the discovery engine with optimized services
      */
     private function registerDiscoveryEngine(): void
     {
-        $this->app->singleton(DiscoveryEngineInterface::class, DiscoveryEngine::class);
+        $this->app->singleton(DiscoveryEngineInterface::class, function ($app): DiscoveryEngine {
+            return new DiscoveryEngine(
+                container: $app,
+                debugDetector: $app->make(\Pollora\Application\Domain\Contracts\DebugDetectorInterface::class),
+                reflectionCache: $app->make(ReflectionCacheInterface::class),
+                instancePool: $app->make(InstancePool::class)
+            );
+        });
     }
 
     /**
