@@ -97,7 +97,8 @@
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^11.5",
-        "mockery/mockery": "2.0.x-dev"
+        "mockery/mockery": "2.0.x-dev",
+        "wp-cli/wp-cli": "^2.13@dev"
     },
     "autoload-dev": {
         "psr-4": {

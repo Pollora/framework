@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\WpCli\Application\Services\WpCliService;
+use Pollora\WpCli\Infrastructure\Adapters\WpCliAdapter;
 use Pollora\WpCli\Infrastructure\Services\WpCliDiscovery;
 use Pollora\WpCli\UI\Console\WpCliMakeCommand;
 
@@ -36,12 +37,19 @@ class WpCliServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register the WP CLI service
-        $this->app->singleton(WpCliService::class, function ($app): WpCliService {
-            return new WpCliService();
+        // Register the WP CLI adapter (Infrastructure layer)
+        $this->app->singleton(WpCliAdapter::class, function ($app): WpCliAdapter {
+            return new WpCliAdapter();
         });
 
-        // Register WP CLI Discovery
+        // Register the WP CLI service (Application layer)
+        $this->app->singleton(WpCliService::class, function ($app): WpCliService {
+            return new WpCliService(
+                $app->make(WpCliAdapter::class)
+            );
+        });
+
+        // Register WP CLI Discovery (Infrastructure layer)
         $this->app->singleton(WpCliDiscovery::class, function ($app): WpCliDiscovery {
             return new WpCliDiscovery(
                 $app->make(WpCliService::class)
