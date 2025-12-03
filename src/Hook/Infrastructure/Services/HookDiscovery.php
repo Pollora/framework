@@ -9,6 +9,7 @@ use Pollora\Attributes\Filter;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
 use ReflectionClass;
@@ -25,7 +26,7 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class HookDiscovery implements DiscoveryInterface
 {
-    use IsDiscovery;
+    use IsDiscovery, HasInstancePool;
 
     /**
      * Create a new Hook discovery
@@ -115,7 +116,7 @@ final class HookDiscovery implements DiscoveryInterface
                     $action = $hookAttribute->newInstance();
 
                     // Create instance and call method directly
-                    $instance = app($className);
+                    $instance = $this->getInstanceFromPool($className);
                     $this->actionService->add(
                         hooks: $action->hook,
                         callback: [$instance, $methodName],
@@ -126,7 +127,7 @@ final class HookDiscovery implements DiscoveryInterface
                     $filter = $hookAttribute->newInstance();
 
                     // Create instance and call method directly
-                    $instance = app($className);
+                    $instance = $this->getInstanceFromPool($className);
                     $this->filterService->add(
                         hooks: $filter->hook,
                         callback: [$instance, $methodName],

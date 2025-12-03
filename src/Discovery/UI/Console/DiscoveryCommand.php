@@ -23,7 +23,9 @@ final class DiscoveryCommand extends Command
      */
     protected $signature = 'discovery:run
                             {--clear-cache : Clear discovery cache before running}
-                            {--discovery= : Run only specific discovery (optional)}';
+                            {--discovery= : Run only specific discovery (optional)}
+                            {--stats : Show performance statistics}
+                            {--verbose-errors : Show detailed error information}';
 
     /**
      * The console command description.
@@ -116,6 +118,11 @@ final class DiscoveryCommand extends Command
             // Show summary
             $this->showDiscoverySummary($discoveryManager, $moduleOrchestrator);
 
+            // Show performance statistics if requested
+            if ($this->option('stats')) {
+                $this->showPerformanceStats($discoveryManager);
+            }
+
             $this->info('Discovery process completed successfully!');
 
             return self::SUCCESS;
@@ -188,6 +195,80 @@ final class DiscoveryCommand extends Command
         }
         if ($frameworkCount > 0) {
             $this->info("Scanned {$frameworkCount} framework modules");
+        }
+    }
+
+    /**
+     * Show performance statistics from the optimized discovery engine
+     *
+     * @param  DiscoveryManager  $discoveryManager  The discovery manager
+     */
+    private function showPerformanceStats(DiscoveryManager $discoveryManager): void
+    {
+        $this->info('');
+        $this->info('Performance Statistics:');
+        $this->info('══════════════════════');
+
+        try {
+            // Get the underlying discovery engine
+            $engine = $discoveryManager->getEngine();
+            
+            if (method_exists($engine, 'getPerformanceStats')) {
+                $stats = $engine->getPerformanceStats();
+                
+                // Display context stats
+                if (isset($stats['context'])) {
+                    $context = $stats['context'];
+                    $this->line("📊 Discovery Context:");
+                    $this->line("  • Classes processed: {$context['total_classes']}");
+                    $this->line("  • Discovery executions: {$context['total_discovery_executions']}");
+                    $this->line("  • Cache efficiency: {$context['cache_efficiency']}%");
+                    
+                    if (isset($context['stats'])) {
+                        $contextStats = $context['stats'];
+                        $this->line("  • Cache hits: {$contextStats['cache_hits']}");
+                        $this->line("  • Cache misses: {$contextStats['cache_misses']}");
+                        if ($contextStats['errors'] > 0) {
+                            $this->line("  • Errors handled: {$contextStats['errors']}");
+                        }
+                    }
+                }
+                
+                // Display instance pool stats
+                if (isset($stats['instance_pool'])) {
+                    $pool = $stats['instance_pool'];
+                    $this->line("🏊 Instance Pool:");
+                    $this->line("  • Pool size: {$pool['pool_size']} instances");
+                    $this->line("  • Hit ratio: {$pool['hit_ratio_percent']}%");
+                    $this->line("  • Total requests: {$pool['total_requests']}");
+                    
+                    if ($pool['circular_dependencies'] > 0) {
+                        $this->line("  • Circular deps avoided: {$pool['circular_dependencies']}");
+                    }
+                    if ($pool['instantiation_errors'] > 0) {
+                        $this->line("  • Instantiation errors: {$pool['instantiation_errors']}");
+                    }
+                }
+                
+                // Display static cache stats
+                if (isset($stats['static_cache_size'])) {
+                    $this->line("💾 Static Cache:");
+                    $this->line("  • Cached structure sets: {$stats['static_cache_size']}");
+                }
+                
+                $this->info('');
+                $this->line('💡 Optimizations enabled: Reflection cache, Instance pooling, Unified discovery');
+                
+            } else {
+                $this->warn('Performance statistics not available (using legacy discovery engine)');
+            }
+            
+        } catch (\Throwable $e) {
+            $this->warn('Unable to retrieve performance statistics: ' . $e->getMessage());
+            
+            if ($this->option('verbose-errors')) {
+                $this->line($e->getTraceAsString());
+            }
         }
     }
 }
