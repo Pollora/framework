@@ -111,7 +111,20 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
      */
     public function getArgs(): array
     {
-        return $this->attributeArgs;
+        $args = $this->attributeArgs;
+        unset($args["priority"]);
+
+        return $args;
+    }
+
+    /**
+     * Get the taxonomy priority declaration
+     *
+     * @return  int $priority Declaration priority
+     */
+    public function getPriority(): int
+    {
+        return $this->attributeArgs['priority'] ?? 5;
     }
 
     /**
@@ -124,7 +137,8 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
             'singular' => $this->singular,
             'plural' => $this->plural,
             'object_type' => $this->objectType,
-            'args' => $this->attributeArgs,
+            'args' => $this->getArgs(),
+            'priority' => $this->getPriority(),
         ];
     }
 }

@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Pollora\Attributes\WpCli;
+use WP_CLI;
+
+/**
+ * {{ description }}
+ */
+#[WpCli]
+class {{ class }}
+{
+    /**
+     * Execute the WP CLI command.
+     *
+     * @param array $arguments Positional arguments passed to the command
+     * @param array $options Named options passed to the command
+     * @return void
+     */
+    public function __invoke(array $arguments, array $options): void
+    {
+        // Add your command logic here
+        WP_CLI::success('{{ class }} executed successfully!');
+    }
+}

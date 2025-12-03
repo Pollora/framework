@@ -78,10 +78,6 @@ class ThemeServiceProvider extends ServiceProvider
         $this->registerThemeDirectories();
         $this->setupThemeBoot();
 
-        add_action('after_setup_theme', function () {
-            //   dd(get_theme_roots());
-        });
-
     }
 
     /**

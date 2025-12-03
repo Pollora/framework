@@ -45,6 +45,7 @@ use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
+use Pollora\WpCli\Infrastructure\Providers\WpCliServiceProvider;
 use Pollora\WpRest\Infrastructure\Providers\WpRestAttributeServiceProvider;
 
 /**
@@ -91,6 +92,9 @@ class PolloraServiceProvider extends ServiceProvider
 
         // WordPress REST API
         $this->app->register(WpRestAttributeServiceProvider::class);
+
+        // WordPress CLI
+        $this->app->register(WpCliServiceProvider::class);
 
         // Shared modules
         $this->app->register(CollectionServiceProvider::class);

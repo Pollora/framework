@@ -30,9 +30,10 @@ class PostTypeFactory implements PostTypeFactoryInterface
      * @param  string|null  $singular  The singular label for the post type
      * @param  string|null  $plural  The plural label for the post type
      * @param  array<string, mixed>  $args  Additional arguments
+     * @param  int $priority Declaration priority
      * @return object The created PostType instance
      */
-    public function make(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object
+    public function make(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object
     {
         // Generate singular name if not provided
         if ($singular === null) {
@@ -47,6 +48,7 @@ class PostTypeFactory implements PostTypeFactoryInterface
         // Create the Entity PostType instance directly (without auto-registration)
         $postType = new EntityPostType($slug, $singular, $plural);
         $postType->init();
+        $postType->priority($priority);
 
         // Apply additional arguments if provided
         if ($args !== []) {

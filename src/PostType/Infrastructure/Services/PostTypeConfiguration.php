@@ -94,7 +94,20 @@ class PostTypeConfiguration implements PostTypeAttributeInterface
      */
     public function getArgs(): array
     {
-        return $this->attributeArgs;
+        $args = $this->attributeArgs;
+        unset($args["priority"]);
+
+        return $args;
+    }
+
+    /**
+     * Get the post type priority declaration
+     *
+     * @return  int $priority Declaration priority
+     */
+    public function getPriority(): int
+    {
+        return $this->attributeArgs['priority'] ?? 5;
     }
 
     /**
@@ -106,7 +119,8 @@ class PostTypeConfiguration implements PostTypeAttributeInterface
             'slug' => $this->slug,
             'singular' => $this->singular,
             'plural' => $this->plural,
-            'args' => $this->attributeArgs,
+            'args' => $this->getArgs(),
+            'priority' => $this->getPriority(),
         ];
     }
 }

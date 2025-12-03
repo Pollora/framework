@@ -27,8 +27,9 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
      * @param  string|null  $singular  The singular label for the taxonomy
      * @param  string|null  $plural  The plural label for the taxonomy
      * @param  array<string, mixed>  $args  Additional arguments
+     * @param  int $priority Declaration Priority
      */
-    public function make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): mixed
+    public function make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): mixed
     {
         // Generate singular name if not provided
         if ($singular === null) {
@@ -43,6 +44,7 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
         // Create the EntityTaxonomy instance directly (without auto-registration)
         $taxonomy = new EntityTaxonomy($slug, $objectType, $singular, $plural);
         $taxonomy->init();
+        $taxonomy->priority($priority);
 
         // Apply additional arguments if provided
         if ($args !== []) {
