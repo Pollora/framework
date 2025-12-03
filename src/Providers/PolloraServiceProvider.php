@@ -12,8 +12,6 @@ use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
 use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
-use Pollora\Attributes\AttributesServiceProvider;
-use Pollora\Attributes\Infrastructure\Providers\AttributableServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
@@ -81,8 +79,6 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(DiscoveryServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
-        $this->app->register(AttributesServiceProvider::class);
-        $this->app->register(AttributableServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
         $this->app->register(ExceptionServiceProvider::class);
 
