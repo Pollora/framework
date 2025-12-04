@@ -19,11 +19,7 @@ final class DiscoveryClearCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'discovery:clear
-                            {--reflection-cache : Clear reflection cache}
-                            {--instance-pool : Clear instance pool}
-                            {--static-cache : Clear static structures cache}
-                            {--all : Clear all caches (default)}';
+    protected $signature = 'discovery:clear';
 
     /**
      * The console command description.
@@ -41,17 +37,8 @@ final class DiscoveryClearCommand extends Command
     public function handle(DiscoveryManager $discoveryManager): int
     {
         try {
-            // Determine which caches to clear
-            $clearAll = $this->option('all') || (!$this->option('reflection-cache') && !$this->option('instance-pool') && !$this->option('static-cache'));
-            
-            if ($clearAll) {
-                $this->info('Clearing all discovery caches...');
-                $this->clearAllCaches($discoveryManager);
-            } else {
-                $this->info('Clearing selected discovery caches...');
-                $this->clearSelectedCaches($discoveryManager);
-            }
-
+            $this->info('Clearing all discovery caches...');
+            $this->clearAllCaches($discoveryManager);
             $this->info('✓ Discovery caches cleared successfully');
 
             return self::SUCCESS;
@@ -68,54 +55,74 @@ final class DiscoveryClearCommand extends Command
      */
     private function clearAllCaches(DiscoveryManager $discoveryManager): void
     {
-        // Clear traditional discovery manager cache
+        // Clear all caches through the discovery manager
+        $this->line('  • Clearing discovery manager cache...');
         $discoveryManager->clearCache();
         
-        // Clear optimized engine caches
+        // Get the engine for additional cache clearing
         $engine = $discoveryManager->getEngine();
         
+        // Clear reflection cache
         if (method_exists($engine, 'getContext')) {
             $this->line('  • Clearing reflection cache...');
             $engine->getContext()->getReflectionCache()->clearCache();
         }
         
+        // Clear instance pool
         if (method_exists($engine, 'getInstancePool')) {
             $this->line('  • Clearing instance pool...');
             $engine->getInstancePool()->clearAll();
         }
         
+        // Clear static structures cache
         if (method_exists($engine, 'clearStructuresCache')) {
             $this->line('  • Clearing static structures cache...');
             $engine::clearStructuresCache();
         }
+        
+        // Clear Spatie structure discoverer cache
+        $this->line('  • Clearing Spatie structure discoverer cache...');
+        $this->clearSpatieCache($engine);
     }
 
     /**
-     * Clear only selected caches based on options
+     * Clear Spatie's structure discoverer cache
+     *
+     * @param  object  $engine  The discovery engine instance
      */
-    private function clearSelectedCaches(DiscoveryManager $discoveryManager): void
+    private function clearSpatieCache(object $engine): void
     {
-        $engine = $discoveryManager->getEngine();
+        if (!method_exists($engine, 'getCacheDriver')) {
+            $this->line('    <comment>Spatie cache driver not available</comment>');
+            return;
+        }
         
-        if ($this->option('reflection-cache')) {
-            $this->line('  • Clearing reflection cache...');
-            if (method_exists($engine, 'getContext')) {
-                $engine->getContext()->getReflectionCache()->clearCache();
+        $cacheDriver = $engine->getCacheDriver();
+        
+        if ($cacheDriver === null) {
+            $this->line('    <comment>No cache driver configured</comment>');
+            return;
+        }
+        
+        if (!method_exists($cacheDriver, 'forget')) {
+            $this->line('    <comment>Cache driver does not support clearing</comment>');
+            return;
+        }
+        
+        // Clear cache for each discovery location
+        $locations = $engine->getLocations();
+        $cleared = 0;
+        
+        foreach ($locations as $location) {
+            $cacheId = 'discovery_'.md5($location->getPath());
+            try {
+                $cacheDriver->forget($cacheId);
+                $cleared++;
+            } catch (\Throwable $e) {
+                $this->line("    <warning>Failed to clear cache for location: {$location->getPath()}</warning>");
             }
         }
         
-        if ($this->option('instance-pool')) {
-            $this->line('  • Clearing instance pool...');
-            if (method_exists($engine, 'getInstancePool')) {
-                $engine->getInstancePool()->clearAll();
-            }
-        }
-        
-        if ($this->option('static-cache')) {
-            $this->line('  • Clearing static structures cache...');
-            if (method_exists($engine, 'clearStructuresCache')) {
-                $engine::clearStructuresCache();
-            }
-        }
+        $this->line("    <info>Cleared cache for {$cleared} discovery locations</info>");
     }
 }
