@@ -172,7 +172,7 @@ class ViteManager implements ViteManagerInterface
                     /** @var Vite $this */
                     $file = $chunk['file'];
                     $filePath = $this->assetPath("{$buildDirectory}/{$file}");
-                    
+
                     // Determine file type based on extension
                     $extension = pathinfo($file, PATHINFO_EXTENSION);
                     if ($extension === 'css') {
@@ -180,7 +180,7 @@ class ViteManager implements ViteManagerInterface
                     } else {
                         $assets['js'][] = $filePath;
                     }
-                    
+
                     // Add additional CSS files
                     foreach ($chunk['css'] ?? [] as $css) {
                         $assets['css'][] = $this->assetPath("{$buildDirectory}/{$css}");

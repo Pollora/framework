@@ -8,8 +8,8 @@ use Illuminate\Support\Str;
 use Pollora\Attributes\PostType;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
-use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
+use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -28,7 +28,7 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class PostTypeDiscovery implements DiscoveryInterface
 {
-    use IsDiscovery, HasInstancePool;
+    use HasInstancePool, IsDiscovery;
 
     /**
      * Create a new PostType discovery service.
@@ -293,7 +293,7 @@ final class PostTypeDiscovery implements DiscoveryInterface
 
             if ($reflectionClass->isInstantiable()) {
                 // Use instance pool if available, otherwise create directly
-                $instance = $this->getInstanceFromPool($className, fn() => $reflectionClass->newInstance());
+                $instance = $this->getInstanceFromPool($className, fn () => $reflectionClass->newInstance());
 
                 // Check if the instance has a withArgs method
                 if (method_exists($instance, 'withArgs')) {

@@ -8,8 +8,8 @@ use Illuminate\Support\Str;
 use Pollora\Attributes\Taxonomy;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
-use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
+use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -28,7 +28,7 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class TaxonomyDiscovery implements DiscoveryInterface
 {
-    use IsDiscovery, HasInstancePool;
+    use HasInstancePool, IsDiscovery;
 
     /**
      * Create a new Taxonomy discovery
@@ -141,7 +141,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
 
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config);
-            
+
             // Register the taxonomy
             $this->taxonomyService->register(
                 $config->getSlug(),
@@ -294,7 +294,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
 
             if ($reflectionClass->isInstantiable()) {
                 // Use instance pool if available, otherwise create directly
-                $instance = $this->getInstanceFromPool($className, fn() => $reflectionClass->newInstance());
+                $instance = $this->getInstanceFromPool($className, fn () => $reflectionClass->newInstance());
 
                 // Check if the instance has a withArgs method
                 if (method_exists($instance, 'withArgs')) {

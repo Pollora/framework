@@ -28,30 +28,26 @@ use Pollora\Hook\Infrastructure\Services\Filter;
  * - Graceful error handling
  * - Email address parsing and validation
  *
- * @package Pollora\Mail
  * @author Pollora Team
+ *
  * @since 1.0.0
  */
 class Mailer
 {
     /**
      * Service locator instance for dependency resolution.
-     *
-     * @var ServiceLocator
      */
     protected ServiceLocator $locator;
 
     /**
      * Filter service for applying WordPress-style hooks and filters.
-     *
-     * @var Filter
      */
     protected Filter $filter;
 
     /**
      * Constructor - Initialize the mailer with required dependencies.
      *
-     * @param Application $app The Laravel application instance for dependency injection
+     * @param  Application  $app  The Laravel application instance for dependency injection
      */
     public function __construct(Application $app)
     {
@@ -66,15 +62,14 @@ class Mailer
      * The method handles various email formats, headers, and attachments while providing
      * graceful error handling.
      *
-     * @param string|array $to The recipient email address(es). Can be a single email string
-     *                         or an array of email addresses.
-     * @param string $subject The email subject line
-     * @param string $message The email message content. HTML is supported and recommended.
-     * @param string|array $headers Optional. Additional email headers as string or array.
-     *                             Supports standard headers like CC, BCC, From, Reply-To.
-     * @param array $attachments Optional. Array of file paths to attach to the email.
-     *                          Files must be accessible by the application.
-     *
+     * @param  string|array  $to  The recipient email address(es). Can be a single email string
+     *                            or an array of email addresses.
+     * @param  string  $subject  The email subject line
+     * @param  string  $message  The email message content. HTML is supported and recommended.
+     * @param  string|array  $headers  Optional. Additional email headers as string or array.
+     *                                 Supports standard headers like CC, BCC, From, Reply-To.
+     * @param  array  $attachments  Optional. Array of file paths to attach to the email.
+     *                              Files must be accessible by the application.
      * @return SentMessage|null Returns SentMessage instance on successful send, null on failure.
      *
      * @throws \InvalidArgumentException When required parameters are invalid
@@ -155,10 +150,8 @@ class Mailer
      * - Reply-To: Reply address
      * - Content-Type: Skipped (managed by Laravel)
      *
-     * @param Message $mail The Laravel mail message instance to modify
-     * @param string|array $headers Headers to process and apply
-     *
-     * @return void
+     * @param  Message  $mail  The Laravel mail message instance to modify
+     * @param  string|array  $headers  Headers to process and apply
      *
      * @internal This method is used internally by the send() method
      */
@@ -178,7 +171,7 @@ class Mailer
             $header = trim($header);
 
             // Skip empty headers or headers without colon separator
-            if (empty($header) || !str_contains($header, ':')) {
+            if (empty($header) || ! str_contains($header, ':')) {
                 continue;
             }
 
@@ -197,17 +190,15 @@ class Mailer
      * Special headers like CC, BCC, From, and Reply-To use dedicated Laravel methods,
      * while other headers are added as raw text headers.
      *
-     * @param Message $mail The mail message instance to modify
-     * @param string $name The header name (normalized to lowercase)
-     * @param string $value The header value
-     *
-     * @return void
+     * @param  Message  $mail  The mail message instance to modify
+     * @param  string  $name  The header name (normalized to lowercase)
+     * @param  string  $value  The header value
      *
      * @internal This method is used internally by processHeaders()
      */
     private function applyHeader(Message $mail, string $name, string $value): void
     {
-        match($name) {
+        match ($name) {
             'cc' => $mail->cc($this->parseEmailAddresses($value)),
             'bcc' => $mail->bcc($this->parseEmailAddresses($value)),
             'from' => $this->setFromHeader($mail, $value),
@@ -224,10 +215,8 @@ class Mailer
      * both a name and email address, which need to be set using Laravel's
      * dedicated from() method rather than as a raw header.
      *
-     * @param Message $mail The mail message instance to modify
-     * @param string $value The from header value (e.g., "John Doe <john@example.com>")
-     *
-     * @return void
+     * @param  Message  $mail  The mail message instance to modify
+     * @param  string  $value  The from header value (e.g., "John Doe <john@example.com>")
      *
      * @internal This method is used internally by applyHeader()
      */
@@ -249,12 +238,10 @@ class Mailer
      * and adds them to the email. It handles both absolute and relative file paths
      * and filters out empty attachment entries.
      *
-     * @param Message $mail The mail message instance to modify
-     * @param array|string $attachments File paths to attach. Can be:
-     *                                 - Array of file paths: ['/path/file1.pdf', '/path/file2.jpg']
-     *                                 - String with newline-separated paths: "/path/file1.pdf\n/path/file2.jpg"
-     *
-     * @return void
+     * @param  Message  $mail  The mail message instance to modify
+     * @param  array|string  $attachments  File paths to attach. Can be:
+     *                                     - Array of file paths: ['/path/file1.pdf', '/path/file2.jpg']
+     *                                     - String with newline-separated paths: "/path/file1.pdf\n/path/file2.jpg"
      *
      * @throws \InvalidArgumentException When attachment files don't exist or aren't readable
      *
@@ -263,7 +250,7 @@ class Mailer
     private function addAttachments(Message $mail, array|string $attachments): void
     {
         // Normalize attachments to array format
-        if (!is_array($attachments)) {
+        if (! is_array($attachments)) {
             $attachments = explode("\n", str_replace("\r\n", "\n", $attachments));
         }
 
@@ -271,7 +258,7 @@ class Mailer
         $attachments = array_filter(array_map('trim', $attachments));
 
         foreach ($attachments as $attachment) {
-            if (!empty($attachment)) {
+            if (! empty($attachment)) {
                 $mail->attach($attachment);
             }
         }
@@ -284,8 +271,7 @@ class Mailer
      * while preserving the proper format for "Name <email@example.com>" style addresses.
      * It handles both single email addresses and arrays of addresses.
      *
-     * @param string|array $emails Email address(es) to clean and normalize
-     *
+     * @param  string|array  $emails  Email address(es) to clean and normalize
      * @return string|array Cleaned email address(es) in the same format as input
      *
      * @example
@@ -321,8 +307,7 @@ class Mailer
      * - With quoted name: "John Doe" <user@example.com>
      * - With extra whitespace: "  John Doe  " <  user@example.com  >
      *
-     * @param string $email The email address to clean
-     *
+     * @param  string  $email  The email address to clean
      * @return string The cleaned and normalized email address
      *
      * @internal This method is used internally by cleanEmailAddresses()
@@ -334,11 +319,11 @@ class Mailer
 
         // Match both quoted and unquoted names
         if (preg_match('/^(?:"?([^"]*?)"?\s*)?<([^>]+)>$/', $email, $matches)) {
-            $name  = trim($matches[1] ?? '');
-            $addr  = trim($matches[2] ?? '');
+            $name = trim($matches[1] ?? '');
+            $addr = trim($matches[2] ?? '');
 
             return $name !== ''
-                ? $name . ' <' . $addr . '>'
+                ? $name.' <'.$addr.'>'
                 : $addr;
         }
 
@@ -352,11 +337,10 @@ class Mailer
      * This method extracts email address and optional name information from
      * various email address formats commonly found in email headers.
      *
-     * @param string $address The email address string to parse
-     *
+     * @param  string  $address  The email address string to parse
      * @return string|array Returns:
-     *                     - string: Simple email address when no name is present
-     *                     - array: ['address' => 'email', 'name' => 'name'] when name is present
+     *                      - string: Simple email address when no name is present
+     *                      - array: ['address' => 'email', 'name' => 'name'] when name is present
      *
      * @example
      * ```php
@@ -381,7 +365,7 @@ class Mailer
             return $address;
         }
 
-        $name  = trim($matches[1] ?? '');
+        $name = trim($matches[1] ?? '');
         $email = trim($matches[2] ?? '');
 
         // Return array only when a name is present
@@ -390,7 +374,6 @@ class Mailer
             : $email;
     }
 
-
     /**
      * Parse multiple email addresses from a comma-separated string.
      *
@@ -398,8 +381,7 @@ class Mailer
      * separated by commas. Each address is individually parsed and can contain
      * name information.
      *
-     * @param string $addresses Comma-separated email addresses string
-     *
+     * @param  string  $addresses  Comma-separated email addresses string
      * @return array Array of parsed email addresses. Each element is either:
      *               - string: Simple email address
      *               - array: ['address' => 'email', 'name' => 'name'] for addresses with names
@@ -419,10 +401,10 @@ class Mailer
     {
         return array_filter(
             array_map(
-                fn($addr) => $this->parseEmailAddress(trim($addr)),
+                fn ($addr) => $this->parseEmailAddress(trim($addr)),
                 explode(',', $addresses)
             ),
-            fn($addr) => !empty($addr) // Remove empty entries
+            fn ($addr) => ! empty($addr) // Remove empty entries
         );
     }
 }

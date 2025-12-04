@@ -8,8 +8,8 @@ use Pollora\Attributes\Action;
 use Pollora\Attributes\Filter;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
-use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
+use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
 use ReflectionClass;
@@ -26,7 +26,7 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class HookDiscovery implements DiscoveryInterface
 {
-    use IsDiscovery, HasInstancePool;
+    use HasInstancePool, IsDiscovery;
 
     /**
      * Create a new Hook discovery

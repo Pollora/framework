@@ -39,7 +39,7 @@ class WpCliServiceProvider extends ServiceProvider
     {
         // Register the WP CLI adapter (Infrastructure layer)
         $this->app->singleton(WpCliAdapter::class, function ($app): WpCliAdapter {
-            return new WpCliAdapter();
+            return new WpCliAdapter;
         });
 
         // Register the WP CLI service (Application layer)

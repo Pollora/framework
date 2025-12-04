@@ -21,10 +21,9 @@ use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
-use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
-use Pollora\Providers\QueryServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
+use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
@@ -95,7 +94,6 @@ class PolloraServiceProvider extends ServiceProvider
         // Shared modules
         $this->app->register(CollectionServiceProvider::class);
         $this->app->register(OptionServiceProvider::class);
-
 
         // Block features
         $this->app->register(BlockCategoryServiceProvider::class);

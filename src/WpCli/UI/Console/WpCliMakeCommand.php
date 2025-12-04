@@ -45,13 +45,13 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
      */
     protected function getStub(): string
     {
-        return file_get_contents(__DIR__ . '/stubs/wp-cli-simple.stub');
+        return file_get_contents(__DIR__.'/stubs/wp-cli-simple.stub');
     }
 
     /**
      * Get the default namespace for the class.
      *
-     * @param string $rootNamespace
+     * @param  string  $rootNamespace
      */
     protected function getDefaultNamespace($rootNamespace): string
     {
@@ -63,7 +63,7 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
     /**
      * Build the class with the given name.
      *
-     * @param string $name
+     * @param  string  $name
      */
     protected function buildClass($name): string
     {
@@ -97,7 +97,7 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
     {
         $commandName = $this->getDefaultOption('command');
         $description = $this->getDefaultOption('description');
-        
+
         return str_replace(
             ['{{ commandName }}', '{{ description }}'],
             [$commandName, $description],
@@ -140,12 +140,12 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
     protected function generateCommandName(): string
     {
         $className = $this->getNameInput();
-        
+
         // Remove "Command" suffix if present
         if (Str::endsWith($className, 'Command')) {
             $className = substr($className, 0, -7);
         }
-        
+
         // Convert to kebab-case
         return Str::kebab($className);
     }
@@ -157,8 +157,9 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
     {
         // Validate command name format
         $commandName = $this->getDefaultOption('command');
-        if (!preg_match('/^[a-z0-9-]+$/', $commandName)) {
+        if (! preg_match('/^[a-z0-9-]+$/', $commandName)) {
             $this->components->error('Command name must only contain lowercase letters, numbers, and hyphens.');
+
             return false;
         }
 

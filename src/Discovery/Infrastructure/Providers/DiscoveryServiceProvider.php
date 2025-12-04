@@ -69,7 +69,7 @@ final class DiscoveryServiceProvider extends ServiceProvider
     {
         // Register reflection cache as singleton for maximum efficiency
         $this->app->singleton(ReflectionCacheInterface::class, ReflectionCache::class);
-        
+
         // Register instance pool as singleton to maintain state across discoveries
         $this->app->singleton(InstancePool::class);
     }

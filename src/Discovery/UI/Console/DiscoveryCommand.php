@@ -52,7 +52,7 @@ final class DiscoveryCommand extends Command
     public function handle(DiscoveryManager $discoveryManager, ModuleDiscoveryOrchestratorInterface $moduleOrchestrator): int
     {
         $this->info('Starting Pollora Discovery Process...');
-        
+
         // Show cache status
         $this->showCacheStatus($discoveryManager);
 
@@ -220,18 +220,18 @@ final class DiscoveryCommand extends Command
         try {
             // Get the underlying discovery engine
             $engine = $discoveryManager->getEngine();
-            
+
             if (method_exists($engine, 'getPerformanceStats')) {
                 $stats = $engine->getPerformanceStats();
-                
+
                 // Display context stats
                 if (isset($stats['context'])) {
                     $context = $stats['context'];
-                    $this->line("📊 Discovery Context:");
+                    $this->line('📊 Discovery Context:');
                     $this->line("  • Classes processed: {$context['total_classes']}");
                     $this->line("  • Discovery executions: {$context['total_discovery_executions']}");
                     $this->line("  • Cache efficiency: {$context['cache_efficiency']}%");
-                    
+
                     if (isset($context['stats'])) {
                         $contextStats = $context['stats'];
                         $this->line("  • Cache hits: {$contextStats['cache_hits']}");
@@ -241,15 +241,15 @@ final class DiscoveryCommand extends Command
                         }
                     }
                 }
-                
+
                 // Display instance pool stats
                 if (isset($stats['instance_pool'])) {
                     $pool = $stats['instance_pool'];
-                    $this->line("🏊 Instance Pool:");
+                    $this->line('🏊 Instance Pool:');
                     $this->line("  • Pool size: {$pool['pool_size']} instances");
                     $this->line("  • Hit ratio: {$pool['hit_ratio_percent']}%");
                     $this->line("  • Total requests: {$pool['total_requests']}");
-                    
+
                     if ($pool['circular_dependencies'] > 0) {
                         $this->line("  • Circular deps avoided: {$pool['circular_dependencies']}");
                     }
@@ -257,29 +257,29 @@ final class DiscoveryCommand extends Command
                         $this->line("  • Instantiation errors: {$pool['instantiation_errors']}");
                     }
                 }
-                
+
                 // Display static cache stats
                 if (isset($stats['static_cache_size'])) {
-                    $this->line("💾 Static Cache:");
+                    $this->line('💾 Static Cache:');
                     $this->line("  • Cached structure sets: {$stats['static_cache_size']}");
                 }
-                
+
                 $this->info('');
                 $this->line('💡 Optimizations enabled: Reflection cache, Instance pooling, Unified discovery');
-                
+
             } else {
                 $this->warn('Performance statistics not available (using legacy discovery engine)');
             }
-            
+
         } catch (\Throwable $e) {
-            $this->warn('Unable to retrieve performance statistics: ' . $e->getMessage());
-            
+            $this->warn('Unable to retrieve performance statistics: '.$e->getMessage());
+
             if ($this->option('verbose-errors')) {
                 $this->line($e->getTraceAsString());
             }
         }
     }
-    
+
     /**
      * Show cache status information
      *
@@ -295,7 +295,7 @@ final class DiscoveryCommand extends Command
         }
         $this->line('');
     }
-    
+
     /**
      * Check if caching is enabled
      *
@@ -305,13 +305,13 @@ final class DiscoveryCommand extends Command
     private function isCacheEnabled(DiscoveryManager $discoveryManager): bool
     {
         $engine = $discoveryManager->getEngine();
-        
-        if (!method_exists($engine, 'getCacheDriver')) {
+
+        if (! method_exists($engine, 'getCacheDriver')) {
             return false;
         }
-        
+
         $cacheDriver = $engine->getCacheDriver();
-        
-        return $cacheDriver !== null && !($cacheDriver instanceof NullDiscoverCacheDriver);
+
+        return $cacheDriver !== null && ! ($cacheDriver instanceof NullDiscoverCacheDriver);
     }
 }

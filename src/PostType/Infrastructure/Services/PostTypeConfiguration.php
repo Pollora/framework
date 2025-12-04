@@ -95,7 +95,7 @@ class PostTypeConfiguration implements PostTypeAttributeInterface
     public function getArgs(): array
     {
         $args = $this->attributeArgs;
-        unset($args["priority"]);
+        unset($args['priority']);
 
         return $args;
     }
@@ -103,7 +103,7 @@ class PostTypeConfiguration implements PostTypeAttributeInterface
     /**
      * Get the post type priority declaration
      *
-     * @return  int $priority Declaration priority
+     * @return int $priority Declaration priority
      */
     public function getPriority(): int
     {

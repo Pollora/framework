@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pollora\Logging\Domain\Models;
 
 readonly class WordPressError

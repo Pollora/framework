@@ -39,7 +39,7 @@ final class DiscoveryClearCommand extends Command
     {
         try {
             // Check if cache is enabled
-            if (!$this->isCacheEnabled($discoveryManager)) {
+            if (! $this->isCacheEnabled($discoveryManager)) {
                 $this->warn('⚠️  Cache is disabled (debug mode or NullDiscoverCacheDriver)');
                 $this->line('   No persistent cache to clear.');
                 $this->line('');
@@ -84,8 +84,9 @@ final class DiscoveryClearCommand extends Command
      */
     private function clearSpatieCache(object $engine): void
     {
-        if (!method_exists($engine, 'getCacheDriver')) {
+        if (! method_exists($engine, 'getCacheDriver')) {
             $this->line('    <comment>Spatie cache driver not available</comment>');
+
             return;
         }
 
@@ -93,11 +94,13 @@ final class DiscoveryClearCommand extends Command
 
         if ($cacheDriver === null) {
             $this->line('    <comment>No cache driver configured</comment>');
+
             return;
         }
 
-        if (!method_exists($cacheDriver, 'forget')) {
+        if (! method_exists($cacheDriver, 'forget')) {
             $this->line('    <comment>Cache driver does not support clearing</comment>');
+
             return;
         }
 
@@ -132,12 +135,12 @@ final class DiscoveryClearCommand extends Command
     {
         $engine = $discoveryManager->getEngine();
 
-        if (!method_exists($engine, 'getCacheDriver')) {
+        if (! method_exists($engine, 'getCacheDriver')) {
             return false;
         }
 
         $cacheDriver = $engine->getCacheDriver();
 
-        return $cacheDriver !== null && !($cacheDriver instanceof NullDiscoverCacheDriver);
+        return $cacheDriver !== null && ! ($cacheDriver instanceof NullDiscoverCacheDriver);
     }
 }

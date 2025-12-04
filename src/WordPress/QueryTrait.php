@@ -23,6 +23,7 @@ trait QueryTrait
      * and that a connection can be established.
      *
      * @return bool True if database is configured, false otherwise
+     *
      * @throws Exception
      */
     public function isDatabaseConfigured(): bool
