@@ -6,6 +6,7 @@ namespace Pollora\Discovery\UI\Console;
 
 use Illuminate\Console\Command;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
+use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
 
 /**
  * Discovery Clear Command
@@ -37,6 +38,13 @@ final class DiscoveryClearCommand extends Command
     public function handle(DiscoveryManager $discoveryManager): int
     {
         try {
+            // Check if cache is enabled
+            if (!$this->isCacheEnabled($discoveryManager)) {
+                $this->warn('⚠️  Cache is disabled (debug mode or NullDiscoverCacheDriver)');
+                $this->line('   No persistent cache to clear.');
+                $this->line('');
+            }
+
             $this->info('Clearing all discovery caches...');
             $this->clearAllCaches($discoveryManager);
             $this->info('✓ Discovery caches cleared successfully');
@@ -51,37 +59,21 @@ final class DiscoveryClearCommand extends Command
     }
 
     /**
-     * Clear all discovery caches
+     * Clear persistent discovery cache only
+     *
+     * Only clears persistent cache that survives between requests.
      */
     private function clearAllCaches(DiscoveryManager $discoveryManager): void
     {
-        // Clear all caches through the discovery manager
-        $this->line('  • Clearing discovery manager cache...');
+        // Clear persistent caches only through the discovery manager
+        $this->line('  • Clearing persistent discovery cache...');
         $discoveryManager->clearCache();
-        
-        // Get the engine for additional cache clearing
+
+        // Get the engine for Spatie cache clearing
         $engine = $discoveryManager->getEngine();
-        
-        // Clear reflection cache
-        if (method_exists($engine, 'getContext')) {
-            $this->line('  • Clearing reflection cache...');
-            $engine->getContext()->getReflectionCache()->clearCache();
-        }
-        
-        // Clear instance pool
-        if (method_exists($engine, 'getInstancePool')) {
-            $this->line('  • Clearing instance pool...');
-            $engine->getInstancePool()->clearAll();
-        }
-        
-        // Clear static structures cache
-        if (method_exists($engine, 'clearStructuresCache')) {
-            $this->line('  • Clearing static structures cache...');
-            $engine::clearStructuresCache();
-        }
-        
-        // Clear Spatie structure discoverer cache
-        $this->line('  • Clearing Spatie structure discoverer cache...');
+
+        // Clear Spatie structure discoverer cache (the only persistent cache)
+        $this->line('  • Clearing structure discoverer cache...');
         $this->clearSpatieCache($engine);
     }
 
@@ -96,23 +88,23 @@ final class DiscoveryClearCommand extends Command
             $this->line('    <comment>Spatie cache driver not available</comment>');
             return;
         }
-        
+
         $cacheDriver = $engine->getCacheDriver();
-        
+
         if ($cacheDriver === null) {
             $this->line('    <comment>No cache driver configured</comment>');
             return;
         }
-        
+
         if (!method_exists($cacheDriver, 'forget')) {
             $this->line('    <comment>Cache driver does not support clearing</comment>');
             return;
         }
-        
+
         // Clear cache for each discovery location
         $locations = $engine->getLocations();
         $cleared = 0;
-        
+
         foreach ($locations as $location) {
             $cacheId = 'discovery_'.md5($location->getPath());
             try {
@@ -122,7 +114,30 @@ final class DiscoveryClearCommand extends Command
                 $this->line("    <warning>Failed to clear cache for location: {$location->getPath()}</warning>");
             }
         }
-        
-        $this->line("    <info>Cleared cache for {$cleared} discovery locations</info>");
+
+        if ($cleared > 0) {
+            $this->line("    <info>Cleared cache for {$cleared} discovery locations</info>");
+        } else {
+            $this->line('    <comment>No cache entries to clear</comment>');
+        }
+    }
+
+    /**
+     * Check if caching is enabled
+     *
+     * @param  DiscoveryManager  $discoveryManager  The discovery manager
+     * @return bool True if cache is enabled, false otherwise
+     */
+    private function isCacheEnabled(DiscoveryManager $discoveryManager): bool
+    {
+        $engine = $discoveryManager->getEngine();
+
+        if (!method_exists($engine, 'getCacheDriver')) {
+            return false;
+        }
+
+        $cacheDriver = $engine->getCacheDriver();
+
+        return $cacheDriver !== null && !($cacheDriver instanceof NullDiscoverCacheDriver);
     }
 }

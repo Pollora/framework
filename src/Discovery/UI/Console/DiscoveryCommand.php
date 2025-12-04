@@ -7,6 +7,7 @@ namespace Pollora\Discovery\UI\Console;
 use Illuminate\Console\Command;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
 
 /**
  * Discovery Console Command
@@ -51,13 +52,20 @@ final class DiscoveryCommand extends Command
     public function handle(DiscoveryManager $discoveryManager, ModuleDiscoveryOrchestratorInterface $moduleOrchestrator): int
     {
         $this->info('Starting Pollora Discovery Process...');
+        
+        // Show cache status
+        $this->showCacheStatus($discoveryManager);
 
         try {
             // Clear cache if requested
             if ($this->option('clear-cache')) {
-                $this->info('Clearing discovery cache...');
-                $discoveryManager->clearCache();
-                $this->info('✓ Cache cleared');
+                if ($this->isCacheEnabled($discoveryManager)) {
+                    $this->info('Clearing discovery cache...');
+                    $discoveryManager->clearCache();
+                    $this->info('✓ Cache cleared');
+                } else {
+                    $this->warn('⚠️  Cache is disabled - skipping cache clear');
+                }
             }
 
             // Run specific discovery or all discoveries
@@ -270,5 +278,40 @@ final class DiscoveryCommand extends Command
                 $this->line($e->getTraceAsString());
             }
         }
+    }
+    
+    /**
+     * Show cache status information
+     *
+     * @param  DiscoveryManager  $discoveryManager  The discovery manager
+     */
+    private function showCacheStatus(DiscoveryManager $discoveryManager): void
+    {
+        if ($this->isCacheEnabled($discoveryManager)) {
+            $this->line('💾 Cache Status: <info>Enabled</info>');
+        } else {
+            $this->line('💾 Cache Status: <comment>Disabled</comment> (debug mode or NullDiscoverCacheDriver)');
+            $this->line('   i️  Discovery will run without persistent caching for better development experience');
+        }
+        $this->line('');
+    }
+    
+    /**
+     * Check if caching is enabled
+     *
+     * @param  DiscoveryManager  $discoveryManager  The discovery manager
+     * @return bool True if cache is enabled, false otherwise
+     */
+    private function isCacheEnabled(DiscoveryManager $discoveryManager): bool
+    {
+        $engine = $discoveryManager->getEngine();
+        
+        if (!method_exists($engine, 'getCacheDriver')) {
+            return false;
+        }
+        
+        $cacheDriver = $engine->getCacheDriver();
+        
+        return $cacheDriver !== null && !($cacheDriver instanceof NullDiscoverCacheDriver);
     }
 }
