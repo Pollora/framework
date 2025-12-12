@@ -28,7 +28,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
      * Discovers classes that extend ServiceProvider and collects them for registration.
      * Only processes concrete classes that extend Laravel's ServiceProvider.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
         if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {

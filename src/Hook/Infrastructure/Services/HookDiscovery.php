@@ -45,7 +45,7 @@ final class HookDiscovery implements DiscoveryInterface
      * Discovers methods with Action and Filter attributes and collects them for registration.
      * Only processes public methods that have hook attributes.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
         if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
@@ -58,16 +58,18 @@ final class HookDiscovery implements DiscoveryInterface
         }
 
         try {
-            // Use reflection to examine methods for hook attributes
-            $reflectionClass = new ReflectionClass($structure->namespace.'\\'.$structure->name);
-
-            foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            $className = $structure->namespace.'\\'.$structure->name;
+            
+            $reflectionClass = $reflectionCache->getClassReflection($className);
+            $methods = $reflectionCache->getPublicMethods($className);
+            
+            foreach ($methods as $method) {
                 // Check for Action attributes
                 $actionAttributes = $method->getAttributes(Action::class);
                 foreach ($actionAttributes as $actionAttribute) {
                     $this->getItems()->add($location, [
                         'type' => 'action',
-                        'class' => $structure->namespace.'\\'.$structure->name,
+                        'class' => $className,
                         'method' => $method->getName(),
                         'attribute' => $actionAttribute,
                         'reflection_method' => $method,
@@ -79,7 +81,7 @@ final class HookDiscovery implements DiscoveryInterface
                 foreach ($filterAttributes as $filterAttribute) {
                     $this->getItems()->add($location, [
                         'type' => 'filter',
-                        'class' => $structure->namespace.'\\'.$structure->name,
+                        'class' => $className,
                         'method' => $method->getName(),
                         'attribute' => $filterAttribute,
                         'reflection_method' => $method,

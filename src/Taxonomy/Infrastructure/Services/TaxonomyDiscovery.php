@@ -80,7 +80,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * Discovers classes with Taxonomy attributes and collects them for registration.
      * Only processes classes that have the Taxonomy attribute and are instantiable.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
         if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
@@ -110,6 +110,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             'class' => $structure->namespace.'\\'.$structure->name,
             'attribute' => $taxonomyAttribute,
             'structure' => $structure,
+            'reflection_cache' => $reflectionCache,
         ]);
     }
 
@@ -131,7 +132,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
 
             try {
                 // Process the complete taxonomy configuration
-                $this->processTaxonomy($className);
+                $reflectionCache = $discoveredItem['reflection_cache'] ?? null;
+                $this->processTaxonomy($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other taxonomies
                 error_log("Failed to register Taxonomy from class {$className}: ".$e->getMessage());
@@ -149,13 +151,13 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * 4. Registering the final taxonomy through the service
      *
      * @param  string  $className  The fully qualified class name
+     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processTaxonomy(string $className): void
+    private function processTaxonomy(string $className, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
-            // Use reflection to get the Taxonomy attribute instance
-            $reflectionClass = new ReflectionClass($className);
-            $taxonomyAttributes = $reflectionClass->getAttributes(Taxonomy::class);
+            $reflectionClass = $reflectionCache->getClassReflection($className);
+            $taxonomyAttributes = $reflectionCache->getClassAttributes($className, Taxonomy::class);
 
             if ($taxonomyAttributes === []) {
                 return;
@@ -175,7 +177,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             $config = $this->processMethodLevelAttributes($reflectionClass, $className, $config);
 
             // Get additional arguments from the class instance if it has a withArgs method
-            $this->processAdditionalArgs($className, $config);
+            $this->processAdditionalArgs($className, $config, $reflectionCache);
 
             // Call configuring method if present and use the configured entity
             $configuredEntity = $this->processConfiguring(
@@ -184,7 +186,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $config->getName(),
                 $config->getPluralName(),
                 ['object_type' => $config->getObjectType()], // Pass only object_type initially, we'll apply attribute configs after
-                $config->getPriority()
+                $config->getPriority(),
+                $reflectionCache
             );
 
             // If configuring was called and returned an entity, apply attribute configurations and register
@@ -336,12 +339,12 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      *
      * @param  string  $className  The class name to process
      * @param  TaxonomyConfiguration  $config  The current configuration
+     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processAdditionalArgs(string $className, TaxonomyConfiguration $config): void
+    private function processAdditionalArgs(string $className, TaxonomyConfiguration $config, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
-            // Try to instantiate the class
-            $reflectionClass = new ReflectionClass($className);
+            $reflectionClass = $reflectionCache->getClassReflection($className);
 
             if ($reflectionClass->isInstantiable()) {
                 // Use instance pool if available, otherwise create directly

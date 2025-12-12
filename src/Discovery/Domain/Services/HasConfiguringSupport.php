@@ -28,12 +28,13 @@ trait HasConfiguringSupport
      * @param  string|null  $plural  The plural name
      * @param  array  $args  Additional arguments
      * @param  int  $priority  Declaration priority
+     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      * @return object|null The entity if configuring was called, null otherwise
      */
-    protected function processConfiguring(string $className, string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): ?object
+    protected function processConfiguring(string $className, string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): ?object
     {
         try {
-            $reflectionClass = new \ReflectionClass($className);
+            $reflectionClass = $reflectionCache->getClassReflection($className);
 
             if (! $reflectionClass->isInstantiable()) {
                 return null;

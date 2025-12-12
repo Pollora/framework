@@ -77,45 +77,4 @@ readonly class TaxonomyService implements TaxonomyServiceInterface
     {
         return $this->registry->getAll();
     }
-
-    /**
-     * Register a taxonomy from a class with Taxonomy attribute.
-     *
-     * @param  string  $className  The fully qualified class name
-     * @return object|null The registered taxonomy instance or null if failed
-     */
-    public function registerFromClass(string $className): ?object
-    {
-        try {
-            // Check if class exists
-            if (! class_exists($className)) {
-                return null;
-            }
-
-            $reflection = new \ReflectionClass($className);
-
-            // Find Taxonomy attribute
-            $taxonomyAttributes = $reflection->getAttributes(\Pollora\Attributes\Taxonomy::class);
-
-            if ($taxonomyAttributes === []) {
-                return null;
-            }
-
-            // Get the first Taxonomy attribute instance
-            $taxonomyAttribute = $taxonomyAttributes[0]->newInstance();
-
-            // Extract data from the attribute
-            $slug = $taxonomyAttribute->getSlug($className);
-            $objectType = $taxonomyAttribute->getObjectType() ?? ['post'];
-            $singular = $taxonomyAttribute->getSingular($className);
-            $plural = $taxonomyAttribute->getPlural($className);
-
-            // Register the taxonomy
-            return $this->register($slug, $objectType, $singular, $plural);
-
-        } catch (\Throwable) {
-            // Return null on any error
-            return null;
-        }
-    }
 }
