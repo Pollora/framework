@@ -65,4 +65,42 @@ trait HasConfiguringSupport
             return null;
         }
     }
+
+    /**
+     * Apply smart merge logic for entity and attribute configurations.
+     *
+     * This method merges configurations from the configuring() method with
+     * attribute-based configurations, giving priority to configuring() values.
+     *
+     * @param  object  $configuredEntity  The entity configured via configuring()
+     * @param  array  $attributeArgs  Arguments from attribute processing
+     */
+    protected function applySmartMerge(object $configuredEntity, array $attributeArgs): void
+    {
+        // Get the args built from entity properties via ArgumentHelper
+        $entityArgs = $configuredEntity->getArgs() ?? [];
+
+        // For labels, do a smart merge: use configuring labels as base, add missing ones from attributes
+        if (isset($entityArgs['labels']) && isset($attributeArgs['labels'])) {
+            $attributeArgs['labels'] = array_merge($attributeArgs['labels'], $entityArgs['labels']);
+        }
+
+        // Merge other args with configuring() taking priority
+        $finalArgs = array_merge($attributeArgs, $entityArgs);
+
+        $configuredEntity->setRawArgs($finalArgs);
+    }
+
+    /**
+     * Register an entity using the appropriate registry adapter.
+     *
+     * @param  object  $entity  The entity to register
+     * @param  string  $registryClass  The registry adapter class
+     */
+    protected function registerEntity(object $entity, string $registryClass): void
+    {
+        $registry = new $registryClass;
+        $registrationService = new \Pollora\Entity\Application\Service\EntityRegistrationService($registry);
+        $registrationService->registerEntity($entity);
+    }
 }

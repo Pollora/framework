@@ -186,24 +186,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
 
             // If configuring was called and returned an entity, apply attribute configurations and register
             if ($configuredEntity !== null) {
-                // Get the args built from entity properties via ArgumentHelper
-                $entityArgs = $configuredEntity->getArgs() ?? [];
-                $attributeArgs = $config->getArgs();
-
-                // For labels, do a smart merge: use configuring labels as base, add missing ones from attributes
-                if (isset($entityArgs['labels']) && isset($attributeArgs['labels'])) {
-                    $attributeArgs['labels'] = array_merge($attributeArgs['labels'], $entityArgs['labels']);
-                }
-
-                // Merge other args with configuring() taking priority
-                $finalArgs = array_merge($attributeArgs, $entityArgs);
-
-                $configuredEntity->setRawArgs($finalArgs);
-
-                // Register the configured entity directly
-                $registry = new \Pollora\Entity\Adapter\Out\WordPress\PostTypeRegistryAdapter;
-                $registrationService = new \Pollora\Entity\Application\Service\EntityRegistrationService($registry);
-                $registrationService->registerEntity($configuredEntity);
+                $this->applySmartMerge($configuredEntity, $config->getArgs());
+                $this->registerEntity($configuredEntity, \Pollora\Entity\Adapter\Out\WordPress\PostTypeRegistryAdapter::class);
             } else {
                 // Register the post type using the original service
                 $this->postTypeService->register(
