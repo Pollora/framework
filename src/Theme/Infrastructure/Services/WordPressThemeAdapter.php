@@ -43,7 +43,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
 
         // Ensure the path is properly formatted and exists
         $sanitizedPath = $this->sanitizePath($path);
-        if ($sanitizedPath === null || $sanitizedPath === '' || $sanitizedPath === '0' || ! is_dir($sanitizedPath)) {
+        if (in_array($sanitizedPath, [null, '', '0'], true) || ! is_dir($sanitizedPath)) {
             return false;
         }
 

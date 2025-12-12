@@ -188,7 +188,7 @@ class PatternService implements PatternServiceInterface
         $content = $this->dataExtractor->getContent($file);
 
         // Skip if content is empty
-        if ($content === null || $content === '' || $content === '0') {
+        if (in_array($content, [null, '', '0'], true)) {
             return;
         }
 

@@ -89,7 +89,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
         // We have a Blade template, get the view name and create a loader
         $viewName = $this->getViewNameFromTemplate($themeTemplate);
 
-        if ($viewName === null || $viewName === '' || $viewName === '0' || ! $this->viewFactory->exists($viewName)) {
+        if (in_array($viewName, [null, '', '0'], true) || ! $this->viewFactory->exists($viewName)) {
             return $themeTemplate;
         }
 
@@ -134,7 +134,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
     protected function getViewNameFromTemplate(string $templatePath): ?string
     {
         $realPath = realpath($templatePath);
-        if ($realPath === '' || $realPath === '0' || $realPath === false) {
+        if (in_array($realPath, ['', '0', false], true)) {
             return null;
         }
 

@@ -73,9 +73,7 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function allEnabled(): array
     {
-        return array_filter($this->all(), function (PluginModuleInterface $plugin): bool {
-            return $plugin->isEnabled();
-        });
+        return array_filter($this->all(), fn (PluginModuleInterface $plugin): bool => $plugin->isEnabled());
     }
 
     /**
@@ -85,9 +83,7 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function allDisabled(): array
     {
-        return array_filter($this->all(), function (PluginModuleInterface $plugin): bool {
-            return $plugin->isDisabled();
-        });
+        return array_filter($this->all(), fn (PluginModuleInterface $plugin): bool => $plugin->isDisabled());
     }
 
     /**
@@ -162,7 +158,7 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function has(string $name): bool
     {
-        return $this->find($name) !== null;
+        return $this->find($name) instanceof \Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
     }
 
     /**
@@ -259,10 +255,12 @@ class PluginRepository implements ModuleRepositoryInterface
         }
 
         foreach ($items as $item) {
-            if ($item === '.' || $item === '..') {
+            if ($item === '.') {
                 continue;
             }
-
+            if ($item === '..') {
+                continue;
+            }
             $pluginPath = $this->pluginsPath.'/'.$item;
 
             if (! is_dir($pluginPath)) {
@@ -293,7 +291,7 @@ class PluginRepository implements ModuleRepositoryInterface
             $mainFile = $pluginPath.'/'.$pluginName.'.php';
             $headers = $this->parser->parsePluginHeaders($mainFile);
 
-            if (empty($headers)) {
+            if ($headers === []) {
                 return null;
             }
 
@@ -385,9 +383,7 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function getByStatus(bool $status): array
     {
-        return array_filter($this->all(), function (PluginModuleInterface $plugin) use ($status): bool {
-            return $plugin->isEnabled() === $status;
-        });
+        return array_filter($this->all(), fn (PluginModuleInterface $plugin): bool => $plugin->isEnabled() === $status);
     }
 
     /**
@@ -398,14 +394,12 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function getByCustomStatus(string $status): array
     {
-        return array_filter($this->all(), function (PluginModuleInterface $plugin) use ($status): bool {
-            return match ($status) {
-                'active' => $plugin->isActive(),
-                'inactive' => ! $plugin->isActive(),
-                'enabled' => $plugin->isEnabled(),
-                'disabled' => $plugin->isDisabled(),
-                default => true,
-            };
+        return array_filter($this->all(), fn (PluginModuleInterface $plugin): bool => match ($status) {
+            'active' => $plugin->isActive(),
+            'inactive' => ! $plugin->isActive(),
+            'enabled' => $plugin->isEnabled(),
+            'disabled' => $plugin->isDisabled(),
+            default => true,
         });
     }
 
@@ -434,9 +428,7 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function getByAuthor(string $author): array
     {
-        return array_filter($this->all(), function (PluginModuleInterface $plugin) use ($author): bool {
-            return $plugin->getAuthor() === $author;
-        });
+        return array_filter($this->all(), fn (PluginModuleInterface $plugin): bool => $plugin->getAuthor() === $author);
     }
 
     /**
@@ -447,9 +439,7 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function getByTextDomain(string $textDomain): array
     {
-        return array_filter($this->all(), function (PluginModuleInterface $plugin) use ($textDomain): bool {
-            return $plugin->getTextDomain() === $textDomain;
-        });
+        return array_filter($this->all(), fn (PluginModuleInterface $plugin): bool => $plugin->getTextDomain() === $textDomain);
     }
 
     /**
@@ -462,10 +452,8 @@ class PluginRepository implements ModuleRepositoryInterface
     {
         $query = strtolower($query);
 
-        return array_filter($this->all(), function (PluginModuleInterface $plugin) use ($query): bool {
-            return str_contains(strtolower($plugin->getName()), $query) ||
-                   str_contains(strtolower($plugin->getDescription()), $query);
-        });
+        return array_filter($this->all(), fn (PluginModuleInterface $plugin): bool => str_contains(strtolower($plugin->getName()), $query) ||
+               str_contains(strtolower($plugin->getDescription()), $query));
     }
 
     /**

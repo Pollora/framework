@@ -38,19 +38,13 @@ class PluginStatusCommand extends Command
     protected $description = 'Display plugin status and information';
 
     /**
-     * Plugin manager instance.
-     */
-    protected PluginManager $pluginManager;
-
-    /**
      * Create a new command instance.
      *
      * @param  PluginManager  $pluginManager  Plugin manager
      */
-    public function __construct(PluginManager $pluginManager)
+    public function __construct(protected PluginManager $pluginManager)
     {
         parent::__construct();
-        $this->pluginManager = $pluginManager;
     }
 
     /**
@@ -115,7 +109,7 @@ class PluginStatusCommand extends Command
         try {
             $plugins = $this->getFilteredPlugins();
 
-            if (empty($plugins)) {
+            if ($plugins === []) {
                 $this->info('No plugins found matching the criteria.');
 
                 return self::SUCCESS;

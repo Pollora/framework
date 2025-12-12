@@ -73,11 +73,11 @@ class ThemeInitializer implements ThemeComponent
             $this->themeService = $this->app->get(ThemeService::class);
 
             // Fallback to 'theme' binding if ThemeService interface isn't registered yet
-            if ($this->themeService === null) {
+            if (! $this->themeService instanceof \Pollora\Theme\Domain\Contracts\ThemeService) {
                 $this->themeService = $this->app->get('theme');
             }
 
-            if ($this->themeService === null) {
+            if (! $this->themeService instanceof \Pollora\Theme\Domain\Contracts\ThemeService) {
                 throw new \RuntimeException('Unable to resolve ThemeService. Make sure it is properly registered.');
             }
         }
@@ -178,7 +178,7 @@ class ThemeInitializer implements ThemeComponent
     public function setThemes(?string $themeName = null): void
     {
         // Theme name is required for self-registered themes
-        if ($themeName === null || $themeName === '' || $themeName === '0') {
+        if (in_array($themeName, [null, '', '0'], true)) {
             throw new \RuntimeException('Theme name is required for self-registered themes.');
         }
 
@@ -211,7 +211,7 @@ class ThemeInitializer implements ThemeComponent
      */
     public function overrideThemeUri(): void
     {
-        $this->filter->add('theme_file_uri', function ($path): string {
+        $this->filter->add('theme_file_uri', function (string $path): string {
             $relativePath = $this->getRelativePath($path);
 
             return (string) (new AssetFile($relativePath))->from('theme');

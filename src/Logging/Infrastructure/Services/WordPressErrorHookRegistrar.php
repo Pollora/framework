@@ -20,28 +20,22 @@ class WordPressErrorHookRegistrar implements WordPressErrorHookRegistrarInterfac
 
     public function registerErrorHandlers(): void
     {
-        $this->action->add('doing_it_wrong_run', function (string $function, string $message, string $version) {
+        $this->action->add('doing_it_wrong_run', function (string $function, string $message, string $version): void {
             $this->container->make(WordPressErrorLoggingService::class)->handleDoingItWrong($function, $message, $version);
         }, 10, 3);
 
-        $this->action->add('deprecated_function_run', function (string $function, string $replacement, string $version) {
+        $this->action->add('deprecated_function_run', function (string $function, string $replacement, string $version): void {
             $this->container->make(WordPressErrorLoggingService::class)->handleDeprecatedFunction($function, $replacement, $version);
         }, 10, 3);
 
-        $this->action->add('deprecated_argument_run', function (string $function, string $message, string $version) {
+        $this->action->add('deprecated_argument_run', function (string $function, string $message, string $version): void {
             $this->container->make(WordPressErrorLoggingService::class)->handleDeprecatedArgument($function, $message, $version);
         }, 10, 3);
 
-        $this->filter->add('doing_it_wrong_trigger_error', function () {
-            return $this->container->make(WordPressErrorLoggingService::class)->disableTriggerError();
-        }, PHP_INT_MAX, 4);
+        $this->filter->add('doing_it_wrong_trigger_error', fn () => $this->container->make(WordPressErrorLoggingService::class)->disableTriggerError(), PHP_INT_MAX, 4);
 
-        $this->filter->add('deprecated_function_trigger_error', function () {
-            return $this->container->make(WordPressErrorLoggingService::class)->disableTriggerError();
-        }, PHP_INT_MAX, 4);
+        $this->filter->add('deprecated_function_trigger_error', fn () => $this->container->make(WordPressErrorLoggingService::class)->disableTriggerError(), PHP_INT_MAX, 4);
 
-        $this->filter->add('deprecated_argument_trigger_error', function () {
-            return $this->container->make(WordPressErrorLoggingService::class)->disableTriggerError();
-        }, PHP_INT_MAX, 4);
+        $this->filter->add('deprecated_argument_trigger_error', fn () => $this->container->make(WordPressErrorLoggingService::class)->disableTriggerError(), PHP_INT_MAX, 4);
     }
 }

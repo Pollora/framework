@@ -63,7 +63,6 @@ class InstallationService
         $this->installLoaderService->bootstrap();
 
         $result = spin(
-            message: 'Installing WordPress...',
             callback: fn () => wp_install(
                 $config->title,
                 $config->adminUser,
@@ -72,7 +71,8 @@ class InstallationService
                 '',
                 $config->adminPassword,
                 $config->locale
-            )
+            ),
+            message: 'Installing WordPress...'
         );
 
         if (is_wp_error($result)) {

@@ -104,7 +104,7 @@ class Mailer
     ): ?SentMessage {
         // Apply the wp_mail filter to maintain WordPress plugin compatibility
         // This allows other plugins to modify mail data before sending
-        $mailData = $this->filter->apply('wp_mail', compact('to', 'subject', 'message', 'headers', 'attachments'));
+        $mailData = $this->filter->apply('wp_mail', ['to' => $to, 'subject' => $subject, 'message' => $message, 'headers' => $headers, 'attachments' => $attachments]);
 
         // Extract filtered values with fallbacks to original values
         $to = $mailData['to'] ?? $to;
@@ -157,7 +157,7 @@ class Mailer
      */
     private function processHeaders(Message $mail, string|array $headers): void
     {
-        if (empty($headers)) {
+        if (in_array($headers, ['', '0', []], true)) {
             return;
         }
 
@@ -168,15 +168,20 @@ class Mailer
 
         // Process each header individually
         foreach ($headerArray as $header) {
-            $header = trim($header);
-
+            $header = trim((string) $header);
             // Skip empty headers or headers without colon separator
-            if (empty($header) || ! str_contains($header, ':')) {
+            if ($header === '') {
+                continue;
+            }
+            if ($header === '0') {
+                continue;
+            }
+            if (! str_contains($header, ':')) {
                 continue;
             }
 
             // Split header name and value (limit to 2 parts in case value contains colons)
-            [$name, $value] = array_map('trim', explode(':', $header, 2));
+            [$name, $value] = array_map(trim(...), explode(':', $header, 2));
 
             // Apply the header using the appropriate method
             $this->applyHeader($mail, strtolower($name), $value);
@@ -255,7 +260,7 @@ class Mailer
         }
 
         // Filter out empty entries and attach each file
-        $attachments = array_filter(array_map('trim', $attachments));
+        $attachments = array_filter(array_map(trim(...), $attachments));
 
         foreach ($attachments as $attachment) {
             if (! empty($attachment)) {
@@ -288,7 +293,7 @@ class Mailer
     private function cleanEmailAddresses(string|array $emails): string|array
     {
         if (is_array($emails)) {
-            return array_map(fn ($email) => $this->cleanEmailAddress($email), $emails);
+            return array_map($this->cleanEmailAddress(...), $emails);
         }
 
         return $this->cleanEmailAddress($emails);
@@ -401,10 +406,10 @@ class Mailer
     {
         return array_filter(
             array_map(
-                fn ($addr) => $this->parseEmailAddress(trim($addr)),
+                fn ($addr): string|array => $this->parseEmailAddress(trim($addr)),
                 explode(',', $addresses)
             ),
-            fn ($addr) => ! empty($addr) // Remove empty entries
+            fn ($addr): bool => ! in_array($addr, ['', '0', []], true) // Remove empty entries
         );
     }
 }

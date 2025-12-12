@@ -94,7 +94,7 @@ class WordPressServiceProvider extends ServiceProvider
      */
     private function setHttpsBasedOnProxy(string $forwardedProtocols): void
     {
-        $protocols = array_map('trim', explode(',', $forwardedProtocols));
+        $protocols = array_map(trim(...), explode(',', $forwardedProtocols));
 
         // Check if the last protocol is HTTPS
         $_SERVER['HTTPS'] = end($protocols) === 'https' ? 'on' : 'off';

@@ -46,7 +46,7 @@ class LaravelPluginModule extends PluginModule
     public function getCachedServicesPath(): string
     {
         // Check if we are running on a Laravel Vapor managed instance
-        if (! is_null(env('VAPOR_MAINTENANCE_MODE', null))) {
+        if (! is_null(env('VAPOR_MAINTENANCE_MODE'))) {
             return Str::replaceLast('config.php', $this->getSnakeName().'_plugin.php', $this->app->getCachedConfigPath());
         }
 

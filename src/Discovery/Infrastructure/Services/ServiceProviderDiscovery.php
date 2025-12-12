@@ -83,7 +83,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
         }
 
         // Use Spatie's discovery data first to avoid autoloading when possible
-        if (! empty($structure->extendsChain)) {
+        if ($structure->extendsChain !== null && $structure->extendsChain !== []) {
             foreach ($structure->extendsChain as $parentClass) {
                 if ($parentClass === ServiceProvider::class) {
                     return true;

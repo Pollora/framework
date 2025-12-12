@@ -52,9 +52,7 @@ class WordPressPluginParser
         $pluginData['Network'] = $this->parseBooleanValue($pluginData['Network'] ?? '');
 
         // Clean up empty values
-        $pluginData = array_filter($pluginData, function ($value): bool {
-            return $value !== '' && $value !== null;
-        });
+        $pluginData = array_filter($pluginData, fn ($value): bool => $value !== '' && $value !== null);
 
         return $pluginData;
     }
@@ -80,9 +78,7 @@ class WordPressPluginParser
         $pluginData['Network'] = $this->parseBooleanValue($pluginData['Network'] ?? '');
 
         // Clean up empty values
-        $pluginData = array_filter($pluginData, function ($value): bool {
-            return $value !== '' && $value !== null;
-        });
+        $pluginData = array_filter($pluginData, fn ($value): bool => $value !== '' && $value !== null);
 
         return $pluginData;
     }
@@ -112,7 +108,7 @@ class WordPressPluginParser
         $headers = [];
 
         foreach ($defaultHeaders as $field => $regex) {
-            if (preg_match('/^[ \t\/*#@]*'.preg_quote($regex, '/').':(.*)$/mi', $fileData, $match) && $match[1]) {
+            if (preg_match('/^[ \t\/*#@]*'.preg_quote((string) $regex, '/').':(.*)$/mi', $fileData, $match) && $match[1]) {
                 $headers[$field] = $this->cleanupHeaderValue($match[1]);
             } else {
                 $headers[$field] = '';
@@ -130,7 +126,7 @@ class WordPressPluginParser
      */
     protected function cleanupHeaderValue(string $value): string
     {
-        return trim(preg_replace('/\s*(?:\*\/|\?>).*/', '', $value));
+        return trim((string) preg_replace('/\s*(?:\*\/|\?>).*/', '', $value));
     }
 
     /**
@@ -193,7 +189,7 @@ class WordPressPluginParser
         }
 
         return [
-            'valid' => empty($errors),
+            'valid' => $errors === [],
             'errors' => $errors,
             'headers' => $headers,
         ];

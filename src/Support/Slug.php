@@ -65,13 +65,13 @@ class Slug
         $string = preg_replace('/([a-z0-9])([A-Z])/', '$1-$2', $string);
 
         // Convert to lowercase
-        $string = strtolower($string);
+        $string = strtolower((string) $string);
 
         // Replace multiple consecutive hyphens with a single hyphen
         $string = preg_replace('/-+/', '-', $string);
 
         // Trim hyphens from the beginning and end
-        $string = trim($string, '-');
+        $string = trim((string) $string, '-');
 
         return $string;
     }

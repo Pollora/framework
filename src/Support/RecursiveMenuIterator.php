@@ -99,9 +99,9 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
     /**
      * Get iterator for child menu items.
      *
-     * @return self|null Iterator for child items or null if no children
+     * @return Pollora\Support\RecursiveMenuIterator Iterator for child items or null if no children
      */
-    public function getChildren(): ?self
+    public function getChildren(): self
     {
         return new self($this->current()->children);
     }

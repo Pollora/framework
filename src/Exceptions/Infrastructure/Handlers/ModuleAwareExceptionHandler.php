@@ -89,7 +89,7 @@ class ModuleAwareExceptionHandler extends Handler
         // Only handle HTTP exceptions with module-aware view resolution
         if ($e instanceof HttpExceptionInterface && $this->shouldRenderHtmlResponse($request)) {
             $response = $this->renderHttpExceptionWithModuleViews($e, $request);
-            if ($response !== null) {
+            if ($response instanceof \Illuminate\Http\Response) {
                 return $response;
             }
         }
@@ -257,7 +257,7 @@ class ModuleAwareExceptionHandler extends Handler
                 return null;
             }
 
-            $exceptionClass = get_class($e);
+            $exceptionClass = $e::class;
 
             foreach ($reportingRules as $rule) {
                 if (isset($rule['exception']) && $rule['exception'] === $exceptionClass) {

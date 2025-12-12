@@ -42,7 +42,7 @@ class BlockPatternServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $action = $this->app->get(Action::class);
-        $action->add('init', function () {
+        $action->add('init', function (): void {
             // Trigger the application service to register patterns and categories
             $this->app->make(PatternServiceInterface::class)->registerAll();
         });

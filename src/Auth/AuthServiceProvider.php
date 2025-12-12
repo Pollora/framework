@@ -43,7 +43,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerWordPressAuthDriver(AuthManager $auth): void
     {
-        $auth->extend('wp', fn ($app, $name, $config): WordPressGuard => $this->createWordPressGuard($auth, $config));
+        $auth->extend('wp', fn ($app, $name, array $config): WordPressGuard => $this->createWordPressGuard($auth, $config));
 
         $auth->provider('wp', fn ($app, $config): WordPressUserProvider => new WordPressUserProvider);
 

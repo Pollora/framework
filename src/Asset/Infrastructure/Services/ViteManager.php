@@ -168,7 +168,7 @@ class ViteManager implements ViteManagerInterface
             $assets = collect($entrypoints)
                 ->map(fn ($entrypoint) => $manifest[$entrypoint] ?? null)
                 ->filter()
-                ->reduce(function (array $assets, $chunk) use ($buildDirectory) {
+                ->reduce(function (array $assets, array $chunk) use ($buildDirectory): array {
                     /** @var Vite $this */
                     $file = $chunk['file'];
                     $filePath = $this->assetPath("{$buildDirectory}/{$file}");

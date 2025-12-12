@@ -53,7 +53,7 @@ class RewriteServiceProvider extends ServiceProvider
         $manager = $this->permalinkManager;
         $filter->add(
             'redirect_canonical',
-            fn ($canonicalUrl): ?string => $manager->handleCanonicalRedirect($canonicalUrl)
+            fn (?string $canonicalUrl): ?string => $manager->handleCanonicalRedirect($canonicalUrl)
         );
     }
 

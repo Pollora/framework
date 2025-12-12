@@ -111,7 +111,7 @@ class AssetManager
      */
     public function getDefaultContainer(): ?AssetContainer
     {
-        return $this->defaultContainer !== null && $this->defaultContainer !== '' && $this->defaultContainer !== '0' ? $this->getContainer($this->defaultContainer) : null;
+        return in_array($this->defaultContainer, [null, '', '0'], true) ? null : $this->getContainer($this->defaultContainer);
     }
 
     /**

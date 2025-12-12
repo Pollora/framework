@@ -58,7 +58,7 @@ class ExceptionServiceProvider extends ServiceProvider
      */
     protected function registerErrorViewResolver(): void
     {
-        $this->app->singleton(ModuleAwareErrorViewResolver::class, function ($app) {
+        $this->app->singleton(ModuleAwareErrorViewResolver::class, function ($app): \Pollora\Exceptions\Infrastructure\Services\ModuleAwareErrorViewResolver {
             /** @var \Illuminate\Contracts\View\Factory $viewFactory */
             $viewFactory = $app->make('view');
 
@@ -74,9 +74,7 @@ class ExceptionServiceProvider extends ServiceProvider
      */
     protected function registerExceptionHandler(): void
     {
-        $this->app->singleton(ExceptionHandler::class, function ($app) {
-            return new ModuleAwareExceptionHandler($app);
-        });
+        $this->app->singleton(ExceptionHandler::class, fn ($app): \Pollora\Exceptions\Infrastructure\Handlers\ModuleAwareExceptionHandler => new ModuleAwareExceptionHandler($app));
     }
 
     /**

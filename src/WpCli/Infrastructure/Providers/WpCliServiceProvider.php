@@ -38,23 +38,17 @@ class WpCliServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register the WP CLI adapter (Infrastructure layer)
-        $this->app->singleton(WpCliAdapter::class, function ($app): WpCliAdapter {
-            return new WpCliAdapter;
-        });
+        $this->app->singleton(WpCliAdapter::class, fn ($app): WpCliAdapter => new WpCliAdapter);
 
         // Register the WP CLI service (Application layer)
-        $this->app->singleton(WpCliService::class, function ($app): WpCliService {
-            return new WpCliService(
-                $app->make(WpCliAdapter::class)
-            );
-        });
+        $this->app->singleton(WpCliService::class, fn ($app): WpCliService => new WpCliService(
+            $app->make(WpCliAdapter::class)
+        ));
 
         // Register WP CLI Discovery (Infrastructure layer)
-        $this->app->singleton(WpCliDiscovery::class, function ($app): WpCliDiscovery {
-            return new WpCliDiscovery(
-                $app->make(WpCliService::class)
-            );
-        });
+        $this->app->singleton(WpCliDiscovery::class, fn ($app): WpCliDiscovery => new WpCliDiscovery(
+            $app->make(WpCliService::class)
+        ));
 
         // Register console commands
         if ($this->consoleDetectionService->isConsole()) {

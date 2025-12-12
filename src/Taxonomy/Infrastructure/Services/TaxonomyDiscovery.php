@@ -6,10 +6,13 @@ namespace Pollora\Taxonomy\Infrastructure\Services;
 
 use Illuminate\Support\Str;
 use Pollora\Attributes\Taxonomy;
+use Pollora\Discovery\Domain\Contracts\ConfigurableDiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Services\HasConfiguringSupport;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -26,9 +29,9 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  * attributes (like MetaBoxCb, UpdateCountCallback) by aggregating all configuration into a
  * complete WordPress taxonomy registration.
  */
-final class TaxonomyDiscovery implements DiscoveryInterface
+final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasConfiguringSupport, HasInstancePool, IsDiscovery;
 
     /**
      * Create a new Taxonomy discovery
@@ -38,6 +41,38 @@ final class TaxonomyDiscovery implements DiscoveryInterface
     public function __construct(
         private readonly TaxonomyServiceInterface $taxonomyService
     ) {}
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): \Pollora\Entity\Domain\Model\Taxonomy
+    {
+        // Generate singular name if not provided
+        if ($singular === null) {
+            $singular = $this->generateSingular($slug, null);
+        }
+
+        // Generate plural name if not provided
+        if ($plural === null) {
+            $plural = Str::plural($singular);
+        }
+
+        // Extract object type from args, default to ['post']
+        $objectType = $args['object_type'] ?? ['post'];
+        unset($args['object_type']);
+
+        // Create the Entity Taxonomy instance directly without auto-registration
+        $taxonomy = new EntityTaxonomy($slug, $objectType, $singular, $plural);
+        $taxonomy->init();
+        $taxonomy->priority($priority);
+
+        // Apply additional arguments if provided
+        if ($args !== []) {
+            $taxonomy->setRawArgs($args);
+        }
+
+        return $taxonomy;
+    }
 
     /**
      * {@inheritDoc}
@@ -142,15 +177,47 @@ final class TaxonomyDiscovery implements DiscoveryInterface
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config);
 
-            // Register the taxonomy
-            $this->taxonomyService->register(
+            // Call configuring method if present and use the configured entity
+            $configuredEntity = $this->processConfiguring(
+                $className,
                 $config->getSlug(),
-                $config->getObjectType(),
                 $config->getName(),
                 $config->getPluralName(),
-                $config->getArgs(),
+                ['object_type' => $config->getObjectType()], // Pass only object_type initially, we'll apply attribute configs after
                 $config->getPriority()
             );
+
+            // If configuring was called and returned an entity, apply attribute configurations and register
+            if ($configuredEntity !== null) {
+                // Get the args built from entity properties via ArgumentHelper
+                $entityArgs = $configuredEntity->getArgs() ?? [];
+                $attributeArgs = $config->getArgs();
+                
+                // For labels, do a smart merge: use configuring labels as base, add missing ones from attributes
+                if (isset($entityArgs['labels']) && isset($attributeArgs['labels'])) {
+                    $attributeArgs['labels'] = array_merge($attributeArgs['labels'], $entityArgs['labels']);
+                }
+                
+                // Merge other args with configuring() taking priority
+                $finalArgs = array_merge($attributeArgs, $entityArgs);
+                
+                $configuredEntity->setRawArgs($finalArgs);
+
+                // Register the configured entity directly
+                $registry = new \Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter;
+                $registrationService = new \Pollora\Entity\Application\Service\EntityRegistrationService($registry);
+                $registrationService->registerEntity($configuredEntity);
+            } else {
+                // Register the taxonomy using the original service
+                $this->taxonomyService->register(
+                    $config->getSlug(),
+                    $config->getObjectType(),
+                    $config->getName(),
+                    $config->getPluralName(),
+                    $config->getArgs(),
+                    $config->getPriority()
+                );
+            }
 
         } catch (\ReflectionException $e) {
             error_log("Failed to process Taxonomy for class {$className}: ".$e->getMessage());
@@ -294,7 +361,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
 
             if ($reflectionClass->isInstantiable()) {
                 // Use instance pool if available, otherwise create directly
-                $instance = $this->getInstanceFromPool($className, fn () => $reflectionClass->newInstance());
+                $instance = $this->getInstanceFromPool($className, fn (): object => $reflectionClass->newInstance());
 
                 // Check if the instance has a withArgs method
                 if (method_exists($instance, 'withArgs')) {

@@ -27,13 +27,10 @@ class Bootstrap
      */
     private array $db;
 
-    protected \Pollora\Hook\Domain\Contracts\Action $action;
-
-    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, Action $action)
+    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, protected \Pollora\Hook\Domain\Contracts\Action $action)
     {
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
         $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
-        $this->action = $action;
     }
 
     /**
@@ -51,7 +48,7 @@ class Bootstrap
      */
     public function boot(): void
     {
-        $this->db = DB::getConfig(null);
+        $this->db = DB::getConfig();
         $this->setDatabaseConstants();
 
         if ($this->isDatabaseConfigured()) {
@@ -212,7 +209,7 @@ class Bootstrap
         Constant::queue('JETPACK_DEV_DEBUG', $debugMode);
 
         foreach ((array) config('wordpress.constants', []) as $key => $value) {
-            $key = strtoupper($key);
+            $key = strtoupper((string) $key);
             Constant::queue($key, $value);
         }
 

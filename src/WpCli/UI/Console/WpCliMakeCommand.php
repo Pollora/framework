@@ -157,7 +157,7 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
     {
         // Validate command name format
         $commandName = $this->getDefaultOption('command');
-        if (! preg_match('/^[a-z0-9-]+$/', $commandName)) {
+        if (! preg_match('/^[a-z0-9-]+$/', (string) $commandName)) {
             $this->components->error('Command name must only contain lowercase letters, numbers, and hyphens.');
 
             return false;

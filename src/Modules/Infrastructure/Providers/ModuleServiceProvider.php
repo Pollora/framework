@@ -61,8 +61,7 @@ class ModuleServiceProvider extends ServiceProvider
             new Filesystem,
             $this->getModulePaths(),
             $this->getCachedModulePath(),
-            $app->make(ModuleRepositoryInterface::class),
-            null // No longer using legacy scout
+            $app->make(ModuleRepositoryInterface::class) // No longer using legacy scout
         ));
 
         $this->app->singleton(ModuleBootstrap::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleBootstrap => new ModuleBootstrap(

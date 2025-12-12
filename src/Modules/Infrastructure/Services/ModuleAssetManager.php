@@ -228,14 +228,13 @@ class ModuleAssetManager
 
                 if ($reflection->hasProperty('paths')) {
                     $pathsProperty = $reflection->getProperty('paths');
-                    $pathsProperty->setAccessible(true);
                     $pathsProperty->setValue($viewFinder, $newPaths);
                 } else {
                     // Fallback to standard addLocation if reflection fails
                     $viewFinder->addLocation($viewPath);
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Fallback to standard registration if priority registration fails
             try {
                 $viewFinder->addLocation($viewPath);

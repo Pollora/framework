@@ -30,13 +30,13 @@ class ResolveBladeTemplateUseCase
     public function execute(string $templatePath): string
     {
         $realPath = realpath($templatePath);
-        if ($realPath === '' || $realPath === '0' || $realPath === false) {
+        if (in_array($realPath, ['', '0', false], true)) {
             return $templatePath;
         }
 
         // Get view name from the template file path
         $viewName = $this->templateFinder->getViewNameFromPath($realPath);
-        if ($viewName === null || $viewName === '' || $viewName === '0') {
+        if (in_array($viewName, [null, '', '0'], true)) {
             return $templatePath;
         }
 

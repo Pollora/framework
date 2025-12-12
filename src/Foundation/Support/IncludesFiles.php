@@ -40,7 +40,7 @@ trait IncludesFiles
      * $this->includes(__DIR__ . '/config', '*.config.php');
      * ```
      */
-    public function includes($path, string $pattern = '*.php'): void
+    public function includes(string|array $path, string $pattern = '*.php'): void
     {
         foreach (Finder::create()->files()->name($pattern)->in($path)->sortByName() as $file) {
             /** @var \SplFileInfo $file */

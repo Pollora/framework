@@ -79,7 +79,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
         }
 
         try {
-            foreach ($this->discoveredModules as $moduleName => $moduleData) {
+            foreach ($this->discoveredModules as $moduleData) {
                 $moduleData['engine']->apply();
             }
         } catch (\Throwable $e) {
@@ -188,10 +188,12 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             $directories = new \DirectoryIterator($this->basePath);
 
             foreach ($directories as $directory) {
-                if ($directory->isDot() || ! $directory->isDir()) {
+                if ($directory->isDot()) {
                     continue;
                 }
-
+                if (! $directory->isDir()) {
+                    continue;
+                }
                 $moduleName = $directory->getBasename();
 
                 // Only include modules that have typical DDD structure

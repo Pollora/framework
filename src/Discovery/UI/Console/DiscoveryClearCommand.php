@@ -109,11 +109,11 @@ final class DiscoveryClearCommand extends Command
         $cleared = 0;
 
         foreach ($locations as $location) {
-            $cacheId = 'discovery_'.md5($location->getPath());
+            $cacheId = 'discovery_'.md5((string) $location->getPath());
             try {
                 $cacheDriver->forget($cacheId);
                 $cleared++;
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 $this->line("    <warning>Failed to clear cache for location: {$location->getPath()}</warning>");
             }
         }

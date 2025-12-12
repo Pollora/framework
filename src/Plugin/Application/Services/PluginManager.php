@@ -172,7 +172,7 @@ class PluginManager
 
         $activePlugins = get_option('active_plugins', []);
 
-        return ! empty($activePlugins) ? $activePlugins[0] : false;
+        return empty($activePlugins) ? false : $activePlugins[0];
     }
 
     /**
@@ -268,9 +268,7 @@ class PluginManager
     {
         $allPlugins = $this->getAllPluginsAsArray();
 
-        return array_filter($allPlugins, function (PluginModuleInterface $plugin): bool {
-            return $plugin->isActive();
-        });
+        return array_filter($allPlugins, fn (PluginModuleInterface $plugin): bool => $plugin->isActive());
     }
 
     /**
@@ -282,9 +280,7 @@ class PluginManager
     {
         $allPlugins = $this->getAllPluginsAsArray();
 
-        return array_filter($allPlugins, function (PluginModuleInterface $plugin): bool {
-            return ! $plugin->isActive();
-        });
+        return array_filter($allPlugins, fn (PluginModuleInterface $plugin): bool => ! $plugin->isActive());
     }
 
     /**
@@ -479,7 +475,7 @@ class PluginManager
         }
 
         // Check for valid plugin headers
-        if (empty($plugin->getHeaders())) {
+        if ($plugin->getHeaders() === []) {
             $errors[] = 'Plugin headers are missing or invalid';
         }
 
@@ -555,9 +551,7 @@ class PluginManager
     {
         $allPlugins = $this->getAllPluginsAsArray();
 
-        return array_filter($allPlugins, function (PluginModuleInterface $plugin): bool {
-            return $plugin->isNetworkWide();
-        });
+        return array_filter($allPlugins, fn (PluginModuleInterface $plugin): bool => $plugin->isNetworkWide());
     }
 
     /**
@@ -569,8 +563,6 @@ class PluginManager
     {
         $allPlugins = $this->getAllPluginsAsArray();
 
-        return array_filter($allPlugins, function (PluginModuleInterface $plugin): bool {
-            return ! $plugin->isNetworkWide();
-        });
+        return array_filter($allPlugins, fn (PluginModuleInterface $plugin): bool => ! $plugin->isNetworkWide());
     }
 }

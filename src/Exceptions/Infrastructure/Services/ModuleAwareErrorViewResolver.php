@@ -118,7 +118,7 @@ class ModuleAwareErrorViewResolver
      */
     protected function getExceptionSpecificCandidates(Throwable $exception): array
     {
-        $exceptionClass = get_class($exception);
+        $exceptionClass = $exception::class;
         $shortName = class_basename($exceptionClass);
 
         $candidates = [];
@@ -255,7 +255,7 @@ class ModuleAwareErrorViewResolver
 
         return [
             'status_code' => $statusCode,
-            'exception_class' => get_class($exception),
+            'exception_class' => $exception::class,
             'view_candidates' => $candidates,
             'existing_views' => $existingViews,
             'missing_views' => $missingViews,

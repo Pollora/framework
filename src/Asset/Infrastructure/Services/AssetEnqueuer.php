@@ -482,10 +482,10 @@ class AssetEnqueuer
         if ($this->useVite) {
             $this->addViteScriptAttributes();
         }
-        if ($this->loadStrategy !== null && $this->loadStrategy !== '' && $this->loadStrategy !== '0') {
+        if (! in_array($this->loadStrategy, [null, '', '0'], true)) {
             wp_script_add_data($this->handle, 'defer', true);
         }
-        if ($this->inlineContent !== null && $this->inlineContent !== '' && $this->inlineContent !== '0') {
+        if (! in_array($this->inlineContent, [null, '', '0'], true)) {
             wp_add_inline_script($this->handle, $this->inlineContent, $this->inlinePosition);
         }
     }
@@ -499,7 +499,7 @@ class AssetEnqueuer
     protected function enqueueStyle(string $path, string $handle): void
     {
         wp_enqueue_style($handle, $path, $this->dependencies, $this->version, $this->media);
-        if ($this->inlineContent !== null && $this->inlineContent !== '' && $this->inlineContent !== '0') {
+        if (! in_array($this->inlineContent, [null, '', '0'], true)) {
             wp_add_inline_style($handle, $this->inlineContent);
         }
     }

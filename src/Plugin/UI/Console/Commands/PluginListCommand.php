@@ -41,19 +41,13 @@ class PluginListCommand extends Command
     protected $description = 'List all available plugins with filtering and sorting options';
 
     /**
-     * Plugin manager instance.
-     */
-    protected PluginManager $pluginManager;
-
-    /**
      * Create a new command instance.
      *
      * @param  PluginManager  $pluginManager  Plugin manager
      */
-    public function __construct(PluginManager $pluginManager)
+    public function __construct(protected PluginManager $pluginManager)
     {
         parent::__construct();
-        $this->pluginManager = $pluginManager;
     }
 
     /**
@@ -66,7 +60,7 @@ class PluginListCommand extends Command
         try {
             $plugins = $this->getFilteredAndSortedPlugins();
 
-            if (empty($plugins)) {
+            if ($plugins === []) {
                 $this->info('No plugins found matching the criteria.');
 
                 return self::SUCCESS;
@@ -138,15 +132,11 @@ class PluginListCommand extends Command
         }
 
         if ($this->option('network')) {
-            $collection = $collection->filter(function (PluginModuleInterface $plugin): bool {
-                return $plugin->isNetworkWide();
-            });
+            $collection = $collection->filter(fn (PluginModuleInterface $plugin): bool => $plugin->isNetworkWide());
         }
 
         if ($author = $this->option('author')) {
-            $collection = $collection->filter(function (PluginModuleInterface $plugin) use ($author): bool {
-                return $plugin->getAuthor() === $author;
-            });
+            return $collection->filter(fn (PluginModuleInterface $plugin): bool => $plugin->getAuthor() === $author);
         }
 
         return $collection;
@@ -182,12 +172,8 @@ class PluginListCommand extends Command
         $direction = $this->option('direction');
 
         return match ($sortBy) {
-            'version' => $collection->sortBy(function (PluginModuleInterface $plugin): string {
-                return $plugin->getVersion();
-            }, SORT_REGULAR, $direction === 'desc'),
-            'author' => $collection->sortBy(function (PluginModuleInterface $plugin): string {
-                return $plugin->getAuthor();
-            }, SORT_REGULAR, $direction === 'desc'),
+            'version' => $collection->sortBy(fn (PluginModuleInterface $plugin): string => $plugin->getVersion(), SORT_REGULAR, $direction === 'desc'),
+            'author' => $collection->sortBy(fn (PluginModuleInterface $plugin): string => $plugin->getAuthor(), SORT_REGULAR, $direction === 'desc'),
             'status' => $collection->sortBy(function (PluginModuleInterface $plugin): string {
                 if ($plugin->isActive() && $plugin->isEnabled()) {
                     return 'active-enabled';
@@ -303,8 +289,9 @@ class PluginListCommand extends Command
 
         $this->info('Plugin Summary');
         $this->line("Total: {$total} | Active: {$active} | Enabled: {$enabled} | Network-wide: {$networkWide}");
+        $filters = $this->getActiveFiltersText();
 
-        if ($filters = $this->getActiveFiltersText()) {
+        if ($filters !== '' && $filters !== '0') {
             $this->line("Filters: {$filters}");
         }
 

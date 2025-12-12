@@ -119,7 +119,7 @@ class ModuleDownloader
 
         $tags = $response->json();
 
-        return array_map(fn ($tag): mixed => $tag['name'], $tags);
+        return array_map(fn (array $tag): mixed => $tag['name'], $tags);
     }
 
     /**
@@ -141,13 +141,13 @@ class ModuleDownloader
      */
     protected function getDownloadUrl(): string
     {
-        if ($this->version !== null && $this->version !== '' && $this->version !== '0') {
+        if (! in_array($this->version, [null, '', '0'], true)) {
             return "https://github.com/{$this->repository}/archive/refs/tags/{$this->version}.zip";
         }
 
         $tag = $this->getLatestTag();
 
-        if ($tag !== null && $tag !== '' && $tag !== '0') {
+        if (! in_array($tag, [null, '', '0'], true)) {
             return "https://github.com/{$this->repository}/archive/refs/tags/{$tag}.zip";
         }
 
