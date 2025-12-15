@@ -146,17 +146,10 @@ final class DiscoveryServiceProvider extends ServiceProvider
     {
         // Add Laravel app directory for discovery
         $appPath = $this->app->path();
-        if (is_dir($appPath)) {
-            $engine->addLocation(new \Pollora\Discovery\Domain\Models\DirectoryLocation($appPath, 'App'));
+        if (!is_dir($appPath)) {
+            return;
         }
 
-        // Add other common Laravel directories
-        $basePath = $this->app->basePath();
-
-        // Add app directory if different from above
-        $appDir = $basePath.'/app';
-        if (is_dir($appDir) && $appDir !== $appPath) {
-            $engine->addLocation(new \Pollora\Discovery\Domain\Models\DirectoryLocation($appDir, 'App'));
-        }
+        $engine->addLocation(new \Pollora\Discovery\Domain\Models\DirectoryLocation($appPath, 'App'));
     }
 }

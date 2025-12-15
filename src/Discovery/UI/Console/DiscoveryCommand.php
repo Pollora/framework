@@ -193,6 +193,7 @@ final class DiscoveryCommand extends Command
         }
 
         $locations = $discoveryManager->getLocations();
+
         $moduleCount = count($moduleResults);
         $frameworkCount = count($frameworkResults);
 
