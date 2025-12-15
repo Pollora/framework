@@ -94,13 +94,13 @@ it('registers a filter hook correctly', function () {
     $testClass = new SingleFilterClass;
     $filterAttribute = new Filter('test_filter', 10);
     $methodReflection = new ReflectionMethod($testClass, 'filterMethod');
-    
+
     $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 
 it('registers multiple filter hooks with different priorities', function () {
     $testClass = new MultipleFilterClass;
-    
+
     // Test first filter
     $this->mockFilter->shouldReceive('add')
         ->once()
@@ -149,7 +149,7 @@ it('registers a filter hook with default priority (10)', function () {
     $testClass = new DefaultPriorityFilterClass;
     $filterAttribute = new Filter('test_filter'); // No priority specified, should default to 10
     $methodReflection = new ReflectionMethod($testClass, 'filterMethod');
-    
+
     $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 
@@ -170,7 +170,7 @@ it('registers a filter hook with custom priority', function () {
     $testClass = new CustomPriorityFilterClass;
     $filterAttribute = new Filter('test_filter', 99);
     $methodReflection = new ReflectionMethod($testClass, 'filterMethod');
-    
+
     $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 

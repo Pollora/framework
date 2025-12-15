@@ -95,13 +95,13 @@ it('registers an action hook correctly', function () {
     $testClass = new SingleActionClass;
     $actionAttribute = new Action('test_action', 10);
     $methodReflection = new ReflectionMethod($testClass, 'actionMethod');
-    
+
     $actionAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $actionAttribute);
 });
 
 it('registers multiple action hooks with different priorities', function () {
     $testClass = new MultipleActionClass;
-    
+
     // Test first action
     $this->mockAction->shouldReceive('add')
         ->once()
@@ -150,7 +150,7 @@ it('registers an action hook with default priority (10)', function () {
     $testClass = new DefaultPriorityActionClass;
     $actionAttribute = new Action('test_action'); // No priority specified, should default to 10
     $methodReflection = new ReflectionMethod($testClass, 'actionMethod');
-    
+
     $actionAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $actionAttribute);
 });
 
@@ -171,7 +171,7 @@ it('registers an action hook with custom priority', function () {
     $testClass = new CustomPriorityActionClass;
     $actionAttribute = new Action('test_action', 42);
     $methodReflection = new ReflectionMethod($testClass, 'actionMethod');
-    
+
     $actionAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $actionAttribute);
 });
 

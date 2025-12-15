@@ -88,7 +88,7 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
     {
         // Remove discovery engine from container
         unset($this->container[DiscoveryEngineInterface::class]);
-        
+
         // Should not throw an exception when no discovery engine is bound
         $this->expectNotToPerformAssertions();
         $this->provider->boot();
