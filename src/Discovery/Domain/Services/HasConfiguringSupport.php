@@ -40,7 +40,6 @@ trait HasConfiguringSupport
                 return null;
             }
 
-            // Réutiliser l'instance du pool pour cohérence avec withArgs
             $instance = $this->getInstanceFromPool(
                 $className,
                 fn (): object => $reflectionClass->newInstance()
@@ -50,10 +49,8 @@ trait HasConfiguringSupport
                 return null;
             }
 
-            // Créer l'entity pour la configuration
             $entity = $this->createEntityForConfiguring($slug, $singular, $plural, $args, $priority);
 
-            // Appeler configuring avec l'entity
             $instance->configuring($entity);
 
             return $entity;

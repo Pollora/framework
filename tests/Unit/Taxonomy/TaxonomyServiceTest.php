@@ -22,12 +22,14 @@ test('register calls make on factory', function () {
     $objectType = 'post';
     $singular = 'Test Taxonomy';
     $plural = 'Test Taxonomies';
+    $args = []; // Default empty args
+    $priority = 5; // Default priority
 
     // Configure the mock factory - register method should only call the factory to create the taxonomy
     // (pollora/entity handles the WordPress registration automatically)
     $this->mockFactory
         ->shouldReceive('make')
-        ->with($slug, $objectType, $singular, $plural)
+        ->with($slug, $objectType, $singular, $plural, $args, $priority)
         ->once()
         ->andReturn($this->mockTaxonomy);
 

@@ -12,7 +12,6 @@ use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
-use ReflectionClass;
 use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
@@ -59,10 +58,10 @@ final class HookDiscovery implements DiscoveryInterface
 
         try {
             $className = $structure->namespace.'\\'.$structure->name;
-            
+
             $reflectionClass = $reflectionCache->getClassReflection($className);
-            $methods = $reflectionCache->getPublicMethods($className);
-            
+            $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
             foreach ($methods as $method) {
                 // Check for Action attributes
                 $actionAttributes = $method->getAttributes(Action::class);

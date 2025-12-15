@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\WpRest\Infrastructure\Providers;
 
 use Illuminate\Container\Container;
-use Pollora\Attributes\AttributeProcessor;
-use Pollora\Discovery\Application\Services\DiscoveryManager;
-use Pollora\WpRest\AbstractWpRestRoute;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\WpRest\Infrastructure\Providers\WpRestAttributeServiceProvider;
 use Pollora\WpRest\Infrastructure\Services\WpRestDiscovery;
 use Tests\TestCase as BaseTestCase;
@@ -24,7 +22,7 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
 
     private WpRestAttributeServiceProvider $provider;
 
-    private DiscoveryManager $discoveryManager;
+    private DiscoveryEngineInterface $discoveryEngine;
 
     protected function setUp(): void
     {
@@ -33,14 +31,9 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
         $this->container = new Container;
         $this->provider = new WpRestAttributeServiceProvider($this->container);
 
-        // Create mock discovery manager
-        $this->discoveryManager = $this->createMock(DiscoveryManager::class);
-        $this->container->instance(DiscoveryManager::class, $this->discoveryManager);
-
-        // Bind AttributeProcessor
-        $this->container->bind(AttributeProcessor::class, function ($app) {
-            return new AttributeProcessor($app);
-        });
+        // Create mock discovery engine
+        $this->discoveryEngine = $this->createMock(DiscoveryEngineInterface::class);
+        $this->container->instance(DiscoveryEngineInterface::class, $this->discoveryEngine);
     }
 
     public function test_register_registers_wprest_discovery(): void
@@ -80,41 +73,25 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
         $this->provider->boot();
     }
 
-    public function test_register_wp_rest_route_skips_invalid_classes(): void
+    public function test_boot_registers_wprest_discovery_with_engine(): void
     {
-        // Bind a non-REST route class
-        $this->container->bind('InvalidClass', function () {
-            return new \stdClass;
-        });
+        // Test that boot method registers WpRestDiscovery with the discovery engine
+        $this->discoveryEngine->expects($this->once())
+            ->method('addDiscovery')
+            ->with('wp_rest_routes', $this->isInstanceOf(WpRestDiscovery::class));
 
-        $reflection = new \ReflectionClass($this->provider);
-        $method = $reflection->getMethod('registerWpRestRoute');
-        $method->setAccessible(true);
-
-        $processor = new AttributeProcessor($this->container);
-
-        // Should not throw an exception for invalid classes
-        $this->expectNotToPerformAssertions();
-        $method->invoke($this->provider, 'InvalidClass', $processor);
+        $this->provider->register();
+        $this->provider->boot();
     }
 
-    public function test_register_wp_rest_route_processes_valid_routes(): void
+    public function test_boot_handles_no_discovery_engine_gracefully(): void
     {
-        $this->container->bind(TestWpRestRoute::class, function () {
-            return new TestWpRestRoute;
-        });
-
-        // Mock the AttributeProcessor to avoid WordPress function calls
-        $mockProcessor = $this->createMock(AttributeProcessor::class);
-        $mockProcessor->expects($this->once())
-            ->method('process')
-            ->with($this->isInstanceOf(TestWpRestRoute::class));
-
-        $reflection = new \ReflectionClass($this->provider);
-        $method = $reflection->getMethod('registerWpRestRoute');
-        $method->setAccessible(true);
-
-        $method->invoke($this->provider, TestWpRestRoute::class, $mockProcessor);
+        // Remove discovery engine from container
+        unset($this->container[DiscoveryEngineInterface::class]);
+        
+        // Should not throw an exception when no discovery engine is bound
+        $this->expectNotToPerformAssertions();
+        $this->provider->boot();
     }
 
     public function test_boot_registers_discovered_wp_rest_routes_with_valid_data(): void
@@ -129,7 +106,7 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
 /**
  * Test WordPress REST route class for testing purposes.
  */
-class TestWpRestRoute extends AbstractWpRestRoute
+class TestWpRestRoute
 {
     public string $namespace = 'test/v1';
 

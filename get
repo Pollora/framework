@@ -1,0 +1,18 @@
+src/Hook/Infrastructure/Services/HookDiscovery.php:            $reflectionClass = $reflectionCache->getClassReflection($className);
+src/Hook/Infrastructure/Services/HookDiscovery.php:            $methods = $reflectionCache->getPublicMethods($className);
+src/WpCli/Infrastructure/Services/WpCliDiscovery.php:        $reflectionClass = $reflectionCache->getClassReflection($className);
+src/Schedule/Infrastructure/Services/ScheduleDiscovery.php:            $reflectionClass = $reflectionCache->getClassReflection($className);
+src/Schedule/Infrastructure/Services/ScheduleDiscovery.php:            $methods = $reflectionCache->getPublicMethods($className);
+src/WpRest/Infrastructure/Services/WpRestDiscovery.php:                $reflectionClass = $reflectionCache->getClassReflection($className);
+src/WpRest/Infrastructure/Services/WpRestDiscovery.php:                $wpRestRouteAttributes = $reflectionCache->getClassAttributes($className, WpRestRoute::class);
+src/PostType/Infrastructure/Services/PostTypeDiscovery.php:            $reflectionClass = $reflectionCache->getClassReflection($className);
+src/PostType/Infrastructure/Services/PostTypeDiscovery.php:            $postTypeAttributes = $reflectionCache->getClassAttributes($className, PostType::class);
+src/PostType/Infrastructure/Services/PostTypeDiscovery.php:            $reflectionClass = $reflectionCache->getClassReflection($className);
+src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php:            $reflectionClass = $reflectionCache->getClassReflection($className);
+src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php:            $taxonomyAttributes = $reflectionCache->getClassAttributes($className, Taxonomy::class);
+src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php:            $reflectionClass = $reflectionCache->getClassReflection($className);
+src/Discovery/Infrastructure/Services/DiscoveryEngine.php:                        $reflection = $reflectionCache->getClassReflection($className);
+src/Discovery/Infrastructure/Services/DiscoveryEngine.php:                        $classAttributes = $reflectionCache->getClassAttributes($className);
+src/Discovery/Infrastructure/Services/DiscoveryEngine.php:                        $methodsWithAttributes = $reflectionCache->getMethodsWithAttributes($className);
+src/Discovery/Domain/Models/DiscoveryContext.php:        $this->reflectionCache->preloadClasses($classNames);
+src/Discovery/Domain/Services/HasConfiguringSupport.php:            $reflectionClass = $reflectionCache->getClassReflection($className);

@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Attributes\Attributable;
-use Pollora\Attributes\AttributeProcessor;
 use Pollora\Attributes\Filter;
 use Pollora\Hook\Infrastructure\Services\Filter as FilterService;
 
@@ -12,8 +10,8 @@ beforeEach(function () {
     // Mock Filter service
     $this->mockFilter = Mockery::mock(FilterService::class);
 
-    // Create a fake container that will be wrapped by ContainerServiceLocator
-    $this->mockContainer = new class($this->mockFilter)
+    // Create a fake service locator
+    $this->mockServiceLocator = new class($this->mockFilter)
     {
         private $filterService;
 
@@ -31,11 +29,9 @@ beforeEach(function () {
             return null;
         }
     };
-
-    $this->processor = new AttributeProcessor($this->mockContainer);
 });
 
-class SingleFilterClass implements Attributable
+class SingleFilterClass
 {
     #[Filter('test_filter', priority: 10)]
     public function filterMethod(string $value): string
@@ -44,7 +40,7 @@ class SingleFilterClass implements Attributable
     }
 }
 
-class MultipleFilterClass implements Attributable
+class MultipleFilterClass
 {
     #[Filter('test_filter', priority: 10)]
     public function filterMethod(string $value): string
@@ -61,7 +57,7 @@ class MultipleFilterClass implements Attributable
     }
 }
 
-class DefaultPriorityFilterClass implements Attributable
+class DefaultPriorityFilterClass
 {
     #[Filter('test_filter')]
     public function filterMethod(string $value): string
@@ -71,7 +67,7 @@ class DefaultPriorityFilterClass implements Attributable
     }
 }
 
-class CustomPriorityFilterClass implements Attributable
+class CustomPriorityFilterClass
 {
     #[Filter('test_filter', priority: 99)]
     public function filterMethod(string $value): string
@@ -94,13 +90,18 @@ it('registers a filter hook correctly', function () {
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Test the filter attribute directly using handle method
     $testClass = new SingleFilterClass;
-    $this->processor->process($testClass);
+    $filterAttribute = new Filter('test_filter', 10);
+    $methodReflection = new ReflectionMethod($testClass, 'filterMethod');
+    
+    $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 
 it('registers multiple filter hooks with different priorities', function () {
-    // Set up expectations for both filters
+    $testClass = new MultipleFilterClass;
+    
+    // Test first filter
     $this->mockFilter->shouldReceive('add')
         ->once()
         ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
@@ -111,6 +112,11 @@ it('registers multiple filter hooks with different priorities', function () {
                 && $priority === 10;
         });
 
+    $filterAttribute1 = new Filter('test_filter', 10);
+    $methodReflection1 = new ReflectionMethod($testClass, 'filterMethod');
+    $filterAttribute1->handle($this->mockServiceLocator, $testClass, $methodReflection1, $filterAttribute1);
+
+    // Test second filter
     $this->mockFilter->shouldReceive('add')
         ->once()
         ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
@@ -121,9 +127,9 @@ it('registers multiple filter hooks with different priorities', function () {
                 && $priority === 20;
         });
 
-    // Process the test class
-    $testClass = new MultipleFilterClass;
-    $this->processor->process($testClass);
+    $filterAttribute2 = new Filter('another_filter', 20);
+    $methodReflection2 = new ReflectionMethod($testClass, 'anotherFilterMethod');
+    $filterAttribute2->handle($this->mockServiceLocator, $testClass, $methodReflection2, $filterAttribute2);
 });
 
 it('registers a filter hook with default priority (10)', function () {
@@ -139,9 +145,12 @@ it('registers a filter hook with default priority (10)', function () {
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Test with default priority
     $testClass = new DefaultPriorityFilterClass;
-    $this->processor->process($testClass);
+    $filterAttribute = new Filter('test_filter'); // No priority specified, should default to 10
+    $methodReflection = new ReflectionMethod($testClass, 'filterMethod');
+    
+    $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 
 it('registers a filter hook with custom priority', function () {
@@ -157,9 +166,12 @@ it('registers a filter hook with custom priority', function () {
                 && $acceptedArgs === 1;
         });
 
-    // Process the test class
+    // Test with custom priority
     $testClass = new CustomPriorityFilterClass;
-    $this->processor->process($testClass);
+    $filterAttribute = new Filter('test_filter', 99);
+    $methodReflection = new ReflectionMethod($testClass, 'filterMethod');
+    
+    $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 
 it('executes filter and returns modified value', function () {
@@ -174,9 +186,11 @@ it('executes filter and returns modified value', function () {
         ->with('test_filter', 'original')
         ->andReturn('modified_original');
 
-    // Process the test class
+    // Test filter attribute directly
     $testClass = new SingleFilterClass;
-    $this->processor->process($testClass);
+    $filterAttribute = new Filter('test_filter', 10);
+    $methodReflection = new ReflectionMethod($testClass, 'filterMethod');
+    $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 
     // Test the apply method
     $result = $this->mockFilter->apply('test_filter', 'original');
@@ -184,8 +198,8 @@ it('executes filter and returns modified value', function () {
 });
 
 it('handles null service locator resolution gracefully', function () {
-    // Create a container that returns null for the service
-    $mockContainer = new class
+    // Create a service locator that returns null for the service
+    $mockServiceLocator = new class
     {
         public function get($serviceClass)
         {
@@ -193,11 +207,12 @@ it('handles null service locator resolution gracefully', function () {
         }
     };
 
-    $processor = new AttributeProcessor($mockContainer);
     $testClass = new SingleFilterClass;
+    $filterAttribute = new Filter('test_filter', 10);
+    $methodReflection = new ReflectionMethod($testClass, 'filterMethod');
 
     // This should not throw an exception
-    $processor->process($testClass);
+    $filterAttribute->handle($mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 
     // No assertions needed - we're just checking that it doesn't throw
     expect(true)->toBeTrue();
