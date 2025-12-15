@@ -202,34 +202,6 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Find the main service provider for this plugin.
-     *
-     * This method is kept for compatibility with ModuleManifest but
-     * provider discovery is now primarily handled by ServiceProviderScout.
-     *
-     * @return string|null Main service provider class name
-     */
-    public function findMainServiceProvider(): ?string
-    {
-        $possibleClasses = [
-            "Plugin\\{$this->getStudlyName()}\\Providers\\PluginServiceProvider",
-            "Plugin\\{$this->getStudlyName()}\\PluginServiceProvider",
-            // Legacy support for old naming conventions
-            "App\\Plugins\\{$this->getStudlyName()}\\Providers\\PluginServiceProvider",
-            "App\\Plugins\\{$this->getStudlyName()}\\PluginServiceProvider",
-            "Plugins\\{$this->getStudlyName()}\\Providers\\PluginServiceProvider",
-        ];
-
-        foreach ($possibleClasses as $class) {
-            if (class_exists($class)) {
-                return $class;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Get plugin routes directory.
      *
      * @return string Plugin routes directory path
