@@ -164,6 +164,7 @@ class ModuleAwareExceptionHandler extends Handler
                 method: 'renderHttpExceptionWithModuleViews'
             );
             $this->loggingService->error('Failed to render module error view', $context, $renderException);
+
             return null;
         }
     }

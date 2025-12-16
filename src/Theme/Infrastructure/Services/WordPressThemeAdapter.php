@@ -68,7 +68,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
                 extra: ['path' => $sanitizedPath]
             );
             $this->loggingService->error('Failed to register theme directory', $context, $e);
-            
+
             return false;
         }
     }

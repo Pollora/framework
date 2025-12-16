@@ -24,8 +24,6 @@ use WP_Error;
  */
 class WordPressGuard implements StatefulGuard
 {
-    public $user;
-
     use GuardHelpers;
 
     /**

@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace Pollora\Modules\Infrastructure\Providers;
 
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Pollora\Logging\Application\Services\LoggingService;
 use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
-use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
-use Pollora\Modules\Infrastructure\Services\ModuleBootstrap;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
-use Pollora\Modules\Infrastructure\Services\ModuleManifest;
 
 /**
  * Main service provider for the generic module system.
@@ -55,20 +50,6 @@ class ModuleServiceProvider extends ServiceProvider
         // Load helper functions
         $this->loadHelperFunctions();
 
-        // Legacy services kept for compatibility but simplified
-        $this->app->singleton(ModuleManifest::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleManifest => new ModuleManifest(
-            new Filesystem,
-            $this->getModulePaths(),
-            $this->getCachedModulePath(),
-            $app->make(ModuleRepositoryInterface::class) // No longer using legacy scout
-        ));
-
-        $this->app->singleton(ModuleBootstrap::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleBootstrap => new ModuleBootstrap(
-            $app,
-            $app->make(ModuleRepositoryInterface::class),
-            $router
-        ));
-
         // Discover Laravel modules but don't apply yet
         $this->discoverLaravelModules();
         $this->applyLaravelModules();
@@ -91,22 +72,6 @@ class ModuleServiceProvider extends ServiceProvider
     protected function loadHelperFunctions(): void
     {
         require_once __DIR__.'/../../UI/Helpers/discovery_functions.php';
-    }
-
-    /**
-     * Get module paths from configuration.
-     */
-    protected function getModulePaths(): array
-    {
-        return [$this->app['config']->get('modules.paths.modules', base_path('modules'))];
-    }
-
-    /**
-     * Get the cached module path.
-     */
-    protected function getCachedModulePath(): string
-    {
-        return Str::replaceLast('services.php', 'modules.php', $this->app->getCachedServicesPath());
     }
 
     /**
