@@ -469,20 +469,12 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     protected function logError(string $message, ?\Throwable $exception = null, array $extra = []): void
     {
-        if ($this->loggingService instanceof LoggingService) {
-            $context = new LogContext(
-                module: 'Plugin',
-                class: static::class,
-                method: debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'] ?? 'unknown',
-                extra: $extra
-            );
-            $this->loggingService->error($message, $context, $exception);
-        } elseif (function_exists('error_log')) {
-            $errorMessage = '[PluginRepository] '.$message;
-            if ($exception instanceof \Throwable) {
-                $errorMessage .= ': '.$exception->getMessage();
-            }
-            error_log($errorMessage);
-        }
+        $context = new LogContext(
+            module: 'Plugin',
+            class: static::class,
+            method: debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'] ?? 'unknown',
+            extra: $extra
+        );
+        $this->loggingService->error($message, $context, $exception);
     }
 }

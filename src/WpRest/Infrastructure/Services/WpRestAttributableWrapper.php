@@ -49,14 +49,12 @@ final readonly class WpRestAttributableWrapper implements Attributable
                 return $reflectionClass->newInstance();
             }
         } catch (\Throwable $e) {
-            if ($this->loggingService instanceof \Pollora\Logging\Application\Services\LoggingService) {
-                $this->loggingService->error(
-                    'Failed to create instance of {className}: {message}',
-                    LogContext::fromException('WpRest', $e, [
-                        'className' => $this->className,
-                    ])
-                );
-            }
+            $this->loggingService->error(
+                'Failed to create instance of {className}: {message}',
+                LogContext::fromException('WpRest', $e, [
+                    'className' => $this->className,
+                ])
+            );
         }
 
         return null;

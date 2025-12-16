@@ -61,19 +61,14 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         try {
             return \register_theme_directory($sanitizedPath);
         } catch (\Throwable $e) {
-            // Log error if logging is available but don't break execution
-            if ($this->loggingService instanceof LoggingService) {
-                $context = new LogContext(
-                    module: 'Theme',
-                    class: static::class,
-                    method: 'registerThemeDirectory',
-                    extra: ['path' => $sanitizedPath]
-                );
-                $this->loggingService->error('Failed to register theme directory', $context, $e);
-            } elseif ($this->isFunctionAvailable('error_log')) {
-                \error_log("Failed to register theme directory: {$e->getMessage()}");
-            }
-
+            $context = new LogContext(
+                module: 'Theme',
+                class: static::class,
+                method: 'registerThemeDirectory',
+                extra: ['path' => $sanitizedPath]
+            );
+            $this->loggingService->error('Failed to register theme directory', $context, $e);
+            
             return false;
         }
     }

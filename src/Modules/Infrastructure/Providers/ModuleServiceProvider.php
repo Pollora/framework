@@ -28,13 +28,10 @@ class ModuleServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register ModuleAutoloader service
-        $this->app->singleton(ModuleAutoloader::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleAutoloader => new ModuleAutoloader($app));
+        $this->app->singleton(ModuleAutoloader::class);
 
         // Register ModuleDiscoveryOrchestrator
-        $this->app->singleton(ModuleDiscoveryOrchestrator::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator => new ModuleDiscoveryOrchestrator(
-            $app,
-            $app->make(LoggingService::class)
-        ));
+        $this->app->singleton(ModuleDiscoveryOrchestrator::class);
 
         // Register interface binding
         $this->app->bind(ModuleDiscoveryOrchestratorInterface::class, ModuleDiscoveryOrchestrator::class);
@@ -43,21 +40,11 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->alias(ModuleDiscoveryOrchestrator::class, 'modules.discovery');
 
         // Register new generic module services
-        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader => new \Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader(
-            $app,
-            $app->make(\Pollora\Config\Domain\Contracts\ConfigRepositoryInterface::class),
-            $app->make(LoggingService::class)
-        ));
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class);
 
-        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleComponentManager => new \Pollora\Modules\Infrastructure\Services\ModuleComponentManager(
-            $app,
-            $app->make(LoggingService::class)
-        ));
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class);
 
-        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleAssetManager => new \Pollora\Modules\Infrastructure\Services\ModuleAssetManager(
-            $app,
-            $app->make(LoggingService::class)
-        ));
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class);
 
         // Merge configuration
         $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');

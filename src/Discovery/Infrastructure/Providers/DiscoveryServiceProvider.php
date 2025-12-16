@@ -79,13 +79,7 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     private function registerDiscoveryEngine(): void
     {
-        $this->app->singleton(DiscoveryEngineInterface::class, fn ($app): DiscoveryEngine => new DiscoveryEngine(
-            container: $app,
-            debugDetector: $app->make(\Pollora\Application\Domain\Contracts\DebugDetectorInterface::class),
-            loggingService: $app->make(\Pollora\Logging\Application\Services\LoggingService::class),
-            reflectionCache: $app->make(ReflectionCacheInterface::class),
-            instancePool: $app->make(InstancePool::class)
-        ));
+        $this->app->singleton(DiscoveryEngineInterface::class, DiscoveryEngine::class);
     }
 
     /**
@@ -93,9 +87,7 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     private function registerDiscoveryManager(): void
     {
-        $this->app->singleton(DiscoveryManager::class, fn ($app): \Pollora\Discovery\Application\Services\DiscoveryManager => new DiscoveryManager(
-            engine: $app->make(DiscoveryEngineInterface::class)
-        ));
+        $this->app->singleton(DiscoveryManager::class);
     }
 
     /**

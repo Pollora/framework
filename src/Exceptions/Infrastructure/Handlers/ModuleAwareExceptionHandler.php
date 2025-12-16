@@ -73,17 +73,12 @@ class ModuleAwareExceptionHandler extends Handler
                 $viewFactory = $this->container->make('view');
                 $this->errorViewResolver = new ModuleAwareErrorViewResolver($this->container, $viewFactory);
             } catch (Throwable $e) {
-                // Log error but don't fail - fall back to default behavior
-                if (isset($this->loggingService)) {
-                    $context = new LogContext(
-                        module: 'Exceptions',
-                        class: static::class,
-                        method: 'initializeErrorViewResolver'
-                    );
-                    $this->loggingService->error('Failed to initialize ModuleAwareErrorViewResolver', $context, $e);
-                } elseif (function_exists('error_log')) {
-                    error_log('Failed to initialize ModuleAwareErrorViewResolver: '.$e->getMessage());
-                }
+                $context = new LogContext(
+                    module: 'Exceptions',
+                    class: static::class,
+                    method: 'initializeErrorViewResolver'
+                );
+                $this->loggingService->error('Failed to initialize ModuleAwareErrorViewResolver', $context, $e);
             }
         }
     }
@@ -163,18 +158,12 @@ class ModuleAwareExceptionHandler extends Handler
             return response()->view($viewName, $viewData, $statusCode, $e->getHeaders());
 
         } catch (Throwable $renderException) {
-            // Log rendering error but don't fail - fall back to default behavior
-            if (isset($this->loggingService)) {
-                $context = new LogContext(
-                    module: 'Exceptions',
-                    class: static::class,
-                    method: 'renderHttpExceptionWithModuleViews'
-                );
-                $this->loggingService->error('Failed to render module error view', $context, $renderException);
-            } elseif (function_exists('error_log')) {
-                error_log('Failed to render module error view: '.$renderException->getMessage());
-            }
-
+            $context = new LogContext(
+                module: 'Exceptions',
+                class: static::class,
+                method: 'renderHttpExceptionWithModuleViews'
+            );
+            $this->loggingService->error('Failed to render module error view', $context, $renderException);
             return null;
         }
     }
