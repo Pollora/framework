@@ -49,9 +49,7 @@ class TaxonomyServiceProvider extends ServiceProvider
         $this->app->singleton(TaxonomyService::class, fn ($app) => $app->make(TaxonomyServiceInterface::class));
 
         // Register Taxonomy Discovery
-        $this->app->singleton(TaxonomyDiscovery::class, fn ($app): \Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery => new TaxonomyDiscovery(
-            $app->make(TaxonomyServiceInterface::class)
-        ));
+        $this->app->singleton(TaxonomyDiscovery::class);
 
         // Register commands
         if ($this->app->runningInConsole()) {

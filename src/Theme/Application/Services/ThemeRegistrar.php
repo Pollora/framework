@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
@@ -25,7 +27,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
     public function __construct(
         protected ContainerInterface $app,
-        protected WordPressThemeParser $themeParser
+        protected WordPressThemeParser $themeParser,
+        protected LoggingService $loggingService
     ) {}
 
     /**
@@ -97,7 +100,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
                 $repository->resetCache();
             }
         } catch (\Exception $e) {
-            $this->logError('Failed to invalidate theme repository cache: '.$e->getMessage());
+            $context = LogContext::fromClass(self::class, 'invalidateRepositoryCache');
+            $this->loggingService->error('Failed to invalidate theme repository cache', $context, $e);
         }
     }
 
@@ -119,7 +123,13 @@ class ThemeRegistrar implements ThemeRegistrarInterface
                 $discoveryService->discover($appPath);
             }
         } catch (\Exception $e) {
-            $this->logError("Theme discovery error for {$theme->getName()}: ".$e->getMessage());
+            $context = new LogContext(
+                module: 'Theme',
+                class: self::class,
+                method: 'discoverThemeStructures',
+                extra: ['theme_name' => $theme->getName()]
+            );
+            $this->loggingService->error('Theme discovery error', $context, $e);
         }
     }
 
@@ -158,7 +168,17 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             ? $structure->getFqn()
             : 'unknown';
 
-        $this->logError("Discovered {$scoutType} in theme {$theme->getName()}: {$structureInfo}");
+        $context = new LogContext(
+            module: 'Theme',
+            class: self::class,
+            method: 'processDiscoveredStructure',
+            extra: [
+                'scout_type' => $scoutType,
+                'theme_name' => $theme->getName(),
+                'structure_info' => $structureInfo,
+            ]
+        );
+        $this->loggingService->debug("Discovered {$scoutType} in theme", $context);
     }
 
     /**
@@ -195,16 +215,6 @@ class ThemeRegistrar implements ThemeRegistrarInterface
     }
 
     /**
-     * Log error message.
-     */
-    protected function logError(string $message): void
-    {
-        if (function_exists('error_log')) {
-            error_log($message);
-        }
-    }
-
-    /**
      * Load theme-specific configuration.
      */
     protected function loadThemeConfiguration(ThemeModuleInterface $theme): void
@@ -222,7 +232,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
                 'theme'
             );
         } catch (\Exception $e) {
-            $this->logError('Failed to load theme configuration: '.$e->getMessage());
+            $context = LogContext::fromClass(self::class, 'loadThemeConfiguration');
+            $this->loggingService->error('Failed to load theme configuration', $context, $e);
         }
     }
 
@@ -255,7 +266,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             $componentManager->registerModuleComponents($moduleId, $themeComponents);
             $componentManager->initializeModuleComponents($moduleId);
         } catch (\Exception $e) {
-            $this->logError('Failed to setup theme components: '.$e->getMessage());
+            $context = LogContext::fromClass(self::class, 'setupThemeComponents');
+            $this->loggingService->error('Failed to setup theme components', $context, $e);
         }
     }
 
@@ -285,7 +297,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             // Register Blade directives
             $assetManager->registerModuleBladeDirectives($theme->getPath());
         } catch (\Exception $e) {
-            $this->logError('Failed to setup theme assets: '.$e->getMessage());
+            $context = LogContext::fromClass(self::class, 'setupThemeAssets');
+            $this->loggingService->error('Failed to setup theme assets', $context, $e);
         }
     }
 }

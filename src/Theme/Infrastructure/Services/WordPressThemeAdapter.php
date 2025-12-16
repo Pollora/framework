@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Services;
 
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
 
 /**
@@ -18,6 +20,15 @@ class WordPressThemeAdapter implements WordPressThemeInterface
     public const DEFAULT_THEME_NAME = 'default';
 
     public const DEFAULT_URI = '/';
+
+    /**
+     * Create a new WordPress theme adapter.
+     *
+     * @param  LoggingService|null  $loggingService  The logging service for error handling (optional)
+     */
+    public function __construct(
+        private readonly ?LoggingService $loggingService = null
+    ) {}
 
     /**
      * Check if WordPress is in installation mode.
@@ -51,7 +62,15 @@ class WordPressThemeAdapter implements WordPressThemeInterface
             return \register_theme_directory($sanitizedPath);
         } catch (\Throwable $e) {
             // Log error if logging is available but don't break execution
-            if ($this->isFunctionAvailable('error_log')) {
+            if ($this->loggingService instanceof LoggingService) {
+                $context = new LogContext(
+                    module: 'Theme',
+                    class: static::class,
+                    method: 'registerThemeDirectory',
+                    extra: ['path' => $sanitizedPath]
+                );
+                $this->loggingService->error('Failed to register theme directory', $context, $e);
+            } elseif ($this->isFunctionAvailable('error_log')) {
                 \error_log("Failed to register theme directory: {$e->getMessage()}");
             }
 

@@ -18,7 +18,7 @@ class Priority extends TaxonomyAttribute
     /**
      * Constructor.
      *
-     * @param  init  $priority  The taxonomy priority declaration
+     * @param  int  $priority  The taxonomy priority declaration
      */
     public function __construct(
         public readonly int $priority = 5

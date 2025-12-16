@@ -6,6 +6,8 @@ use Pollora\Attributes\WpRestRoute;
 use Pollora\Attributes\WpRestRoute\Method;
 use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\Contracts\LoggerInterface;
 use Pollora\WpRest\Infrastructure\Services\WpRestDiscovery;
 
 // Mock WordPress functions if they don't exist
@@ -97,8 +99,16 @@ describe('WpRestDiscovery', function () {
         $wp_actions = [];
     });
 
+    function createMockLoggingService(): LoggingService
+    {
+        $mockLogger = Mockery::mock(LoggerInterface::class);
+        $mockLogger->shouldReceive('logWithModule')->andReturn(null);
+
+        return new LoggingService($mockLogger);
+    }
+
     test('discover method processes only DiscoveredClass instances', function () {
-        $discovery = new WpRestDiscovery;
+        $discovery = new WpRestDiscovery(createMockLoggingService());
 
         // Test that discovery starts empty
         expect($discovery->getItems()->all())->toHaveCount(0);
@@ -111,7 +121,7 @@ describe('WpRestDiscovery', function () {
     });
 
     test('basic discovery functionality works', function () {
-        $discovery = new WpRestDiscovery;
+        $discovery = new WpRestDiscovery(createMockLoggingService());
 
         // Test that we can manually add items (simulating discovery)
         $location = new DiscoveryLocation('Test\\', '/test/path');
@@ -133,7 +143,7 @@ describe('WpRestDiscovery', function () {
     test('registers REST routes when applying discovered items', function () {
         global $registered_routes, $wp_actions;
 
-        $discovery = new WpRestDiscovery;
+        $discovery = new WpRestDiscovery(createMockLoggingService());
         $location = new DiscoveryLocation('', '/test/path');
         $reflectionCache = new ReflectionCache;
 
@@ -161,7 +171,7 @@ describe('WpRestDiscovery', function () {
     });
 
     test('handles reflection errors gracefully', function () {
-        $discovery = new WpRestDiscovery;
+        $discovery = new WpRestDiscovery(createMockLoggingService());
         $location = new DiscoveryLocation('', '/test/path');
         $reflectionCache = new ReflectionCache;
 
@@ -186,7 +196,7 @@ describe('WpRestDiscovery', function () {
     });
 
     test('returns correct identifier', function () {
-        $discovery = new WpRestDiscovery;
+        $discovery = new WpRestDiscovery(createMockLoggingService());
         expect($discovery->getIdentifier())->toBe('wp_rest_routes');
     });
 

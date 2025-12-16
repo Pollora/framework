@@ -33,7 +33,7 @@ if (! function_exists('menu')) {
      *
      * @param  string  $name  name of the menu to get
      * @param  int  $depth  how far to recurse down the nodes
-     * @param  int  $mode  flags to pass to the {@link RecursiveIteratorIterator}
+     * @param  0|1|2  $mode  flags to pass to the {@link RecursiveIteratorIterator}
      */
     function menu(string $name, $depth = -1, int $mode = RecursiveIteratorIterator::SELF_FIRST): RecursiveIteratorIterator
     {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Asset\Infrastructure\Services;
 
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Facades\Log;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Asset\Application\Services\AssetManager;
@@ -111,7 +111,7 @@ class AssetEnqueuer
     /**
      * Constructor with dependency injection.
      */
-    public function __construct(Application $app)
+    public function __construct(Container $app)
     {
         $this->assetManager = $app->make(AssetManager::class);
         $this->consoleDetectionService = $app->make(ConsoleDetectionService::class);

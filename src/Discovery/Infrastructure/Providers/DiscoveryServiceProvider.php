@@ -82,6 +82,7 @@ final class DiscoveryServiceProvider extends ServiceProvider
         $this->app->singleton(DiscoveryEngineInterface::class, fn ($app): DiscoveryEngine => new DiscoveryEngine(
             container: $app,
             debugDetector: $app->make(\Pollora\Application\Domain\Contracts\DebugDetectorInterface::class),
+            loggingService: $app->make(\Pollora\Logging\Application\Services\LoggingService::class),
             reflectionCache: $app->make(ReflectionCacheInterface::class),
             instancePool: $app->make(InstancePool::class)
         ));

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Asset\Infrastructure\Services;
 
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Log;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Contracts\AssetFileInterface;
@@ -27,7 +26,6 @@ class AssetFile extends DomainAssetFile implements AssetFileInterface
     public function __toString(): string
     {
         try {
-            Application::getInstance();
             /** @var AssetContainer|null $assetContainer */
             $assetContainer = app(AssetManager::class)->getContainer($this->assetContainer);
 

@@ -42,13 +42,12 @@ class WpCliServiceProvider extends ServiceProvider
 
         // Register the WP CLI service (Application layer)
         $this->app->singleton(WpCliService::class, fn ($app): WpCliService => new WpCliService(
-            $app->make(WpCliAdapter::class)
+            $app->make(WpCliAdapter::class),
+            $app->make(\Pollora\Logging\Application\Services\LoggingService::class)
         ));
 
         // Register WP CLI Discovery (Infrastructure layer)
-        $this->app->singleton(WpCliDiscovery::class, fn ($app): WpCliDiscovery => new WpCliDiscovery(
-            $app->make(WpCliService::class)
-        ));
+        $this->app->singleton(WpCliDiscovery::class);
 
         // Register console commands
         if ($this->consoleDetectionService->isConsole()) {

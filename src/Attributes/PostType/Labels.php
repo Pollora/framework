@@ -21,7 +21,7 @@ class Labels extends PostTypeAttribute
     /**
      * Constructor.
      *
-     * @param  string  $value  The general name for the post type, usually plural
+     * @param  array  $value  The general name for the post type, usually plural
      */
     public function __construct(
         public readonly array $value

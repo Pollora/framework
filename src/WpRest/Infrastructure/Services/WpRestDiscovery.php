@@ -9,6 +9,8 @@ use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use ReflectionClass;
 use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
@@ -28,6 +30,16 @@ final class WpRestDiscovery implements DiscoveryInterface
      * Cache for wrapper instances to avoid recreating them
      */
     private array $wrapperCache = [];
+
+    /**
+     * Create a new WpRestDiscovery instance
+     */
+    public function __construct(
+        /**
+         * Logging service for error reporting
+         */
+        private LoggingService $loggingService
+    ) {}
 
     /**
      * {@inheritDoc}
@@ -83,7 +95,12 @@ final class WpRestDiscovery implements DiscoveryInterface
                 $this->processWpRestRoute($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other REST routes
-                error_log("Failed to register WP REST route from class {$className}: ".$e->getMessage());
+                $this->loggingService->error(
+                    'Failed to register WP REST route from class {className}: {message}',
+                    LogContext::fromException('WpRest', $e, [
+                        'className' => $className,
+                    ])
+                );
             }
         }
     }
@@ -133,7 +150,8 @@ final class WpRestDiscovery implements DiscoveryInterface
                     $wpRestRoute->namespace,
                     $wpRestRoute->route,
                     $wpRestRoute->permissionCallback,
-                    $reflectionCache
+                    $reflectionCache,
+                    $this->loggingService
                 );
             }
 
@@ -143,7 +161,12 @@ final class WpRestDiscovery implements DiscoveryInterface
             $this->processMethodLevelAttributes($reflectionClass, $attributableWrapper);
 
         } catch (\ReflectionException $e) {
-            error_log("Failed to process WP REST route for class {$className}: ".$e->getMessage());
+            $this->loggingService->error(
+                'Failed to process WP REST route for class {className}: {message}',
+                LogContext::fromException('WpRest', $e, [
+                    'className' => $className,
+                ])
+            );
         }
     }
 
@@ -162,7 +185,12 @@ final class WpRestDiscovery implements DiscoveryInterface
                 $this->processMethodAttributes($method, $attributableWrapper);
             }
         } catch (\ReflectionException $e) {
-            error_log("Failed to process method-level attributes for {$reflectionClass->getName()}: ".$e->getMessage());
+            $this->loggingService->error(
+                'Failed to process method-level attributes for {className}: {message}',
+                LogContext::fromException('WpRest', $e, [
+                    'className' => $reflectionClass->getName(),
+                ])
+            );
         }
     }
 
@@ -210,7 +238,13 @@ final class WpRestDiscovery implements DiscoveryInterface
             });
         } catch (\Throwable $e) {
             $className = $method->getDeclaringClass()->getName();
-            error_log("Failed to process method attribute for {$className}::{$method->getName()}: ".$e->getMessage());
+            $this->loggingService->error(
+                'Failed to process method attribute for {className}::{methodName}: {message}',
+                LogContext::fromException('WpRest', $e, [
+                    'className' => $className,
+                    'methodName' => $method->getName(),
+                ])
+            );
         }
     }
 

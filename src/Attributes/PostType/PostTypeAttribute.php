@@ -16,10 +16,7 @@ use ReflectionMethod;
  *
  * This attribute serves as the base for all post type configuration attributes.
  * It provides common functionality for handling post type registration arguments.
- *
- * @Attribute
  */
-#[Attribute(Attribute::TARGET_CLASS)]
 abstract class PostTypeAttribute implements HandlesAttributes
 {
     /**

@@ -16,10 +16,7 @@ use ReflectionMethod;
  *
  * This attribute serves as the base for all taxonomy configuration attributes.
  * It provides common functionality for handling taxonomy registration arguments.
- *
- * @Attribute
  */
-#[Attribute(Attribute::TARGET_CLASS)]
 abstract class TaxonomyAttribute implements HandlesAttributes
 {
     /**
@@ -48,7 +45,7 @@ abstract class TaxonomyAttribute implements HandlesAttributes
      * This method should be implemented by child classes to set specific
      * configuration options on the taxonomy instance.
      *
-     * @param  Taxonomy  $taxonomy  The taxonomy instance to configure
+     * @param  TaxonomyAttributeInterface  $taxonomy  The taxonomy instance to configure
      */
     abstract protected function configure(TaxonomyAttributeInterface $taxonomy): void;
 }

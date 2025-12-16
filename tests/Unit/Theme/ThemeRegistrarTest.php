@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Theme;
 
 use PHPUnit\Framework\TestCase;
+use Pollora\Logging\Domain\Contracts\LoggerInterface;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
@@ -21,14 +22,20 @@ class ThemeRegistrarTest extends TestCase
 
     private WordPressThemeParser $parser;
 
+    private LoggerInterface $logger;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->container = $this->createMock(ContainerInterface::class);
         $this->parser = $this->createMock(WordPressThemeParser::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
 
-        $this->registrar = new ThemeRegistrar($this->container, $this->parser);
+        // Create LoggingService with mocked logger
+        $loggingService = new \Pollora\Logging\Application\Services\LoggingService($this->logger);
+
+        $this->registrar = new ThemeRegistrar($this->container, $this->parser, $loggingService);
     }
 
     public function test_can_register_active_theme(): void

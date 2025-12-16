@@ -74,7 +74,7 @@ class ExceptionServiceProvider extends ServiceProvider
      */
     protected function registerExceptionHandler(): void
     {
-        $this->app->singleton(ExceptionHandler::class, fn ($app): \Pollora\Exceptions\Infrastructure\Handlers\ModuleAwareExceptionHandler => new ModuleAwareExceptionHandler($app));
+        $this->app->singleton(ExceptionHandler::class, ModuleAwareExceptionHandler::class);
     }
 
     /**

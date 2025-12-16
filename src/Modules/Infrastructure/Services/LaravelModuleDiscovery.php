@@ -9,6 +9,8 @@ use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
 /**
@@ -22,7 +24,8 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
     protected array $discoveredModules = [];
 
     public function __construct(
-        protected Container $container
+        protected Container $container,
+        protected LoggingService $loggingService
     ) {}
 
     /**
@@ -41,9 +44,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 $this->discoverModuleOnly($module);
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Laravel Module discovery error: '.$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Laravel Module discovery error: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
     }
 
@@ -61,9 +65,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 $engineData['engine']->apply();
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Laravel Module apply error: '.$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Laravel Module apply error: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
     }
 
@@ -82,9 +87,12 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 $this->discoverModule($module);
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Laravel Module discovery error for {$moduleName}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Laravel Module discovery error for {moduleName}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'moduleName' => $moduleName,
+                ])
+            );
         }
     }
 
@@ -109,9 +117,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 }
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Laravel Module discovery error: '.$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Laravel Module discovery error: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
 
         return $results;
@@ -156,9 +165,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
             return $repository->allEnabled();
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Error getting enabled modules: '.$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Error getting enabled modules: {message}',
+                LogContext::fromException('Modules', $e)
+            );
 
             return [];
         }
@@ -175,9 +185,12 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
             return $repository->find($name);
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Error finding module {$name}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Error finding module {moduleName}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'moduleName' => $name,
+                ])
+            );
 
             return null;
         }
@@ -207,9 +220,12 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 'path' => $appPath,
             ];
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Discovery error for module {$module->getName()}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Discovery error for module {moduleName}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'moduleName' => $module->getName(),
+                ])
+            );
         }
     }
 
@@ -245,9 +261,12 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
             return $manager->discoverAllInLocation($location);
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Discovery error for module {$module->getName()}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Discovery error for module {moduleName}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'moduleName' => $module->getName(),
+                ])
+            );
 
             return [];
         }

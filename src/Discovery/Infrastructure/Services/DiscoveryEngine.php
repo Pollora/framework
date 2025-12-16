@@ -11,11 +11,14 @@ use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
+use Pollora\Discovery\Domain\Contracts\RequiresInstancePoolInterface;
 use Pollora\Discovery\Domain\Exceptions\DiscoveryException;
 use Pollora\Discovery\Domain\Exceptions\DiscoveryNotFoundException;
 use Pollora\Discovery\Domain\Exceptions\InvalidDiscoveryException;
 use Pollora\Discovery\Domain\Models\DiscoveryContext;
 use Pollora\Discovery\Domain\Models\DiscoveryItems;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
@@ -62,11 +65,6 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
     private readonly DiscoveryContext $context;
 
     /**
-     * Instance pool for managing class instances
-     */
-    private readonly InstancePool $instancePool;
-
-    /**
      * Cache driver for Spatie's structure discovery
      */
     private ?DiscoverCacheDriver $cacheDriver = null;
@@ -76,21 +74,23 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
      *
      * @param  Container  $container  The service container for dependency injection
      * @param  DebugDetectorInterface  $debugDetector  Debug mode detector
+     * @param  LoggingService  $loggingService  The logging service
      * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      * @param  InstancePool|null  $instancePool  Optional instance pool
      */
     public function __construct(
         private readonly Container $container,
         private readonly DebugDetectorInterface $debugDetector,
+        private readonly LoggingService $loggingService,
         ?ReflectionCacheInterface $reflectionCache = null,
-        ?InstancePool $instancePool = null
+        private ?InstancePool $instancePool = null
     ) {
         $this->locations = new Collection;
         $this->discoveries = new Collection;
 
         // Initialize optimized services
-        $reflectionCache ??= new ReflectionCache($container);
-        $this->instancePool = $instancePool ?? new InstancePool($container);
+        $reflectionCache ??= new ReflectionCache($container); // Only use if explicitly provided
+
         $this->context = new DiscoveryContext($reflectionCache);
         $this->cacheDriver = $this->resolveCacheDriver();
     }
@@ -103,7 +103,7 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
         // Check for duplicate locations (same path)
         $locationPath = realpath($location->getPath()) ?: $location->getPath();
 
-        $isDuplicate = $this->locations->contains(function (DiscoveryLocationInterface $existingLocation) use ($locationPath) {
+        $isDuplicate = $this->locations->contains(function (DiscoveryLocationInterface $existingLocation) use ($locationPath): bool {
             $existingPath = realpath($existingLocation->getPath()) ?: $existingLocation->getPath();
 
             return $existingPath === $locationPath;
@@ -240,7 +240,12 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
             // Discover PHP structures using Spatie's native cache
             $this->discoverStructures($discovery);
         } catch (\Throwable $e) {
-            $this->logDiscoveryError($discovery::class, $e);
+            $this->loggingService->error(
+                'Discovery failed for {class}: {message}',
+                LogContext::fromException('Discovery', $e, [
+                    'class' => $discovery::class,
+                ])
+            );
             throw DiscoveryException::discoveryFailed($discovery::class, $e);
         }
     }
@@ -300,7 +305,12 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
             $this->discoverSingle($discovery);
             $discovery->apply();
         } catch (\Throwable $e) {
-            $this->logDiscoveryError($discovery::class, $e);
+            $this->loggingService->error(
+                'Discovery execution failed for {class}: {message}',
+                LogContext::fromException('Discovery', $e, [
+                    'class' => $discovery::class,
+                ])
+            );
             throw DiscoveryException::discoveryFailed($discovery::class, $e);
         }
 
@@ -455,14 +465,25 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
 
                 } catch (\Throwable $e) {
                     $this->context->recordError();
-                    $this->logDiscoveryError("Discovery {$discoveryId} for class {$className}", $e, false);
+                    $this->loggingService->error(
+                        'Discovery {discoveryId} failed for class {className}: {message}',
+                        LogContext::fromException('Discovery', $e, [
+                            'discoveryId' => $discoveryId,
+                            'className' => $className,
+                        ])
+                    );
                     // Continue with other discoveries
                 }
             }
 
         } catch (\Throwable $e) {
             $this->context->recordError();
-            $this->logDiscoveryError("Failed to process class {$className}", $e, false);
+            $this->loggingService->error(
+                'Failed to process class {className}: {message}',
+                LogContext::fromException('Discovery', $e, [
+                    'className' => $className,
+                ])
+            );
         }
     }
 
@@ -497,7 +518,7 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
     /**
      * Get the instance pool.
      */
-    public function getInstancePool(): InstancePool
+    public function getInstancePool(): ?InstancePool
     {
         return $this->instancePool;
     }
@@ -511,7 +532,7 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
     {
         return [
             'context' => $this->context->getSummary(),
-            'instance_pool' => $this->instancePool->getStats(),
+            'instance_pool' => $this->instancePool?->getStats() ?? null,
             'static_cache_size' => count(self::$structuresCache),
         ];
     }
@@ -523,8 +544,13 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
      */
     private function injectInstancePoolIfSupported(DiscoveryInterface $discovery): void
     {
-        // Check if the discovery has a method to accept the instance pool
-        if (method_exists($discovery, 'setInstancePool')) {
+        // Only create and inject instance pool for discoveries that explicitly require it
+        if ($discovery instanceof RequiresInstancePoolInterface && method_exists($discovery, 'setInstancePool')) {
+            // Lazy create the instance pool when needed
+            if (! $this->instancePool instanceof \Pollora\Discovery\Infrastructure\Services\InstancePool) {
+                $this->instancePool = new InstancePool($this->container);
+            }
+
             $discovery->setInstancePool($this->instancePool);
         }
     }
@@ -640,21 +666,5 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
     private function generateCacheId(DiscoveryLocationInterface $location): string
     {
         return 'discovery_'.md5($location->getPath());
-    }
-
-    /**
-     * Log discovery errors with consistent format
-     *
-     * @param  string  $context  The error context
-     * @param  \Throwable  $exception  The exception
-     * @param  bool  $includeStackTrace  Whether to include stack trace
-     */
-    private function logDiscoveryError(string $context, \Throwable $exception, bool $includeStackTrace = true): void
-    {
-        error_log("{$context}: {$exception->getMessage()}");
-
-        if ($includeStackTrace) {
-            error_log('Stack trace: '.$exception->getTraceAsString());
-        }
     }
 }

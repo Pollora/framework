@@ -9,6 +9,8 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
@@ -29,7 +31,10 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleAutoloader::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleAutoloader => new ModuleAutoloader($app));
 
         // Register ModuleDiscoveryOrchestrator
-        $this->app->singleton(ModuleDiscoveryOrchestrator::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator => new ModuleDiscoveryOrchestrator($app));
+        $this->app->singleton(ModuleDiscoveryOrchestrator::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator => new ModuleDiscoveryOrchestrator(
+            $app,
+            $app->make(LoggingService::class)
+        ));
 
         // Register interface binding
         $this->app->bind(ModuleDiscoveryOrchestratorInterface::class, ModuleDiscoveryOrchestrator::class);
@@ -40,12 +45,19 @@ class ModuleServiceProvider extends ServiceProvider
         // Register new generic module services
         $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader => new \Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader(
             $app,
-            $app->make(\Pollora\Config\Domain\Contracts\ConfigRepositoryInterface::class)
+            $app->make(\Pollora\Config\Domain\Contracts\ConfigRepositoryInterface::class),
+            $app->make(LoggingService::class)
         ));
 
-        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleComponentManager => new \Pollora\Modules\Infrastructure\Services\ModuleComponentManager($app));
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleComponentManager => new \Pollora\Modules\Infrastructure\Services\ModuleComponentManager(
+            $app,
+            $app->make(LoggingService::class)
+        ));
 
-        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleAssetManager => new \Pollora\Modules\Infrastructure\Services\ModuleAssetManager($app));
+        $this->app->singleton(\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, fn ($app): \Pollora\Modules\Infrastructure\Services\ModuleAssetManager => new \Pollora\Modules\Infrastructure\Services\ModuleAssetManager(
+            $app,
+            $app->make(LoggingService::class)
+        ));
 
         // Merge configuration
         $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');
@@ -128,9 +140,11 @@ class ModuleServiceProvider extends ServiceProvider
                 $orchestrator->discoverLaravelModules();
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Laravel Module discovery error in ModuleServiceProvider: '.$e->getMessage());
-            }
+            $loggingService = $this->app->make(LoggingService::class);
+            $loggingService->error(
+                'Laravel Module discovery error in ModuleServiceProvider: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
     }
 
@@ -152,9 +166,11 @@ class ModuleServiceProvider extends ServiceProvider
                 $orchestrator->applyLaravelModules();
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Laravel Module apply error in ModuleServiceProvider: '.$e->getMessage());
-            }
+            $loggingService = $this->app->make(LoggingService::class);
+            $loggingService->error(
+                'Laravel Module apply error in ModuleServiceProvider: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
     }
 
@@ -176,9 +192,11 @@ class ModuleServiceProvider extends ServiceProvider
                 $orchestrator->discoverFrameworkModules();
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module discovery error in ModuleServiceProvider: '.$e->getMessage());
-            }
+            $loggingService = $this->app->make(LoggingService::class);
+            $loggingService->error(
+                'Framework Module discovery error in ModuleServiceProvider: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
     }
 
@@ -200,9 +218,11 @@ class ModuleServiceProvider extends ServiceProvider
                 $orchestrator->applyFrameworkModules();
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module apply error in ModuleServiceProvider: '.$e->getMessage());
-            }
+            $loggingService = $this->app->make(LoggingService::class);
+            $loggingService->error(
+                'Framework Module apply error in ModuleServiceProvider: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
     }
 }

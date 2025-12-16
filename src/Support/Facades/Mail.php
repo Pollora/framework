@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * Provides an interface to WordPress mailing system with Laravel-style syntax
  * and improved type safety.
  *
- * @method static ?SentMessage send(string|array $to, string $subject, string $message, string|array $headers = '', array $attachments = []) Send an email
+ * @method static ?\Illuminate\Mail\SentMessage send(string|array $to, string $subject, string $message, string|array $headers = '', array $attachments = []) Send an email
  *
  * @see \Pollora\Mail\Mailer
  */

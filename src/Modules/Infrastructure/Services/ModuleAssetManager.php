@@ -8,6 +8,8 @@ use Illuminate\Container\Container;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Foundation\Support\IncludesFiles;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 
 /**
  * Generic module asset manager.
@@ -20,7 +22,8 @@ class ModuleAssetManager
     use IncludesFiles;
 
     public function __construct(
-        protected Container $app
+        protected Container $app,
+        protected LoggingService $loggingService
     ) {}
 
     /**
@@ -51,9 +54,13 @@ class ModuleAssetManager
             $this->registerModuleViewPaths($modulePath, $moduleType, $moduleSlug);
 
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Failed to setup assets for module {$moduleName} ({$moduleType}): ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Failed to setup assets for module {moduleName} ({moduleType}): {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'moduleName' => $moduleName,
+                    'moduleType' => $moduleType,
+                ])
+            );
         }
     }
 
@@ -116,9 +123,12 @@ class ModuleAssetManager
                 }
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Failed to register Blade directives for module {$modulePath}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Failed to register Blade directives for module {modulePath}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'modulePath' => $modulePath,
+                ])
+            );
         }
     }
 
@@ -165,9 +175,13 @@ class ModuleAssetManager
             }
 
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Failed to register view paths for module {$modulePath} ({$moduleType}): ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Failed to register view paths for module {modulePath} ({moduleType}): {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'modulePath' => $modulePath,
+                    'moduleType' => $moduleType,
+                ])
+            );
         }
     }
 
@@ -240,9 +254,12 @@ class ModuleAssetManager
                 $viewFinder->addLocation($viewPath);
             } catch (\Throwable) {
                 // Silent fail to prevent breaking the application
-                if (function_exists('error_log')) {
-                    error_log("Failed to register view path with priority: {$viewPath}");
-                }
+                $this->loggingService->error(
+                    'Failed to register view path with priority: {viewPath}',
+                    LogContext::fromClass(static::class)->merge([
+                        'viewPath' => $viewPath,
+                    ])
+                );
             }
         }
     }

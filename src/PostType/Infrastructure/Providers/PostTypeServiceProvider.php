@@ -49,9 +49,7 @@ class PostTypeServiceProvider extends ServiceProvider
         $this->app->singleton(PostTypeService::class, fn ($app) => $app->make(PostTypeServiceInterface::class));
 
         // Register PostType Discovery
-        $this->app->singleton(PostTypeDiscovery::class, fn ($app): \Pollora\PostType\Infrastructure\Services\PostTypeDiscovery => new PostTypeDiscovery(
-            $app->make(PostTypeServiceInterface::class)
-        ));
+        $this->app->singleton(PostTypeDiscovery::class);
 
         // Register commands
         if ($this->app->runningInConsole()) {

@@ -6,6 +6,8 @@ namespace Pollora\Theme\Infrastructure\Providers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Pollora\BlockPattern\UI\PatternComponent;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\Menus;
 use Pollora\Theme\Domain\Models\Sidebar;
@@ -31,7 +33,10 @@ class ThemeComponentProvider
         ImageSize::class,
     ];
 
-    public function __construct(protected Application $app) {}
+    public function __construct(
+        protected Application $app,
+        protected LoggingService $loggingService
+    ) {}
 
     /**
      * Register all theme components.
@@ -65,9 +70,13 @@ class ThemeComponentProvider
             }
 
             // Log error but continue in production
-            if (function_exists('error_log')) {
-                error_log("Theme component registration failed: {$component} - ".$e->getMessage());
-            }
+            $context = new LogContext(
+                module: 'Theme',
+                class: self::class,
+                method: 'registerComponent',
+                extra: ['component' => $component]
+            );
+            $this->loggingService->error('Theme component registration failed', $context, $e);
         }
     }
 

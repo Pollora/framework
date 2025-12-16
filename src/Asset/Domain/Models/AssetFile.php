@@ -29,7 +29,6 @@ class AssetFile implements AssetFileInterface
      * Initializes a new asset file instance.
      *
      * @param  string  $filename  The file name or relative path
-     * @param  string  $content  Optional file content
      */
     public function __construct(protected string $filename) {}
 

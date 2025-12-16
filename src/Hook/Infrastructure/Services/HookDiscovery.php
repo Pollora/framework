@@ -12,6 +12,8 @@ use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
@@ -32,10 +34,12 @@ final class HookDiscovery implements DiscoveryInterface
      *
      * @param  ActionContract  $actionService  The action service for hook registration
      * @param  FilterContract  $filterService  The filter service for hook registration
+     * @param  LoggingService  $loggingService  The logging service for error reporting
      */
     public function __construct(
         private readonly ActionContract $actionService,
-        private readonly FilterContract $filterService
+        private readonly FilterContract $filterService,
+        private readonly LoggingService $loggingService
     ) {}
 
     /**
@@ -129,6 +133,7 @@ final class HookDiscovery implements DiscoveryInterface
 
                     // Create instance and call method directly
                     $instance = $this->getInstanceFromPool($className);
+
                     $this->filterService->add(
                         hooks: $filter->hook,
                         callback: [$instance, $methodName],
@@ -136,9 +141,14 @@ final class HookDiscovery implements DiscoveryInterface
                     );
                 }
             } catch (\Throwable $e) {
-                // Log the error but continue with other hooks
-                // In a production environment, you might want to use a proper logger
-                error_log("Failed to register {$hookType} hook from method {$className}::{$methodName}: ".$e->getMessage());
+                // Log the error using the new logging system and continue with other hooks
+                $context = new LogContext(
+                    module: 'Hook',
+                    class: $className,
+                    method: $methodName,
+                    extra: ['hook_type' => $hookType]
+                );
+                $this->loggingService->error("Failed to register {$hookType} hook", $context, $e);
             }
         }
     }

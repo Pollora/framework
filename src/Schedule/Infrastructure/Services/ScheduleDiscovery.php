@@ -11,6 +11,8 @@ use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Schedule\Every;
 use Pollora\Schedule\Interval;
 use ReflectionMethod;
@@ -30,6 +32,15 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 final class ScheduleDiscovery implements DiscoveryInterface
 {
     use HasInstancePool, IsDiscovery;
+
+    /**
+     * Create a new Schedule discovery service.
+     *
+     * @param  LoggingService  $loggingService  The logging service for error handling
+     */
+    public function __construct(
+        private readonly LoggingService $loggingService
+    ) {}
 
     /**
      * Default WordPress recurrence schedules.
@@ -139,7 +150,13 @@ final class ScheduleDiscovery implements DiscoveryInterface
                 }
             } catch (\Throwable $e) {
                 // Log the error but continue with other scheduled tasks
-                error_log("Failed to register Schedule from method {$className}::{$methodName}: ".$e->getMessage());
+                $context = new LogContext(
+                    module: 'Schedule',
+                    class: $className,
+                    method: 'apply',
+                    extra: ['target_method' => $methodName]
+                );
+                $this->loggingService->error('Failed to register Schedule', $context, $e);
             }
         }
     }
@@ -335,7 +352,12 @@ final class ScheduleDiscovery implements DiscoveryInterface
     private function scheduleWordPressCron(string $hookName, string $interval, array $args = []): void
     {
         if (wp_schedule_event(time(), $interval, $hookName, $args) === false) {
-            error_log("Failed to schedule WordPress cron event for hook: {$hookName}");
+            $context = new LogContext(
+                module: 'Schedule',
+                method: 'scheduleWordPressCron',
+                extra: ['hook_name' => $hookName, 'interval' => $interval]
+            );
+            $this->loggingService->error('Failed to schedule WordPress cron event', $context);
         }
     }
 

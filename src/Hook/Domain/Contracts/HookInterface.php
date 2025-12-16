@@ -17,8 +17,9 @@ interface HookInterface
      * @param  string|array  $hooks  Hook name(s)
      * @param  callable|string|array  $callback  The callback function
      * @param  int  $priority  Optional priority
+     * @param  int|null  $acceptedArgs  Optional. Number of arguments the callback accepts
      */
-    public function add(string|array $hooks, callable|string|array $callback, int $priority = 10): self;
+    public function add(string|array $hooks, callable|string|array $callback, int $priority = 10, ?int $acceptedArgs = null): self;
 
     /**
      * Remove a hook callback.
@@ -33,6 +34,8 @@ interface HookInterface
      * Check if a hook exists.
      *
      * @param  string  $hook  Hook name
+     * @param  callable|null  $callback  Optional. Specific callback to check
+     * @param  int|null  $priority  Optional. Specific priority to check
      */
-    public function exists(string $hook): bool;
+    public function exists(string $hook, ?callable $callback = null, ?int $priority = null): bool;
 }

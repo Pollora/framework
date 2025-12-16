@@ -8,6 +8,8 @@ use Illuminate\Container\Container;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
 /**
@@ -24,7 +26,8 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
     protected ?FrameworkModuleDiscovery $frameworkModuleDiscovery = null;
 
     public function __construct(
-        protected Container $container
+        protected Container $container,
+        protected LoggingService $loggingService
     ) {}
 
     /**
@@ -43,9 +46,12 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
             $location = new DirectoryLocation($path);
             $engine->addLocation($location)->discover()->apply();
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Discovery error for path {$path}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Discovery error for path {path}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'path' => $path,
+                ])
+            );
         }
     }
 
@@ -66,9 +72,12 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
 
             return $manager->discoverAllInLocation($location);
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Discovery error for path {$path}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Discovery error for path {path}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'path' => $path,
+                ])
+            );
 
             return [];
         }
@@ -148,7 +157,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
     protected function getLaravelModuleDiscovery(): LaravelModuleDiscovery
     {
         if (! $this->laravelModuleDiscovery instanceof \Pollora\Modules\Infrastructure\Services\LaravelModuleDiscovery) {
-            $this->laravelModuleDiscovery = new LaravelModuleDiscovery($this->container);
+            $this->laravelModuleDiscovery = new LaravelModuleDiscovery($this->container, $this->loggingService);
         }
 
         return $this->laravelModuleDiscovery;
@@ -160,7 +169,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
     protected function getFrameworkModuleDiscovery(): FrameworkModuleDiscovery
     {
         if (! $this->frameworkModuleDiscovery instanceof \Pollora\Modules\Infrastructure\Services\FrameworkModuleDiscovery) {
-            $this->frameworkModuleDiscovery = new FrameworkModuleDiscovery($this->container);
+            $this->frameworkModuleDiscovery = new FrameworkModuleDiscovery($this->container, $this->loggingService);
         }
 
         return $this->frameworkModuleDiscovery;

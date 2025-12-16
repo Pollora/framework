@@ -8,6 +8,8 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
@@ -21,6 +23,16 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 final class ServiceProviderDiscovery implements DiscoveryInterface
 {
     use IsDiscovery;
+
+    /**
+     * Create a new ServiceProviderDiscovery instance
+     */
+    public function __construct(
+        /**
+         * Logging service for error reporting
+         */
+        private LoggingService $loggingService
+    ) {}
 
     /**
      * {@inheritDoc}
@@ -67,7 +79,12 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
                 $this->registerServiceProvider($className);
             } catch (\Throwable $e) {
                 // Log the error but continue with other service providers
-                error_log("Failed to register service provider {$className}: ".$e->getMessage());
+                $this->loggingService->error(
+                    'Failed to register service provider {className}: {message}',
+                    LogContext::fromException('Discovery', $e, [
+                        'className' => $className,
+                    ])
+                );
             }
         }
     }
@@ -125,7 +142,12 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
                 app()->register($className);
             }
         } catch (\Throwable $e) {
-            error_log("Failed to register service provider {$className}: ".$e->getMessage());
+            $this->loggingService->error(
+                'Failed to register service provider {className}: {message}',
+                LogContext::fromException('Discovery', $e, [
+                    'className' => $className,
+                ])
+            );
         }
     }
 

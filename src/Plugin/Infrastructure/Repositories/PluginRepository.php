@@ -8,6 +8,8 @@ use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
 use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Collection\Infrastructure\Adapters\LaravelCollectionAdapter;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Domain\Models\LaravelPluginModule;
@@ -44,10 +46,12 @@ class PluginRepository implements ModuleRepositoryInterface
      *
      * @param  Container  $app  Application container
      * @param  WordPressPluginParser  $parser  Plugin parser service
+     * @param  LoggingService|null  $loggingService  The logging service for error handling (optional)
      */
     public function __construct(
         protected Container $app,
-        protected WordPressPluginParser $parser
+        protected WordPressPluginParser $parser,
+        private readonly ?LoggingService $loggingService = null
     ) {
         $this->pluginsPath = $this->getPluginsBasePath();
     }
@@ -186,7 +190,7 @@ class PluginRepository implements ModuleRepositoryInterface
                 }
             } catch (\Exception $e) {
                 // Log error but continue scanning other plugins
-                $this->logError("Failed to create plugin module for '{$pluginName}': {$e->getMessage()}");
+                $this->logError("Failed to create plugin module for '{$pluginName}'", $e, ['plugin_name' => $pluginName]);
             }
         }
 
@@ -206,7 +210,7 @@ class PluginRepository implements ModuleRepositoryInterface
                     $plugin->register();
                 }
             } catch (\Exception $e) {
-                $this->logError("Failed to register plugin '{$plugin->getName()}': {$e->getMessage()}");
+                $this->logError("Failed to register plugin '{$plugin->getName()}'", $e, ['plugin_name' => $plugin->getName()]);
             }
         }
     }
@@ -222,7 +226,7 @@ class PluginRepository implements ModuleRepositoryInterface
                     $plugin->boot();
                 }
             } catch (\Exception $e) {
-                $this->logError("Failed to boot plugin '{$plugin->getName()}': {$e->getMessage()}");
+                $this->logError("Failed to boot plugin '{$plugin->getName()}'", $e, ['plugin_name' => $plugin->getName()]);
             }
         }
     }
@@ -306,7 +310,7 @@ class PluginRepository implements ModuleRepositoryInterface
 
             return $plugin;
         } catch (\Exception $e) {
-            $this->logError("Failed to create plugin module '{$pluginName}': {$e->getMessage()}");
+            $this->logError("Failed to create plugin module '{$pluginName}'", $e, ['plugin_name' => $pluginName]);
 
             return null;
         }
@@ -457,14 +461,28 @@ class PluginRepository implements ModuleRepositoryInterface
     }
 
     /**
-     * Log error message.
+     * Log error message with structured logging.
      *
      * @param  string  $message  Error message
+     * @param  \Throwable|null  $exception  Optional exception
+     * @param  array  $extra  Additional context data
      */
-    protected function logError(string $message): void
+    protected function logError(string $message, ?\Throwable $exception = null, array $extra = []): void
     {
-        if (function_exists('error_log')) {
-            error_log('[PluginRepository] '.$message);
+        if ($this->loggingService instanceof LoggingService) {
+            $context = new LogContext(
+                module: 'Plugin',
+                class: static::class,
+                method: debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'] ?? 'unknown',
+                extra: $extra
+            );
+            $this->loggingService->error($message, $context, $exception);
+        } elseif (function_exists('error_log')) {
+            $errorMessage = '[PluginRepository] '.$message;
+            if ($exception instanceof \Throwable) {
+                $errorMessage .= ': '.$exception->getMessage();
+            }
+            error_log($errorMessage);
         }
     }
 }

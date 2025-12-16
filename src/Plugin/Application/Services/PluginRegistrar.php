@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Plugin\Application\Services;
 
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
@@ -39,7 +41,8 @@ class PluginRegistrar
      */
     public function __construct(
         protected ContainerInterface $app,
-        protected WordPressPluginParser $pluginParser
+        protected WordPressPluginParser $pluginParser,
+        protected LoggingService $loggingService
     ) {}
 
     /**
@@ -224,7 +227,8 @@ class PluginRegistrar
                 $repository->resetCache();
             }
         } catch (\Exception $e) {
-            $this->logError('Failed to invalidate plugin repository cache: '.$e->getMessage());
+            $context = LogContext::fromClass(self::class, 'invalidateRepositoryCache');
+            $this->loggingService->error('Failed to invalidate plugin repository cache', $context, $e);
         }
     }
 
@@ -244,7 +248,13 @@ class PluginRegistrar
 
             $discoveryService->discover($plugin->getPath());
         } catch (\Exception $e) {
-            $this->logError("Plugin discovery error for {$plugin->getName()}: ".$e->getMessage());
+            $context = new LogContext(
+                module: 'Plugin',
+                class: self::class,
+                method: 'discoverPluginStructures',
+                extra: ['plugin_name' => $plugin->getName()]
+            );
+            $this->loggingService->error('Plugin discovery error', $context, $e);
         }
     }
 
@@ -268,7 +278,8 @@ class PluginRegistrar
                 'plugin'
             );
         } catch (\Exception $e) {
-            $this->logError('Failed to load plugin configuration: '.$e->getMessage());
+            $context = LogContext::fromClass(self::class, 'loadPluginConfiguration');
+            $this->loggingService->error('Failed to load plugin configuration', $context, $e);
         }
     }
 
@@ -302,7 +313,8 @@ class PluginRegistrar
                 $componentManager->initializeModuleComponents($moduleId);
             }
         } catch (\Exception $e) {
-            $this->logError('Failed to setup plugin components: '.$e->getMessage());
+            $context = LogContext::fromClass(self::class, 'setupPluginComponents');
+            $this->loggingService->error('Failed to setup plugin components', $context, $e);
         }
     }
 
@@ -336,7 +348,8 @@ class PluginRegistrar
                 $assetManager->registerModuleBladeDirectives($plugin->getPath());
             }
         } catch (\Exception $e) {
-            $this->logError('Failed to setup plugin assets: '.$e->getMessage());
+            $context = LogContext::fromClass(self::class, 'setupPluginAssets');
+            $this->loggingService->error('Failed to setup plugin assets', $context, $e);
         }
     }
 
@@ -375,17 +388,5 @@ class PluginRegistrar
     protected function isDebugMode(): bool
     {
         return defined('WP_DEBUG') && WP_DEBUG;
-    }
-
-    /**
-     * Log error message.
-     *
-     * @param  string  $message  Error message
-     */
-    protected function logError(string $message): void
-    {
-        if (function_exists('error_log')) {
-            error_log($message);
-        }
     }
 }

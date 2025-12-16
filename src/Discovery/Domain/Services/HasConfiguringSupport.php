@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Discovery\Domain\Services;
 
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
+
 /**
  * Trait providing support for the configuring lifecycle hook.
  *
@@ -13,6 +16,7 @@ namespace Pollora\Discovery\Domain\Services;
  * Classes using this trait must:
  * - Use the HasInstancePool trait
  * - Implement ConfigurableDiscoveryInterface
+ * - Have a protected LoggingService $loggingService property
  */
 trait HasConfiguringSupport
 {
@@ -56,8 +60,11 @@ trait HasConfiguringSupport
             return $entity;
 
         } catch (\ReflectionException|\Throwable $e) {
-            error_log(
-                "Failed to process configuring for {$className}: ".$e->getMessage()
+            $this->loggingService->error(
+                'Failed to process configuring for {className}: {message}',
+                LogContext::fromException('Discovery', $e, [
+                    'className' => $className,
+                ])
             );
 
             return null;

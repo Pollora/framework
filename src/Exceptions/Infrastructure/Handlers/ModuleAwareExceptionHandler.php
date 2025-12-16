@@ -10,6 +10,8 @@ use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Pollora\Exceptions\Infrastructure\Services\ModuleAwareErrorViewResolver;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
@@ -38,6 +40,8 @@ class ModuleAwareExceptionHandler extends Handler
 {
     protected ModuleAwareErrorViewResolver $errorViewResolver;
 
+    protected LoggingService $loggingService;
+
     /**
      * Create a new exception handler instance.
      *
@@ -49,6 +53,9 @@ class ModuleAwareExceptionHandler extends Handler
 
         // Initialize the module-aware error view resolver
         $this->initializeErrorViewResolver();
+
+        // Initialize logging service
+        $this->initializeLoggingService();
     }
 
     /**
@@ -67,9 +74,33 @@ class ModuleAwareExceptionHandler extends Handler
                 $this->errorViewResolver = new ModuleAwareErrorViewResolver($this->container, $viewFactory);
             } catch (Throwable $e) {
                 // Log error but don't fail - fall back to default behavior
-                if (function_exists('error_log')) {
+                if (isset($this->loggingService)) {
+                    $context = new LogContext(
+                        module: 'Exceptions',
+                        class: static::class,
+                        method: 'initializeErrorViewResolver'
+                    );
+                    $this->loggingService->error('Failed to initialize ModuleAwareErrorViewResolver', $context, $e);
+                } elseif (function_exists('error_log')) {
                     error_log('Failed to initialize ModuleAwareErrorViewResolver: '.$e->getMessage());
                 }
+            }
+        }
+    }
+
+    /**
+     * Initialize the logging service.
+     *
+     * Sets up the logging service from the container.
+     * This method ensures the logging service is available for error reporting.
+     */
+    protected function initializeLoggingService(): void
+    {
+        if (! isset($this->loggingService)) {
+            try {
+                $this->loggingService = $this->container->make(LoggingService::class);
+            } catch (Throwable) {
+                // Silent fail - we'll use error_log() as fallback
             }
         }
     }
@@ -133,7 +164,14 @@ class ModuleAwareExceptionHandler extends Handler
 
         } catch (Throwable $renderException) {
             // Log rendering error but don't fail - fall back to default behavior
-            if (function_exists('error_log')) {
+            if (isset($this->loggingService)) {
+                $context = new LogContext(
+                    module: 'Exceptions',
+                    class: static::class,
+                    method: 'renderHttpExceptionWithModuleViews'
+                );
+                $this->loggingService->error('Failed to render module error view', $context, $renderException);
+            } elseif (function_exists('error_log')) {
                 error_log('Failed to render module error view: '.$renderException->getMessage());
             }
 

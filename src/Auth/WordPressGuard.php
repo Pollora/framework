@@ -19,12 +19,13 @@ use WP_Error;
  * It handles user authentication, session management, and WordPress-specific
  * authentication features.
  *
- * @implements StatefulGuard
  *
  * @uses GuardHelpers
  */
 class WordPressGuard implements StatefulGuard
 {
+    public $user;
+
     use GuardHelpers;
 
     /**
@@ -190,5 +191,35 @@ class WordPressGuard implements StatefulGuard
         }
 
         return $this;
+    }
+
+    /**
+     * Determine if the guard has a user instance.
+     */
+    public function hasUser(): bool
+    {
+        return ! is_null($this->user);
+    }
+
+    /**
+     * Determine if the current user is a guest.
+     */
+    public function guest(): bool
+    {
+        return ! $this->check();
+    }
+
+    /**
+     * Get the ID for the currently authenticated user.
+     *
+     * @return mixed
+     */
+    public function id()
+    {
+        if ($this->user) {
+            return $this->user->getAuthIdentifier();
+        }
+
+        return null;
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Container\Container;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 
 /**
  * Generic module component manager.
@@ -17,7 +19,8 @@ class ModuleComponentManager
     protected array $registeredComponents = [];
 
     public function __construct(
-        protected Container $app
+        protected Container $app,
+        protected LoggingService $loggingService
     ) {}
 
     /**
@@ -61,9 +64,13 @@ class ModuleComponentManager
                 $this->app->singleton($serviceKey, $componentClass);
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Failed to register component {$componentClass} for module {$moduleId}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Failed to register component {componentClass} for module {moduleId}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'componentClass' => $componentClass,
+                    'moduleId' => $moduleId,
+                ])
+            );
         }
     }
 
@@ -91,9 +98,13 @@ class ModuleComponentManager
                 );
             }
 
-            if (function_exists('error_log')) {
-                error_log("Component initialization failed: {$componentClass} for module {$moduleId} - ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Component initialization failed: {componentClass} for module {moduleId}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'componentClass' => $componentClass,
+                    'moduleId' => $moduleId,
+                ])
+            );
         }
     }
 

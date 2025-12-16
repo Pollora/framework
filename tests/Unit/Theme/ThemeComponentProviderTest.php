@@ -8,6 +8,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
 use Mockery as m;
 use Pollora\BlockPattern\UI\PatternComponent;
+use Pollora\Logging\Domain\Contracts\LoggerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\Menus;
@@ -29,7 +30,11 @@ beforeEach(function () {
 
     $this->app = m::mock(Application::class);
     $this->config = m::mock(Repository::class);
-    $this->provider = new ThemeComponentProvider($this->app);
+    $this->logger = m::mock(LoggerInterface::class);
+
+    // Create LoggingService with mocked logger
+    $this->loggingService = new \Pollora\Logging\Application\Services\LoggingService($this->logger);
+    $this->provider = new ThemeComponentProvider($this->app, $this->loggingService);
 
     // Define core components that should be registered - order matters from the provider
     $this->coreComponents = [

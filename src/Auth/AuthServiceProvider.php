@@ -15,8 +15,6 @@ use Illuminate\Support\ServiceProvider;
  * including custom guards and user providers. It integrates WordPress
  * capabilities with Laravel's Gate system and handles the registration
  * of authentication-related services in the container.
- *
- * @extends ServiceProvider
  */
 class AuthServiceProvider extends ServiceProvider
 {

@@ -28,7 +28,7 @@ class ModuleBootstrap
         protected ModuleRepositoryInterface $repository,
         protected Router $router
     ) {}
-    
+
     /**
      * Get the cached module path for service provider caching.
      *

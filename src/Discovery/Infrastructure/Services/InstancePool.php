@@ -92,6 +92,7 @@ final class InstancePool
             $this->instantiating[$className] = true;
 
             // Create instance through DI container
+
             $instance = $this->container->make($className);
 
             // Store in pool

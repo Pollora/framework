@@ -6,6 +6,7 @@ namespace Tests\Unit\WpRest\Infrastructure\Providers;
 
 use Illuminate\Container\Container;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
+use Pollora\Logging\Domain\Contracts\LoggerInterface;
 use Pollora\WpRest\Infrastructure\Providers\WpRestAttributeServiceProvider;
 use Pollora\WpRest\Infrastructure\Services\WpRestDiscovery;
 use Tests\TestCase as BaseTestCase;
@@ -30,6 +31,10 @@ final class WpRestAttributeServiceProviderTest extends BaseTestCase
 
         $this->container = new Container;
         $this->provider = new WpRestAttributeServiceProvider($this->container);
+
+        // Create mock logger interface for LoggingService dependency
+        $mockLogger = $this->createMock(LoggerInterface::class);
+        $this->container->instance(LoggerInterface::class, $mockLogger);
 
         // Create mock discovery engine
         $this->discoveryEngine = $this->createMock(DiscoveryEngineInterface::class);

@@ -13,8 +13,11 @@ use Pollora\Attributes\WpCli\Synopsis;
 use Pollora\Attributes\WpCli\When;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\RequiresInstancePoolInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\WpCli\Application\Services\WpCliService;
 use Pollora\WpCli\Infrastructure\Adapters\WpCliMethodWrapper;
 use ReflectionClass;
@@ -28,7 +31,7 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  * Discovers classes decorated with WpCli attributes and registers them
  * as WordPress CLI commands.
  */
-final class WpCliDiscovery implements DiscoveryInterface
+final class WpCliDiscovery implements DiscoveryInterface, RequiresInstancePoolInterface
 {
     use HasInstancePool, IsDiscovery;
 
@@ -38,7 +41,8 @@ final class WpCliDiscovery implements DiscoveryInterface
     private array $commandInstances = [];
 
     public function __construct(
-        private readonly WpCliService $wpCliService
+        private readonly WpCliService $wpCliService,
+        private readonly LoggingService $loggingService
     ) {}
 
     /**
@@ -72,7 +76,12 @@ final class WpCliDiscovery implements DiscoveryInterface
                 $reflectionCache = $discoveredItem['reflection_cache'] ?? null;
                 $this->processWpCliCommand($discoveredItem['class'], $reflectionCache);
             } catch (\Throwable $e) {
-                error_log("Failed to register WP CLI command from class {$discoveredItem['class']}: ".$e->getMessage());
+                $context = new LogContext(
+                    module: 'WpCli',
+                    class: $discoveredItem['class'],
+                    extra: ['discovery_type' => 'WpCli']
+                );
+                $this->loggingService->error('Failed to register WP CLI command', $context, $e);
             }
         }
     }
@@ -98,7 +107,8 @@ final class WpCliDiscovery implements DiscoveryInterface
         $commandName = $attribute->getCommandName($className);
 
         if (empty($commandName)) {
-            error_log("WP CLI command {$className} has no command name defined");
+            $context = LogContext::fromClass($className);
+            $this->loggingService->warning('WP CLI command has no command name defined', $context);
 
             return;
         }

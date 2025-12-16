@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Services\WordPress\Installation;
 
-use DB;
+use Illuminate\Support\Facades\DB;
 use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 
 use function Laravel\Prompts\info;

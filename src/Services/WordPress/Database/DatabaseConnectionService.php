@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Services\WordPress\Database;
 
+use Pollora\Services\WordPress\Installation\DatabaseConnectionException;
 use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
 
 use function Laravel\Prompts\confirm;

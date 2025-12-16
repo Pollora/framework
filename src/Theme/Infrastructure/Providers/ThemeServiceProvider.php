@@ -175,7 +175,8 @@ class ThemeServiceProvider extends ServiceProvider
         // Theme registrar for self-registration pattern
         $this->app->singleton(ThemeRegistrarInterface::class, fn ($app): \Pollora\Theme\Application\Services\ThemeRegistrar => new ThemeRegistrar(
             $app->make(ContainerInterface::class),
-            $app->make(WordPressThemeParser::class)
+            $app->make(WordPressThemeParser::class),
+            $app->make(\Pollora\Logging\Application\Services\LoggingService::class)
         ));
 
         // Theme autoloader service
@@ -208,7 +209,8 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton('theme.repository', fn ($app): \Pollora\Theme\Infrastructure\Repositories\ThemeRepository => new ThemeRepository(
             $app,
             $app->make(WordPressThemeParser::class),
-            $app->make(CollectionFactoryInterface::class)
+            $app->make(CollectionFactoryInterface::class),
+            $app->make(\Pollora\Logging\Application\Services\LoggingService::class)
         ));
     }
 

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
 if (! function_exists('pollora_discover_module')) {
@@ -23,8 +25,11 @@ if (! function_exists('pollora_discover_module')) {
 
             return $discoveryService->discoverAndReturn($modulePath);
         } catch (Exception $e) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_module error: '.$e->getMessage());
+            if (app()->bound(LoggingService::class)) {
+                app(LoggingService::class)->error(
+                    'pollora_discover_module error: {message}',
+                    LogContext::fromException('Modules', $e)
+                );
             }
 
             return [];
@@ -51,8 +56,11 @@ if (! function_exists('pollora_discover_theme')) {
 
             return $discoveryService->discoverAndReturn($themePath);
         } catch (Exception $e) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_theme error: '.$e->getMessage());
+            if (app()->bound(LoggingService::class)) {
+                app(LoggingService::class)->error(
+                    'pollora_discover_theme error: {message}',
+                    LogContext::fromException('Modules', $e)
+                );
             }
 
             return [];
@@ -79,8 +87,11 @@ if (! function_exists('pollora_discover_plugin')) {
 
             return $discoveryService->discoverAndReturn($pluginPath);
         } catch (Exception $e) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_plugin error: '.$e->getMessage());
+            if (app()->bound(LoggingService::class)) {
+                app(LoggingService::class)->error(
+                    'pollora_discover_plugin error: {message}',
+                    LogContext::fromException('Modules', $e)
+                );
             }
 
             return [];
@@ -107,8 +118,11 @@ if (! function_exists('pollora_discover_in_path')) {
 
             return $discoveryService->discoverAndReturn($path);
         } catch (Exception $e) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_in_path error: '.$e->getMessage());
+            if (app()->bound(LoggingService::class)) {
+                app(LoggingService::class)->error(
+                    'pollora_discover_in_path error: {message}',
+                    LogContext::fromException('Modules', $e)
+                );
             }
 
             return [];
@@ -134,8 +148,11 @@ if (! function_exists('pollora_discover_all_in_path')) {
 
             return $discoveryService->discoverAndReturn($path);
         } catch (Exception $e) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_all_in_path error: '.$e->getMessage());
+            if (app()->bound(LoggingService::class)) {
+                app(LoggingService::class)->error(
+                    'pollora_discover_all_in_path error: {message}',
+                    LogContext::fromException('Modules', $e)
+                );
             }
 
             return [];

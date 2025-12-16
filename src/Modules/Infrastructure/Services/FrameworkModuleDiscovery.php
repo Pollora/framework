@@ -8,6 +8,8 @@ use Illuminate\Container\Container;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
 /**
@@ -38,9 +40,11 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      * Laravel Application Module Discovery constructor
      *
      * @param  Container  $container  Laravel container instance
+     * @param  LoggingService  $loggingService  Logging service instance
      */
     public function __construct(
-        protected Container $container
+        protected Container $container,
+        protected LoggingService $loggingService
     ) {
         $this->basePath = app_path();
     }
@@ -60,9 +64,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
         try {
             $this->discoverModuleOnly('app', $this->basePath);
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module discovery error: '.$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Framework Module discovery error: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
     }
 
@@ -83,9 +88,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 $moduleData['engine']->apply();
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module apply error: '.$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Framework Module apply error: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
     }
 
@@ -107,11 +113,14 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 return;
             }
 
-            $this->discoverModule($moduleName, $modules[$moduleName]);
+            $this->discoverModuleOnly($moduleName, $modules[$moduleName]);
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Framework Module discovery error for {$moduleName}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Framework Module discovery error for {moduleName}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'moduleName' => $moduleName,
+                ])
+            );
         }
     }
 
@@ -138,9 +147,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 }
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module discovery error: '.$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Framework Module discovery error: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
 
         return $results;
@@ -202,9 +212,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 }
             }
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log('Error scanning framework modules: '.$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Error scanning framework modules: {message}',
+                LogContext::fromException('Modules', $e)
+            );
         }
 
         return $modules;
@@ -265,9 +276,12 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 'engine' => $engine,
             ];
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Discovery error for framework module {$moduleName}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Discovery error for framework module {moduleName}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'moduleName' => $moduleName,
+                ])
+            );
         }
     }
 
@@ -308,9 +322,12 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
             return $results;
         } catch (\Throwable $e) {
-            if (function_exists('error_log')) {
-                error_log("Discovery error for framework module {$moduleName}: ".$e->getMessage());
-            }
+            $this->loggingService->error(
+                'Discovery error for framework module {moduleName}: {message}',
+                LogContext::fromException('Modules', $e)->merge([
+                    'moduleName' => $moduleName,
+                ])
+            );
 
             return [];
         }

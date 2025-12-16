@@ -13,6 +13,8 @@ use Pollora\Discovery\Domain\Services\HasConfiguringSupport;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -37,9 +39,11 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * Create a new Taxonomy discovery
      *
      * @param  TaxonomyServiceInterface  $taxonomyService  The taxonomy service for registration
+     * @param  LoggingService  $loggingService  The logging service for error handling
      */
     public function __construct(
-        private readonly TaxonomyServiceInterface $taxonomyService
+        private readonly TaxonomyServiceInterface $taxonomyService,
+        private readonly LoggingService $loggingService
     ) {}
 
     /**
@@ -136,7 +140,12 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $this->processTaxonomy($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other taxonomies
-                error_log("Failed to register Taxonomy from class {$className}: ".$e->getMessage());
+                $context = new LogContext(
+                    module: 'Taxonomy',
+                    class: $className,
+                    method: 'apply'
+                );
+                $this->loggingService->error('Failed to register Taxonomy', $context, $e);
             }
         }
     }
@@ -207,7 +216,12 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
 
         } catch (\ReflectionException $e) {
-            error_log("Failed to process Taxonomy for class {$className}: ".$e->getMessage());
+            $context = new LogContext(
+                module: 'Taxonomy',
+                class: $className,
+                method: 'processTaxonomy'
+            );
+            $this->loggingService->error('Failed to process Taxonomy reflection', $context, $e);
         }
     }
 
@@ -255,7 +269,12 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 }
             }
         } catch (\ReflectionException $e) {
-            error_log("Failed to process class-level attributes for {$className}: ".$e->getMessage());
+            $context = new LogContext(
+                module: 'Taxonomy',
+                class: $className,
+                method: 'processClassLevelAttributes'
+            );
+            $this->loggingService->error('Failed to process class-level attributes', $context, $e);
         }
 
         return $config;
@@ -282,7 +301,12 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 }
             }
         } catch (\ReflectionException $e) {
-            error_log("Failed to process method-level attributes for {$className}: ".$e->getMessage());
+            $context = new LogContext(
+                module: 'Taxonomy',
+                class: $className,
+                method: 'processMethodLevelAttributes'
+            );
+            $this->loggingService->error('Failed to process method-level attributes', $context, $e);
         }
 
         return $config;
@@ -361,7 +385,12 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
         } catch (\ReflectionException|\Throwable $e) {
             // Log the error but continue - additional args are optional
-            error_log("Failed to process additional args for {$className}: ".$e->getMessage());
+            $context = new LogContext(
+                module: 'Taxonomy',
+                class: $className,
+                method: 'processAdditionalArgs'
+            );
+            $this->loggingService->error('Failed to process additional args', $context, $e);
         }
     }
 

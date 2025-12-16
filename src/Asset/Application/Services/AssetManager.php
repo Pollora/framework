@@ -30,12 +30,11 @@ class AssetManager
     protected ?string $defaultContainer = null;
 
     /**
-     * Initializes the asset manager with the registration and retrieval services.
+     * Initializes the asset manager with the retrieval service.
      *
-     * @param  AssetRegistrationService  $registrationService  Service for registering assets
      * @param  AssetRetrievalService  $retrievalService  Service for retrieving assets
      */
-    public function __construct(AssetRegistrationService $registrationService, private readonly AssetRetrievalService $retrievalService) {}
+    public function __construct(private readonly AssetRetrievalService $retrievalService) {}
 
     /**
      * Factory method: returns an AssetEnqueuer (builder) for fluent asset management and enqueueing.

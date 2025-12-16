@@ -54,9 +54,9 @@ trait HasPluginSupport
     }
 
     /**
-     * Resolve plugin name.
+     * Resolve plugin path.
      *
-     * @return string|null The resolved plugin name
+     * @return string The resolved plugin path (empty string if no plugin)
      */
     protected function getPluginPath(): string
     {

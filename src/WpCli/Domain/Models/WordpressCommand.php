@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\WpCli\Domain\Models;
 
 use Pollora\Attributes\WpCli;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\WpCli\Domain\Contracts\WpCliCommandInterface;
 use WP_CLI_Command;
 
@@ -77,7 +79,11 @@ abstract class WordpressCommand extends WP_CLI_Command implements WpCliCommandIn
                 return $attribute->name;
             }
         } catch (\ReflectionException $e) {
-            error_log("Failed to get command name for {$class}: ".$e->getMessage());
+            self::logError(
+                'Failed to get command name for {className}: {message}',
+                $e,
+                ['className' => $class]
+            );
         }
 
         return null;
@@ -103,7 +109,11 @@ abstract class WordpressCommand extends WP_CLI_Command implements WpCliCommandIn
                 return $attribute->description ?? null;
             }
         } catch (\ReflectionException $e) {
-            error_log("Failed to get command description for {$class}: ".$e->getMessage());
+            self::logError(
+                'Failed to get command description for {className}: {message}',
+                $e,
+                ['className' => $class]
+            );
         }
 
         return null;
@@ -118,5 +128,21 @@ abstract class WordpressCommand extends WP_CLI_Command implements WpCliCommandIn
     public static function get_shortdesc(): string
     {
         return static::getDefaultDescription() ?? '';
+    }
+
+    /**
+     * Log an error using the logging service from container
+     *
+     * @param  string  $message  The error message template
+     * @param  \Throwable  $exception  The exception
+     * @param  array  $context  Additional context data
+     */
+    private static function logError(string $message, \Throwable $exception, array $context = []): void
+    {
+        $loggingService = app()->make(LoggingService::class);
+        $loggingService->error(
+            $message,
+            LogContext::fromException('WpCli', $exception)->merge($context)
+        );
     }
 }

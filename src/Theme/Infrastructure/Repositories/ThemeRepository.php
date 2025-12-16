@@ -7,6 +7,8 @@ namespace Pollora\Theme\Infrastructure\Repositories;
 use Illuminate\Container\Container;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Domain\Contracts\CollectionInterface;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Domain\Exceptions\ModuleException;
@@ -31,7 +33,8 @@ class ThemeRepository implements ModuleRepositoryInterface
     public function __construct(
         protected Container $app,
         protected WordPressThemeParser $themeParser,
-        protected CollectionFactoryInterface $collectionFactory
+        protected CollectionFactoryInterface $collectionFactory,
+        protected LoggingService $loggingService
     ) {}
 
     public function all(): array
@@ -183,9 +186,8 @@ class ThemeRepository implements ModuleRepositoryInterface
                 }
             } catch (\Exception $e) {
                 // Log error but don't break the repository functionality
-                if (function_exists('error_log')) {
-                    error_log('Failed to load active theme from registrar: '.$e->getMessage());
-                }
+                $context = LogContext::fromClass(self::class, 'loadThemes');
+                $this->loggingService->error('Failed to load active theme from registrar', $context, $e);
             }
         }
 

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\WpRest\Infrastructure\Services;
 
 use Pollora\Attributes\Attributable;
+use Pollora\Logging\Application\Services\LoggingService;
+use Pollora\Logging\Domain\ValueObjects\LogContext;
 
 /**
  * Wrapper class to make any class compatible with Attributable interface.
@@ -21,7 +23,8 @@ final readonly class WpRestAttributableWrapper implements Attributable
         public string $namespace,
         public string $route,
         public ?string $classPermission = null,
-        private ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null
+        private ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null,
+        private ?LoggingService $loggingService = null
     ) {
         $this->realInstance = $this->createRealInstance();
     }
@@ -46,7 +49,14 @@ final readonly class WpRestAttributableWrapper implements Attributable
                 return $reflectionClass->newInstance();
             }
         } catch (\Throwable $e) {
-            error_log("Failed to create instance of {$this->className}: ".$e->getMessage());
+            if ($this->loggingService instanceof \Pollora\Logging\Application\Services\LoggingService) {
+                $this->loggingService->error(
+                    'Failed to create instance of {className}: {message}',
+                    LogContext::fromException('WpRest', $e, [
+                        'className' => $this->className,
+                    ])
+                );
+            }
         }
 
         return null;
