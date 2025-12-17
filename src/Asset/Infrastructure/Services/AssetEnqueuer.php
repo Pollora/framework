@@ -99,6 +99,13 @@ class AssetEnqueuer
     protected string $handle;
 
     /**
+     * Stored localization data to apply after enqueuing.
+     *
+     * @var array<string, array>
+     */
+    protected array $localizationData = [];
+
+    /**
      * AssetManager instance for container resolution.
      */
     protected AssetManager $assetManager;
@@ -325,8 +332,8 @@ class AssetEnqueuer
      */
     public function localize(string $objectName, array $data): self
     {
-        if ($this->type === 'script') {
-            wp_localize_script($this->handle, $objectName, $data);
+        if ($this->type === 'js') {
+            $this->localizationData[$objectName] = $data;
         }
 
         return $this;
@@ -466,7 +473,7 @@ class AssetEnqueuer
         $handle = $this->useVite && ! $this->viteManager->isRunningHot() ? $this->handle.'/'.sanitize_title(basename($path)) : $this->handle;
         match ($type) {
             'css' => $this->enqueueStyle($path, $handle),
-            'js' => $this->enqueueScript($path),
+            'js' => $this->enqueueScript($path, $handle),
             default => throw new \InvalidArgumentException("Unsupported asset type: {$type}")
         };
     }
@@ -476,17 +483,22 @@ class AssetEnqueuer
      *
      * @param  string  $path  Path to the JavaScript file
      */
-    protected function enqueueScript(string $path): void
+    protected function enqueueScript(string $path, string $handle): void
     {
-        wp_enqueue_script($this->handle, $path, $this->dependencies, $this->version, $this->loadInFooter);
+        wp_enqueue_script($handle, $path, $this->dependencies, $this->version, $this->loadInFooter);
+        
+        foreach ($this->localizationData as $objectName => $data) {
+            wp_localize_script($handle, $objectName, $data);
+        }
+        
         if ($this->useVite) {
-            $this->addViteScriptAttributes();
+            $this->addViteScriptAttributes($handle);
         }
         if (! in_array($this->loadStrategy, [null, '', '0'], true)) {
-            wp_script_add_data($this->handle, 'defer', true);
+            wp_script_add_data($handle, 'defer', true);
         }
         if (! in_array($this->inlineContent, [null, '', '0'], true)) {
-            wp_add_inline_script($this->handle, $this->inlineContent, $this->inlinePosition);
+            wp_add_inline_script($handle, $this->inlineContent, $this->inlinePosition);
         }
     }
 
@@ -507,9 +519,9 @@ class AssetEnqueuer
     /**
      * Adds module and crossorigin attributes to Vite script tags.
      */
-    protected function addViteScriptAttributes(): void
+    protected function addViteScriptAttributes(string $handle): void
     {
-        app(HookFilter::class)->add('script_loader_tag', fn ($tag, $handle, $src) => $handle === $this->handle
+        app(HookFilter::class)->add('script_loader_tag', fn ($tag, $scriptHandle, $src) => $scriptHandle === $handle
             ? '<script type="module" crossorigin src="'.esc_url($src).'"></script>'
             : $tag, 10, 3);
     }
