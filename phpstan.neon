@@ -1,8 +1,12 @@
 includes:
     # Commenting out the Larastan include since it's not installed
     # - vendor/larastan/larastan/extension.neon
+    # Using custom WordPress extension without missing stubs
+    - phpstan-wordpress-custom.neon
 
 parameters:
+    bootstrapFiles:
+        - tests/phpstan-bootstrap.php
     treatPhpDocTypesAsCertain: false
     paths:
         - src/
@@ -36,8 +40,6 @@ parameters:
         # Ignore PHPDoc type compatibility issues
         - '#PHPDoc tag @param for parameter .* with type .* is incompatible with native type .*#'
         - '#PHPDoc type for property .* with type .* is incompatible with native type .*#'
-        # Ignore Laravel Auth classes not found
-        - '#.*Illuminate\\Auth\\.*#'
         # Ignore undefined properties on dynamic classes
         - '#Access to an undefined property.*::\$classPermission\.#'
         - '#Access to an undefined property.*::\$namespace\.#'
@@ -50,8 +52,6 @@ parameters:
         - '#Call to an undefined static method .*User::find\(\)\.#'
         # Ignore PHPDoc parse errors  
         - '#PHPDoc tag @.* has invalid value.*#'
-        # Ignore WordPress constants not found
-        - '#Constant [A-Z_][A-Z0-9_]* not found\.#'
         # Ignore specific property access on traits
         # Ignore WordPress-specific function errors
         - '#Used function [a-zA-Z_][a-zA-Z0-9_]* not found\.#'
@@ -78,8 +78,6 @@ parameters:
         - '#Call to an undefined static method .*Post::find\(\)\.#'
         # Ignore Laravel facade return type issues
         - '#Result of static method .* \(void\) is used\.#'
-        # Ignore Laravel Mail return types
-        - '#Method .* has invalid return type Illuminate\\Mail\\SentMessage\.#'
         # Ignore unsafe static instantiation
         - '#Unsafe usage of new static\(\)\.#'
         # Ignore undefined property access
@@ -102,13 +100,9 @@ parameters:
         - '#Variable .* on left side of \?\? always exists and is not nullable\.#'
         # Ignore strict comparison warnings
         - '#Strict comparison using === between .* and .* will always evaluate to .*\.#'
-        # Ignore Laravel/Illuminate class not found errors
-        - '#.*return type contains unknown class Illuminate\\.*#'
         # Ignore external plugin/framework classes
         - '#.*has invalid type WC_.*#'
         - '#Property .* has unknown class WC_.* as its type\.#'
-        - '#Parameter .* has invalid type Illuminate\\.*#'
-        - '#.*on an unknown class Illuminate\\.*#'
         # Ignore WordPress core instantiation
         - '#Instantiated class WP_.* not found\.#'
         # Ignore strict comparison optimization warnings
@@ -127,14 +121,8 @@ parameters:
         # Ignore always true/false conditions
         - '#Call to function .* with .* will always evaluate to .*\.#'
         - '#Negated boolean expression is always .*\.#'
-        # Ignore external library classes
-        - '#Instantiated class Cron\\.*#'
-        - '#.*on an unknown class Cron\\.*#'
         # Ignore instanceof always true (can happen with type refinements)
         - '#Instanceof between .* and .* will always evaluate to true\.#'
-        # Ignore PHPDoc type covariance issues with external frameworks
-        - '#PHPDoc type .* of property .* is not covariant with PHPDoc type .* of overridden property .*#'
-        - '#Property .* has unknown class Illuminate\\.*#'
         # Ignore external interface iteration issues
         - '#Argument of an invalid type .* supplied for foreach, only iterables are supported\.#'
         # Ignore unnecessary null-safe optimizations

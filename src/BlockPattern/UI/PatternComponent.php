@@ -38,7 +38,7 @@ class PatternComponent implements ThemeComponent
     public function register(): void
     {
         $this->action->add('init', function (): void {
-            if (defined('WP_INSTALLING') && WP_INSTALLING) {
+            if (wp_installing()) {
                 return;
             }
             $this->registrationService->registerAll();

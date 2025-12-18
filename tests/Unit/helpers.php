@@ -602,12 +602,7 @@ if (! function_exists('translate_with_gettext_context')) {
     }
 }
 
-if (! function_exists('abort')) {
-    function abort($code, $message = '')
-    {
-        throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message);
-    }
-}
+
 
 /**
  * WooCommerce mock functions
@@ -1100,6 +1095,19 @@ if (! function_exists('response')) {
     {
         return new \Illuminate\Http\Response($content, $status, $headers);
     }
+}
+
+// Override Laravel helper functions that rely on full framework
+if (! function_exists('abort')) {
+    function abort($code = 404, $message = '')
+    {
+        throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message);
+    }
+}
+
+// Force override Laravel's abort helper that would be loaded later
+function abort_test_override($code = 404, $message = '') {
+    throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message);
 }
 
 /**
