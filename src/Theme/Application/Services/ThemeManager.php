@@ -134,7 +134,7 @@ class ThemeManager implements ThemeService
 
         while (true) {
             if (! is_dir($currentTheme->getBasePath()) && ! $this->consoleDetectionService->isConsole()) {
-                throw new ThemeException("Theme directory {$currentTheme->getName()} not found.");
+                throw new ThemeException(sprintf('Theme directory %s not found.', $currentTheme->getName()));
             }
 
             $currentTheme->loadConfiguration();
@@ -184,6 +184,7 @@ class ThemeManager implements ThemeService
             if ($entry === '.' || $entry === '..') {
                 return false;
             }
+
             $themeInfo = new ThemeMetadata($entry, $path);
 
             return file_exists($themeInfo->getConfigPath());
@@ -397,7 +398,7 @@ class ThemeManager implements ThemeService
         $requiredFiles = ['style.css', 'index.php'];
         foreach ($requiredFiles as $file) {
             if (! file_exists($path.'/'.$file)) {
-                $errors[] = "Missing required file: {$file}";
+                $errors[] = 'Missing required file: '.$file;
             }
         }
 

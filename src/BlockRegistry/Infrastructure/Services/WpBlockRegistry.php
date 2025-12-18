@@ -28,6 +28,7 @@ class WpBlockRegistry implements BlockRegistryInterface
         if (! function_exists('wp_register_block_metadata_collection')) {
             throw new BlockRegistryException('The function wp_register_block_metadata_collection does not exist.');
         }
+
         wp_register_block_metadata_collection($path, $manifest);
 
         return true;
@@ -40,6 +41,7 @@ class WpBlockRegistry implements BlockRegistryInterface
         if (! function_exists('wp_register_block_types_from_metadata_collection')) {
             throw new BlockRegistryException('The function wp_register_block_types_from_metadata_collection does not exist.');
         }
+
         $this->validateBlockCollection($path, $manifest);
 
         wp_register_block_types_from_metadata_collection($path, $manifest);
@@ -58,10 +60,11 @@ class WpBlockRegistry implements BlockRegistryInterface
     protected function validateBlockCollection(string $path, string $manifest = ''): void
     {
         if (! is_dir($path)) {
-            throw new BlockRegistryException("The block collection directory does not exist: $path");
+            throw new BlockRegistryException('The block collection directory does not exist: '.$path);
         }
+
         if ($manifest !== '' && ! is_file($manifest)) {
-            throw new BlockRegistryException("The manifest file does not exist: $manifest");
+            throw new BlockRegistryException('The manifest file does not exist: '.$manifest);
         }
     }
 

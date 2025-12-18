@@ -148,7 +148,7 @@ class PluginRepository implements ModuleRepositoryInterface
         $plugin = $this->find($name);
 
         if (! $plugin instanceof PluginModuleInterface) {
-            throw new \Exception("Plugin '{$name}' not found");
+            throw new \Exception(sprintf("Plugin '%s' not found", $name));
         }
 
         return $plugin;
@@ -190,7 +190,7 @@ class PluginRepository implements ModuleRepositoryInterface
                 }
             } catch (\Exception $e) {
                 // Log error but continue scanning other plugins
-                $this->logError("Failed to create plugin module for '{$pluginName}'", $e, ['plugin_name' => $pluginName]);
+                $this->logError(sprintf("Failed to create plugin module for '%s'", $pluginName), $e, ['plugin_name' => $pluginName]);
             }
         }
 
@@ -210,7 +210,7 @@ class PluginRepository implements ModuleRepositoryInterface
                     $plugin->register();
                 }
             } catch (\Exception $e) {
-                $this->logError("Failed to register plugin '{$plugin->getName()}'", $e, ['plugin_name' => $plugin->getName()]);
+                $this->logError(sprintf("Failed to register plugin '%s'", $plugin->getName()), $e, ['plugin_name' => $plugin->getName()]);
             }
         }
     }
@@ -226,7 +226,7 @@ class PluginRepository implements ModuleRepositoryInterface
                     $plugin->boot();
                 }
             } catch (\Exception $e) {
-                $this->logError("Failed to boot plugin '{$plugin->getName()}'", $e, ['plugin_name' => $plugin->getName()]);
+                $this->logError(sprintf("Failed to boot plugin '%s'", $plugin->getName()), $e, ['plugin_name' => $plugin->getName()]);
             }
         }
     }
@@ -262,9 +262,11 @@ class PluginRepository implements ModuleRepositoryInterface
             if ($item === '.') {
                 continue;
             }
+
             if ($item === '..') {
                 continue;
             }
+
             $pluginPath = $this->pluginsPath.'/'.$item;
 
             if (! is_dir($pluginPath)) {
@@ -309,8 +311,8 @@ class PluginRepository implements ModuleRepositoryInterface
             $plugin->setActive($isActive);
 
             return $plugin;
-        } catch (\Exception $e) {
-            $this->logError("Failed to create plugin module '{$pluginName}'", $e, ['plugin_name' => $pluginName]);
+        } catch (\Exception $exception) {
+            $this->logError(sprintf("Failed to create plugin module '%s'", $pluginName), $exception, ['plugin_name' => $pluginName]);
 
             return null;
         }

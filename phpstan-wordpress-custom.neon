@@ -46,7 +46,7 @@ rules:
     - SzepeViktor\PHPStan\WordPress\HookDocsRule
     - SzepeViktor\PHPStan\WordPress\WpConstantFetchRule
 parameters:
-    # Only include the existing bootstrap file, not the missing WordPress stubs
+    # Use phpstan-wordpress bootstrap without conflicting stubs
     bootstrapFiles:
         - vendor/szepeviktor/phpstan-wordpress/bootstrap.php
     dynamicConstantNames:

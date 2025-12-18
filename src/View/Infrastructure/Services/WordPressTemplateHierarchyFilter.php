@@ -61,6 +61,7 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
         if (method_exists($theme, 'load_textdomain') && $theme->load_textdomain()) {
             $theme->get('TextDomain');
         }
+
         $bladeTemplates = $this->getBladeThemeTemplates($postType);
 
         return array_merge($templates, $bladeTemplates);

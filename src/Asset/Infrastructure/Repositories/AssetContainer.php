@@ -46,8 +46,8 @@ class AssetContainer
      */
     public function __construct(protected string $name, protected array $config = [])
     {
-        $this->hotFile = $config['hot_file'] ?? public_path("{$this->name}.hot");
-        $this->buildDirectory = $config['build_directory'] ?? "build/{$this->name}";
+        $this->hotFile = $config['hot_file'] ?? public_path($this->name.'.hot');
+        $this->buildDirectory = $config['build_directory'] ?? 'build/'.$this->name;
         $this->manifestPath = $config['manifest_path'] ?? 'manifest.json';
         $this->basePath = $config['base_path'] ?? '';
     }

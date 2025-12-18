@@ -37,14 +37,14 @@ class RemoveThemeCommand extends BaseThemeCommand
         $themeName = $this->argument('name');
 
         if (! $this->directoryExists()) {
-            $this->error("Theme \"{$themeName}\" does not exist.");
+            $this->error(sprintf('Theme "%s" does not exist.', $themeName));
 
             return self::FAILURE;
         }
 
-        if ($this->confirm("Are you sure you want to permanently delete the theme \"{$themeName}\"?")) {
+        if ($this->confirm(sprintf('Are you sure you want to permanently delete the theme "%s"?', $themeName))) {
             $this->removeTheme();
-            $this->info("Theme \"{$themeName}\" has been removed successfully.");
+            $this->info(sprintf('Theme "%s" has been removed successfully.', $themeName));
 
             return self::SUCCESS;
         }

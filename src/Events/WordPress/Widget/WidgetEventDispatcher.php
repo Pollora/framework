@@ -180,6 +180,7 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
             if (! is_array($sidebarWidgets)) {
                 continue;
             }
+
             foreach ($sidebarWidgets as $widgetId) {
                 $locations[$widgetId] = $sidebarId;
             }

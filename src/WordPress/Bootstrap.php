@@ -59,9 +59,11 @@ class Bootstrap
             Constant::queue('WP_INSTALLING', true);
             Constant::apply();
         }
+
         if (! $this->consoleDetectionService->isConsole() && $this->isWordPressInstalled()) {
             $this->runWp();
         }
+
         $this->setupActionHooks();
     }
 

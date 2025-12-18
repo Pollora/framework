@@ -43,10 +43,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             foreach ($enabledModules as $module) {
                 $this->discoverModuleOnly($module);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Laravel Module discovery error: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
     }
@@ -64,10 +64,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             foreach ($this->discoveredModules as $engineData) {
                 $engineData['engine']->apply();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Laravel Module apply error: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
     }
@@ -86,10 +86,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             if ($module && $module->isEnabled()) {
                 $this->discoverModule($module);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Laravel Module discovery error for {moduleName}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'moduleName' => $moduleName,
                 ])
             );
@@ -116,10 +116,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                     $results[$module->getName()] = $moduleResults;
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Laravel Module discovery error: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
 
@@ -164,10 +164,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             $repository = $this->container->make('modules');
 
             return $repository->allEnabled();
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Error getting enabled modules: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
 
             return [];
@@ -184,10 +184,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             $repository = $this->container->make('modules');
 
             return $repository->find($name);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Error finding module {moduleName}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'moduleName' => $name,
                 ])
             );
@@ -206,6 +206,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
         if (! is_dir($appPath) || ! $this->container->bound(DiscoveryEngineInterface::class)) {
             return;
         }
+
         try {
             // Create a fresh engine instance for each module to avoid interference
             $engine = $this->container->makeWith(DiscoveryEngineInterface::class, []);
@@ -219,10 +220,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 'engine' => $engine,
                 'path' => $appPath,
             ];
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Discovery error for module {moduleName}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'moduleName' => $module->getName(),
                 ])
             );
@@ -260,10 +261,10 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             $location = new DirectoryLocation($appPath);
 
             return $manager->discoverAllInLocation($location);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Discovery error for module {moduleName}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'moduleName' => $module->getName(),
                 ])
             );

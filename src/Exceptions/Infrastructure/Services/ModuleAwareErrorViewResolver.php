@@ -71,7 +71,7 @@ class ModuleAwareErrorViewResolver
         $candidates = [];
 
         // Primary candidate based on HTTP status code
-        $candidates[] = "errors.{$statusCode}";
+        $candidates[] = 'errors.'.$statusCode;
 
         // Fallback candidates for common error types
         $candidates = array_merge($candidates, $this->getCommonErrorViewCandidates($statusCode));
@@ -126,7 +126,7 @@ class ModuleAwareErrorViewResolver
         // Convert exception class name to kebab-case view name
         $kebabCaseName = $this->convertToKebabCase($shortName);
         if ($kebabCaseName !== '') {
-            $candidates[] = "errors.{$kebabCaseName}";
+            $candidates[] = 'errors.'.$kebabCaseName;
         }
 
         // Remove common suffixes for cleaner view names
@@ -134,7 +134,7 @@ class ModuleAwareErrorViewResolver
         if ($cleanName !== $shortName && $cleanName !== '') {
             $kebabCleanName = $this->convertToKebabCase($cleanName);
             if ($kebabCleanName !== '') {
-                $candidates[] = "errors.{$kebabCleanName}";
+                $candidates[] = 'errors.'.$kebabCleanName;
             }
         }
 

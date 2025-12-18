@@ -68,8 +68,8 @@ class Scheduler implements SchedulerInterface
             $job = $event->schedule ? new RecurringEvent($event) : new SingleEvent($event);
 
             return $job->createJob($event);
-        } catch (\Throwable $e) {
-            return $wp_error ? new WP_Error('schedule_error', $e->getMessage()) : null;
+        } catch (\Throwable $throwable) {
+            return $wp_error ? new WP_Error('schedule_error', $throwable->getMessage()) : null;
         }
     }
 
@@ -91,8 +91,8 @@ class Scheduler implements SchedulerInterface
             $job = new RecurringEvent($event);
 
             return $job->createJob($event);
-        } catch (\Throwable $e) {
-            return $wp_error ? new WP_Error('reschedule_error', $e->getMessage()) : null;
+        } catch (\Throwable $throwable) {
+            return $wp_error ? new WP_Error('reschedule_error', $throwable->getMessage()) : null;
         }
     }
 
@@ -124,8 +124,8 @@ class Scheduler implements SchedulerInterface
             }
 
             return $deleted > 0;
-        } catch (\Throwable $e) {
-            return $wp_error ? new WP_Error('unschedule_error', $e->getMessage()) : false;
+        } catch (\Throwable $throwable) {
+            return $wp_error ? new WP_Error('unschedule_error', $throwable->getMessage()) : false;
         }
     }
 
@@ -161,8 +161,8 @@ class Scheduler implements SchedulerInterface
             $query->delete();
 
             return $count;
-        } catch (\Throwable $e) {
-            return $wp_error ? new WP_Error('clear_hook_error', $e->getMessage()) : 0;
+        } catch (\Throwable $throwable) {
+            return $wp_error ? new WP_Error('clear_hook_error', $throwable->getMessage()) : 0;
         }
     }
 

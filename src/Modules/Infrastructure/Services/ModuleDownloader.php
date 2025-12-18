@@ -111,7 +111,7 @@ class ModuleDownloader
      */
     public function getAvailableVersions(): array
     {
-        $response = Http::get("https://api.github.com/repos/{$this->repository}/tags");
+        $response = Http::get(sprintf('https://api.github.com/repos/%s/tags', $this->repository));
 
         if (! $response->successful()) {
             return [];
@@ -127,10 +127,10 @@ class ModuleDownloader
      */
     public function getRepositoryInfo(): array
     {
-        $response = Http::get("https://api.github.com/repos/{$this->repository}");
+        $response = Http::get('https://api.github.com/repos/'.$this->repository);
 
         if (! $response->successful()) {
-            throw new Exception("Unable to fetch repository information for {$this->repository}");
+            throw new Exception('Unable to fetch repository information for '.$this->repository);
         }
 
         return $response->json();
@@ -142,18 +142,18 @@ class ModuleDownloader
     protected function getDownloadUrl(): string
     {
         if (! in_array($this->version, [null, '', '0'], true)) {
-            return "https://github.com/{$this->repository}/archive/refs/tags/{$this->version}.zip";
+            return sprintf('https://github.com/%s/archive/refs/tags/%s.zip', $this->repository, $this->version);
         }
 
         $tag = $this->getLatestTag();
 
         if (! in_array($tag, [null, '', '0'], true)) {
-            return "https://github.com/{$this->repository}/archive/refs/tags/{$tag}.zip";
+            return sprintf('https://github.com/%s/archive/refs/tags/%s.zip', $this->repository, $tag);
         }
 
         $branch = $this->getDefaultBranch();
 
-        return "https://github.com/{$this->repository}/archive/refs/heads/{$branch}.zip";
+        return sprintf('https://github.com/%s/archive/refs/heads/%s.zip', $this->repository, $branch);
     }
 
     /**
@@ -161,7 +161,7 @@ class ModuleDownloader
      */
     protected function getLatestTag(): ?string
     {
-        $response = Http::get("https://api.github.com/repos/{$this->repository}/tags");
+        $response = Http::get(sprintf('https://api.github.com/repos/%s/tags', $this->repository));
 
         if (! $response->successful()) {
             return null;
@@ -177,7 +177,7 @@ class ModuleDownloader
      */
     protected function getDefaultBranch(): string
     {
-        $response = Http::get("https://api.github.com/repos/{$this->repository}");
+        $response = Http::get('https://api.github.com/repos/'.$this->repository);
 
         if (! $response->successful()) {
             return 'main';
@@ -195,7 +195,7 @@ class ModuleDownloader
         $timestamp = time();
         $version = $this->version ?? 'latest';
 
-        return "{$sanitizedRepo}-{$version}-{$timestamp}.zip";
+        return sprintf('%s-%s-%d.zip', $sanitizedRepo, $version, $timestamp);
     }
 
     /**
@@ -203,7 +203,7 @@ class ModuleDownloader
      */
     protected function getTempPath(string $filename): string
     {
-        return storage_path("app/tmp/{$filename}");
+        return storage_path('app/tmp/'.$filename);
     }
 
     /**
@@ -224,7 +224,7 @@ class ModuleDownloader
         $response = Http::withOptions(['stream' => true])->get($url);
 
         if (! $response->successful()) {
-            throw new Exception("Unable to download archive from {$url}");
+            throw new Exception('Unable to download archive from '.$url);
         }
 
         file_put_contents($tempPath, $response->body());
@@ -250,7 +250,7 @@ class ModuleDownloader
         $zip = new ZipArchive;
 
         if ($zip->open($tempPath) !== true) {
-            throw new Exception("Unable to open ZIP archive: {$tempPath}");
+            throw new Exception('Unable to open ZIP archive: '.$tempPath);
         }
 
         $zip->extractTo($extractPath);
@@ -271,7 +271,7 @@ class ModuleDownloader
             ->first();
 
         if (! $subfolder) {
-            throw new Exception("No extracted folder found in {$extractPath}");
+            throw new Exception('No extracted folder found in '.$extractPath);
         }
 
         return $extractPath.'/'.$subfolder;

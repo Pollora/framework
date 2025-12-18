@@ -63,10 +63,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
         try {
             $this->discoverModuleOnly('app', $this->basePath);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Framework Module discovery error: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
     }
@@ -87,10 +87,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             foreach ($this->discoveredModules as $moduleData) {
                 $moduleData['engine']->apply();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Framework Module apply error: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
     }
@@ -114,10 +114,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             }
 
             $this->discoverModuleOnly($moduleName, $modules[$moduleName]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Framework Module discovery error for {moduleName}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'moduleName' => $moduleName,
                 ])
             );
@@ -146,10 +146,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                     $results[$moduleName] = $moduleResults;
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Framework Module discovery error: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
 
@@ -201,9 +201,11 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 if ($directory->isDot()) {
                     continue;
                 }
+
                 if (! $directory->isDir()) {
                     continue;
                 }
+
                 $moduleName = $directory->getBasename();
 
                 // Only include modules that have typical DDD structure
@@ -211,10 +213,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                     $modules[$moduleName] = $directory->getPathname();
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Error scanning framework modules: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
 
@@ -275,10 +277,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 'path' => $modulePath,
                 'engine' => $engine,
             ];
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Discovery error for framework module {moduleName}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'moduleName' => $moduleName,
                 ])
             );
@@ -321,10 +323,10 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             }
 
             return $results;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Discovery error for framework module {moduleName}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'moduleName' => $moduleName,
                 ])
             );

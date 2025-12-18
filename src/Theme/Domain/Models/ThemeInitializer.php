@@ -203,6 +203,7 @@ class ThemeInitializer implements ThemeComponent
         if (! file_exists($path)) {
             return;
         }
+
         $this->app->setConfig($key, array_merge(require $path, $config));
     }
 

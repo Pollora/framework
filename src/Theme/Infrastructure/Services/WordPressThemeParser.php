@@ -102,6 +102,7 @@ class WordPressThemeParser
             if ($line === '') {
                 continue;
             }
+
             if ($line === '0') {
                 continue;
             }

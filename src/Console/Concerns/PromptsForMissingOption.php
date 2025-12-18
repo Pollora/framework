@@ -140,11 +140,11 @@ trait PromptsForMissingOption
 
                 foreach ($rules as $rule) {
                     if ($rule === 'required' && empty($value)) {
-                        return "The {$optionName} is required.";
+                        return sprintf('The %s is required.', $optionName);
                     }
 
                     if ($rule === 'url' && ! empty($value) && ! filter_var($value, FILTER_VALIDATE_URL)) {
-                        return "The {$optionName} must be a valid URL.";
+                        return sprintf('The %s must be a valid URL.', $optionName);
                     }
                 }
 

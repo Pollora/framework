@@ -33,7 +33,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class WpCliDiscovery implements DiscoveryInterface, RequiresInstancePoolInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * @var array<class-string, object>
@@ -190,7 +191,7 @@ final class WpCliDiscovery implements DiscoveryInterface, RequiresInstancePoolIn
             /** @var Command $commandAttribute */
             $commandAttribute = $commandAttributes[0]->newInstance();
             $subcommandName = $commandAttribute->getSubcommandName($method->getName());
-            $fullCommandName = "{$baseCommandName} {$subcommandName}";
+            $fullCommandName = sprintf('%s %s', $baseCommandName, $subcommandName);
 
             $handler = $this->createCallable($instance, $method);
 
@@ -263,6 +264,7 @@ final class WpCliDiscovery implements DiscoveryInterface, RequiresInstancePoolIn
                 if (! empty($description['short'])) {
                     $args['shortdesc'] = $description['short'];
                 }
+
                 if (! empty($description['long'])) {
                     $args['longdesc'] = $description['long'];
                 }

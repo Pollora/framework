@@ -63,10 +63,10 @@ class ModuleComponentManager
             if (! $this->app->bound($serviceKey)) {
                 $this->app->singleton($serviceKey, $componentClass);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Failed to register component {componentClass} for module {moduleId}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'componentClass' => $componentClass,
                     'moduleId' => $moduleId,
                 ])
@@ -89,18 +89,18 @@ class ModuleComponentManager
                     $instance->register();
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (env('APP_DEBUG', false)) {
                 throw new \RuntimeException(
-                    "Failed to initialize component {$componentClass} for module {$moduleId}: ".$e->getMessage(),
+                    sprintf('Failed to initialize component %s for module %s: ', $componentClass, $moduleId).$throwable->getMessage(),
                     0,
-                    $e
+                    $throwable
                 );
             }
 
             $this->loggingService->error(
                 'Component initialization failed: {componentClass} for module {moduleId}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'componentClass' => $componentClass,
                     'moduleId' => $moduleId,
                 ])
@@ -113,7 +113,7 @@ class ModuleComponentManager
      */
     protected function getComponentServiceKey(string $componentClass, string $moduleId): string
     {
-        return "module.{$moduleId}.component.".class_basename($componentClass);
+        return sprintf('module.%s.component.', $moduleId).class_basename($componentClass);
     }
 
     /**

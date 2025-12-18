@@ -103,6 +103,7 @@ class InstallationService
             if (function_exists('flush_rewrite_rules')) {
                 flush_rewrite_rules();
             }
+
             info('Pretty permalinks have been enabled by default.');
         } else {
             info('Permalink structure could not be set automatically. Ensure WordPress is loaded.');

@@ -25,7 +25,9 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
 {
     public $job;
 
-    use Dispatchable, InteractsWithQueue, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use SerializesModels;
 
     /**
      * The WordPress hook to execute.
@@ -59,7 +61,7 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
      */
     public function __construct(?object $event = null)
     {
-        if ($event) {
+        if ($event !== null) {
             $this->hook = $event->hook;
             $this->timestamp = $event->timestamp;
             $this->args = $event->args;

@@ -50,8 +50,8 @@ class ThemeStatusCommand extends Command
 
         if ($registeredTheme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
             $this->info('✓ Self-registered theme found:');
-            $this->line("  Name: {$registeredTheme->getName()}");
-            $this->line("  Path: {$registeredTheme->getPath()}");
+            $this->line('  Name: '.$registeredTheme->getName());
+            $this->line('  Path: '.$registeredTheme->getPath());
             $this->line('  Enabled: '.($registeredTheme->isEnabled() ? 'Yes' : 'No'));
 
             $this->displayThemeHeaders($registeredTheme);
@@ -71,11 +71,11 @@ class ThemeStatusCommand extends Command
         $headers = $theme->getHeaders();
 
         if (! empty($headers['Name'])) {
-            $this->line("  Display Name: {$headers['Name']}");
+            $this->line('  Display Name: '.$headers['Name']);
         }
 
         if (! empty($headers['Version'])) {
-            $this->line("  Version: {$headers['Version']}");
+            $this->line('  Version: '.$headers['Version']);
         }
     }
 
@@ -87,8 +87,8 @@ class ThemeStatusCommand extends Command
 
         if ($activeTheme) {
             $this->info('✓ Active theme via ThemeService:');
-            $this->line("  Name: {$activeTheme->getName()}");
-            $this->line("  Path: {$activeTheme->getPath()}");
+            $this->line('  Name: '.$activeTheme->getName());
+            $this->line('  Path: '.$activeTheme->getPath());
 
             $this->checkSynchronization($registrar, $activeTheme);
         } else {

@@ -63,12 +63,15 @@ class PatternDataProcessor implements PatternDataProcessorInterface
                 if (in_array($key, $arrayProperties, true)) {
                     return $value ? explode(',', $value) : null;
                 }
+
                 if ($key === 'viewportWidth') {
                     return $value ? (int) $value : null;
                 }
+
                 if ($key === 'inserter') {
                     return $value ? in_array(strtolower($value), ['yes', 'true']) : null;
                 }
+
                 if (in_array($key, ['title', 'description'])) {
                     if (! function_exists('translate_with_gettext_context') || ! method_exists($theme, 'get')) {
                         return $value;

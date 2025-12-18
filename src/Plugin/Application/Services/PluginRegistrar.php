@@ -226,9 +226,9 @@ class PluginRegistrar
             if ($repository instanceof PluginRepository) {
                 $repository->resetCache();
             }
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = LogContext::fromClass(self::class, 'invalidateRepositoryCache');
-            $this->loggingService->error('Failed to invalidate plugin repository cache', $context, $e);
+            $this->loggingService->error('Failed to invalidate plugin repository cache', $context, $exception);
         }
     }
 
@@ -247,14 +247,14 @@ class PluginRegistrar
             $discoveryService = $this->app->get(ModuleDiscoveryOrchestratorInterface::class);
 
             $discoveryService->discover($plugin->getPath());
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = new LogContext(
                 module: 'Plugin',
                 class: self::class,
                 method: 'discoverPluginStructures',
                 extra: ['plugin_name' => $plugin->getName()]
             );
-            $this->loggingService->error('Plugin discovery error', $context, $e);
+            $this->loggingService->error('Plugin discovery error', $context, $exception);
         }
     }
 
@@ -277,9 +277,9 @@ class PluginRegistrar
                 $plugin->getPath(),
                 'plugin'
             );
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = LogContext::fromClass(self::class, 'loadPluginConfiguration');
-            $this->loggingService->error('Failed to load plugin configuration', $context, $e);
+            $this->loggingService->error('Failed to load plugin configuration', $context, $exception);
         }
     }
 
@@ -312,9 +312,9 @@ class PluginRegistrar
                 $componentManager->registerModuleComponents($moduleId, $pluginComponents);
                 $componentManager->initializeModuleComponents($moduleId);
             }
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = LogContext::fromClass(self::class, 'setupPluginComponents');
-            $this->loggingService->error('Failed to setup plugin components', $context, $e);
+            $this->loggingService->error('Failed to setup plugin components', $context, $exception);
         }
     }
 
@@ -347,9 +347,9 @@ class PluginRegistrar
             if (method_exists($plugin, 'hasViews') && $plugin->hasViews()) {
                 $assetManager->registerModuleBladeDirectives($plugin->getPath());
             }
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = LogContext::fromClass(self::class, 'setupPluginAssets');
-            $this->loggingService->error('Failed to setup plugin assets', $context, $e);
+            $this->loggingService->error('Failed to setup plugin assets', $context, $exception);
         }
     }
 

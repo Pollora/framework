@@ -92,9 +92,8 @@
         "laravel/pint": "^v1.26.0",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
-        "symfony/var-dumper": "^8.0.0",
-        "szepeviktor/phpstan-wordpress": "*",
-        "php-stubs/wordpress-stubs": "6.*",
+        "szepeviktor/phpstan-wordpress": "2.x-dev",
+        "php-stubs/wordpress-stubs": "^6.9",
         "symplify/vendor-patches": "^12.0",
         "mockery/mockery": "1.6.12",
         "wp-cli/wp-cli": "^2.13@dev"
@@ -107,7 +106,6 @@
             "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
         },
         "files": [
-            "tests/Unit/helpers.php"
         ]
     },
     "scripts": {

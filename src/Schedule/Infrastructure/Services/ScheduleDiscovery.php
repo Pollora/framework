@@ -31,7 +31,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class ScheduleDiscovery implements DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Create a new Schedule discovery service.

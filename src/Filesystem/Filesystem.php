@@ -113,14 +113,14 @@ class Filesystem extends FilesystemBase
         }
 
         if ($path[0] === '/') {
-            return ".{$path}";
+            return '.'.$path;
         }
 
         $colonPos = strpos($path, ':');
         if ($colonPos !== false) {
             $slashPos = strpos($path, '/');
             if ($slashPos === false || $slashPos >= $colonPos) {
-                return "./{$path}";
+                return './'.$path;
             }
         }
 

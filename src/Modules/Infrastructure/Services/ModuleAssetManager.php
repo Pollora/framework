@@ -53,10 +53,10 @@ class ModuleAssetManager
             // Register view paths for the module
             $this->registerModuleViewPaths($modulePath, $moduleType, $moduleSlug);
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Failed to setup assets for module {moduleName} ({moduleType}): {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'moduleName' => $moduleName,
                     'moduleType' => $moduleType,
                 ])
@@ -82,8 +82,8 @@ class ModuleAssetManager
     protected function getAssetConfiguration(string $moduleName, string $modulePath, string $moduleType): array
     {
         return [
-            'hot_file' => public_path("{$moduleName}.hot"),
-            'build_directory' => "build/{$moduleType}/{$moduleName}",
+            'hot_file' => public_path($moduleName.'.hot'),
+            'build_directory' => sprintf('build/%s/%s', $moduleType, $moduleName),
             'manifest_path' => 'manifest.json',
             'base_path' => 'resources/assets/',
             'module_path' => $modulePath,
@@ -122,10 +122,10 @@ class ModuleAssetManager
                     \Illuminate\Support\Facades\Blade::directive($name, $directive);
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Failed to register Blade directives for module {modulePath}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'modulePath' => $modulePath,
                 ])
             );
@@ -174,10 +174,10 @@ class ModuleAssetManager
                 $viewFactory->addNamespace($moduleSlug, $modulePath.'/resources/views');
             }
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Failed to register view paths for module {modulePath} ({moduleType}): {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'modulePath' => $modulePath,
                     'moduleType' => $moduleType,
                 ])

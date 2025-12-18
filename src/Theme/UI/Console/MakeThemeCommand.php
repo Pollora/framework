@@ -90,7 +90,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             $this->downloadFromRepository('pollora/theme-default');
         }
 
-        $this->info("Theme \"{$this->theme->getName()}\" created successfully.");
+        $this->info(sprintf('Theme "%s" created successfully.', $this->theme->getName()));
 
         // Run npm install and npm run build in the frontend directory of the new theme
         if (is_dir($this->theme->getBasePath())) {
@@ -158,12 +158,12 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         $name = $this->theme->getName();
 
-        $this->error("Theme \"{$name}\" already exists.");
+        $this->error(sprintf('Theme "%s" already exists.', $name));
         if ($this->option('force')) {
             return true;
         }
 
-        return $this->confirm("Are you sure you want to override \"{$name}\" theme folder?");
+        return $this->confirm(sprintf('Are you sure you want to override "%s" theme folder?', $name));
     }
 
     /**
@@ -207,7 +207,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
                 $downloader->setVersion($version);
             }
 
-            $this->info("Downloading theme from {$repository}".($version ? " (version: {$version})" : '').'...');
+            $this->info('Downloading theme from '.$repository.($version ? sprintf(' (version: %s)', $version) : '').'...');
 
             $extractedPath = $downloader->downloadAndExtract($this->getThemesPath());
 
@@ -216,8 +216,8 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
             $this->info('Theme downloaded and extracted successfully.');
 
-        } catch (\Exception $e) {
-            $this->error("Failed to download theme: {$e->getMessage()}");
+        } catch (\Exception $exception) {
+            $this->error('Failed to download theme: '.$exception->getMessage());
 
             // Fallback to generating structure if download fails
             $this->warn('Falling back to generating default theme structure...');
@@ -355,7 +355,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     {
         if (File::exists($targetPath) &&
             ! $this->option('force') &&
-            ! $this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")
+            ! $this->confirm(sprintf('File %s already exists. Do you want to overwrite it?', $targetPath))
         ) {
             return;
         }
@@ -522,6 +522,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
                     if (empty($value)) {
                         return 'Repository is required';
                     }
+
                     if (! str_contains($value, '/')) {
                         return 'Repository must be in owner/repo format';
                     }
@@ -542,7 +543,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         return match (true) {
             $value === '' || $value === '0' => 'Name is required.',
             preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== 0 && preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== false => 'Name must be alphanumeric, dash, space or underscore.',
-            $this->files->isDirectory($this->makeTheme($value)->getBasePath()) => "Theme \"{$value}\" already exists.",
+            $this->files->isDirectory($this->makeTheme($value)->getBasePath()) => sprintf('Theme "%s" already exists.', $value),
             default => null,
         };
     }

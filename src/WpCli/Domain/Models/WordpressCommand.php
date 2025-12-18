@@ -78,10 +78,10 @@ abstract class WordpressCommand extends WP_CLI_Command implements WpCliCommandIn
 
                 return $attribute->name;
             }
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException $reflectionException) {
             self::logError(
                 'Failed to get command name for {className}: {message}',
-                $e,
+                $reflectionException,
                 ['className' => $class]
             );
         }
@@ -108,10 +108,10 @@ abstract class WordpressCommand extends WP_CLI_Command implements WpCliCommandIn
 
                 return $attribute->description ?? null;
             }
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException $reflectionException) {
             self::logError(
                 'Failed to get command description for {className}: {message}',
-                $e,
+                $reflectionException,
                 ['className' => $class]
             );
         }

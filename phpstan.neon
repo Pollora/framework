@@ -1,8 +1,8 @@
 includes:
     # Commenting out the Larastan include since it's not installed
     # - vendor/larastan/larastan/extension.neon
-    # Using custom WordPress extension without missing stubs
-    - phpstan-wordpress-custom.neon
+    # Using custom WordPress extension without problematic stubs
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
 parameters:
     bootstrapFiles:
@@ -13,7 +13,7 @@ parameters:
 
     # Level 9 is the highest level
     level: 5
-    
+
     excludePaths:
         # Exclude specific files that have dependency issues
         - src/Auth/WordPressGuard.php
@@ -23,16 +23,8 @@ parameters:
         - src/WordPress/Commands/LaunchPadInstallCommand.php
         - src/Exceptions/Infrastructure/Handlers/ModuleAwareExceptionHandler.php
         - src/Proxy/WordPressDatabase.php
-    
+
     ignoreErrors:
-        # Ignore WordPress function not found errors
-        - '#Function [a-zA-Z_][a-zA-Z0-9_]* not found\.#'
-        # Ignore WordPress class not found errors  
-        - '#Class WP_[a-zA-Z0-9_]* not found\.#'
-        # Ignore WP_Error constructor arguments
-        - '#Class WP_Error constructor invoked with [0-9]+ parameters, 0 required\.#'
-        # Ignore specific WordPress classes
-        - '#Parameter .* has invalid type WP_REST_Request\.#'
         # Ignore Laravel Vite class errors
         - '#.*Illuminate\\Foundation\\Vite.*#'
         # Ignore dynamic attributeArgs property access
@@ -50,16 +42,9 @@ parameters:
         - '#Class .* does not have a constructor and must be instantiated without any parameters\.#'
         # Ignore undefined static methods on User models
         - '#Call to an undefined static method .*User::find\(\)\.#'
-        # Ignore PHPDoc parse errors  
+        # Ignore PHPDoc parse errors
         - '#PHPDoc tag @.* has invalid value.*#'
         # Ignore specific property access on traits
-        # Ignore WordPress-specific function errors
-        - '#Used function [a-zA-Z_][a-zA-Z0-9_]* not found\.#'
-        # Ignore WordPress class method calls
-        - '#Call to method .* on an unknown class WP_.*#'
-        # Ignore WordPress return types
-        - '#.*has invalid return type WP_.*#'
-        - '#Parameter .* has invalid type WP_.*#'
         # Ignore PHPDoc parameter type mismatches
         - '#PHPDoc tag @param for parameter .* with type .* is not subtype of native type .*#'
         # Ignore isset offset warnings
@@ -84,10 +69,6 @@ parameters:
         - '#Access to an undefined property .*::\$.*#'
         # Ignore method parameter count mismatches
         - '#Method .* invoked with [0-9]+ parameters, [0-9\-]+ required\.#'
-        # Ignore property access on unknown WordPress classes
-        - '#Access to property .* on an unknown class WP_.*#'
-        # Ignore property with unknown WordPress classes as type
-        - '#Property .* has unknown class WP_.* as its type\.#'
         # Ignore array return type issues
         - '#.*never returns array so it can be removed from the return type\.#'
         # Ignore method calls on mixed types
@@ -103,8 +84,6 @@ parameters:
         # Ignore external plugin/framework classes
         - '#.*has invalid type WC_.*#'
         - '#Property .* has unknown class WC_.* as its type\.#'
-        # Ignore WordPress core instantiation
-        - '#Instantiated class WP_.* not found\.#'
         # Ignore strict comparison optimization warnings
         - '#Strict comparison using .* between .* will always evaluate to .*\.#'
         # Ignore third-party plugin classes not found
@@ -112,8 +91,6 @@ parameters:
         - '#Class .* not found\.#'
         # Ignore constructor parameter count mismatches
         - '#Class .* constructor invoked with [0-9]+ parameters, [0-9\-]+ required\.#'
-        # Ignore function parameter count mismatches
-        - '#Function .* invoked with [0-9]+ parameters, [0-9\-]+ required\.#'
         # Ignore unused traits
         - '#Trait .* is used zero times and is not analysed\.#'
         # Ignore non-nullable expressions on null coalesce

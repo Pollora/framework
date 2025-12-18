@@ -100,14 +100,17 @@ trait QueryTrait
             $this->action->do('do_robots');
             exit;
         }
+
         if (is_favicon()) {
             $this->action->do('do_favicon');
             exit;
         }
+
         if (is_feed()) {
             do_feed();
             exit;
         }
+
         if (is_trackback()) {
             require_once ABSPATH.'wp-trackback.php';
             exit;

@@ -60,12 +60,12 @@ class ThemeComponentProvider
 
             $instance = $this->app->make($component);
             $instance->register();
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (env('APP_DEBUG', false)) {
                 throw new \RuntimeException(
-                    "Failed to register component {$component}: ".$e->getMessage(),
+                    sprintf('Failed to register component %s: ', $component).$throwable->getMessage(),
                     0,
-                    $e
+                    $throwable
                 );
             }
 
@@ -76,7 +76,7 @@ class ThemeComponentProvider
                 method: 'registerComponent',
                 extra: ['component' => $component]
             );
-            $this->loggingService->error('Theme component registration failed', $context, $e);
+            $this->loggingService->error('Theme component registration failed', $context, $throwable);
         }
     }
 

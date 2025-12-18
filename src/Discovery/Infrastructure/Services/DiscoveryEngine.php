@@ -239,14 +239,14 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
 
             // Discover PHP structures using Spatie's native cache
             $this->discoverStructures($discovery);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Discovery failed for {class}: {message}',
-                LogContext::fromException('Discovery', $e, [
+                LogContext::fromException('Discovery', $throwable, [
                     'class' => $discovery::class,
                 ])
             );
-            throw DiscoveryException::discoveryFailed($discovery::class, $e);
+            throw DiscoveryException::discoveryFailed($discovery::class, $throwable);
         }
     }
 
@@ -304,14 +304,14 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
         try {
             $this->discoverSingle($discovery);
             $discovery->apply();
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Discovery execution failed for {class}: {message}',
-                LogContext::fromException('Discovery', $e, [
+                LogContext::fromException('Discovery', $throwable, [
                     'class' => $discovery::class,
                 ])
             );
-            throw DiscoveryException::discoveryFailed($discovery::class, $e);
+            throw DiscoveryException::discoveryFailed($discovery::class, $throwable);
         }
 
         return $this;
@@ -350,8 +350,8 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
 
         try {
             return $this->container->make($discovery);
-        } catch (\Throwable $e) {
-            throw InvalidDiscoveryException::invalidClass($discovery, "Cannot instantiate: {$e->getMessage()}");
+        } catch (\Throwable $throwable) {
+            throw InvalidDiscoveryException::invalidClass($discovery, 'Cannot instantiate: '.$throwable->getMessage());
         }
     }
 
@@ -476,11 +476,11 @@ final class DiscoveryEngine implements DiscoveryEngineInterface
                 }
             }
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->context->recordError();
             $this->loggingService->error(
                 'Failed to process class {className}: {message}',
-                LogContext::fromException('Discovery', $e, [
+                LogContext::fromException('Discovery', $throwable, [
                     'className' => $className,
                 ])
             );

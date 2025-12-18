@@ -157,13 +157,13 @@ class ModuleAwareExceptionHandler extends Handler
             // Render the view with appropriate status code
             return response()->view($viewName, $viewData, $statusCode, $e->getHeaders());
 
-        } catch (Throwable $renderException) {
+        } catch (Throwable $throwable) {
             $context = new LogContext(
                 module: 'Exceptions',
                 class: static::class,
                 method: 'renderHttpExceptionWithModuleViews'
             );
-            $this->loggingService->error('Failed to render module error view', $context, $renderException);
+            $this->loggingService->error('Failed to render module error view', $context, $throwable);
 
             return null;
         }

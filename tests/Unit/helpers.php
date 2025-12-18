@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+// Skip WordPress function definitions if we're in PHPStan mode with WordPress stubs
+if (defined('PHPSTAN_MODE') && PHPSTAN_MODE === true) {
+    return;
+}
+
 class WP
 {
     public static $wpFunctions;
@@ -602,8 +607,6 @@ if (! function_exists('translate_with_gettext_context')) {
     }
 }
 
-
-
 /**
  * WooCommerce mock functions
  */
@@ -1106,7 +1109,8 @@ if (! function_exists('abort')) {
 }
 
 // Force override Laravel's abort helper that would be loaded later
-function abort_test_override($code = 404, $message = '') {
+function abort_test_override($code = 404, $message = '')
+{
     throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message);
 }
 

@@ -66,10 +66,10 @@ class WpCliService
         try {
             // Delegate validation and registration to the adapter
             $this->wpCliAdapter->addCommand($name, $className, $args);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Failed to register WP CLI command {commandName}: {message}',
-                LogContext::fromException('WpCli', $e, [
+                LogContext::fromException('WpCli', $throwable, [
                     'commandName' => $name,
                 ])
             );

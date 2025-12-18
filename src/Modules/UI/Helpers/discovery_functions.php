@@ -24,11 +24,11 @@ if (! function_exists('pollora_discover_module')) {
             $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($modulePath);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (app()->bound(LoggingService::class)) {
                 app(LoggingService::class)->error(
                     'pollora_discover_module error: {message}',
-                    LogContext::fromException('Modules', $e)
+                    LogContext::fromException('Modules', $exception)
                 );
             }
 
@@ -55,11 +55,11 @@ if (! function_exists('pollora_discover_theme')) {
             $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($themePath);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (app()->bound(LoggingService::class)) {
                 app(LoggingService::class)->error(
                     'pollora_discover_theme error: {message}',
-                    LogContext::fromException('Modules', $e)
+                    LogContext::fromException('Modules', $exception)
                 );
             }
 
@@ -86,11 +86,11 @@ if (! function_exists('pollora_discover_plugin')) {
             $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($pluginPath);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (app()->bound(LoggingService::class)) {
                 app(LoggingService::class)->error(
                     'pollora_discover_plugin error: {message}',
-                    LogContext::fromException('Modules', $e)
+                    LogContext::fromException('Modules', $exception)
                 );
             }
 
@@ -117,11 +117,11 @@ if (! function_exists('pollora_discover_in_path')) {
             $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($path);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (app()->bound(LoggingService::class)) {
                 app(LoggingService::class)->error(
                     'pollora_discover_in_path error: {message}',
-                    LogContext::fromException('Modules', $e)
+                    LogContext::fromException('Modules', $exception)
                 );
             }
 
@@ -147,11 +147,11 @@ if (! function_exists('pollora_discover_all_in_path')) {
             $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($path);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (app()->bound(LoggingService::class)) {
                 app(LoggingService::class)->error(
                     'pollora_discover_all_in_path error: {message}',
-                    LogContext::fromException('Modules', $e)
+                    LogContext::fromException('Modules', $exception)
                 );
             }
 
@@ -211,8 +211,8 @@ if (! function_exists('pollora_debug_route_registration')) {
                 }
             }
 
-        } catch (\Exception $e) {
-            $debug['error'] = $e->getMessage();
+        } catch (\Exception $exception) {
+            $debug['error'] = $exception->getMessage();
         }
 
         return $debug;

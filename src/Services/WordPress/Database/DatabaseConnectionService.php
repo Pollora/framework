@@ -39,7 +39,7 @@ class DatabaseConnectionService
 
                 return $config;
             } catch (\Exception $e) {
-                error("Database connection failed: {$e->getMessage()}");
+                error('Database connection failed: '.$e->getMessage());
 
                 if (! $this->shouldRetry()) {
                     throw new DatabaseConnectionException('Could not establish database connection. Please check your configuration.', $e->getCode(), $e);

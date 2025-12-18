@@ -99,9 +99,9 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             if ($repository instanceof ThemeRepository) {
                 $repository->resetCache();
             }
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = LogContext::fromClass(self::class, 'invalidateRepositoryCache');
-            $this->loggingService->error('Failed to invalidate theme repository cache', $context, $e);
+            $this->loggingService->error('Failed to invalidate theme repository cache', $context, $exception);
         }
     }
 
@@ -122,14 +122,14 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             if ($appPath && is_dir($appPath)) {
                 $discoveryService->discover($appPath);
             }
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = new LogContext(
                 module: 'Theme',
                 class: self::class,
                 method: 'discoverThemeStructures',
                 extra: ['theme_name' => $theme->getName()]
             );
-            $this->loggingService->error('Theme discovery error', $context, $e);
+            $this->loggingService->error('Theme discovery error', $context, $exception);
         }
     }
 
@@ -178,7 +178,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
                 'structure_info' => $structureInfo,
             ]
         );
-        $this->loggingService->debug("Discovered {$scoutType} in theme", $context);
+        $this->loggingService->debug(sprintf('Discovered %s in theme', $scoutType), $context);
     }
 
     /**
@@ -231,9 +231,9 @@ class ThemeRegistrar implements ThemeRegistrarInterface
                 $theme->getPath(),
                 'theme'
             );
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = LogContext::fromClass(self::class, 'loadThemeConfiguration');
-            $this->loggingService->error('Failed to load theme configuration', $context, $e);
+            $this->loggingService->error('Failed to load theme configuration', $context, $exception);
         }
     }
 
@@ -265,9 +265,9 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             $componentManager->registerModuleComponents($moduleId, $themeComponents);
             $componentManager->initializeModuleComponents($moduleId);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = LogContext::fromClass(self::class, 'setupThemeComponents');
-            $this->loggingService->error('Failed to setup theme components', $context, $e);
+            $this->loggingService->error('Failed to setup theme components', $context, $exception);
         }
     }
 
@@ -296,9 +296,9 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             // Register Blade directives
             $assetManager->registerModuleBladeDirectives($theme->getPath());
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $context = LogContext::fromClass(self::class, 'setupThemeAssets');
-            $this->loggingService->error('Failed to setup theme assets', $context, $e);
+            $this->loggingService->error('Failed to setup theme assets', $context, $exception);
         }
     }
 }

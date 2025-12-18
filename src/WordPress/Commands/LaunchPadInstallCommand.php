@@ -50,10 +50,10 @@ class LaunchPadInstallCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Throwable $e) {
-            error($e->getMessage());
+        } catch (\Throwable $throwable) {
+            error($throwable->getMessage());
 
-            $this->handleError($e);
+            $this->handleError($throwable);
 
             return self::FAILURE;
         }

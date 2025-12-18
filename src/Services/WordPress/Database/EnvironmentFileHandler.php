@@ -78,7 +78,7 @@ class EnvironmentFileHandler
 
         // If this key exists in our replacements, update the line
         if (array_key_exists($key, $replacements)) {
-            return "{$key}={$replacements[$key]}";
+            return sprintf('%s=%s', $key, $replacements[$key]);
         }
 
         return $line;

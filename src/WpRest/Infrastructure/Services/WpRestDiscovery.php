@@ -24,7 +24,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class WpRestDiscovery implements DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Cache for wrapper instances to avoid recreating them
@@ -160,10 +161,10 @@ final class WpRestDiscovery implements DiscoveryInterface
             // Process all method-level attributes
             $this->processMethodLevelAttributes($reflectionClass, $attributableWrapper);
 
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException $reflectionException) {
             $this->loggingService->error(
                 'Failed to process WP REST route for class {className}: {message}',
-                LogContext::fromException('WpRest', $e, [
+                LogContext::fromException('WpRest', $reflectionException, [
                     'className' => $className,
                 ])
             );
@@ -184,10 +185,10 @@ final class WpRestDiscovery implements DiscoveryInterface
             foreach ($methods as $method) {
                 $this->processMethodAttributes($method, $attributableWrapper);
             }
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException $reflectionException) {
             $this->loggingService->error(
                 'Failed to process method-level attributes for {className}: {message}',
-                LogContext::fromException('WpRest', $e, [
+                LogContext::fromException('WpRest', $reflectionException, [
                     'className' => $reflectionClass->getName(),
                 ])
             );
@@ -236,11 +237,11 @@ final class WpRestDiscovery implements DiscoveryInterface
             add_action('rest_api_init', function () use ($attributeInstance, $attributableWrapper, $method): void {
                 $attributeInstance->handle(app(), $attributableWrapper, $method, $attributeInstance);
             });
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $className = $method->getDeclaringClass()->getName();
             $this->loggingService->error(
                 'Failed to process method attribute for {className}::{methodName}: {message}',
-                LogContext::fromException('WpRest', $e, [
+                LogContext::fromException('WpRest', $throwable, [
                     'className' => $className,
                     'methodName' => $method->getName(),
                 ])

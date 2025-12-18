@@ -141,10 +141,10 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
             if (! $this->isServiceProviderRegistered($className)) {
                 app()->register($className);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Failed to register service provider {className}: {message}',
-                LogContext::fromException('Discovery', $e, [
+                LogContext::fromException('Discovery', $throwable, [
                     'className' => $className,
                 ])
             );

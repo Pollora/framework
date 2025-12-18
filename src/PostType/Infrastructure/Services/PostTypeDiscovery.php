@@ -33,7 +33,9 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, DiscoveryInterface
 {
-    use HasConfiguringSupport, HasInstancePool, IsDiscovery;
+    use HasConfiguringSupport;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Create a new PostType discovery service.
@@ -211,13 +213,13 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException $reflectionException) {
             $context = new LogContext(
                 module: 'PostType',
                 class: $className,
                 method: 'processPostType'
             );
-            $this->loggingService->error('Failed to process PostType reflection', $context, $e);
+            $this->loggingService->error('Failed to process PostType reflection', $context, $reflectionException);
         }
     }
 
@@ -263,13 +265,13 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException $reflectionException) {
             $context = new LogContext(
                 module: 'PostType',
                 class: $className,
                 method: 'processClassLevelAttributes'
             );
-            $this->loggingService->error('Failed to process class-level attributes', $context, $e);
+            $this->loggingService->error('Failed to process class-level attributes', $context, $reflectionException);
         }
 
         return $config;
@@ -295,13 +297,13 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException $reflectionException) {
             $context = new LogContext(
                 module: 'PostType',
                 class: $className,
                 method: 'processMethodLevelAttributes'
             );
-            $this->loggingService->error('Failed to process method-level attributes', $context, $e);
+            $this->loggingService->error('Failed to process method-level attributes', $context, $reflectionException);
         }
 
         return $config;
@@ -456,20 +458,20 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             'name' => $plural,
             'singular_name' => $singular,
             'add_new' => 'Add New',
-            'add_new_item' => "Add New {$singular}",
-            'edit_item' => "Edit {$singular}",
-            'new_item' => "New {$singular}",
-            'view_item' => "View {$singular}",
-            'view_items' => "View {$plural}",
-            'search_items' => "Search {$plural}",
-            'not_found' => "No {$plural} found",
-            'not_found_in_trash' => "No {$plural} found in Trash",
-            'parent_item_colon' => "Parent {$singular}:",
-            'all_items' => "All {$plural}",
-            'archives' => "{$singular} Archives",
-            'attributes' => "{$singular} Attributes",
-            'insert_into_item' => "Insert into {$singular}",
-            'uploaded_to_this_item' => "Uploaded to this {$singular}",
+            'add_new_item' => 'Add New '.$singular,
+            'edit_item' => 'Edit '.$singular,
+            'new_item' => 'New '.$singular,
+            'view_item' => 'View '.$singular,
+            'view_items' => 'View '.$plural,
+            'search_items' => 'Search '.$plural,
+            'not_found' => sprintf('No %s found', $plural),
+            'not_found_in_trash' => sprintf('No %s found in Trash', $plural),
+            'parent_item_colon' => sprintf('Parent %s:', $singular),
+            'all_items' => 'All '.$plural,
+            'archives' => $singular.' Archives',
+            'attributes' => $singular.' Attributes',
+            'insert_into_item' => 'Insert into '.$singular,
+            'uploaded_to_this_item' => 'Uploaded to this '.$singular,
         ];
     }
 

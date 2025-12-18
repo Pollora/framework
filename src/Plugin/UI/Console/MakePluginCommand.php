@@ -198,9 +198,9 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
         $name = $this->plugin->getName();
 
-        $this->error("Plugin \"{$name}\" already exists.");
+        $this->error(sprintf('Plugin "%s" already exists.', $name));
         if ($this->option('force')) {
-            return $this->confirm("Are you sure you want to override \"{$name}\" plugin folder?");
+            return $this->confirm(sprintf('Are you sure you want to override "%s" plugin folder?', $name));
         }
 
         return false;
@@ -233,7 +233,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
                 $downloader->setVersion($version);
             }
 
-            $this->info("Downloading plugin from {$repository}".($version ? " (version: {$version})" : '').'...');
+            $this->info('Downloading plugin from '.$repository.($version ? sprintf(' (version: %s)', $version) : '').'...');
 
             $extractedPath = $downloader->downloadAndExtract($this->getPluginsPath());
 
@@ -242,8 +242,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
             $this->info('Plugin downloaded and extracted successfully.');
 
-        } catch (\Exception $e) {
-            $this->error("Failed to download plugin: {$e->getMessage()}");
+        } catch (\Exception $exception) {
+            $this->error('Failed to download plugin: '.$exception->getMessage());
 
             // Fallback to generating structure if download fails
             $this->warn('Falling back to generating default plugin structure...');
@@ -306,6 +306,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
             if ($this->shouldExcludeAssetFile($item)) {
                 continue;
             }
+
             $this->processFileWithReplacements($item, $destination);
         }
     }
@@ -416,7 +417,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     {
         if (File::exists($targetPath) &&
             ! $this->option('force') &&
-            ! $this->confirm("File {$targetPath} already exists. Do you want to overwrite it?")
+            ! $this->confirm(sprintf('File %s already exists. Do you want to overwrite it?', $targetPath))
         ) {
             return;
         }
@@ -712,6 +713,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
                     if (empty($value)) {
                         return 'Repository is required';
                     }
+
                     if (! str_contains($value, '/')) {
                         return 'Repository must be in owner/repo format';
                     }
@@ -735,7 +737,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         return match (true) {
             $value === '' || $value === '0' => 'Name is required.',
             preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== 0 && preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== false => 'Name must be alphanumeric, dash, space or underscore.',
-            $this->files->isDirectory($this->makePlugin($value)->getBasePath()) => "Plugin \"{$value}\" already exists.",
+            $this->files->isDirectory($this->makePlugin($value)->getBasePath()) => sprintf('Plugin "%s" already exists.', $value),
             default => null,
         };
     }

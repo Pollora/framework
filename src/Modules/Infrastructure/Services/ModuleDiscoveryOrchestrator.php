@@ -45,10 +45,10 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
 
             $location = new DirectoryLocation($path);
             $engine->addLocation($location)->discover()->apply();
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Discovery error for path {path}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'path' => $path,
                 ])
             );
@@ -71,10 +71,10 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
             $location = new DirectoryLocation($path);
 
             return $manager->discoverAllInLocation($location);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->loggingService->error(
                 'Discovery error for path {path}: {message}',
-                LogContext::fromException('Modules', $e)->merge([
+                LogContext::fromException('Modules', $throwable)->merge([
                     'path' => $path,
                 ])
             );

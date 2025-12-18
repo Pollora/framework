@@ -27,7 +27,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class HookDiscovery implements DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Create a new Hook discovery
@@ -148,7 +149,7 @@ final class HookDiscovery implements DiscoveryInterface
                     method: $methodName,
                     extra: ['hook_type' => $hookType]
                 );
-                $this->loggingService->error("Failed to register {$hookType} hook", $context, $e);
+                $this->loggingService->error(sprintf('Failed to register %s hook', $hookType), $context, $e);
             }
         }
     }

@@ -59,7 +59,7 @@ trait HasThemeSupport
             $this->registrar = app(ThemeRegistrarInterface::class);
         }
 
-        $activeTheme = $this->registrar?->getActiveTheme();
+        $activeTheme = $this->registrar->getActiveTheme();
 
         if ($activeTheme) {
             return $activeTheme->getName();
@@ -79,7 +79,7 @@ trait HasThemeSupport
         // Default themes path, can be overridden
         $themesPath = config('theme.path', base_path('themes'));
 
-        return rtrim($themesPath, '/').'/'.$themeName;
+        return rtrim((string) $themesPath, '/').'/'.$themeName;
     }
 
     /**
@@ -157,7 +157,7 @@ trait HasThemeSupport
         $themePath = $this->getThemePath($theme);
 
         if (! is_dir($themePath)) {
-            throw new InvalidArgumentException("Theme directory not found: {$themePath}");
+            throw new InvalidArgumentException('Theme directory not found: '.$themePath);
         }
 
         return [

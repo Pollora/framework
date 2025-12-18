@@ -171,7 +171,7 @@ class ViteManager implements ViteManagerInterface
                 ->reduce(function (array $assets, array $chunk) use ($buildDirectory): array {
                     /** @var Vite $this */
                     $file = $chunk['file'];
-                    $filePath = $this->assetPath("{$buildDirectory}/{$file}");
+                    $filePath = $this->assetPath(sprintf('%s/%s', $buildDirectory, $file));
 
                     // Determine file type based on extension
                     $extension = pathinfo($file, PATHINFO_EXTENSION);
@@ -183,7 +183,7 @@ class ViteManager implements ViteManagerInterface
 
                     // Add additional CSS files
                     foreach ($chunk['css'] ?? [] as $css) {
-                        $assets['css'][] = $this->assetPath("{$buildDirectory}/{$css}");
+                        $assets['css'][] = $this->assetPath(sprintf('%s/%s', $buildDirectory, $css));
                     }
 
                     return $assets;

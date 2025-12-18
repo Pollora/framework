@@ -50,8 +50,8 @@ class LaunchPadSetupCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Throwable $e) {
-            error($e->getMessage());
+        } catch (\Throwable $throwable) {
+            error($throwable->getMessage());
 
             return self::FAILURE;
         }

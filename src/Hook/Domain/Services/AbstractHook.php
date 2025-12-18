@@ -77,6 +77,7 @@ abstract class AbstractHook implements HookInterface
             if ($hookData === null || $hookData === []) {
                 return false;
             }
+
             // Get the first hook data
             $firstHook = reset($hookData);
             // Extract callback details
@@ -220,7 +221,7 @@ abstract class AbstractHook implements HookInterface
             ];
         }
 
-        throw new \InvalidArgumentException("Invalid callback provided for hook: {$hook}");
+        throw new \InvalidArgumentException('Invalid callback provided for hook: '.$hook);
     }
 
     /**
@@ -251,9 +252,9 @@ abstract class AbstractHook implements HookInterface
                 ];
             }
 
-            throw new \RuntimeException("Method '{$hookMethod}' not found in class '{$className}'.");
-        } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to resolve '{$className}': ".$e->getMessage(), $e->getCode(), $e);
+            throw new \RuntimeException(sprintf("Method '%s' not found in class '%s'.", $hookMethod, $className));
+        } catch (\Exception $exception) {
+            throw new \RuntimeException(sprintf("Failed to resolve '%s': ", $className).$exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
@@ -302,8 +303,8 @@ abstract class AbstractHook implements HookInterface
             static::$reflectionCache[$cacheKey] = $paramCount;
 
             return $paramCount;
-        } catch (\ReflectionException $e) {
-            throw new \RuntimeException('Failed to analyze callable: '.$e->getMessage(), $e->getCode(), $e);
+        } catch (\ReflectionException $reflectionException) {
+            throw new \RuntimeException('Failed to analyze callable: '.$reflectionException->getMessage(), $reflectionException->getCode(), $reflectionException);
         }
     }
 

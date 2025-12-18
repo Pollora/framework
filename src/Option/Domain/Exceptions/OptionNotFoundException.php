@@ -13,6 +13,6 @@ final class OptionNotFoundException extends Exception
 {
     public function __construct(string $key)
     {
-        parent::__construct("Option '{$key}' not found");
+        parent::__construct(sprintf("Option '%s' not found", $key));
     }
 }

@@ -16,13 +16,13 @@ class ThemeException extends Exception
 {
     public static function notFound(string $name): self
     {
-        return new self("Theme '{$name}' not found.");
+        return new self(sprintf("Theme '%s' not found.", $name));
     }
 
     public static function missingRequiredFiles(string $themeName, array $files): self
     {
         $filesList = implode(', ', $files);
 
-        return new self("Theme '{$themeName}' is missing required files: {$filesList}");
+        return new self(sprintf("Theme '%s' is missing required files: %s", $themeName, $filesList));
     }
 }

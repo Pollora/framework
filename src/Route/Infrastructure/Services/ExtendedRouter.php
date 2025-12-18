@@ -98,8 +98,8 @@ class ExtendedRouter extends IlluminateRouter
 
             $this->bindWordPressParametersToRoute($route, $reflection);
 
-        } catch (\Throwable $e) {
-            $this->logError('Failed to add WordPress bindings', $e, [
+        } catch (\Throwable $throwable) {
+            $this->logError('Failed to add WordPress bindings', $throwable, [
                 'route_uri' => $route->uri(),
                 'route_methods' => $route->methods(),
             ]);
@@ -132,6 +132,7 @@ class ExtendedRouter extends IlluminateRouter
             if (! $type) {
                 continue;
             }
+
             if ($type->isBuiltin()) {
                 continue;
             }
@@ -161,8 +162,8 @@ class ExtendedRouter extends IlluminateRouter
                 is_string($callable) && class_exists($callable) => new \ReflectionMethod($callable, '__invoke'),
                 default => null,
             };
-        } catch (\ReflectionException $e) {
-            $this->logError('Failed to get callable reflection', $e, ['callable' => $callable]);
+        } catch (\ReflectionException $reflectionException) {
+            $this->logError('Failed to get callable reflection', $reflectionException, ['callable' => $callable]);
 
             return null;
         }
@@ -219,8 +220,8 @@ class ExtendedRouter extends IlluminateRouter
         return function () use ($resolver) {
             try {
                 return $resolver();
-            } catch (\Throwable $e) {
-                $this->logError('WordPress type resolution failed', $e);
+            } catch (\Throwable $throwable) {
+                $this->logError('WordPress type resolution failed', $throwable);
 
                 return null;
             }

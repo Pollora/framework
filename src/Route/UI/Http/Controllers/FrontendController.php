@@ -56,9 +56,6 @@ class FrontendController
 
         // If no template found, return 404
         abort(404);
-
-        // This line is never reached but satisfies PHPStan
-        return response('', 404);
     }
 
     /**

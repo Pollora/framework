@@ -91,11 +91,11 @@ class ModuleServiceProvider extends ServiceProvider
             if (method_exists($orchestrator, 'discoverLaravelModules')) {
                 $orchestrator->discoverLaravelModules();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $loggingService = $this->app->make(LoggingService::class);
             $loggingService->error(
                 'Laravel Module discovery error in ModuleServiceProvider: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
     }
@@ -117,11 +117,11 @@ class ModuleServiceProvider extends ServiceProvider
             if (method_exists($orchestrator, 'applyLaravelModules')) {
                 $orchestrator->applyLaravelModules();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $loggingService = $this->app->make(LoggingService::class);
             $loggingService->error(
                 'Laravel Module apply error in ModuleServiceProvider: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
     }
@@ -143,11 +143,11 @@ class ModuleServiceProvider extends ServiceProvider
             if (method_exists($orchestrator, 'discoverFrameworkModules')) {
                 $orchestrator->discoverFrameworkModules();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $loggingService = $this->app->make(LoggingService::class);
             $loggingService->error(
                 'Framework Module discovery error in ModuleServiceProvider: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
     }
@@ -169,11 +169,11 @@ class ModuleServiceProvider extends ServiceProvider
             if (method_exists($orchestrator, 'applyFrameworkModules')) {
                 $orchestrator->applyFrameworkModules();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $loggingService = $this->app->make(LoggingService::class);
             $loggingService->error(
                 'Framework Module apply error in ModuleServiceProvider: {message}',
-                LogContext::fromException('Modules', $e)
+                LogContext::fromException('Modules', $throwable)
             );
         }
     }
