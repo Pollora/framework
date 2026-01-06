@@ -24,10 +24,10 @@
     "require": {
         "php": "^8.2.0",
         "pollora/helper-overrider": "dev-main",
-        "illuminate/support": "^12.42",
-        "illuminate/database": "^12.42",
-        "illuminate/routing": "^12.42",
-        "illuminate/console": "^12.42",
+        "illuminate/support": "^12.44",
+        "illuminate/database": "^12.44",
+        "illuminate/routing": "^12.44",
+        "illuminate/console": "^12.44",
         "pollora/entity": "dev-main",
         "watson/rememberable": "^7.0",
         "cweagans/composer-patches": "^1.7",
@@ -39,7 +39,7 @@
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^12.0@dev",
         "symfony/process": "^7.3.4",
-        "illuminate/config": "^12.42",
+        "illuminate/config": "^12.44",
         "laravel/prompts": "^0.3.8@dev"
     },
     "autoload": {
@@ -92,8 +92,8 @@
         "laravel/pint": "^v1.26.0",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
-        "szepeviktor/phpstan-wordpress": "2.x-dev",
-        "php-stubs/wordpress-stubs": "^6.9",
+        "szepeviktor/phpstan-wordpress": "*",
+        "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^12.0",
         "mockery/mockery": "1.6.12",
         "wp-cli/wp-cli": "^2.13@dev"
