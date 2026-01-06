@@ -95,7 +95,7 @@ class Route extends IlluminateRoute
      */
     public function getCondition(): string
     {
-        if ($this->conditionResolver instanceof \Pollora\Route\Domain\Contracts\ConditionResolverInterface) {
+        if ($this->conditionResolver instanceof ConditionResolverInterface) {
             return $this->conditionResolver->resolveCondition($this->condition);
         }
 
@@ -173,6 +173,11 @@ class Route extends IlluminateRoute
      */
     protected function matchesWordPressCondition(): bool
     {
+        // Before evaluating WordPress conditions, check if a Laravel route exists for this request
+        if ($this->hasLaravelRouteForCurrentRequest()) {
+            return false; // Let Laravel routes take precedence
+        }
+
         // Ensure WordPress has parsed the request before evaluating conditions
         $this->ensureWordPressQueryParsed();
 
@@ -182,6 +187,36 @@ class Route extends IlluminateRoute
         // Check if the WordPress function exists and call it
         if (function_exists($condition)) {
             return call_user_func_array($condition, $parameters);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if there's a Laravel route that matches the current request.
+     */
+    protected function hasLaravelRouteForCurrentRequest(): bool
+    {
+        try {
+            $router = app('router');
+            $request = request();
+
+            // Get all routes and try to find a non-WordPress match
+            $routes = $router->getRoutes();
+
+            foreach ($routes as $route) {
+                // Skip WordPress routes and the current route
+                if ($route === $this || (method_exists($route, 'isWordPressRoute') && $route->isWordPressRoute())) {
+                    continue;
+                }
+
+                // Check if this Laravel route matches the request
+                if ($route->matches($request, false)) {
+                    return true;
+                }
+            }
+        } catch (\Throwable) {
+            // If any error occurs, continue with WordPress logic
         }
 
         return false;
