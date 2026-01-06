@@ -198,11 +198,10 @@ class Route extends IlluminateRoute
     protected function hasLaravelRouteForCurrentRequest(): bool
     {
         try {
-            $router = app('router');
             $request = request();
 
             // Get all routes and try to find a non-WordPress match
-            $routes = $router->getRoutes();
+            $routes = $this->router->getRoutes();
 
             foreach ($routes as $route) {
                 // Skip WordPress routes and the current route
