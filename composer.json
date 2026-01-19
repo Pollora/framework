@@ -27,7 +27,7 @@
         "illuminate/support": "^12.46",
         "illuminate/database": "^12.47",
         "illuminate/routing": "^12.46",
-        "illuminate/console": "^12.46",
+        "illuminate/console": "^12.47",
         "pollora/entity": "dev-main",
         "watson/rememberable": "^7.0",
         "cweagans/composer-patches": "^1.7",
