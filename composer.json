@@ -30,7 +30,7 @@
         "illuminate/console": "^12.47",
         "pollora/entity": "dev-main",
         "watson/rememberable": "^7.0",
-        "cweagans/composer-patches": "^1.7",
+        "cweagans/composer-patches": "^2.0",
         "pollora/colt": "^9.0",
         "log1x/sage-directives": "^2.0",
         "roots/bedrock-autoloader": "^1.0",
