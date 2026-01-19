@@ -26,7 +26,7 @@
         "pollora/helper-overrider": "dev-main",
         "illuminate/support": "^12.46",
         "illuminate/database": "^12.47",
-        "illuminate/routing": "^12.46",
+        "illuminate/routing": "^12.47",
         "illuminate/console": "^12.47",
         "pollora/entity": "dev-main",
         "watson/rememberable": "^7.0",
