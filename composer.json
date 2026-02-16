@@ -25,7 +25,7 @@
         "php": "^8.2.0",
         "pollora/helper-overrider": "dev-main",
         "illuminate/support": "^12.50",
-        "illuminate/database": "^12.48",
+        "illuminate/database": "^12.51",
         "illuminate/routing": "^12.49",
         "illuminate/console": "^12.50",
         "pollora/entity": "dev-main",
