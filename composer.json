@@ -33,7 +33,7 @@
         "cweagans/composer-patches": "^1.7",
         "pollora/colt": "^9.0",
         "log1x/sage-directives": "^2.0",
-        "roots/bedrock-autoloader": "^1.0",
+        "roots/bedrock-autoloader": "^1.1",
         "pollora/query": "dev-main",
         "spatie/php-structure-discoverer": "dev-main",
         "coduo/php-humanizer": "5.0.3",
