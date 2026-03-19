@@ -53,6 +53,8 @@ class WordPressHeaders
         }
 
         if ($this->shouldSetPublicCache()) {
+            header_remove('Cache-Control');
+            $response->headers->remove('Cache-Control');
             $response->setPublic();
             $response->headers->addCacheControlDirective('must-revalidate', true);
             $response->headers->addCacheControlDirective('max-age', '3600');
