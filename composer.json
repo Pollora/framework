@@ -29,7 +29,7 @@
         "illuminate/routing": "^12.54",
         "illuminate/console": "^12.54",
         "pollora/entity": "dev-main",
-        "watson/rememberable": "^7.0",
+        "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^1.7",
         "pollora/colt": "^9.0",
         "log1x/sage-directives": "^2.0",
