@@ -170,26 +170,39 @@ class Route extends IlluminateRoute
 
     /**
      * Check if the WordPress condition matches.
+     *
+     * Priority order:
+     * 1. WordPress routes with "positive" conditions (single, page, archive, etc.)
+     * 2. Laravel routes
+     * 3. WordPress 404 route (fallback)
+     *
+     * This ensures that explicit WordPress content routes take precedence,
+     * while Laravel routes can still handle URLs that don't match any WordPress content.
      */
     protected function matchesWordPressCondition(): bool
     {
-        // Before evaluating WordPress conditions, check if a Laravel route exists for this request
-        if ($this->hasLaravelRouteForCurrentRequest()) {
-            return false; // Let Laravel routes take precedence
-        }
-
         // Ensure WordPress has parsed the request before evaluating conditions
         $this->ensureWordPressQueryParsed();
 
         $condition = $this->getCondition();
         $parameters = $this->getConditionParameters();
 
-        // Check if the WordPress function exists and call it
-        if (function_exists($condition)) {
-            return call_user_func_array($condition, $parameters);
+        // Check if the WordPress function exists
+        if (! function_exists($condition)) {
+            return false;
         }
 
-        return false;
+        // For is_404 condition, let Laravel routes take precedence
+        // This prevents WordPress 404 from capturing URLs that should be handled by Laravel
+        if ($condition === 'is_404') {
+            // If a Laravel route exists for this request, don't match the 404 route
+            if ($this->hasLaravelRouteForCurrentRequest()) {
+                return false;
+            }
+        }
+
+        // Evaluate the WordPress condition
+        return call_user_func_array($condition, $parameters);
     }
 
     /**
