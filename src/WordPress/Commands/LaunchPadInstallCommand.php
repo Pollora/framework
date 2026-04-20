@@ -14,7 +14,15 @@ use function Laravel\Prompts\info;
 
 class LaunchPadInstallCommand extends Command
 {
-    protected $signature = 'pollora:install {--install : Suppress informational output for automated runs}';
+    protected $signature = 'pollora:install
+        {--install : Suppress informational output for automated runs}
+        {--title= : Site title}
+        {--description= : Site description}
+        {--admin-user= : Admin username}
+        {--admin-email= : Admin email}
+        {--admin-password= : Admin password}
+        {--locale= : Site locale (e.g. en_US, fr_FR)}
+        {--public= : Allow search engine indexing (true/false)}';
 
     protected $description = 'Install and configure WordPress';
 
@@ -65,7 +73,15 @@ class LaunchPadInstallCommand extends Command
             info('Starting WordPress installation...');
         }
 
-        $config = InstallationConfig::fromPrompts();
+        $config = InstallationConfig::fromPrompts(
+            title: $this->option('title'),
+            description: $this->option('description'),
+            adminUser: $this->option('admin-user'),
+            adminEmail: $this->option('admin-email'),
+            adminPassword: $this->option('admin-password'),
+            locale: $this->option('locale'),
+            isPublic: $this->option('public') !== null ? filter_var($this->option('public'), FILTER_VALIDATE_BOOLEAN) : null,
+        );
 
         $this->installationService->install($config);
 

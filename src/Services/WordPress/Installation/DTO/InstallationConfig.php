@@ -51,32 +51,39 @@ class InstallationConfig
      *
      * @throws \RuntimeException If user input validation fails
      */
-    public static function fromPrompts(): self
-    {
+    public static function fromPrompts(
+        ?string $title = null,
+        ?string $description = null,
+        ?string $adminUser = null,
+        ?string $adminEmail = null,
+        ?string $adminPassword = null,
+        ?string $locale = null,
+        ?bool $isPublic = null,
+    ): self {
         return new self(
-            title: text(
+            title: $title ?? text(
                 label: 'Site title?',
                 required: 'Site title is required'
             ),
-            description: text(
+            description: $description ?? text(
                 label: 'Site description?'
             ),
-            adminUser: text(
+            adminUser: $adminUser ?? text(
                 label: 'Admin username?',
                 required: 'Admin username is required'
             ),
-            adminEmail: text(
+            adminEmail: $adminEmail ?? text(
                 label: 'Admin email?',
                 required: 'Admin email is required',
                 validate: fn (string $value): ?string => filter_var($value, FILTER_VALIDATE_EMAIL) ? null : 'Invalid email address'
             ),
-            adminPassword: password(
+            adminPassword: $adminPassword ?? password(
                 label: 'Admin password?',
                 required: 'Admin password is required',
                 validate: fn (string $value): ?string => strlen($value) < 8 ? 'Password must be at least 8 characters' : null
             ),
-            locale: (new LanguageService)->promptForLanguage(),
-            isPublic: confirm(
+            locale: $locale ?? (new LanguageService)->promptForLanguage(),
+            isPublic: $isPublic ?? confirm(
                 label: 'Allow search engine indexing?'
             ),
         );
