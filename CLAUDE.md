@@ -185,3 +185,11 @@ Use `testbench.yaml` for Laravel package testing configuration with WordPress in
 - WordPress constants managed through Laravel config
 - Database configuration bridged between systems
 - Environment-aware constant definition
+
+## Versioning & Changelog
+
+- The project uses [Semantic Versioning](https://semver.org/) aligned with Laravel major versions (Pollora 13.x targets Laravel 13.x)
+- **CHANGELOG.md** must be updated when tagging a new version: move `[Unreleased]` items into the new version section with the release date
+- Breaking changes must be documented with `**BREAKING**:` prefix in the changelog
+- The **documentation submodule** (`documentation/`) must also be updated when public-facing behavior changes (commands, directives, configuration)
+- The skeleton repository (`Pollora/pollora`) is versioned independently but follows the same major version alignment

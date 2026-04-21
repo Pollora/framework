@@ -51,6 +51,10 @@ outlines our guidelines and conventions.
 - Explain **how to test** the change. Include relevant commands or steps.
 - Ensure your branch is up to date with `develop` and that the CI checks pass.
 
+## Changelog
+
+All notable changes are documented in the [CHANGELOG](CHANGELOG.md). When tagging a new version, update the changelog to move items from `[Unreleased]` to the new version section with the release date.
+
 ## Additional Notes
 - We follow Gitflow for branch management: start feature branches from
    `develop`. Release branches are handled by the project maintainers.
