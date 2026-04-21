@@ -238,6 +238,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         // Move all contents from extracted path to target path with replacements
         $this->copyDirectoryWithReplacements($extractedPath, $targetPath);
 
+        // Remove development-only directories that shouldn't be in generated themes
+        $this->removeDirectory($targetPath.'/bin');
+
         // Clean up the extracted directory
         $this->removeDirectory(dirname($extractedPath));
     }
