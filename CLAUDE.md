@@ -186,6 +186,24 @@ Use `testbench.yaml` for Laravel package testing configuration with WordPress in
 - Database configuration bridged between systems
 - Environment-aware constant definition
 
+## Documentation
+
+The framework has detailed documentation available at [github.com/Pollora/documentation](https://github.com/Pollora/documentation). Key topics:
+
+- **Getting Started** — Installation methods, `pollora:install` CLI options (non-interactive mode)
+- **Routing** — `Route::wp()`, WordPress conditions, hybrid Laravel+WP routing
+- **Post Types & Taxonomies** — `#[PostType]`, `#[Taxonomy]` PHP attributes, config-based registration
+- **Hooks** — `#[Action]`, `#[Filter]` attributes, hookable classes
+- **Scheduling** — `#[Schedule]` attribute, WordPress cron management
+- **REST API** — `#[WpRestRoute]` attribute, custom API endpoints
+- **Theming** — Theme structure, Blade templates, parent/child themes, asset management
+- **Discovery** — Auto-discovery system for PHP attributes
+- **Events** — WordPress event dispatching and Laravel listeners
+- **Auth** — WordPress authentication guard integration
+- **Modules** — Module system (nwidart/laravel-modules)
+
+When answering questions about framework features, consult the online documentation for accurate and up-to-date information.
+
 ## Versioning & Changelog
 
 - The project uses [Semantic Versioning](https://semver.org/) aligned with Laravel major versions (Pollora 13.x targets Laravel 13.x)
