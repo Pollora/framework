@@ -102,7 +102,7 @@ class ThemeMetadata
      */
     public function getThemeNamespace(): string
     {
-        return $this->studlify($this->getName());
+        return 'Theme\\'.$this->studlify($this->getName());
     }
 
     /**
