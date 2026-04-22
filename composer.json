@@ -23,25 +23,25 @@
     ],
     "require": {
         "php": "^8.3",
-        "pollora/helper-overrider": "dev-main",
+        "pollora/helper-overrider": "^1.0",
         "illuminate/auth": "^13.5",
         "illuminate/support": "^13.5",
         "illuminate/database": "^13.5",
         "illuminate/routing": "^13.5",
         "illuminate/console": "^13.5",
-        "pollora/entity": "dev-main",
+        "pollora/entity": "^1.2",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^1.7",
         "pollora/colt": "^10.0",
         "log1x/sage-directives": "^2.0",
         "roots/bedrock-autoloader": "^1.1",
-        "pollora/query": "dev-main",
-        "spatie/php-structure-discoverer": "dev-main",
+        "pollora/query": "^1.0",
+        "spatie/php-structure-discoverer": "^2.4",
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.0",
         "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.5",
-        "laravel/prompts": "^0.3.16@dev"
+        "laravel/prompts": "^0.3.17"
     },
     "autoload": {
         "psr-4": {
@@ -51,7 +51,6 @@
             "src/helpers.php"
         ]
     },
-    "minimum-stability": "dev",
     "extra": {
         "patches": {
             "johnpbloch/wordpress-core": {
@@ -101,7 +100,7 @@
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^12.0",
         "mockery/mockery": "^1.6",
-        "wp-cli/wp-cli": "^2.13@dev",
+        "wp-cli/wp-cli": "^2.12",
         "larastan/larastan": "^3.0",
         "orchestra/testbench": "^10.0|^11.0"
     },
