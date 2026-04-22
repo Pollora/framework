@@ -2,103 +2,66 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Route\Infrastructure\Middleware;
-
 use Illuminate\Http\Request;
-use PHPUnit\Framework\TestCase;
 use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 
-class WordPressBindingsTest extends TestCase
-{
-    private WordPressBindings $middleware;
-
-    private ExtendedRouter $router;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->router = $this->createMock(ExtendedRouter::class);
+describe('WordPressBindings middleware', function (): void {
+    beforeEach(function (): void {
+        $this->router = Mockery::mock(ExtendedRouter::class);
         $this->middleware = new WordPressBindings($this->router);
-    }
+    });
 
-    public function test_it_adds_bindings_for_wordpress_routes(): void
-    {
-        $route = $this->createMock(Route::class);
-        $route->method('hasCondition')->willReturn(true);
-
-        $request = Request::create('/test');
-        $request->setRouteResolver(fn () => $route);
-
-        $this->router->expects($this->once())
-            ->method('addWordPressBindings')
-            ->with($route)
-            ->willReturn($route);
-
-        $next = function ($req) {
-            return 'response';
-        };
-
-        $result = $this->middleware->handle($request, $next);
-
-        $this->assertEquals('response', $result);
-    }
-
-    public function test_it_skips_bindings_for_non_wordpress_routes(): void
-    {
-        $route = $this->createMock(Route::class);
-        $route->method('hasCondition')->willReturn(false);
+    it('adds bindings for WordPress routes', function (): void {
+        $route = Mockery::mock(Route::class);
+        $route->shouldReceive('hasCondition')->andReturn(true);
 
         $request = Request::create('/test');
         $request->setRouteResolver(fn () => $route);
 
-        $this->router->expects($this->never())
-            ->method('addWordPressBindings');
+        $this->router->shouldReceive('addWordPressBindings')->once()->with($route)->andReturn($route);
 
-        $next = function ($req) {
-            return 'response';
-        };
+        $result = $this->middleware->handle($request, fn ($req): string => 'response');
 
-        $result = $this->middleware->handle($request, $next);
+        expect($result)->toBe('response');
+    });
 
-        $this->assertEquals('response', $result);
-    }
-
-    public function test_it_handles_request_without_route(): void
-    {
-        $request = Request::create('/test');
-        $request->setRouteResolver(fn () => null);
-
-        $this->router->expects($this->never())
-            ->method('addWordPressBindings');
-
-        $next = function ($req) {
-            return 'response';
-        };
-
-        $result = $this->middleware->handle($request, $next);
-
-        $this->assertEquals('response', $result);
-    }
-
-    public function test_it_handles_route_without_condition_method(): void
-    {
-        $route = new \stdClass; // Route without hasCondition method
+    it('skips bindings for non-WordPress routes', function (): void {
+        $route = Mockery::mock(Route::class);
+        $route->shouldReceive('hasCondition')->andReturn(false);
 
         $request = Request::create('/test');
         $request->setRouteResolver(fn () => $route);
 
-        $this->router->expects($this->never())
-            ->method('addWordPressBindings');
+        $this->router->shouldNotReceive('addWordPressBindings');
 
-        $next = function ($req) {
-            return 'response';
-        };
+        $result = $this->middleware->handle($request, fn ($req): string => 'response');
 
-        $result = $this->middleware->handle($request, $next);
+        expect($result)->toBe('response');
+    });
 
-        $this->assertEquals('response', $result);
-    }
-}
+    it('handles request without route', function (): void {
+        $request = Request::create('/test');
+        $request->setRouteResolver(fn (): null => null);
+
+        $this->router->shouldNotReceive('addWordPressBindings');
+
+        $result = $this->middleware->handle($request, fn ($req): string => 'response');
+
+        expect($result)->toBe('response');
+    });
+
+    it('handles route without condition method', function (): void {
+        $route = new stdClass;
+
+        $request = Request::create('/test');
+        $request->setRouteResolver(fn (): stdClass => $route);
+
+        $this->router->shouldNotReceive('addWordPressBindings');
+
+        $result = $this->middleware->handle($request, fn ($req): string => 'response');
+
+        expect($result)->toBe('response');
+    });
+});

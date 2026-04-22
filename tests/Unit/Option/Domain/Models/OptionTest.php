@@ -2,82 +2,72 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Option\Domain\Models;
-
-use PHPUnit\Framework\TestCase;
 use Pollora\Option\Domain\Models\Option;
 
-final class OptionTest extends TestCase
-{
-    public function test_can_create_option_with_default_autoload(): void
-    {
+describe('Option', function (): void {
+    it('can create option with default autoload', function (): void {
         $option = new Option('test_key', 'test_value');
 
-        $this->assertEquals('test_key', $option->key);
-        $this->assertEquals('test_value', $option->value);
-        $this->assertTrue($option->autoload);
-    }
+        expect($option->key)->toBe('test_key');
+        expect($option->value)->toBe('test_value');
+        expect($option->autoload)->toBeTrue();
+    });
 
-    public function test_can_create_option_with_custom_autoload(): void
-    {
+    it('can create option with custom autoload', function (): void {
         $option = new Option('test_key', 'test_value', false);
 
-        $this->assertEquals('test_key', $option->key);
-        $this->assertEquals('test_value', $option->value);
-        $this->assertFalse($option->autoload);
-    }
+        expect($option->key)->toBe('test_key');
+        expect($option->value)->toBe('test_value');
+        expect($option->autoload)->toBeFalse();
+    });
 
-    public function test_can_create_option_with_different_value_types(): void
-    {
+    it('can create option with different value types', function (): void {
         $stringOption = new Option('string_key', 'test');
         $intOption = new Option('int_key', 42);
         $arrayOption = new Option('array_key', ['foo' => 'bar']);
         $boolOption = new Option('bool_key', true);
         $nullOption = new Option('null_key', null);
 
-        $this->assertEquals('test', $stringOption->value);
-        $this->assertEquals(42, $intOption->value);
-        $this->assertEquals(['foo' => 'bar'], $arrayOption->value);
-        $this->assertTrue($boolOption->value);
-        $this->assertNull($nullOption->value);
-    }
+        expect($stringOption->value)->toBe('test');
+        expect($intOption->value)->toBe(42);
+        expect($arrayOption->value)->toEqual(['foo' => 'bar']);
+        expect($boolOption->value)->toBeTrue();
+        expect($nullOption->value)->toBeNull();
+    });
 
-    public function test_with_value_returns_new_instance(): void
-    {
+    it('withValue returns new instance', function (): void {
         $original = new Option('test_key', 'original_value');
         $updated = $original->withValue('new_value');
 
-        $this->assertNotSame($original, $updated);
-        $this->assertEquals('original_value', $original->value);
-        $this->assertEquals('new_value', $updated->value);
-        $this->assertEquals('test_key', $updated->key);
-        $this->assertEquals($original->autoload, $updated->autoload);
-    }
+        expect($updated)->not->toBe($original);
+        expect($original->value)->toBe('original_value');
+        expect($updated->value)->toBe('new_value');
+        expect($updated->key)->toBe('test_key');
+        expect($updated->autoload)->toBe($original->autoload);
+    });
 
-    public function test_with_autoload_returns_new_instance(): void
-    {
+    it('withAutoload returns new instance', function (): void {
         $original = new Option('test_key', 'test_value', true);
         $updated = $original->withAutoload(false);
 
-        $this->assertNotSame($original, $updated);
-        $this->assertTrue($original->autoload);
-        $this->assertFalse($updated->autoload);
-        $this->assertEquals($original->key, $updated->key);
-        $this->assertEquals($original->value, $updated->value);
-    }
+        expect($updated)->not->toBe($original);
+        expect($original->autoload)->toBeTrue();
+        expect($updated->autoload)->toBeFalse();
+        expect($updated->key)->toBe($original->key);
+        expect($updated->value)->toBe($original->value);
+    });
 
-    public function test_chaining_with_methods(): void
-    {
+    it('supports chaining with methods', function (): void {
         $original = new Option('test_key', 'original_value', true);
         $updated = $original
             ->withValue('new_value')
             ->withAutoload(false);
 
-        $this->assertEquals('test_key', $updated->key);
-        $this->assertEquals('new_value', $updated->value);
-        $this->assertFalse($updated->autoload);
+        expect($updated->key)->toBe('test_key');
+        expect($updated->value)->toBe('new_value');
+        expect($updated->autoload)->toBeFalse();
 
-        $this->assertEquals('original_value', $original->value);
-        $this->assertTrue($original->autoload);
-    }
-}
+        expect($original->value)->toBe('original_value');
+        expect($original->autoload)->toBeTrue();
+    });
+});

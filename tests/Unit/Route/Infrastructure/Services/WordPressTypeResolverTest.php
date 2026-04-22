@@ -2,36 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Route\Infrastructure\Services;
-
-use PHPUnit\Framework\Attributes\CoversClass;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
-use Tests\TestCase;
 
-#[CoversClass(WordPressTypeResolver::class)]
-class WordPressTypeResolverTest extends TestCase
-{
-    private WordPressTypeResolver $resolver;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
+describe('WordPressTypeResolver', function (): void {
+    beforeEach(function (): void {
         $this->resolver = new WordPressTypeResolver;
-    }
+    });
 
-    public function test_returns_null_for_unsupported_types(): void
-    {
+    it('returns null for unsupported types', function (): void {
         $result = $this->resolver->resolve('UnsupportedType');
-        $this->assertNull($result);
-    }
 
-    public function test_resolver_has_correct_interface(): void
-    {
-        // Test that the resolver implements the correct interface
-        $this->assertInstanceOf(
-            WordPressTypeResolverInterface::class,
-            $this->resolver
-        );
-    }
-}
+        expect($result)->toBeNull();
+    });
+
+    it('implements the correct interface', function (): void {
+        expect($this->resolver)->toBeInstanceOf(WordPressTypeResolverInterface::class);
+    });
+});

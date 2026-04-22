@@ -2,25 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Option\Domain\Exceptions;
-
-use PHPUnit\Framework\TestCase;
 use Pollora\Option\Domain\Exceptions\InvalidOptionException;
 
-final class InvalidOptionExceptionTest extends TestCase
-{
-    public function test_creates_exception_with_custom_message(): void
-    {
+describe('InvalidOptionException', function (): void {
+    it('creates exception with custom message', function (): void {
         $message = 'Custom error message';
         $exception = new InvalidOptionException($message);
 
-        $this->assertEquals($message, $exception->getMessage());
-    }
+        expect($exception->getMessage())->toBe($message);
+    });
 
-    public function test_handles_empty_message(): void
-    {
+    it('handles empty message', function (): void {
         $exception = new InvalidOptionException('');
 
-        $this->assertEquals('', $exception->getMessage());
-    }
-}
+        expect($exception->getMessage())->toBe('');
+    });
+});

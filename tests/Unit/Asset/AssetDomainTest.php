@@ -8,8 +8,8 @@ use Pollora\Asset\Domain\Models\AssetFile;
 use Pollora\Asset\Domain\Models\ViteManager;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 
-describe('Asset domain model', function () {
-    it('can be instantiated with name, path, and attributes', function () {
+describe('Asset domain model', function (): void {
+    it('can be instantiated with name, path, and attributes', function (): void {
         $asset = new Asset('main', 'assets/main.js', ['type' => 'js']);
         expect($asset->getName())->toBe('main');
         expect($asset->getPath())->toBe('assets/main.js');
@@ -17,34 +17,34 @@ describe('Asset domain model', function () {
     });
 });
 
-describe('AssetFile domain model', function () {
-    it('can be instantiated and return filename and container', function () {
+describe('AssetFile domain model', function (): void {
+    it('can be instantiated and return filename and container', function (): void {
         $file = new AssetFile('assets/app.css');
         expect($file->getFilename())->toBe('assets/app.css');
         expect($file->getAssetContainer())->toBe('theme');
     });
-    it('can set a custom asset container', function () {
+    it('can set a custom asset container', function (): void {
         $file = (new AssetFile('assets/app.css'))->from('custom');
         expect($file->getAssetContainer())->toBe('custom');
     });
-    it('can be cast to string as filename', function () {
+    it('can be cast to string as filename', function (): void {
         $file = new AssetFile('assets/app.css');
         expect((string) $file)->toBe('assets/app.css');
     });
 });
 
-describe('ViteManager domain stub', function () {
-    beforeEach(function () {
+describe('ViteManager domain stub', function (): void {
+    beforeEach(function (): void {
         $app = Mockery::mock(Container::class)->makePartial();
-        $app->shouldReceive('publicPath')->andReturnUsing(fn ($path = '') => '/tmp/public'.($path ? '/'.$path : ''));
+        $app->shouldReceive('publicPath')->andReturnUsing(fn ($path = ''): string => '/tmp/public'.($path ? '/'.$path : ''));
         $app->instance('path.public', '/tmp/public');
         Container::setInstance($app);
     });
 
-    afterEach(function () {
+    afterEach(function (): void {
         Container::setInstance(new Container);
     });
-    it('returns stub values for all interface methods', function () {
+    it('returns stub values for all interface methods', function (): void {
         $vite = new ViteManager;
         expect($vite->container())->toBeInstanceOf(AssetContainer::class);
         expect($vite->getAssetUrls(['entry.js']))->toBeArray()->toBeEmpty();

@@ -2,32 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Option;
-
-use PHPUnit\Framework\TestCase;
 use Pollora\Option\Application\Services\OptionService;
 use Pollora\Support\Facades\Option;
 
-final class OptionIntegrationTest extends TestCase
-{
-    public function test_facade_class_exists(): void
-    {
-        $this->assertTrue(class_exists(Option::class));
-    }
+describe('OptionIntegration', function (): void {
+    it('facade class exists', function (): void {
+        expect(class_exists(Option::class))->toBeTrue();
+    });
 
-    public function test_facade_has_correct_accessor(): void
-    {
-        $reflection = new \ReflectionClass(Option::class);
+    it('facade has correct accessor', function (): void {
+        $reflection = new ReflectionClass(Option::class);
         $method = $reflection->getMethod('getFacadeAccessor');
-        $method->setAccessible(true);
 
         $accessor = $method->invoke(null);
 
-        $this->assertEquals(OptionService::class, $accessor);
-    }
+        expect($accessor)->toBe(OptionService::class);
+    });
 
-    public function test_facade_has_forget_alias(): void
-    {
-        $this->assertTrue(method_exists(Option::class, 'forget'));
-    }
-}
+    it('facade has forget alias', function (): void {
+        expect(method_exists(Option::class, 'forget'))->toBeTrue();
+    });
+});
