@@ -38,7 +38,7 @@
         "spatie/php-structure-discoverer": "dev-main",
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.0",
-        "symfony/process": "^8.0",
+        "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.5",
         "laravel/prompts": "^0.3.16@dev"
     },
@@ -92,7 +92,7 @@
         "laravel/pint": "^v1.29.1",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
-        "symfony/var-dumper": "^8.0",
+        "symfony/var-dumper": "^7.4 || ^8.0",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^12.0",
