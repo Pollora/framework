@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Site Health status test reporting whether Pollora is up to date
   - Version data fetched from Packagist API v2, cached via WordPress transients (12h)
 
+### Changed
+- Migrated all 24 PHPUnit-style test files to Pest closure format (~1000 lines removed)
+- Enabled Rector on `tests/` directory (previously excluded)
+- Excluded `helpers.php` from Rector to prevent mock logic corruption
+
 ## [v13.3.0](https://github.com/Pollora/framework/compare/v13.2.0...v13.3.0) - 2026-04-22
 
 ### Added
