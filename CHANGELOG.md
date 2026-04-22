@@ -5,7 +5,22 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.1.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.2.0...develop)
+
+## [v13.2.0](https://github.com/Pollora/framework/compare/v13.1.0...v13.2.0) - 2026-04-22
+
+### Added
+- `pollora:make-theme` now removes `bin/` directory from generated themes (dev-only files)
+- CHANGELOG.md and versioning guidelines in CLAUDE.md and CONTRIBUTING.md
+- Documentation reference (online links) in CLAUDE.md
+
+### Fixed
+- Rewrite rules now flush correctly after permalink setup during installation
+- `ThemeMetadata::getThemeNamespace()` now returns `Theme\{Name}` instead of just `{Name}`, consistent with autoloader conventions
+
+### Changed
+- Upgraded Illuminate dependencies to `^13.5`
+- Upgraded laravel/pint to `^1.29.1`
 
 ### Removed
 - **BREAKING**: `Loop` facade and `Pollora\View\Loop` class — use [Sage Directives](https://log1x.github.io/sage-directives-docs/) (`@title`, `@content`, `@excerpt`, `@permalink`, `@published`) instead
