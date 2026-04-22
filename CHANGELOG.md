@@ -5,7 +5,16 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.3.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.0...develop)
+
+## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
+
+### Added
+- Update notifications for new Pollora versions ([#162](https://github.com/Pollora/framework/issues/162))
+  - Dismissable admin notice when a newer version is available
+  - Site Health debug information section (installed version, latest version, update status)
+  - Site Health status test reporting whether Pollora is up to date
+  - Version data fetched from Packagist API v2, cached via WordPress transients (12h)
 
 ## [v13.3.0](https://github.com/Pollora/framework/compare/v13.2.0...v13.3.0) - 2026-04-22
 
