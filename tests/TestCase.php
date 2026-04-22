@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Dotenv\Repository\RepositoryBuilder;
 use Mockery as m;
+use PhpOption\Option;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -13,7 +15,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        if (! class_exists('Dotenv\\Repository\\RepositoryBuilder')) {
+        if (! class_exists(RepositoryBuilder::class)) {
             eval('namespace Dotenv\\Repository;
             class RepositoryBuilder {
                 public static function createWithDefaultAdapters() {
@@ -33,7 +35,7 @@ abstract class TestCase extends BaseTestCase
             }');
         }
 
-        if (! class_exists('PhpOption\\Option')) {
+        if (! class_exists(Option::class)) {
             eval('namespace PhpOption; class Option { 
                 public static function fromValue($value) { 
                     return new class($value) { 

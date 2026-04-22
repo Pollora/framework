@@ -92,7 +92,7 @@ class PackagistVersionChecker implements VersionCheckerInterface
         }
 
         $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
+        $data = json_decode((string) $body, true);
 
         if (! is_array($data)) {
             return null;

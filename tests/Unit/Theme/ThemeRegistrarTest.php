@@ -2,174 +2,83 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Theme;
-
 use Illuminate\Container\Container;
-use PHPUnit\Framework\TestCase;
-use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
-use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
-use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
-use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
-use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
-use Psr\Container\ContainerInterface;
 
-/**
- * Test suite for the theme self-registration system.
- */
-class ThemeRegistrarTest extends TestCase
+function setupRegistrarMocks(Container $container, $parser): void
 {
-    private ThemeRegistrar $registrar;
+    $parser->shouldReceive('parseThemeHeaders')->andReturn(['Name' => 'Test Theme', 'Version' => '1.0.0']);
+}
 
-    private ContainerInterface $container;
-
-    private WordPressThemeParser $parser;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->container = $this->createMock(ContainerInterface::class);
-        $this->parser = $this->createMock(WordPressThemeParser::class);
-
+describe('ThemeRegistrar', function (): void {
+    beforeEach(function (): void {
+        $this->container = new Container;
+        $this->parser = Mockery::mock(WordPressThemeParser::class)->shouldIgnoreMissing();
         $this->registrar = new ThemeRegistrar($this->container, $this->parser);
-    }
+    });
 
-    public function test_can_register_active_theme(): void
-    {
-        // Arrange
-        $this->parser->expects($this->once())
-            ->method('parseThemeHeaders')
+    it('can register active theme', function (): void {
+        $this->parser->shouldReceive('parseThemeHeaders')
+            ->once()
             ->with('/path/to/theme/style.css')
-            ->willReturn(['Name' => 'Test Theme', 'Version' => '1.0.0']);
+            ->andReturn(['Name' => 'Test Theme', 'Version' => '1.0.0']);
 
-        $this->container->expects($this->any())
-            ->method('has')
-            ->willReturnMap([
-                ['app', true],
-                [ModuleRepositoryInterface::class, false],
-                [ModuleDiscoveryOrchestratorInterface::class, false],
-                [ModuleConfigurationLoader::class, false],
-                [ModuleComponentManager::class, false],
-                [ModuleAssetManager::class, false],
-            ]);
-
-        $mockApp = $this->createMock(Container::class);
-        $this->container->expects($this->any())
-            ->method('get')
-            ->with('app')
-            ->willReturn($mockApp);
-
-        // Act
         $theme = $this->registrar->register();
 
-        // Assert
-        $this->assertInstanceOf(ThemeModuleInterface::class, $theme);
-        $this->assertEquals('test-theme', $theme->getName());
-        $this->assertEquals('/path/to/theme', $theme->getPath());
-        $this->assertTrue($theme->isEnabled());
-    }
+        expect($theme)->toBeInstanceOf(ThemeModuleInterface::class);
+        expect($theme->getName())->toBe('test-theme');
+        expect($theme->getPath())->toBe('/path/to/theme');
+        expect($theme->isEnabled())->toBeTrue();
+    });
 
-    public function test_can_get_active_theme(): void
-    {
-        // Arrange
-        $this->setupMocksForRegistration();
-
-        // Act
+    it('can get active theme', function (): void {
+        setupRegistrarMocks($this->container, $this->parser);
         $registeredTheme = $this->registrar->register();
         $activeTheme = $this->registrar->getActiveTheme();
 
-        // Assert
-        $this->assertSame($registeredTheme, $activeTheme);
-    }
+        expect($activeTheme)->toBe($registeredTheme);
+    });
 
-    public function test_returns_null_when_no_theme_registered(): void
-    {
-        // Act
-        $activeTheme = $this->registrar->getActiveTheme();
+    it('returns null when no theme registered', function (): void {
+        expect($this->registrar->getActiveTheme())->toBeNull();
+    });
 
-        // Assert
-        $this->assertNull($activeTheme);
-    }
-
-    public function test_can_check_if_theme_is_active(): void
-    {
-        // Arrange
-        $this->setupMocksForRegistration();
-
-        // Act
-        $this->registrar->register();
-
-        // Assert
-        $this->assertTrue($this->registrar->isThemeActive('test-theme'));
-        $this->assertTrue($this->registrar->isThemeActive('TEST-THEME')); // Case insensitive
-        $this->assertFalse($this->registrar->isThemeActive('other-theme'));
-    }
-
-    public function test_returns_false_when_no_theme_registered_for_is_active_check(): void
-    {
-        // Act & Assert
-        $this->assertFalse($this->registrar->isThemeActive('any-theme'));
-    }
-
-    public function test_can_reset_active_theme(): void
-    {
-        // Arrange
-        $this->setupMocksForRegistration();
+    it('can check if theme is active', function (): void {
+        setupRegistrarMocks($this->container, $this->parser);
 
         $this->registrar->register();
 
-        // Act
+        expect($this->registrar->isThemeActive('test-theme'))->toBeTrue();
+        expect($this->registrar->isThemeActive('TEST-THEME'))->toBeTrue();
+        expect($this->registrar->isThemeActive('other-theme'))->toBeFalse();
+    });
+
+    it('returns false when no theme registered for isActive check', function (): void {
+        expect($this->registrar->isThemeActive('any-theme'))->toBeFalse();
+    });
+
+    it('can reset active theme', function (): void {
+        setupRegistrarMocks($this->container, $this->parser);
+
+        $this->registrar->register();
         $this->registrar->resetActiveTheme();
 
-        // Assert
-        $this->assertNull($this->registrar->getActiveTheme());
-        $this->assertFalse($this->registrar->isThemeActive('test-theme'));
-    }
+        expect($this->registrar->getActiveTheme())->toBeNull();
+        expect($this->registrar->isThemeActive('test-theme'))->toBeFalse();
+    });
 
-    public function test_parses_theme_headers_when_no_data_provided(): void
-    {
-        // Arrange
-        $expectedStylePath = '/path/to/theme/style.css';
+    it('parses theme headers when no data provided', function (): void {
         $parsedData = ['Name' => 'Parsed Theme', 'Version' => '2.0.0'];
 
-        $this->parser->expects($this->once())
-            ->method('parseThemeHeaders')
-            ->with($expectedStylePath)
-            ->willReturn($parsedData);
+        $this->parser->shouldReceive('parseThemeHeaders')
+            ->once()
+            ->with('/path/to/theme/style.css')
+            ->andReturn($parsedData);
 
-        $this->setupMocksForRegistration();
-
-        // Act
         $theme = $this->registrar->register();
 
-        // Assert
-        $this->assertEquals($parsedData, $theme->getHeaders());
-    }
-
-    private function setupMocksForRegistration(): void
-    {
-        $this->parser->expects($this->any())
-            ->method('parseThemeHeaders')
-            ->willReturn(['Name' => 'Test Theme', 'Version' => '1.0.0']);
-
-        $this->container->expects($this->any())
-            ->method('has')
-            ->willReturnMap([
-                ['app', true],
-                [ModuleRepositoryInterface::class, false],
-                [ModuleDiscoveryOrchestratorInterface::class, false],
-                [ModuleConfigurationLoader::class, false],
-                [ModuleComponentManager::class, false],
-                [ModuleAssetManager::class, false],
-            ]);
-
-        $mockApp = $this->createMock(Container::class);
-        $this->container->expects($this->any())
-            ->method('get')
-            ->with('app')
-            ->willReturn($mockApp);
-    }
-}
+        expect($theme->getHeaders())->toBe($parsedData);
+    });
+});

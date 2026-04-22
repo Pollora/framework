@@ -2,57 +2,43 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Route\Infrastructure\Services;
-
 use Illuminate\Container\Container;
-use PHPUnit\Framework\Attributes\CoversClass;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
-use Tests\TestCase;
 
-#[CoversClass(WordPressConditionManager::class)]
-class WordPressConditionManagerTest extends TestCase
-{
-    private WordPressConditionManager $manager;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
+describe('WordPressConditionManager', function (): void {
+    beforeEach(function (): void {
         $this->manager = new WordPressConditionManager(new Container);
-    }
+    });
 
-    public function test_loads_default_conditions(): void
-    {
+    it('loads default conditions', function (): void {
         $conditions = $this->manager->getConditions();
 
-        $this->assertIsArray($conditions);
-        $this->assertArrayHasKey('home', $conditions);
-        $this->assertEquals('is_home', $conditions['home']);
-        $this->assertArrayHasKey('single', $conditions);
-        $this->assertEquals('is_single', $conditions['single']);
-        $this->assertArrayHasKey('archive', $conditions);
-        $this->assertEquals('is_archive', $conditions['archive']);
-    }
+        expect($conditions)->toBeArray();
+        expect($conditions)->toHaveKey('home');
+        expect($conditions['home'])->toBe('is_home');
+        expect($conditions)->toHaveKey('single');
+        expect($conditions['single'])->toBe('is_single');
+        expect($conditions)->toHaveKey('archive');
+        expect($conditions['archive'])->toBe('is_archive');
+    });
 
-    public function test_can_resolve_known_conditions(): void
-    {
-        $this->assertEquals('is_home', $this->manager->resolveCondition('home'));
-        $this->assertEquals('is_single', $this->manager->resolveCondition('single'));
-        $this->assertEquals('is_archive', $this->manager->resolveCondition('archive'));
-    }
+    it('can resolve known conditions', function (): void {
+        expect($this->manager->resolveCondition('home'))->toBe('is_home');
+        expect($this->manager->resolveCondition('single'))->toBe('is_single');
+        expect($this->manager->resolveCondition('archive'))->toBe('is_archive');
+    });
 
-    public function test_returns_original_condition_for_unknown_aliases(): void
-    {
-        $this->assertEquals('unknown_condition', $this->manager->resolveCondition('unknown_condition'));
-    }
+    it('returns original condition for unknown aliases', function (): void {
+        expect($this->manager->resolveCondition('unknown_condition'))->toBe('unknown_condition');
+    });
 
-    public function test_can_add_custom_conditions(): void
-    {
+    it('can add custom conditions', function (): void {
         $this->manager->addCondition('custom', 'is_custom');
 
-        $this->assertEquals('is_custom', $this->manager->resolveCondition('custom'));
+        expect($this->manager->resolveCondition('custom'))->toBe('is_custom');
 
         $conditions = $this->manager->getConditions();
-        $this->assertArrayHasKey('custom', $conditions);
-        $this->assertEquals('is_custom', $conditions['custom']);
-    }
-}
+        expect($conditions)->toHaveKey('custom');
+        expect($conditions['custom'])->toBe('is_custom');
+    });
+});

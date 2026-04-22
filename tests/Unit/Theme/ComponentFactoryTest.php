@@ -8,16 +8,16 @@ use Pollora\Theme\Domain\Models\ThemeInitializer;
 
 require_once __DIR__.'/../helpers.php';
 
-describe('ComponentFactory', function () {
+describe('ComponentFactory', function (): void {
     it(/**
      * @throws ReflectionException
-     */ 'injects ServiceLocator into ThemeComponent (without constructor)', function () {
+     */ 'injects ServiceLocator into ThemeComponent (without constructor)', function (): void {
         $mockApp = m::mock(ContainerInterface::class);
         $ref = new ReflectionClass(ThemeInitializer::class);
         $instance = $ref->newInstanceWithoutConstructor();
         $refProp = $ref->getProperty('app');
-        $refProp->setAccessible(true);
         $refProp->setValue($instance, $mockApp);
+
         expect($refProp->getValue($instance))->toBe($mockApp);
     });
 });

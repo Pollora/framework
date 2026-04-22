@@ -8,13 +8,13 @@ use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 use Pollora\PostType\Domain\Contracts\PostTypeRegistryInterface;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->mockFactory = mock(PostTypeFactoryInterface::class);
     $this->mockRegistry = mock(PostTypeRegistryInterface::class);
     $this->postTypeService = new PostTypeService($this->mockFactory, $this->mockRegistry);
 });
 
-test('register calls make on factory', function () {
+test('register calls make on factory', function (): void {
     // Define test values
     $slug = 'test-post-type';
     $singular = 'Test Post Type';
@@ -39,7 +39,7 @@ test('register calls make on factory', function () {
     expect($result)->toBe($mockPostType);
 });
 
-test('exists calls exists on registry', function () {
+test('exists calls exists on registry', function (): void {
     // Define test values
     $slug = 'test-post-type';
 
@@ -57,7 +57,7 @@ test('exists calls exists on registry', function () {
     expect($result)->toBeTrue();
 });
 
-test('getRegistered calls getAll on registry', function () {
+test('getRegistered calls getAll on registry', function (): void {
     // Define test values
     $registeredPostTypes = ['post' => [], 'page' => [], 'test-post-type' => []];
 

@@ -128,13 +128,13 @@ class TestTaxonomy implements TaxonomyAttributeInterface
     }
 }
 
-beforeAll(function () {
+beforeAll(function (): void {
     // Create and configure the container
     $app = new Container;
     Facade::setFacadeApplication($app);
 });
 
-afterAll(function () {
+afterAll(function (): void {
     m::close();
     Facade::clearResolvedInstances();
     Facade::setFacadeApplication(null);
@@ -143,7 +143,7 @@ afterAll(function () {
 // Helper function to test simple boolean attributes
 function testBooleanAttribute(string $attributeName, string $argName): void
 {
-    test("$attributeName attribute sets $argName parameter", function () use ($argName) {
+    test(sprintf('%s attribute sets %s parameter', $attributeName, $argName), function () use ($argName): void {
         $taxonomy = new TestTaxonomy;
 
         // Simulate the discovery process by manually processing attributes
@@ -162,7 +162,7 @@ function testBooleanAttribute(string $attributeName, string $argName): void
 // Helper function to test string/value attributes
 function testValueAttribute(string $attributeName, string $argName, mixed $expectedValue): void
 {
-    test("$attributeName attribute sets $argName parameter", function () use ($argName, $expectedValue) {
+    test(sprintf('%s attribute sets %s parameter', $attributeName, $argName), function () use ($argName, $expectedValue): void {
         $taxonomy = new TestTaxonomy;
 
         // Simulate the discovery process by manually processing attributes
@@ -181,7 +181,7 @@ function testValueAttribute(string $attributeName, string $argName, mixed $expec
 // Helper function to test method attributes
 function testMethodAttribute(string $attributeName, string $argName, string $methodName, string $attributeClass): void
 {
-    test("$attributeName attribute sets $argName parameter", function () use ($argName, $methodName, $attributeClass) {
+    test(sprintf('%s attribute sets %s parameter', $attributeName, $argName), function () use ($argName, $methodName, $attributeClass): void {
         $taxonomy = new TestTaxonomy;
 
         // Reset attributeArgs to avoid interference
@@ -241,7 +241,7 @@ testMethodAttribute('MetaBoxSanitizeCb', 'meta_box_sanitize_cb', 'sanitizeMetaBo
 testMethodAttribute('UpdateCountCallback', 'update_count_callback', 'updateCount', UpdateCountCallback::class);
 
 // Test the final getArgs method
-test('getArgs method merges attribute args with withArgs and labels', function () {
+test('getArgs method merges attribute args with withArgs and labels', function (): void {
     $taxonomy = new TestTaxonomy;
 
     // Simulate the discovery process by manually processing attributes

@@ -9,7 +9,7 @@ use Pollora\Route\Domain\Models\Route;
 /**
  * Setup function to create test environment for route tests
  */
-function setupRouteTest()
+function setupRouteTest(): array
 {
     // Define simulated WordPress functions
     mockWordPressFunctionsForRoute();
@@ -30,20 +30,18 @@ function mockWordPressFunctionsForRoute(): void
 /**
  * Clean up after each test
  */
-afterEach(function () {
+afterEach(function (): void {
     m::close();
 });
 
 /**
  * Test that the route is correctly marked as a WordPress route.
  */
-test('route can be marked as WordPress route', function () {
+test('route can be marked as WordPress route', function (): void {
     setupRouteTest();
 
     // Create a route
-    $route = new Route(['GET'], 'test', function () {
-        return 'test';
-    });
+    $route = new Route(['GET'], 'test', fn (): string => 'test');
 
     // By default, it's not a WordPress route
     expect($route->isWordPressRoute())->toBeFalse();
@@ -58,13 +56,11 @@ test('route can be marked as WordPress route', function () {
 /**
  * Test that the WordPress condition is correctly defined and retrieved.
  */
-test('route can define and retrieve WordPress condition', function () {
+test('route can define and retrieve WordPress condition', function (): void {
     setupRouteTest();
 
     // Create a WordPress route
-    $route = new Route(['GET'], 'is_page', function () {
-        return 'page';
-    });
+    $route = new Route(['GET'], 'is_page', fn (): string => 'page');
     $route->setIsWordPressRoute(true);
 
     // Define the condition
@@ -78,13 +74,11 @@ test('route can define and retrieve WordPress condition', function () {
 /**
  * Test that condition parameters are correctly defined and retrieved.
  */
-test('route can define and retrieve condition parameters', function () {
+test('route can define and retrieve condition parameters', function (): void {
     setupRouteTest();
 
     // Create a WordPress route
-    $route = new Route(['GET'], 'is_page', function () {
-        return 'page';
-    });
+    $route = new Route(['GET'], 'is_page', fn (): string => 'page');
     $route->setIsWordPressRoute(true);
 
     // Define condition parameters
@@ -98,13 +92,11 @@ test('route can define and retrieve condition parameters', function () {
 /**
  * Test that the matches method works correctly for WordPress routes.
  */
-test('route matches correctly for WordPress conditions', function () {
+test('route matches correctly for WordPress conditions', function (): void {
     setupRouteTest();
 
     // Create a WordPress route
-    $route = new Route(['GET'], 'test_condition', function () {
-        return 'test';
-    });
+    $route = new Route(['GET'], 'test_condition', fn (): string => 'test');
     $route->setIsWordPressRoute(true);
     $route->setCondition('test_condition');
 
@@ -126,13 +118,11 @@ test('route matches correctly for WordPress conditions', function () {
 /**
  * Test that route can check if it has WordPress conditions.
  */
-test('route can check if it has WordPress conditions', function () {
+test('route can check if it has WordPress conditions', function (): void {
     setupRouteTest();
 
     // Create a route without conditions
-    $route = new Route(['GET'], 'test', function () {
-        return 'test';
-    });
+    $route = new Route(['GET'], 'test', fn (): string => 'test');
 
     // Should not have condition initially
     expect($route->hasCondition())->toBeFalse();
@@ -147,13 +137,11 @@ test('route can check if it has WordPress conditions', function () {
 /**
  * Test that the route correctly evaluates WordPress conditions during matching.
  */
-test('route evaluates WordPress conditions correctly', function () {
+test('route evaluates WordPress conditions correctly', function (): void {
     setupRouteTest();
 
     // Create a WordPress route with a condition that exists
-    $route = new Route(['GET'], 'is_page', function () {
-        return 'page';
-    });
+    $route = new Route(['GET'], 'is_page', fn (): string => 'page');
     $route->setIsWordPressRoute(true);
     $route->setCondition('is_page');
 

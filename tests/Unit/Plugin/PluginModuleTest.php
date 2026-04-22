@@ -2,258 +2,200 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Plugin;
-
-use PHPUnit\Framework\TestCase;
 use Pollora\Plugin\Domain\Models\PluginModule;
 
-/**
- * Tests for PluginModule class.
- */
-class PluginModuleTest extends TestCase
-{
-    private PluginModule $pluginModule;
-
-    private string $pluginName;
-
-    private string $pluginPath;
-
-    protected function setUp(): void
-    {
+describe('PluginModule', function (): void {
+    beforeEach(function (): void {
         $this->pluginName = 'test-plugin';
         $this->pluginPath = '/path/to/plugins/test-plugin';
-        $this->pluginModule = new PluginModule($this->pluginName, $this->pluginPath);
-    }
+        $this->module = new PluginModule($this->pluginName, $this->pluginPath);
+    });
 
-    public function test_it_can_be_instantiated(): void
-    {
-        $this->assertInstanceOf(PluginModule::class, $this->pluginModule);
-        $this->assertEquals($this->pluginName, $this->pluginModule->getName());
-        $this->assertEquals($this->pluginPath, $this->pluginModule->getPath());
-    }
+    it('can be instantiated', function (): void {
+        expect($this->module)->toBeInstanceOf(PluginModule::class);
+        expect($this->module->getName())->toBe($this->pluginName);
+        expect($this->module->getPath())->toBe($this->pluginPath);
+    });
 
-    public function test_it_has_default_disabled_state(): void
-    {
-        $this->assertFalse($this->pluginModule->isEnabled());
-        $this->assertTrue($this->pluginModule->isDisabled());
-        $this->assertFalse($this->pluginModule->isActive());
-    }
+    it('has default disabled state', function (): void {
+        expect($this->module->isEnabled())->toBeFalse();
+        expect($this->module->isDisabled())->toBeTrue();
+        expect($this->module->isActive())->toBeFalse();
+    });
 
-    public function test_it_can_be_enabled_and_disabled(): void
-    {
-        $this->pluginModule->enable();
-        $this->assertTrue($this->pluginModule->isEnabled());
-        $this->assertFalse($this->pluginModule->isDisabled());
+    it('can be enabled and disabled', function (): void {
+        $this->module->enable();
+        expect($this->module->isEnabled())->toBeTrue();
+        expect($this->module->isDisabled())->toBeFalse();
 
-        $this->pluginModule->disable();
-        $this->assertFalse($this->pluginModule->isEnabled());
-        $this->assertTrue($this->pluginModule->isDisabled());
-    }
+        $this->module->disable();
+        expect($this->module->isEnabled())->toBeFalse();
+        expect($this->module->isDisabled())->toBeTrue();
+    });
 
-    public function test_it_can_be_activated_and_deactivated(): void
-    {
-        $this->pluginModule->activate();
-        $this->assertTrue($this->pluginModule->isActive());
+    it('can be activated and deactivated', function (): void {
+        $this->module->activate();
+        expect($this->module->isActive())->toBeTrue();
 
-        $this->pluginModule->deactivate();
-        $this->assertFalse($this->pluginModule->isActive());
-    }
+        $this->module->deactivate();
+        expect($this->module->isActive())->toBeFalse();
+    });
 
-    public function test_it_returns_correct_plugin_data(): void
-    {
-        $this->pluginModule->setHeaders([
+    it('returns correct plugin data', function (): void {
+        $this->module->setHeaders([
             'Name' => 'Test Plugin',
             'Description' => 'A test plugin',
             'Version' => '1.0.0',
             'Author' => 'Test Author',
         ]);
 
-        $pluginData = $this->pluginModule->getPluginData();
+        $data = $this->module->getPluginData();
 
-        $this->assertArrayHasKey('Name', $pluginData);
-        $this->assertArrayHasKey('Description', $pluginData);
-        $this->assertArrayHasKey('Version', $pluginData);
-        $this->assertArrayHasKey('Author', $pluginData);
-        $this->assertEquals('Test Plugin', $pluginData['Name']);
-        $this->assertEquals('A test plugin', $pluginData['Description']);
-        $this->assertEquals('1.0.0', $pluginData['Version']);
-        $this->assertEquals('Test Author', $pluginData['Author']);
-    }
+        expect($data)->toHaveKey('Name');
+        expect($data)->toHaveKey('Description');
+        expect($data)->toHaveKey('Version');
+        expect($data)->toHaveKey('Author');
+        expect($data['Name'])->toBe('Test Plugin');
+        expect($data['Description'])->toBe('A test plugin');
+        expect($data['Version'])->toBe('1.0.0');
+        expect($data['Author'])->toBe('Test Author');
+    });
 
-    public function test_it_returns_correct_main_file_path(): void
-    {
-        $expectedPath = $this->pluginPath.'/'.$this->pluginName.'.php';
-        $this->assertEquals($expectedPath, $this->pluginModule->getMainFile());
-    }
+    it('returns correct main file path', function (): void {
+        expect($this->module->getMainFile())->toBe($this->pluginPath.'/'.$this->pluginName.'.php');
+    });
 
-    public function test_it_returns_default_version(): void
-    {
-        $this->assertEquals('1.0.0', $this->pluginModule->getVersion());
-    }
+    it('returns default version', function (): void {
+        expect($this->module->getVersion())->toBe('1.0.0');
+    });
 
-    public function test_it_returns_custom_version_from_headers(): void
-    {
-        $this->pluginModule->setHeaders(['Version' => '2.1.0']);
-        $this->assertEquals('2.1.0', $this->pluginModule->getVersion());
-    }
+    it('returns custom version from headers', function (): void {
+        $this->module->setHeaders(['Version' => '2.1.0']);
+        expect($this->module->getVersion())->toBe('2.1.0');
+    });
 
-    public function test_it_returns_empty_author_by_default(): void
-    {
-        $this->assertEquals('', $this->pluginModule->getAuthor());
-    }
+    it('returns empty author by default', function (): void {
+        expect($this->module->getAuthor())->toBe('');
+    });
 
-    public function test_it_returns_custom_author_from_headers(): void
-    {
-        $this->pluginModule->setHeaders(['Author' => 'John Doe']);
-        $this->assertEquals('John Doe', $this->pluginModule->getAuthor());
-    }
+    it('returns custom author from headers', function (): void {
+        $this->module->setHeaders(['Author' => 'John Doe']);
+        expect($this->module->getAuthor())->toBe('John Doe');
+    });
 
-    public function test_it_returns_null_plugin_uri_by_default(): void
-    {
-        $this->assertNull($this->pluginModule->getPluginUri());
-    }
+    it('returns null plugin URI by default', function (): void {
+        expect($this->module->getPluginUri())->toBeNull();
+    });
 
-    public function test_it_returns_custom_plugin_uri_from_headers(): void
-    {
-        $uri = 'https://example.com/plugin';
-        $this->pluginModule->setHeaders(['PluginURI' => $uri]);
-        $this->assertEquals($uri, $this->pluginModule->getPluginUri());
-    }
+    it('returns custom plugin URI from headers', function (): void {
+        $this->module->setHeaders(['PluginURI' => 'https://example.com/plugin']);
+        expect($this->module->getPluginUri())->toBe('https://example.com/plugin');
+    });
 
-    public function test_it_returns_null_author_uri_by_default(): void
-    {
-        $this->assertNull($this->pluginModule->getAuthorUri());
-    }
+    it('returns null author URI by default', function (): void {
+        expect($this->module->getAuthorUri())->toBeNull();
+    });
 
-    public function test_it_returns_custom_author_uri_from_headers(): void
-    {
-        $uri = 'https://example.com';
-        $this->pluginModule->setHeaders(['AuthorURI' => $uri]);
-        $this->assertEquals($uri, $this->pluginModule->getAuthorUri());
-    }
+    it('returns custom author URI from headers', function (): void {
+        $this->module->setHeaders(['AuthorURI' => 'https://example.com']);
+        expect($this->module->getAuthorUri())->toBe('https://example.com');
+    });
 
-    public function test_it_is_not_network_wide_by_default(): void
-    {
-        $this->assertFalse($this->pluginModule->isNetworkWide());
-    }
+    it('is not network wide by default', function (): void {
+        expect($this->module->isNetworkWide())->toBeFalse();
+    });
 
-    public function test_it_can_be_set_as_network_wide(): void
-    {
-        $this->pluginModule->setHeaders(['Network' => true]);
-        $this->assertTrue($this->pluginModule->isNetworkWide());
-    }
+    it('can be set as network wide', function (): void {
+        $this->module->setHeaders(['Network' => true]);
+        expect($this->module->isNetworkWide())->toBeTrue();
+    });
 
-    public function test_it_returns_plugin_name_as_text_domain_by_default(): void
-    {
-        $this->assertEquals($this->pluginName, $this->pluginModule->getTextDomain());
-    }
+    it('returns plugin name as text domain by default', function (): void {
+        expect($this->module->getTextDomain())->toBe($this->pluginName);
+    });
 
-    public function test_it_returns_custom_text_domain_from_headers(): void
-    {
-        $textDomain = 'custom-text-domain';
-        $this->pluginModule->setHeaders(['TextDomain' => $textDomain]);
-        $this->assertEquals($textDomain, $this->pluginModule->getTextDomain());
-    }
+    it('returns custom text domain from headers', function (): void {
+        $this->module->setHeaders(['TextDomain' => 'custom-text-domain']);
+        expect($this->module->getTextDomain())->toBe('custom-text-domain');
+    });
 
-    public function test_it_returns_default_domain_path(): void
-    {
-        $this->assertEquals('/languages', $this->pluginModule->getDomainPath());
-    }
+    it('returns default domain path', function (): void {
+        expect($this->module->getDomainPath())->toBe('/languages');
+    });
 
-    public function test_it_returns_custom_domain_path_from_headers(): void
-    {
-        $domainPath = '/lang';
-        $this->pluginModule->setHeaders(['DomainPath' => $domainPath]);
-        $this->assertEquals($domainPath, $this->pluginModule->getDomainPath());
-    }
+    it('returns custom domain path from headers', function (): void {
+        $this->module->setHeaders(['DomainPath' => '/lang']);
+        expect($this->module->getDomainPath())->toBe('/lang');
+    });
 
-    public function test_it_returns_empty_headers_by_default(): void
-    {
-        $this->assertEquals([], $this->pluginModule->getHeaders());
-    }
+    it('returns empty headers by default', function (): void {
+        expect($this->module->getHeaders())->toBe([]);
+    });
 
-    public function test_it_stores_and_returns_headers(): void
-    {
-        $headers = [
-            'Name' => 'Test Plugin',
-            'Version' => '1.0.0',
-            'Author' => 'Test Author',
-        ];
+    it('stores and returns headers', function (): void {
+        $headers = ['Name' => 'Test Plugin', 'Version' => '1.0.0', 'Author' => 'Test Author'];
+        $this->module->setHeaders($headers);
+        expect($this->module->getHeaders())->toBe($headers);
+    });
 
-        $this->pluginModule->setHeaders($headers);
-        $this->assertEquals($headers, $this->pluginModule->getHeaders());
-    }
+    it('returns plugin slug', function (): void {
+        expect($this->module->getSlug())->toBe($this->pluginName);
+    });
 
-    public function test_it_returns_plugin_slug(): void
-    {
-        $this->assertEquals($this->pluginName, $this->pluginModule->getSlug());
-    }
+    it('returns plugin basename', function (): void {
+        expect($this->module->getBasename())->toBe($this->pluginName.'/'.$this->pluginName.'.php');
+    });
 
-    public function test_it_returns_plugin_basename(): void
-    {
-        $expectedBasename = $this->pluginName.'/'.$this->pluginName.'.php';
-        $this->assertEquals($expectedBasename, $this->pluginModule->getBasename());
-    }
+    it('returns root namespace', function (): void {
+        expect($this->module->getRootNamespace())->toBe('Plugin');
+    });
 
-    public function test_it_returns_root_namespace(): void
-    {
-        $this->assertEquals('Plugin', $this->pluginModule->getRootNamespace());
-    }
+    it('returns plugin namespace', function (): void {
+        expect($this->module->getNamespace())->toBe('Plugin\\TestPlugin');
+    });
 
-    public function test_it_returns_plugin_namespace(): void
-    {
-        $expectedNamespace = 'Plugin\\TestPlugin';
-        $this->assertEquals($expectedNamespace, $this->pluginModule->getNamespace());
-    }
-
-    public function test_it_normalizes_plugin_name_for_namespace(): void
-    {
+    it('normalizes plugin name for namespace', function (): void {
         $plugin = new PluginModule('my-awesome-plugin', '/path');
-        $expectedNamespace = 'Plugin\\MyAwesomePlugin';
-        $this->assertEquals($expectedNamespace, $plugin->getNamespace());
-    }
+        expect($plugin->getNamespace())->toBe('Plugin\\MyAwesomePlugin');
+    });
 
-    public function test_it_can_set_active_status(): void
-    {
-        $this->assertFalse($this->pluginModule->isActive());
+    it('can set active status', function (): void {
+        expect($this->module->isActive())->toBeFalse();
 
-        $result = $this->pluginModule->setActive(true);
-        $this->assertTrue($this->pluginModule->isActive());
-        $this->assertSame($this->pluginModule, $result);
+        $result = $this->module->setActive(true);
+        expect($this->module->isActive())->toBeTrue();
+        expect($result)->toBe($this->module);
 
-        $this->pluginModule->setActive(false);
-        $this->assertFalse($this->pluginModule->isActive());
-    }
+        $this->module->setActive(false);
+        expect($this->module->isActive())->toBeFalse();
+    });
 
-    public function test_it_can_set_enabled_status(): void
-    {
-        $this->assertFalse($this->pluginModule->isEnabled());
+    it('can set enabled status', function (): void {
+        expect($this->module->isEnabled())->toBeFalse();
 
-        $result = $this->pluginModule->setEnabled(true);
-        $this->assertTrue($this->pluginModule->isEnabled());
-        $this->assertSame($this->pluginModule, $result);
+        $result = $this->module->setEnabled(true);
+        expect($this->module->isEnabled())->toBeTrue();
+        expect($result)->toBe($this->module);
 
-        $this->pluginModule->setEnabled(false);
-        $this->assertFalse($this->pluginModule->isEnabled());
-    }
+        $this->module->setEnabled(false);
+        expect($this->module->isEnabled())->toBeFalse();
+    });
 
-    public function test_it_returns_null_for_optional_version_fields(): void
-    {
-        $this->assertNull($this->pluginModule->getRequiredWordPressVersion());
-        $this->assertNull($this->pluginModule->getTestedWordPressVersion());
-        $this->assertNull($this->pluginModule->getRequiredPhpVersion());
-    }
+    it('returns null for optional version fields', function (): void {
+        expect($this->module->getRequiredWordPressVersion())->toBeNull();
+        expect($this->module->getTestedWordPressVersion())->toBeNull();
+        expect($this->module->getRequiredPhpVersion())->toBeNull();
+    });
 
-    public function test_it_returns_custom_version_requirements_from_headers(): void
-    {
-        $this->pluginModule->setHeaders([
+    it('returns custom version requirements from headers', function (): void {
+        $this->module->setHeaders([
             'RequiresWP' => '5.0',
             'TestedUpTo' => '6.0',
             'RequiresPHP' => '8.0',
         ]);
 
-        $this->assertEquals('5.0', $this->pluginModule->getRequiredWordPressVersion());
-        $this->assertEquals('6.0', $this->pluginModule->getTestedWordPressVersion());
-        $this->assertEquals('8.0', $this->pluginModule->getRequiredPhpVersion());
-    }
-}
+        expect($this->module->getRequiredWordPressVersion())->toBe('5.0');
+        expect($this->module->getTestedWordPressVersion())->toBe('6.0');
+        expect($this->module->getRequiredPhpVersion())->toBe('8.0');
+    });
+});

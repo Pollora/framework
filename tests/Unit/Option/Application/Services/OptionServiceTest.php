@@ -2,131 +2,65 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Option\Application\Services;
-
-use Mockery;
-use PHPUnit\Framework\TestCase;
 use Pollora\Option\Application\Services\OptionService;
 use Pollora\Option\Domain\Contracts\OptionRepositoryInterface;
 use Pollora\Option\Domain\Models\Option;
 use Pollora\Option\Domain\Services\OptionValidationService;
 
-final class OptionServiceTest extends TestCase
-{
-    private OptionService $service;
-
-    private OptionRepositoryInterface $repository;
-
-    private OptionValidationService $validator;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
+describe('OptionService', function (): void {
+    beforeEach(function (): void {
         $this->repository = Mockery::mock(OptionRepositoryInterface::class);
         $this->validator = new OptionValidationService;
         $this->service = new OptionService($this->repository, $this->validator);
-    }
+    });
 
-    protected function tearDown(): void
-    {
-        Mockery::close();
-        parent::tearDown();
-    }
+    it('returns option value when exists', function (): void {
+        $this->repository->shouldReceive('get')->with('test_key')->once()->andReturn(new Option('test_key', 'test_value'));
 
-    public function test_get_returns_option_value_when_exists(): void
-    {
-        $key = 'test_key';
-        $value = 'test_value';
-        $option = new Option($key, $value);
+        expect($this->service->get('test_key'))->toBe('test_value');
+    });
 
-        $this->repository->shouldReceive('get')->with($key)->once()->andReturn($option);
+    it('returns default when option not exists', function (): void {
+        $this->repository->shouldReceive('get')->with('test_key')->once()->andReturn(null);
 
-        $result = $this->service->get($key);
+        expect($this->service->get('test_key', 'default_value'))->toBe('default_value');
+    });
 
-        $this->assertEquals($value, $result);
-    }
+    it('returns null as default when no default provided', function (): void {
+        $this->repository->shouldReceive('get')->with('test_key')->once()->andReturn(null);
 
-    public function test_get_returns_default_when_option_not_exists(): void
-    {
-        $key = 'test_key';
-        $default = 'default_value';
+        expect($this->service->get('test_key'))->toBeNull();
+    });
 
-        $this->repository->shouldReceive('get')->with($key)->once()->andReturn(null);
-
-        $result = $this->service->get($key, $default);
-
-        $this->assertEquals($default, $result);
-    }
-
-    public function test_get_returns_null_as_default_when_no_default_provided(): void
-    {
-        $key = 'test_key';
-
-        $this->repository->shouldReceive('get')->with($key)->once()->andReturn(null);
-
-        $result = $this->service->get($key);
-
-        $this->assertNull($result);
-    }
-
-    public function test_set_stores_new_option_when_not_exists(): void
-    {
-        $key = 'test_key';
-        $value = 'test_value';
-
-        $this->repository->shouldReceive('exists')->with($key)->once()->andReturn(false);
+    it('stores new option when not exists', function (): void {
+        $this->repository->shouldReceive('exists')->with('test_key')->once()->andReturn(false);
         $this->repository->shouldReceive('store')->once()->andReturn(true);
 
-        $result = $this->service->set($key, $value);
+        expect($this->service->set('test_key', 'test_value'))->toBeTrue();
+    });
 
-        $this->assertTrue($result);
-    }
-
-    public function test_set_updates_existing_option_when_exists(): void
-    {
-        $key = 'test_key';
-        $value = 'test_value';
-
-        $this->repository->shouldReceive('exists')->with($key)->once()->andReturn(true);
+    it('updates existing option when exists', function (): void {
+        $this->repository->shouldReceive('exists')->with('test_key')->once()->andReturn(true);
         $this->repository->shouldReceive('update')->once()->andReturn(true);
 
-        $result = $this->service->set($key, $value);
+        expect($this->service->set('test_key', 'test_value'))->toBeTrue();
+    });
 
-        $this->assertTrue($result);
-    }
-
-    public function test_update_calls_repository_update(): void
-    {
-        $key = 'test_key';
-        $value = 'test_value';
-
+    it('update calls repository update', function (): void {
         $this->repository->shouldReceive('update')->once()->andReturn(true);
 
-        $result = $this->service->update($key, $value);
+        expect($this->service->update('test_key', 'test_value'))->toBeTrue();
+    });
 
-        $this->assertTrue($result);
-    }
+    it('delete calls repository delete', function (): void {
+        $this->repository->shouldReceive('delete')->with('test_key')->once()->andReturn(true);
 
-    public function test_delete_calls_repository_delete(): void
-    {
-        $key = 'test_key';
+        expect($this->service->delete('test_key'))->toBeTrue();
+    });
 
-        $this->repository->shouldReceive('delete')->with($key)->once()->andReturn(true);
+    it('exists calls repository exists', function (): void {
+        $this->repository->shouldReceive('exists')->with('test_key')->once()->andReturn(true);
 
-        $result = $this->service->delete($key);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_exists_calls_repository_exists(): void
-    {
-        $key = 'test_key';
-
-        $this->repository->shouldReceive('exists')->with($key)->once()->andReturn(true);
-
-        $result = $this->service->exists($key);
-
-        $this->assertTrue($result);
-    }
-}
+        expect($this->service->exists('test_key'))->toBeTrue();
+    });
+});

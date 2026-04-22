@@ -2,24 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Option\Domain\Exceptions;
-
-use PHPUnit\Framework\TestCase;
 use Pollora\Option\Domain\Exceptions\OptionNotFoundException;
 
-final class OptionNotFoundExceptionTest extends TestCase
-{
-    public function test_creates_exception_with_formatted_message(): void
-    {
+describe('OptionNotFoundException', function (): void {
+    it('creates exception with formatted message', function (): void {
         $exception = new OptionNotFoundException('test_key');
 
-        $this->assertEquals("Option 'test_key' not found", $exception->getMessage());
-    }
+        expect($exception->getMessage())->toBe("Option 'test_key' not found");
+    });
 
-    public function test_handles_special_characters_in_key(): void
-    {
+    it('handles special characters in key', function (): void {
         $exception = new OptionNotFoundException('test-key_with.special');
 
-        $this->assertEquals("Option 'test-key_with.special' not found", $exception->getMessage());
-    }
-}
+        expect($exception->getMessage())->toBe("Option 'test-key_with.special' not found");
+    });
+});

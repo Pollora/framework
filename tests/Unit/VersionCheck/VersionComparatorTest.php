@@ -5,8 +5,8 @@ declare(strict_types=1);
 use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 
-describe('VersionComparator', function () {
-    it('detects update available when latest is newer', function () {
+describe('VersionComparator', function (): void {
+    it('detects update available when latest is newer', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.2.0');
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
@@ -16,7 +16,7 @@ describe('VersionComparator', function () {
         expect($comparator->isUpdateAvailable())->toBeTrue();
     });
 
-    it('reports no update when versions match', function () {
+    it('reports no update when versions match', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.3.0');
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
@@ -26,7 +26,7 @@ describe('VersionComparator', function () {
         expect($comparator->isUpdateAvailable())->toBeFalse();
     });
 
-    it('reports no update when current is newer', function () {
+    it('reports no update when current is newer', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('14.0.0');
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
@@ -36,7 +36,7 @@ describe('VersionComparator', function () {
         expect($comparator->isUpdateAvailable())->toBeFalse();
     });
 
-    it('reports no update when current version is null', function () {
+    it('reports no update when current version is null', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn(null);
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
@@ -46,7 +46,7 @@ describe('VersionComparator', function () {
         expect($comparator->isUpdateAvailable())->toBeFalse();
     });
 
-    it('reports no update when latest version is null', function () {
+    it('reports no update when latest version is null', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.3.0');
         $checker->shouldReceive('getLatestVersion')->andReturn(null);
@@ -56,7 +56,7 @@ describe('VersionComparator', function () {
         expect($comparator->isUpdateAvailable())->toBeFalse();
     });
 
-    it('delegates getCurrentVersion to checker', function () {
+    it('delegates getCurrentVersion to checker', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.2.0');
 
@@ -65,7 +65,7 @@ describe('VersionComparator', function () {
         expect($comparator->getCurrentVersion())->toBe('13.2.0');
     });
 
-    it('delegates getLatestVersion to checker', function () {
+    it('delegates getLatestVersion to checker', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
 

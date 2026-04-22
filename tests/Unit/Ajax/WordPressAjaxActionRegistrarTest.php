@@ -9,13 +9,13 @@ use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Support\Facades\Action as ActionFacade;
 use Psr\Container\ContainerInterface;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Patch the Action facade statically for all tests in this file
     ActionFacade::swap(new class
     {
         public array $calls = [];
 
-        public function add($hook, $callback)
+        public function add($hook, $callback): void
         {
             $GLOBALS['pollora_action_calls'][] = [$hook, $callback];
         }
@@ -23,12 +23,12 @@ beforeEach(function () {
     $GLOBALS['pollora_action_calls'] = [];
 });
 
-afterEach(function () {
+afterEach(function (): void {
     m::close();
 });
 
-describe('WordPressAjaxActionRegistrar', function () {
-    it('registers both hooks for BOTH_USERS', function () {
+describe('WordPressAjaxActionRegistrar', function (): void {
+    it('registers both hooks for BOTH_USERS', function (): void {
         $container = m::mock(ContainerInterface::class);
         $actionService = m::mock(Action::class);
         $actionService->shouldReceive('add')->andReturnUsing(function ($hook, $callback) use ($actionService) {
@@ -38,13 +38,13 @@ describe('WordPressAjaxActionRegistrar', function () {
         });
         $container->shouldReceive('get')->with(Action::class)->andReturn($actionService);
         $registrar = new WordPressAjaxActionRegistrar($container);
-        $action = (new AjaxAction('my_action', function () {}));
+        $action = (new AjaxAction('my_action', function (): void {}));
         $registrar->register($action);
         expect($GLOBALS['pollora_action_calls'])->toContain(['wp_ajax_my_action', $action->getCallback()])
             ->and($GLOBALS['pollora_action_calls'])->toContain(['wp_ajax_nopriv_my_action', $action->getCallback()]);
     });
 
-    it('registers only wp_ajax for LOGGED_USERS', function () {
+    it('registers only wp_ajax for LOGGED_USERS', function (): void {
         $container = m::mock(ContainerInterface::class);
         $actionService = m::mock(Action::class);
         $actionService->shouldReceive('add')->andReturnUsing(function ($hook, $callback) use ($actionService) {
@@ -54,13 +54,13 @@ describe('WordPressAjaxActionRegistrar', function () {
         });
         $container->shouldReceive('get')->with(Action::class)->andReturn($actionService);
         $registrar = new WordPressAjaxActionRegistrar($container);
-        $action = (new AjaxAction('my_action', function () {}))->forLoggedUsers();
+        $action = (new AjaxAction('my_action', function (): void {}))->forLoggedUsers();
         $registrar->register($action);
         expect($GLOBALS['pollora_action_calls'])->toContain(['wp_ajax_my_action', $action->getCallback()])
             ->and($GLOBALS['pollora_action_calls'])->not->toContain(['wp_ajax_nopriv_my_action', $action->getCallback()]);
     });
 
-    it('registers only wp_ajax_nopriv for GUEST_USERS', function () {
+    it('registers only wp_ajax_nopriv for GUEST_USERS', function (): void {
         $container = m::mock(ContainerInterface::class);
         $actionService = m::mock(Action::class);
         $actionService->shouldReceive('add')->andReturnUsing(function ($hook, $callback) use ($actionService) {
@@ -70,7 +70,7 @@ describe('WordPressAjaxActionRegistrar', function () {
         });
         $container->shouldReceive('get')->with(Action::class)->andReturn($actionService);
         $registrar = new WordPressAjaxActionRegistrar($container);
-        $action = (new AjaxAction('my_action', function () {}))->forGuestUsers();
+        $action = (new AjaxAction('my_action', function (): void {}))->forGuestUsers();
         $registrar->register($action);
         expect($GLOBALS['pollora_action_calls'])->not->toContain(['wp_ajax_my_action', $action->getCallback()])
             ->and($GLOBALS['pollora_action_calls'])->toContain(['wp_ajax_nopriv_my_action', $action->getCallback()]);

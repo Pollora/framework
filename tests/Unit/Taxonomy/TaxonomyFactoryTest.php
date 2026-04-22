@@ -6,12 +6,12 @@ namespace Tests\Unit\Taxonomy;
 
 use Pollora\Taxonomy\Infrastructure\Factories\TaxonomyFactory;
 
-beforeEach(function () {
+beforeEach(function (): void {
     setupWordPressMocks();
     $this->factory = new TaxonomyFactory;
 });
 
-test('make creates new Taxonomy instance with correct parameters', function () {
+test('make creates new Taxonomy instance with correct parameters', function (): void {
     // Define test values
     $slug = 'test-taxonomy';
     $objectType = ['post', 'page'];
@@ -28,7 +28,7 @@ test('make creates new Taxonomy instance with correct parameters', function () {
         ->and($result->getObjectType())->toBe($objectType);
 });
 
-test('make handles null parameters correctly', function () {
+test('make handles null parameters correctly', function (): void {
     // Define test values
     $slug = 'test-taxonomy';
     $objectType = 'post';
@@ -43,7 +43,7 @@ test('make handles null parameters correctly', function () {
         ->and($result->getObjectType())->toBe($objectType);
 });
 
-test('make generates singular name from slug when not provided', function () {
+test('make generates singular name from slug when not provided', function (): void {
     // Define test values
     $slug = 'product_category';
     $objectType = 'product';
@@ -57,7 +57,7 @@ test('make generates singular name from slug when not provided', function () {
         ->and($result->getSlug())->toBe($slug);
 });
 
-test('make generates plural name from singular when not provided', function () {
+test('make generates plural name from singular when not provided', function (): void {
     // Define test values
     $slug = 'category';
     $objectType = 'post';
@@ -72,7 +72,7 @@ test('make generates plural name from singular when not provided', function () {
         ->and($result->getSlug())->toBe($slug);
 });
 
-test('make handles string object type', function () {
+test('make handles string object type', function (): void {
     // Define test values
     $slug = 'tag';
     $objectType = 'post';
@@ -87,7 +87,7 @@ test('make handles string object type', function () {
         ->and($result->getObjectType())->toBe($objectType);
 });
 
-test('make handles array object type', function () {
+test('make handles array object type', function (): void {
     // Define test values
     $slug = 'category';
     $objectType = ['post', 'page', 'product'];
@@ -102,7 +102,7 @@ test('make handles array object type', function () {
         ->and($result->getObjectType())->toBe($objectType);
 });
 
-test('make applies additional arguments when provided', function () {
+test('make applies additional arguments when provided', function (): void {
     // Define test values
     $slug = 'test-taxonomy';
     $objectType = 'post';

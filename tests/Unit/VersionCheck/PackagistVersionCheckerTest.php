@@ -6,12 +6,12 @@ use Pollora\VersionCheck\Infrastructure\Services\PackagistVersionChecker;
 
 require_once dirname(__DIR__).'/helpers.php';
 
-beforeEach(function () {
+beforeEach(function (): void {
     setupWordPressMocks();
 });
 
-describe('PackagistVersionChecker', function () {
-    it('returns the currently installed version', function () {
+describe('PackagistVersionChecker', function (): void {
+    it('returns the currently installed version', function (): void {
         $checker = new PackagistVersionChecker;
         $version = $checker->getCurrentVersion();
 
@@ -19,25 +19,25 @@ describe('PackagistVersionChecker', function () {
         expect($version)->toBeString();
     });
 
-    it('returns cached version from transient', function () {
-        setWordPressFunction('get_transient', fn () => '99.0.0');
+    it('returns cached version from transient', function (): void {
+        setWordPressFunction('get_transient', fn (): string => '99.0.0');
 
         $checker = new PackagistVersionChecker;
 
         expect($checker->getLatestVersion())->toBe('99.0.0');
     });
 
-    it('fetches from packagist when no cache and stores in transient', function () {
-        setWordPressFunction('get_transient', fn () => false);
+    it('fetches from packagist when no cache and stores in transient', function (): void {
+        setWordPressFunction('get_transient', fn (): false => false);
 
         $storedVersion = null;
-        setWordPressFunction('set_transient', function ($key, $value, $ttl) use (&$storedVersion) {
+        setWordPressFunction('set_transient', function ($key, $value, $ttl) use (&$storedVersion): true {
             $storedVersion = $value;
 
             return true;
         });
 
-        setWordPressFunction('wp_remote_get', fn () => [
+        setWordPressFunction('wp_remote_get', fn (): array => [
             'body' => json_encode([
                 'packages' => [
                     'pollora/framework' => [
@@ -50,7 +50,7 @@ describe('PackagistVersionChecker', function () {
         ]);
 
         setWordPressFunction('wp_remote_retrieve_body', fn ($response) => $response['body']);
-        setWordPressFunction('is_wp_error', fn () => false);
+        setWordPressFunction('is_wp_error', fn (): false => false);
 
         $checker = new PackagistVersionChecker;
 
@@ -58,11 +58,11 @@ describe('PackagistVersionChecker', function () {
         expect($storedVersion)->toBe('13.3.0');
     });
 
-    it('skips dev and pre-release versions', function () {
-        setWordPressFunction('get_transient', fn () => false);
-        setWordPressFunction('set_transient', fn () => true);
+    it('skips dev and pre-release versions', function (): void {
+        setWordPressFunction('get_transient', fn (): false => false);
+        setWordPressFunction('set_transient', fn (): true => true);
 
-        setWordPressFunction('wp_remote_get', fn () => [
+        setWordPressFunction('wp_remote_get', fn (): array => [
             'body' => json_encode([
                 'packages' => [
                     'pollora/framework' => [
@@ -77,17 +77,17 @@ describe('PackagistVersionChecker', function () {
         ]);
 
         setWordPressFunction('wp_remote_retrieve_body', fn ($response) => $response['body']);
-        setWordPressFunction('is_wp_error', fn () => false);
+        setWordPressFunction('is_wp_error', fn (): false => false);
 
         $checker = new PackagistVersionChecker;
 
         expect($checker->getLatestVersion())->toBe('13.3.0');
     });
 
-    it('returns null on API error', function () {
-        setWordPressFunction('get_transient', fn () => false);
-        setWordPressFunction('is_wp_error', fn () => true);
-        setWordPressFunction('wp_remote_get', fn () => new stdClass);
+    it('returns null on API error', function (): void {
+        setWordPressFunction('get_transient', fn (): false => false);
+        setWordPressFunction('is_wp_error', fn (): true => true);
+        setWordPressFunction('wp_remote_get', fn (): stdClass => new stdClass);
 
         $checker = new PackagistVersionChecker;
 
