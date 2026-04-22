@@ -60,9 +60,9 @@ class ModuleComponentManager
             if (! $this->app->bound($serviceKey)) {
                 $this->app->singleton($serviceKey, $componentClass);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Failed to register component {$componentClass} for module {$moduleId}: ".$e->getMessage());
+                error_log(sprintf('Failed to register component %s for module %s: ', $componentClass, $moduleId).$throwable->getMessage());
             }
         }
     }
@@ -82,17 +82,17 @@ class ModuleComponentManager
                     $instance->register();
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (env('APP_DEBUG', false)) {
                 throw new \RuntimeException(
-                    "Failed to initialize component {$componentClass} for module {$moduleId}: ".$e->getMessage(),
+                    sprintf('Failed to initialize component %s for module %s: ', $componentClass, $moduleId).$throwable->getMessage(),
                     0,
-                    $e
+                    $throwable
                 );
             }
 
             if (function_exists('error_log')) {
-                error_log("Component initialization failed: {$componentClass} for module {$moduleId} - ".$e->getMessage());
+                error_log(sprintf('Component initialization failed: %s for module %s - ', $componentClass, $moduleId).$throwable->getMessage());
             }
         }
     }
@@ -102,7 +102,7 @@ class ModuleComponentManager
      */
     protected function getComponentServiceKey(string $componentClass, string $moduleId): string
     {
-        return "module.{$moduleId}.component.".class_basename($componentClass);
+        return sprintf('module.%s.component.', $moduleId).class_basename($componentClass);
     }
 
     /**

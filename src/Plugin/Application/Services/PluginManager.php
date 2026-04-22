@@ -107,7 +107,7 @@ class PluginManager
         $this->plugin = $plugin;
 
         if (! is_dir($plugin->getBasePath()) && ! $this->consoleDetectionService->isConsole()) {
-            throw new PluginException("Plugin directory {$plugin->getName()} not found.");
+            throw new PluginException(sprintf('Plugin directory %s not found.', $plugin->getName()));
         }
 
         $plugin->loadConfiguration();
@@ -346,8 +346,8 @@ class PluginManager
             if (function_exists('do_action')) {
                 do_action('activate_plugin', $plugin->getBasename());
             }
-        } catch (\Exception $e) {
-            throw PluginException::activationFailed($name, $e->getMessage(), 0, $e);
+        } catch (\Exception $exception) {
+            throw PluginException::activationFailed($name, $exception->getMessage(), 0, $exception);
         }
     }
 
@@ -373,8 +373,8 @@ class PluginManager
             if (function_exists('do_action')) {
                 do_action('deactivate_plugin', $plugin->getBasename());
             }
-        } catch (\Exception $e) {
-            throw PluginException::deactivationFailed($name, $e->getMessage(), 0, $e);
+        } catch (\Exception $exception) {
+            throw PluginException::deactivationFailed($name, $exception->getMessage(), 0, $exception);
         }
     }
 

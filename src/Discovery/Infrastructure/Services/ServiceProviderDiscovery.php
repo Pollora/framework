@@ -69,7 +69,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
                 $this->registerServiceProvider($className);
             } catch (\Throwable $e) {
                 // Log the error but continue with other service providers
-                error_log("Failed to register service provider {$className}: ".$e->getMessage());
+                error_log(sprintf('Failed to register service provider %s: ', $className).$e->getMessage());
             }
         }
     }
@@ -126,8 +126,8 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
             if (! $this->isServiceProviderRegistered($className)) {
                 app()->register($className);
             }
-        } catch (\Throwable $e) {
-            error_log("Failed to register service provider {$className}: ".$e->getMessage());
+        } catch (\Throwable $throwable) {
+            error_log(sprintf('Failed to register service provider %s: ', $className).$throwable->getMessage());
         }
     }
 

@@ -158,8 +158,8 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
 
         $content = $this->makeReplacements($stub);
 
-        if (preg_match("/public function {$hookMethodName}\(/", $existingContent)) {
-            $this->error("The method '{$hookMethodName}' already exists in the file '{$path}'.");
+        if (preg_match(sprintf('/public function %s\(/', $hookMethodName), $existingContent)) {
+            $this->error(sprintf("The method '%s' already exists in the file '%s'.", $hookMethodName, $path));
             exit;
         }
 
@@ -182,7 +182,7 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
 
         foreach ($requiredImports as $import) {
             $escapedImport = preg_quote($import, '/');
-            if (in_array(preg_match("/use {$escapedImport};/", $content), [0, false], true)) {
+            if (in_array(preg_match(sprintf('/use %s;/', $escapedImport), $content), [0, false], true)) {
                 // Find the last "use" statement
                 $lastUsePosition = strrpos($content, 'use ');
                 if ($lastUsePosition !== false) {
@@ -213,7 +213,7 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
         return str_replace(
             ['{{ hookType }}', '{{ hook }}', '{{ priority }}', '{{ hookMethodName }}',
                 '{{ arg }}', '{{ returnType }}', '{{ return }}'],
-            [$hookType, $hook, ", priority:{$priority}", $hookMethodName, $arg, $returnType, $return],
+            [$hookType, $hook, ', priority:'.$priority, $hookMethodName, $arg, $returnType, $return],
             $stub
         );
     }

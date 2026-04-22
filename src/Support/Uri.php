@@ -50,13 +50,13 @@ class Uri
     {
         $scheme = $parts['scheme'] ?? '';
         $host = $parts['host'] ?? '';
-        $port = isset($parts['port']) ? ":{$parts['port']}" : '';
+        $port = isset($parts['port']) ? ':'.$parts['port'] : '';
         $path = $parts['path'] ?? '';
-        $query = isset($parts['query']) ? "?{$parts['query']}" : '';
-        $fragment = isset($parts['fragment']) ? "#{$parts['fragment']}" : '';
+        $query = isset($parts['query']) ? '?'.$parts['query'] : '';
+        $fragment = isset($parts['fragment']) ? '#'.$parts['fragment'] : '';
 
         return $scheme
-            ? "{$scheme}://{$host}{$port}{$path}{$query}{$fragment}"
-            : "{$host}{$port}{$path}{$query}{$fragment}";
+            ? sprintf('%s://%s%s%s%s%s', $scheme, $host, $port, $path, $query, $fragment)
+            : $host.$port.$path.$query.$fragment;
     }
 }

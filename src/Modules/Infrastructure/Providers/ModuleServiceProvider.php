@@ -131,9 +131,9 @@ class ModuleServiceProvider extends ServiceProvider
             if (method_exists($orchestrator, 'discoverLaravelModules')) {
                 $orchestrator->discoverLaravelModules();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log('Laravel Module discovery error in ModuleServiceProvider: '.$e->getMessage());
+                error_log('Laravel Module discovery error in ModuleServiceProvider: '.$throwable->getMessage());
             }
         }
     }
@@ -155,9 +155,9 @@ class ModuleServiceProvider extends ServiceProvider
             if (method_exists($orchestrator, 'applyLaravelModules')) {
                 $orchestrator->applyLaravelModules();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log('Laravel Module apply error in ModuleServiceProvider: '.$e->getMessage());
+                error_log('Laravel Module apply error in ModuleServiceProvider: '.$throwable->getMessage());
             }
         }
     }
@@ -179,9 +179,9 @@ class ModuleServiceProvider extends ServiceProvider
             if (method_exists($orchestrator, 'discoverFrameworkModules')) {
                 $orchestrator->discoverFrameworkModules();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log('Framework Module discovery error in ModuleServiceProvider: '.$e->getMessage());
+                error_log('Framework Module discovery error in ModuleServiceProvider: '.$throwable->getMessage());
             }
         }
     }
@@ -203,9 +203,9 @@ class ModuleServiceProvider extends ServiceProvider
             if (method_exists($orchestrator, 'applyFrameworkModules')) {
                 $orchestrator->applyFrameworkModules();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log('Framework Module apply error in ModuleServiceProvider: '.$e->getMessage());
+                error_log('Framework Module apply error in ModuleServiceProvider: '.$throwable->getMessage());
             }
         }
     }

@@ -121,7 +121,7 @@ final readonly class LaravelDiscoveryCache implements DiscoveryCacheInterface
 
         $locationsHash = md5(implode('|', $locationPaths));
 
-        return "{$discoveryIdentifier}.{$locationsHash}";
+        return sprintf('%s.%s', $discoveryIdentifier, $locationsHash);
     }
 
     /**

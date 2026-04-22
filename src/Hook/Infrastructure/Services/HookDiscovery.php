@@ -27,7 +27,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class HookDiscovery implements DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Create a new Hook discovery
@@ -140,7 +141,7 @@ final class HookDiscovery implements DiscoveryInterface
             } catch (\Throwable $e) {
                 // Log the error but continue with other hooks
                 // In a production environment, you might want to use a proper logger
-                error_log("Failed to register {$hookType} hook from method {$className}::{$methodName}: ".$e->getMessage());
+                error_log(sprintf('Failed to register %s hook from method %s::%s: ', $hookType, $className, $methodName).$e->getMessage());
             }
         }
     }

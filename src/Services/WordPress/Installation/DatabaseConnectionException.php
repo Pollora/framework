@@ -21,6 +21,6 @@ class DatabaseConnectionException extends \RuntimeException
      */
     public static function fromPdoError(string $message): self
     {
-        return new self("Database connection failed: $message");
+        return new self('Database connection failed: '.$message);
     }
 }

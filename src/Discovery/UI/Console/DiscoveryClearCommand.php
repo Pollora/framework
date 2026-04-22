@@ -51,8 +51,8 @@ final class DiscoveryClearCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Throwable $e) {
-            $this->error('Failed to clear discovery caches: '.$e->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->error('Failed to clear discovery caches: '.$throwable->getMessage());
 
             return self::FAILURE;
         }
@@ -114,12 +114,12 @@ final class DiscoveryClearCommand extends Command
                 $cacheDriver->forget($cacheId);
                 $cleared++;
             } catch (\Throwable) {
-                $this->line("    <warning>Failed to clear cache for location: {$location->getPath()}</warning>");
+                $this->line(sprintf('    <warning>Failed to clear cache for location: %s</warning>', $location->getPath()));
             }
         }
 
         if ($cleared > 0) {
-            $this->line("    <info>Cleared cache for {$cleared} discovery locations</info>");
+            $this->line(sprintf('    <info>Cleared cache for %d discovery locations</info>', $cleared));
         } else {
             $this->line('    <comment>No cache entries to clear</comment>');
         }

@@ -60,7 +60,7 @@ trait HasConfiguringSupport
 
         } catch (\ReflectionException|\Throwable $e) {
             error_log(
-                "Failed to process configuring for {$className}: ".$e->getMessage()
+                sprintf('Failed to process configuring for %s: ', $className).$e->getMessage()
             );
 
             return null;

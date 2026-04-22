@@ -34,7 +34,9 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, DiscoveryInterface
 {
-    use HasConfiguringSupport, HasInstancePool, IsDiscovery;
+    use HasConfiguringSupport;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Create a new Taxonomy discovery
@@ -139,7 +141,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $this->processTaxonomy($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other taxonomies
-                error_log("Failed to register Taxonomy from class {$className}: ".$e->getMessage());
+                error_log(sprintf('Failed to register Taxonomy from class %s: ', $className).$e->getMessage());
             }
         }
     }
@@ -209,8 +211,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process Taxonomy for class {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process Taxonomy for class %s: ', $className).$reflectionException->getMessage());
         }
     }
 
@@ -257,8 +259,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process class-level attributes for {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
         }
 
         return $config;
@@ -284,8 +286,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process method-level attributes for {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
         }
 
         return $config;
@@ -364,7 +366,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
         } catch (\ReflectionException|\Throwable $e) {
             // Log the error but continue - additional args are optional
-            error_log("Failed to process additional args for {$className}: ".$e->getMessage());
+            error_log(sprintf('Failed to process additional args for %s: ', $className).$e->getMessage());
         }
     }
 
@@ -435,20 +437,20 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             'name' => $plural,
             'singular_name' => $singular,
             'menu_name' => $plural,
-            'all_items' => "All {$plural}",
-            'edit_item' => "Edit {$singular}",
-            'view_item' => "View {$singular}",
-            'update_item' => "Update {$singular}",
-            'add_new_item' => "Add New {$singular}",
-            'new_item_name' => "New {$singular} Name",
-            'search_items' => "Search {$plural}",
-            'popular_items' => "Popular {$plural}",
-            'separate_items_with_commas' => "Separate {$plural} with commas",
-            'add_or_remove_items' => "Add or remove {$plural}",
-            'choose_from_most_used' => "Choose from the most used {$plural}",
-            'not_found' => "No {$plural} found",
-            'parent_item' => "Parent {$singular}",
-            'parent_item_colon' => "Parent {$singular}:",
+            'all_items' => 'All '.$plural,
+            'edit_item' => 'Edit '.$singular,
+            'view_item' => 'View '.$singular,
+            'update_item' => 'Update '.$singular,
+            'add_new_item' => 'Add New '.$singular,
+            'new_item_name' => sprintf('New %s Name', $singular),
+            'search_items' => 'Search '.$plural,
+            'popular_items' => 'Popular '.$plural,
+            'separate_items_with_commas' => sprintf('Separate %s with commas', $plural),
+            'add_or_remove_items' => 'Add or remove '.$plural,
+            'choose_from_most_used' => 'Choose from the most used '.$plural,
+            'not_found' => sprintf('No %s found', $plural),
+            'parent_item' => 'Parent '.$singular,
+            'parent_item_colon' => sprintf('Parent %s:', $singular),
         ];
     }
 

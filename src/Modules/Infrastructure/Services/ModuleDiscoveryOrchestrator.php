@@ -42,9 +42,9 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
 
             $location = new DirectoryLocation($path);
             $engine->addLocation($location)->discover()->apply();
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for path {$path}: ".$e->getMessage());
+                error_log(sprintf('Discovery error for path %s: ', $path).$throwable->getMessage());
             }
         }
     }
@@ -65,9 +65,9 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
             $location = new DirectoryLocation($path);
 
             return $manager->discoverAllInLocation($location);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for path {$path}: ".$e->getMessage());
+                error_log(sprintf('Discovery error for path %s: ', $path).$throwable->getMessage());
             }
 
             return [];

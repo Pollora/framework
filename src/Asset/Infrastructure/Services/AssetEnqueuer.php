@@ -164,11 +164,13 @@ class AssetEnqueuer
         if ($this->consoleDetectionService->isConsole() || $this->consoleDetectionService->isWpCli()) {
             return $this;
         }
+
         $container = $this->assetManager->getContainer($containerName);
 
         if (! $container instanceof AssetContainer) {
-            throw new \RuntimeException("Asset container '{$containerName}' not found. Make sure you have added it via AssetManager::addContainer().");
+            throw new \RuntimeException(sprintf("Asset container '%s' not found. Make sure you have added it via AssetManager::addContainer().", $containerName));
         }
+
         $this->container = $container;
 
         return $this;
@@ -203,6 +205,7 @@ class AssetEnqueuer
         if (! $this->container instanceof AssetContainer) {
             throw new \RuntimeException("No asset container defined before useVite(). Use ->container('theme') before ->useVite().");
         }
+
         $this->useVite = true;
         $this->viteManager = new ViteManager($this->container);
 
@@ -371,10 +374,11 @@ class AssetEnqueuer
                 if ($this->needToLoadViteClient()) {
                     $this->loadViteClient($hook);
                 }
+
                 app(HookAction::class)->add($hook, $this->enqueueStyleOrScript(...), 99);
             }
-        } catch (\Throwable $e) {
-            Log::error('Error in AssetEnqueuer::__destruct', ['error' => $e->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
+        } catch (\Throwable $throwable) {
+            Log::error('Error in AssetEnqueuer::__destruct', ['error' => $throwable->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
         }
     }
 
@@ -474,7 +478,7 @@ class AssetEnqueuer
         match ($type) {
             'css' => $this->enqueueStyle($path, $handle),
             'js' => $this->enqueueScript($path, $handle),
-            default => throw new \InvalidArgumentException("Unsupported asset type: {$type}")
+            default => throw new \InvalidArgumentException('Unsupported asset type: '.$type)
         };
     }
 
@@ -494,9 +498,11 @@ class AssetEnqueuer
         if ($this->useVite) {
             $this->addViteScriptAttributes($handle);
         }
+
         if (! in_array($this->loadStrategy, [null, '', '0'], true)) {
             wp_script_add_data($handle, 'defer', true);
         }
+
         if (! in_array($this->inlineContent, [null, '', '0'], true)) {
             wp_add_inline_script($handle, $this->inlineContent, $this->inlinePosition);
         }
@@ -537,6 +543,7 @@ class AssetEnqueuer
         if (str_contains($path, '://')) {
             return $path;
         }
+
         $basePath = $this->container instanceof AssetContainer ? $this->container->getBasePath() : '';
         $fullPath = $basePath.'/'.ltrim($path, '/');
 
@@ -554,8 +561,8 @@ class AssetEnqueuer
     protected function determineFileType(string $path): string
     {
         $type = pathinfo($path, PATHINFO_EXTENSION);
-        if (! in_array($type, ['css', 'js'])) {
-            throw new \InvalidArgumentException("Unsupported file type: {$type}");
+        if (! in_array($type, ['css', 'js'], true)) {
+            throw new \InvalidArgumentException('Unsupported file type: '.$type);
         }
 
         return $type;

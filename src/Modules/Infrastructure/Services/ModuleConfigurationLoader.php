@@ -96,8 +96,8 @@ class ModuleConfigurationLoader
             if (is_array($configData)) {
                 $this->configRepository->set($configKey, $configData);
             }
-        } catch (\Throwable $e) {
-            error_log("Failed to load {$moduleType} config {$configFile}: ".$e->getMessage());
+        } catch (\Throwable $throwable) {
+            error_log(sprintf('Failed to load %s config %s: ', $moduleType, $configFile).$throwable->getMessage());
         }
     }
 
@@ -106,6 +106,6 @@ class ModuleConfigurationLoader
      */
     private function buildConfigKey(string $moduleType, string $key): string
     {
-        return "{$moduleType}.{$key}";
+        return sprintf('%s.%s', $moduleType, $key);
     }
 }

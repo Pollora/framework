@@ -61,11 +61,13 @@ class Bootstrap
             Constant::queue('WP_INSTALLING', true);
             Constant::apply();
         }
+
         if (! $this->consoleDetectionService->isConsole() && $this->isWordPressInstalled()) {
             $this->withWordPressErrorHandling(function (): void {
                 $this->runWp();
             });
         }
+
         $this->setupActionHooks();
     }
 
@@ -84,7 +86,7 @@ class Bootstrap
             }
 
             // Forward all other errors to the previous handler (Laravel's)
-            if ($previousHandler) {
+            if ($previousHandler !== null) {
                 return $previousHandler($level, $message, $file, $line);
             }
 

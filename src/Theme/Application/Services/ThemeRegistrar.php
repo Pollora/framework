@@ -103,8 +103,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             if ($repository instanceof ThemeRepository) {
                 $repository->resetCache();
             }
-        } catch (\Exception $e) {
-            $this->logError('Failed to invalidate theme repository cache: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to invalidate theme repository cache: '.$exception->getMessage());
         }
     }
 
@@ -125,8 +125,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             if ($appPath && is_dir($appPath)) {
                 $discoveryService->discover($appPath);
             }
-        } catch (\Exception $e) {
-            $this->logError("Theme discovery error for {$theme->getName()}: ".$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError(sprintf('Theme discovery error for %s: ', $theme->getName()).$exception->getMessage());
         }
     }
 
@@ -165,7 +165,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             ? $structure->getFqn()
             : 'unknown';
 
-        $this->logError("Discovered {$scoutType} in theme {$theme->getName()}: {$structureInfo}");
+        $this->logError(sprintf('Discovered %s in theme %s: %s', $scoutType, $theme->getName(), $structureInfo));
     }
 
     /**
@@ -228,8 +228,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
                 $theme->getPath(),
                 'theme'
             );
-        } catch (\Exception $e) {
-            $this->logError('Failed to load theme configuration: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to load theme configuration: '.$exception->getMessage());
         }
     }
 
@@ -261,8 +261,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             $componentManager->registerModuleComponents($moduleId, $themeComponents);
             $componentManager->initializeModuleComponents($moduleId);
-        } catch (\Exception $e) {
-            $this->logError('Failed to setup theme components: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to setup theme components: '.$exception->getMessage());
         }
     }
 
@@ -291,8 +291,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             // Register Blade directives
             $assetManager->registerModuleBladeDirectives($theme->getPath());
-        } catch (\Exception $e) {
-            $this->logError('Failed to setup theme assets: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to setup theme assets: '.$exception->getMessage());
         }
     }
 }

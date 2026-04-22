@@ -75,7 +75,7 @@ class PluginStatusCommand extends Command
             $plugin = $this->pluginManager->findPlugin($pluginName);
 
             if (! $plugin instanceof PluginModuleInterface) {
-                $this->error("Plugin '{$pluginName}' not found.");
+                $this->error(sprintf("Plugin '%s' not found.", $pluginName));
 
                 return self::FAILURE;
             }
@@ -92,8 +92,8 @@ class PluginStatusCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Exception $e) {
-            $this->error("Error retrieving plugin information: {$e->getMessage()}");
+        } catch (\Exception $exception) {
+            $this->error('Error retrieving plugin information: '.$exception->getMessage());
 
             return self::FAILURE;
         }
@@ -131,8 +131,8 @@ class PluginStatusCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Exception $e) {
-            $this->error("Error retrieving plugins: {$e->getMessage()}");
+        } catch (\Exception $exception) {
+            $this->error('Error retrieving plugins: '.$exception->getMessage());
 
             return self::FAILURE;
         }
@@ -173,7 +173,7 @@ class PluginStatusCommand extends Command
      */
     protected function displayPluginDetails(array $info): void
     {
-        $this->info("Plugin Details: {$info['name']}");
+        $this->info('Plugin Details: '.$info['name']);
         $this->newLine();
 
         $this->table(
@@ -213,9 +213,9 @@ class PluginStatusCommand extends Command
 
         $this->info('Plugin Summary');
         $this->newLine();
-        $this->line("Total Plugins: {$totalPlugins}");
-        $this->line("Active Plugins: {$activePlugins}");
-        $this->line("Enabled Plugins: {$enabledPlugins}");
+        $this->line('Total Plugins: '.$totalPlugins);
+        $this->line('Active Plugins: '.$activePlugins);
+        $this->line('Enabled Plugins: '.$enabledPlugins);
         $this->newLine();
     }
 
@@ -270,16 +270,16 @@ class PluginStatusCommand extends Command
             'enabled' => $plugin->isEnabled(),
         ]);
 
-        $this->line("<info>{$plugin->getName()}</info> <comment>v{$plugin->getVersion()}</comment>");
-        $this->line("Author: {$plugin->getAuthor()}");
-        $this->line("Status: {$status}");
-        $this->line("Description: {$plugin->getDescription()}");
+        $this->line(sprintf('<info>%s</info> <comment>v%s</comment>', $plugin->getName(), $plugin->getVersion()));
+        $this->line('Author: '.$plugin->getAuthor());
+        $this->line('Status: '.$status);
+        $this->line('Description: '.$plugin->getDescription());
 
         if ($plugin->getPluginUri()) {
-            $this->line("Plugin URI: {$plugin->getPluginUri()}");
+            $this->line('Plugin URI: '.$plugin->getPluginUri());
         }
 
-        $this->line("Path: {$plugin->getPath()}");
+        $this->line('Path: '.$plugin->getPath());
         $this->line(str_repeat('-', 60));
     }
 

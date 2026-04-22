@@ -219,9 +219,11 @@ class Route extends IlluminateRoute
                 if ($route === $this) {
                     continue;
                 }
+
                 if (method_exists($route, 'isWordPressRoute') && $route->isWordPressRoute()) {
                     continue;
                 }
+
                 // Check if this Laravel route matches the request
                 if ($route->matches($request, false)) {
                     return true;

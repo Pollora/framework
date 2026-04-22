@@ -49,10 +49,10 @@ class WordPressThemeAdapter implements WordPressThemeInterface
 
         try {
             return \register_theme_directory($sanitizedPath);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             // Log error if logging is available but don't break execution
             if ($this->isFunctionAvailable('error_log')) {
-                \error_log("Failed to register theme directory: {$e->getMessage()}");
+                \error_log('Failed to register theme directory: '.$throwable->getMessage());
             }
 
             return false;

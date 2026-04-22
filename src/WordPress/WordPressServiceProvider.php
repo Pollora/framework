@@ -40,6 +40,7 @@ class WordPressServiceProvider extends ServiceProvider
         $this->app->singleton(Bootstrap::class);
         $this->bootstrap = $this->app->make(Bootstrap::class);
         $this->bootstrap->register();
+
         $this->app->singleton(DatabaseService::class);
         $this->app->singleton(InstallationService::class);
         $this->app->singleton(LanguageService::class);

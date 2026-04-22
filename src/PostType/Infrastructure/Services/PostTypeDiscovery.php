@@ -34,7 +34,9 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, DiscoveryInterface
 {
-    use HasConfiguringSupport, HasInstancePool, IsDiscovery;
+    use HasConfiguringSupport;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Create a new PostType discovery service.
@@ -136,7 +138,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $this->processPostType($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other post types
-                error_log("Failed to register PostType from class {$className}: ".$e->getMessage());
+                error_log(sprintf('Failed to register PostType from class %s: ', $className).$e->getMessage());
             }
         }
     }
@@ -205,8 +207,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process PostType for class {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process PostType for class %s: ', $className).$reflectionException->getMessage());
         }
     }
 
@@ -252,8 +254,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process class-level attributes for {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
         }
 
         return $config;
@@ -279,8 +281,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process method-level attributes for {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
         }
 
         return $config;
@@ -359,7 +361,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
         } catch (\ReflectionException|\Throwable $e) {
             // Log the error but continue - additional args are optional
-            error_log("Failed to process additional args for {$className}: ".$e->getMessage());
+            error_log(sprintf('Failed to process additional args for %s: ', $className).$e->getMessage());
         }
     }
 
@@ -430,20 +432,20 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             'name' => $plural,
             'singular_name' => $singular,
             'add_new' => 'Add New',
-            'add_new_item' => "Add New {$singular}",
-            'edit_item' => "Edit {$singular}",
-            'new_item' => "New {$singular}",
-            'view_item' => "View {$singular}",
-            'view_items' => "View {$plural}",
-            'search_items' => "Search {$plural}",
-            'not_found' => "No {$plural} found",
-            'not_found_in_trash' => "No {$plural} found in Trash",
-            'parent_item_colon' => "Parent {$singular}:",
-            'all_items' => "All {$plural}",
-            'archives' => "{$singular} Archives",
-            'attributes' => "{$singular} Attributes",
-            'insert_into_item' => "Insert into {$singular}",
-            'uploaded_to_this_item' => "Uploaded to this {$singular}",
+            'add_new_item' => 'Add New '.$singular,
+            'edit_item' => 'Edit '.$singular,
+            'new_item' => 'New '.$singular,
+            'view_item' => 'View '.$singular,
+            'view_items' => 'View '.$plural,
+            'search_items' => 'Search '.$plural,
+            'not_found' => sprintf('No %s found', $plural),
+            'not_found_in_trash' => sprintf('No %s found in Trash', $plural),
+            'parent_item_colon' => sprintf('Parent %s:', $singular),
+            'all_items' => 'All '.$plural,
+            'archives' => $singular.' Archives',
+            'attributes' => $singular.' Attributes',
+            'insert_into_item' => 'Insert into '.$singular,
+            'uploaded_to_this_item' => 'Uploaded to this '.$singular,
         ];
     }
 

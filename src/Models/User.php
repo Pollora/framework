@@ -24,7 +24,8 @@ use Watson\Rememberable\Rememberable;
  */
 class User extends \Pollora\Colt\Model\User implements AuthenticatableContract
 {
-    use Authenticatable, Rememberable;
+    use Authenticatable;
+    use Rememberable;
 
     /**
      * Convert the User instance to a WP_User object.

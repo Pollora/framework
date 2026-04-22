@@ -157,7 +157,7 @@ trait HasThemeSupport
         $themePath = $this->getThemePath($theme);
 
         if (! is_dir($themePath)) {
-            throw new InvalidArgumentException("Theme directory not found: {$themePath}");
+            throw new InvalidArgumentException('Theme directory not found: '.$themePath);
         }
 
         return [
