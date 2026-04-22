@@ -39,7 +39,7 @@ class HookServiceProvider extends ServiceProvider
     public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
-        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+        $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
     }
 
     /**

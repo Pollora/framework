@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Events\WordPress\Installer;
 
+use Illuminate\Support\Facades\Request;
 use Pollora\Events\WordPress\AbstractEventDispatcher;
 use Pollora\Events\WordPress\Installer\Plugin\PluginActivated;
 use Pollora\Events\WordPress\Installer\Plugin\PluginDeactivated;
@@ -216,7 +217,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         }
 
         // Determine the input type (GET or POST)
-        $type = isset($_POST['action2']) ? INPUT_POST : INPUT_GET;
+        $type = Request::post('action2') !== null ? INPUT_POST : INPUT_GET;
 
         // Get the plugins that are being deleted
         $plugins = filter_input($type, 'checked', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);

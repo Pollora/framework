@@ -46,7 +46,7 @@ class AssetManager
      */
     public function add(string $handle, string $file): AssetEnqueuer
     {
-        return app(AssetEnqueuer::class)
+        return resolve(AssetEnqueuer::class)
             ->handle($handle)
             ->path($file);
     }

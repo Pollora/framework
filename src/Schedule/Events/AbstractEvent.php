@@ -100,7 +100,7 @@ abstract class AbstractEvent implements EventInterface, ShouldQueue
     public static function createJob(object $event): self
     {
         $job = new static($event);
-        $dispatcher = app(JobDispatcher::class);
+        $dispatcher = resolve(JobDispatcher::class);
         $jobId = $dispatcher->dispatch($job);
         $job->saveToDatabase($jobId);
 

@@ -111,7 +111,7 @@ class RouteServiceProvider extends ServiceProvider
             }
 
             // Get the router instance to resolve condition aliases
-            $router = app('router');
+            $router = resolve('router');
             $resolvedCondition = $router->resolveCondition($condition);
 
             // Create a unique URI for the route

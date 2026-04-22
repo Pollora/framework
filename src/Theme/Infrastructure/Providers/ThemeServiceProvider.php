@@ -402,7 +402,7 @@ class ThemeServiceProvider extends ServiceProvider
 
         Blade::if('theme', function (string $name) {
             /** @var ThemeService $themeManager */
-            $themeManager = app(ThemeService::class);
+            $themeManager = resolve(ThemeService::class);
 
             return $themeManager->hasTheme($name);
         });

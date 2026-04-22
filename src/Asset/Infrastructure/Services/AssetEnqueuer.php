@@ -375,7 +375,7 @@ class AssetEnqueuer
                     $this->loadViteClient($hook);
                 }
 
-                app(HookAction::class)->add($hook, $this->enqueueStyleOrScript(...), 99);
+                resolve(HookAction::class)->add($hook, $this->enqueueStyleOrScript(...), 99);
             }
         } catch (\Throwable $throwable) {
             Log::error('Error in AssetEnqueuer::__destruct', ['error' => $throwable->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
@@ -415,7 +415,7 @@ class AssetEnqueuer
      */
     protected function loadViteClient(string $hook): void
     {
-        app(HookAction::class)->add($hook, function (): void {
+        resolve(HookAction::class)->add($hook, function (): void {
             if ($this->viteManager && $this->viteManager->isRunningHot()) {
                 echo $this->viteManager->getViteClientHtml();
             }
@@ -527,7 +527,7 @@ class AssetEnqueuer
      */
     protected function addViteScriptAttributes(string $handle): void
     {
-        app(HookFilter::class)->add('script_loader_tag', fn ($tag, $scriptHandle, $src) => $scriptHandle === $handle
+        resolve(HookFilter::class)->add('script_loader_tag', fn ($tag, $scriptHandle, $src) => $scriptHandle === $handle
             ? '<script type="module" crossorigin src="'.esc_url($src).'"></script>'
             : $tag, 10, 3);
     }

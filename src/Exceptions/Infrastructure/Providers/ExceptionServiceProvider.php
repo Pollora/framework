@@ -59,7 +59,7 @@ class ExceptionServiceProvider extends ServiceProvider
      */
     protected function registerErrorViewResolver(): void
     {
-        $this->app->singleton(ModuleAwareErrorViewResolver::class, function ($app): ModuleAwareErrorViewResolver {
+        $this->app->singleton(function ($app): ModuleAwareErrorViewResolver {
             /** @var Factory $viewFactory */
             $viewFactory = $app->make('view');
 

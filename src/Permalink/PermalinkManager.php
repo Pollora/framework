@@ -86,6 +86,6 @@ class PermalinkManager
             }
         }
 
-        return app(Uri::class)->removeTrailingSlash($canonicalUrl);
+        return resolve(Uri::class)->removeTrailingSlash($canonicalUrl);
     }
 }

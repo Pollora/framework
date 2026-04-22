@@ -20,7 +20,7 @@ if (! function_exists('pollora_discover_module')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($modulePath);
         } catch (Exception $exception) {
@@ -48,7 +48,7 @@ if (! function_exists('pollora_discover_theme')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($themePath);
         } catch (Exception $exception) {
@@ -76,7 +76,7 @@ if (! function_exists('pollora_discover_plugin')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($pluginPath);
         } catch (Exception $exception) {
@@ -104,7 +104,7 @@ if (! function_exists('pollora_discover_in_path')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($path);
         } catch (Exception $exception) {
@@ -131,7 +131,7 @@ if (! function_exists('pollora_discover_all_in_path')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($path);
         } catch (Exception $exception) {
@@ -171,7 +171,7 @@ if (! function_exists('pollora_debug_route_registration')) {
 
         try {
             /** @var Router $router */
-            $router = app('router');
+            $router = resolve('router');
             $routes = $router->getRoutes();
 
             $debug['routes_count'] = $routes->count();
@@ -219,7 +219,7 @@ if (! function_exists('pollora_list_module_routes')) {
 
         try {
             /** @var Router $router */
-            $router = app('router');
+            $router = resolve('router');
             $routes = $router->getRoutes();
 
             foreach ($routes as $route) {

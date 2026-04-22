@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\WordPress;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
@@ -25,7 +26,7 @@ class WordPressServiceProvider extends ServiceProvider
     public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
-        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+        $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
     }
 
     /**
@@ -83,7 +84,7 @@ class WordPressServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $_SERVER['X_FORWARDED_PROTO'] ?? null;
+        $forwardedProto = Request::server('HTTP_X_FORWARDED_PROTO') ?? Request::server('X_FORWARDED_PROTO') ?? null;
 
         if ($forwardedProto) {
             $this->setHttpsBasedOnProxy($forwardedProto);

@@ -50,7 +50,7 @@ class ViewServiceProvider extends ViewServiceProviderBase
             $view = $this->getName();
             $path = $this->getPath();
             $id = md5($this->getCompiled());
-            $compiled_path = app('config')['view.compiled'];
+            $compiled_path = resolve('config')['view.compiled'];
 
             $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", $view)
                 ."\n<?php /**PATH {$path} ENDPATH**/ ?>";
