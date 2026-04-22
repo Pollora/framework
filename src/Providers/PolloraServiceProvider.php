@@ -38,6 +38,7 @@ use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
 use Pollora\ThirdParty\WpRocket\WpRocketServiceProvider;
+use Pollora\VersionCheck\Infrastructure\Providers\VersionCheckServiceProvider;
 use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
 use Pollora\View\ViewServiceProvider;
 use Pollora\WordPress\Config\ConstantServiceProvider;
@@ -130,6 +131,9 @@ class PolloraServiceProvider extends ServiceProvider
         // Hashing service provider
         $this->app->register(HashServiceProvider::class);
         $this->app->register(WordPressServiceProvider::class);
+
+        // Version check notifications
+        $this->app->register(VersionCheckServiceProvider::class);
     }
 
     /**
