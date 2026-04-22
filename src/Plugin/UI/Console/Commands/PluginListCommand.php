@@ -7,6 +7,7 @@ namespace Pollora\Plugin\UI\Console\Commands;
 use Illuminate\Console\Command;
 use Pollora\Plugin\Application\Services\PluginManager;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
+use Pollora\Plugin\Domain\Support\PluginCollection;
 
 /**
  * Command to list all available plugins.
@@ -110,8 +111,8 @@ class PluginListCommand extends Command
     /**
      * Apply filters to the plugin collection.
      *
-     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
-     * @return \Pollora\Plugin\Domain\Support\PluginCollection Filtered collection
+     * @param  PluginCollection  $collection  Plugin collection
+     * @return PluginCollection Filtered collection
      */
     protected function applyFilters($collection)
     {
@@ -145,9 +146,9 @@ class PluginListCommand extends Command
     /**
      * Apply search to the plugin collection.
      *
-     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
+     * @param  PluginCollection  $collection  Plugin collection
      * @param  string  $search  Search term
-     * @return \Pollora\Plugin\Domain\Support\PluginCollection Filtered collection
+     * @return PluginCollection Filtered collection
      */
     protected function applySearch($collection, string $search)
     {
@@ -163,8 +164,8 @@ class PluginListCommand extends Command
     /**
      * Apply sorting to the plugin collection.
      *
-     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
-     * @return \Pollora\Plugin\Domain\Support\PluginCollection Sorted collection
+     * @param  PluginCollection  $collection  Plugin collection
+     * @return PluginCollection Sorted collection
      */
     protected function applySorting($collection)
     {

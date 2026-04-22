@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Routing\Router;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
 if (! function_exists('pollora_discover_module')) {
@@ -169,7 +170,7 @@ if (! function_exists('pollora_debug_route_registration')) {
         }
 
         try {
-            /** @var \Illuminate\Routing\Router $router */
+            /** @var Router $router */
             $router = app('router');
             $routes = $router->getRoutes();
 
@@ -194,7 +195,7 @@ if (! function_exists('pollora_debug_route_registration')) {
                 }
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $debug['error'] = $e->getMessage();
         }
 
@@ -217,7 +218,7 @@ if (! function_exists('pollora_list_module_routes')) {
         }
 
         try {
-            /** @var \Illuminate\Routing\Router $router */
+            /** @var Router $router */
             $router = app('router');
             $routes = $router->getRoutes();
 
@@ -240,7 +241,7 @@ if (! function_exists('pollora_list_module_routes')) {
                 }
             }
 
-        } catch (\Exception) {
+        } catch (Exception) {
             // Silently fail
         }
 

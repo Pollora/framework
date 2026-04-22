@@ -116,7 +116,7 @@ test('router adds WordPress bindings to routes', function () {
     $router = $setup['router'];
 
     // Create a route with a closure that has WordPress dependencies
-    $route = new Route(['GET'], 'test', function (\WP_Post $post) {
+    $route = new Route(['GET'], 'test', function (WP_Post $post) {
         return 'test';
     });
 

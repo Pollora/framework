@@ -59,7 +59,7 @@ class HookServiceProvider extends ServiceProvider
         $this->app->bind(FilterContract::class, Filter::class);
 
         // Register Hook Discovery
-        $this->app->singleton(HookDiscovery::class, fn ($app): \Pollora\Hook\Infrastructure\Services\HookDiscovery => new HookDiscovery(
+        $this->app->singleton(HookDiscovery::class, fn ($app): HookDiscovery => new HookDiscovery(
             $app->make(ActionContract::class),
             $app->make(FilterContract::class)
         ));

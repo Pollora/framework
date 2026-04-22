@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\View;
 
+use Illuminate\Contracts\View\Engine;
 use Illuminate\View\Engines\CompilerEngine;
 use Illuminate\View\View;
 use Illuminate\View\ViewServiceProvider as ViewServiceProviderBase;
@@ -32,7 +33,7 @@ class ViewServiceProvider extends ViewServiceProviderBase
             /** @var string $file path to file */
             $file = $this->getPath();
 
-            /** @var \Illuminate\Contracts\View\Engine $engine */
+            /** @var Engine $engine */
             $engine = $this->getEngine();
 
             return ($engine instanceof CompilerEngine)

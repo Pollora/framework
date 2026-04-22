@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Pollora\Taxonomy\Application\Services\TaxonomyService;
 
 return [
     /*
@@ -24,5 +25,5 @@ return [
     | with your own implementation if needed.
     |
     */
-    'provider' => \Pollora\Taxonomy\Application\Services\TaxonomyService::class,
+    'provider' => TaxonomyService::class,
 ];

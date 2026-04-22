@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Discovery\Domain\Services;
 
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
+use Pollora\Entity\Application\Service\EntityRegistrationService;
+
 /**
  * Trait providing support for the configuring lifecycle hook.
  *
@@ -28,10 +31,10 @@ trait HasConfiguringSupport
      * @param  string|null  $plural  The plural name
      * @param  array  $args  Additional arguments
      * @param  int  $priority  Declaration priority
-     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      * @return object|null The entity if configuring was called, null otherwise
      */
-    protected function processConfiguring(string $className, string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): ?object
+    protected function processConfiguring(string $className, string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5, ?ReflectionCacheInterface $reflectionCache = null): ?object
     {
         try {
             $reflectionClass = $reflectionCache->getClassReflection($className);
@@ -98,7 +101,7 @@ trait HasConfiguringSupport
     protected function registerEntity(object $entity, string $registryClass): void
     {
         $registry = new $registryClass;
-        $registrationService = new \Pollora\Entity\Application\Service\EntityRegistrationService($registry);
+        $registrationService = new EntityRegistrationService($registry);
         $registrationService->registerEntity($entity);
     }
 }

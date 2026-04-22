@@ -8,11 +8,13 @@ use Pollora\Attributes\Action;
 use Pollora\Attributes\Filter;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
 use ReflectionMethod;
+use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
@@ -44,10 +46,10 @@ final class HookDiscovery implements DiscoveryInterface
      * Discovers methods with Action and Filter attributes and collects them for registration.
      * Only processes public methods that have hook attributes.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
-        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof DiscoveredClass) {
             return;
         }
 

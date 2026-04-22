@@ -16,7 +16,7 @@ use Pollora\Admin\Page;
  * @method static Page addPage(string $pageTitle, string $menuTitle, string $capability, string $slug, mixed $action, string $iconUrl = '', ?int $position = null) Add a top-level admin page
  * @method static Page addSubPage(string $parent, string $pageTitle, string $menuTitle, string $capability, string $slug, mixed $action) Add a sub-level admin page
  *
- * @see \Pollora\Admin\Page
+ * @see Page
  */
 class AdminPage extends Facade
 {

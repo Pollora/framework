@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Theme;
 
 use PHPUnit\Framework\TestCase;
+use Pollora\Theme\Application\Services\ThemeRegistrar;
 
 /**
  * Integration test for the theme self-registration system.
@@ -18,7 +19,7 @@ class SelfRegistrationTest extends TestCase
     public function test_theme_registrar_exists(): void
     {
         // This is a placeholder test to ensure the test class doesn't fail completely
-        $this->assertTrue(class_exists(\Pollora\Theme\Application\Services\ThemeRegistrar::class));
+        $this->assertTrue(class_exists(ThemeRegistrar::class));
     }
 
     public function test_skip_wordpress_dependent_tests(): void

@@ -9,13 +9,16 @@ use Pollora\Attributes\PostType;
 use Pollora\Discovery\Domain\Contracts\ConfigurableDiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\HasConfiguringSupport;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Entity\Adapter\Out\WordPress\PostTypeRegistryAdapter;
 use Pollora\Entity\Domain\Model\PostType as EntityPostType;
 use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
@@ -45,7 +48,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
     /**
      * {@inheritDoc}
      */
-    public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): \Pollora\Entity\Domain\Model\PostType
+    public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): EntityPostType
     {
         // Generate singular name if not provided
         if ($singular === null) {
@@ -76,10 +79,10 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * Discovers classes with PostType attributes and collects them for registration.
      * Only processes classes that have the PostType attribute and are instantiable.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
-        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof DiscoveredClass) {
             return;
         }
 
@@ -148,9 +151,9 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * 4. Registering the final post type through the service
      *
      * @param  string  $className  The fully qualified class name
-     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processPostType(string $className, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    private function processPostType(string $className, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
             $reflectionClass = $reflectionCache->getClassReflection($className);
@@ -190,7 +193,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             // If configuring was called and returned an entity, apply attribute configurations and register
             if ($configuredEntity !== null) {
                 $this->applySmartMerge($configuredEntity, $config->getArgs());
-                $this->registerEntity($configuredEntity, \Pollora\Entity\Adapter\Out\WordPress\PostTypeRegistryAdapter::class);
+                $this->registerEntity($configuredEntity, PostTypeRegistryAdapter::class);
             } else {
                 // Register the post type using the original service
                 $this->postTypeService->register(
@@ -334,9 +337,9 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      *
      * @param  string  $className  The class name to process
      * @param  PostTypeConfiguration  $config  The current configuration
-     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processAdditionalArgs(string $className, PostTypeConfiguration $config, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    private function processAdditionalArgs(string $className, PostTypeConfiguration $config, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
             $reflectionClass = $reflectionCache->getClassReflection($className);

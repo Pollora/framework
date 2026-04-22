@@ -158,7 +158,7 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function has(string $name): bool
     {
-        return $this->find($name) instanceof \Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
+        return $this->find($name) instanceof PluginModuleInterface;
     }
 
     /**

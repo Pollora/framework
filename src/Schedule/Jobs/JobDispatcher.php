@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Schedule\Jobs;
 
+use Illuminate\Contracts\Bus\Dispatcher;
 use Pollora\Schedule\Contracts\JobDispatcherInterface;
 
 /**
@@ -19,9 +20,9 @@ class JobDispatcher implements JobDispatcherInterface
     /**
      * Create a new job dispatcher instance.
      *
-     * @param  \Illuminate\Contracts\Bus\Dispatcher  $dispatcher  Laravel job dispatcher
+     * @param  Dispatcher  $dispatcher  Laravel job dispatcher
      */
-    public function __construct(protected \Illuminate\Contracts\Bus\Dispatcher $dispatcher) {}
+    public function __construct(protected Dispatcher $dispatcher) {}
 
     /**
      * Dispatch a job to the queue.

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Pollora\Discovery\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
+use Pollora\Discovery\Domain\Models\DirectoryLocation;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryEngine;
 use Pollora\Discovery\Infrastructure\Services\InstancePool;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
@@ -81,7 +83,7 @@ final class DiscoveryServiceProvider extends ServiceProvider
     {
         $this->app->singleton(DiscoveryEngineInterface::class, fn ($app): DiscoveryEngine => new DiscoveryEngine(
             container: $app,
-            debugDetector: $app->make(\Pollora\Application\Domain\Contracts\DebugDetectorInterface::class),
+            debugDetector: $app->make(DebugDetectorInterface::class),
             reflectionCache: $app->make(ReflectionCacheInterface::class),
             instancePool: $app->make(InstancePool::class)
         ));
@@ -92,7 +94,7 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     private function registerDiscoveryManager(): void
     {
-        $this->app->singleton(DiscoveryManager::class, fn ($app): \Pollora\Discovery\Application\Services\DiscoveryManager => new DiscoveryManager(
+        $this->app->singleton(DiscoveryManager::class, fn ($app): DiscoveryManager => new DiscoveryManager(
             engine: $app->make(DiscoveryEngineInterface::class)
         ));
     }
@@ -150,6 +152,6 @@ final class DiscoveryServiceProvider extends ServiceProvider
             return;
         }
 
-        $engine->addLocation(new \Pollora\Discovery\Domain\Models\DirectoryLocation($appPath));
+        $engine->addLocation(new DirectoryLocation($appPath));
     }
 }

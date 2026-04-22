@@ -67,7 +67,7 @@ class ModuleCollection extends Collection
      */
     public function hasByName(string $name): bool
     {
-        return $this->findByName($name) instanceof \Pollora\Modules\Domain\Contracts\ModuleInterface;
+        return $this->findByName($name) instanceof ModuleInterface;
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Services\WordPress\Database;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -22,7 +23,7 @@ class EnvironmentFileHandler
      *
      * @param  array<string, string>  $replacements  Key-value pairs of environment variables to update
      *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException When neither .env nor .env.example exists
+     * @throws FileNotFoundException When neither .env nor .env.example exists
      */
     public function updateEnvFile(array $replacements): void
     {

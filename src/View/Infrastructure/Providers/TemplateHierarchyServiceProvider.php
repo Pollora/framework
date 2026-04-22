@@ -50,13 +50,13 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
         $this->app->singleton(Filesystem::class);
 
         // Template Finder Interface
-        $this->app->bind(TemplateFinderInterface::class, fn ($app): \Pollora\View\Infrastructure\Services\FileSystemTemplateFinder => new FileSystemTemplateFinder(
+        $this->app->bind(TemplateFinderInterface::class, fn ($app): FileSystemTemplateFinder => new FileSystemTemplateFinder(
             $app->get('view')->getFinder(),
             $app->make(Filesystem::class)
         ));
 
         // Template Hierarchy Filter Interface
-        $this->app->bind(TemplateHierarchyFilterInterface::class, fn ($app): \Pollora\View\Infrastructure\Services\WordPressTemplateHierarchyFilter => new WordPressTemplateHierarchyFilter(
+        $this->app->bind(TemplateHierarchyFilterInterface::class, fn ($app): WordPressTemplateHierarchyFilter => new WordPressTemplateHierarchyFilter(
             $app->make(TemplateFinderInterface::class),
             $app->make(ResolveBladeTemplateUseCase::class),
             $app->make(Filesystem::class)
@@ -69,13 +69,13 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
     private function registerUseCases(): void
     {
         // Resolve Blade Template Use Case
-        $this->app->bind(ResolveBladeTemplateUseCase::class, fn ($app): \Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase => new ResolveBladeTemplateUseCase(
+        $this->app->bind(ResolveBladeTemplateUseCase::class, fn ($app): ResolveBladeTemplateUseCase => new ResolveBladeTemplateUseCase(
             $app->make(TemplateFinderInterface::class),
             $app->get('view')
         ));
 
         // Register Template Hierarchy Filters Use Case
-        $this->app->bind(RegisterTemplateHierarchyFiltersUseCase::class, fn ($app): \Pollora\View\Application\UseCases\RegisterTemplateHierarchyFiltersUseCase => new RegisterTemplateHierarchyFiltersUseCase(
+        $this->app->bind(RegisterTemplateHierarchyFiltersUseCase::class, fn ($app): RegisterTemplateHierarchyFiltersUseCase => new RegisterTemplateHierarchyFiltersUseCase(
             $app->make(Filter::class),
             $app->make(TemplateHierarchyFilterInterface::class)
         ));
@@ -87,7 +87,7 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
     private function registerApplicationServices(): void
     {
         // Main Template Hierarchy Service
-        $this->app->singleton(TemplateHierarchyService::class, fn ($app): \Pollora\View\Application\Services\TemplateHierarchyService => new TemplateHierarchyService(
+        $this->app->singleton(TemplateHierarchyService::class, fn ($app): TemplateHierarchyService => new TemplateHierarchyService(
             $app->make(RegisterTemplateHierarchyFiltersUseCase::class)
         ));
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Route\Infrastructure\Services;
 
+use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +27,7 @@ class ExtendedRouterTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
 
         // Mock config
-        $config = $this->createMock(\Illuminate\Config\Repository::class);
+        $config = $this->createMock(Repository::class);
         $config->method('get')
             ->willReturnCallback(function ($key, $default = null) {
                 if ($key === 'wordpress.conditions') {

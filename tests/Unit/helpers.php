@@ -1,6 +1,13 @@
 <?php
 
 declare(strict_types=1);
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\Response;
+use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
+use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class WP
 {
@@ -350,11 +357,11 @@ if (! function_exists('app')) {
      * Get the available container instance.
      *
      * @param  string|null  $abstract
-     * @return mixed|\Illuminate\Contracts\Foundation\Application
+     * @return mixed|Application
      */
     function app($abstract = null, array $parameters = [])
     {
-        $app = \Illuminate\Container\Container::getInstance();
+        $app = Container::getInstance();
 
         if (is_null($abstract)) {
             return $app;
@@ -605,7 +612,7 @@ if (! function_exists('translate_with_gettext_context')) {
 if (! function_exists('abort')) {
     function abort($code, $message = '')
     {
-        throw new \Symfony\Component\HttpKernel\Exception\HttpException($code, $message);
+        throw new HttpException($code, $message);
     }
 }
 
@@ -1098,16 +1105,16 @@ if (! class_exists('WP_Screen')) {
 if (! function_exists('response')) {
     function response($content = '', $status = 200, array $headers = [])
     {
-        return new \Illuminate\Http\Response($content, $status, $headers);
+        return new Response($content, $status, $headers);
     }
 }
 
 /**
  * Create a real Template instance for testing since it's a readonly final class.
  */
-function createTestTemplate(string $path = '/test/template.php', bool $isBladeTemplate = false): \Pollora\ThirdParty\WooCommerce\Domain\Models\Template
+function createTestTemplate(string $path = '/test/template.php', bool $isBladeTemplate = false): Template
 {
-    return new \Pollora\ThirdParty\WooCommerce\Domain\Models\Template($path, basename($path, '.php'), $isBladeTemplate);
+    return new Template($path, basename($path, '.php'), $isBladeTemplate);
 }
 
 /**
@@ -1115,7 +1122,7 @@ function createTestTemplate(string $path = '/test/template.php', bool $isBladeTe
  */
 function createMockWooCommerceService(array $templates = []): object
 {
-    $service = Mockery::mock(\Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService::class);
+    $service = Mockery::mock(WooCommerceService::class);
 
     // Setup default behaviors
     $service->shouldReceive('getAllTemplatePaths')
@@ -1146,7 +1153,7 @@ function createMockWooCommerceService(array $templates = []): object
  */
 function createMockWooCommerceAdapter(): object
 {
-    $adapter = Mockery::mock(\Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter::class);
+    $adapter = Mockery::mock(WordPressWooCommerceAdapter::class);
 
     // Setup default behaviors
     $adapter->shouldReceive('isAdmin')

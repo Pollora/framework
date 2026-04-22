@@ -46,7 +46,7 @@ class AssetManager
      */
     public function add(string $handle, string $file): AssetEnqueuer
     {
-        return app(\Pollora\Asset\Infrastructure\Services\AssetEnqueuer::class)
+        return app(AssetEnqueuer::class)
             ->handle($handle)
             ->path($file);
     }

@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 use Tests\TestCase;
 
-#[CoversClass(\Pollora\Route\Infrastructure\Services\WordPressConditionManager::class)]
+#[CoversClass(WordPressConditionManager::class)]
 class WordPressConditionManagerTest extends TestCase
 {
     private WordPressConditionManager $manager;

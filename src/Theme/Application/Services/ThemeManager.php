@@ -151,7 +151,7 @@ class ThemeManager implements ThemeService
             $this->parentThemes[] = $currentTheme;
         }
 
-        if ($this->localeLoader instanceof \Illuminate\Contracts\Translation\Loader) {
+        if ($this->localeLoader instanceof Loader) {
             $this->localeLoader->addNamespace($themeName, $baseTheme->getLanguagePath());
         }
     }
@@ -285,7 +285,7 @@ class ThemeManager implements ThemeService
      */
     public function findTheme(string $name): ?ThemeModuleInterface
     {
-        if (! $this->repository instanceof \Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface) {
+        if (! $this->repository instanceof ModuleRepositoryInterface) {
             return null;
         }
 
@@ -325,7 +325,7 @@ class ThemeManager implements ThemeService
     {
         $theme = $this->findTheme($name);
 
-        if (! $theme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
+        if (! $theme instanceof ThemeModuleInterface) {
             throw ThemeException::notFound($name);
         }
 
@@ -378,7 +378,7 @@ class ThemeManager implements ThemeService
     {
         $theme = $this->findTheme($name);
 
-        if (! $theme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
+        if (! $theme instanceof ThemeModuleInterface) {
             return [
                 'valid' => false,
                 'errors' => ['Theme not found'],

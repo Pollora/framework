@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Coduo\PHPHumanizer\StringHumanizer;
 use Illuminate\Support\Str;
 use Pollora\Support\RecursiveMenuIterator;
 
@@ -57,7 +58,7 @@ if (! function_exists('humanize_class_name')) {
         $className = class_basename($className);
 
         // Convert from camelCase or PascalCase to words with spaces
-        $humanized = \Coduo\PHPHumanizer\StringHumanizer::humanize(
+        $humanized = StringHumanizer::humanize(
             Str::snake($className)
         );
 

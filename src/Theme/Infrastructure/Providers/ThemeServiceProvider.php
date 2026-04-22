@@ -170,10 +170,10 @@ class ThemeServiceProvider extends ServiceProvider
     private function registerCoreServices(): void
     {
         // Domain container adapter - bridges domain and Laravel container
-        $this->app->singleton(ContainerInterface::class, fn ($app): \Pollora\Theme\Domain\Contracts\ContainerInterface => $this->createDomainContainer($app));
+        $this->app->singleton(ContainerInterface::class, fn ($app): ContainerInterface => $this->createDomainContainer($app));
 
         // Theme registrar for self-registration pattern
-        $this->app->singleton(ThemeRegistrarInterface::class, fn ($app): \Pollora\Theme\Application\Services\ThemeRegistrar => new ThemeRegistrar(
+        $this->app->singleton(ThemeRegistrarInterface::class, fn ($app): ThemeRegistrar => new ThemeRegistrar(
             $app->make(ContainerInterface::class),
             $app->make(WordPressThemeParser::class)
         ));
@@ -182,7 +182,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(ThemeAutoloader::class);
 
         // Main theme service - implements domain interface
-        $this->app->singleton(ThemeService::class, fn ($app): \Pollora\Theme\Application\Services\ThemeManager => new ThemeManager(
+        $this->app->singleton(ThemeService::class, fn ($app): ThemeManager => new ThemeManager(
             $app,
             $app->get('view')->getFinder(),
             $app->make('translator')->getLoader(),
@@ -205,7 +205,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressThemeParser::class);
 
         // Deprecated theme repository - kept for backward compatibility only
-        $this->app->singleton('theme.repository', fn ($app): \Pollora\Theme\Infrastructure\Repositories\ThemeRepository => new ThemeRepository(
+        $this->app->singleton('theme.repository', fn ($app): ThemeRepository => new ThemeRepository(
             $app,
             $app->make(WordPressThemeParser::class),
             $app->make(CollectionFactoryInterface::class)
@@ -396,7 +396,7 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function registerBladeDirectives(): void
     {
-        if (! class_exists(\Illuminate\Support\Facades\Blade::class)) {
+        if (! class_exists(Blade::class)) {
             return;
         }
 
@@ -427,9 +427,9 @@ class ThemeServiceProvider extends ServiceProvider
     private function registerCommands(): void
     {
         $commands = [
-            'theme.generator' => fn ($app): \Pollora\Theme\UI\Console\MakeThemeCommand => new MakeThemeCommand($app->make('config'), $app->make('files')),
-            'theme.remover' => fn ($app): \Pollora\Theme\UI\Console\RemoveThemeCommand => new RemoveThemeCommand($app->make('config'), $app->make('files')),
-            'theme.status' => fn ($app): \Pollora\Theme\UI\Console\Commands\ThemeStatusCommand => new ThemeStatusCommand,
+            'theme.generator' => fn ($app): MakeThemeCommand => new MakeThemeCommand($app->make('config'), $app->make('files')),
+            'theme.remover' => fn ($app): RemoveThemeCommand => new RemoveThemeCommand($app->make('config'), $app->make('files')),
+            'theme.status' => fn ($app): ThemeStatusCommand => new ThemeStatusCommand,
         ];
 
         foreach ($commands as $name => $factory) {

@@ -6,6 +6,7 @@ namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Container\Container;
 use Nwidart\Modules\Contracts\RepositoryInterface;
+use Nwidart\Modules\Module;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
@@ -141,7 +142,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
      */
     protected function isLaravelModulesAvailable(): bool
     {
-        return interface_exists(\Nwidart\Modules\Contracts\RepositoryInterface::class) &&
+        return interface_exists(RepositoryInterface::class) &&
                $this->container->bound('modules');
     }
 
@@ -167,7 +168,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
     /**
      * Find a specific Laravel module by name.
      */
-    protected function findModule(string $name): ?\Nwidart\Modules\Module
+    protected function findModule(string $name): ?Module
     {
         try {
             /** @var RepositoryInterface $repository */

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\UI\Console\Commands;
 
 use Illuminate\Console\Command;
+use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 
@@ -48,7 +49,7 @@ class ThemeStatusCommand extends Command
     {
         $registeredTheme = $registrar->getActiveTheme();
 
-        if ($registeredTheme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
+        if ($registeredTheme instanceof ThemeModuleInterface) {
             $this->info('✓ Self-registered theme found:');
             $this->line("  Name: {$registeredTheme->getName()}");
             $this->line("  Path: {$registeredTheme->getPath()}");

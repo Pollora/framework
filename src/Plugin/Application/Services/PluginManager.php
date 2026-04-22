@@ -112,7 +112,7 @@ class PluginManager
 
         $plugin->loadConfiguration();
 
-        if ($this->localeLoader instanceof \Illuminate\Contracts\Translation\Translator) {
+        if ($this->localeLoader instanceof Translator) {
             $this->localeLoader->addNamespace($pluginName, $plugin->getLanguagePath());
         }
     }
@@ -291,7 +291,7 @@ class PluginManager
      */
     public function findPlugin(string $name): ?PluginModuleInterface
     {
-        if (! $this->repository instanceof \Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface) {
+        if (! $this->repository instanceof ModuleRepositoryInterface) {
             return null;
         }
 

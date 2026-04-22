@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Schedule;
 
+use Cron\CronExpression;
 use Illuminate\Support\Facades\DB;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Events\AbstractEvent;
@@ -364,7 +365,7 @@ class Scheduler implements SchedulerInterface
     protected function getNextRunTime(string $schedule, ?int $interval): int
     {
         $cron = RecurringEvent::getCronExpression($schedule, $interval);
-        $cron = new \Cron\CronExpression($cron);
+        $cron = new CronExpression($cron);
 
         return $cron->getNextRunDate()->getTimestamp();
     }

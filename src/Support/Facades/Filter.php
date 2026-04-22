@@ -18,7 +18,7 @@ use Pollora\Hook\Hook;
  * @method static bool exists(string $hook) Check if a filter exists
  * @method static Hook|false remove(string $hook, \Closure|string $callback, int $priority = 10) Remove a filter hook
  *
- * @see \Pollora\Hook\Hook
+ * @see Hook
  */
 class Filter extends Facade
 {

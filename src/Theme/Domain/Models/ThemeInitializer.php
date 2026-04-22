@@ -10,6 +10,7 @@ use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
@@ -69,15 +70,15 @@ class ThemeInitializer implements ThemeComponent
      */
     protected function getThemeService(): ThemeService
     {
-        if (! $this->themeService instanceof \Pollora\Theme\Domain\Contracts\ThemeService) {
+        if (! $this->themeService instanceof ThemeService) {
             $this->themeService = $this->app->get(ThemeService::class);
 
             // Fallback to 'theme' binding if ThemeService interface isn't registered yet
-            if (! $this->themeService instanceof \Pollora\Theme\Domain\Contracts\ThemeService) {
+            if (! $this->themeService instanceof ThemeService) {
                 $this->themeService = $this->app->get('theme');
             }
 
-            if (! $this->themeService instanceof \Pollora\Theme\Domain\Contracts\ThemeService) {
+            if (! $this->themeService instanceof ThemeService) {
                 throw new \RuntimeException('Unable to resolve ThemeService. Make sure it is properly registered.');
             }
         }
@@ -108,7 +109,7 @@ class ThemeInitializer implements ThemeComponent
         // Get the active theme from the registrar
         $activeTheme = $this->registrar->getActiveTheme();
 
-        if ($activeTheme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
+        if ($activeTheme instanceof ThemeModuleInterface) {
             return str_replace($themeRootUri, $activeTheme->getPath(), $stylesheetDirUri);
         }
 
@@ -132,7 +133,7 @@ class ThemeInitializer implements ThemeComponent
         // Get the active theme from the registrar
         $activeTheme = $this->registrar->getActiveTheme();
 
-        if ($activeTheme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
+        if ($activeTheme instanceof ThemeModuleInterface) {
             // Use the registered theme's path
             $this->themeRoot = $activeTheme->getPath();
 

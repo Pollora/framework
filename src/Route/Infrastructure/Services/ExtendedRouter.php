@@ -200,7 +200,7 @@ class ExtendedRouter extends IlluminateRouter
      */
     private function logError(string $message, \Throwable $exception, array $context = []): void
     {
-        if (! $this->logger instanceof \Psr\Log\LoggerInterface) {
+        if (! $this->logger instanceof LoggerInterface) {
             return;
         }
 

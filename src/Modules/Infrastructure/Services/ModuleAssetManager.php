@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Container\Container;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\View\Factory;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Foundation\Support\IncludesFiles;
@@ -110,9 +112,9 @@ class ModuleAssetManager
         try {
             $directives = require $directivesPath;
 
-            if (is_array($directives) && class_exists(\Illuminate\Support\Facades\Blade::class)) {
+            if (is_array($directives) && class_exists(Blade::class)) {
                 foreach ($directives as $name => $directive) {
-                    \Illuminate\Support\Facades\Blade::directive($name, $directive);
+                    Blade::directive($name, $directive);
                 }
             }
         } catch (\Throwable $e) {
@@ -141,7 +143,7 @@ class ModuleAssetManager
         }
 
         try {
-            /** @var \Illuminate\View\Factory $viewFactory */
+            /** @var Factory $viewFactory */
             $viewFactory = $this->app->make('view');
             $viewFinder = $viewFactory->getFinder();
 

@@ -43,7 +43,7 @@ class RouteServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressTypeResolverInterface::class, WordPressTypeResolver::class);
 
         // Register the condition manager (implements both interfaces)
-        $this->app->singleton(WordPressConditionManagerInterface::class, fn ($app): \Pollora\Route\Infrastructure\Services\WordPressConditionManager => new WordPressConditionManager($app));
+        $this->app->singleton(WordPressConditionManagerInterface::class, fn ($app): WordPressConditionManager => new WordPressConditionManager($app));
 
         // Bind the domain interface to the same instance
         $this->app->bind(ConditionResolverInterface::class, fn ($app) => $app->make(WordPressConditionManagerInterface::class));

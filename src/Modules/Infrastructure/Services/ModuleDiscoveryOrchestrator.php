@@ -147,7 +147,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
      */
     protected function getLaravelModuleDiscovery(): LaravelModuleDiscovery
     {
-        if (! $this->laravelModuleDiscovery instanceof \Pollora\Modules\Infrastructure\Services\LaravelModuleDiscovery) {
+        if (! $this->laravelModuleDiscovery instanceof LaravelModuleDiscovery) {
             $this->laravelModuleDiscovery = new LaravelModuleDiscovery($this->container);
         }
 
@@ -159,7 +159,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
      */
     protected function getFrameworkModuleDiscovery(): FrameworkModuleDiscovery
     {
-        if (! $this->frameworkModuleDiscovery instanceof \Pollora\Modules\Infrastructure\Services\FrameworkModuleDiscovery) {
+        if (! $this->frameworkModuleDiscovery instanceof FrameworkModuleDiscovery) {
             $this->frameworkModuleDiscovery = new FrameworkModuleDiscovery($this->container);
         }
 

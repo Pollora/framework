@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Models;
 
+use Illuminate\Database\Eloquent\Collection;
+
 /**
  * Class Post
  *
@@ -31,10 +33,10 @@ namespace Pollora\Models;
  * @property string $post_mime_type
  * @property int $comment_count
  * @property-read string $permalink
- * @property-read \Illuminate\Database\Eloquent\Collection $meta
- * @property-read \Illuminate\Database\Eloquent\Collection $taxonomies
- * @property-read \Illuminate\Database\Eloquent\Collection $comments
- * @property-read \Pollora\Models\User $author
+ * @property-read Collection $meta
+ * @property-read Collection $taxonomies
+ * @property-read Collection $comments
+ * @property-read User $author
  *
  * @method static \Illuminate\Database\Eloquent\Builder published()
  * @method static \Illuminate\Database\Eloquent\Builder status($status)

@@ -12,7 +12,7 @@ use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 use Tests\TestCase;
 
-#[CoversClass(\Pollora\Route\Infrastructure\Services\ExtendedRouter::class)]
+#[CoversClass(ExtendedRouter::class)]
 class ExtendedRouterDependencyInjectionTest extends TestCase
 {
     private Container $container;

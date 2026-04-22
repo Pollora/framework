@@ -18,7 +18,7 @@ class ModuleConfigurationLoader
 {
     public $action;
 
-    protected \Pollora\Hook\Domain\Contracts\Action $actionService;
+    protected Action $actionService;
 
     public function __construct(
         protected Container $app,

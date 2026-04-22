@@ -29,12 +29,12 @@ class AssetServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AssetRepositoryInterface::class, InMemoryAssetRepository::class);
-        $this->app->singleton(AssetManager::class, fn ($app): \Pollora\Asset\Application\Services\AssetManager => new AssetManager(
+        $this->app->singleton(AssetManager::class, fn ($app): AssetManager => new AssetManager(
             $app->make(AssetRegistrationService::class),
             $app->make(AssetRetrievalService::class)
         ));
-        $this->app->bind(AssetEnqueuer::class, fn ($app): \Pollora\Asset\Infrastructure\Services\AssetEnqueuer => new AssetEnqueuer($app));
-        $this->app->singleton(RootAssetManager::class, fn ($app): \Pollora\Asset\Infrastructure\Services\RootAssetManager => new RootAssetManager(
+        $this->app->bind(AssetEnqueuer::class, fn ($app): AssetEnqueuer => new AssetEnqueuer($app));
+        $this->app->singleton(RootAssetManager::class, fn ($app): RootAssetManager => new RootAssetManager(
             $app->make(AssetManager::class)
         ));
     }

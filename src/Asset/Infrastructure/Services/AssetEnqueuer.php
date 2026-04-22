@@ -166,7 +166,7 @@ class AssetEnqueuer
         }
         $container = $this->assetManager->getContainer($containerName);
 
-        if (! $container instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer) {
+        if (! $container instanceof AssetContainer) {
             throw new \RuntimeException("Asset container '{$containerName}' not found. Make sure you have added it via AssetManager::addContainer().");
         }
         $this->container = $container;
@@ -200,7 +200,7 @@ class AssetEnqueuer
             return $this;
         }
 
-        if (! $this->container instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer) {
+        if (! $this->container instanceof AssetContainer) {
             throw new \RuntimeException("No asset container defined before useVite(). Use ->container('theme') before ->useVite().");
         }
         $this->useVite = true;
@@ -486,11 +486,11 @@ class AssetEnqueuer
     protected function enqueueScript(string $path, string $handle): void
     {
         wp_enqueue_script($handle, $path, $this->dependencies, $this->version, $this->loadInFooter);
-        
+
         foreach ($this->localizationData as $objectName => $data) {
             wp_localize_script($handle, $objectName, $data);
         }
-        
+
         if ($this->useVite) {
             $this->addViteScriptAttributes($handle);
         }
@@ -537,7 +537,7 @@ class AssetEnqueuer
         if (str_contains($path, '://')) {
             return $path;
         }
-        $basePath = $this->container instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer ? $this->container->getBasePath() : '';
+        $basePath = $this->container instanceof AssetContainer ? $this->container->getBasePath() : '';
         $fullPath = $basePath.'/'.ltrim($path, '/');
 
         return home_url($fullPath);

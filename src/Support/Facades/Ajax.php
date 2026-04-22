@@ -15,7 +15,7 @@ use Pollora\Ajax\Ajax as AjaxBuilder;
  *
  * @method static AjaxBuilder listen(string $action, callable|string $callback) Register an AJAX action handler
  *
- * @see \Pollora\Ajax\Ajax
+ * @see AjaxBuilder
  */
 class Ajax extends Facade
 {

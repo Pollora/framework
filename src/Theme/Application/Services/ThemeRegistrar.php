@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
+use Pollora\BlockPattern\UI\PatternComponent;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
@@ -11,8 +12,14 @@ use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
+use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;
+use Pollora\Theme\Domain\Models\Menus;
+use Pollora\Theme\Domain\Models\Sidebar;
+use Pollora\Theme\Domain\Models\Templates;
+use Pollora\Theme\Domain\Models\ThemeInitializer;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
+use Pollora\Theme\Infrastructure\Services\Support;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Psr\Container\ContainerInterface;
 
@@ -241,13 +248,13 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             // Define theme-specific components
             $themeComponents = [
-                \Pollora\Theme\Domain\Models\ThemeInitializer::class,
-                \Pollora\BlockPattern\UI\PatternComponent::class,
-                \Pollora\Theme\Domain\Models\Menus::class,
-                \Pollora\Theme\Infrastructure\Services\Support::class,
-                \Pollora\Theme\Domain\Models\Sidebar::class,
-                \Pollora\Theme\Domain\Models\Templates::class,
-                \Pollora\Theme\Domain\Models\ImageSize::class,
+                ThemeInitializer::class,
+                PatternComponent::class,
+                Menus::class,
+                Support::class,
+                Sidebar::class,
+                Templates::class,
+                ImageSize::class,
             ];
 
             $moduleId = 'theme.'.$theme->getLowerName();
