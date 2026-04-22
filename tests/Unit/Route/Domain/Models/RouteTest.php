@@ -2,58 +2,42 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Route\Domain\Models;
-
 use Illuminate\Http\Request;
-use PHPUnit\Framework\TestCase;
 use Pollora\Route\Domain\Models\Route;
 
-class RouteTest extends TestCase
-{
-    private Route $route;
+describe('Route', function (): void {
+    beforeEach(function (): void {
+        $this->route = new Route(['GET'], '/test', fn (): string => 'test');
+    });
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->route = new Route(['GET'], '/test', function () {
-            return 'test';
-        });
-    }
-
-    public function test_it_can_set_and_check_wordpress_route_status(): void
-    {
-        $this->assertFalse($this->route->isWordPressRoute());
+    it('can set and check WordPress route status', function (): void {
+        expect($this->route->isWordPressRoute())->toBeFalse();
 
         $this->route->setIsWordPressRoute(true);
 
-        $this->assertTrue($this->route->isWordPressRoute());
-    }
+        expect($this->route->isWordPressRoute())->toBeTrue();
+    });
 
-    public function test_it_can_set_and_get_condition(): void
-    {
-        $this->assertFalse($this->route->hasCondition());
-        $this->assertEmpty($this->route->getCondition());
+    it('can set and get condition', function (): void {
+        expect($this->route->hasCondition())->toBeFalse();
+        expect($this->route->getCondition())->toBeEmpty();
 
         $this->route->setCondition('is_single');
 
-        $this->assertTrue($this->route->hasCondition());
-        $this->assertEquals('is_single', $this->route->getCondition());
-    }
+        expect($this->route->hasCondition())->toBeTrue();
+        expect($this->route->getCondition())->toBe('is_single');
+    });
 
-    public function test_it_can_set_and_get_condition_parameters(): void
-    {
-        $this->assertEmpty($this->route->getConditionParameters());
+    it('can set and get condition parameters', function (): void {
+        expect($this->route->getConditionParameters())->toBeEmpty();
 
         $parameters = ['product', 123];
         $this->route->setConditionParameters($parameters);
 
-        $this->assertEquals($parameters, $this->route->getConditionParameters());
-    }
+        expect($this->route->getConditionParameters())->toBe($parameters);
+    });
 
-    public function test_it_matches_wordpress_condition_when_function_exists(): void
-    {
-        // Mock a WordPress function
+    it('matches WordPress condition when function exists', function (): void {
         if (! function_exists('test_wp_function')) {
             eval('function test_wp_function($param = null) { return $param === "test"; }');
         }
@@ -64,12 +48,10 @@ class RouteTest extends TestCase
 
         $request = Request::create('/test');
 
-        $this->assertTrue($this->route->matches($request));
-    }
+        expect($this->route->matches($request))->toBeTrue();
+    });
 
-    public function test_it_does_not_match_when_wordpress_function_returns_false(): void
-    {
-        // Mock a WordPress function that returns false
+    it('does not match when WordPress function returns false', function (): void {
         if (! function_exists('test_wp_function_false')) {
             eval('function test_wp_function_false() { return false; }');
         }
@@ -79,39 +61,33 @@ class RouteTest extends TestCase
 
         $request = Request::create('/test');
 
-        $this->assertFalse($this->route->matches($request));
-    }
+        expect($this->route->matches($request))->toBeFalse();
+    });
 
-    public function test_it_falls_back_to_laravel_matching_for_non_wordpress_routes(): void
-    {
+    it('falls back to Laravel matching for non-WordPress routes', function (): void {
         $request = Request::create('/test', 'GET');
+        expect($this->route->matches($request))->toBeTrue();
 
-        // This should use Laravel's default matching behavior
-        $this->assertTrue($this->route->matches($request));
-
-        // Different URI should not match
         $wrongRequest = Request::create('/different', 'GET');
-        $this->assertFalse($this->route->matches($wrongRequest));
-    }
+        expect($this->route->matches($wrongRequest))->toBeFalse();
+    });
 
-    public function test_it_returns_false_when_wordpress_function_does_not_exist(): void
-    {
+    it('returns false when WordPress function does not exist', function (): void {
         $this->route->setIsWordPressRoute(true);
         $this->route->setCondition('non_existent_function');
 
         $request = Request::create('/test');
 
-        $this->assertFalse($this->route->matches($request));
-    }
+        expect($this->route->matches($request))->toBeFalse();
+    });
 
-    public function test_chaining_methods_return_route_instance(): void
-    {
+    it('chaining methods return route instance', function (): void {
         $result = $this->route
             ->setIsWordPressRoute(true)
             ->setCondition('is_single')
             ->setConditionParameters(['test']);
 
-        $this->assertInstanceOf(Route::class, $result);
-        $this->assertSame($this->route, $result);
-    }
-}
+        expect($result)->toBeInstanceOf(Route::class);
+        expect($result)->toBe($this->route);
+    });
+});

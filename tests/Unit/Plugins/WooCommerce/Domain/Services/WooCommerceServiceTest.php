@@ -5,17 +5,17 @@ declare(strict_types=1);
 use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
 
-describe('WooCommerceService', function () {
-    beforeEach(function () {
+describe('WooCommerceService', function (): void {
+    beforeEach(function (): void {
         setupWordPressMocks();
         $this->service = new WooCommerceService;
     });
 
-    afterEach(function () {
+    afterEach(function (): void {
         resetWordPressMocks();
     });
 
-    test('can get default template paths', function () {
+    test('can get default template paths', function (): void {
         // Mock WC_ABSPATH constant
         if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
@@ -26,7 +26,7 @@ describe('WooCommerceService', function () {
         expect($paths)->toContain('/plugin/woocommerce/templates/');
     });
 
-    test('returns empty array when WC_ABSPATH not defined', function () {
+    test('returns empty array when WC_ABSPATH not defined', function (): void {
         // This test only works if WC_ABSPATH is not defined
         // Since we can't easily undefine constants in PHP, we'll skip if already defined
         if (defined('WC_ABSPATH')) {
@@ -39,10 +39,10 @@ describe('WooCommerceService', function () {
         expect($paths)->toBe([]);
     });
 
-    test('can get theme template paths for child themes', function () {
+    test('can get theme template paths for child themes', function (): void {
         // Mock WordPress functions
-        setWordPressFunction('is_child_theme', fn () => true);
-        setWordPressFunction('get_template_directory', fn () => '/themes/parent');
+        setWordPressFunction('is_child_theme', fn (): true => true);
+        setWordPressFunction('get_template_directory', fn (): string => '/themes/parent');
 
         // Mock WooCommerce function
         $mockWC = Mockery::mock();
@@ -54,15 +54,15 @@ describe('WooCommerceService', function () {
         expect($paths)->toContain('/themes/parent/woocommerce/');
     });
 
-    test('returns empty array for non-child themes', function () {
-        setWordPressFunction('is_child_theme', fn () => false);
+    test('returns empty array for non-child themes', function (): void {
+        setWordPressFunction('is_child_theme', fn (): false => false);
 
         $paths = $this->service->getThemeTemplatePaths();
 
         expect($paths)->toBe([]);
     });
 
-    test('can detect woocommerce status screen', function () {
+    test('can detect woocommerce status screen', function (): void {
         $screen = new stdClass;
         $screen->id = 'woocommerce_page_wc-status';
 
@@ -71,7 +71,7 @@ describe('WooCommerceService', function () {
         expect($result)->toBeTrue();
     });
 
-    test('returns false when not on woocommerce status screen', function () {
+    test('returns false when not on woocommerce status screen', function (): void {
         $screen = new stdClass;
         $screen->id = 'edit-post';
 
@@ -80,7 +80,7 @@ describe('WooCommerceService', function () {
         expect($result)->toBeFalse();
     });
 
-    test('returns false when doing ajax', function () {
+    test('returns false when doing ajax', function (): void {
         $screen = new stdClass;
         $screen->id = 'woocommerce_page_wc-status';
 
@@ -89,7 +89,7 @@ describe('WooCommerceService', function () {
         expect($result)->toBeFalse();
     });
 
-    test('returns false when not in admin', function () {
+    test('returns false when not in admin', function (): void {
         $screen = new stdClass;
         $screen->id = 'woocommerce_page_wc-status';
 
@@ -98,7 +98,7 @@ describe('WooCommerceService', function () {
         expect($result)->toBeFalse();
     });
 
-    test('can get woocommerce template path with WC available', function () {
+    test('can get woocommerce template path with WC available', function (): void {
         $mockWC = Mockery::mock();
         $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
         setWordPressFunction('WC', fn () => $mockWC);
@@ -108,22 +108,22 @@ describe('WooCommerceService', function () {
         expect($path)->toBe('woocommerce/');
     });
 
-    test('returns default path when WC not available', function () {
-        setWordPressFunction('WC', fn () => null);
+    test('returns default path when WC not available', function (): void {
+        setWordPressFunction('WC', fn (): null => null);
 
         $path = $this->service->getWooCommerceTemplatePath();
 
         expect($path)->toBe('woocommerce/');
     });
 
-    test('can get all template paths', function () {
+    test('can get all template paths', function (): void {
         // Mock WC_ABSPATH constant
         if (! defined('WC_ABSPATH')) {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
-        setWordPressFunction('is_child_theme', fn () => true);
-        setWordPressFunction('get_template_directory', fn () => '/themes/parent');
+        setWordPressFunction('is_child_theme', fn (): true => true);
+        setWordPressFunction('get_template_directory', fn (): string => '/themes/parent');
 
         $mockWC = Mockery::mock();
         $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
@@ -135,14 +135,14 @@ describe('WooCommerceService', function () {
         expect($paths)->toContain('/themes/parent/woocommerce/');
     });
 
-    test('can create template from path', function () {
+    test('can create template from path', function (): void {
         $template = $this->service->createTemplate('/path/to/single-product.php');
 
         expect($template)->toBeInstanceOf(Template::class);
         expect($template->path)->toBe('/path/to/single-product.php');
     });
 
-    test('can add blade variants to template list', function () {
+    test('can add blade variants to template list', function (): void {
         $templates = [
             'single-product.php',
             'archive-product.php',
@@ -159,7 +159,7 @@ describe('WooCommerceService', function () {
         expect($result)->not->toContain('style.blade.css');
     });
 
-    test('does not duplicate existing blade templates', function () {
+    test('does not duplicate existing blade templates', function (): void {
         $templates = [
             'single-product.blade.php',
             'archive-product.php',
@@ -176,7 +176,7 @@ describe('WooCommerceService', function () {
         expect(array_count_values($result)['single-product.blade.php'])->toBe(1);
     });
 
-    test('handles empty template list', function () {
+    test('handles empty template list', function (): void {
         $templates = [];
 
         $result = $this->service->addBladeVariants($templates);

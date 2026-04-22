@@ -10,8 +10,8 @@ use Psr\Container\ContainerInterface;
 
 require_once __DIR__.'/../helpers.php';
 
-describe('ImageSize', function () {
-    it('resolves Action from Laravel container', function () {
+describe('ImageSize', function (): void {
+    it('resolves Action from Laravel container', function (): void {
         $mockAction = m::mock(Action::class);
         $mockContainer = m::mock(ContainerInterface::class);
         $mockConfig = m::mock(ConfigRepositoryInterface::class);

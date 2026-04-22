@@ -18,29 +18,30 @@ class DummyRegisterAjaxActionService extends RegisterAjaxActionService
     }
 }
 
-describe('AjaxAction', function () {
-    it('can be instantiated with valid parameters', function () {
-        $action = new AjaxAction('my_action', function () {});
+describe('AjaxAction', function (): void {
+    it('can be instantiated with valid parameters', function (): void {
+        $action = new AjaxAction('my_action', function (): void {});
         expect($action->getName())->toBe('my_action')
             ->and($action->getUserType())->toBe(AjaxAction::BOTH_USERS)
             ->and(is_callable($action->getCallback()) || is_string($action->getCallback()))->toBeTrue();
     });
 
-    it('throws exception if name or callback is empty', function () {
-        expect(fn () => new AjaxAction('', function () {}))->toThrow(InvalidAjaxActionException::class)
-            ->and(fn () => new AjaxAction('my_action', null))->toThrow(InvalidAjaxActionException::class);
+    it('throws exception if name or callback is empty', function (): void {
+        expect(fn (): AjaxAction => new AjaxAction('', function (): void {}))->toThrow(InvalidAjaxActionException::class)
+            ->and(fn (): AjaxAction => new AjaxAction('my_action', null))->toThrow(InvalidAjaxActionException::class);
     });
 
-    it('can set user type to logged or guest', function () {
-        $action = new AjaxAction('my_action', function () {});
+    it('can set user type to logged or guest', function (): void {
+        $action = new AjaxAction('my_action', function (): void {});
         $action->forLoggedUsers();
+
         expect($action->getUserType())->toBe(AjaxAction::LOGGED_USERS);
         $action->forGuestUsers();
         expect($action->getUserType())->toBe(AjaxAction::GUEST_USERS);
     });
 
-    it('isBothOrLoggedUsers and isBothOrGuestUsers logic works', function () {
-        $action = new AjaxAction('my_action', function () {});
+    it('isBothOrLoggedUsers and isBothOrGuestUsers logic works', function (): void {
+        $action = new AjaxAction('my_action', function (): void {});
         expect($action->isBothOrLoggedUsers())->toBeTrue()
             ->and($action->isBothOrGuestUsers())->toBeTrue();
         $action->forLoggedUsers();
@@ -51,9 +52,9 @@ describe('AjaxAction', function () {
             ->and($action->isBothOrLoggedUsers())->toBeFalse();
     });
 
-    it('registers via RegisterAjaxActionService on destruct', function () {
+    it('registers via RegisterAjaxActionService on destruct', function (): void {
         $mockService = new DummyRegisterAjaxActionService;
-        $action = new AjaxAction('my_action', function () {}, $mockService);
+        $action = new AjaxAction('my_action', function (): void {}, $mockService);
         unset($action);
         expect($mockService->calls)->toHaveCount(1)
             ->and($mockService->calls[0]->getName())->toBe('my_action');

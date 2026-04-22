@@ -6,7 +6,7 @@ use Illuminate\Filesystem\Filesystem;
 use Mockery as m;
 use Pollora\PostType\UI\Console\PostTypeMakeCommand;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create a mock filesystem
     $this->files = m::mock(Filesystem::class);
 
@@ -14,34 +14,31 @@ beforeEach(function () {
     $this->command = new PostTypeMakeCommand($this->files);
 });
 
-afterEach(function () {
+afterEach(function (): void {
     m::close();
 });
 
-test('PostTypeMakeCommand generates correct slug from class name', function () {
+test('PostTypeMakeCommand generates correct slug from class name', function (): void {
     // Test the protected method via reflection
     $reflectionMethod = new ReflectionMethod(PostTypeMakeCommand::class, 'getSlugFromClassName');
-    $reflectionMethod->setAccessible(true);
 
     $result = $reflectionMethod->invoke($this->command, 'EventRegistration');
 
     expect($result)->toBe('event-registration');
 });
 
-test('PostTypeMakeCommand generates correct singular name from class name', function () {
+test('PostTypeMakeCommand generates correct singular name from class name', function (): void {
     // Test the protected method via reflection
     $reflectionMethod = new ReflectionMethod(PostTypeMakeCommand::class, 'getNameFromClassName');
-    $reflectionMethod->setAccessible(true);
 
     $result = $reflectionMethod->invoke($this->command, 'EventRegistration');
 
     expect($result)->toBe('Event registration');
 });
 
-test('PostTypeMakeCommand generates correct plural name from class name', function () {
+test('PostTypeMakeCommand generates correct plural name from class name', function (): void {
     // Test the protected method via reflection
     $reflectionMethod = new ReflectionMethod(PostTypeMakeCommand::class, 'getPluralNameFromClassName');
-    $reflectionMethod->setAccessible(true);
 
     $result = $reflectionMethod->invoke($this->command, 'Event');
 

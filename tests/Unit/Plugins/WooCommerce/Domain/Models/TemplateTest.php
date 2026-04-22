@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
 
-describe('Template', function () {
-    test('can be created with basic parameters', function () {
+describe('Template', function (): void {
+    test('can be created with basic parameters', function (): void {
         $template = new Template('/path/to/template.php', 'template', false);
 
         expect($template->path)->toBe('/path/to/template.php');
@@ -13,7 +13,7 @@ describe('Template', function () {
         expect($template->isBladeTemplate)->toBeFalse();
     });
 
-    test('can be created from path', function () {
+    test('can be created from path', function (): void {
         $template = Template::fromPath('/path/to/single-product.php');
 
         expect($template->path)->toBe('/path/to/single-product.php');
@@ -21,7 +21,7 @@ describe('Template', function () {
         expect($template->isBladeTemplate)->toBeFalse();
     });
 
-    test('can detect blade templates when created from path', function () {
+    test('can detect blade templates when created from path', function (): void {
         $template = Template::fromPath('/path/to/single-product.blade.php');
 
         expect($template->path)->toBe('/path/to/single-product.blade.php');
@@ -29,7 +29,7 @@ describe('Template', function () {
         expect($template->isBladeTemplate)->toBeTrue();
     });
 
-    test('can get relative path', function () {
+    test('can get relative path', function (): void {
         $template = new Template('/plugin/templates/single-product.php');
         $defaultPaths = ['/plugin/templates/'];
 
@@ -38,7 +38,7 @@ describe('Template', function () {
         expect($relativePath)->toBe('single-product.php');
     });
 
-    test('returns original path when no default paths match', function () {
+    test('returns original path when no default paths match', function (): void {
         $template = new Template('/theme/templates/single-product.php');
         $defaultPaths = ['/plugin/templates/'];
 
@@ -47,21 +47,21 @@ describe('Template', function () {
         expect($relativePath)->toBe('/theme/templates/single-product.php');
     });
 
-    test('can detect woocommerce template', function () {
+    test('can detect woocommerce template', function (): void {
         $template = new Template('/plugin/templates/single-product.php');
         $defaultPaths = ['/plugin/templates/'];
 
         expect($template->isWooCommerceTemplate($defaultPaths))->toBeTrue();
     });
 
-    test('can detect non-woocommerce template', function () {
+    test('can detect non-woocommerce template', function (): void {
         $template = new Template('/theme/templates/single-product.php');
         $defaultPaths = ['/plugin/templates/'];
 
         expect($template->isWooCommerceTemplate($defaultPaths))->toBeFalse();
     });
 
-    test('can convert to blade template', function () {
+    test('can convert to blade template', function (): void {
         $template = new Template('/path/to/single-product.php', 'single-product', false);
 
         $bladeTemplate = $template->toBladeTemplate();
@@ -71,7 +71,7 @@ describe('Template', function () {
         expect($bladeTemplate->isBladeTemplate)->toBeTrue();
     });
 
-    test('blade template conversion is idempotent', function () {
+    test('blade template conversion is idempotent', function (): void {
         $template = new Template('/path/to/single-product.blade.php', 'single-product', true);
 
         $bladeTemplate = $template->toBladeTemplate();
@@ -82,7 +82,7 @@ describe('Template', function () {
         expect($bladeTemplate)->toBe($template);
     });
 
-    test('non-php files are not converted to blade', function () {
+    test('non-php files are not converted to blade', function (): void {
         $template = new Template('/path/to/style.css', 'style', false);
 
         $bladeTemplate = $template->toBladeTemplate();
@@ -90,7 +90,7 @@ describe('Template', function () {
         expect($bladeTemplate)->toBe($template);
     });
 
-    test('can get view name for blade templates', function () {
+    test('can get view name for blade templates', function (): void {
         $template = new Template('woocommerce/single-product.blade.php', 'single-product', true);
 
         $viewName = $template->getViewName();
@@ -98,7 +98,7 @@ describe('Template', function () {
         expect($viewName)->toBe('woocommerce.single-product');
     });
 
-    test('returns empty view name for non-blade templates', function () {
+    test('returns empty view name for non-blade templates', function (): void {
         $template = new Template('woocommerce/single-product.php', 'single-product', false);
 
         $viewName = $template->getViewName();
@@ -106,7 +106,7 @@ describe('Template', function () {
         expect($viewName)->toBe('');
     });
 
-    test('handles complex path in view name', function () {
+    test('handles complex path in view name', function (): void {
         $template = new Template('woocommerce/cart/cart.blade.php', 'cart', true);
 
         $viewName = $template->getViewName();
@@ -114,7 +114,7 @@ describe('Template', function () {
         expect($viewName)->toBe('woocommerce.cart.cart');
     });
 
-    test('trims dots from view name', function () {
+    test('trims dots from view name', function (): void {
         $template = new Template('/single-product.blade.php', 'single-product', true);
 
         $viewName = $template->getViewName();

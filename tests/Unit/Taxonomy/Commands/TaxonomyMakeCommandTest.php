@@ -6,7 +6,7 @@ use Illuminate\Filesystem\Filesystem;
 use Mockery as m;
 use Pollora\Taxonomy\UI\Console\TaxonomyMakeCommand;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create a mock filesystem
     $this->files = m::mock(Filesystem::class);
 
@@ -17,11 +17,11 @@ beforeEach(function () {
     }
 });
 
-afterEach(function () {
+afterEach(function (): void {
     m::close();
 });
 
-test('TaxonomyMakeCommand generates correct slug from class name', function () {
+test('TaxonomyMakeCommand generates correct slug from class name', function (): void {
     // Skip if command doesn't exist yet
     if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
@@ -29,14 +29,13 @@ test('TaxonomyMakeCommand generates correct slug from class name', function () {
 
     // Test the protected method via reflection
     $reflectionMethod = new ReflectionMethod(TaxonomyMakeCommand::class, 'getSlugFromClassName');
-    $reflectionMethod->setAccessible(true);
 
     $result = $reflectionMethod->invoke($this->command, 'ProductCategory');
 
     expect($result)->toBe('product-category');
 });
 
-test('TaxonomyMakeCommand generates correct singular name from class name', function () {
+test('TaxonomyMakeCommand generates correct singular name from class name', function (): void {
     // Skip if command doesn't exist yet
     if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
@@ -44,14 +43,13 @@ test('TaxonomyMakeCommand generates correct singular name from class name', func
 
     // Test the protected method via reflection
     $reflectionMethod = new ReflectionMethod(TaxonomyMakeCommand::class, 'getNameFromClassName');
-    $reflectionMethod->setAccessible(true);
 
     $result = $reflectionMethod->invoke($this->command, 'ProductCategory');
 
     expect($result)->toBe('Product category');
 });
 
-test('TaxonomyMakeCommand generates correct plural name from class name', function () {
+test('TaxonomyMakeCommand generates correct plural name from class name', function (): void {
     // Skip if command doesn't exist yet
     if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
@@ -59,7 +57,6 @@ test('TaxonomyMakeCommand generates correct plural name from class name', functi
 
     // Test the protected method via reflection
     $reflectionMethod = new ReflectionMethod(TaxonomyMakeCommand::class, 'getPluralNameFromClassName');
-    $reflectionMethod->setAccessible(true);
 
     $result = $reflectionMethod->invoke($this->command, 'Category');
 
@@ -70,7 +67,7 @@ test('TaxonomyMakeCommand generates correct plural name from class name', functi
     expect($result)->toBe('Tags');
 });
 
-test('TaxonomyMakeCommand generates default object type for taxonomy', function () {
+test('TaxonomyMakeCommand generates default object type for taxonomy', function (): void {
     // Skip if command doesn't exist yet
     if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
@@ -79,7 +76,6 @@ test('TaxonomyMakeCommand generates default object type for taxonomy', function 
     // Test object type generation if method exists
     if (method_exists(TaxonomyMakeCommand::class, 'getDefaultObjectType')) {
         $reflectionMethod = new ReflectionMethod(TaxonomyMakeCommand::class, 'getDefaultObjectType');
-        $reflectionMethod->setAccessible(true);
 
         $result = $reflectionMethod->invoke($this->command);
 
@@ -90,7 +86,7 @@ test('TaxonomyMakeCommand generates default object type for taxonomy', function 
     }
 });
 
-test('TaxonomyMakeCommand handles hierarchical flag correctly', function () {
+test('TaxonomyMakeCommand handles hierarchical flag correctly', function (): void {
     // Skip if command doesn't exist yet
     if (! class_exists(TaxonomyMakeCommand::class)) {
         $this->markTestSkipped('TaxonomyMakeCommand class does not exist yet');
@@ -99,7 +95,6 @@ test('TaxonomyMakeCommand handles hierarchical flag correctly', function () {
     // Test hierarchical option handling if method exists
     if (method_exists(TaxonomyMakeCommand::class, 'shouldBeHierarchical')) {
         $reflectionMethod = new ReflectionMethod(TaxonomyMakeCommand::class, 'shouldBeHierarchical');
-        $reflectionMethod->setAccessible(true);
 
         // Test with different class names that might suggest hierarchy
         $result = $reflectionMethod->invoke($this->command, 'Category');
@@ -114,7 +109,7 @@ test('TaxonomyMakeCommand handles hierarchical flag correctly', function () {
 });
 
 // Placeholder test for when the command is fully implemented
-test('TaxonomyMakeCommand can be instantiated', function () {
+test('TaxonomyMakeCommand can be instantiated', function (): void {
     if (class_exists(TaxonomyMakeCommand::class)) {
         expect($this->command)->toBeInstanceOf(TaxonomyMakeCommand::class);
     } else {

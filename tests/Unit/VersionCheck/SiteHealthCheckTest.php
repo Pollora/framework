@@ -6,8 +6,8 @@ use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Pollora\VersionCheck\UI\Http\SiteHealthCheck;
 
-describe('SiteHealthCheck', function () {
-    it('adds Pollora section to debug information', function () {
+describe('SiteHealthCheck', function (): void {
+    it('adds Pollora section to debug information', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.3.0');
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
@@ -22,7 +22,7 @@ describe('SiteHealthCheck', function () {
         expect($info['pollora']['fields']['up_to_date']['value'])->toBe('Yes');
     });
 
-    it('shows not up to date when update available', function () {
+    it('shows not up to date when update available', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.2.0');
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
@@ -33,7 +33,7 @@ describe('SiteHealthCheck', function () {
         expect($info['pollora']['fields']['up_to_date']['value'])->toBe('No');
     });
 
-    it('adds version test to site status tests', function () {
+    it('adds version test to site status tests', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
 
         $health = new SiteHealthCheck(new VersionComparator($checker));
@@ -43,7 +43,7 @@ describe('SiteHealthCheck', function () {
         expect($tests['direct']['pollora_update']['test'])->toBeCallable();
     });
 
-    it('returns good status when up to date', function () {
+    it('returns good status when up to date', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.3.0');
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
@@ -55,7 +55,7 @@ describe('SiteHealthCheck', function () {
         expect($result['badge']['color'])->toBe('blue');
     });
 
-    it('returns recommended status when update available', function () {
+    it('returns recommended status when update available', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.2.0');
         $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
@@ -68,7 +68,7 @@ describe('SiteHealthCheck', function () {
         expect($result['label'])->toContain('13.3.0');
     });
 
-    it('returns recommended status when version cannot be determined', function () {
+    it('returns recommended status when version cannot be determined', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn(null);
         $checker->shouldReceive('getLatestVersion')->andReturn(null);

@@ -2,123 +2,84 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Route\Infrastructure\Services;
-
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
-use PHPUnit\Framework\TestCase;
 use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 
-class ExtendedRouterTest extends TestCase
-{
-    private ExtendedRouter $router;
-
-    private Container $container;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
+describe('ExtendedRouter', function (): void {
+    beforeEach(function (): void {
         $this->container = new Container;
-        $dispatcher = $this->createMock(Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
-        // Mock config
-        $config = $this->createMock(Repository::class);
-        $config->method('get')
-            ->willReturnCallback(function ($key, $default = null) {
-                if ($key === 'wordpress.conditions') {
-                    return [
-                        'is_single' => 'single',
-                        'is_page' => 'page',
-                        'is_category' => 'category',
-                    ];
-                }
-                if ($key === 'wordpress.plugin_conditions') {
-                    return [];
-                }
+        $config = Mockery::mock(Repository::class);
+        $config->shouldReceive('get')->andReturnUsing(function ($key, $default = null) {
+            if ($key === 'wordpress.conditions') {
+                return [
+                    'is_single' => 'single',
+                    'is_page' => 'page',
+                    'is_category' => 'category',
+                ];
+            }
 
-                return $default;
-            });
+            if ($key === 'wordpress.plugin_conditions') {
+                return [];
+            }
+
+            return $default;
+        });
 
         $this->container->instance('config', $config);
 
-        // Create dependencies with the mocked config
         $conditionManager = new WordPressConditionManager($this->container);
         $typeResolver = new WordPressTypeResolver;
 
-        $this->router = new ExtendedRouter(
-            $dispatcher,
-            $this->container,
-            $conditionManager,
-            $typeResolver,
-            null // no logger for tests
-        );
-    }
+        $this->router = new ExtendedRouter($dispatcher, $this->container, $conditionManager, $typeResolver);
+    });
 
-    public function test_it_creates_route_objects_of_correct_type(): void
-    {
-        $route = $this->router->get('/test', function () {
-            return 'test';
-        });
+    it('creates route objects of correct type', function (): void {
+        $route = $this->router->get('/test', fn (): string => 'test');
 
-        $this->assertInstanceOf(Route::class, $route);
-    }
+        expect($route)->toBeInstanceOf(Route::class);
+    });
 
-    public function test_it_loads_wordpress_conditions_from_config(): void
-    {
+    it('loads WordPress conditions from config', function (): void {
         $conditions = $this->router->getConditions();
 
-        $this->assertArrayHasKey('single', $conditions);
-        $this->assertEquals('is_single', $conditions['single']);
-        $this->assertArrayHasKey('page', $conditions);
-        $this->assertEquals('is_page', $conditions['page']);
-        $this->assertArrayHasKey('category', $conditions);
-        $this->assertEquals('is_category', $conditions['category']);
-    }
+        expect($conditions)->toHaveKey('single');
+        expect($conditions['single'])->toBe('is_single');
+        expect($conditions)->toHaveKey('page');
+        expect($conditions['page'])->toBe('is_page');
+        expect($conditions)->toHaveKey('category');
+        expect($conditions['category'])->toBe('is_category');
+    });
 
-    public function test_it_resolves_condition_aliases(): void
-    {
-        $this->assertEquals('is_single', $this->router->resolveCondition('single'));
-        $this->assertEquals('is_page', $this->router->resolveCondition('page'));
+    it('resolves condition aliases', function (): void {
+        expect($this->router->resolveCondition('single'))->toBe('is_single');
+        expect($this->router->resolveCondition('page'))->toBe('is_page');
+        expect($this->router->resolveCondition('is_custom'))->toBe('is_custom');
+    });
 
-        // Non-aliased conditions should return as-is
-        $this->assertEquals('is_custom', $this->router->resolveCondition('is_custom'));
-    }
-
-    public function test_it_adds_wordpress_bindings_to_route(): void
-    {
-        // Test that the addWordPressBindings method runs without error
-        $closure = function (\WP_Post $post, \WP_Query $wp_query) {
-            return [$post, $wp_query];
-        };
-
-        $route = new Route(['GET'], '/test', $closure);
+    it('adds WordPress bindings to route', function (): void {
+        $route = new Route(['GET'], '/test', fn (WP_Post $post, WP_Query $wp_query): array => [$post, $wp_query]);
 
         $result = $this->router->addWordPressBindings($route);
+        expect($result)->toBe($route);
 
-        // The method should return the same route instance
-        $this->assertSame($route, $result);
+        $nonWpRoute = new Route(['GET'], '/other', fn (string $name, int $id): array => [$name, $id]);
 
-        // Test with non-WordPress types (should not cause errors)
-        $nonWpClosure = function (string $name, int $id) {
-            return [$name, $id];
-        };
-
-        $nonWpRoute = new Route(['GET'], '/other', $nonWpClosure);
         $nonWpResult = $this->router->addWordPressBindings($nonWpRoute);
+        expect($nonWpResult)->toBe($nonWpRoute);
+    });
 
-        $this->assertSame($nonWpRoute, $nonWpResult);
-    }
-
-    public function test_it_handles_missing_config_gracefully(): void
-    {
-        // Create router without config
+    it('handles missing config gracefully', function (): void {
         $container = new Container;
-        $dispatcher = $this->createMock(Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
         $conditionManager = new WordPressConditionManager($container);
         $typeResolver = new WordPressTypeResolver;
@@ -126,9 +87,8 @@ class ExtendedRouterTest extends TestCase
         $router = new ExtendedRouter($dispatcher, $container, $conditionManager, $typeResolver);
 
         $conditions = $router->getConditions();
-        $this->assertIsArray($conditions);
-        // Should have default conditions even without config
-        $this->assertArrayHasKey('home', $conditions);
-        $this->assertEquals('is_home', $conditions['home']);
-    }
-}
+        expect($conditions)->toBeArray();
+        expect($conditions)->toHaveKey('home');
+        expect($conditions['home'])->toBe('is_home');
+    });
+});

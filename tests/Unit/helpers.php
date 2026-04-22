@@ -17,7 +17,7 @@ class WP
 /**
  * Setup WordPress mock functions for tests
  */
-function setupWordPressMocks()
+function setupWordPressMocks(): void
 {
     // Initialize WP::$wpFunctions if not already set
     if (! isset(WP::$wpFunctions) || ! WP::$wpFunctions) {
@@ -26,20 +26,7 @@ function setupWordPressMocks()
 
     // Mock WordPress hook functions with specific handlers for common filters
     WP::$wpFunctions->shouldReceive('add_filter')
-        ->withArgs(function ($hook, $callback, $priority = 10, $accepted_args = 1) {
-            // Allow any template_include filter to be registered
-            if ($hook === 'template_include') {
-                return true;
-            }
-
-            // Allow template_redirect action to be registered
-            if ($hook === 'template_redirect') {
-                return true;
-            }
-
-            // Default behavior for other hooks
-            return true;
-        })
+        ->withArgs(fn ($hook, $callback, $priority = 10, $accepted_args = 1): bool => true)
         ->andReturn(true)
         ->byDefault();
 
@@ -72,9 +59,7 @@ function setupWordPressMocks()
     // Mock WordPress option functions
     WP::$wpFunctions->shouldReceive('get_option')
         ->withAnyArgs()
-        ->andReturnUsing(function ($option, $default = false) {
-            return $default;
-        })
+        ->andReturnUsing(fn ($option, $default = false) => $default)
         ->byDefault();
 
     WP::$wpFunctions->shouldReceive('add_option')
@@ -125,9 +110,7 @@ function setupWordPressMocks()
 
     WP::$wpFunctions->shouldReceive('apply_filters')
         ->withAnyArgs()
-        ->andReturnUsing(function ($tag, $value) {
-            return $value;
-        })
+        ->andReturnUsing(fn ($tag, $value) => $value)
         ->byDefault();
 
     // Default WordPress conditional functions behavior
@@ -299,7 +282,7 @@ function setupWordPressMocks()
 
     WP::$wpFunctions->shouldReceive('get_queried_object')
         ->withAnyArgs()
-        ->andReturnUsing(function () {
+        ->andReturnUsing(function (): stdClass {
             $obj = new stdClass;
             $obj->post_type = 'page';
             $obj->post_name = 'test-page';
@@ -311,7 +294,7 @@ function setupWordPressMocks()
 
     WP::$wpFunctions->shouldReceive('get_post')
         ->withAnyArgs()
-        ->andReturnUsing(function () {
+        ->andReturnUsing(function (): stdClass {
             $post = new stdClass;
             $post->post_name = 'parent-page';
             $post->post_parent = 0;
@@ -322,16 +305,14 @@ function setupWordPressMocks()
 
     WP::$wpFunctions->shouldReceive('get_query_var')
         ->withAnyArgs()
-        ->andReturnUsing(function ($var) {
-            return $var === 'post_type' ? 'page' : '';
-        })
+        ->andReturnUsing(fn ($var): string => $var === 'post_type' ? 'page' : '')
         ->byDefault();
 }
 
 /**
  * Convenience function to set mock WordPress condition values
  */
-function setWordPressConditions(array $conditions = [])
+function setWordPressConditions(array $conditions = []): void
 {
     // Make sure WP::$wpFunctions is initialized
     if (! isset(WP::$wpFunctions) || ! WP::$wpFunctions) {
@@ -374,11 +355,8 @@ if (! function_exists('app')) {
 if (! function_exists('app_path')) {
     /**
      * Get the path to the application folder.
-     *
-     * @param  string  $path
-     * @return string
      */
-    function app_path($path = '')
+    function app_path(?string $path = ''): string
     {
         return __DIR__.'/../../app/'.($path ? DIRECTORY_SEPARATOR.$path : $path);
     }
@@ -387,11 +365,8 @@ if (! function_exists('app_path')) {
 if (! function_exists('config_path')) {
     /**
      * Get the path to the config folder.
-     *
-     * @param  string  $path
-     * @return string
      */
-    function config_path($path = '')
+    function config_path(?string $path = ''): string
     {
         return __DIR__.'/../../config/'.($path ? DIRECTORY_SEPARATOR.$path : $path);
     }
@@ -400,11 +375,8 @@ if (! function_exists('config_path')) {
 if (! function_exists('base_path')) {
     /**
      * Get the path to the base of the install.
-     *
-     * @param  string  $path
-     * @return string
      */
-    function base_path($path = '')
+    function base_path(?string $path = ''): string
     {
         return __DIR__.'/../..'.($path ? DIRECTORY_SEPARATOR.$path : $path);
     }
@@ -553,14 +525,14 @@ if (! function_exists('wp_is_block_theme')) {
 }
 
 if (! function_exists('__return_true')) {
-    function __return_true()
+    function __return_true(): bool
     {
         return true;
     }
 }
 
 if (! function_exists('__return_false')) {
-    function __return_false()
+    function __return_false(): bool
     {
         return false;
     }
@@ -570,7 +542,7 @@ if (! function_exists('__return_false')) {
  * Helper function for route condition testing
  */
 if (! function_exists('route_condition_test')) {
-    function route_condition_test($param = null)
+    function route_condition_test($param = null): bool
     {
         return false; // Default implementation, will be mocked in tests
     }
@@ -610,7 +582,7 @@ if (! function_exists('translate_with_gettext_context')) {
 }
 
 if (! function_exists('abort')) {
-    function abort($code, $message = '')
+    function abort($code, $message = ''): void
     {
         throw new HttpException($code, $message);
     }
@@ -991,14 +963,14 @@ if (! function_exists('translate')) {
 if (! function_exists('_cleanup_header_comment')) {
     function _cleanup_header_comment($str)
     {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->_cleanup_header_comment($str) : trim($str);
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->_cleanup_header_comment($str) : trim((string) $str);
     }
 }
 
 if (! function_exists('sanitize_key')) {
     function sanitize_key($key)
     {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->sanitize_key($key) : strtolower(trim($key));
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->sanitize_key($key) : strtolower(trim((string) $key));
     }
 }
 
@@ -1040,12 +1012,7 @@ if (! class_exists('MockActionFacade')) {
 if (! class_exists('TestContainer')) {
     class TestContainer
     {
-        private array $services;
-
-        public function __construct(array $services = [])
-        {
-            $this->services = $services;
-        }
+        public function __construct(private array $services = []) {}
 
         public function get(string $serviceClass): ?object
         {
@@ -1053,7 +1020,7 @@ if (! class_exists('TestContainer')) {
         }
 
         // Added for compatibility with attribute tests
-        public function make($abstract, array $parameters = [])
+        public function make(string $abstract, array $parameters = []): ?object
         {
             return $this->get($abstract);
         }
@@ -1068,7 +1035,7 @@ if (! class_exists('TestContainer')) {
             return isset($this->services[$serviceClass]);
         }
 
-        public function instance($abstract, $instance)
+        public function instance($abstract, $instance): void
         {
             $this->services[$abstract] = $instance;
         }
@@ -1103,7 +1070,7 @@ if (! class_exists('WP_Screen')) {
 
 // Laravel response helper function
 if (! function_exists('response')) {
-    function response($content = '', $status = 200, array $headers = [])
+    function response($content = '', $status = 200, array $headers = []): Response
     {
         return new Response($content, $status, $headers);
     }
@@ -1293,7 +1260,7 @@ if (! function_exists('check_ajax_referer')) {
 if (! function_exists('sanitize_text_field')) {
     function sanitize_text_field($str)
     {
-        return isset(WP::$wpFunctions) ? WP::$wpFunctions->sanitize_text_field($str) : trim(strip_tags($str));
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->sanitize_text_field($str) : trim(strip_tags((string) $str));
     }
 }
 
@@ -1306,14 +1273,14 @@ if (! function_exists('wp_die')) {
 
 // WordPress escaping functions
 if (! function_exists('esc_attr')) {
-    function esc_attr($text)
+    function esc_attr($text): string
     {
         return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
     }
 }
 
 if (! function_exists('esc_html')) {
-    function esc_html($text)
+    function esc_html($text): string
     {
         return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
     }

@@ -10,8 +10,8 @@ use Psr\Container\ContainerInterface;
 
 require_once __DIR__.'/../helpers.php';
 
-describe('Sidebar', function () {
-    it('resolves Application from Laravel container', function () {
+describe('Sidebar', function (): void {
+    it('resolves Application from Laravel container', function (): void {
         $mockAction = m::mock(Action::class);
         $mockContainer = m::mock(ContainerInterface::class);
         $mockConfig = m::mock(ConfigRepositoryInterface::class);
@@ -23,7 +23,7 @@ describe('Sidebar', function () {
 
         $sidebar = new Sidebar($mockContainer, $mockConfig);
         $ref = new ReflectionProperty($sidebar, 'app');
-        $ref->setAccessible(true);
+
         expect($ref->getValue($sidebar))->toBe($mockContainer);
     });
 });

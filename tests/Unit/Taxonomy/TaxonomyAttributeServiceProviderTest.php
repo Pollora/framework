@@ -9,7 +9,7 @@ use Pollora\Support\Facades\Action;
 
 // Define app_path function if it doesn't exist in the test environment
 if (! function_exists('app_path')) {
-    function app_path($path = '')
+    function app_path(string $path = ''): string
     {
         return '/path/to/app/'.$path;
     }
@@ -17,7 +17,7 @@ if (! function_exists('app_path')) {
 
 // Define is_dir function if needed for testing
 if (! function_exists('is_dir_mock')) {
-    function is_dir_mock($path)
+    function is_dir_mock($path): bool
     {
         return true; // Always return true for testing
     }
@@ -25,13 +25,13 @@ if (! function_exists('is_dir_mock')) {
 
 // Define mkdir function if needed for testing
 if (! function_exists('mkdir_mock')) {
-    function mkdir_mock($path, $mode = 0777, $recursive = false)
+    function mkdir_mock($path, $mode = 0777, $recursive = false): bool
     {
         return true; // Always return true for testing
     }
 }
 
-beforeAll(function () {
+beforeAll(function (): void {
     $app = new Container;
     Facade::setFacadeApplication($app);
 
@@ -46,13 +46,13 @@ beforeAll(function () {
     Action::setFacadeApplication($app);
 });
 
-afterAll(function () {
+afterAll(function (): void {
     m::close();
     Facade::clearResolvedInstances();
     Facade::setFacadeApplication(null);
 });
 
-it('can be instantiated', function () {
+it('can be instantiated', function (): void {
     expect(true)->toBeTrue();
 });
 

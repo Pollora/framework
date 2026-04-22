@@ -6,19 +6,14 @@ use Illuminate\Support\Facades\Facade;
 use Pollora\Attributes\Filter;
 use Pollora\Hook\Infrastructure\Services\Filter as FilterService;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Mock Filter service
     $this->mockFilter = Mockery::mock(FilterService::class);
 
     // Create a fake service locator
     $this->mockServiceLocator = new class($this->mockFilter)
     {
-        private $filterService;
-
-        public function __construct($filterService)
-        {
-            $this->filterService = $filterService;
-        }
+        public function __construct(private $filterService) {}
 
         public function get($serviceClass)
         {
@@ -36,7 +31,7 @@ class SingleFilterClass
     #[Filter('test_filter', priority: 10)]
     public function filterMethod(string $value): string
     {
-        return "modified_{$value}";
+        return 'modified_'.$value;
     }
 }
 
@@ -45,7 +40,7 @@ class MultipleFilterClass
     #[Filter('test_filter', priority: 10)]
     public function filterMethod(string $value): string
     {
-        return "modified_{$value}";
+        return 'modified_'.$value;
     }
 
     #[Filter('another_filter', priority: 20)]
@@ -63,7 +58,7 @@ class DefaultPriorityFilterClass
     public function filterMethod(string $value): string
     {
         // Test method with default priority
-        return "modified_{$value}";
+        return 'modified_'.$value;
     }
 }
 
@@ -73,22 +68,20 @@ class CustomPriorityFilterClass
     public function filterMethod(string $value): string
     {
         // Test method with custom priority
-        return "modified_{$value}";
+        return 'modified_'.$value;
     }
 }
 
-it('registers a filter hook correctly', function () {
+it('registers a filter hook correctly', function (): void {
     // Set up expectations
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
-            return $hook === 'test_filter'
-                && is_array($callback)
-                && $callback[0] instanceof SingleFilterClass
-                && $callback[1] === 'filterMethod'
-                && $priority === 10
-                && $acceptedArgs === 1;
-        });
+        ->withArgs(fn ($hook, $callback, $priority, $acceptedArgs): bool => $hook === 'test_filter'
+            && is_array($callback)
+            && $callback[0] instanceof SingleFilterClass
+            && $callback[1] === 'filterMethod'
+            && $priority === 10
+            && $acceptedArgs === 1);
 
     // Test the filter attribute directly using handle method
     $testClass = new SingleFilterClass;
@@ -98,19 +91,17 @@ it('registers a filter hook correctly', function () {
     $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 
-it('registers multiple filter hooks with different priorities', function () {
+it('registers multiple filter hooks with different priorities', function (): void {
     $testClass = new MultipleFilterClass;
 
     // Test first filter
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
-            return $hook === 'test_filter'
-                && is_array($callback)
-                && $callback[0] instanceof MultipleFilterClass
-                && $callback[1] === 'filterMethod'
-                && $priority === 10;
-        });
+        ->withArgs(fn ($hook, $callback, $priority, $acceptedArgs): bool => $hook === 'test_filter'
+            && is_array($callback)
+            && $callback[0] instanceof MultipleFilterClass
+            && $callback[1] === 'filterMethod'
+            && $priority === 10);
 
     $filterAttribute1 = new Filter('test_filter', 10);
     $methodReflection1 = new ReflectionMethod($testClass, 'filterMethod');
@@ -119,31 +110,27 @@ it('registers multiple filter hooks with different priorities', function () {
     // Test second filter
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
-            return $hook === 'another_filter'
-                && is_array($callback)
-                && $callback[0] instanceof MultipleFilterClass
-                && $callback[1] === 'anotherFilterMethod'
-                && $priority === 20;
-        });
+        ->withArgs(fn ($hook, $callback, $priority, $acceptedArgs): bool => $hook === 'another_filter'
+            && is_array($callback)
+            && $callback[0] instanceof MultipleFilterClass
+            && $callback[1] === 'anotherFilterMethod'
+            && $priority === 20);
 
     $filterAttribute2 = new Filter('another_filter', 20);
     $methodReflection2 = new ReflectionMethod($testClass, 'anotherFilterMethod');
     $filterAttribute2->handle($this->mockServiceLocator, $testClass, $methodReflection2, $filterAttribute2);
 });
 
-it('registers a filter hook with default priority (10)', function () {
+it('registers a filter hook with default priority (10)', function (): void {
     // Set up expectations
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
-            return $hook === 'test_filter'
-                && is_array($callback)
-                && $callback[0] instanceof DefaultPriorityFilterClass
-                && $callback[1] === 'filterMethod'
-                && $priority === 10 // Default priority should be 10
-                && $acceptedArgs === 1;
-        });
+        ->withArgs(fn ($hook, $callback, $priority, $acceptedArgs): bool => $hook === 'test_filter'
+            && is_array($callback)
+            && $callback[0] instanceof DefaultPriorityFilterClass
+            && $callback[1] === 'filterMethod'
+            && $priority === 10 // Default priority should be 10
+            && $acceptedArgs === 1);
 
     // Test with default priority
     $testClass = new DefaultPriorityFilterClass;
@@ -153,18 +140,16 @@ it('registers a filter hook with default priority (10)', function () {
     $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 
-it('registers a filter hook with custom priority', function () {
+it('registers a filter hook with custom priority', function (): void {
     // Set up expectations
     $this->mockFilter->shouldReceive('add')
         ->once()
-        ->withArgs(function ($hook, $callback, $priority, $acceptedArgs) {
-            return $hook === 'test_filter'
-                && is_array($callback)
-                && $callback[0] instanceof CustomPriorityFilterClass
-                && $callback[1] === 'filterMethod'
-                && $priority === 99 // Custom priority
-                && $acceptedArgs === 1;
-        });
+        ->withArgs(fn ($hook, $callback, $priority, $acceptedArgs): bool => $hook === 'test_filter'
+            && is_array($callback)
+            && $callback[0] instanceof CustomPriorityFilterClass
+            && $callback[1] === 'filterMethod'
+            && $priority === 99 // Custom priority
+            && $acceptedArgs === 1);
 
     // Test with custom priority
     $testClass = new CustomPriorityFilterClass;
@@ -174,7 +159,7 @@ it('registers a filter hook with custom priority', function () {
     $filterAttribute->handle($this->mockServiceLocator, $testClass, $methodReflection, $filterAttribute);
 });
 
-it('executes filter and returns modified value', function () {
+it('executes filter and returns modified value', function (): void {
     // Set up expectations for the add method
     $this->mockFilter->shouldReceive('add')
         ->once()
@@ -197,11 +182,11 @@ it('executes filter and returns modified value', function () {
     expect($result)->toBe('modified_original');
 });
 
-it('handles null service locator resolution gracefully', function () {
+it('handles null service locator resolution gracefully', function (): void {
     // Create a service locator that returns null for the service
     $mockServiceLocator = new class
     {
-        public function get($serviceClass)
+        public function get($serviceClass): null
         {
             return null;
         }
@@ -218,7 +203,7 @@ it('handles null service locator resolution gracefully', function () {
     expect(true)->toBeTrue();
 });
 
-afterEach(function () {
+afterEach(function (): void {
     Mockery::close();
     Facade::clearResolvedInstances();
 });

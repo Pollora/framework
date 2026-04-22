@@ -2,173 +2,112 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Plugin;
-
-use PHPUnit\Framework\TestCase;
 use Pollora\Plugin\Domain\Models\PluginMetadata;
 
-/**
- * Tests for PluginMetadata class.
- */
-class PluginMetadataTest extends TestCase
-{
-    private PluginMetadata $pluginMetadata;
-
-    private string $pluginName;
-
-    private string $basePath;
-
-    protected function setUp(): void
-    {
+describe('PluginMetadata', function (): void {
+    beforeEach(function (): void {
         $this->pluginName = 'test-plugin';
         $this->basePath = '/path/to/plugins';
-        $this->pluginMetadata = new PluginMetadata($this->pluginName, $this->basePath);
-    }
+        $this->metadata = new PluginMetadata($this->pluginName, $this->basePath);
+    });
 
-    public function test_it_can_be_instantiated_with_name_and_base_path(): void
-    {
-        $this->assertInstanceOf(PluginMetadata::class, $this->pluginMetadata);
-        $this->assertEquals($this->pluginName, $this->pluginMetadata->getName());
-    }
+    it('can be instantiated with name and base path', function (): void {
+        expect($this->metadata)->toBeInstanceOf(PluginMetadata::class);
+        expect($this->metadata->getName())->toBe($this->pluginName);
+    });
 
-    public function test_it_returns_correct_base_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName;
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getBasePath());
-    }
+    it('returns correct base path', function (): void {
+        expect($this->metadata->getBasePath())->toBe($this->basePath.'/'.$this->pluginName);
+    });
 
-    public function test_it_returns_correct_main_file_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/'.$this->pluginName.'.php';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getMainFilePath());
-    }
+    it('returns correct main file path', function (): void {
+        expect($this->metadata->getMainFilePath())->toBe($this->basePath.'/'.$this->pluginName.'/'.$this->pluginName.'.php');
+    });
 
-    public function test_it_returns_correct_config_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/plugin.json';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getConfigPath());
-    }
+    it('returns correct config path', function (): void {
+        expect($this->metadata->getConfigPath())->toBe($this->basePath.'/'.$this->pluginName.'/plugin.json');
+    });
 
-    public function test_it_returns_correct_language_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/languages';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getLanguagePath());
-    }
+    it('returns correct language path', function (): void {
+        expect($this->metadata->getLanguagePath())->toBe($this->basePath.'/'.$this->pluginName.'/languages');
+    });
 
-    public function test_it_returns_correct_plugin_namespace(): void
-    {
-        $expectedNamespace = 'TestPlugin';
-        $this->assertEquals($expectedNamespace, $this->pluginMetadata->getPluginNamespace());
-    }
+    it('returns correct plugin namespace', function (): void {
+        expect($this->metadata->getPluginNamespace())->toBe('TestPlugin');
+    });
 
-    public function test_it_handles_complex_plugin_names(): void
-    {
-        $complexPlugin = new PluginMetadata('my-awesome-plugin', $this->basePath);
-        $expectedNamespace = 'MyAwesomePlugin';
-        $this->assertEquals($expectedNamespace, $complexPlugin->getPluginNamespace());
-    }
+    it('handles complex plugin names', function (): void {
+        $plugin = new PluginMetadata('my-awesome-plugin', $this->basePath);
+        expect($plugin->getPluginNamespace())->toBe('MyAwesomePlugin');
+    });
 
-    public function test_it_returns_correct_plugin_app_dir(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/app';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getPluginAppDir());
-    }
+    it('returns correct plugin app dir', function (): void {
+        expect($this->metadata->getPluginAppDir())->toBe($this->basePath.'/'.$this->pluginName.'/app');
+    });
 
-    public function test_it_returns_correct_plugin_app_dir_with_subdirectory(): void
-    {
-        $subDirectory = 'Providers';
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/app/'.$subDirectory;
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getPluginAppDir($subDirectory));
-    }
+    it('returns correct plugin app dir with subdirectory', function (): void {
+        expect($this->metadata->getPluginAppDir('Providers'))->toBe($this->basePath.'/'.$this->pluginName.'/app/Providers');
+    });
 
-    public function test_it_returns_correct_plugin_app_file(): void
-    {
-        $fileName = 'ServiceProvider.php';
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/app/'.$fileName;
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getPluginAppFile($fileName));
-    }
+    it('returns correct plugin app file', function (): void {
+        expect($this->metadata->getPluginAppFile('ServiceProvider.php'))->toBe($this->basePath.'/'.$this->pluginName.'/app/ServiceProvider.php');
+    });
 
-    public function test_it_returns_empty_config_initially(): void
-    {
-        $this->assertEquals([], $this->pluginMetadata->getConfig());
-    }
+    it('returns empty config initially', function (): void {
+        expect($this->metadata->getConfig())->toBe([]);
+    });
 
-    public function test_it_returns_correct_slug(): void
-    {
-        $this->assertEquals('test-plugin', $this->pluginMetadata->getSlug());
-    }
+    it('returns correct slug', function (): void {
+        expect($this->metadata->getSlug())->toBe('test-plugin');
+    });
 
-    public function test_it_returns_correct_basename(): void
-    {
-        $expectedBasename = $this->pluginName.'/'.$this->pluginName.'.php';
-        $this->assertEquals($expectedBasename, $this->pluginMetadata->getBasename());
-    }
+    it('returns correct basename', function (): void {
+        expect($this->metadata->getBasename())->toBe($this->pluginName.'/'.$this->pluginName.'.php');
+    });
 
-    public function test_it_handles_plugin_name_with_spaces(): void
-    {
+    it('handles plugin name with spaces', function (): void {
         $plugin = new PluginMetadata('My Plugin Name', $this->basePath);
-        $this->assertEquals('my-plugin-name', $plugin->getSlug());
-    }
+        expect($plugin->getSlug())->toBe('my-plugin-name');
+    });
 
-    public function test_it_handles_plugin_name_with_underscores(): void
-    {
+    it('handles plugin name with underscores', function (): void {
         $plugin = new PluginMetadata('my_plugin_name', $this->basePath);
-        $this->assertEquals('my-plugin-name', $plugin->getSlug());
-    }
+        expect($plugin->getSlug())->toBe('my-plugin-name');
+    });
 
-    public function test_it_returns_correct_views_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/views';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getViewsPath());
-    }
+    it('returns correct views path', function (): void {
+        expect($this->metadata->getViewsPath())->toBe($this->basePath.'/'.$this->pluginName.'/views');
+    });
 
-    public function test_it_returns_correct_assets_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/assets';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getAssetsPath());
-    }
+    it('returns correct assets path', function (): void {
+        expect($this->metadata->getAssetsPath())->toBe($this->basePath.'/'.$this->pluginName.'/assets');
+    });
 
-    public function test_it_returns_correct_routes_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/routes';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getRoutesPath());
-    }
+    it('returns correct routes path', function (): void {
+        expect($this->metadata->getRoutesPath())->toBe($this->basePath.'/'.$this->pluginName.'/routes');
+    });
 
-    public function test_it_returns_correct_config_dir(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/config';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getConfigDir());
-    }
+    it('returns correct config dir', function (): void {
+        expect($this->metadata->getConfigDir())->toBe($this->basePath.'/'.$this->pluginName.'/config');
+    });
 
-    public function test_it_returns_correct_database_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/database';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getDatabasePath());
-    }
+    it('returns correct database path', function (): void {
+        expect($this->metadata->getDatabasePath())->toBe($this->basePath.'/'.$this->pluginName.'/database');
+    });
 
-    public function test_it_returns_correct_tests_path(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/tests';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getTestsPath());
-    }
+    it('returns correct tests path', function (): void {
+        expect($this->metadata->getTestsPath())->toBe($this->basePath.'/'.$this->pluginName.'/tests');
+    });
 
-    public function test_it_returns_path_for_item_with_array(): void
-    {
-        $pathParts = ['config', 'app.php'];
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/config/app.php';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getPathForItem($pathParts));
-    }
+    it('returns path for item with array', function (): void {
+        expect($this->metadata->getPathForItem(['config', 'app.php']))->toBe($this->basePath.'/'.$this->pluginName.'/config/app.php');
+    });
 
-    public function test_it_returns_path_for_item_with_string(): void
-    {
-        $pathPart = 'config';
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/config';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getPathForItem($pathPart));
-    }
+    it('returns path for item with string', function (): void {
+        expect($this->metadata->getPathForItem('config'))->toBe($this->basePath.'/'.$this->pluginName.'/config');
+    });
 
-    public function test_it_returns_path_for_item_with_null(): void
-    {
-        $expectedPath = $this->basePath.'/'.$this->pluginName.'/';
-        $this->assertEquals($expectedPath, $this->pluginMetadata->getPathForItem(null));
-    }
-}
+    it('returns path for item with null', function (): void {
+        expect($this->metadata->getPathForItem(null))->toBe($this->basePath.'/'.$this->pluginName.'/');
+    });
+});

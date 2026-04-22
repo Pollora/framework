@@ -10,8 +10,8 @@ use Psr\Container\ContainerInterface;
 
 require_once __DIR__.'/../helpers.php';
 
-describe('Templates', function () {
-    it('resolves Action from container', function () {
+describe('Templates', function (): void {
+    it('resolves Action from container', function (): void {
         $mockAction = m::mock(Action::class);
         $mockContainer = m::mock(ContainerInterface::class);
         $mockConfig = m::mock(ConfigRepositoryInterface::class);
@@ -27,7 +27,7 @@ describe('Templates', function () {
 
         $component = new Templates($mockContainer, $mockConfig);
         $ref = new ReflectionProperty($component, 'app');
-        $ref->setAccessible(true);
+
         expect($ref->getValue($component))->toBe($mockContainer);
     });
 });

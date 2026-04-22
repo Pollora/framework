@@ -9,14 +9,14 @@ use Pollora\Taxonomy\Application\Services\TaxonomyService;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyRegistryInterface;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->mockFactory = mock(TaxonomyFactoryInterface::class);
     $this->mockRegistry = mock(TaxonomyRegistryInterface::class);
     $this->mockTaxonomy = mock(Taxonomy::class);
     $this->taxonomyService = new TaxonomyService($this->mockFactory, $this->mockRegistry);
 });
 
-test('register calls make on factory', function () {
+test('register calls make on factory', function (): void {
     // Define test values
     $slug = 'test-taxonomy';
     $objectType = 'post';
@@ -40,7 +40,7 @@ test('register calls make on factory', function () {
     expect($result)->toBe($this->mockTaxonomy);
 });
 
-test('exists calls exists on registry', function () {
+test('exists calls exists on registry', function (): void {
     // Define test values
     $slug = 'test-taxonomy';
 
@@ -58,7 +58,7 @@ test('exists calls exists on registry', function () {
     expect($result)->toBeTrue();
 });
 
-test('getRegistered calls getAll on registry', function () {
+test('getRegistered calls getAll on registry', function (): void {
     // Define test values
     $registeredTaxonomies = ['category', 'tag', 'test-taxonomy'];
 

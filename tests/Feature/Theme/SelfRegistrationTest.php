@@ -8,11 +8,11 @@ use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 
 require_once dirname(__DIR__, 2).'/Unit/helpers.php';
 
-beforeEach(function () {
+beforeEach(function (): void {
     setupWordPressMocks();
 
-    setWordPressFunction('get_stylesheet', fn () => 'my-theme');
-    setWordPressFunction('get_stylesheet_directory', fn () => __DIR__.'/fixtures/my-theme');
+    setWordPressFunction('get_stylesheet', fn (): string => 'my-theme');
+    setWordPressFunction('get_stylesheet_directory', fn (): string => __DIR__.'/fixtures/my-theme');
 
     // Create a minimal theme fixture
     $fixturePath = __DIR__.'/fixtures/my-theme';
@@ -22,7 +22,7 @@ beforeEach(function () {
     }
 });
 
-afterEach(function () {
+afterEach(function (): void {
     // Clean up fixture
     $fixturePath = __DIR__.'/fixtures/my-theme';
     if (is_dir($fixturePath)) {
@@ -32,8 +32,8 @@ afterEach(function () {
     }
 });
 
-describe('ThemeRegistrar integration', function () {
-    it('registers a theme with parsed headers from style.css', function () {
+describe('ThemeRegistrar integration', function (): void {
+    it('registers a theme with parsed headers from style.css', function (): void {
         $parser = new WordPressThemeParser;
         $registrar = new ThemeRegistrar($this->app, $parser);
 
@@ -46,7 +46,7 @@ describe('ThemeRegistrar integration', function () {
         expect($theme->isEnabled())->toBeTrue();
     });
 
-    it('can retrieve the active theme after registration', function () {
+    it('can retrieve the active theme after registration', function (): void {
         $parser = new WordPressThemeParser;
         $registrar = new ThemeRegistrar($this->app, $parser);
 
@@ -57,7 +57,7 @@ describe('ThemeRegistrar integration', function () {
         expect($registrar->isThemeActive('other-theme'))->toBeFalse();
     });
 
-    it('can reset the active theme', function () {
+    it('can reset the active theme', function (): void {
         $parser = new WordPressThemeParser;
         $registrar = new ThemeRegistrar($this->app, $parser);
 

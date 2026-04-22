@@ -11,8 +11,8 @@ use Psr\Container\ContainerInterface;
 
 require_once __DIR__.'/../helpers.php';
 
-describe('Menus', function () {
-    it('resolves Action and Filter from container', function () {
+describe('Menus', function (): void {
+    it('resolves Action and Filter from container', function (): void {
         $mockAction = m::mock(Action::class);
         $mockFilter = m::mock(Filter::class);
         $mockContainer = m::mock(ContainerInterface::class);
@@ -33,7 +33,7 @@ describe('Menus', function () {
 
         $component = new Menus($mockContainer, $mockConfig);
         $ref = new ReflectionProperty($component, 'app');
-        $ref->setAccessible(true);
+
         expect($ref->getValue($component))->toBe($mockContainer);
     });
 });
