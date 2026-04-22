@@ -50,12 +50,4 @@ interface TaxonomyServiceInterface
      * @return array<string, mixed> The registered post types
      */
     public function getRegistered(): array;
-
-    /**
-     * Register a taxonomy from a class with Taxonomy attribute.
-     *
-     * @param  string  $className  The fully qualified class name
-     * @return object|null The registered taxonomy instance or null if failed
-     */
-    public function registerFromClass(string $className): ?object;
 }

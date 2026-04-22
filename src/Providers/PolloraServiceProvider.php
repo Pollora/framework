@@ -12,8 +12,6 @@ use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
 use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
-use Pollora\Attributes\AttributesServiceProvider;
-use Pollora\Attributes\Infrastructure\Providers\AttributableServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
@@ -23,10 +21,9 @@ use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
-use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
-use Pollora\Providers\QueryServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
+use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
@@ -81,8 +78,6 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(DiscoveryServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
-        $this->app->register(AttributesServiceProvider::class);
-        $this->app->register(AttributableServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
         $this->app->register(ExceptionServiceProvider::class);
 
@@ -99,7 +94,6 @@ class PolloraServiceProvider extends ServiceProvider
         // Shared modules
         $this->app->register(CollectionServiceProvider::class);
         $this->app->register(OptionServiceProvider::class);
-
 
         // Block features
         $this->app->register(BlockCategoryServiceProvider::class);

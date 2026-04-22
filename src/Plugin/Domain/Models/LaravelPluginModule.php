@@ -46,7 +46,7 @@ class LaravelPluginModule extends PluginModule
     public function getCachedServicesPath(): string
     {
         // Check if we are running on a Laravel Vapor managed instance
-        if (! is_null(env('VAPOR_MAINTENANCE_MODE', null))) {
+        if (! is_null(env('VAPOR_MAINTENANCE_MODE'))) {
             return Str::replaceLast('config.php', $this->getSnakeName().'_plugin.php', $this->app->getCachedConfigPath());
         }
 
@@ -199,34 +199,6 @@ class LaravelPluginModule extends PluginModule
     public function getFiles(): array
     {
         return $this->get('files', []);
-    }
-
-    /**
-     * Find the main service provider for this plugin.
-     *
-     * This method is kept for compatibility with ModuleManifest but
-     * provider discovery is now primarily handled by ServiceProviderScout.
-     *
-     * @return string|null Main service provider class name
-     */
-    public function findMainServiceProvider(): ?string
-    {
-        $possibleClasses = [
-            "Plugin\\{$this->getStudlyName()}\\Providers\\PluginServiceProvider",
-            "Plugin\\{$this->getStudlyName()}\\PluginServiceProvider",
-            // Legacy support for old naming conventions
-            "App\\Plugins\\{$this->getStudlyName()}\\Providers\\PluginServiceProvider",
-            "App\\Plugins\\{$this->getStudlyName()}\\PluginServiceProvider",
-            "Plugins\\{$this->getStudlyName()}\\Providers\\PluginServiceProvider",
-        ];
-
-        foreach ($possibleClasses as $class) {
-            if (class_exists($class)) {
-                return $class;
-            }
-        }
-
-        return null;
     }
 
     /**

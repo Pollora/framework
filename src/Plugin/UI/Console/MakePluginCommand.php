@@ -80,26 +80,14 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     protected PluginMetadata $plugin;
 
     /**
-     * Configuration repository.
-     */
-    protected Repository $config;
-
-    /**
-     * Filesystem instance.
-     */
-    protected Filesystem $files;
-
-    /**
      * Create a new command instance.
      *
      * @param  Repository  $config  Configuration repository
      * @param  Filesystem  $files  Filesystem instance
      */
-    public function __construct(Repository $config, Filesystem $files)
+    public function __construct(protected Repository $config, protected Filesystem $files)
     {
         parent::__construct();
-        $this->config = $config;
-        $this->files = $files;
     }
 
     /**
@@ -117,7 +105,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
         $repository = $this->promptForRepository();
 
-        if ($repository !== null && $repository !== '' && $repository !== '0') {
+        if (! in_array($repository, [null, '', '0'], true)) {
             $this->downloadFromRepository($repository);
         } else {
             // Use default repository instead of local stubs
@@ -188,7 +176,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     protected function validatePluginName(): bool
     {
         $message = $this->validateValue($this->argument('name'));
-        if ($message !== null && $message !== '' && $message !== '0') {
+        if (! in_array($message, [null, '', '0'], true)) {
             $this->error($message);
 
             return false;
@@ -213,9 +201,9 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         $this->error("Plugin \"{$name}\" already exists.");
         if ($this->option('force')) {
             return $this->confirm("Are you sure you want to override \"{$name}\" plugin folder?");
-        } else {
-            return false;
         }
+
+        return false;
 
     }
 
@@ -525,14 +513,12 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         foreach ($this->assetFilesToExclude as $excludePattern) {
             if (str_ends_with($excludePattern, '/')) {
                 // Directory pattern
-                if (str_starts_with($relativePath, $excludePattern)) {
+                if (str_starts_with((string) $relativePath, $excludePattern)) {
                     return true;
                 }
-            } else {
+            } elseif ($relativePath === $excludePattern || str_ends_with((string) $relativePath, '/'.$excludePattern)) {
                 // File pattern
-                if ($relativePath === $excludePattern || str_ends_with($relativePath, '/'.$excludePattern)) {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -617,14 +603,14 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         $sanitized = preg_replace('/[^a-z0-9_]/', '_', $sanitized);
 
         // Remove multiple consecutive underscores
-        $sanitized = preg_replace('/_+/', '_', $sanitized);
+        $sanitized = preg_replace('/_+/', '_', (string) $sanitized);
 
         // Remove leading/trailing underscores
-        $sanitized = trim($sanitized, '_');
+        $sanitized = trim((string) $sanitized, '_');
 
         // Ensure it doesn't start with a number by prefixing with underscore
-        if (preg_match('/^[0-9]/', $sanitized)) {
-            $sanitized = '_'.$sanitized;
+        if (preg_match('/^\d/', $sanitized)) {
+            return '_'.$sanitized;
         }
 
         return $sanitized;
@@ -693,7 +679,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
             'name' => fn (): string => text(
                 label: 'What is the name of the new plugin?',
                 default: 'default-plugin',
-                validate: fn ($value): ?string => $this->validateValue($value)
+                validate: fn (string $value): ?string => $this->validateValue($value)
             ),
         ];
     }

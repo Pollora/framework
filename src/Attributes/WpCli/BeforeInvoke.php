@@ -13,14 +13,14 @@ use Attribute;
  * The callback can be a method name or a callable array.
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-final class BeforeInvoke
+final readonly class BeforeInvoke
 {
     /**
      * Create a new Before Invoke attribute.
      *
-     * @param string|callable $callback The callback to execute before command invocation
+     * @param  string|callable  $callback  The callback to execute before command invocation
      */
     public function __construct(
-        public readonly string|array $callback
+        public string|array $callback
     ) {}
 }

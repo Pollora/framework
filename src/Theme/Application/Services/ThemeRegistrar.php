@@ -113,10 +113,36 @@ class ThemeRegistrar implements ThemeRegistrarInterface
         try {
             $discoveryService = $this->app->get(ModuleDiscoveryOrchestratorInterface::class);
 
-            $discoveryService->discover($theme->getPath());
+            // Get the app directory path for the theme
+            $appPath = $this->getThemeAppPath($theme);
+            if ($appPath && is_dir($appPath)) {
+                $discoveryService->discover($appPath);
+            }
         } catch (\Exception $e) {
             $this->logError("Theme discovery error for {$theme->getName()}: ".$e->getMessage());
         }
+    }
+
+    /**
+     * Get the app directory path for a theme
+     */
+    private function getThemeAppPath(ThemeModuleInterface $theme): ?string
+    {
+        $basePath = $theme->getPath();
+
+        // Check for app/ directory first (preferred)
+        $appPath = $basePath.'/app';
+        if (is_dir($appPath)) {
+            return $appPath;
+        }
+
+        // Fallback to src/ directory
+        $srcPath = $basePath.'/src';
+        if (is_dir($srcPath)) {
+            return $srcPath;
+        }
+
+        return null;
     }
 
     /**

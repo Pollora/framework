@@ -63,7 +63,6 @@ class InstallationService
         $this->installLoaderService->bootstrap();
 
         $result = spin(
-            message: 'Installing WordPress...',
             callback: fn () => wp_install(
                 $config->title,
                 $config->adminUser,
@@ -72,7 +71,8 @@ class InstallationService
                 '',
                 $config->adminPassword,
                 $config->locale
-            )
+            ),
+            message: 'Installing WordPress...'
         );
 
         if (is_wp_error($result)) {
@@ -100,6 +100,15 @@ class InstallationService
         // Enable pretty permalinks by default
         if (function_exists('update_option')) {
             update_option('permalink_structure', '/%postname%/');
+
+            // The bootstrap filter on 'pre_option_permalink_structure' forces an empty
+            // structure. Replace it so flush_rewrite_rules() uses the actual value.
+            remove_all_filters('pre_option_permalink_structure');
+
+            // Reinitialize WP_Rewrite with the correct permalink structure
+            global $wp_rewrite;
+            $wp_rewrite->init();
+
             if (function_exists('flush_rewrite_rules')) {
                 flush_rewrite_rules();
             }

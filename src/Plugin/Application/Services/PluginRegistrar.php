@@ -116,7 +116,7 @@ class PluginRegistrar
         $registeredPlugins = [];
 
         foreach ($activePlugins as $pluginBasename) {
-            $pluginName = dirname($pluginBasename);
+            $pluginName = dirname((string) $pluginBasename);
             $pluginPath = WP_PLUGIN_DIR.'/'.$pluginName;
 
             if (is_dir($pluginPath) && $pluginName !== '.') {
@@ -297,7 +297,7 @@ class PluginRegistrar
 
             $moduleId = 'plugin.'.$plugin->getLowerName();
 
-            if (! empty($pluginComponents)) {
+            if ($pluginComponents !== []) {
                 $componentManager->registerModuleComponents($moduleId, $pluginComponents);
                 $componentManager->initializeModuleComponents($moduleId);
             }
@@ -358,14 +358,12 @@ class PluginRegistrar
      */
     public function getRegisteredPluginsByStatus(string $status): array
     {
-        return array_filter($this->registeredPlugins, function (PluginModuleInterface $plugin) use ($status): bool {
-            return match ($status) {
-                'active' => $plugin->isActive(),
-                'inactive' => ! $plugin->isActive(),
-                'enabled' => $plugin->isEnabled(),
-                'disabled' => $plugin->isDisabled(),
-                default => true,
-            };
+        return array_filter($this->registeredPlugins, fn (PluginModuleInterface $plugin): bool => match ($status) {
+            'active' => $plugin->isActive(),
+            'inactive' => ! $plugin->isActive(),
+            'enabled' => $plugin->isEnabled(),
+            'disabled' => $plugin->isDisabled(),
+            default => true,
         });
     }
 

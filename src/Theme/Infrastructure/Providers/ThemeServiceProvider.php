@@ -170,29 +170,25 @@ class ThemeServiceProvider extends ServiceProvider
     private function registerCoreServices(): void
     {
         // Domain container adapter - bridges domain and Laravel container
-        $this->app->singleton(ContainerInterface::class, fn ($app) => $this->createDomainContainer($app));
+        $this->app->singleton(ContainerInterface::class, fn ($app): \Pollora\Theme\Domain\Contracts\ContainerInterface => $this->createDomainContainer($app));
 
         // Theme registrar for self-registration pattern
-        $this->app->singleton(ThemeRegistrarInterface::class, function ($app) {
-            return new ThemeRegistrar(
-                $app->make(ContainerInterface::class),
-                $app->make(WordPressThemeParser::class)
-            );
-        });
+        $this->app->singleton(ThemeRegistrarInterface::class, fn ($app): \Pollora\Theme\Application\Services\ThemeRegistrar => new ThemeRegistrar(
+            $app->make(ContainerInterface::class),
+            $app->make(WordPressThemeParser::class)
+        ));
 
         // Theme autoloader service
         $this->app->singleton(ThemeAutoloader::class);
 
         // Main theme service - implements domain interface
-        $this->app->singleton(ThemeService::class, function ($app) {
-            return new ThemeManager(
-                $app,
-                $app->get('view')->getFinder(),
-                $app->make('translator')->getLoader(),
-                $app->bound('theme.repository') ? $app->make('theme.repository') : null,
-                $app->make(ThemeRegistrarInterface::class)
-            );
-        });
+        $this->app->singleton(ThemeService::class, fn ($app): \Pollora\Theme\Application\Services\ThemeManager => new ThemeManager(
+            $app,
+            $app->get('view')->getFinder(),
+            $app->make('translator')->getLoader(),
+            $app->bound('theme.repository') ? $app->make('theme.repository') : null,
+            $app->make(ThemeRegistrarInterface::class)
+        ));
     }
 
     /**
@@ -209,13 +205,11 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressThemeParser::class);
 
         // Deprecated theme repository - kept for backward compatibility only
-        $this->app->singleton('theme.repository', function ($app) {
-            return new ThemeRepository(
-                $app,
-                $app->make(WordPressThemeParser::class),
-                $app->make(CollectionFactoryInterface::class)
-            );
-        });
+        $this->app->singleton('theme.repository', fn ($app): \Pollora\Theme\Infrastructure\Repositories\ThemeRepository => new ThemeRepository(
+            $app,
+            $app->make(WordPressThemeParser::class),
+            $app->make(CollectionFactoryInterface::class)
+        ));
     }
 
     /**
@@ -433,15 +427,9 @@ class ThemeServiceProvider extends ServiceProvider
     private function registerCommands(): void
     {
         $commands = [
-            'theme.generator' => function ($app) {
-                return new MakeThemeCommand($app->make('config'), $app->make('files'));
-            },
-            'theme.remover' => function ($app) {
-                return new RemoveThemeCommand($app->make('config'), $app->make('files'));
-            },
-            'theme.status' => function ($app) {
-                return new ThemeStatusCommand;
-            },
+            'theme.generator' => fn ($app): \Pollora\Theme\UI\Console\MakeThemeCommand => new MakeThemeCommand($app->make('config'), $app->make('files')),
+            'theme.remover' => fn ($app): \Pollora\Theme\UI\Console\RemoveThemeCommand => new RemoveThemeCommand($app->make('config'), $app->make('files')),
+            'theme.status' => fn ($app): \Pollora\Theme\UI\Console\Commands\ThemeStatusCommand => new ThemeStatusCommand,
         ];
 
         foreach ($commands as $name => $factory) {

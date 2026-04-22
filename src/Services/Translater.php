@@ -76,7 +76,7 @@ class Translater
      * @param  array<int, string>  $keys  The array of keys to traverse
      * @param  array<string, mixed>  $item  Reference to the item array being modified
      */
-    protected function recursiveTranslateByKey(array $keys, &$item): void
+    protected function recursiveTranslateByKey(array $keys, array &$item): void
     {
         $currentKey = array_shift($keys);
 

@@ -56,7 +56,6 @@ class LanguageService
 
         return search(
             label: 'Select site language (type to search)',
-            placeholder: 'Start typing language name...',
             options: function (string $value) use ($languages) {
                 if ($value === '' || $value === '0') {
                     return $languages;
@@ -72,8 +71,9 @@ class LanguageService
                     })
                     ->all();
             },
-            hint: 'Search by language name or code (e.g., "french" or "fr")',
-            scroll: 5
+            placeholder: 'Start typing language name...',
+            scroll: 5,
+            hint: 'Search by language name or code (e.g., "french" or "fr")'
         );
     }
 
@@ -88,8 +88,8 @@ class LanguageService
     {
         try {
             $response = spin(
-                message: 'Fetching available languages...',
-                callback: fn (): string|false => file_get_contents(self::API_URL)
+                callback: fn (): string|false => file_get_contents(self::API_URL),
+                message: 'Fetching available languages...'
             );
 
             if ($response === false) {

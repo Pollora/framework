@@ -25,7 +25,7 @@ abstract class PostTypeAttribute implements HandlesAttributes
     /**
      * Handle the attribute processing.
      *
-     * This method is called by the AttributeProcessor when processing attributes
+     * This method is called by discovery services when processing attributes
      * on a class. It validates that the class implements the PostType interface
      * and then calls the configure method.
      *

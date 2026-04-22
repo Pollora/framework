@@ -20,6 +20,7 @@ test('register calls make on factory', function () {
     $singular = 'Test Post Type';
     $plural = 'Test Post Types';
     $args = ['public' => true];
+    $priority = 5; // Default priority
 
     $mockPostType = new \stdClass;
 
@@ -27,7 +28,7 @@ test('register calls make on factory', function () {
     // (pollora/entity handles the WordPress registration automatically)
     $this->mockFactory
         ->shouldReceive('make')
-        ->with($slug, $singular, $plural, $args)
+        ->with($slug, $singular, $plural, $args, $priority)
         ->once()
         ->andReturn($mockPostType);
 

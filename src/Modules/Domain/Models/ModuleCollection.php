@@ -75,7 +75,7 @@ class ModuleCollection extends Collection
      */
     public function toThemeArray(): array
     {
-        return $this->mapWithKeys(fn (ModuleInterface $module) => [
+        return $this->mapWithKeys(fn (ModuleInterface $module): array => [
             $module->getLowerName() => [
                 'name' => $module->getName(),
                 'description' => $module->getDescription(),

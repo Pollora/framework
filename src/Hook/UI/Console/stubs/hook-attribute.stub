@@ -1,10 +1,9 @@
 <?php
 namespace {{ namespace }};
 
-use Pollora\Hook\Domain\Contracts\Hooks;
 use Pollora\Attributes\{{ hookType }};
 
-class {{ class }} implements Hooks
+class {{ class }}
 {
     #[{{ hookType }}('{{ hook }}'{{ priority }})]
     public function {{ hookMethodName }}({{ arg }}){{ returnType }}

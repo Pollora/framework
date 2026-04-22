@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
-use Pollora\Discovery\Domain\Models\DiscoveryLocation;
+use Pollora\Discovery\Domain\Models\DirectoryLocation;
 
 /**
  * Discovery Manager
@@ -31,15 +31,14 @@ class DiscoveryManager
     ) {}
 
     /**
-     * Add a discovery location by path and namespace
+     * Add a discovery location by path
      *
-     * @param  string  $namespace  The base namespace for the location
      * @param  string  $path  The filesystem path to scan
      * @return static Returns self for method chaining
      */
-    public function addLocation(string $namespace, string $path): static
+    public function addLocation(string $path): static
     {
-        $location = new DiscoveryLocation($namespace, $path);
+        $location = new DirectoryLocation($path);
         $this->engine->addLocation($location);
 
         return $this;
@@ -48,13 +47,13 @@ class DiscoveryManager
     /**
      * Add multiple discovery locations
      *
-     * @param  array<array{namespace: string, path: string}>  $locations  Array of location data
+     * @param  array<string>  $paths  Array of filesystem paths
      * @return static Returns self for method chaining
      */
-    public function addLocations(array $locations): static
+    public function addLocations(array $paths): static
     {
-        foreach ($locations as $locationData) {
-            $this->addLocation($locationData['namespace'], $locationData['path']);
+        foreach ($paths as $path) {
+            $this->addLocation($path);
         }
 
         return $this;
@@ -162,7 +161,10 @@ class DiscoveryManager
     }
 
     /**
-     * Clear all discovery caches
+     * Clear persistent discovery cache
+     *
+     * Only clears persistent cache (Spatie structure discoverer cache).
+     * In-memory caches are automatically cleared at process end.
      *
      * @return static Returns self for method chaining
      */
@@ -254,5 +256,64 @@ class DiscoveryManager
         }
 
         return $results;
+    }
+
+    /**
+     * Get the underlying discovery engine
+     *
+     * @return DiscoveryEngineInterface The discovery engine instance
+     */
+    public function getEngine(): DiscoveryEngineInterface
+    {
+        return $this->engine;
+    }
+
+    /**
+     * Get performance statistics from the optimized engine
+     *
+     * @return array<string, mixed> Performance statistics or empty array if not available
+     */
+    public function getPerformanceStats(): array
+    {
+        if (method_exists($this->engine, 'getPerformanceStats')) {
+            return $this->engine->getPerformanceStats();
+        }
+
+        return [];
+    }
+
+    /**
+     * Get debugging information about the discovery state
+     *
+     * @return array<string, mixed> Debug information
+     */
+    public function getDebugInfo(): array
+    {
+        $debugInfo = [
+            'discoveries_count' => $this->getDiscoveries()->count(),
+            'locations_count' => $this->getLocations()->count(),
+            'discoveries' => [],
+            'locations' => [],
+        ];
+
+        // Add discovery details
+        foreach ($this->getDiscoveries() as $identifier => $discovery) {
+            $items = $this->getDiscoveredItems($identifier);
+            $debugInfo['discoveries'][$identifier] = [
+                'class' => $discovery::class,
+                'items_count' => count($items),
+                'items' => array_slice($items, 0, 3), // Show first 3 items for debugging
+            ];
+        }
+
+        // Add location details
+        foreach ($this->getLocations() as $location) {
+            $debugInfo['locations'][] = [
+                'path' => $location->getPath(),
+                'exists' => is_dir($location->getPath()),
+            ];
+        }
+
+        return $debugInfo;
     }
 }

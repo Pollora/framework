@@ -28,21 +28,16 @@ use Pollora\Theme\Domain\Contracts\ContainerInterface;
 class DomainContainerAdapter implements ContainerInterface
 {
     /**
-     * Laravel application container instance.
-     *
-     * @var mixed Laravel application container
-     */
-    protected mixed $app;
-
-    /**
      * Create a new domain container adapter.
      *
      * @param  mixed  $app  Laravel application container
      */
-    public function __construct(mixed $app)
-    {
-        $this->app = $app;
-    }
+    public function __construct(
+        /**
+         * Laravel application container instance.
+         */
+        protected mixed $app
+    ) {}
 
     /**
      * Retrieve a service from the container.

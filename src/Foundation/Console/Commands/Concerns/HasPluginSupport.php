@@ -68,7 +68,7 @@ trait HasPluginSupport
         return WP_PLUGIN_DIR.DIRECTORY_SEPARATOR.$pluginOpt;
     }
 
-    protected function getPluginNamespace()
+    protected function getPluginNamespace(): string
     {
         $pluginOpt = $this->resolvePlugin();
         if ($pluginOpt === null) {
@@ -103,14 +103,12 @@ trait HasPluginSupport
             throw new InvalidArgumentException('Plugin name cannot be empty when --plugin option is used.');
         }
 
-        $location = [
+        return [
             'type' => 'plugin',
             'path' => $this->getPluginPath(),
             'namespace' => $this->getPluginNamespace(),
             'source_path' => $this->getPluginSourcePath(),
             'source_namespace' => $this->getPluginSourceNamespace(),
         ];
-
-        return $location;
     }
 }

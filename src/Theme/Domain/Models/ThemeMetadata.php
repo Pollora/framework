@@ -102,7 +102,7 @@ class ThemeMetadata
      */
     public function getThemeNamespace(): string
     {
-        return $this->studlify($this->getName());
+        return 'Theme\\'.$this->studlify($this->getName());
     }
 
     /**
@@ -146,7 +146,7 @@ class ThemeMetadata
     public function getPathForItem(string|array|null $pathParts = null): string
     {
         $pathParts = $this->wrapInArray($pathParts);
-        $folders = $pathParts === [] ? '' : implode('/', $pathParts);
+        $folders = implode('/', $pathParts);
 
         return $this->getBasePath().'/'.$folders;
     }

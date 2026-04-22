@@ -6,9 +6,13 @@ namespace Pollora\Taxonomy\Infrastructure\Services;
 
 use Illuminate\Support\Str;
 use Pollora\Attributes\Taxonomy;
+use Pollora\Discovery\Domain\Contracts\ConfigurableDiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Services\HasConfiguringSupport;
+use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -25,9 +29,9 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  * attributes (like MetaBoxCb, UpdateCountCallback) by aggregating all configuration into a
  * complete WordPress taxonomy registration.
  */
-final class TaxonomyDiscovery implements DiscoveryInterface
+final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, DiscoveryInterface
 {
-    use IsDiscovery;
+    use HasConfiguringSupport, HasInstancePool, IsDiscovery;
 
     /**
      * Create a new Taxonomy discovery
@@ -40,11 +44,43 @@ final class TaxonomyDiscovery implements DiscoveryInterface
 
     /**
      * {@inheritDoc}
+     */
+    public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): \Pollora\Entity\Domain\Model\Taxonomy
+    {
+        // Generate singular name if not provided
+        if ($singular === null) {
+            $singular = $this->generateSingular($slug, null);
+        }
+
+        // Generate plural name if not provided
+        if ($plural === null) {
+            $plural = Str::plural($singular);
+        }
+
+        // Extract object type from args, default to ['post']
+        $objectType = $args['object_type'] ?? ['post'];
+        unset($args['object_type']);
+
+        // Create the Entity Taxonomy instance directly without auto-registration
+        $taxonomy = new EntityTaxonomy($slug, $objectType, $singular, $plural);
+        $taxonomy->init();
+        $taxonomy->priority($priority);
+
+        // Apply additional arguments if provided
+        if ($args !== []) {
+            $taxonomy->setRawArgs($args);
+        }
+
+        return $taxonomy;
+    }
+
+    /**
+     * {@inheritDoc}
      *
      * Discovers classes with Taxonomy attributes and collects them for registration.
      * Only processes classes that have the Taxonomy attribute and are instantiable.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
         if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
@@ -74,6 +110,7 @@ final class TaxonomyDiscovery implements DiscoveryInterface
             'class' => $structure->namespace.'\\'.$structure->name,
             'attribute' => $taxonomyAttribute,
             'structure' => $structure,
+            'reflection_cache' => $reflectionCache,
         ]);
     }
 
@@ -95,7 +132,8 @@ final class TaxonomyDiscovery implements DiscoveryInterface
 
             try {
                 // Process the complete taxonomy configuration
-                $this->processTaxonomy($className);
+                $reflectionCache = $discoveredItem['reflection_cache'] ?? null;
+                $this->processTaxonomy($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other taxonomies
                 error_log("Failed to register Taxonomy from class {$className}: ".$e->getMessage());
@@ -113,13 +151,13 @@ final class TaxonomyDiscovery implements DiscoveryInterface
      * 4. Registering the final taxonomy through the service
      *
      * @param  string  $className  The fully qualified class name
+     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processTaxonomy(string $className): void
+    private function processTaxonomy(string $className, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
-            // Use reflection to get the Taxonomy attribute instance
-            $reflectionClass = new ReflectionClass($className);
-            $taxonomyAttributes = $reflectionClass->getAttributes(Taxonomy::class);
+            $reflectionClass = $reflectionCache->getClassReflection($className);
+            $taxonomyAttributes = $reflectionCache->getClassAttributes($className, Taxonomy::class);
 
             if ($taxonomyAttributes === []) {
                 return;
@@ -139,17 +177,34 @@ final class TaxonomyDiscovery implements DiscoveryInterface
             $config = $this->processMethodLevelAttributes($reflectionClass, $className, $config);
 
             // Get additional arguments from the class instance if it has a withArgs method
-            $this->processAdditionalArgs($className, $config);
-            
-            // Register the taxonomy
-            $this->taxonomyService->register(
+            $this->processAdditionalArgs($className, $config, $reflectionCache);
+
+            // Call configuring method if present and use the configured entity
+            $configuredEntity = $this->processConfiguring(
+                $className,
                 $config->getSlug(),
-                $config->getObjectType(),
                 $config->getName(),
                 $config->getPluralName(),
-                $config->getArgs(),
-                $config->getPriority()
+                ['object_type' => $config->getObjectType()], // Pass only object_type initially, we'll apply attribute configs after
+                $config->getPriority(),
+                $reflectionCache
             );
+
+            // If configuring was called and returned an entity, apply attribute configurations and register
+            if ($configuredEntity !== null) {
+                $this->applySmartMerge($configuredEntity, $config->getArgs());
+                $this->registerEntity($configuredEntity, \Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter::class);
+            } else {
+                // Register the taxonomy using the original service
+                $this->taxonomyService->register(
+                    $config->getSlug(),
+                    $config->getObjectType(),
+                    $config->getName(),
+                    $config->getPluralName(),
+                    $config->getArgs(),
+                    $config->getPriority()
+                );
+            }
 
         } catch (\ReflectionException $e) {
             error_log("Failed to process Taxonomy for class {$className}: ".$e->getMessage());
@@ -284,15 +339,16 @@ final class TaxonomyDiscovery implements DiscoveryInterface
      *
      * @param  string  $className  The class name to process
      * @param  TaxonomyConfiguration  $config  The current configuration
+     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processAdditionalArgs(string $className, TaxonomyConfiguration $config): void
+    private function processAdditionalArgs(string $className, TaxonomyConfiguration $config, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
-            // Try to instantiate the class
-            $reflectionClass = new ReflectionClass($className);
+            $reflectionClass = $reflectionCache->getClassReflection($className);
 
             if ($reflectionClass->isInstantiable()) {
-                $instance = $reflectionClass->newInstance();
+                // Use instance pool if available, otherwise create directly
+                $instance = $this->getInstanceFromPool($className, fn (): object => $reflectionClass->newInstance());
 
                 // Check if the instance has a withArgs method
                 if (method_exists($instance, 'withArgs')) {

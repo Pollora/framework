@@ -109,7 +109,7 @@ class TaxonomyMakeCommand extends AbstractGeneratorCommand
         // Check if object-type option is provided
         if ($objectType = $this->option(static::OBJECT_TYPE_OPTION)) {
             // Split by comma and trim each value
-            $types = array_map('trim', explode(',', $objectType));
+            $types = array_map(trim(...), explode(',', $objectType));
 
             // Format as PHP array
             return $this->formatAsPhpArray($types);

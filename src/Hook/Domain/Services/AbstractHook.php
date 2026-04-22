@@ -264,7 +264,7 @@ abstract class AbstractHook implements HookInterface
     private function studly(string $value): string
     {
         $words = explode('_', $value);
-        $studlyWords = array_map('ucfirst', $words);
+        $studlyWords = array_map(ucfirst(...), $words);
 
         return implode('', $studlyWords);
     }

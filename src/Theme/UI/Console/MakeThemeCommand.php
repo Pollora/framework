@@ -83,7 +83,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         $repository = $this->promptForRepository();
 
-        if ($repository !== null && $repository !== '' && $repository !== '0') {
+        if (! in_array($repository, [null, '', '0'], true)) {
             $this->downloadFromRepository($repository);
         } else {
             // Use default repository instead of local stubs
@@ -138,7 +138,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected function validateThemeName(): bool
     {
         $message = $this->validateValue($this->argument('name'));
-        if ($message !== null && $message !== '' && $message !== '0') {
+        if (! in_array($message, [null, '', '0'], true)) {
             $this->error($message);
 
             return false;
@@ -237,6 +237,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         // Move all contents from extracted path to target path with replacements
         $this->copyDirectoryWithReplacements($extractedPath, $targetPath);
+
+        // Remove development-only directories that shouldn't be in generated themes
+        $this->removeDirectory($targetPath.'/bin');
 
         // Clean up the extracted directory
         $this->removeDirectory(dirname($extractedPath));
@@ -491,7 +494,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             'name' => fn (): string => text(
                 label: 'What is a name of the new theme?',
                 default: 'default',
-                validate: fn ($value): ?string => $this->validateValue($value)
+                validate: fn (string $value): ?string => $this->validateValue($value)
             ),
         ];
     }

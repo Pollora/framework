@@ -95,7 +95,7 @@ class Route extends IlluminateRoute
      */
     public function getCondition(): string
     {
-        if ($this->conditionResolver instanceof \Pollora\Route\Domain\Contracts\ConditionResolverInterface) {
+        if ($this->conditionResolver instanceof ConditionResolverInterface) {
             return $this->conditionResolver->resolveCondition($this->condition);
         }
 
@@ -170,6 +170,14 @@ class Route extends IlluminateRoute
 
     /**
      * Check if the WordPress condition matches.
+     *
+     * Priority order:
+     * 1. WordPress routes with "positive" conditions (single, page, archive, etc.)
+     * 2. Laravel routes
+     * 3. WordPress 404 route (fallback)
+     *
+     * This ensures that explicit WordPress content routes take precedence,
+     * while Laravel routes can still handle URLs that don't match any WordPress content.
      */
     protected function matchesWordPressCondition(): bool
     {
@@ -179,9 +187,48 @@ class Route extends IlluminateRoute
         $condition = $this->getCondition();
         $parameters = $this->getConditionParameters();
 
-        // Check if the WordPress function exists and call it
-        if (function_exists($condition)) {
-            return call_user_func_array($condition, $parameters);
+        // Check if the WordPress function exists
+        if (! function_exists($condition)) {
+            return false;
+        }
+
+        // For is_404 condition, let Laravel routes take precedence
+        // This prevents WordPress 404 from capturing URLs that should be handled by Laravel
+        if ($condition === 'is_404') {
+            // If a Laravel route exists for this request, don't match the 404 route
+            if ($this->hasLaravelRouteForCurrentRequest()) {
+                return false;
+            }
+        }
+
+        // Evaluate the WordPress condition
+        return call_user_func_array($condition, $parameters);
+    }
+
+    /**
+     * Check if there's a Laravel route that matches the current request.
+     */
+    protected function hasLaravelRouteForCurrentRequest(): bool
+    {
+        try {
+            $request = request();
+
+            // Get all routes and try to find a non-WordPress match
+            $routes = $this->router->getRoutes();
+
+            foreach ($routes as $route) {
+                // Skip WordPress routes and the current route
+                if ($route === $this || (method_exists($route, 'isWordPressRoute') && $route->isWordPressRoute())) {
+                    continue;
+                }
+
+                // Check if this Laravel route matches the request
+                if ($route->matches($request, false)) {
+                    return true;
+                }
+            }
+        } catch (\Throwable) {
+            // If any error occurs, continue with WordPress logic
         }
 
         return false;

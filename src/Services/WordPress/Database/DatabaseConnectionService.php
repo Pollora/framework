@@ -60,7 +60,6 @@ class DatabaseConnectionService
     private function testConnection(DatabaseConfig $config): void
     {
         spin(
-            message: 'Testing database connection...',
             callback: fn (): \PDO => new \PDO(
                 sprintf(
                     'mysql:host=%s;port=%d;dbname=%s',
@@ -74,7 +73,8 @@ class DatabaseConnectionService
                     \PDO::ATTR_TIMEOUT => 5, // 5 seconds timeout
                     \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 ]
-            )
+            ),
+            message: 'Testing database connection...'
         );
     }
 

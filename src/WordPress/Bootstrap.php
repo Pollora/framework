@@ -27,13 +27,10 @@ class Bootstrap
      */
     private array $db;
 
-    protected \Pollora\Hook\Domain\Contracts\Action $action;
-
-    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, Action $action)
+    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, protected \Pollora\Hook\Domain\Contracts\Action $action)
     {
         $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
         $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
-        $this->action = $action;
     }
 
     /**
@@ -51,11 +48,13 @@ class Bootstrap
      */
     public function boot(): void
     {
-        $this->db = DB::getConfig(null);
+        $this->db = DB::getConfig();
         $this->setDatabaseConstants();
 
         if ($this->isDatabaseConfigured()) {
-            $this->loadWordPressSettings();
+            $this->withWordPressErrorHandling(function () {
+                $this->loadWordPressSettings();
+            });
         }
 
         if ($this->consoleDetectionService->isConsole() && ! $this->isWordPressInstalled()) {
@@ -63,9 +62,40 @@ class Bootstrap
             Constant::apply();
         }
         if (! $this->consoleDetectionService->isConsole() && $this->isWordPressInstalled()) {
-            $this->runWp();
+            $this->withWordPressErrorHandling(function () {
+                $this->runWp();
+            });
         }
         $this->setupActionHooks();
+    }
+
+    /**
+     * Execute a callback with WordPress-safe error handling.
+     *
+     * Temporarily replaces Laravel's error handler with a basic one that
+     * does not resolve container services on deprecation warnings.
+     */
+    private function withWordPressErrorHandling(callable $callback): void
+    {
+        $previousHandler = set_error_handler(function (int $level, string $message, string $file = '', int $line = 0) use (&$previousHandler) {
+            // Silently ignore deprecation warnings from WordPress/plugins
+            if (in_array($level, [E_DEPRECATED, E_USER_DEPRECATED], true)) {
+                return true;
+            }
+
+            // Forward all other errors to the previous handler (Laravel's)
+            if ($previousHandler) {
+                return $previousHandler($level, $message, $file, $line);
+            }
+
+            return false;
+        });
+
+        try {
+            $callback();
+        } finally {
+            restore_error_handler();
+        }
     }
 
     /**
@@ -212,7 +242,7 @@ class Bootstrap
         Constant::queue('JETPACK_DEV_DEBUG', $debugMode);
 
         foreach ((array) config('wordpress.constants', []) as $key => $value) {
-            $key = strtoupper($key);
+            $key = strtoupper((string) $key);
             Constant::queue($key, $value);
         }
 

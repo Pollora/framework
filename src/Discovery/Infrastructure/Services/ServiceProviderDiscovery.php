@@ -28,7 +28,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
      * Discovers classes that extend ServiceProvider and collects them for registration.
      * Only processes concrete classes that extend Laravel's ServiceProvider.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
         if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
@@ -82,15 +82,30 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
             return true;
         }
 
-        // Check if it extends any class that extends ServiceProvider
+        // Use Spatie's discovery data first to avoid autoloading when possible
+        if ($structure->extendsChain !== null && $structure->extendsChain !== []) {
+            foreach ($structure->extendsChain as $parentClass) {
+                if ($parentClass === ServiceProvider::class) {
+                    return true;
+                }
+            }
+        }
+
+        // Fallback to runtime check only if absolutely necessary
         $fullClassName = $structure->namespace.'\\'.$structure->name;
 
         try {
-            if (class_exists($fullClassName)) {
+            // First check if class is already loaded to avoid triggering autoloader
+            if (class_exists($fullClassName, false)) {
+                return is_subclass_of($fullClassName, ServiceProvider::class);
+            }
+
+            // Only try autoloading as last resort and catch any errors gracefully
+            if (class_exists($fullClassName, true)) {
                 return is_subclass_of($fullClassName, ServiceProvider::class);
             }
         } catch (\Throwable) {
-            // If class cannot be loaded, skip it
+            // If class cannot be loaded (missing dependencies), skip it silently
             return false;
         }
 

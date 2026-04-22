@@ -130,7 +130,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
         $viewName = str_replace(['/', '\\'], '.', $viewName);
         $viewName = preg_replace('/\.(blade\.)?php$/', '', $viewName);
 
-        return $viewName !== '' && $viewName !== '0' && $viewName !== [] ? $viewName : null;
+        return in_array($viewName, ['', '0', []], true) ? null : $viewName;
     }
 
     /**
@@ -138,7 +138,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
      */
     public function getBladeTemplates(array $templates): array
     {
-        return array_map(fn ($template): string|array => str_ends_with($template, '.php') && ! str_ends_with($template, '.blade.php')
+        return array_map(fn (string $template): string|array => str_ends_with($template, '.php') && ! str_ends_with($template, '.blade.php')
             ? str_replace('.php', '.blade.php', $template)
             : $template, $templates);
     }

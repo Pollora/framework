@@ -13,6 +13,7 @@ use Pollora\Attributes\WpCli\Synopsis;
 use Pollora\Attributes\WpCli\When;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\WpCli\Application\Services\WpCliService;
 use Pollora\WpCli\Infrastructure\Adapters\WpCliMethodWrapper;
@@ -29,7 +30,7 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class WpCliDiscovery implements DiscoveryInterface
 {
-    use IsDiscovery;
+    use HasInstancePool, IsDiscovery;
 
     /**
      * @var array<class-string, object>
@@ -43,7 +44,7 @@ final class WpCliDiscovery implements DiscoveryInterface
     /**
      * {@inheritDoc}
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         if (! $structure instanceof DiscoveredClass || $structure->isAbstract) {
             return;
@@ -52,8 +53,10 @@ final class WpCliDiscovery implements DiscoveryInterface
         foreach ($structure->attributes as $attribute) {
             if ($attribute->class === WpCli::class) {
                 $this->getItems()->add($location, [
-                    'class' => $structure->namespace . '\\' . $structure->name,
+                    'class' => $structure->namespace.'\\'.$structure->name,
+                    'reflection_cache' => $reflectionCache,
                 ]);
+
                 return;
             }
         }
@@ -66,9 +69,10 @@ final class WpCliDiscovery implements DiscoveryInterface
     {
         foreach ($this->getItems() as $discoveredItem) {
             try {
-                $this->processWpCliCommand($discoveredItem['class']);
+                $reflectionCache = $discoveredItem['reflection_cache'] ?? null;
+                $this->processWpCliCommand($discoveredItem['class'], $reflectionCache);
             } catch (\Throwable $e) {
-                error_log("Failed to register WP CLI command from class {$discoveredItem['class']}: " . $e->getMessage());
+                error_log("Failed to register WP CLI command from class {$discoveredItem['class']}: ".$e->getMessage());
             }
         }
     }
@@ -76,9 +80,9 @@ final class WpCliDiscovery implements DiscoveryInterface
     /**
      * Process a WP CLI command class for registration.
      */
-    private function processWpCliCommand(string $className): void
+    private function processWpCliCommand(string $className, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
-        $reflectionClass = new ReflectionClass($className);
+        $reflectionClass = $reflectionCache->getClassReflection($className);
 
         if (! $reflectionClass->isInstantiable()) {
             return;
@@ -95,6 +99,7 @@ final class WpCliDiscovery implements DiscoveryInterface
 
         if (empty($commandName)) {
             error_log("WP CLI command {$className} has no command name defined");
+
             return;
         }
 
@@ -113,21 +118,22 @@ final class WpCliDiscovery implements DiscoveryInterface
         }
     }
 
-
-
     /**
      * Retourne une instance unique de la classe de commande.
      *
-     * @param class-string $className
+     * @param  class-string  $className
      */
     private function getCommandInstance(string $className): object
     {
-        if (! isset($this->commandInstances[$className])) {
-            // On laisse le container gérer la construction
-            $this->commandInstances[$className] = app($className);
-        }
+        // Use instance pool if available, otherwise fallback to local cache
+        return $this->getInstanceFromPool($className, function () use ($className) {
+            if (! isset($this->commandInstances[$className])) {
+                // On laisse le container gérer la construction
+                $this->commandInstances[$className] = app($className);
+            }
 
-        return $this->commandInstances[$className];
+            return $this->commandInstances[$className];
+        });
     }
 
     /**
@@ -178,7 +184,6 @@ final class WpCliDiscovery implements DiscoveryInterface
 
             $handler = $this->createCallable($instance, $method);
 
-
             $this->registerCommand(
                 $fullCommandName,
                 $handler,
@@ -187,15 +192,12 @@ final class WpCliDiscovery implements DiscoveryInterface
         }
     }
 
-
-
     /**
      * Register a command through the WP CLI service only.
      * This ensures single responsibility and avoids duplication.
      *
-     * @param string                    $commandName
-     * @param string|array|object       $handler
-     * @param array<string,mixed>       $args
+     * @param  string|array|object  $handler
+     * @param  array<string,mixed>  $args
      */
     private function registerCommand(string $commandName, string|array $handler, array $args = []): void
     {
@@ -213,17 +215,12 @@ final class WpCliDiscovery implements DiscoveryInterface
             return [$instance, $method->getName()];
         }
 
-        // Pour les méthodes non publiques, on doit préserver la documentation
-        // On retourne directement l'instance et le nom de la méthode, mais on rend la méthode accessible
-        $method->setAccessible(true);
-
         // Créer un wrapper qui se comporte comme la méthode originale
         $wrapper = new WpCliMethodWrapper($instance, $method);
 
         // Retourner un callable qui préserve l'accès à la documentation
-        return [$wrapper, '__invoke'];
+        return $wrapper->__invoke(...);
     }
-
 
     /**
      * Collect WP CLI arguments from reflection attributes.
@@ -253,10 +250,10 @@ final class WpCliDiscovery implements DiscoveryInterface
             if ($docComment) {
                 // Extraire la description courte et longue du docblock
                 $description = $this->extractMethodDescription($docComment);
-                if (!empty($description['short'])) {
+                if (! empty($description['short'])) {
                     $args['shortdesc'] = $description['short'];
                 }
-                if (!empty($description['long'])) {
+                if (! empty($description['long'])) {
                     $args['longdesc'] = $description['long'];
                 }
             }
@@ -272,7 +269,7 @@ final class WpCliDiscovery implements DiscoveryInterface
     {
         // Remove /** and */ and leading asterisks
         $cleaned = preg_replace('/^\/\*\*|\*\/$/', '', $docComment);
-        $lines = explode("\n", $cleaned);
+        $lines = explode("\n", (string) $cleaned);
 
         $description = ['short' => '', 'long' => ''];
         $inLongDesc = false;
@@ -282,7 +279,7 @@ final class WpCliDiscovery implements DiscoveryInterface
             $line = trim(ltrim($line, ' *'));
 
             // Skip empty lines at the beginning
-            if (empty($line) && empty($description['short']) && empty($longDescLines)) {
+            if (($line === '' || $line === '0') && empty($description['short']) && $longDescLines === []) {
                 continue;
             }
 
@@ -292,21 +289,22 @@ final class WpCliDiscovery implements DiscoveryInterface
             }
 
             // First non-empty line is the short description
-            if (empty($description['short']) && !empty($line)) {
+            if (empty($description['short']) && ($line !== '' && $line !== '0')) {
                 $description['short'] = $line;
+
                 continue;
             }
 
             // After short description, collect long description
-            if (!empty($description['short'])) {
+            if (isset($description['short']) && ($description['short'] !== '' && $description['short'] !== '0')) {
                 $inLongDesc = true;
-                if (!empty($line) || !empty($longDescLines)) {
+                if ($line !== '' && $line !== '0' || $longDescLines !== []) {
                     $longDescLines[] = $line;
                 }
             }
         }
 
-        if (!empty($longDescLines)) {
+        if ($longDescLines !== []) {
             $description['long'] = trim(implode("\n", $longDescLines));
         }
 

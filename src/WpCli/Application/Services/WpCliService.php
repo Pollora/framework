@@ -28,12 +28,11 @@ class WpCliService
     /**
      * Register a WP CLI command.
      *
-     * @param string $name The command name
-     * @param string|array $className The command class name or callable array
-     * @param string $description The command description
-     * @param int $priority The registration priority
-     * @param array $args Additional WP_CLI::add_command() arguments
-     * @return void
+     * @param  string  $name  The command name
+     * @param  string|array  $className  The command class name or callable array
+     * @param  string  $description  The command description
+     * @param  int  $priority  The registration priority
+     * @param  array  $args  Additional WP_CLI::add_command() arguments
      */
     public function register(string $name, string|array $className, string $description = '', int $priority = 0, array $args = []): void
     {
@@ -45,21 +44,19 @@ class WpCliService
         ];
 
         // Register immediately if WP CLI is available
-        $this->registerWithWpCli($name, $className, $description, $args);
+        $this->registerWithWpCli($name, $className, $args);
     }
 
     /**
      * Register a command with WP CLI through the adapter.
      *
-     * @param string $name The command name
-     * @param string|array $className The command class name or callable array
-     * @param string $description The command description
-     * @param array $args Additional WP_CLI::add_command() arguments
-     * @return void
+     * @param  string  $name  The command name
+     * @param  string|array  $className  The command class name or callable array
+     * @param  array  $args  Additional WP_CLI::add_command() arguments
      */
-    private function registerWithWpCli(string $name, string|array $className, string $description = '', array $args = []): void
+    private function registerWithWpCli(string $name, string|array $className, array $args = []): void
     {
-        if (!$this->wpCliAdapter->isAvailable()) {
+        if (! $this->wpCliAdapter->isAvailable()) {
             return;
         }
 
@@ -67,24 +64,22 @@ class WpCliService
             // Delegate validation and registration to the adapter
             $this->wpCliAdapter->addCommand($name, $className, $args);
         } catch (\Throwable $e) {
-            error_log("Failed to register WP CLI command {$name}: " . $e->getMessage());
+            error_log("Failed to register WP CLI command {$name}: ".$e->getMessage());
         }
     }
 
     /**
      * Initialize all registered commands.
      * This method can be called to ensure all commands are properly initialized.
-     *
-     * @return void
      */
     public function initializeCommands(): void
     {
-        if (!$this->wpCliAdapter->isAvailable()) {
+        if (! $this->wpCliAdapter->isAvailable()) {
             return;
         }
 
         foreach ($this->registeredCommands as $name => $commandData) {
-            $this->registerWithWpCli($name, $commandData['class'], $commandData['description'], $commandData['args']);
+            $this->registerWithWpCli($name, $commandData['class'], $commandData['args']);
         }
     }
 
@@ -101,8 +96,7 @@ class WpCliService
     /**
      * Check if a command is registered.
      *
-     * @param string $name The command name
-     * @return bool
+     * @param  string  $name  The command name
      */
     public function hasCommand(string $name): bool
     {
@@ -112,7 +106,7 @@ class WpCliService
     /**
      * Get command information.
      *
-     * @param string $name The command name
+     * @param  string  $name  The command name
      * @return array{class: string|array, description: string, priority: int, args: array}|null
      */
     public function getCommand(string $name): ?array

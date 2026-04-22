@@ -11,11 +11,11 @@ use Pollora\Option\Domain\Services\OptionValidationService;
 /**
  * Application service for managing WordPress options.
  */
-final class OptionService
+final readonly class OptionService
 {
     public function __construct(
-        private readonly OptionRepositoryInterface $repository,
-        private readonly OptionValidationService $validator
+        private OptionRepositoryInterface $repository,
+        private OptionValidationService $validator
     ) {}
 
     /**

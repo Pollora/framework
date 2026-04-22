@@ -7,6 +7,7 @@ namespace Pollora\WpRest\Infrastructure\Services;
 use Pollora\Attributes\WpRestRoute;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use ReflectionClass;
 use ReflectionMethod;
@@ -21,7 +22,12 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class WpRestDiscovery implements DiscoveryInterface
 {
-    use IsDiscovery;
+    use HasInstancePool, IsDiscovery;
+
+    /**
+     * Cache for wrapper instances to avoid recreating them
+     */
+    private array $wrapperCache = [];
 
     /**
      * {@inheritDoc}
@@ -29,7 +35,7 @@ final class WpRestDiscovery implements DiscoveryInterface
      * Discovers classes with WpRestRoute attributes and collects them for registration.
      * Only processes classes that have the WpRestRoute attribute.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
         if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
@@ -52,6 +58,7 @@ final class WpRestDiscovery implements DiscoveryInterface
             'class' => $structure->namespace.'\\'.$structure->name,
             'attribute' => $wpRestRouteAttribute,
             'structure' => $structure,
+            'reflection_cache' => $reflectionCache,
         ]);
     }
 
@@ -72,7 +79,8 @@ final class WpRestDiscovery implements DiscoveryInterface
 
             try {
                 // Process the complete WP REST route configuration
-                $this->processWpRestRoute($className);
+                $reflectionCache = $discoveredItem['reflection_cache'] ?? null;
+                $this->processWpRestRoute($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other REST routes
                 error_log("Failed to register WP REST route from class {$className}: ".$e->getMessage());
@@ -101,12 +109,13 @@ final class WpRestDiscovery implements DiscoveryInterface
      * Process a complete WP REST route configuration from its class and attributes.
      *
      * @param  string  $className  The fully qualified class name
+     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processWpRestRoute(string $className): void
+    private function processWpRestRoute(string $className, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
-            $reflectionClass = new ReflectionClass($className);
-            $wpRestRouteAttributes = $reflectionClass->getAttributes(WpRestRoute::class);
+            $reflectionClass = $reflectionCache->getClassReflection($className);
+            $wpRestRouteAttributes = $reflectionCache->getClassAttributes($className, WpRestRoute::class);
 
             if ($wpRestRouteAttributes === []) {
                 return;
@@ -115,13 +124,20 @@ final class WpRestDiscovery implements DiscoveryInterface
             /** @var WpRestRoute $wpRestRoute */
             $wpRestRoute = $wpRestRouteAttributes[0]->newInstance();
 
-            // Create wrapper once for the class
-            $attributableWrapper = new WpRestAttributableWrapper(
-                $className,
-                $wpRestRoute->namespace,
-                $wpRestRoute->route,
-                $wpRestRoute->permissionCallback
-            );
+            // Create wrapper once for the class (use cache to avoid recreating)
+            $wrapperKey = md5($className.$wpRestRoute->namespace.$wpRestRoute->route);
+
+            if (! isset($this->wrapperCache[$wrapperKey])) {
+                $this->wrapperCache[$wrapperKey] = new WpRestAttributableWrapper(
+                    $className,
+                    $wpRestRoute->namespace,
+                    $wpRestRoute->route,
+                    $wpRestRoute->permissionCallback,
+                    $reflectionCache
+                );
+            }
+
+            $attributableWrapper = $this->wrapperCache[$wrapperKey];
 
             // Process all method-level attributes
             $this->processMethodLevelAttributes($reflectionClass, $attributableWrapper);

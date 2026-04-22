@@ -83,7 +83,7 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
             if ($template) {
                 $pages = array_filter(
                     $templates,
-                    fn ($file): bool => str_contains($file, (string) $template)
+                    fn (string $file): bool => str_contains($file, (string) $template)
                 );
 
                 $templates = array_diff($templates, $pages);

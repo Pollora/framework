@@ -112,7 +112,7 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
     public function getArgs(): array
     {
         $args = $this->attributeArgs;
-        unset($args["priority"]);
+        unset($args['priority']);
 
         return $args;
     }
@@ -120,7 +120,7 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
     /**
      * Get the taxonomy priority declaration
      *
-     * @return  int $priority Declaration priority
+     * @return int $priority Declaration priority
      */
     public function getPriority(): int
     {

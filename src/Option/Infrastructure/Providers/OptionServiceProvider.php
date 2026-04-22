@@ -27,12 +27,10 @@ final class OptionServiceProvider extends ServiceProvider
 
         $this->app->singleton(OptionValidationService::class);
 
-        $this->app->singleton(OptionService::class, function ($app) {
-            return new OptionService(
-                $app->make(OptionRepositoryInterface::class),
-                $app->make(OptionValidationService::class)
-            );
-        });
+        $this->app->singleton(OptionService::class, fn ($app): \Pollora\Option\Application\Services\OptionService => new OptionService(
+            $app->make(OptionRepositoryInterface::class),
+            $app->make(OptionValidationService::class)
+        ));
     }
 
     /**

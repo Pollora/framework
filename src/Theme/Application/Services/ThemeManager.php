@@ -143,7 +143,7 @@ class ThemeManager implements ThemeService
 
             $parentThemeName = $currentTheme->getParentTheme();
 
-            if ($parentThemeName === null || $parentThemeName === '' || $parentThemeName === '0') {
+            if (in_array($parentThemeName, [null, '', '0'], true)) {
                 break;
             }
 

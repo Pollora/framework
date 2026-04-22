@@ -20,21 +20,21 @@ use Pollora\Support\Slug;
  * - Command descriptions support WP CLI format with OPTIONS and EXAMPLES sections
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
-final class WpCli
+final readonly class WpCli
 {
     /**
      * Create a new WP CLI attribute.
      *
-     * @param string|null $commandName Optional custom command name/slug. If null, generated from class name.
+     * @param  string|null  $commandName  Optional custom command name/slug. If null, generated from class name.
      */
     public function __construct(
-        public readonly ?string $commandName = null
+        public ?string $commandName = null
     ) {}
 
     /**
      * Get the command name, generating it from class name if not provided.
      *
-     * @param string $className The fully qualified class name
+     * @param  string  $className  The fully qualified class name
      * @return string The command name/slug
      */
     public function getCommandName(string $className): string

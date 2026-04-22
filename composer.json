@@ -22,26 +22,25 @@
         }
     ],
     "require": {
-        "php": "^8.3.0",
+        "php": "^8.3",
         "pollora/helper-overrider": "dev-main",
-        "illuminate/support": "^12.34",
-        "illuminate/database": "^12.34",
-        "illuminate/routing": "^12.34",
-        "illuminate/console": "^12.34",
+        "illuminate/support": "^13.5",
+        "illuminate/database": "^13.5",
+        "illuminate/routing": "^13.5",
+        "illuminate/console": "^13.5",
         "pollora/entity": "dev-main",
-        "watson/rememberable": "^7.0",
+        "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^1.7",
-        "pollora/colt": "^9.0",
+        "pollora/colt": "^10.0",
         "log1x/sage-directives": "^2.0",
-        "roots/bedrock-autoloader": "^1.0",
+        "roots/bedrock-autoloader": "^1.1",
         "pollora/query": "dev-main",
         "spatie/php-structure-discoverer": "dev-main",
-        "coduo/php-humanizer": "5.0.2",
-        "nwidart/laravel-modules": "^12.0@dev",
-        "symfony/process": "^7.3.4",
-        "illuminate/config": "^12.34",
-        "laravel/prompts": "^0.3.7@dev",
-        "spatie/invade": "dev-main"
+        "coduo/php-humanizer": "5.0.3",
+        "nwidart/laravel-modules": "^13.0",
+        "symfony/process": "^8.0",
+        "illuminate/config": "^13.5",
+        "laravel/prompts": "^0.3.16@dev"
     },
     "autoload": {
         "psr-4": {
@@ -89,14 +88,14 @@
         }
     },
     "require-dev": {
-        "driftingly/rector-laravel": "^2.1",
-        "laravel/pint": "^v1.25.1",
+        "driftingly/rector-laravel": "^2.3",
+        "laravel/pint": "^v1.29.1",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
-        "symfony/var-dumper": "^7.3.4",
+        "symfony/var-dumper": "^8.0",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
-        "symplify/vendor-patches": "^11.5",
+        "symplify/vendor-patches": "^12.0",
         "mockery/mockery": "2.0.x-dev",
         "wp-cli/wp-cli": "^2.13@dev"
     },

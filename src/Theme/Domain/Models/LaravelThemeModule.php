@@ -30,7 +30,7 @@ class LaravelThemeModule extends ThemeModule
     public function getCachedServicesPath(): string
     {
         // Check if we are running on a Laravel Vapor managed instance
-        if (! is_null(env('VAPOR_MAINTENANCE_MODE', null))) {
+        if (! is_null(env('VAPOR_MAINTENANCE_MODE'))) {
             return Str::replaceLast('config.php', $this->getSnakeName().'_theme.php', $this->app->getCachedConfigPath());
         }
 
@@ -178,32 +178,6 @@ class LaravelThemeModule extends ThemeModule
     public function getFiles(): array
     {
         return $this->get('files', []);
-    }
-
-    /**
-     * Find the main service provider for this theme.
-     *
-     * This method is kept for compatibility with ModuleManifest but
-     * provider discovery is now primarily handled by ServiceProviderScout.
-     */
-    public function findMainServiceProvider(): ?string
-    {
-        $possibleClasses = [
-            "Theme\\{$this->getStudlyName()}\\Providers\\ThemeServiceProvider",
-            "Theme\\{$this->getStudlyName()}\\ThemeServiceProvider",
-            // Legacy support for old naming conventions
-            "App\\Themes\\{$this->getStudlyName()}\\Providers\\ThemeServiceProvider",
-            "App\\Themes\\{$this->getStudlyName()}\\ThemeServiceProvider",
-            "Themes\\{$this->getStudlyName()}\\Providers\\ThemeServiceProvider",
-        ];
-
-        foreach ($possibleClasses as $class) {
-            if (class_exists($class)) {
-                return $class;
-            }
-        }
-
-        return null;
     }
 
     /**

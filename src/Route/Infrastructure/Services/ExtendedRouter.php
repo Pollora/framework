@@ -240,11 +240,11 @@ class ExtendedRouter extends IlluminateRouter
         }
 
         $typesToRegister = [
-            'WP_Post' => fn (): ?\WP_Post => $this->typeResolver->resolvePost(),
-            'WP_Term' => fn (): ?\WP_Term => $this->typeResolver->resolveTerm(),
-            'WP_User' => fn (): ?\WP_User => $this->typeResolver->resolveUser(),
-            'WP_Query' => fn (): ?\WP_Query => $this->typeResolver->resolveQuery(),
-            'WP' => fn (): ?\WP => $this->typeResolver->resolveWP(),
+            'WP_Post' => $this->typeResolver->resolvePost(...),
+            'WP_Term' => $this->typeResolver->resolveTerm(...),
+            'WP_User' => $this->typeResolver->resolveUser(...),
+            'WP_Query' => $this->typeResolver->resolveQuery(...),
+            'WP' => $this->typeResolver->resolveWP(...),
         ];
 
         foreach ($typesToRegister as $type => $resolver) {

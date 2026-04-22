@@ -44,7 +44,7 @@ class WordPressMailServiceProvider extends ServiceProvider
         }
 
         // Register the pre_wp_mail filter to intercept mail sending
-        $filter->add('pre_wp_mail', function ($null, $atts) {
+        $filter->add('pre_wp_mail', function ($null, array $atts): bool {
             // Extract mail parameters from the attributes array
             $to = $atts['to'] ?? '';
             $subject = $atts['subject'] ?? '';

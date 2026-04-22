@@ -152,7 +152,7 @@ class PluginMetadata
     public function getPathForItem(string|array|null $pathParts = null): string
     {
         $pathParts = $this->wrapInArray($pathParts);
-        $folders = $pathParts === [] ? '' : implode('/', $pathParts);
+        $folders = implode('/', $pathParts);
 
         return $this->getBasePath().'/'.$folders;
     }

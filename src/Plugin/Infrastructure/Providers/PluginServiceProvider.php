@@ -51,9 +51,7 @@ class PluginServiceProvider extends ServiceProvider
      */
     protected function registerPluginAutoloader(): void
     {
-        $this->app->singleton(PluginAutoloader::class, function ($app): PluginAutoloader {
-            return new PluginAutoloader($app);
-        });
+        $this->app->singleton(PluginAutoloader::class, fn ($app): PluginAutoloader => new PluginAutoloader($app));
     }
 
     /**
@@ -61,9 +59,7 @@ class PluginServiceProvider extends ServiceProvider
      */
     protected function registerPluginParser(): void
     {
-        $this->app->singleton(WordPressPluginParser::class, function ($app): WordPressPluginParser {
-            return new WordPressPluginParser;
-        });
+        $this->app->singleton(WordPressPluginParser::class, fn ($app): WordPressPluginParser => new WordPressPluginParser);
     }
 
     /**
@@ -71,17 +67,13 @@ class PluginServiceProvider extends ServiceProvider
      */
     protected function registerPluginRepository(): void
     {
-        $this->app->singleton(PluginRepository::class, function ($app): PluginRepository {
-            return new PluginRepository(
-                $app,
-                $app->make(WordPressPluginParser::class)
-            );
-        });
+        $this->app->singleton(PluginRepository::class, fn ($app): PluginRepository => new PluginRepository(
+            $app,
+            $app->make(WordPressPluginParser::class)
+        ));
 
         // Bind as ModuleRepositoryInterface when specifically for plugins
-        $this->app->bind('plugin.repository', function ($app): PluginRepository {
-            return $app->make(PluginRepository::class);
-        });
+        $this->app->bind('plugin.repository', fn ($app): PluginRepository => $app->make(PluginRepository::class));
     }
 
     /**
@@ -89,13 +81,11 @@ class PluginServiceProvider extends ServiceProvider
      */
     protected function registerPluginManager(): void
     {
-        $this->app->singleton(PluginManager::class, function ($app): PluginManager {
-            return new PluginManager(
-                $app,
-                $app->bound('translator') ? $app->make('translator') : null,
-                $app->make(PluginRepository::class)
-            );
-        });
+        $this->app->singleton(PluginManager::class, fn ($app): PluginManager => new PluginManager(
+            $app,
+            $app->bound('translator') ? $app->make('translator') : null,
+            $app->make(PluginRepository::class)
+        ));
 
         // Register alias for convenience
         $this->app->alias(PluginManager::class, 'plugin.manager');
@@ -106,12 +96,10 @@ class PluginServiceProvider extends ServiceProvider
      */
     protected function registerPluginRegistrar(): void
     {
-        $this->app->singleton(PluginRegistrar::class, function ($app): PluginRegistrar {
-            return new PluginRegistrar(
-                $app,
-                $app->make(WordPressPluginParser::class)
-            );
-        });
+        $this->app->singleton(PluginRegistrar::class, fn ($app): PluginRegistrar => new PluginRegistrar(
+            $app,
+            $app->make(WordPressPluginParser::class)
+        ));
 
         // Register alias for convenience
         $this->app->alias(PluginRegistrar::class, 'plugin.registrar');

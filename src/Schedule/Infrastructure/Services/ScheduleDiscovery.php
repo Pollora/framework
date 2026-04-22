@@ -9,10 +9,10 @@ use InvalidArgumentException;
 use Pollora\Attributes\Schedule;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Schedule\Every;
 use Pollora\Schedule\Interval;
-use ReflectionClass;
 use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
@@ -29,7 +29,7 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class ScheduleDiscovery implements DiscoveryInterface
 {
-    use IsDiscovery;
+    use HasInstancePool, IsDiscovery;
 
     /**
      * Default WordPress recurrence schedules.
@@ -49,7 +49,7 @@ final class ScheduleDiscovery implements DiscoveryInterface
      * Discovers methods with Schedule attributes and collects them for registration.
      * Only processes public methods that have the Schedule attribute.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
         if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
@@ -62,10 +62,12 @@ final class ScheduleDiscovery implements DiscoveryInterface
         }
 
         try {
-            // Use reflection to examine methods for Schedule attributes
-            $reflectionClass = new ReflectionClass($structure->namespace.'\\'.$structure->name);
+            $className = $structure->namespace.'\\'.$structure->name;
 
-            foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            $reflectionClass = $reflectionCache->getClassReflection($className);
+            $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+            foreach ($methods as $method) {
                 $scheduleAttributes = $method->getAttributes(Schedule::class);
 
                 if (empty($scheduleAttributes)) {
@@ -75,7 +77,7 @@ final class ScheduleDiscovery implements DiscoveryInterface
                 foreach ($scheduleAttributes as $scheduleAttribute) {
                     // Collect the method for registration
                     $this->getItems()->add($location, [
-                        'class' => $structure->namespace.'\\'.$structure->name,
+                        'class' => $className,
                         'method' => $method->getName(),
                         'attribute' => $scheduleAttribute,
                         'reflection_method' => $method,
@@ -120,7 +122,8 @@ final class ScheduleDiscovery implements DiscoveryInterface
 
                 // Register the action handler that will execute the scheduled method
                 add_action($hookName, function () use ($className, $methodName, $schedule): void {
-                    $instance = app($className);
+                    // Use instance pool if available, otherwise fallback to container
+                    $instance = $this->getInstanceFromPool($className);
 
                     // Call method with arguments if provided
                     if ($schedule->args !== []) {

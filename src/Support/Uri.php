@@ -21,7 +21,7 @@ class Uri
      */
     public function removeTrailingSlash(?string $url): ?string
     {
-        if ($url === null || $url === '' || $url === '0') {
+        if (in_array($url, [null, '', '0'], true)) {
             return $url;
         }
 

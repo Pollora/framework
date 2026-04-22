@@ -28,52 +28,7 @@ class ModuleBootstrap
         protected ModuleRepositoryInterface $repository,
         protected Router $router
     ) {}
-
-    /**
-     * Register all enabled modules in the application.
-     *
-     * This method is now deprecated as modules use self-registration.
-     * Only kept for backward compatibility with Laravel Module system.
-     */
-    public function registerModules(): void
-    {
-        // Legacy method - Laravel modules now handle their own registration
-        // through nwidart/laravel-modules package service providers
-    }
-
-    /**
-     * Register migration paths for all enabled modules.
-     *
-     * This method is now deprecated as modules handle their own migrations.
-     */
-    public function registerMigrations(): void
-    {
-        // Legacy method - Laravel modules handle their own migrations
-        // through nwidart/laravel-modules package
-    }
-
-    /**
-     * Register translation namespaces for all enabled modules.
-     *
-     * This method is now deprecated as modules handle their own translations.
-     */
-    public function registerTranslations(): void
-    {
-        // Legacy method - Laravel modules handle their own translations
-        // through nwidart/laravel-modules package
-    }
-
-    /**
-     * Register routes for all enabled modules.
-     *
-     * This method is now deprecated as modules handle their own routes.
-     */
-    public function registerRoutes(): void
-    {
-        // Legacy method - Laravel modules handle their own routes
-        // through nwidart/laravel-modules package
-    }
-
+    
     /**
      * Get the cached module path for service provider caching.
      *

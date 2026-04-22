@@ -12,8 +12,6 @@ use Pollora\Query\DateQuery;
 use Pollora\Query\MetaQuery;
 use Pollora\Query\PostQuery;
 use Pollora\Query\TaxQuery;
-use Pollora\View\Loop;
-
 /**
  * Service provider for WordPress query functionality.
  *
@@ -23,7 +21,6 @@ use Pollora\View\Loop;
  * - Taxonomy queries
  * - Meta queries
  * - Date queries
- * - WordPress loop functionality
  */
 class QueryServiceProvider extends ServiceProvider
 {
@@ -50,8 +47,7 @@ class QueryServiceProvider extends ServiceProvider
         $this->app->singleton('wp.query.meta', fn (): MetaQuery => new MetaQuery);
         $this->app->singleton('wp.query.date', fn (): DateQuery => new DateQuery);
 
-        // Loop and current post bindings
-        $this->app->bind('wp.loop', fn ($app): Loop => new Loop($app));
+        // Current post binding
         $this->app->singleton(Post::class, fn () => Post::find(get_the_ID()));
     }
 }

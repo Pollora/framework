@@ -22,9 +22,7 @@ class PluginCollection extends Collection
      */
     public function active(): static
     {
-        return $this->filter(function (PluginModuleInterface $plugin): bool {
-            return $plugin->isActive();
-        });
+        return $this->filter(fn (PluginModuleInterface $plugin): bool => $plugin->isActive());
     }
 
     /**
@@ -34,9 +32,7 @@ class PluginCollection extends Collection
      */
     public function inactive(): static
     {
-        return $this->filter(function (PluginModuleInterface $plugin): bool {
-            return ! $plugin->isActive();
-        });
+        return $this->filter(fn (PluginModuleInterface $plugin): bool => ! $plugin->isActive());
     }
 
     /**
@@ -46,9 +42,7 @@ class PluginCollection extends Collection
      */
     public function enabled(): static
     {
-        return $this->filter(function (PluginModuleInterface $plugin): bool {
-            return $plugin->isEnabled();
-        });
+        return $this->filter(fn (PluginModuleInterface $plugin): bool => $plugin->isEnabled());
     }
 
     /**
@@ -58,9 +52,7 @@ class PluginCollection extends Collection
      */
     public function disabled(): static
     {
-        return $this->filter(function (PluginModuleInterface $plugin): bool {
-            return $plugin->isDisabled();
-        });
+        return $this->filter(fn (PluginModuleInterface $plugin): bool => $plugin->isDisabled());
     }
 
     /**
@@ -71,9 +63,7 @@ class PluginCollection extends Collection
      */
     public function sortByName(string $direction = 'asc'): static
     {
-        return $this->sortBy(function (PluginModuleInterface $plugin): string {
-            return $plugin->getName();
-        }, SORT_REGULAR, $direction === 'desc');
+        return $this->sortBy(fn (PluginModuleInterface $plugin): string => $plugin->getName(), SORT_REGULAR, $direction === 'desc');
     }
 
     /**
@@ -84,9 +74,7 @@ class PluginCollection extends Collection
      */
     public function findByName(string $name): ?PluginModuleInterface
     {
-        return $this->first(function (PluginModuleInterface $plugin) use ($name): bool {
-            return $plugin->getName() === $name;
-        });
+        return $this->first(fn (PluginModuleInterface $plugin): bool => $plugin->getName() === $name);
     }
 
     /**
@@ -97,8 +85,6 @@ class PluginCollection extends Collection
      */
     public function findBySlug(string $slug): ?PluginModuleInterface
     {
-        return $this->first(function (PluginModuleInterface $plugin) use ($slug): bool {
-            return $plugin->getSlug() === $slug;
-        });
+        return $this->first(fn (PluginModuleInterface $plugin): bool => $plugin->getSlug() === $slug);
     }
 }

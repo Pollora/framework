@@ -63,13 +63,13 @@ trait PromptsForMissingOption
         }
 
         $prompted = (new Collection($this->getDefinition()->getOptions()))
-            ->reject(fn (InputOption $option) => $option->getName() === 'help' || $option->getName() === 'quiet' || $option->getName() === 'verbose' || $option->getName() === 'version' || $option->getName() === 'ansi' || $option->getName() === 'no-ansi' || $option->getName() === 'no-interaction')
-            ->filter(fn (InputOption $option) => array_key_exists($option->getName(), $promptConfiguration))
-            ->filter(fn (InputOption $option) => match (true) {
+            ->reject(fn (InputOption $option): bool => in_array($option->getName(), ['help', 'quiet', 'verbose', 'version', 'ansi', 'no-ansi', 'no-interaction'], true))
+            ->filter(fn (InputOption $option): bool => array_key_exists($option->getName(), $promptConfiguration))
+            ->filter(fn (InputOption $option): bool => match (true) {
                 $option->isArray() => empty($input->getOption($option->getName())),
                 default => is_null($input->getOption($option->getName())) || $input->getOption($option->getName()) === false,
             })
-            ->each(function (InputOption $option) use ($input, $promptConfiguration) {
+            ->each(function (InputOption $option) use ($input, $promptConfiguration): void {
                 $optionName = $option->getName();
                 $configuration = $promptConfiguration[$optionName];
 
@@ -135,7 +135,7 @@ trait PromptsForMissingOption
         }
 
         if (is_string($validation)) {
-            return function ($value) use ($validation, $optionName) {
+            return function ($value) use ($validation, $optionName): ?string {
                 $rules = explode('|', $validation);
 
                 foreach ($rules as $rule) {

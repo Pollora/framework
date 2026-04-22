@@ -81,7 +81,7 @@ class WordPressBodyClass
         }
 
         return array_filter(array_map(
-            fn ($token): string|false => match ($token[0]) {
+            fn (array $token): string|false => match ($token[0]) {
                 'variable' => $this->handleVariableToken($token, $route),
                 'text' => $this->sanitizeClass($token[1]),
                 default => false,

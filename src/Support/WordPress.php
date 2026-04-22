@@ -34,7 +34,7 @@ class WordPress
     public function multisite(null|int|array $id = null): bool
     {
         if (is_array($id)) {
-            return array_reduce($id, fn ($carry, $i): bool => $carry || $this->multisite($i), false);
+            return array_reduce($id, fn ($carry, null|int|array $i): bool => $carry || $this->multisite($i), false);
         }
 
         return $id === null ? is_multisite() : ($id === $this->getSiteId());
