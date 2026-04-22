@@ -14,9 +14,9 @@ use Tests\TestCase;
 |
 */
 
-uses(TestCase::class)->in('Feature/Modules', 'Feature/Option', 'Feature/Theme');
+uses(TestCase::class)->in('Feature/Modules', 'Feature/Option');
 uses(TestCase::class)->in('Unit');
-uses(Orchestra\Testbench\TestCase::class)->in('Feature/Route');
+uses(Orchestra\Testbench\TestCase::class)->in('Feature/Route', 'Feature/Theme');
 
 /*
 |--------------------------------------------------------------------------

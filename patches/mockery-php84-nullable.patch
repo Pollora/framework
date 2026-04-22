@@ -1,7 +1,82 @@
-diff --git a/library/Mockery.php b/library/Mockery.php
---- a/library/Mockery.php
-+++ b/library/Mockery.php
-@@ -533,7 +533,7 @@ class Mockery
+diff -ruN a/library/Mockery/Container.php b/library/Mockery/Container.php
+--- a/library/Mockery/Container.php	2026-04-22 12:00:48.825192877 +0200
++++ b/library/Mockery/Container.php	2026-04-22 12:00:48.853192611 +0200
+@@ -61,7 +61,7 @@
+      */
+     protected $_namedMocks = array();
+ 
+-    public function __construct(Generator $generator = null, LoaderInterface $loader = null)
++    public function __construct(?Generator $generator = null, ?LoaderInterface $loader = null)
+     {
+         $this->_generator = $generator ?: \Mockery::getDefaultGenerator();
+         $this->_loader = $loader ?: \Mockery::getDefaultLoader();
+diff -ruN a/library/Mockery/Expectation.php b/library/Mockery/Expectation.php
+--- a/library/Mockery/Expectation.php	2026-04-22 12:00:48.834192791 +0200
++++ b/library/Mockery/Expectation.php	2026-04-22 12:00:48.865192496 +0200
+@@ -624,7 +624,7 @@
+      * @param \Exception $previous
+      * @return self
+      */
+-    public function andThrow($exception, $message = '', $code = 0, \Exception $previous = null)
++    public function andThrow($exception, $message = '', $code = 0, ?\Exception $previous = null)
+     {
+         $this->_throw = true;
+         if (is_object($exception)) {
+@@ -635,7 +635,7 @@
+         return $this;
+     }
+ 
+-    public function andThrows($exception, $message = '', $code = 0, \Exception $previous = null)
++    public function andThrows($exception, $message = '', $code = 0, ?\Exception $previous = null)
+     {
+         return $this->andThrow($exception, $message, $code, $previous);
+     }
+diff -ruN a/library/Mockery/LegacyMockInterface.php b/library/Mockery/LegacyMockInterface.php
+--- a/library/Mockery/LegacyMockInterface.php	2026-04-22 12:00:48.835192782 +0200
++++ b/library/Mockery/LegacyMockInterface.php	2026-04-22 12:00:48.854192601 +0200
+@@ -19,7 +19,7 @@
+      * @param object $partialObject
+      * @return void
+      */
+-    public function mockery_init(\Mockery\Container $container = null, $partialObject = null);
++    public function mockery_init(?\Mockery\Container $container = null, $partialObject = null);
+ 
+     /**
+      * Set expected method calls
+@@ -95,7 +95,7 @@
+      * @param array $args (optional)
+      * @return mixed
+      */
+-    public function shouldNotHaveBeenCalled(array $args = null);
++    public function shouldNotHaveBeenCalled(?array $args = null);
+ 
+     /**
+      * In the event shouldReceive() accepting an array of methods/returns
+diff -ruN a/library/Mockery/Mock.php b/library/Mockery/Mock.php
+--- a/library/Mockery/Mock.php	2026-04-22 12:00:48.836192772 +0200
++++ b/library/Mockery/Mock.php	2026-04-22 12:00:48.862192525 +0200
+@@ -167,7 +167,7 @@
+      * @param bool $instanceMock
+      * @return void
+      */
+-    public function mockery_init(\Mockery\Container $container = null, $partialObject = null, $instanceMock = true)
++    public function mockery_init(?\Mockery\Container $container = null, $partialObject = null, $instanceMock = true)
+     {
+         if (is_null($container)) {
+             $container = new \Mockery\Container();
+@@ -798,7 +798,7 @@
+         return null;
+     }
+ 
+-    public function shouldNotHaveBeenCalled(array $args = null)
++    public function shouldNotHaveBeenCalled(?array $args = null)
+     {
+         return $this->shouldNotHaveReceived("__invoke", $args);
+     }
+diff -ruN a/library/Mockery.php b/library/Mockery.php
+--- a/library/Mockery.php	2026-04-22 12:00:48.824192887 +0200
++++ b/library/Mockery.php	2026-04-22 12:00:48.843192706 +0200
+@@ -533,7 +533,7 @@
       *
       * @return string
       */
@@ -10,78 +85,12 @@ diff --git a/library/Mockery.php b/library/Mockery.php
      {
          if (is_null($arguments)) {
              return $method . '()';
-@@ -609,7 +609,7 @@ class Mockery
+@@ -609,7 +609,7 @@
       *
       * @return string
       */
 -    public static function formatObjects(array $objects = null)
 +    public static function formatObjects(?array $objects = null)
      {
-         $objects = array_filter($objects, 'is_object');
-
-diff --git a/library/Mockery/Container.php b/library/Mockery/Container.php
---- a/library/Mockery/Container.php
-+++ b/library/Mockery/Container.php
-@@ -61,7 +61,7 @@ class Container
-      */
-     protected $_namedMocks = array();
-
--    public function __construct(Generator $generator = null, LoaderInterface $loader = null)
-+    public function __construct(?Generator $generator = null, ?LoaderInterface $loader = null)
-     {
-         $this->_generator = $generator ?: \Mockery::getDefaultGenerator();
-         $this->_loader = $loader ?: \Mockery::getDefaultLoader();
-diff --git a/library/Mockery/Generator/StringManipulation/Pass/MagicMethodTypeHintsPass.php b/library/Mockery/Generator/StringManipulation/Pass/MagicMethodTypeHintsPass.php
---- a/library/Mockery/Generator/StringManipulation/Pass/MagicMethodTypeHintsPass.php
-+++ b/library/Mockery/Generator/StringManipulation/Pass/MagicMethodTypeHintsPass.php
-@@ -66,7 +66,7 @@ class MagicMethodTypeHintsPass implements Pass
-      * @return array
-      */
-     public function getMagicMethods(
--        TargetClassInterface $class = null
-+        ?TargetClassInterface $class = null
-     ) {
-         if (is_null($class)) {
-
-diff --git a/library/Mockery/LegacyMockInterface.php b/library/Mockery/LegacyMockInterface.php
---- a/library/Mockery/LegacyMockInterface.php
-+++ b/library/Mockery/LegacyMockInterface.php
-@@ -19,7 +19,7 @@ interface LegacyMockInterface
-      * Set the Container for this mock.
-      *
-      */
--    public function mockery_init(\Mockery\Container $container = null, $partialObject = null);
-+    public function mockery_init(?\Mockery\Container $container = null, $partialObject = null);
-
-     /**
-      * Set an expectation on the count of calls to this mock
-@@ -95,7 +95,7 @@ interface LegacyMockInterface
-      * @param array $args (optional)
-      * @return void
-      */
--    public function shouldNotHaveBeenCalled(array $args = null);
-+    public function shouldNotHaveBeenCalled(?array $args = null);
-
-     /**
-      * Fetch the mock container for this mock.
-diff --git a/library/Mockery/Mock.php b/library/Mockery/Mock.php
---- a/library/Mockery/Mock.php
-+++ b/library/Mockery/Mock.php
-@@ -167,7 +167,7 @@ class Mock implements MockInterface
-      * We want to avoid constructors since class is copied to Generator.php
-      * for inclusion on extending class definitions.
-      */
--    public function mockery_init(\Mockery\Container $container = null, $partialObject = null, $instanceMock = true)
-+    public function mockery_init(?\Mockery\Container $container = null, $partialObject = null, $instanceMock = true)
-     {
-         if (is_null($container)) {
-             $container = new \Mockery\Container();
-@@ -798,7 +798,7 @@ class Mock implements MockInterface
-         return $this;
-     }
-
--    public function shouldNotHaveBeenCalled(array $args = null)
-+    public function shouldNotHaveBeenCalled(?array $args = null)
-     {
-         return $this->shouldNotHaveReceived(Mockery::MOCK_METHOD_CALLED_SENTINEL, $args);
-     }
+         static $formatting;
+ 
