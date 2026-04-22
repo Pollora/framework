@@ -12,6 +12,7 @@ use Pollora\Query\DateQuery;
 use Pollora\Query\MetaQuery;
 use Pollora\Query\PostQuery;
 use Pollora\Query\TaxQuery;
+
 /**
  * Service provider for WordPress query functionality.
  *

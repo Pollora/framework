@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Adapters;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
 
 /**
@@ -49,8 +50,8 @@ class DomainContainerAdapter implements ContainerInterface
      * @param  string  $id  Service identifier (class name or binding key)
      * @return mixed Resolved service instance
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     *                                                                    When the service cannot be resolved
+     * @throws BindingResolutionException
+     *                                    When the service cannot be resolved
      */
     public function get(string $id): mixed
     {

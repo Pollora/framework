@@ -17,32 +17,32 @@ final class PatternConstants
     /**
      * Directory path for pattern files relative to theme root.
      */
-    public const PATTERN_DIRECTORY = '/resources/views/patterns/';
+    public const string PATTERN_DIRECTORY = '/resources/views/patterns/';
 
     /**
      * File extension for Blade pattern files.
      */
-    public const PATTERN_FILE_EXTENSION = '.blade.php';
+    public const string PATTERN_FILE_EXTENSION = '.blade.php';
 
     /**
      * File extension for PHP pattern files.
      */
-    public const PHP_FILE_EXTENSION = '.php';
+    public const string PHP_FILE_EXTENSION = '.php';
 
     /**
      * Default viewport width for patterns when none is specified.
      */
-    public const DEFAULT_VIEWPORT_WIDTH = 1200;
+    public const int DEFAULT_VIEWPORT_WIDTH = 1200;
 
     /**
      * Maximum allowed viewport width for patterns.
      */
-    public const MAX_VIEWPORT_WIDTH = 2000;
+    public const int MAX_VIEWPORT_WIDTH = 2000;
 
     /**
      * Default pattern category when none is specified.
      */
-    public const DEFAULT_CATEGORY = 'general';
+    public const string DEFAULT_CATEGORY = 'general';
 
     /**
      * Pattern file headers configuration.
@@ -51,7 +51,7 @@ final class PatternConstants
      *
      * @var array<string, string>
      */
-    public const DEFAULT_HEADERS = [
+    public const array DEFAULT_HEADERS = [
         'title' => 'Title',
         'slug' => 'Slug',
         'description' => 'Description',
@@ -68,7 +68,7 @@ final class PatternConstants
      *
      * @var array<string>
      */
-    public const ARRAY_PROPERTIES = [
+    public const array ARRAY_PROPERTIES = [
         'categories',
         'keywords',
         'blockTypes',
@@ -80,7 +80,7 @@ final class PatternConstants
      *
      * @var array<string>
      */
-    public const BOOLEAN_PROPERTIES = [
+    public const array BOOLEAN_PROPERTIES = [
         'inserter',
     ];
 
@@ -89,7 +89,7 @@ final class PatternConstants
      *
      * @var array<string>
      */
-    public const INTEGER_PROPERTIES = [
+    public const array INTEGER_PROPERTIES = [
         'viewportWidth',
     ];
 
@@ -98,7 +98,7 @@ final class PatternConstants
      *
      * @var array<string>
      */
-    public const TRANSLATABLE_PROPERTIES = [
+    public const array TRANSLATABLE_PROPERTIES = [
         'title',
         'description',
     ];
@@ -108,7 +108,7 @@ final class PatternConstants
      *
      * @var array<string>
      */
-    public const TRUE_VALUES = [
+    public const array TRUE_VALUES = [
         'yes',
         'true',
         '1',

@@ -72,10 +72,10 @@ final class DiscoveryCommand extends Command
             $specificDiscovery = $this->option('discovery');
 
             if ($specificDiscovery) {
-                $this->info("Running discovery: {$specificDiscovery}");
+                $this->info('Running discovery: '.$specificDiscovery);
 
                 if (! $discoveryManager->hasDiscovery($specificDiscovery)) {
-                    $this->error("Discovery '{$specificDiscovery}' not found!");
+                    $this->error(sprintf("Discovery '%s' not found!", $specificDiscovery));
 
                     return self::FAILURE;
                 }
@@ -84,7 +84,7 @@ final class DiscoveryCommand extends Command
                 $discoveryManager->discover();
                 $items = $discoveryManager->getDiscoveredItems($specificDiscovery);
 
-                $this->info('Found '.count($items)." items for '{$specificDiscovery}'");
+                $this->info('Found '.count($items).sprintf(" items for '%s'", $specificDiscovery));
 
                 if ($this->confirm('Apply discovered items?', true)) {
                     $discoveryManager->apply();
@@ -135,11 +135,11 @@ final class DiscoveryCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Throwable $e) {
-            $this->error('Discovery process failed: '.$e->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->error('Discovery process failed: '.$throwable->getMessage());
 
             if ($this->getOutput()->isVerbose()) {
-                $this->error($e->getTraceAsString());
+                $this->error($throwable->getTraceAsString());
             }
 
             return self::FAILURE;
@@ -189,7 +189,7 @@ final class DiscoveryCommand extends Command
 
         // Display aggregated results
         foreach ($totals as $identifier => $totalCount) {
-            $this->line("• {$identifier}: {$totalCount} items");
+            $this->line(sprintf('• %s: %d items', $identifier, $totalCount));
         }
 
         $locations = $discoveryManager->getLocations();
@@ -198,12 +198,13 @@ final class DiscoveryCommand extends Command
         $frameworkCount = count($frameworkResults);
 
         $this->info('');
-        $this->info("Scanned {$locations->count()} discovery locations");
+        $this->info(sprintf('Scanned %d discovery locations', $locations->count()));
         if ($moduleCount > 0) {
-            $this->info("Scanned {$moduleCount} Laravel modules");
+            $this->info(sprintf('Scanned %d Laravel modules', $moduleCount));
         }
+
         if ($frameworkCount > 0) {
-            $this->info("Scanned {$frameworkCount} framework modules");
+            $this->info(sprintf('Scanned %d framework modules', $frameworkCount));
         }
     }
 
@@ -229,16 +230,16 @@ final class DiscoveryCommand extends Command
                 if (isset($stats['context'])) {
                     $context = $stats['context'];
                     $this->line('📊 Discovery Context:');
-                    $this->line("  • Classes processed: {$context['total_classes']}");
-                    $this->line("  • Discovery executions: {$context['total_discovery_executions']}");
-                    $this->line("  • Cache efficiency: {$context['cache_efficiency']}%");
+                    $this->line('  • Classes processed: '.$context['total_classes']);
+                    $this->line('  • Discovery executions: '.$context['total_discovery_executions']);
+                    $this->line(sprintf('  • Cache efficiency: %s%%', $context['cache_efficiency']));
 
                     if (isset($context['stats'])) {
                         $contextStats = $context['stats'];
-                        $this->line("  • Cache hits: {$contextStats['cache_hits']}");
-                        $this->line("  • Cache misses: {$contextStats['cache_misses']}");
+                        $this->line('  • Cache hits: '.$contextStats['cache_hits']);
+                        $this->line('  • Cache misses: '.$contextStats['cache_misses']);
                         if ($contextStats['errors'] > 0) {
-                            $this->line("  • Errors handled: {$contextStats['errors']}");
+                            $this->line('  • Errors handled: '.$contextStats['errors']);
                         }
                     }
                 }
@@ -247,22 +248,23 @@ final class DiscoveryCommand extends Command
                 if (isset($stats['instance_pool'])) {
                     $pool = $stats['instance_pool'];
                     $this->line('🏊 Instance Pool:');
-                    $this->line("  • Pool size: {$pool['pool_size']} instances");
-                    $this->line("  • Hit ratio: {$pool['hit_ratio_percent']}%");
-                    $this->line("  • Total requests: {$pool['total_requests']}");
+                    $this->line(sprintf('  • Pool size: %s instances', $pool['pool_size']));
+                    $this->line(sprintf('  • Hit ratio: %s%%', $pool['hit_ratio_percent']));
+                    $this->line('  • Total requests: '.$pool['total_requests']);
 
                     if ($pool['circular_dependencies'] > 0) {
-                        $this->line("  • Circular deps avoided: {$pool['circular_dependencies']}");
+                        $this->line('  • Circular deps avoided: '.$pool['circular_dependencies']);
                     }
+
                     if ($pool['instantiation_errors'] > 0) {
-                        $this->line("  • Instantiation errors: {$pool['instantiation_errors']}");
+                        $this->line('  • Instantiation errors: '.$pool['instantiation_errors']);
                     }
                 }
 
                 // Display static cache stats
                 if (isset($stats['static_cache_size'])) {
                     $this->line('💾 Static Cache:');
-                    $this->line("  • Cached structure sets: {$stats['static_cache_size']}");
+                    $this->line('  • Cached structure sets: '.$stats['static_cache_size']);
                 }
 
                 $this->info('');
@@ -272,11 +274,11 @@ final class DiscoveryCommand extends Command
                 $this->warn('Performance statistics not available (using legacy discovery engine)');
             }
 
-        } catch (\Throwable $e) {
-            $this->warn('Unable to retrieve performance statistics: '.$e->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->warn('Unable to retrieve performance statistics: '.$throwable->getMessage());
 
             if ($this->option('verbose-errors')) {
-                $this->line($e->getTraceAsString());
+                $this->line($throwable->getTraceAsString());
             }
         }
     }
@@ -294,6 +296,7 @@ final class DiscoveryCommand extends Command
             $this->line('💾 Cache Status: <comment>Disabled</comment> (debug mode or NullDiscoverCacheDriver)');
             $this->line('   i️  Discovery will run without persistent caching for better development experience');
         }
+
         $this->line('');
     }
 

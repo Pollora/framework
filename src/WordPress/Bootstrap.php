@@ -29,8 +29,8 @@ class Bootstrap
 
     public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, protected \Pollora\Hook\Domain\Contracts\Action $action)
     {
-        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
-        $this->debugDetector = $debugDetector ?? app(DebugDetectorInterface::class);
+        $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
+        $this->debugDetector = $debugDetector ?? resolve(DebugDetectorInterface::class);
     }
 
     /**
@@ -52,7 +52,7 @@ class Bootstrap
         $this->setDatabaseConstants();
 
         if ($this->isDatabaseConfigured()) {
-            $this->withWordPressErrorHandling(function () {
+            $this->withWordPressErrorHandling(function (): void {
                 $this->loadWordPressSettings();
             });
         }
@@ -61,11 +61,13 @@ class Bootstrap
             Constant::queue('WP_INSTALLING', true);
             Constant::apply();
         }
+
         if (! $this->consoleDetectionService->isConsole() && $this->isWordPressInstalled()) {
-            $this->withWordPressErrorHandling(function () {
+            $this->withWordPressErrorHandling(function (): void {
                 $this->runWp();
             });
         }
+
         $this->setupActionHooks();
     }
 
@@ -84,7 +86,7 @@ class Bootstrap
             }
 
             // Forward all other errors to the previous handler (Laravel's)
-            if ($previousHandler) {
+            if ($previousHandler !== null) {
                 return $previousHandler($level, $message, $file, $line);
             }
 

@@ -146,7 +146,7 @@ class AjaxAction
      */
     public function __destruct()
     {
-        if ($this->registerService instanceof \Pollora\Ajax\Application\Services\RegisterAjaxActionService) {
+        if ($this->registerService instanceof RegisterAjaxActionService) {
             $this->registerService->execute($this);
         }
     }

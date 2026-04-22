@@ -46,7 +46,7 @@ use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
  * @method static object siteFilters(array $siteFilters)
  * @method static object siteSortables(array $siteSortables)
  *
- * @see \Pollora\PostType\Infrastructure\Factories\PostTypeFactory
+ * @see PostTypeFactory
  * @see \Pollora\Entity\PostType
  */
 class PostType extends Facade

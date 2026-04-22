@@ -23,24 +23,25 @@
     ],
     "require": {
         "php": "^8.3",
-        "pollora/helper-overrider": "dev-main",
+        "pollora/helper-overrider": "^1.0",
+        "illuminate/auth": "^13.5",
         "illuminate/support": "^13.5",
         "illuminate/database": "^13.5",
         "illuminate/routing": "^13.5",
         "illuminate/console": "^13.5",
-        "pollora/entity": "dev-main",
+        "pollora/entity": "^1.2",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^1.7",
         "pollora/colt": "^10.0",
         "log1x/sage-directives": "^2.0",
         "roots/bedrock-autoloader": "^1.1",
-        "pollora/query": "dev-main",
-        "spatie/php-structure-discoverer": "dev-main",
+        "pollora/query": "^1.0",
+        "spatie/php-structure-discoverer": "^2.4",
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.0",
-        "symfony/process": "^8.0",
+        "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.5",
-        "laravel/prompts": "^0.3.16@dev"
+        "laravel/prompts": "^0.3.17"
     },
     "autoload": {
         "psr-4": {
@@ -50,7 +51,6 @@
             "src/helpers.php"
         ]
     },
-    "minimum-stability": "dev",
     "extra": {
         "patches": {
             "johnpbloch/wordpress-core": {
@@ -58,6 +58,9 @@
             },
             "php-stubs/wordpress-stubs": {
                 "Rename __ and wp_mail functions": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/wordpress-stubs.patch"
+            },
+            "mockery/mockery": {
+                "Fix PHP 8.4 implicit nullable deprecations": "patches/mockery-php84-nullable.patch"
             }
         },
         "laravel": {
@@ -92,12 +95,14 @@
         "laravel/pint": "^v1.29.1",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
-        "symfony/var-dumper": "^8.0",
+        "symfony/var-dumper": "^7.4 || ^8.0",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^12.0",
-        "mockery/mockery": "2.0.x-dev",
-        "wp-cli/wp-cli": "^2.13@dev"
+        "mockery/mockery": "^1.6",
+        "wp-cli/wp-cli": "^2.12",
+        "larastan/larastan": "^3.0",
+        "orchestra/testbench": "^10.0|^11.0"
     },
     "autoload-dev": {
         "psr-4": {
@@ -105,10 +110,7 @@
             "Workbench\\App\\": "workbench/app/",
             "Workbench\\Database\\Factories\\": "workbench/database/factories/",
             "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
-        },
-        "files": [
-            "tests/Unit/helpers.php"
-        ]
+        }
     },
     "scripts": {
         "post-autoload-dump": [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
+use Pollora\BlockPattern\UI\PatternComponent;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
@@ -11,8 +12,14 @@ use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
+use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;
+use Pollora\Theme\Domain\Models\Menus;
+use Pollora\Theme\Domain\Models\Sidebar;
+use Pollora\Theme\Domain\Models\Templates;
+use Pollora\Theme\Domain\Models\ThemeInitializer;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
+use Pollora\Theme\Infrastructure\Services\Support;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Psr\Container\ContainerInterface;
 
@@ -96,8 +103,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             if ($repository instanceof ThemeRepository) {
                 $repository->resetCache();
             }
-        } catch (\Exception $e) {
-            $this->logError('Failed to invalidate theme repository cache: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to invalidate theme repository cache: '.$exception->getMessage());
         }
     }
 
@@ -118,8 +125,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             if ($appPath && is_dir($appPath)) {
                 $discoveryService->discover($appPath);
             }
-        } catch (\Exception $e) {
-            $this->logError("Theme discovery error for {$theme->getName()}: ".$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError(sprintf('Theme discovery error for %s: ', $theme->getName()).$exception->getMessage());
         }
     }
 
@@ -158,7 +165,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             ? $structure->getFqn()
             : 'unknown';
 
-        $this->logError("Discovered {$scoutType} in theme {$theme->getName()}: {$structureInfo}");
+        $this->logError(sprintf('Discovered %s in theme %s: %s', $scoutType, $theme->getName(), $structureInfo));
     }
 
     /**
@@ -221,8 +228,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
                 $theme->getPath(),
                 'theme'
             );
-        } catch (\Exception $e) {
-            $this->logError('Failed to load theme configuration: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to load theme configuration: '.$exception->getMessage());
         }
     }
 
@@ -241,21 +248,21 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             // Define theme-specific components
             $themeComponents = [
-                \Pollora\Theme\Domain\Models\ThemeInitializer::class,
-                \Pollora\BlockPattern\UI\PatternComponent::class,
-                \Pollora\Theme\Domain\Models\Menus::class,
-                \Pollora\Theme\Infrastructure\Services\Support::class,
-                \Pollora\Theme\Domain\Models\Sidebar::class,
-                \Pollora\Theme\Domain\Models\Templates::class,
-                \Pollora\Theme\Domain\Models\ImageSize::class,
+                ThemeInitializer::class,
+                PatternComponent::class,
+                Menus::class,
+                Support::class,
+                Sidebar::class,
+                Templates::class,
+                ImageSize::class,
             ];
 
             $moduleId = 'theme.'.$theme->getLowerName();
 
             $componentManager->registerModuleComponents($moduleId, $themeComponents);
             $componentManager->initializeModuleComponents($moduleId);
-        } catch (\Exception $e) {
-            $this->logError('Failed to setup theme components: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to setup theme components: '.$exception->getMessage());
         }
     }
 
@@ -284,8 +291,8 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
             // Register Blade directives
             $assetManager->registerModuleBladeDirectives($theme->getPath());
-        } catch (\Exception $e) {
-            $this->logError('Failed to setup theme assets: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to setup theme assets: '.$exception->getMessage());
         }
     }
 }

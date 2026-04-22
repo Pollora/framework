@@ -22,7 +22,7 @@ class WordPressInstallLoaderService
      *
      * @var array<int, string>
      */
-    private const CORE_FILES = [
+    private const array CORE_FILES = [
         '/l10n.php',
         '/class-wp-textdomain-registry.php',
         '/class-wp-walker.php',
@@ -47,7 +47,7 @@ class WordPressInstallLoaderService
      *
      * @var array<int, string>
      */
-    private const CORE_CLASSES = [
+    private const array CORE_CLASSES = [
         '/class-wp-rewrite.php',
         '/class-wp-theme.php',
         '/class-wp-roles.php',

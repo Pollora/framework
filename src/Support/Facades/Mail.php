@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use Pollora\Mail\Mailer;
 
 /**
  * Facade for WordPress Mail functionality.
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Facade;
  *
  * @method static ?SentMessage send(string|array $to, string $subject, string $message, string|array $headers = '', array $attachments = []) Send an email
  *
- * @see \Pollora\Mail\Mailer
+ * @see Mailer
  */
 class Mail extends Facade
 {

@@ -25,7 +25,7 @@ class RecurringEvent extends AbstractEvent
     public function __construct(?object $event = null)
     {
         parent::__construct($event);
-        if ($event) {
+        if ($event !== null) {
             $this->schedule = $event->schedule;
             $this->interval = $event->interval;
         }
@@ -126,7 +126,7 @@ class RecurringEvent extends AbstractEvent
         $minutes = $interval / 60;
 
         if ($minutes < 60) {
-            return "*/{$minutes} * * * *";
+            return sprintf('*/%s * * * *', $minutes);
         }
 
         if ($minutes == 60) {
@@ -136,9 +136,9 @@ class RecurringEvent extends AbstractEvent
         if ($minutes % 60 === 0) {
             $hours = $minutes / 60;
 
-            return "0 */{$hours} * * *";
+            return sprintf('0 */%s * * *', $hours);
         }
 
-        return "*/{$minutes} * * * *";
+        return sprintf('*/%s * * * *', $minutes);
     }
 }

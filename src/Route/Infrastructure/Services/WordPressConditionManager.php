@@ -79,6 +79,7 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
             if (is_string($aliases) && $aliases === $condition) {
                 return $wpFunction;
             }
+
             // Handle single alias (string)
             if (is_array($aliases) && in_array($condition, $aliases, true)) {
                 return $wpFunction;

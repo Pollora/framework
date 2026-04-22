@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Exceptions;
 
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Request;
@@ -117,7 +118,7 @@ class ModuleAwareErrorViewResolverTest extends TestCase
     public function test_returns_empty_debug_info_when_debug_disabled(): void
     {
         // Mock config service to return debug = false
-        $config = $this->createMock(\Illuminate\Contracts\Config\Repository::class);
+        $config = $this->createMock(Repository::class);
         $config->expects($this->once())
             ->method('get')
             ->with('app.debug', false)

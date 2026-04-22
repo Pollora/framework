@@ -19,7 +19,7 @@ class LocalEnvironmentDetector
      *
      * @var array<string, string>
      */
-    private const DEFAULT_CONFIG = [
+    private const array DEFAULT_CONFIG = [
         'siteUrl' => 'http://localhost',
         'dbHost' => 'localhost',
         'dbPort' => '3306',

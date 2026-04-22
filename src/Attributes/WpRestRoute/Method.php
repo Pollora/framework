@@ -17,7 +17,7 @@ use WP_REST_Request;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Method implements HandlesAttributes
 {
-    private const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    private const array ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
 
     /**
      * Constructor for the Method attribute.
@@ -43,7 +43,7 @@ class Method implements HandlesAttributes
     private function validateMethods(): void
     {
         foreach ($this->methods as $method) {
-            if (! in_array(strtoupper((string) $method), self::ALLOWED_METHODS)) {
+            if (! in_array(strtoupper((string) $method), self::ALLOWED_METHODS, true)) {
                 throw new InvalidArgumentException(
                     sprintf(
                         'Invalid HTTP method "%s". Allowed methods are: %s',
@@ -143,7 +143,7 @@ class Method implements HandlesAttributes
         }
 
         if (! class_exists($permissionCallback) || ! is_subclass_of($permissionCallback, Permission::class)) {
-            return fn (): \WP_Error => new WP_Error('rest_forbidden', __('Invalid permission handler.'), ['status' => 403]);
+            return fn (): WP_Error => new WP_Error('rest_forbidden', __('Invalid permission handler.'), ['status' => 403]);
         }
 
         return WpGlobals::wrap(function (WP_REST_Request $request) use ($permissionCallback): bool|\WP_Error {

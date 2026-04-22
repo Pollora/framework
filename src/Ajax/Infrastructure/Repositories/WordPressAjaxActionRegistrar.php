@@ -30,6 +30,7 @@ class WordPressAjaxActionRegistrar implements AjaxActionRegistrarInterface
         if ($action->isBothOrLoggedUsers()) {
             $this->action->add('wp_ajax_'.$action->getName(), $action->getCallback());
         }
+
         if ($action->isBothOrGuestUsers()) {
             $this->action->add('wp_ajax_nopriv_'.$action->getName(), $action->getCallback());
         }

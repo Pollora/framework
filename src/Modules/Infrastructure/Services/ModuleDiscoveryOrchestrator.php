@@ -42,9 +42,9 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
 
             $location = new DirectoryLocation($path);
             $engine->addLocation($location)->discover()->apply();
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for path {$path}: ".$e->getMessage());
+                error_log(sprintf('Discovery error for path %s: ', $path).$throwable->getMessage());
             }
         }
     }
@@ -65,9 +65,9 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
             $location = new DirectoryLocation($path);
 
             return $manager->discoverAllInLocation($location);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for path {$path}: ".$e->getMessage());
+                error_log(sprintf('Discovery error for path %s: ', $path).$throwable->getMessage());
             }
 
             return [];
@@ -147,7 +147,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
      */
     protected function getLaravelModuleDiscovery(): LaravelModuleDiscovery
     {
-        if (! $this->laravelModuleDiscovery instanceof \Pollora\Modules\Infrastructure\Services\LaravelModuleDiscovery) {
+        if (! $this->laravelModuleDiscovery instanceof LaravelModuleDiscovery) {
             $this->laravelModuleDiscovery = new LaravelModuleDiscovery($this->container);
         }
 
@@ -159,7 +159,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
      */
     protected function getFrameworkModuleDiscovery(): FrameworkModuleDiscovery
     {
-        if (! $this->frameworkModuleDiscovery instanceof \Pollora\Modules\Infrastructure\Services\FrameworkModuleDiscovery) {
+        if (! $this->frameworkModuleDiscovery instanceof FrameworkModuleDiscovery) {
             $this->frameworkModuleDiscovery = new FrameworkModuleDiscovery($this->container);
         }
 

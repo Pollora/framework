@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Route\Infrastructure\Services;
 
+use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use PHPUnit\Framework\TestCase;
@@ -42,7 +43,7 @@ class LazyConfigLoadingTest extends TestCase
         $router = new ExtendedRouter($dispatcher, $container);
 
         // Now bind the config service (simulating Laravel config being loaded later)
-        $config = $this->createMock(\Illuminate\Config\Repository::class);
+        $config = $this->createMock(Repository::class);
         $config->method('get')
             ->willReturnCallback(function ($key, $default = null) {
                 if ($key === 'wordpress.conditions') {
@@ -80,7 +81,7 @@ class LazyConfigLoadingTest extends TestCase
         $router = new ExtendedRouter($dispatcher, $container);
 
         // Mock config - expects to be called exactly twice (once for conditions, once for plugin_conditions)
-        $config = $this->createMock(\Illuminate\Config\Repository::class);
+        $config = $this->createMock(Repository::class);
         $config->expects($this->exactly(2))
             ->method('get')
             ->willReturnCallback(function ($key, $default = null) {
@@ -111,7 +112,7 @@ class LazyConfigLoadingTest extends TestCase
         $router = new ExtendedRouter($dispatcher, $container);
 
         // Mock config that throws an exception
-        $config = $this->createMock(\Illuminate\Config\Repository::class);
+        $config = $this->createMock(Repository::class);
         $config->method('get')
             ->willThrowException(new \Exception('Config not ready'));
 
@@ -133,7 +134,7 @@ class LazyConfigLoadingTest extends TestCase
         $router = new ExtendedRouter($dispatcher, $container);
 
         // Mock config with limited conditions to test merge behavior
-        $config = $this->createMock(\Illuminate\Config\Repository::class);
+        $config = $this->createMock(Repository::class);
         $config->method('get')
             ->willReturnCallback(function ($key, $default = null) {
                 if ($key === 'wordpress.conditions') {

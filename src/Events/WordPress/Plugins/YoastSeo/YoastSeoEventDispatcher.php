@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Events\WordPress\Plugins\YoastSeo;
 
+use Illuminate\Support\Facades\Request;
 use Pollora\Events\WordPress\AbstractEventDispatcher;
 
 /**
@@ -96,7 +97,7 @@ class YoastSeoEventDispatcher extends AbstractEventDispatcher
             'importbreadcrumbs' => 'Yoast Breadcrumbs',
         ];
 
-        $options = $_POST['wpseo'] ?? [];
+        $options = Request::post('wpseo') ?? [];
 
         foreach ($imports as $key => $name) {
             if (! empty($options[$key])) {
@@ -113,7 +114,7 @@ class YoastSeoEventDispatcher extends AbstractEventDispatcher
      */
     public function handleWpseoImport(): void
     {
-        $options = $_POST['wpseo'] ?? [];
+        $options = Request::post('wpseo') ?? [];
 
         if (! empty($options['export'])) {
             $this->dispatch(SettingsExported::class, [
@@ -129,11 +130,11 @@ class YoastSeoEventDispatcher extends AbstractEventDispatcher
     {
         $action = '';
 
-        if (! empty($_POST['create_robots'])) {
+        if (! empty(Request::post('create_robots'))) {
             $action = 'create_robots';
-        } elseif (! empty($_POST['submitrobots'])) {
+        } elseif (! empty(Request::post('submitrobots'))) {
             $action = 'update_robots';
-        } elseif (! empty($_POST['submithtaccess'])) {
+        } elseif (! empty(Request::post('submithtaccess'))) {
             $action = 'update_htaccess';
         }
 

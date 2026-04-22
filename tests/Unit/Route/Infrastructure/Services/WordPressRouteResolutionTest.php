@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Route\Infrastructure\Services;
 
+use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class WordPressRouteResolutionTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
 
         // Mock config for WordPress routing conditions - using the new format
-        $config = $this->createMock(\Illuminate\Config\Repository::class);
+        $config = $this->createMock(Repository::class);
         $config->method('get')
             ->willReturnCallback(function ($key, $default = null) {
                 if ($key === 'wordpress.conditions') {

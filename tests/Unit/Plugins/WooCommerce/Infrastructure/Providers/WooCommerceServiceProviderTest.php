@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\Container\ContextualBindingBuilder;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\Hook\Infrastructure\Services\Filter;
@@ -65,8 +67,8 @@ describe('WooCommerceServiceProvider', function () {
 
         $this->provider->register();
 
-        expect($this->container->has(\Pollora\ThirdParty\WooCommerce\WooCommerce::class))->toBeTrue();
-        expect($this->container->has(\Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver::class))->toBeTrue();
+        expect($this->container->has(Pollora\ThirdParty\WooCommerce\WooCommerce::class))->toBeTrue();
+        expect($this->container->has(Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver::class))->toBeTrue();
     });
 
     test('can resolve woocommerce integration service', function () {
@@ -121,7 +123,7 @@ describe('WooCommerceServiceProvider', function () {
 });
 
 // Extend TestContainer to support singleton behavior for service provider tests
-class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Contracts\Container\Container
+class WooCommerceTestContainer extends TestContainer implements Container
 {
     private array $singletons = [];
 
@@ -129,7 +131,7 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
 
     public function singleton($abstract, $concrete = null)
     {
-        if ($concrete instanceof \Closure) {
+        if ($concrete instanceof Closure) {
             $this->singletons[$abstract] = $concrete;
         } elseif ($concrete === null) {
             // When no concrete is provided, Laravel auto-resolves the class
@@ -229,17 +231,17 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
         }
     }
 
-    public function extend($abstract, \Closure $closure): void
+    public function extend($abstract, Closure $closure): void
     {
         // Simplified implementation
     }
 
-    public function when($concrete): \Illuminate\Contracts\Container\ContextualBindingBuilder
+    public function when($concrete): ContextualBindingBuilder
     {
-        throw new \Exception('when() not implemented in test container');
+        throw new Exception('when() not implemented in test container');
     }
 
-    public function factory($abstract): \Closure
+    public function factory($abstract): Closure
     {
         return function () use ($abstract) {
             return $this->make($abstract);
@@ -257,12 +259,12 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
         return isset($this->services[$abstract]);
     }
 
-    public function resolving($abstract, ?\Closure $callback = null): void
+    public function resolving($abstract, ?Closure $callback = null): void
     {
         // Simplified implementation
     }
 
-    public function afterResolving($abstract, ?\Closure $callback = null): void
+    public function afterResolving($abstract, ?Closure $callback = null): void
     {
         // Simplified implementation
     }
@@ -273,7 +275,7 @@ class WooCommerceTestContainer extends \TestContainer implements \Illuminate\Con
         if (is_callable($callback)) {
             return call_user_func_array($callback, $parameters);
         }
-        throw new \Exception('call() not fully implemented in test container');
+        throw new Exception('call() not fully implemented in test container');
     }
 
     public function bindMethod($method, $callback)

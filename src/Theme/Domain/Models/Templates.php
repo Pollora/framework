@@ -62,9 +62,11 @@ class Templates implements ThemeComponent
             if (! isset($template['post_types'])) {
                 continue;
             }
+
             if (! in_array($postType, (array) $template['post_types'])) {
                 continue;
             }
+
             $pageTemplates[$slug] = $template['label'];
         }
 

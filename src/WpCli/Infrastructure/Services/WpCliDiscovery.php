@@ -13,6 +13,7 @@ use Pollora\Attributes\WpCli\Synopsis;
 use Pollora\Attributes\WpCli\When;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\WpCli\Application\Services\WpCliService;
@@ -30,7 +31,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class WpCliDiscovery implements DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * @var array<class-string, object>
@@ -44,7 +46,7 @@ final class WpCliDiscovery implements DiscoveryInterface
     /**
      * {@inheritDoc}
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         if (! $structure instanceof DiscoveredClass || $structure->isAbstract) {
             return;
@@ -72,7 +74,7 @@ final class WpCliDiscovery implements DiscoveryInterface
                 $reflectionCache = $discoveredItem['reflection_cache'] ?? null;
                 $this->processWpCliCommand($discoveredItem['class'], $reflectionCache);
             } catch (\Throwable $e) {
-                error_log("Failed to register WP CLI command from class {$discoveredItem['class']}: ".$e->getMessage());
+                error_log(sprintf('Failed to register WP CLI command from class %s: ', $discoveredItem['class']).$e->getMessage());
             }
         }
     }
@@ -80,7 +82,7 @@ final class WpCliDiscovery implements DiscoveryInterface
     /**
      * Process a WP CLI command class for registration.
      */
-    private function processWpCliCommand(string $className, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    private function processWpCliCommand(string $className, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         $reflectionClass = $reflectionCache->getClassReflection($className);
 
@@ -98,7 +100,7 @@ final class WpCliDiscovery implements DiscoveryInterface
         $commandName = $attribute->getCommandName($className);
 
         if (empty($commandName)) {
-            error_log("WP CLI command {$className} has no command name defined");
+            error_log(sprintf('WP CLI command %s has no command name defined', $className));
 
             return;
         }
@@ -129,7 +131,7 @@ final class WpCliDiscovery implements DiscoveryInterface
         return $this->getInstanceFromPool($className, function () use ($className) {
             if (! isset($this->commandInstances[$className])) {
                 // On laisse le container gérer la construction
-                $this->commandInstances[$className] = app($className);
+                $this->commandInstances[$className] = resolve($className);
             }
 
             return $this->commandInstances[$className];
@@ -180,7 +182,7 @@ final class WpCliDiscovery implements DiscoveryInterface
             /** @var Command $commandAttribute */
             $commandAttribute = $commandAttributes[0]->newInstance();
             $subcommandName = $commandAttribute->getSubcommandName($method->getName());
-            $fullCommandName = "{$baseCommandName} {$subcommandName}";
+            $fullCommandName = sprintf('%s %s', $baseCommandName, $subcommandName);
 
             $handler = $this->createCallable($instance, $method);
 
@@ -253,6 +255,7 @@ final class WpCliDiscovery implements DiscoveryInterface
                 if (! empty($description['short'])) {
                     $args['shortdesc'] = $description['short'];
                 }
+
                 if (! empty($description['long'])) {
                     $args['longdesc'] = $description['long'];
                 }

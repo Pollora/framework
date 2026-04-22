@@ -89,7 +89,7 @@ class MakeModelCommand extends AbstractGeneratorCommand
                 ->map(fn ($item): string => "'".trim($item)."'")
                 ->implode(', ');
 
-            $fillable = "[{$fillable}]";
+            $fillable = sprintf('[%s]', $fillable);
         } else {
             $fillable = '[]';
         }

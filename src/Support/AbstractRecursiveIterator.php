@@ -13,7 +13,7 @@ use RecursiveIterator;
  * This class provides a foundation for implementing recursive iterators,
  * with support for Laravel Collections and arrays.
  *
- * @implements \RecursiveIterator<int, mixed>
+ * @implements RecursiveIterator<int, mixed>
  */
 abstract class AbstractRecursiveIterator implements RecursiveIterator
 {

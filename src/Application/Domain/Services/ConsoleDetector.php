@@ -17,7 +17,7 @@ class ConsoleDetector implements ConsoleDetectorInterface
     public function isConsole(): bool
     {
         // Default logic, can be overridden by infrastructure
-        return php_sapi_name() === 'cli';
+        return PHP_SAPI === 'cli';
     }
 
     /**

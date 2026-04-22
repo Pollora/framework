@@ -32,7 +32,7 @@ class PluginCollection extends Collection
      */
     public function inactive(): static
     {
-        return $this->filter(fn (PluginModuleInterface $plugin): bool => ! $plugin->isActive());
+        return $this->reject(fn (PluginModuleInterface $plugin): bool => $plugin->isActive());
     }
 
     /**

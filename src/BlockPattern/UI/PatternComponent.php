@@ -41,6 +41,7 @@ class PatternComponent implements ThemeComponent
             if (defined('WP_INSTALLING') && WP_INSTALLING) {
                 return;
             }
+
             $this->registrationService->registerAll();
         });
     }

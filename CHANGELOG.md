@@ -5,7 +5,32 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.2.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.3.0...develop)
+
+## [v13.3.0](https://github.com/Pollora/framework/compare/v13.2.0...v13.3.0) - 2026-04-22
+
+### Added
+- SECURITY.md security policy with GitHub Security Advisories reporting
+- Larastan (PHPStan for Laravel) and Orchestra Testbench for improved static analysis and testing
+- PHPUnit XML configuration (`phpunit.xml.dist`)
+- Real integration tests for ThemeRegistrar (replacing skipped tests)
+- Consolidated CI workflow (`ci.yml`) with tests, code-quality, coverage-upload, and changelog validation jobs
+- Composer cache in CI workflows for faster builds
+- `composer audit` in code-quality CI job
+- Security scan workflow (`security.yml`) with weekly schedule
+- Deploy workflow now extracts changelog body for GitHub releases
+
+### Changed
+- Replaced all `dev-main` dependencies with stable version constraints (`pollora/helper-overrider ^1.0`, `pollora/entity ^1.2`, `pollora/query ^1.0`, `spatie/php-structure-discoverer ^2.4`, `laravel/prompts ^0.3.17`, `wp-cli/wp-cli ^2.12`)
+- Removed `minimum-stability: dev` (no longer needed)
+- Configured `driftingly/rector-laravel` with Laravel-specific rule sets (UP_TO_LARAVEL_130, code quality, collections, type declarations)
+- Applied Rector Laravel refactoring: `app()` → `resolve()`, collection filter/reject improvements
+- Replaced deprecated `strictBooleans` Rector set with `codingStyle`
+
+### Fixed
+- Patched Mockery 1.x for PHP 8.4 implicit nullable parameter deprecations
+- Fixed npm vulnerabilities (picomatch, ajv, yaml)
+- Fixed Pint code style issues
 
 ## [v13.2.0](https://github.com/Pollora/framework/compare/v13.1.0...v13.2.0) - 2026-04-22
 

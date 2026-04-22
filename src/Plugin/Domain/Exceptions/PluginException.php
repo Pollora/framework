@@ -28,7 +28,7 @@ class PluginException extends Exception
      */
     public static function activationFailed(string $pluginName, string $reason, int $code = 0, ?Exception $previous = null): self
     {
-        return new self("Plugin '{$pluginName}' activation failed: {$reason}", $code, $previous);
+        return new self(sprintf("Plugin '%s' activation failed: %s", $pluginName, $reason), $code, $previous);
     }
 
     /**
@@ -42,7 +42,7 @@ class PluginException extends Exception
      */
     public static function deactivationFailed(string $pluginName, string $reason, int $code = 0, ?Exception $previous = null): self
     {
-        return new self("Plugin '{$pluginName}' deactivation failed: {$reason}", $code, $previous);
+        return new self(sprintf("Plugin '%s' deactivation failed: %s", $pluginName, $reason), $code, $previous);
     }
 
     /**
@@ -56,7 +56,7 @@ class PluginException extends Exception
      */
     public static function configurationError(string $pluginName, string $configIssue, int $code = 0, ?Exception $previous = null): self
     {
-        return new self("Plugin '{$pluginName}' configuration error: {$configIssue}", $code, $previous);
+        return new self(sprintf("Plugin '%s' configuration error: %s", $pluginName, $configIssue), $code, $previous);
     }
 
     /**
@@ -70,7 +70,7 @@ class PluginException extends Exception
      */
     public static function dependencyConflict(string $pluginName, string $dependencyIssue, int $code = 0, ?Exception $previous = null): self
     {
-        return new self("Plugin '{$pluginName}' dependency conflict: {$dependencyIssue}", $code, $previous);
+        return new self(sprintf("Plugin '%s' dependency conflict: %s", $pluginName, $dependencyIssue), $code, $previous);
     }
 
     /**
@@ -84,7 +84,7 @@ class PluginException extends Exception
      */
     public static function fileSystemError(string $pluginName, string $fileSystemIssue, int $code = 0, ?Exception $previous = null): self
     {
-        return new self("Plugin '{$pluginName}' file system error: {$fileSystemIssue}", $code, $previous);
+        return new self(sprintf("Plugin '%s' file system error: %s", $pluginName, $fileSystemIssue), $code, $previous);
     }
 
     /**
@@ -97,7 +97,7 @@ class PluginException extends Exception
      */
     public static function pluginNotFound(string $pluginName, int $code = 0, ?Exception $previous = null): self
     {
-        return new self("Plugin '{$pluginName}' not found", $code, $previous);
+        return new self(sprintf("Plugin '%s' not found", $pluginName), $code, $previous);
     }
 
     /**
@@ -111,6 +111,6 @@ class PluginException extends Exception
      */
     public static function invalidStructure(string $pluginName, string $structureIssue, int $code = 0, ?Exception $previous = null): self
     {
-        return new self("Plugin '{$pluginName}' has invalid structure: {$structureIssue}", $code, $previous);
+        return new self(sprintf("Plugin '%s' has invalid structure: %s", $pluginName, $structureIssue), $code, $previous);
     }
 }

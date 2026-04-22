@@ -101,10 +101,12 @@ class DatabaseConfig
                     if (! filter_var($value, FILTER_VALIDATE_URL)) {
                         return 'Please enter a valid URL (e.g., https://pollora.ddev.site)';
                     }
+
                     // Ensure URL doesn't end with a slash
                     if (str_ends_with($value, '/')) {
                         return 'URL should not end with a slash';
                     }
+
                     // Check protocol
                     if (! str_starts_with($value, 'http://') && ! str_starts_with($value, 'https://')) {
                         return 'URL must start with http:// or https://';
