@@ -1215,3 +1215,121 @@ if (! function_exists('delete_option')) {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->delete_option($option) : true;
     }
 }
+
+// WordPress transient functions
+if (! function_exists('get_transient')) {
+    function get_transient($transient)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_transient($transient) : false;
+    }
+}
+
+if (! function_exists('set_transient')) {
+    function set_transient($transient, $value, $expiration = 0)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->set_transient($transient, $value, $expiration) : true;
+    }
+}
+
+// WordPress HTTP functions
+if (! function_exists('wp_remote_get')) {
+    function wp_remote_get($url, $args = [])
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_remote_get($url, $args) : new WP_Error;
+    }
+}
+
+if (! function_exists('wp_remote_retrieve_body')) {
+    function wp_remote_retrieve_body($response)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_remote_retrieve_body($response) : '';
+    }
+}
+
+if (! function_exists('is_wp_error')) {
+    function is_wp_error($thing)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_wp_error($thing) : ($thing instanceof WP_Error);
+    }
+}
+
+// WordPress user functions
+if (! function_exists('get_current_user_id')) {
+    function get_current_user_id()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_current_user_id() : 0;
+    }
+}
+
+if (! function_exists('get_user_meta')) {
+    function get_user_meta($user_id, $key = '', $single = false)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->get_user_meta($user_id, $key, $single) : '';
+    }
+}
+
+if (! function_exists('update_user_meta')) {
+    function update_user_meta($user_id, $meta_key, $meta_value, $prev_value = '')
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->update_user_meta($user_id, $meta_key, $meta_value, $prev_value) : true;
+    }
+}
+
+// WordPress security functions
+if (! function_exists('wp_create_nonce')) {
+    function wp_create_nonce($action = -1)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_create_nonce($action) : 'test-nonce';
+    }
+}
+
+if (! function_exists('check_ajax_referer')) {
+    function check_ajax_referer($action = -1, $query_arg = false, $stop = true)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->check_ajax_referer($action, $query_arg, $stop) : true;
+    }
+}
+
+if (! function_exists('sanitize_text_field')) {
+    function sanitize_text_field($str)
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->sanitize_text_field($str) : trim(strip_tags($str));
+    }
+}
+
+if (! function_exists('wp_die')) {
+    function wp_die($message = '', $title = '', $args = [])
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->wp_die($message, $title, $args) : null;
+    }
+}
+
+// WordPress escaping functions
+if (! function_exists('esc_attr')) {
+    function esc_attr($text)
+    {
+        return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (! function_exists('esc_html')) {
+    function esc_html($text)
+    {
+        return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (! function_exists('esc_url')) {
+    function esc_url($url)
+    {
+        return filter_var($url, FILTER_SANITIZE_URL) ?: '';
+    }
+}
+
+// WordPress i18n
+if (! function_exists('__')) {
+    function __($text, $domain = 'default')
+    {
+        return $text;
+    }
+}
