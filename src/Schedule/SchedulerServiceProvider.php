@@ -6,6 +6,7 @@ namespace Pollora\Schedule;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
+use Orchestra\Testbench\TestCase;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Events\RecurringEvent;
@@ -91,6 +92,6 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     private function isOrchastraTest(): bool
     {
-        return defined('LARAVEL_START') && class_exists('\Orchestra\Testbench\TestCase');
+        return defined('LARAVEL_START') && class_exists(TestCase::class);
     }
 }

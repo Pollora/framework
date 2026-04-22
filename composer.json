@@ -24,6 +24,7 @@
     "require": {
         "php": "^8.3",
         "pollora/helper-overrider": "dev-main",
+        "illuminate/auth": "^13.5",
         "illuminate/support": "^13.5",
         "illuminate/database": "^13.5",
         "illuminate/routing": "^13.5",
@@ -96,8 +97,10 @@
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^12.0",
-        "mockery/mockery": "2.0.x-dev",
-        "wp-cli/wp-cli": "^2.13@dev"
+        "mockery/mockery": "^1.6",
+        "wp-cli/wp-cli": "^2.13@dev",
+        "larastan/larastan": "^3.0",
+        "orchestra/testbench": "^10.0|^11.0"
     },
     "autoload-dev": {
         "psr-4": {
@@ -105,10 +108,7 @@
             "Workbench\\App\\": "workbench/app/",
             "Workbench\\Database\\Factories\\": "workbench/database/factories/",
             "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
-        },
-        "files": [
-            "tests/Unit/helpers.php"
-        ]
+        }
     },
     "scripts": {
         "post-autoload-dump": [

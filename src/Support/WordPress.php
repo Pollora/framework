@@ -19,10 +19,8 @@ class WordPress
 {
     /**
      * Default value for options when not found.
-     *
-     * @var bool
      */
-    private const DEFAULT_OPTION_VALUE = false;
+    private const bool DEFAULT_OPTION_VALUE = false;
 
     /**
      * Check if we are on a multisite, and optionally check the multisite we are on.

@@ -1,7 +1,7 @@
 includes:
     - phpstan-baseline.neon
-    # phpstan-ignore-rules.neon uses excludeRules which requires Larastan
-    # - phpstan-ignore-rules.neon
+    - phpstan-ignore-rules.neon
+    - vendor/larastan/larastan/extension.neon
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
 parameters:

@@ -79,7 +79,7 @@ trait HasThemeSupport
         // Default themes path, can be overridden
         $themesPath = config('theme.path', base_path('themes'));
 
-        return rtrim($themesPath, '/').'/'.$themeName;
+        return rtrim((string) $themesPath, '/').'/'.$themeName;
     }
 
     /**

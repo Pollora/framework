@@ -12,7 +12,6 @@ namespace Pollora\Theme\UI\Console;
 
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
 use Pollora\Console\Concerns\PromptsForMissingOption;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
@@ -59,14 +58,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      * @var array<string, string>
      */
     protected array $containerFolder;
-
-    /**
-     * Constructor.
-     */
-    public function __construct(Repository $config, Filesystem $files)
-    {
-        parent::__construct($config, $files);
-    }
 
     /**
      * Handle the command execution.

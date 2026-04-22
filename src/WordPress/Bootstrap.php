@@ -52,7 +52,7 @@ class Bootstrap
         $this->setDatabaseConstants();
 
         if ($this->isDatabaseConfigured()) {
-            $this->withWordPressErrorHandling(function () {
+            $this->withWordPressErrorHandling(function (): void {
                 $this->loadWordPressSettings();
             });
         }
@@ -62,7 +62,7 @@ class Bootstrap
             Constant::apply();
         }
         if (! $this->consoleDetectionService->isConsole() && $this->isWordPressInstalled()) {
-            $this->withWordPressErrorHandling(function () {
+            $this->withWordPressErrorHandling(function (): void {
                 $this->runWp();
             });
         }

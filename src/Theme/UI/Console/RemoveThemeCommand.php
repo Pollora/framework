@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\UI\Console;
 
-use Illuminate\Config\Repository;
 use Illuminate\Filesystem\Filesystem;
 
 /**
@@ -15,17 +14,6 @@ class RemoveThemeCommand extends BaseThemeCommand
     protected $signature = 'pollora:delete-theme {name : Name of the theme to remove}';
 
     protected $description = 'Remove an existing theme';
-
-    /**
-     * Create a new command instance.
-     *
-     * @param  Repository  $config  The configuration repository
-     * @param  Filesystem  $files  Filesystem instance used for file operations
-     */
-    public function __construct(Repository $config, Filesystem $files)
-    {
-        parent::__construct($config, $files);
-    }
 
     /**
      * Execute the command.

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Container\Container;
 use Pollora\Asset\Domain\Models\Asset;
 use Pollora\Asset\Domain\Models\AssetFile;
 use Pollora\Asset\Domain\Models\ViteManager;
@@ -34,11 +35,14 @@ describe('AssetFile domain model', function () {
 
 describe('ViteManager domain stub', function () {
     beforeEach(function () {
-        // Bind 'path.public' to avoid BindingResolutionException
-        if (! function_exists('app')) {
-            require_once __DIR__.'/helpers.php';
-        }
-        app()->instance('path.public', '/tmp/public');
+        $app = Mockery::mock(Container::class)->makePartial();
+        $app->shouldReceive('publicPath')->andReturnUsing(fn ($path = '') => '/tmp/public'.($path ? '/'.$path : ''));
+        $app->instance('path.public', '/tmp/public');
+        Container::setInstance($app);
+    });
+
+    afterEach(function () {
+        Container::setInstance(new Container);
     });
     it('returns stub values for all interface methods', function () {
         $vite = new ViteManager;

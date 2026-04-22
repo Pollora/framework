@@ -9,16 +9,12 @@ use Pollora\Route\UI\Http\Controllers\FrontendController;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-require_once __DIR__.'/../../../../helpers.php';
+require_once dirname(__DIR__, 5).'/Unit/helpers.php';
 
 beforeEach(function () {
     setupWordPressMocks();
     $this->templateFinder = Mockery::mock(TemplateFinderInterface::class);
     $this->controller = new FrontendController($this->templateFinder);
-});
-
-afterEach(function () {
-    Mockery::close();
 });
 
 describe('FrontendController', function () {
