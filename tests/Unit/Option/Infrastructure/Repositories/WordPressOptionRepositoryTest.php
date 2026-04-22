@@ -2,114 +2,60 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Option\Infrastructure\Repositories;
-
-use PHPUnit\Framework\TestCase;
 use Pollora\Option\Domain\Models\Option;
 use Pollora\Option\Infrastructure\Repositories\WordPressOptionRepository;
 
-final class WordPressOptionRepositoryTest extends TestCase
-{
-    private WordPressOptionRepository $repository;
+require_once dirname(__DIR__, 3).'/helpers.php';
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+describe('WordPressOptionRepository', function (): void {
+    beforeEach(function (): void {
         setupWordPressMocks();
         $this->repository = new WordPressOptionRepository;
-    }
+    });
 
-    public function test_get_returns_option_when_exists(): void
-    {
-        $key = 'test_key';
-        $value = 'test_value';
+    it('returns option when exists', function (): void {
+        setWordPressFunction('get_option', fn ($key, $default) => $key === 'test_key' ? 'test_value' : $default);
 
-        setWordPressFunction('get_option', function ($optionKey, $default) use ($key, $value) {
-            return $optionKey === $key ? $value : $default;
-        });
+        $result = $this->repository->get('test_key');
 
-        $result = $this->repository->get($key);
+        expect($result)->toBeInstanceOf(Option::class);
+        expect($result->key)->toBe('test_key');
+        expect($result->value)->toBe('test_value');
+    });
 
-        $this->assertInstanceOf(Option::class, $result);
-        $this->assertEquals($key, $result->key);
-        $this->assertEquals($value, $result->value);
-    }
+    it('returns null when not exists', function (): void {
+        setWordPressFunction('get_option', fn ($key, $default) => $key === 'non_existent_key' ? null : $default);
 
-    public function test_get_returns_null_when_not_exists(): void
-    {
-        $key = 'non_existent_key';
+        expect($this->repository->get('non_existent_key'))->toBeNull();
+    });
 
-        setWordPressFunction('get_option', function ($optionKey, $default) use ($key) {
-            return $optionKey === $key ? null : $default;
-        });
+    it('store returns true', function (): void {
+        setWordPressFunction('add_option', fn (): true => true);
 
-        $result = $this->repository->get($key);
+        expect($this->repository->store(new Option('test_key', 'test_value', true)))->toBeTrue();
+    });
 
-        $this->assertNull($result);
-    }
+    it('update returns true', function (): void {
+        setWordPressFunction('update_option', fn (): true => true);
 
-    public function test_store_returns_true(): void
-    {
-        $option = new Option('test_key', 'test_value', true);
+        expect($this->repository->update(new Option('test_key', 'updated_value', false)))->toBeTrue();
+    });
 
-        setWordPressFunction('add_option', function () {
-            return true;
-        });
+    it('delete returns true', function (): void {
+        setWordPressFunction('delete_option', fn (): true => true);
 
-        $result = $this->repository->store($option);
+        expect($this->repository->delete('test_key'))->toBeTrue();
+    });
 
-        $this->assertTrue($result);
-    }
+    it('exists returns true when option has value', function (): void {
+        setWordPressFunction('get_option', fn ($key, $default) => $key === 'existing_key' ? 'some_value' : $default);
 
-    public function test_update_returns_true(): void
-    {
-        $option = new Option('test_key', 'updated_value', false);
+        expect($this->repository->exists('existing_key'))->toBeTrue();
+    });
 
-        setWordPressFunction('update_option', function () {
-            return true;
-        });
+    it('exists returns false when option is null', function (): void {
+        setWordPressFunction('get_option', fn ($key, $default) => $key === 'non_existent_key' ? null : $default);
 
-        $result = $this->repository->update($option);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_delete_returns_true(): void
-    {
-        $key = 'test_key';
-
-        setWordPressFunction('delete_option', function () {
-            return true;
-        });
-
-        $result = $this->repository->delete($key);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_exists_returns_true_when_option_has_value(): void
-    {
-        $key = 'existing_key';
-
-        setWordPressFunction('get_option', function ($optionKey, $default) use ($key) {
-            return $optionKey === $key ? 'some_value' : $default;
-        });
-
-        $result = $this->repository->exists($key);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_exists_returns_false_when_option_is_null(): void
-    {
-        $key = 'non_existent_key';
-
-        setWordPressFunction('get_option', function ($optionKey, $default) use ($key) {
-            return $optionKey === $key ? null : $default;
-        });
-
-        $result = $this->repository->exists($key);
-
-        $this->assertFalse($result);
-    }
-}
+        expect($this->repository->exists('non_existent_key'))->toBeFalse();
+    });
+});

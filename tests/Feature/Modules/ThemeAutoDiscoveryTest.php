@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->app = new Container;
 });
 
-it('can create container for auto discovery testing', function () {
+it('can create container for auto discovery testing', function (): void {
     expect($this->app)->toBeInstanceOf(Container::class);
 });
 

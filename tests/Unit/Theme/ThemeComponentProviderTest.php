@@ -21,7 +21,7 @@ use Pollora\Theme\Infrastructure\Services\Support;
 // For simplicity with Mockery, we'll define them in `beforeEach` and access them via `$this`.
 // Pest will make $this available in tests if the closure in beforeEach uses $this.
 
-beforeEach(function () {
+beforeEach(function (): void {
     // parent::setUp() from TestCase is usually not needed directly in Pest unless it does something critical.
     // If TestCase::setUp() has essential mocking or app bootstrapping, it might need to be replicated or called.
     // Assuming Tests\TestCase::setUp() is for general Laravel testing setup, which Pest handles via uses(Tests\TestCase::class).
@@ -52,7 +52,7 @@ beforeEach(function () {
 // it should be included with `uses(Tests\TestCase::class);` at the top level of the file.
 // For now, assuming it's not strictly necessary for these specific tests beyond Mockery setup.
 
-it('registers component factory (verifies all core components registration)', function () {
+it('registers component factory (verifies all core components registration)', function (): void {
     // This test is named component_factory, but ThemeComponentProvider doesn't deal with ComponentFactory directly.
     // It registers individual components. Let's assume this test is actually about verifying that
     // all components defined in the provider are registered correctly.
@@ -70,7 +70,7 @@ it('registers component factory (verifies all core components registration)', fu
     expect($this->provider)->toBeInstanceOf(ThemeComponentProvider::class);
 });
 
-it('registers core components', function () {
+it('registers core components', function (): void {
     $mockComponent = m::mock(ThemeComponent::class);
     $mockComponent->shouldReceive('register')->byDefault(); // All components have a register method
 
@@ -90,12 +90,12 @@ it('registers core components', function () {
     expect($this->provider)->toBeInstanceOf(ThemeComponentProvider::class);
 });
 
-it('can be instantiated', function () {
+it('can be instantiated', function (): void {
     expect($this->provider)->toBeInstanceOf(ThemeComponentProvider::class);
 });
 
 // tearDown with m::close() is usually handled by Pest's Mockery plugin or a global helper if needed.
 // If not using the plugin, m::close() might be called in an `afterEach`.
-afterEach(function () {
+afterEach(function (): void {
     m::close();
 });

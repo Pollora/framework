@@ -2,169 +2,140 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Route\Infrastructure\Services;
-
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
-use PHPUnit\Framework\TestCase;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 
-/**
- * Tests for lazy configuration loading in ExtendedRouter.
- *
- * This test verifies that the router can handle situations where
- * the configuration is not available during construction but becomes
- * available later during the application lifecycle.
- */
-class LazyConfigLoadingTest extends TestCase
-{
-    public function test_router_works_without_config_during_construction(): void
-    {
-        // Create a container without config service bound
+describe('LazyConfigLoading', function (): void {
+    it('router works without config during construction', function (): void {
         $container = new Container;
-        $dispatcher = $this->createMock(Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
-        // This should not throw an exception even though config is not available
         $router = new ExtendedRouter($dispatcher, $container);
 
-        // Router should still have default conditions
         $conditions = $router->getConditions();
-        $this->assertArrayHasKey('single', $conditions);
-        $this->assertEquals('is_single', $conditions['single']);
-    }
+        expect($conditions)->toHaveKey('single');
+        expect($conditions['single'])->toBe('is_single');
+    });
 
-    public function test_router_loads_config_when_available_later(): void
-    {
-        // Create a container without config initially
+    it('router loads config when available later', function (): void {
         $container = new Container;
-        $dispatcher = $this->createMock(Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
         $router = new ExtendedRouter($dispatcher, $container);
 
-        // Now bind the config service (simulating Laravel config being loaded later)
-        $config = $this->createMock(Repository::class);
-        $config->method('get')
-            ->willReturnCallback(function ($key, $default = null) {
-                if ($key === 'wordpress.conditions') {
-                    return [
-                        'is_custom_condition' => 'custom',
-                        'is_special_condition' => 'special',
-                    ];
-                }
-                if ($key === 'wordpress.plugin_conditions') {
-                    return [];
-                }
+        $config = Mockery::mock(Repository::class);
+        $config->shouldReceive('get')->andReturnUsing(function ($key, $default = null) {
+            if ($key === 'wordpress.conditions') {
+                return [
+                    'is_custom_condition' => 'custom',
+                    'is_special_condition' => 'special',
+                ];
+            }
 
-                return $default;
-            });
+            if ($key === 'wordpress.plugin_conditions') {
+                return [];
+            }
+
+            return $default;
+        });
 
         $container->instance('config', $config);
 
-        // Now when we call resolveCondition, it should load the config
         $result = $router->resolveCondition('custom');
-        $this->assertEquals('is_custom_condition', $result);
+        expect($result)->toBe('is_custom_condition');
 
-        // And it should have merged with defaults
         $conditions = $router->getConditions();
-        $this->assertArrayHasKey('single', $conditions); // Default condition
-        $this->assertArrayHasKey('custom', $conditions); // Config condition
-        $this->assertEquals('is_single', $conditions['single']);
-        $this->assertEquals('is_custom_condition', $conditions['custom']);
-    }
+        expect($conditions)->toHaveKey('single');
+        expect($conditions)->toHaveKey('custom');
+        expect($conditions['single'])->toBe('is_single');
+        expect($conditions['custom'])->toBe('is_custom_condition');
+    });
 
-    public function test_config_is_only_loaded_once(): void
-    {
+    it('config is only loaded once', function (): void {
         $container = new Container;
-        $dispatcher = $this->createMock(Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
         $router = new ExtendedRouter($dispatcher, $container);
 
-        // Mock config - expects to be called exactly twice (once for conditions, once for plugin_conditions)
-        $config = $this->createMock(Repository::class);
-        $config->expects($this->exactly(2))
-            ->method('get')
-            ->willReturnCallback(function ($key, $default = null) {
-                if ($key === 'wordpress.conditions') {
-                    return ['is_test' => 'test'];
-                }
-                if ($key === 'wordpress.plugin_conditions') {
-                    return [];
-                }
+        $config = Mockery::mock(Repository::class);
+        $config->shouldReceive('get')->twice()->andReturnUsing(function ($key, $default = null) {
+            if ($key === 'wordpress.conditions') {
+                return ['is_test' => 'test'];
+            }
 
-                return $default;
-            });
+            if ($key === 'wordpress.plugin_conditions') {
+                return [];
+            }
+
+            return $default;
+        });
 
         $container->instance('config', $config);
 
-        // Call multiple times - config should only be loaded once
         $router->resolveCondition('test');
         $router->resolveCondition('test');
         $router->getConditions();
         $router->resolveCondition('another');
-    }
+    });
 
-    public function test_router_handles_config_exceptions_gracefully(): void
-    {
+    it('handles config exceptions gracefully', function (): void {
         $container = new Container;
-        $dispatcher = $this->createMock(Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
         $router = new ExtendedRouter($dispatcher, $container);
 
-        // Mock config that throws an exception
-        $config = $this->createMock(Repository::class);
-        $config->method('get')
-            ->willThrowException(new \Exception('Config not ready'));
+        $config = Mockery::mock(Repository::class);
+        $config->shouldReceive('get')->andThrow(new Exception('Config not ready'));
 
         $container->instance('config', $config);
 
-        // Router should handle the exception gracefully and still work
         $result = $router->resolveCondition('single');
-        $this->assertEquals('is_single', $result);
+        expect($result)->toBe('is_single');
 
         $conditions = $router->getConditions();
-        $this->assertArrayHasKey('single', $conditions);
-    }
+        expect($conditions)->toHaveKey('single');
+    });
 
-    public function test_config_merges_with_defaults_correctly(): void
-    {
+    it('config merges with defaults correctly', function (): void {
         $container = new Container;
-        $dispatcher = $this->createMock(Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
         $router = new ExtendedRouter($dispatcher, $container);
 
-        // Mock config with limited conditions to test merge behavior
-        $config = $this->createMock(Repository::class);
-        $config->method('get')
-            ->willReturnCallback(function ($key, $default = null) {
-                if ($key === 'wordpress.conditions') {
-                    return [
-                        'is_front_page' => 'front',
-                        'is_custom_condition' => 'custom',
-                    ];
-                }
-                if ($key === 'wordpress.plugin_conditions') {
-                    return [];
-                }
+        $config = Mockery::mock(Repository::class);
+        $config->shouldReceive('get')->andReturnUsing(function ($key, $default = null) {
+            if ($key === 'wordpress.conditions') {
+                return [
+                    'is_front_page' => 'front',
+                    'is_custom_condition' => 'custom',
+                ];
+            }
 
-                return $default;
-            });
+            if ($key === 'wordpress.plugin_conditions') {
+                return [];
+            }
+
+            return $default;
+        });
 
         $container->instance('config', $config);
 
-        // Test that config conditions work
-        $this->assertEquals('is_front_page', $router->resolveCondition('front'));
-        $this->assertEquals('is_custom_condition', $router->resolveCondition('custom'));
+        expect($router->resolveCondition('front'))->toBe('is_front_page');
+        expect($router->resolveCondition('custom'))->toBe('is_custom_condition');
+        expect($router->resolveCondition('single'))->toBe('is_single');
+        expect($router->resolveCondition('date'))->toBe('is_date');
 
-        // Test that default conditions are preserved
-        $this->assertEquals('is_single', $router->resolveCondition('single'));
-        $this->assertEquals('is_date', $router->resolveCondition('date'));
-
-        // Test that all conditions are available
         $conditions = $router->getConditions();
-        $this->assertArrayHasKey('front', $conditions); // From config
-        $this->assertArrayHasKey('custom', $conditions); // From config
-        $this->assertArrayHasKey('single', $conditions); // From defaults
-        $this->assertArrayHasKey('date', $conditions); // From defaults
-    }
-}
+        expect($conditions)->toHaveKey('front');
+        expect($conditions)->toHaveKey('custom');
+        expect($conditions)->toHaveKey('single');
+        expect($conditions)->toHaveKey('date');
+    });
+});

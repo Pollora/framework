@@ -6,12 +6,12 @@ namespace Tests\Unit\PostType;
 
 use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
 
-beforeEach(function () {
+beforeEach(function (): void {
     setupWordPressMocks();
     $this->factory = new PostTypeFactory;
 });
 
-test('make creates new PostType instance with correct parameters', function () {
+test('make creates new PostType instance with correct parameters', function (): void {
     // Define test values
     $slug = 'test-post-type';
     $singular = 'Test Post Type';
@@ -26,7 +26,7 @@ test('make creates new PostType instance with correct parameters', function () {
         ->and($result->getSlug())->toBe($slug);
 });
 
-test('make handles null parameters correctly', function () {
+test('make handles null parameters correctly', function (): void {
     // Define test values
     $slug = 'test-post-type';
 

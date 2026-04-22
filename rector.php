@@ -10,10 +10,11 @@ use RectorLaravel\Set\LaravelSetList;
 return RectorConfig::configure()
     ->withPaths([
         __DIR__.'/src',
-        // __DIR__.'/tests',
+        __DIR__.'/tests',
     ])
     ->withSkip([
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        __DIR__.'/tests/Unit/helpers.php',
     ])
     ->withPreparedSets(
         deadCode: true,

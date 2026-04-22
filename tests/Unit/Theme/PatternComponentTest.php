@@ -10,8 +10,8 @@ use Psr\Container\ContainerInterface;
 
 require_once __DIR__.'/../helpers.php';
 
-describe('PatternComponent', function () {
-    it('resolves PatternServiceInterface from Laravel container', function () {
+describe('PatternComponent', function (): void {
+    it('resolves PatternServiceInterface from Laravel container', function (): void {
         $mockPatternService = m::mock(PatternServiceInterface::class);
         $mockAction = m::mock(Action::class);
         $mockContainer = m::mock(ContainerInterface::class);

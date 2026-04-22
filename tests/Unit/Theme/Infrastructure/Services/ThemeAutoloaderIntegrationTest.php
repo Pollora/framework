@@ -6,7 +6,7 @@ use Illuminate\Container\Container;
 use Pollora\Theme\Domain\Models\ThemeModule;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->app = new Container;
     $this->autoloader = new ThemeAutoloader($this->app);
 
@@ -35,20 +35,20 @@ beforeEach(function () {
     };
 });
 
-afterEach(function () {
+afterEach(function (): void {
     // Clean up temporary directory
     if (is_dir($this->tempDir)) {
         exec('rm -rf '.escapeshellarg($this->tempDir));
     }
 });
 
-it('generates correct namespace for theme', function () {
+it('generates correct namespace for theme', function (): void {
     $namespace = $this->autoloader->getThemeNamespace('TestTheme');
 
     expect($namespace)->toBe('Theme\\TestTheme\\');
 });
 
-it('tracks theme registration status', function () {
+it('tracks theme registration status', function (): void {
     // Initially not registered
     expect($this->autoloader->isThemeRegistered('TestTheme'))->toBeFalse();
 
@@ -59,7 +59,7 @@ it('tracks theme registration status', function () {
     expect($this->autoloader->isThemeRegistered('TestTheme'))->toBeTrue();
 });
 
-it('generates correct namespace for different theme names', function () {
+it('generates correct namespace for different theme names', function (): void {
     $testCases = [
         'Solidarmonde' => 'Theme\\Solidarmonde\\',
         'MyCustomTheme' => 'Theme\\MyCustomTheme\\',
@@ -71,7 +71,7 @@ it('generates correct namespace for different theme names', function () {
     }
 });
 
-it('can register multiple themes without conflicts', function () {
+it('can register multiple themes without conflicts', function (): void {
     // Create directory structure for additional themes
     $theme1Path = $this->tempDir.'/themes/theme-one';
     $theme2Path = $this->tempDir.'/themes/theme-two';
@@ -128,7 +128,7 @@ it('can register multiple themes without conflicts', function () {
     expect($this->autoloader->getThemeNamespace('ThemeTwo'))->toBe('Theme\\ThemeTwo\\');
 });
 
-it('handles theme registration idempotently', function () {
+it('handles theme registration idempotently', function (): void {
     // Register the same theme multiple times
     $this->autoloader->registerThemeModule($this->theme);
     $this->autoloader->registerThemeModule($this->theme);
@@ -139,14 +139,12 @@ it('handles theme registration idempotently', function () {
 
     // Should have only one namespace registration
     $registeredNamespaces = $this->autoloader->getRegisteredNamespaces();
-    $themeNamespaces = array_filter(array_keys($registeredNamespaces), function ($ns) {
-        return str_starts_with($ns, 'Theme\\TestTheme\\');
-    });
+    $themeNamespaces = array_filter(array_keys($registeredNamespaces), fn (int|string $ns): bool => str_starts_with((string) $ns, 'Theme\\TestTheme\\'));
 
     expect(count($themeNamespaces))->toBe(1);
 });
 
-it('can register themes using batch method', function () {
+it('can register themes using batch method', function (): void {
     // Create directory structure for batch themes
     $batch1Path = $this->tempDir.'/themes/batch-theme-1';
     $batch2Path = $this->tempDir.'/themes/batch-theme-2';
@@ -197,13 +195,13 @@ it('can register themes using batch method', function () {
     expect($this->autoloader->isThemeRegistered('BatchTheme2'))->toBeTrue();
 });
 
-it('returns empty registered namespaces initially', function () {
+it('returns empty registered namespaces initially', function (): void {
     $namespaces = $this->autoloader->getRegisteredNamespaces();
 
     expect($namespaces)->toBeArray()->toBeEmpty();
 });
 
-it('tracks registered namespaces after registration', function () {
+it('tracks registered namespaces after registration', function (): void {
     $this->autoloader->registerThemeModule($this->theme);
 
     $namespaces = $this->autoloader->getRegisteredNamespaces();

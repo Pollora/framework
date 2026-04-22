@@ -11,25 +11,25 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 require_once dirname(__DIR__, 5).'/Unit/helpers.php';
 
-beforeEach(function () {
+beforeEach(function (): void {
     setupWordPressMocks();
     $this->templateFinder = Mockery::mock(TemplateFinderInterface::class);
     $this->controller = new FrontendController($this->templateFinder);
 });
 
-describe('FrontendController', function () {
-    it('aborts when themes disabled', function () {
-        setWordPressFunction('wp_using_themes', fn () => false);
+describe('FrontendController', function (): void {
+    it('aborts when themes disabled', function (): void {
+        setWordPressFunction('wp_using_themes', fn (): false => false);
         $request = Request::create('/test');
 
         expect(fn () => $this->controller->handle($request))
             ->toThrow(HttpException::class, 'Themes are disabled');
     });
 
-    it('renders blade view when available', function () {
-        setWordPressFunction('wp_using_themes', fn () => true);
-        setWordPressFunction('is_page', fn () => true);
-        setWordPressFunction('get_page_template', fn () => '/theme/page.php');
+    it('renders blade view when available', function (): void {
+        setWordPressFunction('wp_using_themes', fn (): true => true);
+        setWordPressFunction('is_page', fn (): true => true);
+        setWordPressFunction('get_page_template', fn (): string => '/theme/page.php');
         setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')
@@ -50,11 +50,11 @@ describe('FrontendController', function () {
         expect($response->getContent())->toBe('<html>Blade page content</html>');
     });
 
-    it('falls back to php template', function () {
+    it('falls back to php template', function (): void {
         $templatePath = __DIR__.'/test-template.php';
-        setWordPressFunction('wp_using_themes', fn () => true);
-        setWordPressFunction('is_page', fn () => true);
-        setWordPressFunction('get_page_template', fn () => $templatePath);
+        setWordPressFunction('wp_using_themes', fn (): true => true);
+        setWordPressFunction('is_page', fn (): true => true);
+        setWordPressFunction('get_page_template', fn (): string => $templatePath);
         setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')
@@ -68,8 +68,8 @@ describe('FrontendController', function () {
         expect($response->getContent())->toBe('This is a PHP template');
     });
 
-    it('throws 404 when no template', function () {
-        setWordPressFunction('wp_using_themes', fn () => true);
+    it('throws 404 when no template', function (): void {
+        setWordPressFunction('wp_using_themes', fn (): true => true);
 
         setWordPressConditions([
             'is_page' => false,
@@ -91,7 +91,7 @@ describe('FrontendController', function () {
             'is_embed' => false,
         ]);
 
-        setWordPressFunction('get_index_template', fn () => '');
+        setWordPressFunction('get_index_template', fn (): string => '');
         setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')

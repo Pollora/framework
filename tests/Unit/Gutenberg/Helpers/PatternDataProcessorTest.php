@@ -6,9 +6,9 @@ use Pollora\BlockPattern\Infrastructure\Helpers\PatternDataProcessor;
 
 require_once __DIR__.'/../../helpers.php';
 
-describe('PatternDataProcessor', function () {
+describe('PatternDataProcessor', function (): void {
 
-    it('extracts data from pattern file', function () {
+    it('extracts data from pattern file', function (): void {
         $processor = new PatternDataProcessor;
         // Mock of the global get_file_data function
         $data = $processor->getPatternData('dummy-path');
@@ -16,7 +16,7 @@ describe('PatternDataProcessor', function () {
             ->and($data['slug'])->toBe('slug-demo');
     });
 
-    it('processes array fields and viewportWidth', function () {
+    it('processes array fields and viewportWidth', function (): void {
         $processor = new PatternDataProcessor;
         $patternData = [
             'categories' => 'news,updates',
@@ -31,7 +31,7 @@ describe('PatternDataProcessor', function () {
             ->and($result['viewportWidth'])->toBe(1200);
     });
 
-    it('filters empty values', function () {
+    it('filters empty values', function (): void {
         $processor = new PatternDataProcessor;
         $patternData = [
             'categories' => '',

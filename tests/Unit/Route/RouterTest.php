@@ -11,7 +11,7 @@ use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 /**
  * Setup function to create mocks and the router instance for all tests
  */
-function setupRouterTest()
+function setupRouterTest(): array
 {
     // Initialize WordPress functions from helpers.php
     setupWordPressMocks();
@@ -66,8 +66,8 @@ function mockWordPressClasses(): void
 /**
  * Clean up after each test
  */
-afterEach(function () {
-    Container::setInstance(null);
+afterEach(function (): void {
+    Container::setInstance();
     WP::$wpFunctions = null;
     m::close();
 });
@@ -75,14 +75,12 @@ afterEach(function () {
 /**
  * Test that the Router correctly creates new Route instances.
  */
-test('router creates new route instances', function () {
+test('router creates new route instances', function (): void {
     $setup = setupRouterTest();
     $router = $setup['router'];
 
     // Create a route using the router
-    $route = $router->get('/test', function () {
-        return 'test';
-    });
+    $route = $router->get('/test', fn (): string => 'test');
 
     // Verify that the route is an instance of our extended Route class
     expect($route)->toBeInstanceOf(Route::class);
@@ -93,7 +91,7 @@ test('router creates new route instances', function () {
 /**
  * Test that the Router can handle WordPress conditions.
  */
-test('router manages WordPress conditions', function () {
+test('router manages WordPress conditions', function (): void {
     $setup = setupRouterTest();
     $router = $setup['router'];
 
@@ -111,14 +109,12 @@ test('router manages WordPress conditions', function () {
 /**
  * Test that the Router can add WordPress bindings to routes.
  */
-test('router adds WordPress bindings to routes', function () {
+test('router adds WordPress bindings to routes', function (): void {
     $setup = setupRouterTest();
     $router = $setup['router'];
 
     // Create a route with a closure that has WordPress dependencies
-    $route = new Route(['GET'], 'test', function (WP_Post $post) {
-        return 'test';
-    });
+    $route = new Route(['GET'], 'test', fn (WP_Post $post): string => 'test');
 
     // Add WordPress bindings
     $enhancedRoute = $router->addWordPressBindings($route);
@@ -131,14 +127,12 @@ test('router adds WordPress bindings to routes', function () {
 /**
  * Test that the Router creates routes with proper configuration.
  */
-test('router creates WordPress-compatible routes', function () {
+test('router creates WordPress-compatible routes', function (): void {
     $setup = setupRouterTest();
     $router = $setup['router'];
 
     // Create a WordPress route
-    $route = $router->get('/page', function () {
-        return 'page';
-    });
+    $route = $router->get('/page', fn (): string => 'page');
 
     // Set it as a WordPress route with condition
     $route->setIsWordPressRoute(true);
@@ -153,14 +147,12 @@ test('router creates WordPress-compatible routes', function () {
 /**
  * Test that the Router can create new Route instances with newRoute method.
  */
-test('router newRoute method creates proper Route instances', function () {
+test('router newRoute method creates proper Route instances', function (): void {
     $setup = setupRouterTest();
     $router = $setup['router'];
 
     // Use the newRoute method
-    $route = $router->newRoute(['GET'], 'test', function () {
-        return 'test';
-    });
+    $route = $router->newRoute(['GET'], 'test', fn (): string => 'test');
 
     // Verify that it returns our extended Route class
     expect($route)->toBeInstanceOf(Route::class);

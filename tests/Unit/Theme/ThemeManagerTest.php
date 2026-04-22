@@ -12,7 +12,7 @@ use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create mock container with config property
     $this->app = Mockery::mock(Container::class);
     $this->config = Mockery::mock('config');
@@ -29,7 +29,7 @@ beforeEach(function () {
     $this->themeManager = new ThemeManager($this->app, $this->viewFinder, $this->localeLoader, $this->moduleRepository, $this->themeRegistrar, $this->consoleDetectionService);
 });
 
-test('loads a valid theme', function () {
+test('loads a valid theme', function (): void {
     $testPath = '/path/to/themes';
     $themeName = 'testTheme';
     $app = Mockery::mock(Container::class);
@@ -48,6 +48,7 @@ test('loads a valid theme', function () {
         [$app, $this->viewFinder, $this->localeLoader, $moduleRepository, $themeRegistrar, $consoleDetectionService]
     )->makePartial();
     $manager->shouldAllowMockingProtectedMethods();
+
     $themeMetadata = Mockery::mock(ThemeMetadata::class);
     $themeMetadata->shouldReceive('getName')->andReturn($themeName);
     $themeMetadata->shouldReceive('getBasePath')->andReturn($testPath.'/'.$themeName);
@@ -62,12 +63,12 @@ test('loads a valid theme', function () {
     expect($manager->instance())->toBeInstanceOf(ThemeManager::class);
 });
 
-test('throws an exception if theme name is empty', function () {
+test('throws an exception if theme name is empty', function (): void {
     expect(fn () => $this->themeManager->load(''))->toThrow(ThemeException::class)
         ->and(fn () => $this->themeManager->load('0'))->toThrow(ThemeException::class);
 });
 
-test('throws an exception if theme directory does not exist', function () {
+test('throws an exception if theme directory does not exist', function (): void {
     $themeName = 'nonexistent';
     $app = Mockery::mock(Container::class);
     $config = Mockery::mock('config');
@@ -84,15 +85,16 @@ test('throws an exception if theme directory does not exist', function () {
         [$app, $this->viewFinder, $this->localeLoader, $moduleRepository, $themeRegistrar, $consoleDetectionService]
     )->makePartial();
     $manager->shouldAllowMockingProtectedMethods();
+
     $themeMetadata = Mockery::mock(ThemeMetadata::class);
     $themeMetadata->shouldReceive('getName')->andReturn($themeName);
     $themeMetadata->shouldReceive('getBasePath')->andReturn('/path/to/themes/'.$themeName);
     $manager->shouldReceive('createThemeMetadata')->andReturn($themeMetadata);
     $manager->shouldReceive('getThemesPath')->andReturn('/path/to/themes');
     expect(fn () => $manager->load($themeName))
-        ->toThrow(ThemeException::class, "Theme directory {$themeName} not found.");
+        ->toThrow(ThemeException::class, sprintf('Theme directory %s not found.', $themeName));
 });
 
-test('instance returns self', function () {
+test('instance returns self', function (): void {
     expect($this->themeManager->instance())->toBeInstanceOf(ThemeManager::class);
 });
