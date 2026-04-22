@@ -1,2 +1,1651 @@
 parameters:
 	ignoreErrors:
+		-
+			message: '#^PHPDoc tag @extends has invalid value \(ServiceProvider\)\: Unexpected token "\\n ", expected ''\<'' at offset 302 on line 8$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Admin/PageServiceProvider.php
+
+		-
+			message: '#^Constructor of class Pollora\\Asset\\Application\\Services\\AssetManager has an unused parameter \$registrationService\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: src/Asset/Application/Services/AssetManager.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$content$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Asset/Domain/Models/AssetFile.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Foundation\\Vite\:\:getAssetUrls\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Asset/Infrastructure/Services/ViteManager.php
+
+		-
+			message: '#^Call to protected method assetPath\(\) of class Illuminate\\Foundation\\Vite\.$#'
+			identifier: method.protected
+			count: 2
+			path: src/Asset/Infrastructure/Services/ViteManager.php
+
+		-
+			message: '#^Call to protected method manifest\(\) of class Illuminate\\Foundation\\Vite\.$#'
+			identifier: method.protected
+			count: 1
+			path: src/Asset/Infrastructure/Services/ViteManager.php
+
+		-
+			message: '#^PHPDoc tag @var with type Illuminate\\Foundation\\Vite is not subtype of native type \$this\(Pollora\\Asset\\Infrastructure\\Services\\ViteManager\)\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: src/Asset/Infrastructure/Services/ViteManager.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/AdminCol.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/AdminCols.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/AdminFilters.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Archive.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/BlockEditor.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/CanExport.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Capabilities.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/CapabilityType.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Chronological.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/DashboardActivity.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/DashboardGlance.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/DeleteWithUser.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Description.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/ExcludeFromSearch.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/FeaturedImage.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/HasArchive.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Hierarchical.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Label.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Labels.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$value with type string is incompatible with native type array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Attributes/PostType/Labels.php
+
+		-
+			message: '#^PHPDoc type for property Pollora\\Attributes\\PostType\\Labels\:\:\$value with type string is incompatible with native type array\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Attributes/PostType/Labels.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/MapMetaCap.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/MenuIcon.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/MenuPosition.php
+
+		-
+			message: '#^Abstract class Pollora\\Attributes\\PostType\\PostTypeAttribute cannot be an Attribute class\.$#'
+			identifier: attribute.abstract
+			count: 1
+			path: src/Attributes/PostType/PostTypeAttribute.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Priority.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$priority with type Pollora\\Attributes\\PostType\\init is incompatible with native type int\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Attributes/PostType/Priority.php
+
+		-
+			message: '#^PHPDoc type for property Pollora\\Attributes\\PostType\\Priority\:\:\$priority with type Pollora\\Attributes\\PostType\\init is incompatible with native type int\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Attributes/PostType/Priority.php
+
+		-
+			message: '#^Parameter \$priority of method Pollora\\Attributes\\PostType\\Priority\:\:__construct\(\) has invalid type Pollora\\Attributes\\PostType\\init\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Attributes/PostType/Priority.php
+
+		-
+			message: '#^Property Pollora\\Attributes\\PostType\\Priority\:\:\$priority has unknown class Pollora\\Attributes\\PostType\\init as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Attributes/PostType/Priority.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/PublicPostType.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/PubliclyQueryable.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/QueryVar.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/QuickEdit.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/RegisterMetaBoxCb.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/RestBase.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/RestControllerClass.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/RestNamespace.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Rewrite.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/ShowInAdminBar.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/ShowInFeed.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/ShowInMenu.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/ShowInNavMenus.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/ShowInRest.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/ShowUI.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/SiteFilters.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/SiteSortables.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Supports.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Taxonomies.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/Template.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/TemplateLock.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/PostType/TitlePlaceholder.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/AllowHierarchy.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Args.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Capabilities.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/CheckedOntop.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$taxonomy with type Pollora\\Attributes\\Taxonomy\\Taxonomy is not subtype of native type Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Attributes/Taxonomy/CheckedOntop.php
+
+		-
+			message: '#^Parameter \$taxonomy of method Pollora\\Attributes\\Taxonomy\\CheckedOntop\:\:configure\(\) has invalid type Pollora\\Attributes\\Taxonomy\\Taxonomy\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/CheckedOntop.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/DefaultTerm.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Description.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Exclusive.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Hierarchical.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Label.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Labels.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$value with type string is incompatible with native type array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Attributes/Taxonomy/Labels.php
+
+		-
+			message: '#^PHPDoc type for property Pollora\\Attributes\\Taxonomy\\Labels\:\:\$value with type string is incompatible with native type array\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Attributes/Taxonomy/Labels.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/MetaBoxCb.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/MetaBoxSanitizeCb.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/ObjectType.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Priority.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$priority with type Pollora\\Attributes\\Taxonomy\\init is incompatible with native type int\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Attributes/Taxonomy/Priority.php
+
+		-
+			message: '#^PHPDoc type for property Pollora\\Attributes\\Taxonomy\\Priority\:\:\$priority with type Pollora\\Attributes\\Taxonomy\\init is incompatible with native type int\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Attributes/Taxonomy/Priority.php
+
+		-
+			message: '#^Parameter \$priority of method Pollora\\Attributes\\Taxonomy\\Priority\:\:__construct\(\) has invalid type Pollora\\Attributes\\Taxonomy\\init\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Priority.php
+
+		-
+			message: '#^Property Pollora\\Attributes\\Taxonomy\\Priority\:\:\$priority has unknown class Pollora\\Attributes\\Taxonomy\\init as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Priority.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/PublicTaxonomy.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/QueryVar.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/RestBase.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/RestControllerClass.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/RestNamespace.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Rewrite.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/ShowAdminColumn.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/ShowInMenu.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/ShowInNavMenus.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/ShowInQuickEdit.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/ShowInRest.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/ShowTagcloud.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/ShowUI.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/Sort.php
+
+		-
+			message: '#^Abstract class Pollora\\Attributes\\Taxonomy\\TaxonomyAttribute cannot be an Attribute class\.$#'
+			identifier: attribute.abstract
+			count: 1
+			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$taxonomy with type Pollora\\Attributes\\Taxonomy\\Taxonomy is not subtype of native type Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
+
+		-
+			message: '#^Parameter \$taxonomy of method Pollora\\Attributes\\Taxonomy\\TaxonomyAttribute\:\:configure\(\) has invalid type Pollora\\Attributes\\Taxonomy\\Taxonomy\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/Taxonomy/UpdateCountCallback.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Attributes/WpCli/AfterInvoke.php
+
+		-
+			message: '#^PHPDoc type for property Pollora\\Attributes\\WpCli\\AfterInvoke\:\:\$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Attributes/WpCli/AfterInvoke.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Attributes/WpCli/BeforeInvoke.php
+
+		-
+			message: '#^PHPDoc type for property Pollora\\Attributes\\WpCli\\BeforeInvoke\:\:\$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Attributes/WpCli/BeforeInvoke.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$classPermission\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/WpRestRoute/Method.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$namespace\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Attributes/WpRestRoute/Method.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$route\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Attributes/WpRestRoute/Method.php
+
+		-
+			message: '#^Offset 1 on array\{list\<string\>, list\<non\-empty\-string\>\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Attributes/WpRestRoute/Method.php
+
+		-
+			message: '#^Class Pollora\\Auth\\WordPressGuard does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 2
+			path: src/Auth/AuthServiceProvider.php
+
+		-
+			message: '#^PHPDoc tag @extends has invalid value \(ServiceProvider\)\: Unexpected token "\\n ", expected ''\<'' at offset 375 on line 9$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Auth/AuthServiceProvider.php
+
+		-
+			message: '#^Parameter \#2 \$callback of method Illuminate\\Auth\\AuthManager\:\:extend\(\) expects bindable closure, static closure given\.$#'
+			identifier: argument.staticClosure
+			count: 1
+			path: src/Auth/AuthServiceProvider.php
+
+		-
+			message: '#^Constant AUTH_COOKIE not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Auth/WordPressGuard.php
+
+		-
+			message: '#^Constant SECURE_AUTH_COOKIE not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Auth/WordPressGuard.php
+
+		-
+			message: '#^PHPDoc tag @implements has invalid value \(StatefulGuard\)\: Unexpected token "\\n \*", expected ''\<'' at offset 343 on line 9$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Auth/WordPressGuard.php
+
+		-
+			message: '#^PHPDoc tag @implements has invalid value \(UserProvider\)\: Unexpected token "\\n ", expected ''\<'' at offset 305 on line 8$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Auth/WordPressUserProvider.php
+
+		-
+			message: '#^Found usage of constant WP_INSTALLING\. Use wp_installing\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/BlockPattern/UI/PatternComponent.php
+
+		-
+			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:filter\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
+
+		-
+			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:map\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
+
+		-
+			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:merge\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
+
+		-
+			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:values\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Console\\AbstractGeneratorCommand\:\:\$registrar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^Instantiated class Pollora\\Foundation\\Console\\Commands\\Concerns\\InvalidArgumentException not found\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^Method Pollora\\Console\\AbstractGeneratorCommand\:\:resolvePluginLocation\(\) should return array\{type\: string, path\: string, namespace\: string, name\: string\} but returns array\{type\: ''plugin'', path\: string, namespace\: string, source_path\: string, source_namespace\: string\}\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^Method Pollora\\Console\\AbstractGeneratorCommand\:\:resolveTargetLocation\(\) should return array\{type\: string, path\: string, namespace\: string, source_path\: string, source_namespace\: string\} but returns array\{type\: string, path\: string, namespace\: string, name\: string\}\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^Method Pollora\\Console\\AbstractGeneratorCommand\:\:resolveTargetLocation\(\) should return array\{type\: string, path\: string, namespace\: string, source_path\: string, source_namespace\: string\} but returns array\{type\: string, path\: string, namespace\: string\}\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^Method Pollora\\Console\\AbstractGeneratorCommand\:\:resolveThemeLocation\(\) should return array\{type\: string, path\: string, namespace\: string, name\: string\} but returns array\{type\: ''theme'', path\: string, namespace\: non\-falsy\-string, source_path\: string, source_namespace\: string\}\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^PHPDoc tag @return with type string\|null is not subtype of native type string\.$#'
+			identifier: return.phpDocType
+			count: 2
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^PHPDoc tag @throws with type Pollora\\Foundation\\Console\\Commands\\Concerns\\InvalidArgumentException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 4
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^Throwing object of an unknown class Pollora\\Foundation\\Console\\Commands\\Concerns\\InvalidArgumentException\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type mixed\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: src/Console/AbstractGeneratorCommand.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryEngineInterface\:\:clearCache\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/Application/Services/DiscoveryManager.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryEngineInterface\:\:clearLocations\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Discovery/Application/Services/DiscoveryManager.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryEngineInterface\:\:runDiscovery\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/Application/Services/DiscoveryManager.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 2
+			path: src/Discovery/Domain/Exceptions/DiscoveryException.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 2
+			path: src/Discovery/Domain/Exceptions/DiscoveryNotFoundException.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 3
+			path: src/Discovery/Domain/Exceptions/InvalidDiscoveryException.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface\:\:__serialize\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/Infrastructure/Adapters/LaravelDiscoveryCache.php
+
+		-
+			message: '#^Access to an undefined property Spatie\\StructureDiscoverer\\Data\\DiscoveredClass\:\:\$location\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Discovery/Infrastructure/Services/DiscoveryEngine.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:applyFrameworkModules\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/UI/Console/DiscoveryCommand.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:applyLaravelModules\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/UI/Console/DiscoveryCommand.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:discoverAndReturnFrameworkModules\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/UI/Console/DiscoveryCommand.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:discoverAndReturnLaravelModules\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/UI/Console/DiscoveryCommand.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:discoverFrameworkModules\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/UI/Console/DiscoveryCommand.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:discoverLaravelModules\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Discovery/UI/Console/DiscoveryCommand.php
+
+		-
+			message: '#^Access to an undefined property WP_Upgrader_Skin\:\:\$plugin\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
+
+		-
+			message: '#^Access to an undefined property WP_Upgrader_Skin\:\:\$theme\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
+
+		-
+			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} and array\{\} will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
+
+		-
+			message: '#^Class Pollora\\Events\\WordPress\\Installer\\Plugin\\PluginDeleted has an uninitialized readonly property \$networkWide\. Assign it in the constructor\.$#'
+			identifier: property.uninitializedReadonly
+			count: 1
+			path: src/Events/WordPress/Installer/Plugin/PluginDeleted.php
+
+		-
+			message: '#^Variable \$old_value on left side of \?\? is never defined\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: src/Events/WordPress/Menu/MenuEventDispatcher.php
+
+		-
+			message: '#^Call to static method get_entry\(\) on an unknown class GFAPI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Events/WordPress/Plugins/GravityForms/GravityFormsEventDispatcher.php
+
+		-
+			message: '#^Call to static method get_form\(\) on an unknown class GFAPI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Events/WordPress/Plugins/GravityForms/GravityFormsEventDispatcher.php
+
+		-
+			message: '#^Parameter \$order of method Pollora\\Events\\WordPress\\Plugins\\WooCommerce\\OrderStatusChanged\:\:__construct\(\) has invalid type WC_Order\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Events/WordPress/Plugins/WooCommerce/OrderStatusChanged.php
+
+		-
+			message: '#^Property Pollora\\Events\\WordPress\\Plugins\\WooCommerce\\OrderStatusChanged\:\:\$order has unknown class WC_Order as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Events/WordPress/Plugins/WooCommerce/OrderStatusChanged.php
+
+		-
+			message: '#^Class WC_Order not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
+
+		-
+			message: '#^Function wc_get_order not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between ''create_robots''\|''update_htaccess''\|''update_robots'' and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Events/WordPress/Plugins/YoastSeo/YoastSeoEventDispatcher.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Exceptions/Infrastructure/Services/ModuleAwareErrorViewResolver.php
+
+		-
+			message: '#^PHPDoc tag @extends has invalid value \(FilesystemBase\)\: Unexpected token "\\n ", expected ''\<'' at offset 305 on line 8$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Filesystem/Filesystem.php
+
+		-
+			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Logging/Application/Services/WordPressErrorLoggingService.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 2
+			path: src/Logging/Infrastructure/Providers/LoggingServiceProvider.php
+
+		-
+			message: '#^Offset 1 on array\{non\-falsy\-string, string, non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: src/Mail/Mailer.php
+
+		-
+			message: '#^Offset 2 on array\{non\-falsy\-string, string, non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: src/Mail/Mailer.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta_value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Attachment.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 5
+			path: src/Modules/Domain/Exceptions/ModuleException.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Infrastructure\\Services\\FrameworkModuleDiscovery\:\:discoverModule\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Modules/Infrastructure/Services/FrameworkModuleDiscovery.php
+
+		-
+			message: '#^Class Pollora\\Discovery\\Domain\\Models\\DirectoryLocation constructor invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Modules/Infrastructure/Services/FrameworkModuleDiscovery.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Modules/Infrastructure/Services/ModuleAssetManager.php
+
+		-
+			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: src/Modules/Infrastructure/Services/ModuleAssetManager.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Modules/Infrastructure/Services/ModuleBootstrap.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: src/Modules/Infrastructure/Services/ModuleComponentManager.php
+
+		-
+			message: '#^Argument of an invalid type Illuminate\\Routing\\RouteCollectionInterface supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 2
+			path: src/Modules/UI/Helpers/discovery_functions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Routing\\RouteCollectionInterface\:\:count\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Modules/UI/Helpers/discovery_functions.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Option/Application/Services/OptionService.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleRepositoryInterface\:\:resetCache\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Plugin/Application/Services/PluginManager.php
+
+		-
+			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: src/Plugin/Application/Services/PluginManager.php
+
+		-
+			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Domain\\Models\\LaravelPluginModule constructor expects Illuminate\\Container\\Container, Psr\\Container\\ContainerInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Plugin/Application/Services/PluginRegistrar.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between array\{\} and array\{\} will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: src/Plugin/Application/Services/PluginRegistrar.php
+
+		-
+			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:activationFailed\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Plugin/Domain/Exceptions/PluginException.php
+
+		-
+			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:configurationError\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Plugin/Domain/Exceptions/PluginException.php
+
+		-
+			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:deactivationFailed\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Plugin/Domain/Exceptions/PluginException.php
+
+		-
+			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:dependencyConflict\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Plugin/Domain/Exceptions/PluginException.php
+
+		-
+			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:fileSystemError\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Plugin/Domain/Exceptions/PluginException.php
+
+		-
+			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:invalidStructure\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Plugin/Domain/Exceptions/PluginException.php
+
+		-
+			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:pluginNotFound\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Plugin/Domain/Exceptions/PluginException.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Plugin/Domain/Models/LaravelPluginModule.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Plugin/Domain/Models/LaravelPluginModule.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: src/Plugin/Domain/Models/LaravelPluginModule.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 14
+			path: src/Plugin/config/plugin.php
+
+		-
+			message: '#^Method Pollora\\PostType\\Domain\\Contracts\\PostTypeFactoryInterface\:\:make\(\) invoked with 5 parameters, 1\-4 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/PostType/Application/Services/PostTypeService.php
+
+		-
+			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 2
+			path: src/PostType/Infrastructure/Services/PostTypeDiscovery.php
+
+		-
+			message: '#^PHPDoc type mixed of property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh is not covariant with PHPDoc type mysqli\|false\|null of overridden property wpdb\:\:\$dbh\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Proxy/WordPressDatabase.php
+
+		-
+			message: '#^Argument of an invalid type Illuminate\\Routing\\RouteCollectionInterface supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/Route/Domain/Models/Route.php
+
+		-
+			message: '#^Parameter \#1 \$route of method Pollora\\Route\\Infrastructure\\Services\\ExtendedRouter\:\:addWordPressBindings\(\) expects Pollora\\Route\\Domain\\Models\\Route, Illuminate\\Routing\\Route given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Route/Infrastructure/Middleware/WordPressBindings.php
+
+		-
+			message: '#^Call to function method_exists\(\) with Pollora\\Route\\Domain\\Models\\Route and ''getCompiled'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Route/Infrastructure/Middleware/WordPressBodyClass.php
+
+		-
+			message: '#^Method Pollora\\Route\\Infrastructure\\Middleware\\WordPressHeaders\:\:handle\(\) should return Symfony\\Component\\HttpFoundation\\Response but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Route/Infrastructure/Middleware/WordPressHeaders.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Routing\\Route\:\:setCondition\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Routing\\Route\:\:setConditionParameters\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Routing\\Route\:\:setIsWordPressRoute\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Routing\\Router\:\:resolveCondition\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
+
+		-
+			message: '#^Call to an undefined static method Illuminate\\Support\\Facades\\Route\:\:wpMatch\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
+
+		-
+			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Route/Infrastructure/Services/ExtendedRouter.php
+
+		-
+			message: '#^Call to an undefined method ReflectionType\:\:isBuiltin\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Route/Infrastructure/Services/ExtendedRouter.php
+
+		-
+			message: '#^Parameter \#1 \$resolver of method Pollora\\Route\\Domain\\Models\\Route\:\:setConditionResolver\(\) expects Pollora\\Route\\Domain\\Contracts\\ConditionResolverInterface, Pollora\\Route\\Infrastructure\\Services\\Contracts\\WordPressConditionManagerInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Route/Infrastructure/Services/ExtendedRouter.php
+
+		-
+			message: '#^PHPDoc tag @implements has invalid value \(EventInterface\)\: Unexpected token "\\n \* ", expected ''\<'' at offset 222 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Schedule/Events/AbstractEvent.php
+
+		-
+			message: '#^PHPDoc tag @implements has invalid value \(ShouldQueue\)\: Unexpected token "\\n ", expected ''\<'' at offset 249 on line 8$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Schedule/Events/AbstractEvent.php
+
+		-
+			message: '#^PHPDoc tag @extends has invalid value \(AbstractEvent\)\: Unexpected token "\\n ", expected ''\<'' at offset 221 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Schedule/Events/RecurringEvent.php
+
+		-
+			message: '#^PHPDoc tag @extends has invalid value \(AbstractEvent\)\: Unexpected token "\\n ", expected ''\<'' at offset 197 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Schedule/Events/SingleEvent.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Schedule\\Interval\:\:toDisplayString\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Schedule\\Interval\:\:toSeconds\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
+
+		-
+			message: '#^Instanceof between Pollora\\Schedule\\Interval and Pollora\\Schedule\\Interval will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
+
+		-
+			message: '#^PHPDoc tag @implements has invalid value \(JobDispatcherInterface\)\: Unexpected token "\\n ", expected ''\<'' at offset 231 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Schedule/Jobs/JobDispatcher.php
+
+		-
+			message: '#^PHPDoc tag @implements has invalid value \(SchedulerInterface\)\: Unexpected token "\\n ", expected ''\<'' at offset 222 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Schedule/Scheduler.php
+
+		-
+			message: '#^Instantiated class Pollora\\Services\\WordPress\\Database\\DatabaseConnectionException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Services/WordPress/Database/DatabaseConnectionService.php
+
+		-
+			message: '#^PHPDoc tag @throws with type Pollora\\Services\\WordPress\\Database\\DatabaseConnectionException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: src/Services/WordPress/Database/DatabaseConnectionService.php
+
+		-
+			message: '#^Throwing object of an unknown class Pollora\\Services\\WordPress\\Database\\DatabaseConnectionException\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Services/WordPress/Database/DatabaseConnectionService.php
+
+		-
+			message: '#^PHPDoc tag @extends has invalid value \(\\RuntimeException\)\: Unexpected token "\\n ", expected ''\<'' at offset 205 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Services/WordPress/Installation/DatabaseConnectionException.php
+
+		-
+			message: '#^Constant WPINC not found\.$#'
+			identifier: constant.notFound
+			count: 2
+			path: src/Services/WordPress/Installation/WordPressInstallLoaderService.php
+
+		-
+			message: '#^PHPDoc tag @extends has invalid value \(\\RuntimeException\)\: Unexpected token "\\n ", expected ''\<'' at offset 229 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Services/WordPress/Installation/WordPressInstallationException.php
+
+		-
+			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Action\:\:add\(\) return type contains unknown class Pollora\\Hook\\Hook\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Support/Facades/Action.php
+
+		-
+			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Action\:\:remove\(\) return type contains unknown class Pollora\\Hook\\Hook\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Support/Facades/Action.php
+
+		-
+			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Ajax\:\:listen\(\) return type contains unknown class Pollora\\Ajax\\Ajax\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Support/Facades/Ajax.php
+
+		-
+			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Filter\:\:add\(\) return type contains unknown class Pollora\\Hook\\Hook\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Support/Facades/Filter.php
+
+		-
+			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Filter\:\:remove\(\) return type contains unknown class Pollora\\Hook\\Hook\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Support/Facades/Filter.php
+
+		-
+			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Mail\:\:send\(\) return type contains unknown class Pollora\\Support\\Facades\\SentMessage\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Support/Facades/Mail.php
+
+		-
+			message: '#^Access to an undefined property WP_Post\:\:\$children\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Support/RecursiveMenuIterator.php
+
+		-
+			message: '#^Class Pollora\\Support\\RecursiveMenuIterator @extends tag contains incompatible type iterable\<int, WP_Post\>&Pollora\\Support\\AbstractRecursiveIterator\.$#'
+			identifier: generics.notCompatible
+			count: 1
+			path: src/Support/RecursiveMenuIterator.php
+
+		-
+			message: '#^Method Pollora\\Support\\RecursiveMenuIterator\:\:getChildren\(\) has invalid return type Pollora\\Support\\Pollora\\Support\\RecursiveMenuIterator\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Support/RecursiveMenuIterator.php
+
+		-
+			message: '#^PHPDoc tag @return with type Pollora\\Support\\Pollora\\Support\\RecursiveMenuIterator is not subtype of native type Pollora\\Support\\RecursiveMenuIterator\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: src/Support/RecursiveMenuIterator.php
+
+		-
+			message: '#^Trait Pollora\\Support\\Traits\\ArgumentTranslater is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Support/Traits/ArgumentTranslater.php
+
+		-
+			message: '#^Constant WPINC not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Support/WordPress.php
+
+		-
+			message: '#^Method Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyFactoryInterface\:\:make\(\) invoked with 6 parameters, 2\-5 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/Taxonomy/Application/Services/TaxonomyService.php
+
+		-
+			message: '#^Method Pollora\\Taxonomy\\Infrastructure\\Adapters\\WordPressTaxonomyRegistry\:\:getAll\(\) should return array\<string, mixed\> but returns array\<int, WP_Taxonomy\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php
+
+		-
+			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 2
+			path: src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleRepositoryInterface\:\:resetCache\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/Application/Services/ThemeManager.php
+
+		-
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:bound\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/Application/Services/ThemeManager.php
+
+		-
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:make\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/Application/Services/ThemeManager.php
+
+		-
+			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: src/Theme/Application/Services/ThemeManager.php
+
+		-
+			message: '#^Parameter \#3 \$app of class Pollora\\Theme\\Domain\\Models\\LaravelThemeModule constructor expects Illuminate\\Container\\Container, Psr\\Container\\ContainerInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Theme/Application/Services/ThemeRegistrar.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$themeData$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Theme/Domain/Contracts/ThemeRegistrarInterface.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$themeName$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Theme/Domain/Contracts/ThemeRegistrarInterface.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$themePath$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Theme/Domain/Contracts/ThemeRegistrarInterface.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/Domain/Models/LaravelThemeModule.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/Domain/Models/LaravelThemeModule.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: src/Theme/Domain/Models/LaravelThemeModule.php
+
+		-
+			message: '#^PHPDoc tag @implements has invalid value \(ThemeComponent\)\: Unexpected token "\\n ", expected ''\<'' at offset 51 on line 4$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Theme/Domain/Models/Menus.php
+
+		-
+			message: '#^PHPDoc tag @implements has invalid value \(ContainerInterface\)\: Unexpected token "\\n ", expected ''\<'' at offset 633 on line 18$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Theme/Infrastructure/Adapters/DomainContainerAdapter.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: src/Theme/Infrastructure/Providers/ThemeComponentProvider.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Theme\\Domain\\Contracts\\ThemeService\:\:hasTheme\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/Infrastructure/Providers/ThemeServiceProvider.php
+
+		-
+			message: '#^Call to function is_callable\(\) with callable\-string&non\-falsy\-string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Theme/Infrastructure/Services/WordPressThemeAdapter.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: src/Theme/Infrastructure/Services/WordPressThemeAdapter.php
+
+		-
+			message: '#^Call to an undefined method Pollora\\Theme\\Domain\\Contracts\\ThemeService\:\:getActiveTheme\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/UI/Console/Commands/ThemeStatusCommand.php
+
+		-
+			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\View\\WooCommerceTemplateResolver not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/ThirdParty/WooCommerce/Infrastructure/Providers/WooCommerceServiceProvider.php
+
+		-
+			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\WooCommerce not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/ThirdParty/WooCommerce/Infrastructure/Providers/WooCommerceServiceProvider.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Contracts\\View\\View\:\:makeLoader\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
+
+		-
+			message: '#^Class Pollora\\View\\Infrastructure\\Services\\WordPressTemplateHierarchyFilter constructor invoked with 3 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/View/Infrastructure/Providers/TemplateHierarchyServiceProvider.php
+
+		-
+			message: '#^Anonymous function never returns array so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/View/Infrastructure/Services/FileSystemTemplateFinder.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/View/Infrastructure/Services/FileSystemTemplateFinder.php
+
+		-
+			message: '#^Cannot call method get\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
+
+		-
+			message: '#^Offset string on array\{\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\View\:\:getCompiled\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/View/ViewServiceProvider.php
+
+		-
+			message: '#^Method Pollora\\Hook\\Domain\\Contracts\\HookInterface\:\:add\(\) invoked with 4 parameters, 2\-3 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/WordPress/Bootstrap.php
+
+		-
+			message: '#^Variable \$debugDetector on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: src/WordPress/Bootstrap.php
+
+		-
+			message: '#^Class Pollora\\WordPress\\Commands\\DatabaseConnectionException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/WordPress/Commands/LaunchPadInstallCommand.php
+
+		-
+			message: '#^Class Pollora\\WordPress\\Commands\\WordPressInstallationException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/WordPress/Commands/LaunchPadInstallCommand.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Attributes\\WpCli\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/WpCli/Domain/Models/WordpressCommand.php
+
+		-
+			message: '#^Access to an undefined property Pollora\\Attributes\\WpCli\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/WpCli/Domain/Models/WordpressCommand.php
+
+		-
+			message: '#^Constant WP_CLI_VERSION not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
+
+		-
+			message: '#^Dead catch \- Throwable is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
+
+		-
+			message: '#^Class class@anonymous/WpCli/Infrastructure/Adapters/WpCliMethodWrapper\.php\:58 does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/WpCli/Infrastructure/Adapters/WpCliMethodWrapper.php
+
+		-
+			message: '#^Expression "new class\(\$this\-\>docComment, \$methodName\)…" on a separate line does not do anything\.$#'
+			identifier: expr.resultUnused
+			count: 1
+			path: src/WpCli/Infrastructure/Adapters/WpCliMethodWrapper.php
+
+		-
+			message: '#^Method Pollora\\WpCli\\Infrastructure\\Services\\WpCliDiscovery\:\:createCallable\(\) should return array but returns Closure\.$#'
+			identifier: return.type
+			count: 1
+			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
+
+		-
+			message: '#^Offset ''short'' on array\{short\: string, long\: ''''\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$handler with type array\|object\|string is not subtype of native type array\|string\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
+
+		-
+			message: '#^Parameter \#2 \$mode of class RecursiveIteratorIterator constructor expects 0\|1\|2, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/helpers.php

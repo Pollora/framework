@@ -35,12 +35,12 @@ class TaxonomyServiceProvider extends ServiceProvider
         $this->app->singleton(TaxonomyRegistryInterface::class, WordPressTaxonomyRegistry::class);
 
         // Register the repository
-        $this->app->singleton(TaxonomyRepositoryInterface::class, fn ($app): \Pollora\Taxonomy\Infrastructure\Repositories\TaxonomyRepository => new TaxonomyRepository(
+        $this->app->singleton(TaxonomyRepositoryInterface::class, fn ($app): TaxonomyRepository => new TaxonomyRepository(
             $app->make(TaxonomyRegistryInterface::class)
         ));
 
         // Register the TaxonomyService with interface binding
-        $this->app->singleton(TaxonomyServiceInterface::class, fn ($app): \Pollora\Taxonomy\Application\Services\TaxonomyService => new TaxonomyService(
+        $this->app->singleton(TaxonomyServiceInterface::class, fn ($app): TaxonomyService => new TaxonomyService(
             $app->make(TaxonomyFactoryInterface::class),
             $app->make(TaxonomyRegistryInterface::class)
         ));
@@ -49,7 +49,7 @@ class TaxonomyServiceProvider extends ServiceProvider
         $this->app->singleton(TaxonomyService::class, fn ($app) => $app->make(TaxonomyServiceInterface::class));
 
         // Register Taxonomy Discovery
-        $this->app->singleton(TaxonomyDiscovery::class, fn ($app): \Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery => new TaxonomyDiscovery(
+        $this->app->singleton(TaxonomyDiscovery::class, fn ($app): TaxonomyDiscovery => new TaxonomyDiscovery(
             $app->make(TaxonomyServiceInterface::class)
         ));
 

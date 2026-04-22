@@ -46,6 +46,7 @@ class WooCommerceService
             if (function_exists('WC') && WC() && method_exists(WC(), 'template_path')) {
                 $templatePath = WC()->template_path();
             }
+
             $paths[] = get_template_directory().'/'.$templatePath;
         }
 

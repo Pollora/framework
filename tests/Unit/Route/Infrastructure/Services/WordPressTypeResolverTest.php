@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Tests\Unit\Route\Infrastructure\Services;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Tests\TestCase;
 
-#[CoversClass(\Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver::class)]
+#[CoversClass(WordPressTypeResolver::class)]
 class WordPressTypeResolverTest extends TestCase
 {
     private WordPressTypeResolver $resolver;
@@ -29,7 +30,7 @@ class WordPressTypeResolverTest extends TestCase
     {
         // Test that the resolver implements the correct interface
         $this->assertInstanceOf(
-            \Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface::class,
+            WordPressTypeResolverInterface::class,
             $this->resolver
         );
     }

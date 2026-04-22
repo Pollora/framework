@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Routing\Router;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
 if (! function_exists('pollora_discover_module')) {
@@ -19,12 +20,12 @@ if (! function_exists('pollora_discover_module')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($modulePath);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (function_exists('error_log')) {
-                error_log('pollora_discover_module error: '.$e->getMessage());
+                error_log('pollora_discover_module error: '.$exception->getMessage());
             }
 
             return [];
@@ -47,12 +48,12 @@ if (! function_exists('pollora_discover_theme')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($themePath);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (function_exists('error_log')) {
-                error_log('pollora_discover_theme error: '.$e->getMessage());
+                error_log('pollora_discover_theme error: '.$exception->getMessage());
             }
 
             return [];
@@ -75,12 +76,12 @@ if (! function_exists('pollora_discover_plugin')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($pluginPath);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (function_exists('error_log')) {
-                error_log('pollora_discover_plugin error: '.$e->getMessage());
+                error_log('pollora_discover_plugin error: '.$exception->getMessage());
             }
 
             return [];
@@ -103,12 +104,12 @@ if (! function_exists('pollora_discover_in_path')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($path);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (function_exists('error_log')) {
-                error_log('pollora_discover_in_path error: '.$e->getMessage());
+                error_log('pollora_discover_in_path error: '.$exception->getMessage());
             }
 
             return [];
@@ -130,12 +131,12 @@ if (! function_exists('pollora_discover_all_in_path')) {
         }
 
         try {
-            $discoveryService = app(ModuleDiscoveryOrchestratorInterface::class);
+            $discoveryService = resolve(ModuleDiscoveryOrchestratorInterface::class);
 
             return $discoveryService->discoverAndReturn($path);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             if (function_exists('error_log')) {
-                error_log('pollora_discover_all_in_path error: '.$e->getMessage());
+                error_log('pollora_discover_all_in_path error: '.$exception->getMessage());
             }
 
             return [];
@@ -169,8 +170,8 @@ if (! function_exists('pollora_debug_route_registration')) {
         }
 
         try {
-            /** @var \Illuminate\Routing\Router $router */
-            $router = app('router');
+            /** @var Router $router */
+            $router = resolve('router');
             $routes = $router->getRoutes();
 
             $debug['routes_count'] = $routes->count();
@@ -194,8 +195,8 @@ if (! function_exists('pollora_debug_route_registration')) {
                 }
             }
 
-        } catch (\Exception $e) {
-            $debug['error'] = $e->getMessage();
+        } catch (Exception $exception) {
+            $debug['error'] = $exception->getMessage();
         }
 
         return $debug;
@@ -217,8 +218,8 @@ if (! function_exists('pollora_list_module_routes')) {
         }
 
         try {
-            /** @var \Illuminate\Routing\Router $router */
-            $router = app('router');
+            /** @var Router $router */
+            $router = resolve('router');
             $routes = $router->getRoutes();
 
             foreach ($routes as $route) {
@@ -240,7 +241,7 @@ if (! function_exists('pollora_list_module_routes')) {
                 }
             }
 
-        } catch (\Exception) {
+        } catch (Exception) {
             // Silently fail
         }
 

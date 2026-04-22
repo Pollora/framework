@@ -9,13 +9,16 @@ use Pollora\Attributes\Taxonomy;
 use Pollora\Discovery\Domain\Contracts\ConfigurableDiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\HasConfiguringSupport;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter;
 use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
@@ -31,7 +34,9 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, DiscoveryInterface
 {
-    use HasConfiguringSupport, HasInstancePool, IsDiscovery;
+    use HasConfiguringSupport;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Create a new Taxonomy discovery
@@ -45,7 +50,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
     /**
      * {@inheritDoc}
      */
-    public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): \Pollora\Entity\Domain\Model\Taxonomy
+    public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): EntityTaxonomy
     {
         // Generate singular name if not provided
         if ($singular === null) {
@@ -80,10 +85,10 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * Discovers classes with Taxonomy attributes and collects them for registration.
      * Only processes classes that have the Taxonomy attribute and are instantiable.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
-        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof DiscoveredClass) {
             return;
         }
 
@@ -136,7 +141,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $this->processTaxonomy($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other taxonomies
-                error_log("Failed to register Taxonomy from class {$className}: ".$e->getMessage());
+                error_log(sprintf('Failed to register Taxonomy from class %s: ', $className).$e->getMessage());
             }
         }
     }
@@ -151,9 +156,9 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * 4. Registering the final taxonomy through the service
      *
      * @param  string  $className  The fully qualified class name
-     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processTaxonomy(string $className, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    private function processTaxonomy(string $className, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
             $reflectionClass = $reflectionCache->getClassReflection($className);
@@ -193,7 +198,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             // If configuring was called and returned an entity, apply attribute configurations and register
             if ($configuredEntity !== null) {
                 $this->applySmartMerge($configuredEntity, $config->getArgs());
-                $this->registerEntity($configuredEntity, \Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter::class);
+                $this->registerEntity($configuredEntity, TaxonomyRegistryAdapter::class);
             } else {
                 // Register the taxonomy using the original service
                 $this->taxonomyService->register(
@@ -206,8 +211,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process Taxonomy for class {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process Taxonomy for class %s: ', $className).$reflectionException->getMessage());
         }
     }
 
@@ -254,8 +259,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process class-level attributes for {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
         }
 
         return $config;
@@ -281,8 +286,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process method-level attributes for {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
         }
 
         return $config;
@@ -339,9 +344,9 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      *
      * @param  string  $className  The class name to process
      * @param  TaxonomyConfiguration  $config  The current configuration
-     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processAdditionalArgs(string $className, TaxonomyConfiguration $config, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    private function processAdditionalArgs(string $className, TaxonomyConfiguration $config, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
             $reflectionClass = $reflectionCache->getClassReflection($className);
@@ -361,7 +366,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
         } catch (\ReflectionException|\Throwable $e) {
             // Log the error but continue - additional args are optional
-            error_log("Failed to process additional args for {$className}: ".$e->getMessage());
+            error_log(sprintf('Failed to process additional args for %s: ', $className).$e->getMessage());
         }
     }
 
@@ -432,20 +437,20 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             'name' => $plural,
             'singular_name' => $singular,
             'menu_name' => $plural,
-            'all_items' => "All {$plural}",
-            'edit_item' => "Edit {$singular}",
-            'view_item' => "View {$singular}",
-            'update_item' => "Update {$singular}",
-            'add_new_item' => "Add New {$singular}",
-            'new_item_name' => "New {$singular} Name",
-            'search_items' => "Search {$plural}",
-            'popular_items' => "Popular {$plural}",
-            'separate_items_with_commas' => "Separate {$plural} with commas",
-            'add_or_remove_items' => "Add or remove {$plural}",
-            'choose_from_most_used' => "Choose from the most used {$plural}",
-            'not_found' => "No {$plural} found",
-            'parent_item' => "Parent {$singular}",
-            'parent_item_colon' => "Parent {$singular}:",
+            'all_items' => 'All '.$plural,
+            'edit_item' => 'Edit '.$singular,
+            'view_item' => 'View '.$singular,
+            'update_item' => 'Update '.$singular,
+            'add_new_item' => 'Add New '.$singular,
+            'new_item_name' => sprintf('New %s Name', $singular),
+            'search_items' => 'Search '.$plural,
+            'popular_items' => 'Popular '.$plural,
+            'separate_items_with_commas' => sprintf('Separate %s with commas', $plural),
+            'add_or_remove_items' => 'Add or remove '.$plural,
+            'choose_from_most_used' => 'Choose from the most used '.$plural,
+            'not_found' => sprintf('No %s found', $plural),
+            'parent_item' => 'Parent '.$singular,
+            'parent_item_colon' => sprintf('Parent %s:', $singular),
         ];
     }
 

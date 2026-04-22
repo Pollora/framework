@@ -37,7 +37,7 @@ class PostEventDispatcher extends AbstractEventDispatcher
     public function handleTransitionPostStatus(string $new_status, string $old_status, WP_Post $post): void
     {
         // Skip auto-drafts and revisions
-        if (in_array($new_status, ['auto-draft', 'inherit']) || $post->post_type == 'revision') {
+        if (in_array($new_status, ['auto-draft', 'inherit'], true) || $post->post_type == 'revision') {
             return;
         }
 
@@ -48,7 +48,7 @@ class PostEventDispatcher extends AbstractEventDispatcher
             $this->dispatch(PostRestored::class, [$post]);
         } elseif ($new_status === 'trash') {
             $this->dispatch(PostTrashed::class, [$post]);
-        } elseif ($new_status === 'publish' && ! in_array($old_status, ['publish', 'future'])) {
+        } elseif ($new_status === 'publish' && ! in_array($old_status, ['publish', 'future'], true)) {
             $this->dispatch(PostPublished::class, [$post]);
         } else {
             $this->dispatch(PostUpdated::class, [$post, $old_status, $new_status]);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Option;
 
 use PHPUnit\Framework\TestCase;
+use Pollora\Option\Application\Services\OptionService;
 use Pollora\Support\Facades\Option;
 
 final class OptionIntegrationTest extends TestCase
@@ -22,7 +23,7 @@ final class OptionIntegrationTest extends TestCase
 
         $accessor = $method->invoke(null);
 
-        $this->assertEquals(\Pollora\Option\Application\Services\OptionService::class, $accessor);
+        $this->assertEquals(OptionService::class, $accessor);
     }
 
     public function test_facade_has_forget_alias(): void

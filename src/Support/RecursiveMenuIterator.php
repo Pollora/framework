@@ -13,7 +13,7 @@ use WP_Post;
  * This class provides an interface for iterating over WordPress menu items,
  * supporting nested menu structures and hierarchical navigation.
  *
- * @extends AbstractRecursiveIterator<int, \WP_Post>
+ * @extends AbstractRecursiveIterator<int, WP_Post>
  */
 final class RecursiveMenuIterator extends AbstractRecursiveIterator
 {
@@ -79,7 +79,7 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
     /**
      * Get the current menu item.
      *
-     * @return \WP_Post Current menu item
+     * @return WP_Post Current menu item
      */
     public function current(): WP_Post
     {

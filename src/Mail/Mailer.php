@@ -173,9 +173,11 @@ class Mailer
             if ($header === '') {
                 continue;
             }
+
             if ($header === '0') {
                 continue;
             }
+
             if (! str_contains($header, ':')) {
                 continue;
             }

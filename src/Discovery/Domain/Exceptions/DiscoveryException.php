@@ -15,18 +15,6 @@ use Exception;
 class DiscoveryException extends Exception
 {
     /**
-     * Create a new discovery exception
-     *
-     * @param  string  $message  The exception message
-     * @param  int  $code  The exception code
-     * @param  \Throwable|null  $previous  Previous exception for chaining
-     */
-    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null)
-    {
-        parent::__construct($message, $code, $previous);
-    }
-
-    /**
      * Create exception for discovery process failure
      *
      * @param  string  $discoveryClass  The discovery class that failed
@@ -35,7 +23,7 @@ class DiscoveryException extends Exception
     public static function discoveryFailed(string $discoveryClass, ?\Throwable $previous = null): static
     {
         return new static(
-            message: "Discovery failed for class: {$discoveryClass}",
+            message: 'Discovery failed for class: '.$discoveryClass,
             previous: $previous
         );
     }
@@ -49,7 +37,7 @@ class DiscoveryException extends Exception
     public static function applicationFailed(string $discoveryClass, ?\Throwable $previous = null): static
     {
         return new static(
-            message: "Failed to apply discovery for class: {$discoveryClass}",
+            message: 'Failed to apply discovery for class: '.$discoveryClass,
             previous: $previous
         );
     }

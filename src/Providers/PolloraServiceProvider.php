@@ -120,6 +120,7 @@ class PolloraServiceProvider extends ServiceProvider
         if (config('wordpress.use_laravel_scheduler', false)) {
             $this->app->register(SchedulerServiceProvider::class);
         }
+
         $this->app->register(SchedulerDiscoveryServiceProvider::class);
         $this->app->singleton(JobDispatcher::class, fn ($app): JobDispatcher => new JobDispatcher($app->make(Dispatcher::class)));
 

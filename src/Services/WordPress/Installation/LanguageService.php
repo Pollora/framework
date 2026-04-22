@@ -18,17 +18,15 @@ class LanguageService
 {
     /**
      * WordPress translations API endpoint.
-     *
-     * @var string
      */
-    private const API_URL = 'https://api.wordpress.org/translations/core/1.0/';
+    private const string API_URL = 'https://api.wordpress.org/translations/core/1.0/';
 
     /**
      * Default fallback languages if API fails.
      *
      * @var array<string, string>
      */
-    private const FALLBACK_LANGUAGES = [
+    private const array FALLBACK_LANGUAGES = [
         'en_US' => 'English (United States)',
         'fr_FR' => 'French (France)',
         'es_ES' => 'Spanish (Spain) - Español',

@@ -11,9 +11,9 @@ use Pollora\Option\Domain\Exceptions\InvalidOptionException;
  */
 final class OptionValidationService
 {
-    private const MAX_KEY_LENGTH = 191;
+    private const int MAX_KEY_LENGTH = 191;
 
-    private const MIN_KEY_LENGTH = 1;
+    private const int MIN_KEY_LENGTH = 1;
 
     /**
      * Validate an option key.

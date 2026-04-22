@@ -88,7 +88,7 @@ class ThemeManager implements ThemeService
         protected ?ThemeRegistrarInterface $registrar = null,
         ?ConsoleDetectionService $consoleDetectionService = null
     ) {
-        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+        $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
     }
 
     /**
@@ -134,7 +134,7 @@ class ThemeManager implements ThemeService
 
         while (true) {
             if (! is_dir($currentTheme->getBasePath()) && ! $this->consoleDetectionService->isConsole()) {
-                throw new ThemeException("Theme directory {$currentTheme->getName()} not found.");
+                throw new ThemeException(sprintf('Theme directory %s not found.', $currentTheme->getName()));
             }
 
             $currentTheme->loadConfiguration();
@@ -151,7 +151,7 @@ class ThemeManager implements ThemeService
             $this->parentThemes[] = $currentTheme;
         }
 
-        if ($this->localeLoader instanceof \Illuminate\Contracts\Translation\Loader) {
+        if ($this->localeLoader instanceof Loader) {
             $this->localeLoader->addNamespace($themeName, $baseTheme->getLanguagePath());
         }
     }
@@ -184,6 +184,7 @@ class ThemeManager implements ThemeService
             if ($entry === '.' || $entry === '..') {
                 return false;
             }
+
             $themeInfo = new ThemeMetadata($entry, $path);
 
             return file_exists($themeInfo->getConfigPath());
@@ -285,7 +286,7 @@ class ThemeManager implements ThemeService
      */
     public function findTheme(string $name): ?ThemeModuleInterface
     {
-        if (! $this->repository instanceof \Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface) {
+        if (! $this->repository instanceof ModuleRepositoryInterface) {
             return null;
         }
 
@@ -325,7 +326,7 @@ class ThemeManager implements ThemeService
     {
         $theme = $this->findTheme($name);
 
-        if (! $theme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
+        if (! $theme instanceof ThemeModuleInterface) {
             throw ThemeException::notFound($name);
         }
 
@@ -378,7 +379,7 @@ class ThemeManager implements ThemeService
     {
         $theme = $this->findTheme($name);
 
-        if (! $theme instanceof \Pollora\Theme\Domain\Contracts\ThemeModuleInterface) {
+        if (! $theme instanceof ThemeModuleInterface) {
             return [
                 'valid' => false,
                 'errors' => ['Theme not found'],
@@ -397,7 +398,7 @@ class ThemeManager implements ThemeService
         $requiredFiles = ['style.css', 'index.php'];
         foreach ($requiredFiles as $file) {
             if (! file_exists($path.'/'.$file)) {
-                $errors[] = "Missing required file: {$file}";
+                $errors[] = 'Missing required file: '.$file;
             }
         }
 

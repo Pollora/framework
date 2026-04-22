@@ -22,12 +22,9 @@ class Options implements OptionsInterface
      * @param  string  $key  The option key
      * @param  T  $default  The default value if the option doesn't exist
      * @return T The option value
-     *
-     * @phpstan-ignore-next-line WordPress function
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        /** @phpstan-ignore-next-line WordPress function */
         return \get_option($key, $default);
     }
 
@@ -36,34 +33,25 @@ class Options implements OptionsInterface
      *
      * @param  string  $key  The option key
      * @param  mixed  $value  The new value
-     *
-     * @phpstan-ignore-next-line WordPress function
      */
     public function update(string $key, mixed $value): bool
     {
-        /** @phpstan-ignore-next-line WordPress function */
         return \update_option($key, $value);
     }
 
     /**
      * Delete an option.
-     *
-     * @phpstan-ignore-next-line WordPress function
      */
     public function delete(string $key): bool
     {
-        /** @phpstan-ignore-next-line WordPress function */
         return \delete_option($key);
     }
 
     /**
      * Check if an option exists.
-     *
-     * @phpstan-ignore-next-line WordPress function
      */
     public function exists(string $key): bool
     {
-        /** @phpstan-ignore-next-line WordPress function */
         return \get_option($key) !== false;
     }
 }

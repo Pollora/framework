@@ -223,8 +223,8 @@ class PluginRegistrar
             if ($repository instanceof PluginRepository) {
                 $repository->resetCache();
             }
-        } catch (\Exception $e) {
-            $this->logError('Failed to invalidate plugin repository cache: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to invalidate plugin repository cache: '.$exception->getMessage());
         }
     }
 
@@ -243,8 +243,8 @@ class PluginRegistrar
             $discoveryService = $this->app->get(ModuleDiscoveryOrchestratorInterface::class);
 
             $discoveryService->discover($plugin->getPath());
-        } catch (\Exception $e) {
-            $this->logError("Plugin discovery error for {$plugin->getName()}: ".$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError(sprintf('Plugin discovery error for %s: ', $plugin->getName()).$exception->getMessage());
         }
     }
 
@@ -267,8 +267,8 @@ class PluginRegistrar
                 $plugin->getPath(),
                 'plugin'
             );
-        } catch (\Exception $e) {
-            $this->logError('Failed to load plugin configuration: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to load plugin configuration: '.$exception->getMessage());
         }
     }
 
@@ -301,8 +301,8 @@ class PluginRegistrar
                 $componentManager->registerModuleComponents($moduleId, $pluginComponents);
                 $componentManager->initializeModuleComponents($moduleId);
             }
-        } catch (\Exception $e) {
-            $this->logError('Failed to setup plugin components: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to setup plugin components: '.$exception->getMessage());
         }
     }
 
@@ -335,8 +335,8 @@ class PluginRegistrar
             if (method_exists($plugin, 'hasViews') && $plugin->hasViews()) {
                 $assetManager->registerModuleBladeDirectives($plugin->getPath());
             }
-        } catch (\Exception $e) {
-            $this->logError('Failed to setup plugin assets: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Failed to setup plugin assets: '.$exception->getMessage());
         }
     }
 

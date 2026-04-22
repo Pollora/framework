@@ -39,7 +39,7 @@ class ConstantManager
     public function get(string $key): mixed
     {
         if (! $this->constants->has($key)) {
-            throw new UndefinedConstantException("Constant '$key' has not been queued.");
+            throw new UndefinedConstantException(sprintf("Constant '%s' has not been queued.", $key));
         }
 
         return $this->constants->get($key);

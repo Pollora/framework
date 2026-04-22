@@ -89,7 +89,7 @@ class ModuleAwareExceptionHandler extends Handler
         // Only handle HTTP exceptions with module-aware view resolution
         if ($e instanceof HttpExceptionInterface && $this->shouldRenderHtmlResponse($request)) {
             $response = $this->renderHttpExceptionWithModuleViews($e, $request);
-            if ($response instanceof \Illuminate\Http\Response) {
+            if ($response instanceof Response) {
                 return $response;
             }
         }
@@ -131,10 +131,10 @@ class ModuleAwareExceptionHandler extends Handler
             // Render the view with appropriate status code
             return response()->view($viewName, $viewData, $statusCode, $e->getHeaders());
 
-        } catch (Throwable $renderException) {
+        } catch (Throwable $throwable) {
             // Log rendering error but don't fail - fall back to default behavior
             if (function_exists('error_log')) {
-                error_log('Failed to render module error view: '.$renderException->getMessage());
+                error_log('Failed to render module error view: '.$throwable->getMessage());
             }
 
             return null;

@@ -7,7 +7,9 @@ namespace Pollora\Discovery\Infrastructure\Services;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
@@ -28,10 +30,10 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
      * Discovers classes that extend ServiceProvider and collects them for registration.
      * Only processes concrete classes that extend Laravel's ServiceProvider.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
-        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof DiscoveredClass) {
             return;
         }
 
@@ -67,7 +69,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
                 $this->registerServiceProvider($className);
             } catch (\Throwable $e) {
                 // Log the error but continue with other service providers
-                error_log("Failed to register service provider {$className}: ".$e->getMessage());
+                error_log(sprintf('Failed to register service provider %s: ', $className).$e->getMessage());
             }
         }
     }
@@ -75,7 +77,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
     /**
      * Check if a discovered class extends ServiceProvider
      */
-    private function extendsServiceProvider(\Spatie\StructureDiscoverer\Data\DiscoveredClass $structure): bool
+    private function extendsServiceProvider(DiscoveredClass $structure): bool
     {
         // Check if the class extends ServiceProvider directly
         if ($structure->extends === ServiceProvider::class) {
@@ -124,8 +126,8 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
             if (! $this->isServiceProviderRegistered($className)) {
                 app()->register($className);
             }
-        } catch (\Throwable $e) {
-            error_log("Failed to register service provider {$className}: ".$e->getMessage());
+        } catch (\Throwable $throwable) {
+            error_log(sprintf('Failed to register service provider %s: ', $className).$throwable->getMessage());
         }
     }
 

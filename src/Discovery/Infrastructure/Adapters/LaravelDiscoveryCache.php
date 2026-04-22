@@ -21,12 +21,12 @@ final readonly class LaravelDiscoveryCache implements DiscoveryCacheInterface
     /**
      * Cache key prefix for discovery items
      */
-    private const CACHE_PREFIX = 'pollora.discovery.';
+    private const string CACHE_PREFIX = 'pollora.discovery.';
 
     /**
      * Default cache TTL in seconds (24 hours)
      */
-    private const DEFAULT_TTL = 86400;
+    private const int DEFAULT_TTL = 86400;
 
     /**
      * Create a new Laravel discovery cache
@@ -121,7 +121,7 @@ final readonly class LaravelDiscoveryCache implements DiscoveryCacheInterface
 
         $locationsHash = md5(implode('|', $locationPaths));
 
-        return "{$discoveryIdentifier}.{$locationsHash}";
+        return sprintf('%s.%s', $discoveryIdentifier, $locationsHash);
     }
 
     /**

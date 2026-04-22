@@ -1,3 +1,2 @@
 parameters:
-    excludeRules:
-        - Larastan\Larastan\Rules\NoEnvCallsOutsideOfConfigRule
+    ignoreErrors: []

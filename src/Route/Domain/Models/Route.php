@@ -194,11 +194,9 @@ class Route extends IlluminateRoute
 
         // For is_404 condition, let Laravel routes take precedence
         // This prevents WordPress 404 from capturing URLs that should be handled by Laravel
-        if ($condition === 'is_404') {
-            // If a Laravel route exists for this request, don't match the 404 route
-            if ($this->hasLaravelRouteForCurrentRequest()) {
-                return false;
-            }
+        // If a Laravel route exists for this request, don't match the 404 route
+        if ($condition === 'is_404' && $this->hasLaravelRouteForCurrentRequest()) {
+            return false;
         }
 
         // Evaluate the WordPress condition
@@ -218,7 +216,11 @@ class Route extends IlluminateRoute
 
             foreach ($routes as $route) {
                 // Skip WordPress routes and the current route
-                if ($route === $this || (method_exists($route, 'isWordPressRoute') && $route->isWordPressRoute())) {
+                if ($route === $this) {
+                    continue;
+                }
+
+                if (method_exists($route, 'isWordPressRoute') && $route->isWordPressRoute()) {
                     continue;
                 }
 

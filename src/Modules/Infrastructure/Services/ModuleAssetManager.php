@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Container\Container;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\View\Factory;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Foundation\Support\IncludesFiles;
@@ -50,9 +52,9 @@ class ModuleAssetManager
             // Register view paths for the module
             $this->registerModuleViewPaths($modulePath, $moduleType, $moduleSlug);
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Failed to setup assets for module {$moduleName} ({$moduleType}): ".$e->getMessage());
+                error_log(sprintf('Failed to setup assets for module %s (%s): ', $moduleName, $moduleType).$throwable->getMessage());
             }
         }
     }
@@ -75,8 +77,8 @@ class ModuleAssetManager
     protected function getAssetConfiguration(string $moduleName, string $modulePath, string $moduleType): array
     {
         return [
-            'hot_file' => public_path("{$moduleName}.hot"),
-            'build_directory' => "build/{$moduleType}/{$moduleName}",
+            'hot_file' => public_path($moduleName.'.hot'),
+            'build_directory' => sprintf('build/%s/%s', $moduleType, $moduleName),
             'manifest_path' => 'manifest.json',
             'base_path' => 'resources/assets/',
             'module_path' => $modulePath,
@@ -110,14 +112,14 @@ class ModuleAssetManager
         try {
             $directives = require $directivesPath;
 
-            if (is_array($directives) && class_exists(\Illuminate\Support\Facades\Blade::class)) {
+            if (is_array($directives) && class_exists(Blade::class)) {
                 foreach ($directives as $name => $directive) {
-                    \Illuminate\Support\Facades\Blade::directive($name, $directive);
+                    Blade::directive($name, $directive);
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Failed to register Blade directives for module {$modulePath}: ".$e->getMessage());
+                error_log(sprintf('Failed to register Blade directives for module %s: ', $modulePath).$throwable->getMessage());
             }
         }
     }
@@ -141,7 +143,7 @@ class ModuleAssetManager
         }
 
         try {
-            /** @var \Illuminate\View\Factory $viewFactory */
+            /** @var Factory $viewFactory */
             $viewFactory = $this->app->make('view');
             $viewFinder = $viewFactory->getFinder();
 
@@ -164,9 +166,9 @@ class ModuleAssetManager
                 $viewFactory->addNamespace($moduleSlug, $modulePath.'/resources/views');
             }
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Failed to register view paths for module {$modulePath} ({$moduleType}): ".$e->getMessage());
+                error_log(sprintf('Failed to register view paths for module %s (%s): ', $modulePath, $moduleType).$throwable->getMessage());
             }
         }
     }
@@ -241,7 +243,7 @@ class ModuleAssetManager
             } catch (\Throwable) {
                 // Silent fail to prevent breaking the application
                 if (function_exists('error_log')) {
-                    error_log("Failed to register view path with priority: {$viewPath}");
+                    error_log('Failed to register view path with priority: '.$viewPath);
                 }
             }
         }

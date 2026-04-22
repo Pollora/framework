@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Application\Infrastructure\Services;
 
+use Illuminate\Contracts\Foundation\Application;
 use Pollora\Application\Domain\Contracts\ConsoleDetectorInterface;
 
 /**
@@ -14,7 +15,7 @@ class LaravelConsoleDetector implements ConsoleDetectorInterface
     /**
      * Constructor.
      *
-     * @param  \Illuminate\Contracts\Foundation\Application  $app
+     * @param  Application  $app
      */
     public function __construct(
         /**

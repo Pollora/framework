@@ -19,12 +19,12 @@ class WordPressHeaders
     /**
      * Framework name constant for headers.
      */
-    private const FRAMEWORK_NAME = 'Pollora';
+    private const string FRAMEWORK_NAME = 'Pollora';
 
     /**
      * Framework header name constant.
      */
-    private const FRAMEWORK_HEADER = 'X-Powered-By';
+    private const string FRAMEWORK_HEADER = 'X-Powered-By';
 
     /**
      * Handle the incoming request.

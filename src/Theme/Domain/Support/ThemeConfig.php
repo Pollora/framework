@@ -37,7 +37,7 @@ class ThemeConfig
     {
         $key = 'theme.'.$key;
 
-        if (! self::$configRepository instanceof \Pollora\Config\Domain\Contracts\ConfigRepositoryInterface) {
+        if (! self::$configRepository instanceof ConfigRepositoryInterface) {
             // If no default is provided, throw the exception
             if (func_num_args() === 1) {
                 throw new \RuntimeException(
@@ -57,7 +57,7 @@ class ThemeConfig
      */
     public static function isInitialized(): bool
     {
-        return self::$configRepository instanceof \Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
+        return self::$configRepository instanceof ConfigRepositoryInterface;
     }
 
     /**

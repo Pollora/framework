@@ -9,10 +9,4 @@ use Exception;
 /**
  * Exception thrown when an option key or value is invalid.
  */
-final class InvalidOptionException extends Exception
-{
-    public function __construct(string $message)
-    {
-        parent::__construct($message);
-    }
-}
+final class InvalidOptionException extends Exception {}

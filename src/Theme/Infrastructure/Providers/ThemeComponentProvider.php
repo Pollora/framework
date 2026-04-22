@@ -55,18 +55,18 @@ class ThemeComponentProvider
 
             $instance = $this->app->make($component);
             $instance->register();
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (env('APP_DEBUG', false)) {
                 throw new \RuntimeException(
-                    "Failed to register component {$component}: ".$e->getMessage(),
+                    sprintf('Failed to register component %s: ', $component).$throwable->getMessage(),
                     0,
-                    $e
+                    $throwable
                 );
             }
 
             // Log error but continue in production
             if (function_exists('error_log')) {
-                error_log("Theme component registration failed: {$component} - ".$e->getMessage());
+                error_log(sprintf('Theme component registration failed: %s - ', $component).$throwable->getMessage());
             }
         }
     }

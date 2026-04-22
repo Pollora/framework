@@ -60,7 +60,7 @@ class ThemeRepository implements ModuleRepositoryInterface
     {
         $module = $this->find($name);
 
-        if (! $module instanceof \Pollora\Modules\Domain\Contracts\ModuleInterface) {
+        if (! $module instanceof ModuleInterface) {
             throw ModuleException::notFound($name);
         }
 
@@ -69,7 +69,7 @@ class ThemeRepository implements ModuleRepositoryInterface
 
     public function has(string $name): bool
     {
-        return $this->find($name) instanceof \Pollora\Modules\Domain\Contracts\ModuleInterface;
+        return $this->find($name) instanceof ModuleInterface;
     }
 
     public function getByStatus(bool $status): array

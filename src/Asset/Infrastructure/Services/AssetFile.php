@@ -29,16 +29,16 @@ class AssetFile extends DomainAssetFile implements AssetFileInterface
         try {
             Application::getInstance();
             /** @var AssetContainer|null $assetContainer */
-            $assetContainer = app(AssetManager::class)->getContainer($this->assetContainer);
+            $assetContainer = resolve(AssetManager::class)->getContainer($this->assetContainer);
 
             if ($assetContainer === null) {
                 return '';
             }
 
             return (new ViteManager($assetContainer))->asset($this->filename);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             Log::error('Error in AssetFile::__toString', [
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
                 'path' => $this->filename,
             ]);
 

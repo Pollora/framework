@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Application\Application\Services;
 
+use Pollora\Application\Domain\Contracts\ConsoleDetectorInterface;
+
 /**
  * Application service to orchestrate console detection use cases.
  */
@@ -12,7 +14,7 @@ class ConsoleDetectionService
     /**
      * Constructor.
      */
-    public function __construct(protected \Pollora\Application\Domain\Contracts\ConsoleDetectorInterface $detector) {}
+    public function __construct(protected ConsoleDetectorInterface $detector) {}
 
     /**
      * Check if running in console.

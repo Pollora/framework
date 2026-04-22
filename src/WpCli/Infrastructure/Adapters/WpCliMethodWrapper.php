@@ -42,7 +42,7 @@ final readonly class WpCliMethodWrapper
             return $this->originalMethod->invoke($this->instance, ...$arguments);
         }
 
-        throw new \BadMethodCallException("Method {$name} does not exist");
+        throw new \BadMethodCallException(sprintf('Method %s does not exist', $name));
     }
 
     /**
@@ -50,7 +50,7 @@ final readonly class WpCliMethodWrapper
      * This method will have the same name and docblock as the original method,
      * allowing WP-CLI to properly extract documentation.
      */
-    public function createProxyMethod(): \ReflectionMethod
+    public function createProxyMethod(): ReflectionMethod
     {
         $methodName = $this->originalMethod->getName();
 

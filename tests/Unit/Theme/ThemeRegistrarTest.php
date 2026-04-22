@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Theme;
 
+use Illuminate\Container\Container;
 use PHPUnit\Framework\TestCase;
+use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
+use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
+use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
+use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
@@ -43,14 +49,14 @@ class ThemeRegistrarTest extends TestCase
             ->method('has')
             ->willReturnMap([
                 ['app', true],
-                [\Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface::class, false],
-                [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false],
-                [\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, false],
-                [\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, false],
-                [\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, false],
+                [ModuleRepositoryInterface::class, false],
+                [ModuleDiscoveryOrchestratorInterface::class, false],
+                [ModuleConfigurationLoader::class, false],
+                [ModuleComponentManager::class, false],
+                [ModuleAssetManager::class, false],
             ]);
 
-        $mockApp = $this->createMock(\Illuminate\Container\Container::class);
+        $mockApp = $this->createMock(Container::class);
         $this->container->expects($this->any())
             ->method('get')
             ->with('app')
@@ -153,14 +159,14 @@ class ThemeRegistrarTest extends TestCase
             ->method('has')
             ->willReturnMap([
                 ['app', true],
-                [\Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface::class, false],
-                [\Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface::class, false],
-                [\Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader::class, false],
-                [\Pollora\Modules\Infrastructure\Services\ModuleComponentManager::class, false],
-                [\Pollora\Modules\Infrastructure\Services\ModuleAssetManager::class, false],
+                [ModuleRepositoryInterface::class, false],
+                [ModuleDiscoveryOrchestratorInterface::class, false],
+                [ModuleConfigurationLoader::class, false],
+                [ModuleComponentManager::class, false],
+                [ModuleAssetManager::class, false],
             ]);
 
-        $mockApp = $this->createMock(\Illuminate\Container\Container::class);
+        $mockApp = $this->createMock(Container::class);
         $this->container->expects($this->any())
             ->method('get')
             ->with('app')

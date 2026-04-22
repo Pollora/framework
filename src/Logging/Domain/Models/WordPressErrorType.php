@@ -21,9 +21,9 @@ enum WordPressErrorType: string
     public function getLogMessage(string $function): string
     {
         return match ($this) {
-            self::DOING_IT_WRONG => "WordPress: {$function} called incorrectly",
-            self::DEPRECATED_FUNCTION => "WordPress: Deprecated function {$function} used",
-            self::DEPRECATED_ARGUMENT => "WordPress: Deprecated argument in {$function}",
+            self::DOING_IT_WRONG => sprintf('WordPress: %s called incorrectly', $function),
+            self::DEPRECATED_FUNCTION => sprintf('WordPress: Deprecated function %s used', $function),
+            self::DEPRECATED_ARGUMENT => 'WordPress: Deprecated argument in '.$function,
         };
     }
 }

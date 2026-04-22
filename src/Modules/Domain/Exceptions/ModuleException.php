@@ -10,24 +10,24 @@ class ModuleException extends Exception
 {
     public static function notFound(string $name): static
     {
-        return new static("Module [{$name}] not found.");
+        return new static(sprintf('Module [%s] not found.', $name));
     }
 
     public static function alreadyEnabled(string $name): static
     {
-        return new static("Module [{$name}] is already enabled.");
+        return new static(sprintf('Module [%s] is already enabled.', $name));
     }
 
     public static function alreadyDisabled(string $name): static
     {
-        return new static("Module [{$name}] is already disabled.");
+        return new static(sprintf('Module [%s] is already disabled.', $name));
     }
 
     public static function cannotEnable(string $name, string $reason = ''): static
     {
-        $message = "Cannot enable module [{$name}]";
+        $message = sprintf('Cannot enable module [%s]', $name);
         if ($reason !== '' && $reason !== '0') {
-            $message .= ": {$reason}";
+            $message .= ': '.$reason;
         }
 
         return new static($message);
@@ -35,9 +35,9 @@ class ModuleException extends Exception
 
     public static function cannotDisable(string $name, string $reason = ''): static
     {
-        $message = "Cannot disable module [{$name}]";
+        $message = sprintf('Cannot disable module [%s]', $name);
         if ($reason !== '' && $reason !== '0') {
-            $message .= ": {$reason}";
+            $message .= ': '.$reason;
         }
 
         return new static($message);

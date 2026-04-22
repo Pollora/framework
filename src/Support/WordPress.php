@@ -19,10 +19,8 @@ class WordPress
 {
     /**
      * Default value for options when not found.
-     *
-     * @var bool
      */
-    private const DEFAULT_OPTION_VALUE = false;
+    private const bool DEFAULT_OPTION_VALUE = false;
 
     /**
      * Check if we are on a multisite, and optionally check the multisite we are on.
@@ -65,7 +63,7 @@ class WordPress
     /**
      * Get the current site that the user is browsing.
      *
-     * @return \WP_Network Current WordPress network/site object
+     * @return WP_Network Current WordPress network/site object
      */
     public function site(): WP_Network
     {
@@ -93,7 +91,7 @@ class WordPress
      *
      * @deprecated Use auth()->user() instead
      *
-     * @return \WP_User Current WordPress user object
+     * @return WP_User Current WordPress user object
      */
     public function currentUser(): WP_User
     {

@@ -9,11 +9,13 @@ use InvalidArgumentException;
 use Pollora\Attributes\Schedule;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Schedule\Every;
 use Pollora\Schedule\Interval;
 use ReflectionMethod;
+use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
@@ -29,14 +31,15 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class ScheduleDiscovery implements DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Default WordPress recurrence schedules.
      *
      * @var array<string>
      */
-    private const DEFAULT_SCHEDULES = [
+    private const array DEFAULT_SCHEDULES = [
         'hourly',
         'twicedaily',
         'daily',
@@ -49,10 +52,10 @@ final class ScheduleDiscovery implements DiscoveryInterface
      * Discovers methods with Schedule attributes and collects them for registration.
      * Only processes public methods that have the Schedule attribute.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
-        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof DiscoveredClass) {
             return;
         }
 
@@ -139,7 +142,7 @@ final class ScheduleDiscovery implements DiscoveryInterface
                 }
             } catch (\Throwable $e) {
                 // Log the error but continue with other scheduled tasks
-                error_log("Failed to register Schedule from method {$className}::{$methodName}: ".$e->getMessage());
+                error_log(sprintf('Failed to register Schedule from method %s::%s: ', $className, $methodName).$e->getMessage());
             }
         }
     }
@@ -335,7 +338,7 @@ final class ScheduleDiscovery implements DiscoveryInterface
     private function scheduleWordPressCron(string $hookName, string $interval, array $args = []): void
     {
         if (wp_schedule_event(time(), $interval, $hookName, $args) === false) {
-            error_log("Failed to schedule WordPress cron event for hook: {$hookName}");
+            error_log('Failed to schedule WordPress cron event for hook: '.$hookName);
         }
     }
 

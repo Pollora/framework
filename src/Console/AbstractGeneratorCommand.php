@@ -19,7 +19,12 @@ use Pollora\Foundation\Console\Commands\Concerns\ResolvesLocation;
  */
 abstract class AbstractGeneratorCommand extends GeneratorCommand
 {
-    use HasModuleSupport, HasNameSupport, HasPathSupport, HasPluginSupport, HasThemeSupport, ResolvesLocation;
+    use HasModuleSupport;
+    use HasNameSupport;
+    use HasPathSupport;
+    use HasPluginSupport;
+    use HasThemeSupport;
+    use ResolvesLocation;
 
     /**
      * The subpath where the class should be generated.
@@ -47,7 +52,7 @@ abstract class AbstractGeneratorCommand extends GeneratorCommand
         $location = $this->resolveTargetLocation();
 
         // Show where the file will be created
-        $this->info("Creating {$this->type} in {$location['type']}: {$location['path']}");
+        $this->info(sprintf('Creating %s in %s: %s', $this->type, $location['type'], $location['path']));
 
         $name = $this->qualifyClass($this->getNameInput());
         $path = $this->getPath($name);

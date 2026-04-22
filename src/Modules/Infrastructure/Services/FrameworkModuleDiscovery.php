@@ -59,9 +59,9 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
 
         try {
             $this->discoverModuleOnly('app', $this->basePath);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log('Framework Module discovery error: '.$e->getMessage());
+                error_log('Framework Module discovery error: '.$throwable->getMessage());
             }
         }
     }
@@ -82,9 +82,9 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             foreach ($this->discoveredModules as $moduleData) {
                 $moduleData['engine']->apply();
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log('Framework Module apply error: '.$e->getMessage());
+                error_log('Framework Module apply error: '.$throwable->getMessage());
             }
         }
     }
@@ -108,9 +108,9 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             }
 
             $this->discoverModule($moduleName, $modules[$moduleName]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Framework Module discovery error for {$moduleName}: ".$e->getMessage());
+                error_log(sprintf('Framework Module discovery error for %s: ', $moduleName).$throwable->getMessage());
             }
         }
     }
@@ -137,9 +137,9 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                     $results[$moduleName] = $moduleResults;
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log('Framework Module discovery error: '.$e->getMessage());
+                error_log('Framework Module discovery error: '.$throwable->getMessage());
             }
         }
 
@@ -191,9 +191,11 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 if ($directory->isDot()) {
                     continue;
                 }
+
                 if (! $directory->isDir()) {
                     continue;
                 }
+
                 $moduleName = $directory->getBasename();
 
                 // Only include modules that have typical DDD structure
@@ -201,9 +203,9 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                     $modules[$moduleName] = $directory->getPathname();
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log('Error scanning framework modules: '.$e->getMessage());
+                error_log('Error scanning framework modules: '.$throwable->getMessage());
             }
         }
 
@@ -264,9 +266,9 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 'path' => $modulePath,
                 'engine' => $engine,
             ];
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for framework module {$moduleName}: ".$e->getMessage());
+                error_log(sprintf('Discovery error for framework module %s: ', $moduleName).$throwable->getMessage());
             }
         }
     }
@@ -307,9 +309,9 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
             }
 
             return $results;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
-                error_log("Discovery error for framework module {$moduleName}: ".$e->getMessage());
+                error_log(sprintf('Discovery error for framework module %s: ', $moduleName).$throwable->getMessage());
             }
 
             return [];

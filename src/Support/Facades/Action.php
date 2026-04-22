@@ -18,7 +18,7 @@ use Pollora\Hook\Hook;
  * @method static bool exists(string $hook) Check if an action exists
  * @method static Hook|false remove(string $hook, \Closure|string $callback, int $priority = 10) Remove an action hook
  *
- * @see \Pollora\Hook\Hook
+ * @see Hook
  */
 class Action extends Facade
 {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\View;
 
+use Illuminate\Contracts\View\Engine;
 use Illuminate\View\Engines\CompilerEngine;
 use Illuminate\View\View;
 use Illuminate\View\ViewServiceProvider as ViewServiceProviderBase;
@@ -32,7 +33,7 @@ class ViewServiceProvider extends ViewServiceProviderBase
             /** @var string $file path to file */
             $file = $this->getPath();
 
-            /** @var \Illuminate\Contracts\View\Engine $engine */
+            /** @var Engine $engine */
             $engine = $this->getEngine();
 
             return ($engine instanceof CompilerEngine)
@@ -49,12 +50,12 @@ class ViewServiceProvider extends ViewServiceProviderBase
             $view = $this->getName();
             $path = $this->getPath();
             $id = md5($this->getCompiled());
-            $compiled_path = app('config')['view.compiled'];
+            $compiled_path = resolve('config')['view.compiled'];
 
-            $content = "<?= \\view('{$view}', \$data ?? get_defined_vars())->render(); ?>"
+            $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", $view)
                 ."\n<?php /**PATH {$path} ENDPATH**/ ?>";
 
-            if (! file_exists($loader = "{$compiled_path}/{$id}-loader.php")) {
+            if (! file_exists($loader = sprintf('%s/%s-loader.php', $compiled_path, $id))) {
                 file_put_contents($loader, $content);
             }
 

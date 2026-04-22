@@ -1,18 +1,16 @@
 includes:
-    # Commenting out the Larastan include since it's not installed
-    # - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+    - phpstan-ignore-rules.neon
+    - vendor/larastan/larastan/extension.neon
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
 parameters:
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+
     treatPhpDocTypesAsCertain: false
+
     paths:
         - src/
 
-    # Level 9 is the highest level
     level: 5
-#    ignoreErrors:
-#        - '#PHPDoc tag @var#'
-#
-#    excludePaths:
-#        - ./*/*/FileToBeExcluded.php
-#
-#    checkMissingIterableValueType: false

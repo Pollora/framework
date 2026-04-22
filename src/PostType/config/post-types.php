@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
 
 return [
     /*
@@ -24,5 +25,5 @@ return [
     | with your own implementation if needed.
     |
     */
-    'provider' => Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider::class,
+    'provider' => PostTypeServiceProvider::class,
 ];

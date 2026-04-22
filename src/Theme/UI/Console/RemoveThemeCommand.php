@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\UI\Console;
 
-use Illuminate\Config\Repository;
 use Illuminate\Filesystem\Filesystem;
 
 /**
@@ -17,17 +16,6 @@ class RemoveThemeCommand extends BaseThemeCommand
     protected $description = 'Remove an existing theme';
 
     /**
-     * Create a new command instance.
-     *
-     * @param  Repository  $config  The configuration repository
-     * @param  Filesystem  $files  Filesystem instance used for file operations
-     */
-    public function __construct(Repository $config, Filesystem $files)
-    {
-        parent::__construct($config, $files);
-    }
-
-    /**
      * Execute the command.
      *
      * @return int Command exit code
@@ -37,14 +25,14 @@ class RemoveThemeCommand extends BaseThemeCommand
         $themeName = $this->argument('name');
 
         if (! $this->directoryExists()) {
-            $this->error("Theme \"{$themeName}\" does not exist.");
+            $this->error(sprintf('Theme "%s" does not exist.', $themeName));
 
             return self::FAILURE;
         }
 
-        if ($this->confirm("Are you sure you want to permanently delete the theme \"{$themeName}\"?")) {
+        if ($this->confirm(sprintf('Are you sure you want to permanently delete the theme "%s"?', $themeName))) {
             $this->removeTheme();
-            $this->info("Theme \"{$themeName}\" has been removed successfully.");
+            $this->info(sprintf('Theme "%s" has been removed successfully.', $themeName));
 
             return self::SUCCESS;
         }

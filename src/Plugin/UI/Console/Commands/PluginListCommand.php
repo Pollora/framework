@@ -7,6 +7,7 @@ namespace Pollora\Plugin\UI\Console\Commands;
 use Illuminate\Console\Command;
 use Pollora\Plugin\Application\Services\PluginManager;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
+use Pollora\Plugin\Domain\Support\PluginCollection;
 
 /**
  * Command to list all available plugins.
@@ -76,8 +77,8 @@ class PluginListCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Exception $e) {
-            $this->error("Error listing plugins: {$e->getMessage()}");
+        } catch (\Exception $exception) {
+            $this->error('Error listing plugins: '.$exception->getMessage());
 
             return self::FAILURE;
         }
@@ -110,8 +111,8 @@ class PluginListCommand extends Command
     /**
      * Apply filters to the plugin collection.
      *
-     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
-     * @return \Pollora\Plugin\Domain\Support\PluginCollection Filtered collection
+     * @param  PluginCollection  $collection  Plugin collection
+     * @return PluginCollection Filtered collection
      */
     protected function applyFilters($collection)
     {
@@ -145,9 +146,9 @@ class PluginListCommand extends Command
     /**
      * Apply search to the plugin collection.
      *
-     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
+     * @param  PluginCollection  $collection  Plugin collection
      * @param  string  $search  Search term
-     * @return \Pollora\Plugin\Domain\Support\PluginCollection Filtered collection
+     * @return PluginCollection Filtered collection
      */
     protected function applySearch($collection, string $search)
     {
@@ -163,8 +164,8 @@ class PluginListCommand extends Command
     /**
      * Apply sorting to the plugin collection.
      *
-     * @param  \Pollora\Plugin\Domain\Support\PluginCollection  $collection  Plugin collection
-     * @return \Pollora\Plugin\Domain\Support\PluginCollection Sorted collection
+     * @param  PluginCollection  $collection  Plugin collection
+     * @return PluginCollection Sorted collection
      */
     protected function applySorting($collection)
     {
@@ -178,9 +179,11 @@ class PluginListCommand extends Command
                 if ($plugin->isActive() && $plugin->isEnabled()) {
                     return 'active-enabled';
                 }
+
                 if ($plugin->isActive()) {
                     return 'active';
                 }
+
                 if ($plugin->isEnabled()) {
                     return 'enabled';
                 }
@@ -227,14 +230,14 @@ class PluginListCommand extends Command
 
         foreach ($plugins as $plugin) {
             $status = $this->getStatusBadge($plugin);
-            $this->line("• <info>{$plugin->getName()}</info> <comment>v{$plugin->getVersion()}</comment> - {$status}");
+            $this->line(sprintf('• <info>%s</info> <comment>v%s</comment> - %s', $plugin->getName(), $plugin->getVersion(), $status));
 
             if ($plugin->getDescription()) {
-                $this->line("  {$plugin->getDescription()}");
+                $this->line('  '.$plugin->getDescription());
             }
 
             if ($plugin->getAuthor()) {
-                $this->line("  <fg=gray>By: {$plugin->getAuthor()}</fg=gray>");
+                $this->line(sprintf('  <fg=gray>By: %s</fg=gray>', $plugin->getAuthor()));
             }
 
             $this->newLine();
@@ -288,11 +291,11 @@ class PluginListCommand extends Command
         $networkWide = count(array_filter($plugins, fn (PluginModuleInterface $plugin): bool => $plugin->isNetworkWide()));
 
         $this->info('Plugin Summary');
-        $this->line("Total: {$total} | Active: {$active} | Enabled: {$enabled} | Network-wide: {$networkWide}");
+        $this->line(sprintf('Total: %d | Active: %d | Enabled: %d | Network-wide: %d', $total, $active, $enabled, $networkWide));
         $filters = $this->getActiveFiltersText();
 
         if ($filters !== '' && $filters !== '0') {
-            $this->line("Filters: {$filters}");
+            $this->line('Filters: '.$filters);
         }
 
         $this->newLine();
@@ -333,23 +336,29 @@ class PluginListCommand extends Command
         if ($this->option('active')) {
             $filters[] = 'active';
         }
+
         if ($this->option('inactive')) {
             $filters[] = 'inactive';
         }
+
         if ($this->option('enabled')) {
             $filters[] = 'enabled';
         }
+
         if ($this->option('disabled')) {
             $filters[] = 'disabled';
         }
+
         if ($this->option('network')) {
             $filters[] = 'network-wide';
         }
+
         if ($author = $this->option('author')) {
-            $filters[] = "author:{$author}";
+            $filters[] = 'author:'.$author;
         }
+
         if ($search = $this->option('search')) {
-            $filters[] = "search:{$search}";
+            $filters[] = 'search:'.$search;
         }
 
         return $filters;

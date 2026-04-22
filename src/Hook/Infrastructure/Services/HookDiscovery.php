@@ -8,11 +8,13 @@ use Pollora\Attributes\Action;
 use Pollora\Attributes\Filter;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
 use ReflectionMethod;
+use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
@@ -25,7 +27,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class HookDiscovery implements DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Create a new Hook discovery
@@ -44,10 +47,10 @@ final class HookDiscovery implements DiscoveryInterface
      * Discovers methods with Action and Filter attributes and collects them for registration.
      * Only processes public methods that have hook attributes.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
-        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof DiscoveredClass) {
             return;
         }
 
@@ -138,7 +141,7 @@ final class HookDiscovery implements DiscoveryInterface
             } catch (\Throwable $e) {
                 // Log the error but continue with other hooks
                 // In a production environment, you might want to use a proper logger
-                error_log("Failed to register {$hookType} hook from method {$className}::{$methodName}: ".$e->getMessage());
+                error_log(sprintf('Failed to register %s hook from method %s::%s: ', $hookType, $className, $methodName).$e->getMessage());
             }
         }
     }

@@ -7,10 +7,12 @@ namespace Pollora\WpRest\Infrastructure\Services;
 use Pollora\Attributes\WpRestRoute;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
+use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use ReflectionClass;
 use ReflectionMethod;
+use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
@@ -22,7 +24,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  */
 final class WpRestDiscovery implements DiscoveryInterface
 {
-    use HasInstancePool, IsDiscovery;
+    use HasInstancePool;
+    use IsDiscovery;
 
     /**
      * Cache for wrapper instances to avoid recreating them
@@ -35,10 +38,10 @@ final class WpRestDiscovery implements DiscoveryInterface
      * Discovers classes with WpRestRoute attributes and collects them for registration.
      * Only processes classes that have the WpRestRoute attribute.
      */
-    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    public function discover(DiscoveryLocationInterface $location, DiscoveredStructure $structure, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         // Only process classes
-        if (! $structure instanceof \Spatie\StructureDiscoverer\Data\DiscoveredClass) {
+        if (! $structure instanceof DiscoveredClass) {
             return;
         }
 
@@ -83,7 +86,7 @@ final class WpRestDiscovery implements DiscoveryInterface
                 $this->processWpRestRoute($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other REST routes
-                error_log("Failed to register WP REST route from class {$className}: ".$e->getMessage());
+                error_log(sprintf('Failed to register WP REST route from class %s: ', $className).$e->getMessage());
             }
         }
     }
@@ -109,9 +112,9 @@ final class WpRestDiscovery implements DiscoveryInterface
      * Process a complete WP REST route configuration from its class and attributes.
      *
      * @param  string  $className  The fully qualified class name
-     * @param  \Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      */
-    private function processWpRestRoute(string $className, ?\Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface $reflectionCache = null): void
+    private function processWpRestRoute(string $className, ?ReflectionCacheInterface $reflectionCache = null): void
     {
         try {
             $reflectionClass = $reflectionCache->getClassReflection($className);
@@ -142,8 +145,8 @@ final class WpRestDiscovery implements DiscoveryInterface
             // Process all method-level attributes
             $this->processMethodLevelAttributes($reflectionClass, $attributableWrapper);
 
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process WP REST route for class {$className}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process WP REST route for class %s: ', $className).$reflectionException->getMessage());
         }
     }
 
@@ -161,8 +164,8 @@ final class WpRestDiscovery implements DiscoveryInterface
             foreach ($methods as $method) {
                 $this->processMethodAttributes($method, $attributableWrapper);
             }
-        } catch (\ReflectionException $e) {
-            error_log("Failed to process method-level attributes for {$reflectionClass->getName()}: ".$e->getMessage());
+        } catch (\ReflectionException $reflectionException) {
+            error_log(sprintf('Failed to process method-level attributes for %s: ', $reflectionClass->getName()).$reflectionException->getMessage());
         }
     }
 
@@ -208,9 +211,9 @@ final class WpRestDiscovery implements DiscoveryInterface
             add_action('rest_api_init', function () use ($attributeInstance, $attributableWrapper, $method): void {
                 $attributeInstance->handle(app(), $attributableWrapper, $method, $attributeInstance);
             });
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $className = $method->getDeclaringClass()->getName();
-            error_log("Failed to process method attribute for {$className}::{$method->getName()}: ".$e->getMessage());
+            error_log(sprintf('Failed to process method attribute for %s::%s: ', $className, $method->getName()).$throwable->getMessage());
         }
     }
 

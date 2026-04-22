@@ -63,7 +63,7 @@ class PluginManager
         protected ?ModuleRepositoryInterface $repository = null,
         ?ConsoleDetectionService $consoleDetectionService = null
     ) {
-        $this->consoleDetectionService = $consoleDetectionService ?? app(ConsoleDetectionService::class);
+        $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
     }
 
     /**
@@ -107,12 +107,12 @@ class PluginManager
         $this->plugin = $plugin;
 
         if (! is_dir($plugin->getBasePath()) && ! $this->consoleDetectionService->isConsole()) {
-            throw new PluginException("Plugin directory {$plugin->getName()} not found.");
+            throw new PluginException(sprintf('Plugin directory %s not found.', $plugin->getName()));
         }
 
         $plugin->loadConfiguration();
 
-        if ($this->localeLoader instanceof \Illuminate\Contracts\Translation\Translator) {
+        if ($this->localeLoader instanceof Translator) {
             $this->localeLoader->addNamespace($pluginName, $plugin->getLanguagePath());
         }
     }
@@ -291,7 +291,7 @@ class PluginManager
      */
     public function findPlugin(string $name): ?PluginModuleInterface
     {
-        if (! $this->repository instanceof \Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface) {
+        if (! $this->repository instanceof ModuleRepositoryInterface) {
             return null;
         }
 
@@ -346,8 +346,8 @@ class PluginManager
             if (function_exists('do_action')) {
                 do_action('activate_plugin', $plugin->getBasename());
             }
-        } catch (\Exception $e) {
-            throw PluginException::activationFailed($name, $e->getMessage(), 0, $e);
+        } catch (\Exception $exception) {
+            throw PluginException::activationFailed($name, $exception->getMessage(), 0, $exception);
         }
     }
 
@@ -373,8 +373,8 @@ class PluginManager
             if (function_exists('do_action')) {
                 do_action('deactivate_plugin', $plugin->getBasename());
             }
-        } catch (\Exception $e) {
-            throw PluginException::deactivationFailed($name, $e->getMessage(), 0, $e);
+        } catch (\Exception $exception) {
+            throw PluginException::deactivationFailed($name, $exception->getMessage(), 0, $exception);
         }
     }
 
