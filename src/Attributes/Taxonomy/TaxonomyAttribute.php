@@ -48,7 +48,7 @@ abstract class TaxonomyAttribute implements HandlesAttributes
      * This method should be implemented by child classes to set specific
      * configuration options on the taxonomy instance.
      *
-     * @param  Taxonomy  $taxonomy  The taxonomy instance to configure
+     * @param  TaxonomyAttributeInterface  $taxonomy  The taxonomy instance to configure
      */
     abstract protected function configure(TaxonomyAttributeInterface $taxonomy): void;
 }

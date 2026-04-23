@@ -118,28 +118,24 @@ abstract class AbstractTaxonomy implements TaxonomyAttributeInterface
         $name = $this->getName();
         $pluralName = $this->getPluralName();
 
-        // Convert to lowercase for labels where the name is not in first position
-        $lowerName = strtolower($name);
-        $lowerPluralName = strtolower($pluralName);
-
         return [
             'name' => $pluralName,
             'singular_name' => $name,
             'menu_name' => $pluralName,
-            'all_items' => __('All '.$lowerPluralName, 'textdomain'),
-            'edit_item' => __('Edit '.$lowerName, 'textdomain'),
-            'view_item' => __('View '.$lowerName, 'textdomain'),
-            'update_item' => __('Update '.$lowerName, 'textdomain'),
-            'add_new_item' => __('Add New '.$lowerName, 'textdomain'),
-            'new_item_name' => __('New '.$lowerName.' Name', 'textdomain'),
-            'search_items' => __('Search '.$lowerPluralName, 'textdomain'),
-            'popular_items' => __('Popular '.$lowerPluralName, 'textdomain'),
-            'separate_items_with_commas' => __('Separate '.$lowerPluralName.' with commas', 'textdomain'),
-            'add_or_remove_items' => __('Add or remove '.$lowerPluralName, 'textdomain'),
-            'choose_from_most_used' => __('Choose from the most used '.$lowerPluralName, 'textdomain'),
-            'not_found' => __('No '.$lowerPluralName.' found', 'textdomain'),
-            'parent_item' => __('Parent '.$lowerName, 'textdomain'),
-            'parent_item_colon' => __('Parent '.$lowerName.':', 'textdomain'),
+            'all_items' => sprintf(__('All %s', 'pollora'), $pluralName),
+            'edit_item' => sprintf(__('Edit %s', 'pollora'), $name),
+            'view_item' => sprintf(__('View %s', 'pollora'), $name),
+            'update_item' => sprintf(__('Update %s', 'pollora'), $name),
+            'add_new_item' => sprintf(__('Add New %s', 'pollora'), $name),
+            'new_item_name' => sprintf(__('New %s Name', 'pollora'), $name),
+            'search_items' => sprintf(__('Search %s', 'pollora'), $pluralName),
+            'popular_items' => sprintf(__('Popular %s', 'pollora'), $pluralName),
+            'separate_items_with_commas' => sprintf(__('Separate %s with commas', 'pollora'), $pluralName),
+            'add_or_remove_items' => sprintf(__('Add or remove %s', 'pollora'), $pluralName),
+            'choose_from_most_used' => sprintf(__('Choose from the most used %s', 'pollora'), $pluralName),
+            'not_found' => sprintf(__('No %s found', 'pollora'), $pluralName),
+            'parent_item' => sprintf(__('Parent %s', 'pollora'), $name),
+            'parent_item_colon' => sprintf(__('Parent %s:', 'pollora'), $name),
         ];
     }
 

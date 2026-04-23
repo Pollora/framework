@@ -99,28 +99,24 @@ class WordPressTaxonomyRegistry implements TaxonomyRegistryInterface
      */
     private function generateLabels(string $singular, string $plural): array
     {
-        // Convert to lowercase for labels where the name is not in first position
-        $lowerSingular = strtolower($singular);
-        $lowerPlural = strtolower($plural);
-
         return [
             'name' => $plural,
             'singular_name' => $singular,
             'menu_name' => $plural,
-            'all_items' => __('All '.$lowerPlural, 'textdomain'),
-            'edit_item' => __('Edit '.$lowerSingular, 'textdomain'),
-            'view_item' => __('View '.$lowerSingular, 'textdomain'),
-            'update_item' => __('Update '.$lowerSingular, 'textdomain'),
-            'add_new_item' => __('Add New '.$lowerSingular, 'textdomain'),
-            'new_item_name' => __('New '.$lowerSingular.' Name', 'textdomain'),
-            'search_items' => __('Search '.$lowerPlural, 'textdomain'),
-            'popular_items' => __('Popular '.$lowerPlural, 'textdomain'),
-            'separate_items_with_commas' => __('Separate '.$lowerPlural.' with commas', 'textdomain'),
-            'add_or_remove_items' => __('Add or remove '.$lowerPlural, 'textdomain'),
-            'choose_from_most_used' => __('Choose from the most used '.$lowerPlural, 'textdomain'),
-            'not_found' => __('No '.$lowerPlural.' found', 'textdomain'),
-            'parent_item' => __('Parent '.$lowerSingular, 'textdomain'),
-            'parent_item_colon' => __('Parent '.$lowerSingular.':', 'textdomain'),
+            'all_items' => sprintf(__('All %s', 'pollora'), $plural),
+            'edit_item' => sprintf(__('Edit %s', 'pollora'), $singular),
+            'view_item' => sprintf(__('View %s', 'pollora'), $singular),
+            'update_item' => sprintf(__('Update %s', 'pollora'), $singular),
+            'add_new_item' => sprintf(__('Add New %s', 'pollora'), $singular),
+            'new_item_name' => sprintf(__('New %s Name', 'pollora'), $singular),
+            'search_items' => sprintf(__('Search %s', 'pollora'), $plural),
+            'popular_items' => sprintf(__('Popular %s', 'pollora'), $plural),
+            'separate_items_with_commas' => sprintf(__('Separate %s with commas', 'pollora'), $plural),
+            'add_or_remove_items' => sprintf(__('Add or remove %s', 'pollora'), $plural),
+            'choose_from_most_used' => sprintf(__('Choose from the most used %s', 'pollora'), $plural),
+            'not_found' => sprintf(__('No %s found', 'pollora'), $plural),
+            'parent_item' => sprintf(__('Parent %s', 'pollora'), $singular),
+            'parent_item_colon' => sprintf(__('Parent %s:', 'pollora'), $singular),
         ];
     }
 }
