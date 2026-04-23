@@ -10,7 +10,7 @@ use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
  * Renders the Pollora admin dashboard page.
  *
  * Displays system information including framework version, environment details,
- * discovered post types, taxonomies, hooks, and cache state, with Pollora branding.
+ * discovered entities, performance stats, and cache state, with Pollora branding.
  */
 final class DashboardController
 {
@@ -18,45 +18,30 @@ final class DashboardController
         private readonly SystemInfoCollector $collector
     ) {}
 
-    /**
-     * Render the dashboard page.
-     */
     public function __invoke(): void
     {
         $info = $this->collector->collect();
 
-        $this->renderPage($info);
-    }
-
-    /**
-     * @param  array<string, mixed>  $info
-     */
-    private function renderPage(array $info): void
-    {
-        /** @var array{current: ?string, latest: ?string, update_available: bool} $framework */
-        $framework = $info['framework'];
-        /** @var array{php: string, laravel: string, wordpress: string} $environment */
-        $environment = $info['environment'];
-        /** @var array{post_types: array{count: int, items: list<array{class: string, slug: string, label: string}>}, taxonomies: array{count: int, items: list<array{class: string, slug: string, label: string}>}, hooks: array{count: int, actions: int, filters: int}} $discovery */
-        $discovery = $info['discovery'];
-        /** @var array{driver: string, enabled: bool} $cache */
-        $cache = $info['cache'];
-        /** @var array{name: string, version: string, template: string} $theme */
-        $theme = $info['theme'];
-
         echo '<div class="wrap pollora-wrap">';
 
         $this->renderStyles();
-        $this->renderHeader($framework);
+        $this->renderHeader($info['framework']);
 
         echo '<div class="pollora-dashboard">';
 
-        $this->renderEnvironmentCard($environment);
-        $this->renderPostTypesCard($discovery['post_types']);
-        $this->renderTaxonomiesCard($discovery['taxonomies']);
-        $this->renderHooksCard($discovery['hooks']);
-        $this->renderCacheCard($cache);
-        $this->renderThemeCard($theme);
+        $this->renderEnvironmentCard($info['environment']);
+        $this->renderWordPressCard($info['wordpress']);
+        $this->renderPostTypesCard($info['discovery']['post_types']);
+        $this->renderTaxonomiesCard($info['discovery']['taxonomies']);
+        $this->renderHooksCard($info['discovery']['hooks']);
+        $this->renderRestRoutesCard($info['discovery']['rest_routes']);
+        $this->renderWpCliCard($info['discovery']['wp_cli_commands']);
+        $this->renderSchedulesCard($info['discovery']['schedules']);
+        $this->renderServiceProvidersCard($info['discovery']['service_providers']);
+        $this->renderModulesCard($info['modules']);
+        $this->renderCacheCard($info['cache']);
+        $this->renderPerformanceCard($info['performance']);
+        $this->renderThemeCard($info['theme']);
 
         echo '</div>';
         echo '</div>';
@@ -115,14 +100,14 @@ final class DashboardController
             .pollora-entity-list { margin: 0; padding: 0; list-style: none; }
             .pollora-entity-item {
                 display: flex; align-items: center; justify-content: space-between;
-                padding: 8px 0; border-bottom: 1px solid #f5f5f5;
+                padding: 8px 0; border-bottom: 1px solid #f5f5f5; gap: 8px;
             }
             .pollora-entity-item:last-child { border-bottom: none; }
             .pollora-entity-label { font-size: 13px; font-weight: 500; color: #1d142a; }
-            .pollora-entity-meta { font-size: 11px; color: #999; }
+            .pollora-entity-meta { font-size: 11px; color: #999; word-break: break-all; }
             .pollora-entity-slug {
                 font-size: 11px; background: #f5f5f5; color: #666;
-                padding: 2px 8px; border-radius: 3px; font-family: monospace;
+                padding: 2px 8px; border-radius: 3px; font-family: monospace; white-space: nowrap; flex-shrink: 0;
             }
             .pollora-empty { color: #999; font-style: italic; font-size: 13px; }
         </style>';
@@ -190,34 +175,34 @@ final class DashboardController
     }
 
     /**
+     * @param  array{debug: bool, multisite: bool, permalink_structure: string}  $wordpress
+     */
+    private function renderWordPressCard(array $wordpress): void
+    {
+        $debugBadge = $wordpress['debug']
+            ? '<span class="pollora-badge pollora-badge--orange">'.__('Enabled', 'pollora').'</span>'
+            : '<span class="pollora-badge pollora-badge--green">'.__('Disabled', 'pollora').'</span>';
+
+        $multisiteBadge = $wordpress['multisite']
+            ? '<span class="pollora-badge pollora-badge--gradient">'.__('Yes', 'pollora').'</span>'
+            : '<span class="pollora-badge pollora-badge--gray">'.__('No', 'pollora').'</span>';
+
+        echo '<div class="pollora-card">';
+        echo '<h2>'.__('WordPress Config', 'pollora').'</h2>';
+        echo '<table>';
+        printf('<tr><td>WP_DEBUG</td><td>%s</td></tr>', $debugBadge);
+        printf('<tr><td>%s</td><td>%s</td></tr>', __('Multisite', 'pollora'), $multisiteBadge);
+        printf('<tr><td>%s</td><td><code>%s</code></td></tr>', __('Permalinks', 'pollora'), esc_html($wordpress['permalink_structure']));
+        echo '</table>';
+        echo '</div>';
+    }
+
+    /**
      * @param  array{count: int, items: list<array{class: string, slug: string, label: string}>}  $postTypes
      */
     private function renderPostTypesCard(array $postTypes): void
     {
-        echo '<div class="pollora-card">';
-        printf(
-            '<h2>%s <span class="pollora-badge pollora-badge--gradient">%d</span></h2>',
-            __('Post Types', 'pollora'),
-            $postTypes['count']
-        );
-
-        if ($postTypes['items'] === []) {
-            printf('<p class="pollora-empty">%s</p>', __('No post types discovered.', 'pollora'));
-        } else {
-            echo '<ul class="pollora-entity-list">';
-            foreach ($postTypes['items'] as $item) {
-                echo '<li class="pollora-entity-item">';
-                echo '<div>';
-                printf('<div class="pollora-entity-label">%s</div>', esc_html($item['label']));
-                printf('<div class="pollora-entity-meta">%s</div>', esc_html($item['class']));
-                echo '</div>';
-                printf('<span class="pollora-entity-slug">%s</span>', esc_html($item['slug']));
-                echo '</li>';
-            }
-            echo '</ul>';
-        }
-
-        echo '</div>';
+        $this->renderEntityCard(__('Post Types', 'pollora'), $postTypes, true);
     }
 
     /**
@@ -225,24 +210,45 @@ final class DashboardController
      */
     private function renderTaxonomiesCard(array $taxonomies): void
     {
+        $this->renderEntityCard(__('Taxonomies', 'pollora'), $taxonomies, true);
+    }
+
+    /**
+     * @param  array{count: int, items: list<array{class: string, slug?: string, label?: string, method?: string}>}  $data
+     */
+    private function renderEntityCard(string $title, array $data, bool $hasSlugAndLabel = false): void
+    {
         echo '<div class="pollora-card">';
         printf(
             '<h2>%s <span class="pollora-badge pollora-badge--gradient">%d</span></h2>',
-            __('Taxonomies', 'pollora'),
-            $taxonomies['count']
+            $title,
+            $data['count']
         );
 
-        if ($taxonomies['items'] === []) {
-            printf('<p class="pollora-empty">%s</p>', __('No taxonomies discovered.', 'pollora'));
+        if ($data['items'] === []) {
+            printf('<p class="pollora-empty">%s</p>', __('None discovered.', 'pollora'));
         } else {
             echo '<ul class="pollora-entity-list">';
-            foreach ($taxonomies['items'] as $item) {
+            foreach ($data['items'] as $item) {
                 echo '<li class="pollora-entity-item">';
                 echo '<div>';
-                printf('<div class="pollora-entity-label">%s</div>', esc_html($item['label']));
-                printf('<div class="pollora-entity-meta">%s</div>', esc_html($item['class']));
+
+                if ($hasSlugAndLabel && isset($item['label'])) {
+                    printf('<div class="pollora-entity-label">%s</div>', esc_html($item['label']));
+                }
+
+                $meta = $item['class'];
+                if (isset($item['method'])) {
+                    $meta .= '::'.$item['method'].'()';
+                }
+                printf('<div class="pollora-entity-meta">%s</div>', esc_html($meta));
+
                 echo '</div>';
-                printf('<span class="pollora-entity-slug">%s</span>', esc_html($item['slug']));
+
+                if ($hasSlugAndLabel && isset($item['slug'])) {
+                    printf('<span class="pollora-entity-slug">%s</span>', esc_html($item['slug']));
+                }
+
                 echo '</li>';
             }
             echo '</ul>';
@@ -270,6 +276,88 @@ final class DashboardController
     }
 
     /**
+     * @param  array{count: int, items: list<array{class: string}>}  $restRoutes
+     */
+    private function renderRestRoutesCard(array $restRoutes): void
+    {
+        $this->renderEntityCard(__('REST API Routes', 'pollora'), $restRoutes);
+    }
+
+    /**
+     * @param  array{count: int, items: list<array{class: string}>}  $wpCli
+     */
+    private function renderWpCliCard(array $wpCli): void
+    {
+        $this->renderEntityCard(__('WP-CLI Commands', 'pollora'), $wpCli);
+    }
+
+    /**
+     * @param  array{count: int, items: list<array{class: string, method: string}>}  $schedules
+     */
+    private function renderSchedulesCard(array $schedules): void
+    {
+        $this->renderEntityCard(__('Scheduled Tasks', 'pollora'), $schedules);
+    }
+
+    /**
+     * @param  array{count: int, items: list<array{class: string}>}  $providers
+     */
+    private function renderServiceProvidersCard(array $providers): void
+    {
+        $this->renderEntityCard(__('Auto-discovered Providers', 'pollora'), $providers);
+    }
+
+    /**
+     * @param  array{count: int, enabled: int, disabled: int, items: list<array{name: string, status: string, description: string, priority: string}>}  $modules
+     */
+    private function renderModulesCard(array $modules): void
+    {
+        echo '<div class="pollora-card">';
+        printf(
+            '<h2>%s <span class="pollora-badge pollora-badge--gradient">%d</span></h2>',
+            __('Modules', 'pollora'),
+            $modules['count']
+        );
+
+        if ($modules['items'] === []) {
+            printf('<p class="pollora-empty">%s</p>', __('No modules installed.', 'pollora'));
+        } else {
+            echo '<table>';
+            printf(
+                '<tr><td>%s</td><td><span class="pollora-badge pollora-badge--green">%d</span></td></tr>',
+                __('Enabled', 'pollora'),
+                $modules['enabled']
+            );
+            printf(
+                '<tr><td>%s</td><td><span class="pollora-badge pollora-badge--gray">%d</span></td></tr>',
+                __('Disabled', 'pollora'),
+                $modules['disabled']
+            );
+            echo '</table>';
+
+            echo '<ul class="pollora-entity-list" style="margin-top: 10px;">';
+            foreach ($modules['items'] as $module) {
+                $statusBadge = $module['status'] === 'enabled'
+                    ? '<span class="pollora-badge pollora-badge--green">'.__('On', 'pollora').'</span>'
+                    : '<span class="pollora-badge pollora-badge--gray">'.__('Off', 'pollora').'</span>';
+
+                echo '<li class="pollora-entity-item">';
+                echo '<div>';
+                printf('<div class="pollora-entity-label">%s</div>', esc_html($module['name']));
+                if ($module['description'] !== '') {
+                    printf('<div class="pollora-entity-meta">%s</div>', esc_html($module['description']));
+                }
+                echo '</div>';
+                echo $statusBadge;
+                echo '</li>';
+            }
+            echo '</ul>';
+        }
+
+        echo '</div>';
+    }
+
+    /**
      * @param  array{driver: string, enabled: bool}  $cache
      */
     private function renderCacheCard(array $cache): void
@@ -284,6 +372,45 @@ final class DashboardController
         printf('<tr><td>%s</td><td>%s</td></tr>', __('Driver', 'pollora'), esc_html($cache['driver']));
         printf('<tr><td>%s</td><td>%s</td></tr>', __('Status', 'pollora'), $statusBadge);
         echo '</table>';
+        echo '</div>';
+    }
+
+    /**
+     * @param  array<string, mixed>  $performance
+     */
+    private function renderPerformanceCard(array $performance): void
+    {
+        echo '<div class="pollora-card">';
+        echo '<h2>'.__('Discovery Performance', 'pollora').'</h2>';
+
+        if ($performance === []) {
+            printf('<p class="pollora-empty">%s</p>', __('No performance data available.', 'pollora'));
+        } else {
+            echo '<table>';
+
+            $context = $performance['context'] ?? [];
+            if (isset($context['cache_hits'])) {
+                printf('<tr><td>%s</td><td>%d</td></tr>', __('Cache hits', 'pollora'), $context['cache_hits']);
+            }
+            if (isset($context['cache_misses'])) {
+                printf('<tr><td>%s</td><td>%d</td></tr>', __('Cache misses', 'pollora'), $context['cache_misses']);
+            }
+            if (isset($context['classes_processed'])) {
+                printf('<tr><td>%s</td><td>%d</td></tr>', __('Classes processed', 'pollora'), $context['classes_processed']);
+            }
+            if (isset($context['discoveries_executed'])) {
+                printf('<tr><td>%s</td><td>%d</td></tr>', __('Discoveries executed', 'pollora'), $context['discoveries_executed']);
+            }
+            if (isset($performance['instance_pool']['total_instances'])) {
+                printf('<tr><td>%s</td><td>%d</td></tr>', __('Instance pool size', 'pollora'), $performance['instance_pool']['total_instances']);
+            }
+            if (isset($performance['static_cache_size'])) {
+                printf('<tr><td>%s</td><td>%d</td></tr>', __('Static cache entries', 'pollora'), $performance['static_cache_size']);
+            }
+
+            echo '</table>';
+        }
+
         echo '</div>';
     }
 

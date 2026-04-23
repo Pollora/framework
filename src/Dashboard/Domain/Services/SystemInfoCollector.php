@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Pollora\Dashboard\Domain\Services;
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
+use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
@@ -13,8 +15,8 @@ use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
 /**
  * Collects system information about the Pollora framework and its environment.
  *
- * Gathers version data, discovery statistics (post types, taxonomies, hooks),
- * cache state, and environment details for display in the admin dashboard
+ * Gathers version data, discovery statistics, cache state, modules,
+ * WordPress config, and environment details for the admin dashboard
  * and CLI status command.
  */
 final class SystemInfoCollector
@@ -22,6 +24,7 @@ final class SystemInfoCollector
     public function __construct(
         private readonly VersionComparator $versionComparator,
         private readonly DiscoveryManager $discoveryManager,
+        private readonly Container $container,
     ) {}
 
     /**
@@ -34,8 +37,11 @@ final class SystemInfoCollector
         return [
             'framework' => $this->collectFrameworkInfo(),
             'environment' => $this->collectEnvironmentInfo(),
+            'wordpress' => $this->collectWordPressConfig(),
             'discovery' => $this->collectDiscoveryInfo(),
+            'performance' => $this->collectPerformanceInfo(),
             'cache' => $this->collectCacheInfo(),
+            'modules' => $this->collectModulesInfo(),
             'theme' => $this->collectThemeInfo(),
         ];
     }
@@ -69,7 +75,25 @@ final class SystemInfoCollector
     }
 
     /**
-     * @return array{post_types: array{count: int, items: list<array{class: string, slug: string, label: string}>}, taxonomies: array{count: int, items: list<array{class: string, slug: string, label: string}>}, hooks: array{count: int, actions: int, filters: int}}
+     * @return array{debug: bool, multisite: bool, permalink_structure: string}
+     */
+    public function collectWordPressConfig(): array
+    {
+        $debug = defined('WP_DEBUG') && WP_DEBUG;
+        $multisite = function_exists('is_multisite') && is_multisite();
+        $permalink = function_exists('get_option')
+            ? (string) get_option('permalink_structure', '')
+            : '';
+
+        return [
+            'debug' => $debug,
+            'multisite' => $multisite,
+            'permalink_structure' => $permalink !== '' ? $permalink : 'Plain',
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
      */
     public function collectDiscoveryInfo(): array
     {
@@ -77,6 +101,10 @@ final class SystemInfoCollector
             'post_types' => $this->collectPostTypeInfo(),
             'taxonomies' => $this->collectTaxonomyInfo(),
             'hooks' => $this->collectHookInfo(),
+            'rest_routes' => $this->collectRestRouteInfo(),
+            'wp_cli_commands' => $this->collectWpCliInfo(),
+            'schedules' => $this->collectScheduleInfo(),
+            'service_providers' => $this->collectServiceProviderInfo(),
         ];
     }
 
@@ -105,10 +133,7 @@ final class SystemInfoCollector
                 ];
             }
 
-            return [
-                'count' => count($result),
-                'items' => $result,
-            ];
+            return ['count' => count($result), 'items' => $result];
         } catch (\Throwable) {
             return ['count' => 0, 'items' => []];
         }
@@ -139,10 +164,7 @@ final class SystemInfoCollector
                 ];
             }
 
-            return [
-                'count' => count($result),
-                'items' => $result,
-            ];
+            return ['count' => count($result), 'items' => $result];
         } catch (\Throwable) {
             return ['count' => 0, 'items' => []];
         }
@@ -192,14 +214,89 @@ final class SystemInfoCollector
                 };
             }
 
-            return [
-                'count' => $actions + $filters,
-                'actions' => $actions,
-                'filters' => $filters,
-            ];
+            return ['count' => $actions + $filters, 'actions' => $actions, 'filters' => $filters];
         } catch (\Throwable) {
             return ['count' => 0, 'actions' => 0, 'filters' => 0];
         }
+    }
+
+    /**
+     * @return array{count: int, items: list<array{class: string}>}
+     */
+    private function collectRestRouteInfo(): array
+    {
+        return $this->collectDiscoveryItemsByClass('wp_rest_routes');
+    }
+
+    /**
+     * @return array{count: int, items: list<array{class: string}>}
+     */
+    private function collectWpCliInfo(): array
+    {
+        return $this->collectDiscoveryItemsByClass('wp_cli_commands');
+    }
+
+    /**
+     * @return array{count: int, items: list<array{class: string, method: string}>}
+     */
+    private function collectScheduleInfo(): array
+    {
+        try {
+            $items = $this->discoveryManager->getDiscoveredItems('schedules');
+            $result = [];
+
+            foreach ($items as $item) {
+                if (! isset($item['class'], $item['method'])) {
+                    continue;
+                }
+
+                $result[] = [
+                    'class' => $item['class'],
+                    'method' => $item['method'],
+                ];
+            }
+
+            return ['count' => count($result), 'items' => $result];
+        } catch (\Throwable) {
+            return ['count' => 0, 'items' => []];
+        }
+    }
+
+    /**
+     * @return array{count: int, items: list<array{class: string}>}
+     */
+    private function collectServiceProviderInfo(): array
+    {
+        return $this->collectDiscoveryItemsByClass('service_providers');
+    }
+
+    /**
+     * @return array{count: int, items: list<array{class: string}>}
+     */
+    private function collectDiscoveryItemsByClass(string $identifier): array
+    {
+        try {
+            $items = $this->discoveryManager->getDiscoveredItems($identifier);
+            $result = [];
+
+            foreach ($items as $item) {
+                if (isset($item['class'])) {
+                    $result[] = ['class' => $item['class']];
+                }
+            }
+
+            return ['count' => count($result), 'items' => $result];
+        } catch (\Throwable) {
+            return ['count' => 0, 'items' => []];
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function collectPerformanceInfo(): array
+    {
+        return $this->discoveryManager->getPerformanceStats();
     }
 
     /**
@@ -219,6 +316,39 @@ final class SystemInfoCollector
             ];
         } catch (\Throwable) {
             return ['driver' => 'Unknown', 'enabled' => false];
+        }
+    }
+
+    /**
+     * @return array{count: int, enabled: int, disabled: int, items: list<array{name: string, status: string, description: string, priority: string}>}
+     */
+    public function collectModulesInfo(): array
+    {
+        try {
+            /** @var RepositoryInterface $modules */
+            $modules = $this->container->make('modules');
+            $all = $modules->all();
+            $enabled = $modules->allEnabled();
+            $disabled = $modules->allDisabled();
+
+            $items = [];
+            foreach ($all as $module) {
+                $items[] = [
+                    'name' => $module->getName(),
+                    'status' => isset($enabled[$module->getName()]) ? 'enabled' : 'disabled',
+                    'description' => $module->getDescription(),
+                    'priority' => $module->getPriority(),
+                ];
+            }
+
+            return [
+                'count' => count($all),
+                'enabled' => count($enabled),
+                'disabled' => count($disabled),
+                'items' => $items,
+            ];
+        } catch (\Throwable) {
+            return ['count' => 0, 'enabled' => 0, 'disabled' => 0, 'items' => []];
         }
     }
 

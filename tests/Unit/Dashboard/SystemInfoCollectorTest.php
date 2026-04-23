@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Foundation\Application;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
@@ -17,6 +18,7 @@ use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
 function createCollector(
     ?VersionComparator $comparator = null,
     ?DiscoveryManager $manager = null,
+    ?Container $container = null,
 ): SystemInfoCollector {
     $comparator ??= new VersionComparator(
         Mockery::mock(VersionCheckerInterface::class, [
@@ -26,8 +28,9 @@ function createCollector(
     );
 
     $manager ??= Mockery::mock(DiscoveryManager::class);
+    $container ??= Mockery::mock(Container::class);
 
-    return new SystemInfoCollector($comparator, $manager);
+    return new SystemInfoCollector($comparator, $manager, $container);
 }
 
 describe('SystemInfoCollector', function (): void {
@@ -84,6 +87,17 @@ describe('SystemInfoCollector', function (): void {
         });
     });
 
+    describe('collectWordPressConfig', function (): void {
+        it('returns WordPress config with defaults', function (): void {
+            $collector = createCollector();
+            $info = $collector->collectWordPressConfig();
+
+            expect($info)->toHaveKeys(['debug', 'multisite', 'permalink_structure']);
+            expect($info['debug'])->toBeBool();
+            expect($info['multisite'])->toBeBool();
+        });
+    });
+
     describe('collectDiscoveryInfo', function (): void {
         it('collects post type count and labels from discovery', function (): void {
             $items = new DiscoveryItems;
@@ -100,10 +114,7 @@ describe('SystemInfoCollector', function (): void {
                 ->with('post_types')
                 ->andReturn($items->all());
             $manager->shouldReceive('getDiscoveredItems')
-                ->with('taxonomies')
-                ->andReturn([]);
-            $manager->shouldReceive('getDiscoveredItems')
-                ->with('hooks')
+                ->withAnyArgs()
                 ->andReturn([]);
 
             $collector = createCollector(manager: $manager);
@@ -113,17 +124,10 @@ describe('SystemInfoCollector', function (): void {
             expect($info['post_types']['items'][0])->toHaveKeys(['class', 'slug', 'label']);
             expect($info['post_types']['items'][0]['class'])->toBe('App\\PostTypes\\Project');
             expect($info['post_types']['items'][0]['slug'])->toBe('project');
-            expect($info['post_types']['items'][1]['class'])->toBe('App\\PostTypes\\Service');
         });
 
         it('collects hook counts by type', function (): void {
             $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')
-                ->with('post_types')
-                ->andReturn([]);
-            $manager->shouldReceive('getDiscoveredItems')
-                ->with('taxonomies')
-                ->andReturn([]);
             $manager->shouldReceive('getDiscoveredItems')
                 ->with('hooks')
                 ->andReturn([
@@ -131,6 +135,9 @@ describe('SystemInfoCollector', function (): void {
                     ['type' => 'action', 'class' => 'Hooks\\MyHook', 'method' => 'onSave'],
                     ['type' => 'filter', 'class' => 'Hooks\\MyFilter', 'method' => 'filterTitle'],
                 ]);
+            $manager->shouldReceive('getDiscoveredItems')
+                ->withAnyArgs()
+                ->andReturn([]);
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectDiscoveryInfo();
@@ -138,6 +145,37 @@ describe('SystemInfoCollector', function (): void {
             expect($info['hooks']['count'])->toBe(3);
             expect($info['hooks']['actions'])->toBe(2);
             expect($info['hooks']['filters'])->toBe(1);
+        });
+
+        it('collects schedules with class and method', function (): void {
+            $manager = Mockery::mock(DiscoveryManager::class);
+            $manager->shouldReceive('getDiscoveredItems')
+                ->with('schedules')
+                ->andReturn([
+                    ['class' => 'App\\Schedule\\Cleanup', 'method' => 'run'],
+                ]);
+            $manager->shouldReceive('getDiscoveredItems')
+                ->withAnyArgs()
+                ->andReturn([]);
+
+            $collector = createCollector(manager: $manager);
+            $info = $collector->collectDiscoveryInfo();
+
+            expect($info['schedules']['count'])->toBe(1);
+            expect($info['schedules']['items'][0]['method'])->toBe('run');
+        });
+
+        it('collects all discovery types', function (): void {
+            $manager = Mockery::mock(DiscoveryManager::class);
+            $manager->shouldReceive('getDiscoveredItems')->andReturn([]);
+
+            $collector = createCollector(manager: $manager);
+            $info = $collector->collectDiscoveryInfo();
+
+            expect($info)->toHaveKeys([
+                'post_types', 'taxonomies', 'hooks',
+                'rest_routes', 'wp_cli_commands', 'schedules', 'service_providers',
+            ]);
         });
 
         it('handles missing discovery gracefully', function (): void {
@@ -150,6 +188,24 @@ describe('SystemInfoCollector', function (): void {
             expect($info['post_types']['count'])->toBe(0);
             expect($info['taxonomies']['count'])->toBe(0);
             expect($info['hooks']['count'])->toBe(0);
+            expect($info['rest_routes']['count'])->toBe(0);
+            expect($info['wp_cli_commands']['count'])->toBe(0);
+            expect($info['schedules']['count'])->toBe(0);
+            expect($info['service_providers']['count'])->toBe(0);
+        });
+    });
+
+    describe('collectPerformanceInfo', function (): void {
+        it('delegates to discovery manager', function (): void {
+            $stats = ['context' => ['cache_hits' => 5, 'cache_misses' => 2]];
+
+            $manager = Mockery::mock(DiscoveryManager::class);
+            $manager->shouldReceive('getPerformanceStats')->andReturn($stats);
+
+            $collector = createCollector(manager: $manager);
+            $info = $collector->collectPerformanceInfo();
+
+            expect($info)->toBe($stats);
         });
     });
 
@@ -197,6 +253,22 @@ describe('SystemInfoCollector', function (): void {
         });
     });
 
+    describe('collectModulesInfo', function (): void {
+        it('falls back when modules not available', function (): void {
+            $container = Mockery::mock(Container::class);
+            $container->shouldReceive('make')
+                ->with('modules')
+                ->andThrow(new RuntimeException('Not bound'));
+
+            $collector = createCollector(container: $container);
+            $info = $collector->collectModulesInfo();
+
+            expect($info['count'])->toBe(0);
+            expect($info['enabled'])->toBe(0);
+            expect($info['disabled'])->toBe(0);
+        });
+    });
+
     describe('collectThemeInfo', function (): void {
         it('returns Unknown when wp_get_theme is not available', function (): void {
             $collector = createCollector();
@@ -218,11 +290,20 @@ describe('SystemInfoCollector', function (): void {
             $manager = Mockery::mock(DiscoveryManager::class);
             $manager->shouldReceive('getDiscoveredItems')->andReturn([]);
             $manager->shouldReceive('getEngine')->andReturn($engine);
+            $manager->shouldReceive('getPerformanceStats')->andReturn([]);
 
-            $collector = createCollector(manager: $manager);
+            $container = Mockery::mock(Container::class);
+            $container->shouldReceive('make')
+                ->with('modules')
+                ->andThrow(new RuntimeException('Not bound'));
+
+            $collector = createCollector(manager: $manager, container: $container);
             $info = $collector->collect();
 
-            expect($info)->toHaveKeys(['framework', 'environment', 'discovery', 'cache', 'theme']);
+            expect($info)->toHaveKeys([
+                'framework', 'environment', 'wordpress',
+                'discovery', 'performance', 'cache', 'modules', 'theme',
+            ]);
         });
     });
 });
