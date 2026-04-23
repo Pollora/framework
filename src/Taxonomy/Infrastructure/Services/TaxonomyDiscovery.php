@@ -232,9 +232,11 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
         $singular = $this->generateSingular($className, $taxonomy->singular);
         $plural = $this->generatePlural($taxonomy->plural, $singular);
         $objectType = $taxonomy->objectType ?? ['post'];
+        $textDomain = $taxonomy->textDomain ?? 'pollora';
 
         $initialArgs = [
-            'labels' => $this->generateLabels($singular, $plural),
+            'labels' => $this->generateLabels($singular, $plural, $textDomain),
+            'text_domain' => $textDomain,
         ];
 
         return new TaxonomyConfiguration($slug, $singular, $plural, $objectType, $initialArgs);
@@ -431,40 +433,40 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  string  $plural  The plural name
      * @return array<string, string> The labels array
      */
-    private function generateLabels(string $singular, string $plural): array
+    private function generateLabels(string $singular, string $plural, string $textDomain = 'pollora'): array
     {
         return [
             'name' => $plural,
             'singular_name' => $singular,
             'menu_name' => $plural,
             /* translators: %s: taxonomy general name (plural) */
-            'all_items' => sprintf(__('All %s', 'pollora'), $plural),
+            'all_items' => sprintf(__('All %s', $textDomain), $plural),
             /* translators: %s: taxonomy singular name */
-            'edit_item' => sprintf(__('Edit %s', 'pollora'), $singular),
+            'edit_item' => sprintf(__('Edit %s', $textDomain), $singular),
             /* translators: %s: taxonomy singular name */
-            'view_item' => sprintf(__('View %s', 'pollora'), $singular),
+            'view_item' => sprintf(__('View %s', $textDomain), $singular),
             /* translators: %s: taxonomy singular name */
-            'update_item' => sprintf(__('Update %s', 'pollora'), $singular),
+            'update_item' => sprintf(__('Update %s', $textDomain), $singular),
             /* translators: %s: taxonomy singular name */
-            'add_new_item' => sprintf(__('Add New %s', 'pollora'), $singular),
+            'add_new_item' => sprintf(__('Add New %s', $textDomain), $singular),
             /* translators: %s: taxonomy singular name */
-            'new_item_name' => sprintf(__('New %s Name', 'pollora'), $singular),
+            'new_item_name' => sprintf(__('New %s Name', $textDomain), $singular),
             /* translators: %s: taxonomy general name (plural) */
-            'search_items' => sprintf(__('Search %s', 'pollora'), $plural),
+            'search_items' => sprintf(__('Search %s', $textDomain), $plural),
             /* translators: %s: taxonomy general name (plural) */
-            'popular_items' => sprintf(__('Popular %s', 'pollora'), $plural),
+            'popular_items' => sprintf(__('Popular %s', $textDomain), $plural),
             /* translators: %s: taxonomy general name (plural) */
-            'separate_items_with_commas' => sprintf(__('Separate %s with commas', 'pollora'), $plural),
+            'separate_items_with_commas' => sprintf(__('Separate %s with commas', $textDomain), $plural),
             /* translators: %s: taxonomy general name (plural) */
-            'add_or_remove_items' => sprintf(__('Add or remove %s', 'pollora'), $plural),
+            'add_or_remove_items' => sprintf(__('Add or remove %s', $textDomain), $plural),
             /* translators: %s: taxonomy general name (plural) */
-            'choose_from_most_used' => sprintf(__('Choose from the most used %s', 'pollora'), $plural),
+            'choose_from_most_used' => sprintf(__('Choose from the most used %s', $textDomain), $plural),
             /* translators: %s: taxonomy general name (plural) */
-            'not_found' => sprintf(__('No %s found', 'pollora'), $plural),
+            'not_found' => sprintf(__('No %s found', $textDomain), $plural),
             /* translators: %s: taxonomy singular name */
-            'parent_item' => sprintf(__('Parent %s', 'pollora'), $singular),
+            'parent_item' => sprintf(__('Parent %s', $textDomain), $singular),
             /* translators: %s: taxonomy singular name */
-            'parent_item_colon' => sprintf(__('Parent %s:', 'pollora'), $singular),
+            'parent_item_colon' => sprintf(__('Parent %s:', $textDomain), $singular),
         ];
     }
 

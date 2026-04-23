@@ -227,9 +227,11 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
         $slug = $this->generateSlug($className, $postType->slug);
         $singular = $this->generateSingular($className, $postType->singular);
         $plural = $this->generatePlural($postType->plural, $singular);
+        $textDomain = $postType->textDomain ?? 'pollora';
 
         $initialArgs = [
-            'labels' => $this->generateLabels($singular, $plural),
+            'labels' => $this->generateLabels($singular, $plural, $textDomain),
+            'text_domain' => $textDomain,
         ];
 
         return new PostTypeConfiguration($slug, $singular, $plural, $initialArgs);
@@ -426,41 +428,41 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  string  $plural  The plural name
      * @return array<string, string> The labels array
      */
-    private function generateLabels(string $singular, string $plural): array
+    private function generateLabels(string $singular, string $plural, string $textDomain = 'pollora'): array
     {
         return [
             'name' => $plural,
             'singular_name' => $singular,
             /* translators: %s: post type general name (plural) */
-            'add_new' => __('Add New', 'pollora'),
+            'add_new' => __('Add New', $textDomain),
             /* translators: %s: post type singular name */
-            'add_new_item' => sprintf(__('Add New %s', 'pollora'), $singular),
+            'add_new_item' => sprintf(__('Add New %s', $textDomain), $singular),
             /* translators: %s: post type singular name */
-            'edit_item' => sprintf(__('Edit %s', 'pollora'), $singular),
+            'edit_item' => sprintf(__('Edit %s', $textDomain), $singular),
             /* translators: %s: post type singular name */
-            'new_item' => sprintf(__('New %s', 'pollora'), $singular),
+            'new_item' => sprintf(__('New %s', $textDomain), $singular),
             /* translators: %s: post type singular name */
-            'view_item' => sprintf(__('View %s', 'pollora'), $singular),
+            'view_item' => sprintf(__('View %s', $textDomain), $singular),
             /* translators: %s: post type general name (plural) */
-            'view_items' => sprintf(__('View %s', 'pollora'), $plural),
+            'view_items' => sprintf(__('View %s', $textDomain), $plural),
             /* translators: %s: post type general name (plural) */
-            'search_items' => sprintf(__('Search %s', 'pollora'), $plural),
+            'search_items' => sprintf(__('Search %s', $textDomain), $plural),
             /* translators: %s: post type general name (plural) */
-            'not_found' => sprintf(__('No %s found', 'pollora'), $plural),
+            'not_found' => sprintf(__('No %s found', $textDomain), $plural),
             /* translators: %s: post type general name (plural) */
-            'not_found_in_trash' => sprintf(__('No %s found in Trash', 'pollora'), $plural),
+            'not_found_in_trash' => sprintf(__('No %s found in Trash', $textDomain), $plural),
             /* translators: %s: post type singular name */
-            'parent_item_colon' => sprintf(__('Parent %s:', 'pollora'), $singular),
+            'parent_item_colon' => sprintf(__('Parent %s:', $textDomain), $singular),
             /* translators: %s: post type general name (plural) */
-            'all_items' => sprintf(__('All %s', 'pollora'), $plural),
+            'all_items' => sprintf(__('All %s', $textDomain), $plural),
             /* translators: %s: post type singular name */
-            'archives' => sprintf(__('%s Archives', 'pollora'), $singular),
+            'archives' => sprintf(__('%s Archives', $textDomain), $singular),
             /* translators: %s: post type singular name */
-            'attributes' => sprintf(__('%s Attributes', 'pollora'), $singular),
+            'attributes' => sprintf(__('%s Attributes', $textDomain), $singular),
             /* translators: %s: post type singular name */
-            'insert_into_item' => sprintf(__('Insert into %s', 'pollora'), $singular),
+            'insert_into_item' => sprintf(__('Insert into %s', $textDomain), $singular),
             /* translators: %s: post type singular name */
-            'uploaded_to_this_item' => sprintf(__('Uploaded to this %s', 'pollora'), $singular),
+            'uploaded_to_this_item' => sprintf(__('Uploaded to this %s', $textDomain), $singular),
         ];
     }
 
