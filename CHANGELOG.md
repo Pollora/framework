@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
 ### Added
+- Admin dashboard page under **Tools > Pollora** with Pollora branding and inline SVG logo
+  - Framework version status (current vs latest, dev branch detection)
+  - Environment info (PHP, Laravel, WordPress versions)
+  - WordPress config (WP_DEBUG, multisite, permalink structure)
+  - Discovered post types and taxonomies with labels, slugs, and class names
+  - Discovered hooks count (actions and filters)
+  - Discovered REST API routes, WP-CLI commands, and scheduled tasks
+  - Auto-discovered service providers list
+  - Laravel modules status (enabled/disabled via nwidart/laravel-modules)
+  - Discovery cache state and performance stats (cache hits/misses, classes processed)
+  - Active theme info (name, version, template)
+  - Notification badge on menu item when a framework update is available (Site Health pattern)
+- `php artisan pollora:status` CLI command with the same information
+  - `--json` flag for machine-readable output (AI agents, CI pipelines)
 - Update notifications for new Pollora versions ([#162](https://github.com/Pollora/framework/issues/162))
   - Dismissable admin notice when a newer version is available
   - Site Health debug information section (installed version, latest version, update status)
