@@ -151,7 +151,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('returns default template path when WC not available', function (): void {
-        Brain\Monkey\Functions\when('WC')->justReturn(null);
+        Brain\Monkey\Functions\when('WC')->justReturn();
 
         $result = $this->adapter->getWooCommerceTemplatePath();
 
