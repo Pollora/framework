@@ -19,15 +19,8 @@ use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 describe('WooCommerceServiceProvider', function (): void {
     beforeEach(function (): void {
-        setupWordPressMocks();
-
         $this->container = new WooCommerceTestContainer;
         $this->provider = new WooCommerceServiceProvider($this->container);
-    });
-
-    afterEach(function (): void {
-        resetWordPressMocks();
-        Mockery::close();
     });
 
     test('can register domain services', function (): void {
@@ -37,7 +30,6 @@ describe('WooCommerceServiceProvider', function (): void {
     });
 
     test('can register infrastructure services', function (): void {
-        // Mock required dependencies
         $this->container->instance(TemplateFinderInterface::class, Mockery::mock(TemplateFinderInterface::class));
         $this->container->instance(ViewFactory::class, Mockery::mock(ViewFactory::class));
 
@@ -49,7 +41,6 @@ describe('WooCommerceServiceProvider', function (): void {
     });
 
     test('can register application services', function (): void {
-        // Mock required dependencies
         $this->container->instance(Action::class, Mockery::mock(Action::class));
         $this->container->instance(Filter::class, Mockery::mock(Filter::class));
         $this->container->instance(WooCommerceIntegrationInterface::class, Mockery::mock(WooCommerceIntegrationInterface::class));
@@ -61,7 +52,6 @@ describe('WooCommerceServiceProvider', function (): void {
     });
 
     test('maintains backward compatibility bindings', function (): void {
-        // Mock required dependencies
         $this->container->instance(TemplateFinderInterface::class, Mockery::mock(TemplateFinderInterface::class));
         $this->container->instance(ViewFactory::class, Mockery::mock(ViewFactory::class));
 
@@ -72,7 +62,6 @@ describe('WooCommerceServiceProvider', function (): void {
     });
 
     test('can resolve woocommerce integration service', function (): void {
-        // Mock all required dependencies
         $this->container->instance(TemplateFinderInterface::class, Mockery::mock(TemplateFinderInterface::class));
         $this->container->instance(ViewFactory::class, Mockery::mock(ViewFactory::class));
         $this->container->instance(WooCommerceService::class, new WooCommerceService);
@@ -85,7 +74,6 @@ describe('WooCommerceServiceProvider', function (): void {
     });
 
     test('can resolve template resolver service', function (): void {
-        // Mock all required dependencies
         $this->container->instance(TemplateFinderInterface::class, Mockery::mock(TemplateFinderInterface::class));
         $this->container->instance(ViewFactory::class, Mockery::mock(ViewFactory::class));
         $this->container->instance(WooCommerceService::class, new WooCommerceService);
@@ -97,7 +85,6 @@ describe('WooCommerceServiceProvider', function (): void {
     });
 
     test('can resolve use case with all dependencies', function (): void {
-        // Mock all required dependencies
         $this->container->instance(Action::class, Mockery::mock(Action::class));
         $this->container->instance(Filter::class, Mockery::mock(Filter::class));
         $this->container->instance(TemplateFinderInterface::class, Mockery::mock(TemplateFinderInterface::class));
@@ -112,7 +99,6 @@ describe('WooCommerceServiceProvider', function (): void {
     });
 
     test('executes use case on boot', function (): void {
-        // Create a mock use case that tracks execution
         $useCase = Mockery::mock(RegisterWooCommerceHooksUseCase::class);
         $useCase->shouldReceive('execute')->once();
 
@@ -134,7 +120,6 @@ class WooCommerceTestContainer extends TestContainer implements Container
         if ($concrete instanceof Closure) {
             $this->singletons[$abstract] = $concrete;
         } elseif ($concrete === null) {
-            // When no concrete is provided, Laravel auto-resolves the class
             $this->singletons[$abstract] = (fn ($container): object => new $abstract);
         } else {
             $this->services[$abstract] = $concrete;
@@ -143,7 +128,6 @@ class WooCommerceTestContainer extends TestContainer implements Container
 
     public function get(string $serviceClass): ?object
     {
-        // Check if it's a singleton factory
         if (isset($this->singletons[$serviceClass])) {
             if (! isset($this->services[$serviceClass])) {
                 $factory = $this->singletons[$serviceClass];
@@ -158,13 +142,10 @@ class WooCommerceTestContainer extends TestContainer implements Container
 
     public function make($abstract, array $parameters = []): ?object
     {
-        // Support both Laravel Container interface (mixed $abstract, array $parameters)
-        // and TestContainer interface (string $serviceClass)
         if (is_string($abstract)) {
             return $this->get($abstract);
         }
 
-        // Handle other types if needed
         return null;
     }
 
@@ -173,21 +154,14 @@ class WooCommerceTestContainer extends TestContainer implements Container
         return isset($this->services[$serviceClass]) || isset($this->singletons[$serviceClass]);
     }
 
-    // Required by Container interface
     public function bound($abstract): bool
     {
         return $this->has($abstract);
     }
 
-    public function alias($abstract, $alias): void
-    {
-        // Simplified implementation
-    }
+    public function alias($abstract, $alias): void {}
 
-    public function tag($abstracts, $tags): void
-    {
-        // Simplified implementation
-    }
+    public function tag($abstracts, $tags): void {}
 
     public function tagged($tag): iterable
     {
@@ -229,10 +203,7 @@ class WooCommerceTestContainer extends TestContainer implements Container
         }
     }
 
-    public function extend($abstract, Closure $closure): void
-    {
-        // Simplified implementation
-    }
+    public function extend($abstract, Closure $closure): void {}
 
     public function when($concrete): ContextualBindingBuilder
     {
@@ -255,19 +226,12 @@ class WooCommerceTestContainer extends TestContainer implements Container
         return isset($this->services[$abstract]);
     }
 
-    public function resolving($abstract, ?Closure $callback = null): void
-    {
-        // Simplified implementation
-    }
+    public function resolving($abstract, ?Closure $callback = null): void {}
 
-    public function afterResolving($abstract, ?Closure $callback = null): void
-    {
-        // Simplified implementation
-    }
+    public function afterResolving($abstract, ?Closure $callback = null): void {}
 
     public function call($callback, array $parameters = [], $defaultMethod = null)
     {
-        // Simplified implementation
         if (is_callable($callback)) {
             return call_user_func_array($callback, $parameters);
         }
@@ -275,18 +239,9 @@ class WooCommerceTestContainer extends TestContainer implements Container
         throw new Exception('call() not fully implemented in test container');
     }
 
-    public function bindMethod($method, $callback): void
-    {
-        // Simplified implementation
-    }
+    public function bindMethod($method, $callback): void {}
 
-    public function addContextualBinding($concrete, $abstract, $implementation): void
-    {
-        // Simplified implementation
-    }
+    public function addContextualBinding($concrete, $abstract, $implementation): void {}
 
-    public function beforeResolving($abstract, $callback = null): void
-    {
-        // Simplified implementation
-    }
+    public function beforeResolving($abstract, $callback = null): void {}
 }

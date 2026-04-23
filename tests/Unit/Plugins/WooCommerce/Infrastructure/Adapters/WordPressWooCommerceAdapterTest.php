@@ -6,16 +6,11 @@ use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceA
 
 describe('WordPressWooCommerceAdapter', function (): void {
     beforeEach(function (): void {
-        setupWordPressMocks();
         $this->adapter = new WordPressWooCommerceAdapter;
     });
 
-    afterEach(function (): void {
-        resetWordPressMocks();
-    });
-
     test('can locate template using wordpress function', function (): void {
-        setWordPressFunction('locate_template', function ($templates, $load, $requireOnce): string {
+        Brain\Monkey\Functions\when('locate_template')->alias(function ($templates, $load, $requireOnce): string {
             expect($templates)->toBe('single-product.php');
             expect($load)->toBeFalse();
             expect($requireOnce)->toBeTrue();
@@ -29,7 +24,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can locate template with array of templates', function (): void {
-        setWordPressFunction('locate_template', function ($templates, $load, $requireOnce): string {
+        Brain\Monkey\Functions\when('locate_template')->alias(function ($templates, $load, $requireOnce): string {
             expect($templates)->toBe(['single-product.blade.php', 'single-product.php']);
 
             return '/theme/single-product.php';
@@ -41,7 +36,6 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('returns empty string when locate_template function not available', function (): void {
-        // Don't set the function to simulate unavailability
         $adapter = new WordPressWooCommerceAdapter;
 
         $result = $adapter->locateTemplate('single-product.php');
@@ -50,7 +44,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can add theme support', function (): void {
-        setWordPressFunction('add_theme_support', function ($feature, $options = null): true {
+        Brain\Monkey\Functions\when('add_theme_support')->alias(function ($feature, $options = null): true {
             expect($feature)->toBe('woocommerce');
             expect($options)->toBeNull();
 
@@ -63,7 +57,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can add theme support with options', function (): void {
-        setWordPressFunction('add_theme_support', function ($feature, $options = null): true {
+        Brain\Monkey\Functions\when('add_theme_support')->alias(function ($feature, $options = null): true {
             expect($feature)->toBe('woocommerce');
             expect($options)->toBe(['gallery_thumbnail_image_width' => 150]);
 
@@ -75,10 +69,8 @@ describe('WordPressWooCommerceAdapter', function (): void {
         expect($result)->toBeTrue();
     });
 
-    // Removed test for function availability since functions are always defined in our test environment
-
     test('can detect child theme', function (): void {
-        setWordPressFunction('is_child_theme', fn (): true => true);
+        Brain\Monkey\Functions\when('is_child_theme')->justReturn(true);
 
         $result = $this->adapter->isChildTheme();
 
@@ -86,7 +78,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('returns false when not child theme', function (): void {
-        setWordPressFunction('is_child_theme', fn (): false => false);
+        Brain\Monkey\Functions\when('is_child_theme')->justReturn(false);
 
         $result = $this->adapter->isChildTheme();
 
@@ -94,7 +86,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can get stylesheet directory', function (): void {
-        setWordPressFunction('get_stylesheet_directory', fn (): string => '/themes/child');
+        Brain\Monkey\Functions\when('get_stylesheet_directory')->justReturn('/themes/child');
 
         $result = $this->adapter->getStylesheetDirectory();
 
@@ -102,7 +94,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can get template directory', function (): void {
-        setWordPressFunction('get_template_directory', fn (): string => '/themes/parent');
+        Brain\Monkey\Functions\when('get_template_directory')->justReturn('/themes/parent');
 
         $result = $this->adapter->getTemplateDirectory();
 
@@ -110,7 +102,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can detect admin area', function (): void {
-        setWordPressFunction('is_admin', fn (): true => true);
+        Brain\Monkey\Functions\when('is_admin')->justReturn(true);
 
         $result = $this->adapter->isAdmin();
 
@@ -118,7 +110,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can detect ajax request', function (): void {
-        setWordPressFunction('wp_doing_ajax', fn (): true => true);
+        Brain\Monkey\Functions\when('wp_doing_ajax')->justReturn(true);
 
         $result = $this->adapter->isDoingAjax();
 
@@ -129,7 +121,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
         $expectedScreen = new WP_Screen;
         $expectedScreen->id = 'woocommerce_page_wc-status';
 
-        setWordPressFunction('get_current_screen', fn (): WP_Screen => $expectedScreen);
+        Brain\Monkey\Functions\when('get_current_screen')->justReturn($expectedScreen);
 
         $result = $this->adapter->getCurrentScreen();
 
@@ -137,7 +129,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can detect doing action', function (): void {
-        setWordPressFunction('doing_action', function ($action): true {
+        Brain\Monkey\Functions\when('doing_action')->alias(function ($action): true {
             expect($action)->toBe('after_setup_theme');
 
             return true;
@@ -151,7 +143,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     test('can get woocommerce template path', function (): void {
         $mockWC = Mockery::mock();
         $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
-        setWordPressFunction('WC', fn () => $mockWC);
+        Brain\Monkey\Functions\when('WC')->justReturn($mockWC);
 
         $result = $this->adapter->getWooCommerceTemplatePath();
 
@@ -159,7 +151,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('returns default template path when WC not available', function (): void {
-        setWordPressFunction('WC', fn (): null => null);
+        Brain\Monkey\Functions\when('WC')->justReturn(null);
 
         $result = $this->adapter->getWooCommerceTemplatePath();
 
@@ -167,7 +159,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
     });
 
     test('can apply filters', function (): void {
-        setWordPressFunction('apply_filters', function ($hook, $value, ...$args): array {
+        Brain\Monkey\Functions\when('apply_filters')->alias(function ($hook, $value, ...$args): array {
             expect($hook)->toBe('pollora/woocommerce/template_paths');
             expect($value)->toBe(['/default/path/']);
             expect($args)->toBe(['extra', 'args']);
@@ -193,7 +185,7 @@ describe('WordPressWooCommerceAdapter', function (): void {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
-        setWordPressFunction('WC', fn (): stdClass => new stdClass);
+        Brain\Monkey\Functions\when('WC')->justReturn(new stdClass);
 
         $result = $this->adapter->isWooCommerceAvailable();
 
