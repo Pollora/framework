@@ -15,8 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Site Health debug information section (installed version, latest version, update status)
   - Site Health status test reporting whether Pollora is up to date
   - Version data fetched from Packagist API v2, cached via WordPress transients (12h)
+- Brain Monkey (`brain/monkey`) for structured WordPress function mocking in tests
+- Type coverage check in CI (`pest --type-coverage --min=98`)
+- Testbench integration tests for `DiscoveryServiceProvider`, `HookServiceProvider`, and `VersionCheckServiceProvider`
 
 ### Changed
+- Replaced manual WordPress mock system with Brain Monkey (`tests/Unit/helpers.php`: 1302 → 416 lines)
+- Tests now use `Brain\Monkey\Functions\when()` / `stubs()` instead of `WP::$wpFunctions` + global function stubs
 - Migrated all 24 PHPUnit-style test files to Pest closure format (~1000 lines removed)
 - Enabled Rector on `tests/` directory (previously excluded)
 - Excluded `helpers.php` from Rector to prevent mock logic corruption
