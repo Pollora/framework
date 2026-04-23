@@ -1,0 +1,341 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Pollora Framework\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-04-23T17:23:14+02:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: pollora\n"
+
+#: Dashboard/Infrastructure/Providers/DashboardServiceProvider.php:43
+#: Dashboard/Infrastructure/Providers/DashboardServiceProvider.php:60
+msgid "Pollora"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:121
+msgid "Unknown"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:149
+msgid "available"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:168
+msgid "Environment"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:183
+#: Dashboard/UI/Http/DashboardController.php:328
+#: Dashboard/UI/Http/DashboardController.php:366
+msgid "Enabled"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:184
+#: Dashboard/UI/Http/DashboardController.php:333
+#: Dashboard/UI/Http/DashboardController.php:367
+msgid "Disabled"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:187
+#: VersionCheck/UI/Http/SiteHealthCheck.php:54
+msgid "Yes"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:188
+#: VersionCheck/UI/Http/SiteHealthCheck.php:54
+msgid "No"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:191
+msgid "WordPress Config"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:194
+msgid "Multisite"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:195
+msgid "Permalinks"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:205
+msgid "Post Types"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:213
+msgid "Taxonomies"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:229
+msgid "None discovered."
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:268
+msgid "Hooks"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:272
+msgid "Actions"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:273
+msgid "Filters"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:283
+msgid "REST API Routes"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:291
+msgid "WP-CLI Commands"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:299
+msgid "Scheduled Tasks"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:307
+msgid "Auto-discovered Providers"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:318
+msgid "Modules"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:323
+msgid "No modules installed."
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:341
+msgid "On"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:342
+msgid "Off"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:370
+msgid "Discovery Cache"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:372
+msgid "Driver"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:373
+msgid "Status"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:384
+msgid "Discovery Performance"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:387
+msgid "No performance data available."
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:393
+msgid "Cache hits"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:396
+msgid "Cache misses"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:399
+msgid "Classes processed"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:402
+msgid "Discoveries executed"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:405
+msgid "Instance pool size"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:408
+msgid "Static cache entries"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:423
+msgid "Active Theme"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:425
+msgid "Name"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:426
+msgid "Version"
+msgstr ""
+
+#: Dashboard/UI/Http/DashboardController.php:427
+msgid "Template"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:105
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:125
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:106
+#, php-format
+msgid "All %s"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:106
+msgid "Add New"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:107
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:129
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:110
+#, php-format
+msgid "Add New %s"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:108
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:126
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:107
+#, php-format
+msgid "Edit %s"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:109
+#, php-format
+msgid "New %s"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:110
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:127
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:108
+#, php-format
+msgid "View %s"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:111
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:131
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:112
+#, php-format
+msgid "Search %s"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:112
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:136
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:117
+#, php-format
+msgid "No %s found"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:113
+#, php-format
+msgid "No %s found in trash"
+msgstr ""
+
+#: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:114
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:138
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:119
+#, php-format
+msgid "Parent %s:"
+msgstr ""
+
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:128
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:109
+#, php-format
+msgid "Update %s"
+msgstr ""
+
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:130
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:111
+#, php-format
+msgid "New %s Name"
+msgstr ""
+
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:132
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:113
+#, php-format
+msgid "Popular %s"
+msgstr ""
+
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:133
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:114
+#, php-format
+msgid "Separate %s with commas"
+msgstr ""
+
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:134
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:115
+#, php-format
+msgid "Add or remove %s"
+msgstr ""
+
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:135
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:116
+#, php-format
+msgid "Choose from the most used %s"
+msgstr ""
+
+#: Taxonomy/Domain/Models/AbstractTaxonomy.php:137
+#: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:118
+#, php-format
+msgid "Parent %s"
+msgstr ""
+
+#: VersionCheck/UI/Http/AdminNotice.php:58
+#, php-format
+msgid "<strong>Pollora %1$s</strong> is available (you are using %2$s). <a href=\"%3$s\" target=\"_blank\" rel=\"noopener noreferrer\">View changelog</a>."
+msgstr ""
+
+#: VersionCheck/UI/Http/AdminNotice.php:60
+msgid "unknown"
+msgstr ""
+
+#: VersionCheck/UI/Http/SiteHealthCheck.php:45
+msgid "Installed version"
+msgstr ""
+
+#: VersionCheck/UI/Http/SiteHealthCheck.php:49
+msgid "Latest version"
+msgstr ""
+
+#: VersionCheck/UI/Http/SiteHealthCheck.php:53
+msgid "Up to date"
+msgstr ""
+
+#: VersionCheck/UI/Http/SiteHealthCheck.php:74
+#: VersionCheck/UI/Http/SiteHealthCheck.php:111
+msgid "Pollora is up to date"
+msgstr ""
+
+#: VersionCheck/UI/Http/SiteHealthCheck.php:98
+msgid "Unable to determine Pollora version status"
+msgstr ""
+
+#: VersionCheck/UI/Http/SiteHealthCheck.php:104
+msgid "Could not determine the current or latest Pollora version. Check your internet connection."
+msgstr ""
+
+#. translators: %s: currently installed version
+#: VersionCheck/UI/Http/SiteHealthCheck.php:118
+#, php-format
+msgid "You are running Pollora %s, which is the latest version."
+msgstr ""
+
+#. translators: %s: latest available version
+#: VersionCheck/UI/Http/SiteHealthCheck.php:125
+#, php-format
+msgid "Pollora %s is available"
+msgstr ""
+
+#. translators: 1: current version, 2: latest version, 3: opening link tag, 4: closing link tag
+#: VersionCheck/UI/Http/SiteHealthCheck.php:133
+#, php-format
+msgid "You are running Pollora %1$s. The latest version is %2$s. %3$sView changelog%4$s."
+msgstr ""
+
+#: VersionCheck/UI/Http/SiteHealthCheck.php:139
+msgid "Learn more about updating Pollora"
+msgstr ""
