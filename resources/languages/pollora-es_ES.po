@@ -1,0 +1,241 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Pollora Framework\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Pollora Team\n"
+"Language-Team: Spanish\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2026-04-23 17:30+0200\n"
+"X-Generator: Pollora\n"
+"X-Domain: pollora\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Pollora"
+msgstr "Pollora"
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "available"
+msgstr "disponible"
+
+msgid "Environment"
+msgstr "Entorno"
+
+msgid "Enabled"
+msgstr "Activado"
+
+msgid "Disabled"
+msgstr "Desactivado"
+
+msgid "Yes"
+msgstr "Sí"
+
+msgid "No"
+msgstr "No"
+
+msgid "WordPress Config"
+msgstr "Configuración de WordPress"
+
+msgid "Multisite"
+msgstr "Multisitio"
+
+msgid "Permalinks"
+msgstr "Enlaces permanentes"
+
+msgid "Post Types"
+msgstr "Tipos de contenido"
+
+msgid "Taxonomies"
+msgstr "Taxonomías"
+
+msgid "None discovered."
+msgstr "Ninguno descubierto."
+
+msgid "Hooks"
+msgstr "Hooks"
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Filters"
+msgstr "Filtros"
+
+msgid "REST API Routes"
+msgstr "Rutas REST API"
+
+msgid "WP-CLI Commands"
+msgstr "Comandos WP-CLI"
+
+msgid "Scheduled Tasks"
+msgstr "Tareas programadas"
+
+msgid "Auto-discovered Providers"
+msgstr "Providers auto-descubiertos"
+
+msgid "Modules"
+msgstr "Módulos"
+
+msgid "No modules installed."
+msgstr "No hay módulos instalados."
+
+msgid "On"
+msgstr "Activo"
+
+msgid "Off"
+msgstr "Inactivo"
+
+msgid "Discovery Cache"
+msgstr "Caché de descubrimiento"
+
+msgid "Driver"
+msgstr "Driver"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Discovery Performance"
+msgstr "Rendimiento de descubrimiento"
+
+msgid "No performance data available."
+msgstr "No hay datos de rendimiento disponibles."
+
+msgid "Cache hits"
+msgstr "Aciertos de caché"
+
+msgid "Cache misses"
+msgstr "Fallos de caché"
+
+msgid "Classes processed"
+msgstr "Clases procesadas"
+
+msgid "Discoveries executed"
+msgstr "Descubrimientos ejecutados"
+
+msgid "Instance pool size"
+msgstr "Tamaño del pool de instancias"
+
+msgid "Static cache entries"
+msgstr "Entradas de caché estático"
+
+msgid "Active Theme"
+msgstr "Tema activo"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Version"
+msgstr "Versión"
+
+msgid "Template"
+msgstr "Plantilla"
+
+#, php-format
+msgid "All %s"
+msgstr "Todos los %s"
+
+msgid "Add New"
+msgstr "Añadir nuevo"
+
+#, php-format
+msgid "Add New %s"
+msgstr "Añadir nuevo %s"
+
+#, php-format
+msgid "Edit %s"
+msgstr "Editar %s"
+
+#, php-format
+msgid "New %s"
+msgstr "Nuevo %s"
+
+#, php-format
+msgid "View %s"
+msgstr "Ver %s"
+
+#, php-format
+msgid "Search %s"
+msgstr "Buscar %s"
+
+#, php-format
+msgid "No %s found"
+msgstr "No se encontraron %s"
+
+#, php-format
+msgid "No %s found in trash"
+msgstr "No se encontraron %s en la papelera"
+
+#, php-format
+msgid "Parent %s:"
+msgstr "%s superior:"
+
+#, php-format
+msgid "Update %s"
+msgstr "Actualizar %s"
+
+#, php-format
+msgid "New %s Name"
+msgstr "Nuevo nombre de %s"
+
+#, php-format
+msgid "Popular %s"
+msgstr "%s populares"
+
+#, php-format
+msgid "Separate %s with commas"
+msgstr "Separar %s con comas"
+
+#, php-format
+msgid "Add or remove %s"
+msgstr "Añadir o eliminar %s"
+
+#, php-format
+msgid "Choose from the most used %s"
+msgstr "Elegir entre los %s más utilizados"
+
+#, php-format
+msgid "Parent %s"
+msgstr "%s superior"
+
+#, php-format
+msgid "<strong>Pollora %1$s</strong> is available (you are using %2$s). <a href=\"%3$s\" target=\"_blank\" rel=\"noopener noreferrer\">View changelog</a>."
+msgstr "<strong>Pollora %1$s</strong> está disponible (estás usando %2$s). <a href=\"%3$s\" target=\"_blank\" rel=\"noopener noreferrer\">Ver changelog</a>."
+
+msgid "unknown"
+msgstr "desconocida"
+
+msgid "Installed version"
+msgstr "Versión instalada"
+
+msgid "Latest version"
+msgstr "Última versión"
+
+msgid "Up to date"
+msgstr "Actualizado"
+
+msgid "Pollora is up to date"
+msgstr "Pollora está actualizado"
+
+msgid "Unable to determine Pollora version status"
+msgstr "No se pudo determinar el estado de la versión de Pollora"
+
+msgid "Could not determine the current or latest Pollora version. Check your internet connection."
+msgstr "No se pudo determinar la versión actual o la última versión de Pollora. Comprueba tu conexión a internet."
+
+#, php-format
+msgid "You are running Pollora %s, which is the latest version."
+msgstr "Estás usando Pollora %s, que es la última versión."
+
+#, php-format
+msgid "Pollora %s is available"
+msgstr "Pollora %s está disponible"
+
+#, php-format
+msgid "You are running Pollora %1$s. The latest version is %2$s. %3$sView changelog%4$s."
+msgstr "Estás usando Pollora %1$s. La última versión es %2$s. %3$sVer changelog%4$s."
+
+msgid "Learn more about updating Pollora"
+msgstr "Más información sobre la actualización de Pollora"

@@ -1,0 +1,241 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Pollora Framework\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Pollora Team\n"
+"Language-Team: Dutch\n"
+"Language: nl_NL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2026-04-23 17:30+0200\n"
+"X-Generator: Pollora\n"
+"X-Domain: pollora\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Pollora"
+msgstr "Pollora"
+
+msgid "Unknown"
+msgstr "Onbekend"
+
+msgid "available"
+msgstr "beschikbaar"
+
+msgid "Environment"
+msgstr "Omgeving"
+
+msgid "Enabled"
+msgstr "Ingeschakeld"
+
+msgid "Disabled"
+msgstr "Uitgeschakeld"
+
+msgid "Yes"
+msgstr "Ja"
+
+msgid "No"
+msgstr "Nee"
+
+msgid "WordPress Config"
+msgstr "WordPress-configuratie"
+
+msgid "Multisite"
+msgstr "Multisite"
+
+msgid "Permalinks"
+msgstr "Permalinks"
+
+msgid "Post Types"
+msgstr "Berichttypen"
+
+msgid "Taxonomies"
+msgstr "Taxonomieën"
+
+msgid "None discovered."
+msgstr "Geen ontdekt."
+
+msgid "Hooks"
+msgstr "Hooks"
+
+msgid "Actions"
+msgstr "Acties"
+
+msgid "Filters"
+msgstr "Filters"
+
+msgid "REST API Routes"
+msgstr "REST API-routes"
+
+msgid "WP-CLI Commands"
+msgstr "WP-CLI-opdrachten"
+
+msgid "Scheduled Tasks"
+msgstr "Geplande taken"
+
+msgid "Auto-discovered Providers"
+msgstr "Automatisch ontdekte providers"
+
+msgid "Modules"
+msgstr "Modules"
+
+msgid "No modules installed."
+msgstr "Geen modules geïnstalleerd."
+
+msgid "On"
+msgstr "Aan"
+
+msgid "Off"
+msgstr "Uit"
+
+msgid "Discovery Cache"
+msgstr "Discovery-cache"
+
+msgid "Driver"
+msgstr "Driver"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Discovery Performance"
+msgstr "Discovery-prestaties"
+
+msgid "No performance data available."
+msgstr "Geen prestatiegegevens beschikbaar."
+
+msgid "Cache hits"
+msgstr "Cache-treffers"
+
+msgid "Cache misses"
+msgstr "Cache-missers"
+
+msgid "Classes processed"
+msgstr "Verwerkte klassen"
+
+msgid "Discoveries executed"
+msgstr "Uitgevoerde discoveries"
+
+msgid "Instance pool size"
+msgstr "Instance pool-grootte"
+
+msgid "Static cache entries"
+msgstr "Statische cache-items"
+
+msgid "Active Theme"
+msgstr "Actief thema"
+
+msgid "Name"
+msgstr "Naam"
+
+msgid "Version"
+msgstr "Versie"
+
+msgid "Template"
+msgstr "Template"
+
+#, php-format
+msgid "All %s"
+msgstr "Alle %s"
+
+msgid "Add New"
+msgstr "Nieuwe toevoegen"
+
+#, php-format
+msgid "Add New %s"
+msgstr "Nieuwe %s toevoegen"
+
+#, php-format
+msgid "Edit %s"
+msgstr "%s bewerken"
+
+#, php-format
+msgid "New %s"
+msgstr "Nieuwe %s"
+
+#, php-format
+msgid "View %s"
+msgstr "%s bekijken"
+
+#, php-format
+msgid "Search %s"
+msgstr "%s zoeken"
+
+#, php-format
+msgid "No %s found"
+msgstr "Geen %s gevonden"
+
+#, php-format
+msgid "No %s found in trash"
+msgstr "Geen %s gevonden in de prullenbak"
+
+#, php-format
+msgid "Parent %s:"
+msgstr "Hoofd-%s:"
+
+#, php-format
+msgid "Update %s"
+msgstr "%s bijwerken"
+
+#, php-format
+msgid "New %s Name"
+msgstr "Nieuwe %s-naam"
+
+#, php-format
+msgid "Popular %s"
+msgstr "Populaire %s"
+
+#, php-format
+msgid "Separate %s with commas"
+msgstr "%s scheiden met komma's"
+
+#, php-format
+msgid "Add or remove %s"
+msgstr "%s toevoegen of verwijderen"
+
+#, php-format
+msgid "Choose from the most used %s"
+msgstr "Kies uit de meest gebruikte %s"
+
+#, php-format
+msgid "Parent %s"
+msgstr "Hoofd-%s"
+
+#, php-format
+msgid "<strong>Pollora %1$s</strong> is available (you are using %2$s). <a href=\"%3$s\" target=\"_blank\" rel=\"noopener noreferrer\">View changelog</a>."
+msgstr "<strong>Pollora %1$s</strong> is beschikbaar (je gebruikt %2$s). <a href=\"%3$s\" target=\"_blank\" rel=\"noopener noreferrer\">Changelog bekijken</a>."
+
+msgid "unknown"
+msgstr "onbekend"
+
+msgid "Installed version"
+msgstr "Geïnstalleerde versie"
+
+msgid "Latest version"
+msgstr "Nieuwste versie"
+
+msgid "Up to date"
+msgstr "Up-to-date"
+
+msgid "Pollora is up to date"
+msgstr "Pollora is up-to-date"
+
+msgid "Unable to determine Pollora version status"
+msgstr "Kan de versiestatus van Pollora niet bepalen"
+
+msgid "Could not determine the current or latest Pollora version. Check your internet connection."
+msgstr "Kan de huidige of nieuwste Pollora-versie niet bepalen. Controleer je internetverbinding."
+
+#, php-format
+msgid "You are running Pollora %s, which is the latest version."
+msgstr "Je gebruikt Pollora %s, de nieuwste versie."
+
+#, php-format
+msgid "Pollora %s is available"
+msgstr "Pollora %s is beschikbaar"
+
+#, php-format
+msgid "You are running Pollora %1$s. The latest version is %2$s. %3$sView changelog%4$s."
+msgstr "Je gebruikt Pollora %1$s. De nieuwste versie is %2$s. %3$sChangelog bekijken%4$s."
+
+msgid "Learn more about updating Pollora"
+msgstr "Meer informatie over het bijwerken van Pollora"
