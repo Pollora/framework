@@ -13,9 +13,6 @@ use Pollora\Route\Infrastructure\Services\ExtendedRouter;
  */
 function setupRouterTest(): array
 {
-    // Initialize WordPress functions from helpers.php
-    setupWordPressMocks();
-
     // Set up the event dispatcher mock
     $events = m::mock(Dispatcher::class);
     $events->shouldReceive('dispatch')->andReturn(null);
@@ -68,8 +65,6 @@ function mockWordPressClasses(): void
  */
 afterEach(function (): void {
     Container::setInstance();
-    WP::$wpFunctions = null;
-    m::close();
 });
 
 /**

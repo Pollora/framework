@@ -9,17 +9,14 @@ use Pollora\Route\UI\Http\Controllers\FrontendController;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-require_once dirname(__DIR__, 5).'/Unit/helpers.php';
-
 beforeEach(function (): void {
-    setupWordPressMocks();
     $this->templateFinder = Mockery::mock(TemplateFinderInterface::class);
     $this->controller = new FrontendController($this->templateFinder);
 });
 
 describe('FrontendController', function (): void {
     it('aborts when themes disabled', function (): void {
-        setWordPressFunction('wp_using_themes', fn (): false => false);
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(false);
         $request = Request::create('/test');
 
         expect(fn () => $this->controller->handle($request))
@@ -27,10 +24,10 @@ describe('FrontendController', function (): void {
     });
 
     it('renders blade view when available', function (): void {
-        setWordPressFunction('wp_using_themes', fn (): true => true);
-        setWordPressFunction('is_page', fn (): true => true);
-        setWordPressFunction('get_page_template', fn (): string => '/theme/page.php');
-        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\when('is_page')->justReturn(true);
+        Brain\Monkey\Functions\when('get_page_template')->justReturn('/theme/page.php');
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')
             ->with('/theme/page.php')
@@ -52,10 +49,10 @@ describe('FrontendController', function (): void {
 
     it('falls back to php template', function (): void {
         $templatePath = __DIR__.'/test-template.php';
-        setWordPressFunction('wp_using_themes', fn (): true => true);
-        setWordPressFunction('is_page', fn (): true => true);
-        setWordPressFunction('get_page_template', fn (): string => $templatePath);
-        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\when('is_page')->justReturn(true);
+        Brain\Monkey\Functions\when('get_page_template')->justReturn($templatePath);
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')
             ->with($templatePath)
@@ -69,9 +66,9 @@ describe('FrontendController', function (): void {
     });
 
     it('throws 404 when no template', function (): void {
-        setWordPressFunction('wp_using_themes', fn (): true => true);
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
 
-        setWordPressConditions([
+        Brain\Monkey\Functions\stubs([
             'is_page' => false,
             'is_singular' => false,
             'is_archive' => false,
@@ -91,8 +88,8 @@ describe('FrontendController', function (): void {
             'is_embed' => false,
         ]);
 
-        setWordPressFunction('get_index_template', fn (): string => '');
-        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
+        Brain\Monkey\Functions\when('get_index_template')->justReturn('');
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')
             ->with('')

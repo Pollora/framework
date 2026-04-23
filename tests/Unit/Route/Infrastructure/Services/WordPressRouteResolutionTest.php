@@ -9,12 +9,8 @@ use Illuminate\Http\Request;
 use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 
-require_once dirname(__DIR__, 3).'/helpers.php';
-
 describe('WordPressRouteResolution', function (): void {
     beforeEach(function (): void {
-        setupWordPressMocks();
-
         $this->container = new Container;
         $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldReceive('dispatch')->andReturn(null);
@@ -43,10 +39,6 @@ describe('WordPressRouteResolution', function (): void {
 
         $this->container->instance('config', $config);
         $this->router = new ExtendedRouter($dispatcher, $this->container);
-    });
-
-    afterEach(function (): void {
-        resetWordPressMocks();
     });
 
     it('resolves condition aliases correctly', function (): void {
@@ -121,19 +113,19 @@ describe('WordPressRouteResolution', function (): void {
     });
 
     it('matches routes with WordPress condition mocking', function (): void {
-        setWordPressFunction('is_front_page', fn (): true => true);
+        Brain\Monkey\Functions\when('is_front_page')->justReturn(true);
         $frontRoute = createWpRoute($this->router, 'front');
         $request = Request::create('/', 'GET');
         expect($frontRoute->matches($request))->toBeTrue();
 
-        setWordPressFunction('is_front_page', fn (): false => false);
+        Brain\Monkey\Functions\when('is_front_page')->justReturn(false);
         expect($frontRoute->matches($request))->toBeFalse();
 
-        setWordPressFunction('is_single', fn (): true => true);
+        Brain\Monkey\Functions\when('is_single')->justReturn(true);
         $singleRoute = createWpRoute($this->router, 'single');
         expect($singleRoute->matches(Request::create('/blog/article', 'GET')))->toBeTrue();
 
-        setWordPressFunction('is_category', fn (): true => true);
+        Brain\Monkey\Functions\when('is_category')->justReturn(true);
         $categoryRoute = createWpRoute($this->router, 'archive');
         expect($categoryRoute->matches(Request::create('/category/news', 'GET')))->toBeTrue();
     });
@@ -141,15 +133,15 @@ describe('WordPressRouteResolution', function (): void {
     it('matches route with parameters using WordPress mocks', function (): void {
         $route = createWpRoute($this->router, 'is_singular', ['realisations']);
 
-        setWordPressFunction('is_singular', fn (): true => true);
+        Brain\Monkey\Functions\when('is_singular')->justReturn(true);
         expect($route->matches(Request::create('/realisations/campus-vert', 'GET')))->toBeTrue();
 
-        setWordPressFunction('is_singular', fn (): false => false);
+        Brain\Monkey\Functions\when('is_singular')->justReturn(false);
         expect($route->matches(Request::create('/realisations/campus-vert', 'GET')))->toBeFalse();
     });
 
     it('simulates multiple conditions correctly', function (): void {
-        setWordPressConditions([
+        Brain\Monkey\Functions\stubs([
             'is_front_page' => true, 'is_home' => false, 'is_page' => false,
             'is_single' => false, 'is_category' => false, 'is_404' => false,
         ]);
@@ -161,7 +153,7 @@ describe('WordPressRouteResolution', function (): void {
         expect($frontRoute->matches($request))->toBeTrue();
         expect($homeRoute->matches($request))->toBeFalse();
 
-        setWordPressConditions([
+        Brain\Monkey\Functions\stubs([
             'is_front_page' => false, 'is_home' => true, 'is_page' => false,
             'is_single' => false, 'is_category' => false, 'is_404' => false,
         ]);
@@ -169,7 +161,7 @@ describe('WordPressRouteResolution', function (): void {
         expect($frontRoute->matches(Request::create('/blog', 'GET')))->toBeFalse();
         expect($homeRoute->matches(Request::create('/blog', 'GET')))->toBeTrue();
 
-        setWordPressConditions([
+        Brain\Monkey\Functions\stubs([
             'is_front_page' => false, 'is_home' => false, 'is_page' => false,
             'is_single' => false, 'is_category' => true, 'is_404' => false,
         ]);
