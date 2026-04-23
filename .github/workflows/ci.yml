@@ -93,6 +93,9 @@ jobs:
       - name: Rector analysis
         run: composer test:refacto
 
+      - name: Type coverage
+        run: composer test:type-coverage
+
       - name: Security audit
         run: composer audit
 
