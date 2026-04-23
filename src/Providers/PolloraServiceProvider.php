@@ -17,6 +17,7 @@ use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
+use Pollora\Dashboard\Infrastructure\Providers\DashboardServiceProvider;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
@@ -134,6 +135,9 @@ class PolloraServiceProvider extends ServiceProvider
 
         // Version check notifications
         $this->app->register(VersionCheckServiceProvider::class);
+
+        // Dashboard
+        $this->app->register(DashboardServiceProvider::class);
     }
 
     /**
