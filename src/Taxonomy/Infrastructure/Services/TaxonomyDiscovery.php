@@ -437,20 +437,34 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             'name' => $plural,
             'singular_name' => $singular,
             'menu_name' => $plural,
-            'all_items' => 'All '.$plural,
-            'edit_item' => 'Edit '.$singular,
-            'view_item' => 'View '.$singular,
-            'update_item' => 'Update '.$singular,
-            'add_new_item' => 'Add New '.$singular,
-            'new_item_name' => sprintf('New %s Name', $singular),
-            'search_items' => 'Search '.$plural,
-            'popular_items' => 'Popular '.$plural,
-            'separate_items_with_commas' => sprintf('Separate %s with commas', $plural),
-            'add_or_remove_items' => 'Add or remove '.$plural,
-            'choose_from_most_used' => 'Choose from the most used '.$plural,
-            'not_found' => sprintf('No %s found', $plural),
-            'parent_item' => 'Parent '.$singular,
-            'parent_item_colon' => sprintf('Parent %s:', $singular),
+            /* translators: %s: taxonomy general name (plural) */
+            'all_items' => sprintf(__('All %s', 'pollora'), $plural),
+            /* translators: %s: taxonomy singular name */
+            'edit_item' => sprintf(__('Edit %s', 'pollora'), $singular),
+            /* translators: %s: taxonomy singular name */
+            'view_item' => sprintf(__('View %s', 'pollora'), $singular),
+            /* translators: %s: taxonomy singular name */
+            'update_item' => sprintf(__('Update %s', 'pollora'), $singular),
+            /* translators: %s: taxonomy singular name */
+            'add_new_item' => sprintf(__('Add New %s', 'pollora'), $singular),
+            /* translators: %s: taxonomy singular name */
+            'new_item_name' => sprintf(__('New %s Name', 'pollora'), $singular),
+            /* translators: %s: taxonomy general name (plural) */
+            'search_items' => sprintf(__('Search %s', 'pollora'), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'popular_items' => sprintf(__('Popular %s', 'pollora'), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'separate_items_with_commas' => sprintf(__('Separate %s with commas', 'pollora'), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'add_or_remove_items' => sprintf(__('Add or remove %s', 'pollora'), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'choose_from_most_used' => sprintf(__('Choose from the most used %s', 'pollora'), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'not_found' => sprintf(__('No %s found', 'pollora'), $plural),
+            /* translators: %s: taxonomy singular name */
+            'parent_item' => sprintf(__('Parent %s', 'pollora'), $singular),
+            /* translators: %s: taxonomy singular name */
+            'parent_item_colon' => sprintf(__('Parent %s:', 'pollora'), $singular),
         ];
     }
 

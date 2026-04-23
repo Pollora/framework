@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Http\Response;
 use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
@@ -25,7 +26,12 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 function setupDefaultWordPressStubs(): void
 {
-    // Translation functions — __() is already provided by Laravel, stub WP-only ones
+    // Provide a passthrough translator so Laravel's __() works without a full app.
+    // Must accept mixed $replace because WordPress-style __('text', 'domain')
+    // passes a string where Laravel expects an array.
+    Container::getInstance()->instance('translator', new PassthroughTranslator);
+
+    // WordPress-specific translation functions
     foreach (['_x', '_n', '_nx', 'esc_html__', 'esc_html_x', 'esc_attr__', 'esc_attr_x'] as $fn) {
         \Brain\Monkey\Functions\when($fn)->returnArg();
     }
@@ -195,6 +201,38 @@ function setupDefaultWordPressStubs(): void
         '__return_true' => true,
         '__return_false' => false,
     ]);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Passthrough Translator
+|--------------------------------------------------------------------------
+|
+| Handles both Laravel-style __($key, $replace[], $locale) and
+| WordPress-style __($text, $domain) calls by returning the key as-is.
+|
+*/
+
+if (! class_exists('PassthroughTranslator')) {
+    class PassthroughTranslator
+    {
+        public function get($key, mixed $replace = [], $locale = null): string
+        {
+            return $key;
+        }
+
+        public function choice($key, $number, array $replace = [], $locale = null): string
+        {
+            return $key;
+        }
+
+        public function getLocale(): string
+        {
+            return 'en';
+        }
+
+        public function setLocale($locale): void {}
+    }
 }
 
 /*

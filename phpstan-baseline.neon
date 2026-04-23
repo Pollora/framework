@@ -157,18 +157,6 @@ parameters:
 			path: src/Attributes/PostType/Labels.php
 
 		-
-			message: '#^PHPDoc tag @param for parameter \$value with type string is incompatible with native type array\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/PostType/Labels.php
-
-		-
-			message: '#^PHPDoc type for property Pollora\\Attributes\\PostType\\Labels\:\:\$value with type string is incompatible with native type array\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: src/Attributes/PostType/Labels.php
-
-		-
 			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
 			identifier: property.notFound
 			count: 1
@@ -427,18 +415,6 @@ parameters:
 			path: src/Attributes/Taxonomy/Labels.php
 
 		-
-			message: '#^PHPDoc tag @param for parameter \$value with type string is incompatible with native type array\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/Taxonomy/Labels.php
-
-		-
-			message: '#^PHPDoc type for property Pollora\\Attributes\\Taxonomy\\Labels\:\:\$value with type string is incompatible with native type array\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: src/Attributes/Taxonomy/Labels.php
-
-		-
 			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
 			identifier: property.notFound
 			count: 1
@@ -573,18 +549,6 @@ parameters:
 		-
 			message: '#^Abstract class Pollora\\Attributes\\Taxonomy\\TaxonomyAttribute cannot be an Attribute class\.$#'
 			identifier: attribute.abstract
-			count: 1
-			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$taxonomy with type Pollora\\Attributes\\Taxonomy\\Taxonomy is not subtype of native type Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
-
-		-
-			message: '#^Parameter \$taxonomy of method Pollora\\Attributes\\Taxonomy\\TaxonomyAttribute\:\:configure\(\) has invalid type Pollora\\Attributes\\Taxonomy\\Taxonomy\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
 

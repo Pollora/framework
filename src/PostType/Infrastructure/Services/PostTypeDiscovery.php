@@ -431,21 +431,36 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
         return [
             'name' => $plural,
             'singular_name' => $singular,
-            'add_new' => 'Add New',
-            'add_new_item' => 'Add New '.$singular,
-            'edit_item' => 'Edit '.$singular,
-            'new_item' => 'New '.$singular,
-            'view_item' => 'View '.$singular,
-            'view_items' => 'View '.$plural,
-            'search_items' => 'Search '.$plural,
-            'not_found' => sprintf('No %s found', $plural),
-            'not_found_in_trash' => sprintf('No %s found in Trash', $plural),
-            'parent_item_colon' => sprintf('Parent %s:', $singular),
-            'all_items' => 'All '.$plural,
-            'archives' => $singular.' Archives',
-            'attributes' => $singular.' Attributes',
-            'insert_into_item' => 'Insert into '.$singular,
-            'uploaded_to_this_item' => 'Uploaded to this '.$singular,
+            /* translators: %s: post type general name (plural) */
+            'add_new' => __('Add New', 'pollora'),
+            /* translators: %s: post type singular name */
+            'add_new_item' => sprintf(__('Add New %s', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'edit_item' => sprintf(__('Edit %s', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'new_item' => sprintf(__('New %s', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'view_item' => sprintf(__('View %s', 'pollora'), $singular),
+            /* translators: %s: post type general name (plural) */
+            'view_items' => sprintf(__('View %s', 'pollora'), $plural),
+            /* translators: %s: post type general name (plural) */
+            'search_items' => sprintf(__('Search %s', 'pollora'), $plural),
+            /* translators: %s: post type general name (plural) */
+            'not_found' => sprintf(__('No %s found', 'pollora'), $plural),
+            /* translators: %s: post type general name (plural) */
+            'not_found_in_trash' => sprintf(__('No %s found in Trash', 'pollora'), $plural),
+            /* translators: %s: post type singular name */
+            'parent_item_colon' => sprintf(__('Parent %s:', 'pollora'), $singular),
+            /* translators: %s: post type general name (plural) */
+            'all_items' => sprintf(__('All %s', 'pollora'), $plural),
+            /* translators: %s: post type singular name */
+            'archives' => sprintf(__('%s Archives', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'attributes' => sprintf(__('%s Attributes', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'insert_into_item' => sprintf(__('Insert into %s', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'uploaded_to_this_item' => sprintf(__('Uploaded to this %s', 'pollora'), $singular),
         ];
     }
 
