@@ -81,8 +81,10 @@ class DashboardServiceProvider extends ServiceProvider
 
         try {
             $comparator = $this->app->make(VersionComparator::class);
+            $current = $comparator->getCurrentVersion();
+            $isDev = is_string($current) && str_starts_with($current, 'dev-');
 
-            if ($comparator->isUpdateAvailable()) {
+            if (! $isDev && $comparator->isUpdateAvailable()) {
                 $count++;
             }
         } catch (\Throwable) {
