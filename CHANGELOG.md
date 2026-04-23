@@ -18,8 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Brain Monkey (`brain/monkey`) for structured WordPress function mocking in tests
 - Type coverage check in CI (`pest --type-coverage --min=98`)
 - Testbench integration tests for `DiscoveryServiceProvider`, `HookServiceProvider`, and `VersionCheckServiceProvider`
+- Text domain `pollora` for all framework UI strings (AdminNotice, SiteHealthCheck, auto-generated labels)
+- `#[Labels]` sub-attribute now accepts named parameters for partial label overrides with extractible `__()` calls
 
 ### Changed
+- Replaced `'textdomain'` placeholder with `sprintf(__('Edit %s', 'pollora'), $singular)` pattern for extractible i18n
 - Replaced manual WordPress mock system with Brain Monkey (`tests/Unit/helpers.php`: 1302 → 416 lines)
 - Tests now use `Brain\Monkey\Functions\when()` / `stubs()` instead of `WP::$wpFunctions` + global function stubs
 - Migrated all 24 PHPUnit-style test files to Pest closure format (~1000 lines removed)
