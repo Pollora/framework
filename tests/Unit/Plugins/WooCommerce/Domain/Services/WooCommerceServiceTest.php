@@ -99,7 +99,7 @@ describe('WooCommerceService', function (): void {
     });
 
     test('returns default path when WC not available', function (): void {
-        Brain\Monkey\Functions\when('WC')->justReturn(null);
+        Brain\Monkey\Functions\when('WC')->justReturn();
 
         $path = $this->service->getWooCommerceTemplatePath();
 

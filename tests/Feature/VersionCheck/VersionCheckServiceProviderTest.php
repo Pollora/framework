@@ -57,10 +57,12 @@ describe('VersionCheckServiceProvider', function (): void {
 
         $action = Mockery::mock(Action::class);
         $action->shouldNotReceive('add');
+
         $this->app->instance(ActionContract::class, $action);
 
         $filter = Mockery::mock(Filter::class);
         $filter->shouldNotReceive('add');
+
         $this->app->instance(FilterContract::class, $filter);
 
         $provider = new VersionCheckServiceProvider($this->app);
