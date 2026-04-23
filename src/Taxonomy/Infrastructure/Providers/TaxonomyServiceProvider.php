@@ -66,56 +66,7 @@ class TaxonomyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Publish configuration
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../../config/taxonomies.php' => config_path('taxonomies.php'),
-            ], 'pollora-taxonomy-config');
-        }
-
-        // Register taxonomies from configuration
-        $this->registerConfiguredTaxonomies();
-
-        // Register Taxonomy discovery with the discovery engine
         $this->registerTaxonomyDiscovery();
-    }
-
-    /**
-     * Register all the site's custom taxonomies
-     *
-     * Reads taxonomy configurations from the config file and registers
-     * each taxonomy using the TaxonomyService, following hexagonal architecture
-     * principles by using dependency injection instead of facades.
-     */
-    public function registerTaxonomies(): void
-    {
-        // Get the taxonomies from the config
-        $taxonomies = $this->app['config']->get('taxonomies', []);
-
-        // Resolve the service from the container using the interface
-        $taxonomyService = $this->app->make(TaxonomyServiceInterface::class);
-
-        // Register each taxonomy
-        foreach ($taxonomies as $slug => $config) {
-            if (! is_array($config)) {
-                continue;
-            }
-
-            $objectType = $config['links'] ?? ['post'];
-            $singular = $config['names']['singular'] ?? null;
-            $plural = $config['names']['plural'] ?? null;
-            $args = $config['args'] ?? [];
-
-            $taxonomyService->register($slug, $objectType, $singular, $plural, $args);
-        }
-    }
-
-    /**
-     * Register taxonomies defined in the configuration.
-     */
-    private function registerConfiguredTaxonomies(): void
-    {
-        $this->registerTaxonomies();
     }
 
     /**

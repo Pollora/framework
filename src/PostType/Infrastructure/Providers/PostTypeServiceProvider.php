@@ -66,47 +66,7 @@ class PostTypeServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Publish configuration
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../../config/post-types.php' => config_path('post-types.php'),
-            ], 'pollora-posttype-config');
-        }
-
-        // Register post types from configuration
-        $this->registerConfiguredPostTypes();
-
-        // Register PostType discovery with the discovery engine
         $this->registerPostTypeDiscovery();
-    }
-
-    /**
-     * Register post types defined in the configuration.
-     */
-    private function registerConfiguredPostTypes(): void
-    {
-        // Get the post types from the config
-        $postTypes = $this->app['config']->get('post-types', []);
-
-        if (empty($postTypes)) {
-            return;
-        }
-
-        // Resolve the service from the container using the interface
-        $postTypeService = $this->app->make(PostTypeServiceInterface::class);
-
-        // Register each post type
-        foreach ($postTypes as $slug => $config) {
-            if (! is_array($config)) {
-                continue;
-            }
-
-            $singular = $config['names']['singular'] ?? null;
-            $plural = $config['names']['plural'] ?? null;
-            $args = $config['args'] ?? [];
-
-            $postTypeService->register($slug, $singular, $plural, $args);
-        }
     }
 
     /**
