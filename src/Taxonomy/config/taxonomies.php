@@ -6,22 +6,22 @@ use Pollora\Taxonomy\Application\Services\TaxonomyService;
 return [
     /*
     |--------------------------------------------------------------------------
-    | Post Types Directory
+    | Taxonomies Directory
     |--------------------------------------------------------------------------
     |
-    | This value determines the directory where the post type classes are stored.
-    | By default, this is set to 'Cms/PostTypes' within the application directory.
+    | This value determines the directory where the taxonomy classes are stored.
+    | By default, this is set to 'Cms/Taxonomies' within the application directory.
     |
     */
     'directory' => 'Cms/Taxonomies',
 
     /*
     |--------------------------------------------------------------------------
-    | Post Types Service Provider
+    | Taxonomies Service Provider
     |--------------------------------------------------------------------------
     |
     | This value determines the service provider class that will be used to
-    | register post types with WordPress. You can extend or replace this
+    | register taxonomies with WordPress. You can extend or replace this
     | with your own implementation if needed.
     |
     */
