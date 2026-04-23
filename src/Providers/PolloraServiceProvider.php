@@ -151,5 +151,31 @@ class PolloraServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../public/wp-config.php' => public_path(),
         ], 'public');
+
+        $this->loadPolloraTextDomain();
+    }
+
+    /**
+     * Load the 'pollora' text domain for framework translations.
+     *
+     * Checks for user-provided translations in `wp-content/languages/pollora/`
+     * first, then falls back to the framework's bundled translations.
+     */
+    private function loadPolloraTextDomain(): void
+    {
+        if (! function_exists('load_textdomain')) {
+            return;
+        }
+
+        $locale = determine_locale();
+        $moFile = sprintf('pollora-%s.mo', $locale);
+
+        // User-provided translations take priority
+        $loaded = load_textdomain('pollora', WP_LANG_DIR.'/pollora/'.$moFile);
+
+        // Fall back to bundled translations
+        if (! $loaded) {
+            load_textdomain('pollora', dirname(__DIR__, 2).'/resources/languages/'.$moFile);
+        }
     }
 }
