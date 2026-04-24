@@ -1,0 +1,19 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "{{ blockFullName }}",
+    "version": "1.0.0",
+    "title": "{{ title }}",
+    "category": "{{ category }}",
+    "icon": "{{ icon }}",
+    "description": "A {{ title }} block.",
+    "keywords": ["{{ blockSlug }}"],
+    "textdomain": "{{ targetSlug }}",
+    "supports": {
+        "html": false,
+        "align": ["wide", "full"]
+    },
+    "editorScript": "file:./index.jsx",
+    "editorStyle": "file:./editor.css",
+    "style": "file:./style.css"
+}
