@@ -10,6 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
 ### Added
+- Gutenberg block registration system with Vite integration (`BlockRegistrar`, `BlockServiceProvider`)
+  - Scans `resources/blocks/` directories and pre-registers script/style handles via ViteManager
+  - Creates `{parent}.blocks` asset container (no basePath) for direct manifest resolution
+  - Adds `type="module"` and `crossorigin` attributes for Vite-compiled scripts
+  - Works identically for themes (`theme`), plugins (`plugin.{slug}`), and modules (`module.{slug}`)
+- `pollora:make-block` Artisan command for scaffolding Gutenberg blocks
+  - Generates block.json, index.jsx, edit.jsx, save.jsx, CSS, and view.js
+  - Supports `--dynamic` (render.php), `--inner-blocks`, `--no-view-script` options
+  - First-run bootstrap: creates `BlocksServiceProvider`, patches `vite.config.js`, adds npm dependencies
+  - Publishable stubs via `--tag=pollora-block-stubs`
+- JSX/TSX/TS support in `AssetEnqueuer::determineFileType()` (mapped to `js` type)
+- [Blocks documentation](documentation/blocks.md) covering the full workflow
 - Admin dashboard page under **Tools > Pollora** with Pollora branding and inline SVG logo
   - Framework version status (current vs latest, dev branch detection)
   - Environment info (PHP, Laravel, WordPress versions)
