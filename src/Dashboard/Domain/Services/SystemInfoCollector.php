@@ -19,12 +19,12 @@ use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
  * WordPress config, and environment details for the admin dashboard
  * and CLI status command.
  */
-final class SystemInfoCollector
+final readonly class SystemInfoCollector
 {
     public function __construct(
-        private readonly VersionComparator $versionComparator,
-        private readonly DiscoveryManager $discoveryManager,
-        private readonly Container $container,
+        private VersionComparator $versionComparator,
+        private DiscoveryManager $discoveryManager,
+        private Container $container,
     ) {}
 
     /**

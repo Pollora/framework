@@ -191,9 +191,11 @@ final class StatusCommand extends Command
         if (isset($context['cache_hits'])) {
             $parts[] = sprintf('%d cache hits', $context['cache_hits']);
         }
+
         if (isset($context['cache_misses'])) {
             $parts[] = sprintf('%d misses', $context['cache_misses']);
         }
+
         if (isset($context['classes_processed'])) {
             $parts[] = sprintf('%d classes', $context['classes_processed']);
         }

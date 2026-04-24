@@ -12,10 +12,10 @@ use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
  * Displays system information including framework version, environment details,
  * discovered entities, performance stats, and cache state, with Pollora branding.
  */
-final class DashboardController
+final readonly class DashboardController
 {
     public function __construct(
-        private readonly SystemInfoCollector $collector
+        private SystemInfoCollector $collector
     ) {}
 
     public function __invoke(): void
@@ -241,6 +241,7 @@ final class DashboardController
                 if (isset($item['method'])) {
                     $meta .= '::'.$item['method'].'()';
                 }
+
                 printf('<div class="pollora-entity-meta">%s</div>', esc_html($meta));
 
                 echo '</div>';
@@ -251,6 +252,7 @@ final class DashboardController
 
                 echo '</li>';
             }
+
             echo '</ul>';
         }
 
@@ -347,10 +349,12 @@ final class DashboardController
                 if ($module['description'] !== '') {
                     printf('<div class="pollora-entity-meta">%s</div>', esc_html($module['description']));
                 }
+
                 echo '</div>';
                 echo $statusBadge;
                 echo '</li>';
             }
+
             echo '</ul>';
         }
 
@@ -392,18 +396,23 @@ final class DashboardController
             if (isset($context['cache_hits'])) {
                 printf('<tr><td>%s</td><td>%d</td></tr>', __('Cache hits', 'pollora'), $context['cache_hits']);
             }
+
             if (isset($context['cache_misses'])) {
                 printf('<tr><td>%s</td><td>%d</td></tr>', __('Cache misses', 'pollora'), $context['cache_misses']);
             }
+
             if (isset($context['classes_processed'])) {
                 printf('<tr><td>%s</td><td>%d</td></tr>', __('Classes processed', 'pollora'), $context['classes_processed']);
             }
+
             if (isset($context['discoveries_executed'])) {
                 printf('<tr><td>%s</td><td>%d</td></tr>', __('Discoveries executed', 'pollora'), $context['discoveries_executed']);
             }
+
             if (isset($performance['instance_pool']['total_instances'])) {
                 printf('<tr><td>%s</td><td>%d</td></tr>', __('Instance pool size', 'pollora'), $performance['instance_pool']['total_instances']);
             }
+
             if (isset($performance['static_cache_size'])) {
                 printf('<tr><td>%s</td><td>%d</td></tr>', __('Static cache entries', 'pollora'), $performance['static_cache_size']);
             }
