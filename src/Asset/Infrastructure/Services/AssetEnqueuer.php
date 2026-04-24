@@ -561,6 +561,12 @@ class AssetEnqueuer
     protected function determineFileType(string $path): string
     {
         $type = pathinfo($path, PATHINFO_EXTENSION);
+
+        // JSX/TSX/TS are JavaScript variants (transpiled by Vite)
+        if (in_array($type, ['jsx', 'tsx', 'ts'], true)) {
+            return 'js';
+        }
+
         if (! in_array($type, ['css', 'js'], true)) {
             throw new \InvalidArgumentException('Unsupported file type: '.$type);
         }

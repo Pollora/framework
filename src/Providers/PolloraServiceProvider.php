@@ -13,6 +13,7 @@ use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
 use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
+use Pollora\Block\Infrastructure\Providers\BlockServiceProvider;
 use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
@@ -98,6 +99,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(OptionServiceProvider::class);
 
         // Block features
+        $this->app->register(BlockServiceProvider::class);
         $this->app->register(BlockCategoryServiceProvider::class);
         $this->app->register(BlockPatternServiceProvider::class);
 
