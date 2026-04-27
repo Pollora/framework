@@ -13,9 +13,9 @@ use Pollora\Collection\Domain\Contracts\CollectionInterface;
  * This is a decorator around Laravel's Collection that implements
  * our framework-agnostic CollectionInterface.
  */
-final class LaravelCollectionAdapter implements CollectionInterface
+final readonly class LaravelCollectionAdapter implements CollectionInterface
 {
-    private readonly LaravelCollection $laravelCollection;
+    private LaravelCollection $laravelCollection;
 
     /**
      * Create a new LaravelCollectionAdapter instance.
