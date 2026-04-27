@@ -20,7 +20,8 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class MakeBlockCommand extends Command
 {
-    use HasPluginSupport, HasThemeSupport;
+    use HasPluginSupport;
+    use HasThemeSupport;
 
     protected $name = 'pollora:make-block';
 
@@ -29,7 +30,7 @@ class MakeBlockCommand extends Command
     /**
      * npm dependencies to add for block development.
      */
-    private const NPM_DEPENDENCIES = [
+    private const array NPM_DEPENDENCIES = [
         '@roots/vite-plugin' => '^2.0.0',
         'glob' => '^11.0.0',
         '@wordpress/blocks' => '^14.0.0',
@@ -44,7 +45,7 @@ class MakeBlockCommand extends Command
         $name = $this->argument('name');
 
         if (! preg_match('/^[a-z][a-z0-9-]*$/', $name)) {
-            $this->components->error("Invalid block name \"{$name}\". Must be kebab-case (e.g. hero-banner).");
+            $this->components->error(sprintf('Invalid block name "%s". Must be kebab-case (e.g. hero-banner).', $name));
 
             return self::FAILURE;
         }
@@ -66,10 +67,8 @@ class MakeBlockCommand extends Command
         $blockDir = $blocksDir.'/'.$name;
 
         // Check if block already exists
-        if (is_dir($blockDir) && ! $this->option('force')) {
-            if (! $this->components->confirm("Block \"{$name}\" already exists. Overwrite?")) {
-                return self::FAILURE;
-            }
+        if (is_dir($blockDir) && !$this->option('force') && ! $this->components->confirm(sprintf('Block "%s" already exists. Overwrite?', $name))) {
+            return self::FAILURE;
         }
 
         $isFirstBlock = ! is_dir($blocksDir) || $this->isEmptyDirectory($blocksDir);
@@ -83,14 +82,14 @@ class MakeBlockCommand extends Command
         $this->scaffoldBlock($name, $blockDir, $target);
 
         $namespace = $this->option('namespace') ?? $target['slug'];
-        $this->components->info("Block [{$namespace}/{$name}] created in {$blockDir}/");
+        $this->components->info(sprintf('Block [%s/%s] created in %s/', $namespace, $name, $blockDir));
 
         if ($isFirstBlock) {
             $this->newLine();
             $this->components->info('Next steps:');
-            $this->line("  1. Run: cd {$target['path']} && npm install");
+            $this->line(sprintf('  1. Run: cd %s && npm install', $target['path']));
             $this->line('  2. Run: npm run dev (for HMR) or npm run build');
-            $this->line("  3. Your block will appear in the editor under \"{$this->option('category')}\" category");
+            $this->line(sprintf('  3. Your block will appear in the editor under "%s" category', $this->option('category')));
         }
 
         return self::SUCCESS;
@@ -115,7 +114,7 @@ class MakeBlockCommand extends Command
             $path = $this->getPluginPath();
 
             if (! is_dir($path)) {
-                $this->components->error("Plugin directory not found: {$path}");
+                $this->components->error('Plugin directory not found: ' . $path);
 
                 return null;
             }
@@ -141,7 +140,7 @@ class MakeBlockCommand extends Command
         $path = $this->getThemePath($theme);
 
         if (! is_dir($path)) {
-            $this->components->error("Theme directory not found: {$path}");
+            $this->components->error('Theme directory not found: ' . $path);
 
             return null;
         }
@@ -248,19 +247,18 @@ class MakeBlockCommand extends Command
         if (! str_contains($content, '@roots/vite-plugin')) {
             $imports[] = $rootsImport;
         }
+
         if (! str_contains($content, 'globSync')) {
             $imports[] = $globImport;
         }
 
-        if ($imports !== []) {
-            // Find the last import statement and add after it
-            if (preg_match('/^(import\s+.+?[\'"];?\s*$)/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
-                // Find the last import
-                preg_match_all('/^import\s+.+?[\'"];?\s*$/m', $content, $allMatches, PREG_OFFSET_CAPTURE);
-                $lastImport = end($allMatches[0]);
-                $insertPos = $lastImport[1] + strlen($lastImport[0]);
-                $content = substr($content, 0, $insertPos)."\n".implode("\n", $imports).substr($content, $insertPos);
-            }
+        // Find the last import statement and add after it
+        if ($imports !== [] && preg_match('/^(import\s+.+?[\'"];?\s*$)/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
+            // Find the last import
+            preg_match_all('/^import\s+.+?[\'"];?\s*$/m', $content, $allMatches, PREG_OFFSET_CAPTURE);
+            $lastImport = end($allMatches[0]);
+            $insertPos = $lastImport[1] + strlen($lastImport[0]);
+            $content = substr($content, 0, $insertPos)."\n".implode("\n", $imports).substr($content, $insertPos);
         }
 
         // 2. Add block entries discovery after imports (before export/function)
@@ -275,12 +273,10 @@ const blockEntries = globSync('./resources/blocks/*/index.{js,jsx,ts,tsx}')
 const hasBlocks = Object.keys(blockEntries).length > 0;
 JS;
 
-        if (! str_contains($content, 'blockEntries')) {
-            // Insert before the first export or function declaration
-            if (preg_match('/^(export\s|function\s|const\s+\w+\s*=\s*\()/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
-                $insertPos = $matches[0][1];
-                $content = substr($content, 0, $insertPos).$blockEntriesCode."\n\n".substr($content, $insertPos);
-            }
+        // Insert before the first export or function declaration
+        if (!str_contains($content, 'blockEntries') && preg_match('/^(export\s|function\s|const\s+\w+\s*=\s*\()/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
+            $insertPos = $matches[0][1];
+            $content = substr($content, 0, $insertPos).$blockEntriesCode."\n\n".substr($content, $insertPos);
         }
 
         // 3. Add block entries to input array
@@ -297,22 +293,20 @@ JS;
         }
 
         // 4. Add wordpressPlugin() to plugins array
-        if (! str_contains($content, 'wordpressPlugin')) {
-            // Find plugins: [ ... ] and add before the closing bracket
-            if (preg_match('/(plugins:\s*\[)(.*?)(\])/s', $content, $matches)) {
-                $existingPlugins = rtrim($matches[2]);
-                $separator = $existingPlugins !== '' ? ",\n        " : "\n        ";
-                $content = str_replace(
-                    $matches[0],
-                    $matches[1].$matches[2].$separator.'...(hasBlocks ? [wordpressPlugin()] : [])'.$separator.$matches[3],
-                    $content
-                );
-            }
+        // Find plugins: [ ... ] and add before the closing bracket
+        if (!str_contains($content, 'wordpressPlugin') && preg_match('/(plugins:\s*\[)(.*?)(\])/s', $content, $matches)) {
+            $existingPlugins = rtrim($matches[2]);
+            $separator = $existingPlugins !== '' ? ",\n        " : "\n        ";
+            $content = str_replace(
+                $matches[0],
+                $matches[1].$matches[2].$separator.'...(hasBlocks ? [wordpressPlugin()] : [])'.$separator.$matches[3],
+                $content
+            );
         }
 
         // 5. Add resources/blocks/** to refresh paths if present
         if (str_contains($content, 'refresh') && ! str_contains($content, 'resources/blocks')) {
-            $content = preg_replace(
+            return preg_replace(
                 "/(refresh:\s*\[)([^\]]*?)(\])/",
                 '$1$2, \'resources/blocks/**\'$3',
                 $content
@@ -354,7 +348,7 @@ JS;
         $packageJsonPath = $target['path'].'/package.json';
 
         if (! file_exists($packageJsonPath)) {
-            $this->components->error("package.json not found in {$target['path']}. Run npm init -y first.");
+            $this->components->error(sprintf('package.json not found in %s. Run npm init -y first.', $target['path']));
 
             return;
         }
@@ -415,6 +409,7 @@ JS;
         // block.json — may need conditional additions
         $blockJson = $this->getStubContent('block.json');
         $blockJson = $this->replaceStubPlaceholders($blockJson, $replacements);
+
         $blockJsonData = json_decode($blockJson, true);
 
         if ($isDynamic) {
@@ -441,6 +436,7 @@ JS;
                 $indexStub
             );
         }
+
         $this->writeStub($blockDir.'/index.jsx', $indexStub, $replacements);
 
         // edit.jsx
@@ -474,13 +470,13 @@ JS;
     private function getStubContent(string $stubName): string
     {
         // Check for published stubs first
-        $publishedPath = base_path("stubs/pollora-block/{$stubName}.stub");
+        $publishedPath = base_path(sprintf('stubs/pollora-block/%s.stub', $stubName));
 
         if (file_exists($publishedPath)) {
             return file_get_contents($publishedPath);
         }
 
-        return file_get_contents(dirname(__DIR__, 2)."/stubs/{$stubName}.stub");
+        return file_get_contents(dirname(__DIR__, 2).sprintf('/stubs/%s.stub', $stubName));
     }
 
     /**

@@ -12,6 +12,8 @@ trait HasThemeSupport
 {
     const THEME_OPTION = 'theme';
 
+    private ?ThemeRegistrarInterface $registrar = null;
+
     /**
      * Get the console command options for theme support.
      *
@@ -55,11 +57,11 @@ trait HasThemeSupport
      */
     protected function getActiveTheme(): ?string
     {
-        if (! property_exists($this, 'registrar') || $this->registrar === null) {
+        if ($this->registrar === null) {
             $this->registrar = resolve(ThemeRegistrarInterface::class);
         }
 
-        $activeTheme = $this->registrar?->getActiveTheme();
+        $activeTheme = $this->registrar->getActiveTheme();
 
         if ($activeTheme) {
             return $activeTheme->getName();
@@ -137,7 +139,7 @@ trait HasThemeSupport
     /**
      * Resolve theme location.
      *
-     * @return array{type: string, path: string, namespace: string, name: string}
+     * @return array{type: string, path: string, namespace: string, name: string, source_path: string, source_namespace: string}
      *
      * @throws InvalidArgumentException When theme is not found
      */
@@ -163,6 +165,7 @@ trait HasThemeSupport
         return [
             'type' => 'theme',
             'path' => $this->getThemePath($theme),
+            'name' => $theme,
             'namespace' => 'Theme\\'.$this->normalizeThemeName($theme),
             'source_path' => $this->getThemeSourcePath($theme),
             'source_namespace' => $this->getThemeSourceNamespace($theme),

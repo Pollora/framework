@@ -25,17 +25,17 @@ class BlockRegistrar implements BlockRegistrarInterface
     /**
      * Script fields in block.json.
      */
-    private const SCRIPT_FIELDS = ['editorScript', 'script', 'viewScript'];
+    private const array SCRIPT_FIELDS = ['editorScript', 'script', 'viewScript'];
 
     /**
      * Style fields in block.json.
      */
-    private const STYLE_FIELDS = ['editorStyle', 'style', 'viewStyle'];
+    private const array STYLE_FIELDS = ['editorStyle', 'style', 'viewStyle'];
 
     /**
      * Default WordPress dependencies for editor scripts.
      */
-    private const DEFAULT_EDITOR_DEPS = ['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n'];
+    private const array DEFAULT_EDITOR_DEPS = ['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n'];
 
     public function __construct(
         private readonly AssetManager $assetManager,
@@ -50,7 +50,11 @@ class BlockRegistrar implements BlockRegistrarInterface
         $iterator = new \DirectoryIterator($directory);
 
         foreach ($iterator as $item) {
-            if ($item->isDot() || ! $item->isDir()) {
+            if ($item->isDot()) {
+                continue;
+            }
+
+            if (! $item->isDir()) {
                 continue;
             }
 
@@ -67,7 +71,7 @@ class BlockRegistrar implements BlockRegistrarInterface
         $metadataFile = $blockDir.'/block.json';
 
         if (! file_exists($metadataFile)) {
-            Log::warning("BlockRegistrar: block.json not found in {$blockDir}");
+            Log::warning('BlockRegistrar: block.json not found in ' . $blockDir);
 
             return;
         }
@@ -75,14 +79,14 @@ class BlockRegistrar implements BlockRegistrarInterface
         $metadata = json_decode(file_get_contents($metadataFile), true);
 
         if (! is_array($metadata) || ! isset($metadata['name'])) {
-            Log::warning("BlockRegistrar: Invalid block.json in {$blockDir}");
+            Log::warning('BlockRegistrar: Invalid block.json in ' . $blockDir);
 
             return;
         }
 
         $viteManager = $this->getBlocksViteManager($containerName);
 
-        if ($viteManager === null) {
+        if (!$viteManager instanceof \Pollora\Asset\Domain\Contracts\ViteManagerInterface) {
             return;
         }
 
@@ -104,8 +108,8 @@ class BlockRegistrar implements BlockRegistrarInterface
         // It reads block.json, generates handles, finds them already registered, and wires everything.
         $args = [];
 
-        if (isset($metadata['render']) && str_starts_with($metadata['render'], 'file:./')) {
-            $renderFile = $blockDir.'/'.substr($metadata['render'], 7);
+        if (isset($metadata['render']) && str_starts_with((string) $metadata['render'], 'file:./')) {
+            $renderFile = $blockDir.'/'.substr((string) $metadata['render'], 7);
 
             if (file_exists($renderFile)) {
                 $args['render_callback'] = function (array $attributes, string $content, \WP_Block $block) use ($renderFile): string {
@@ -141,7 +145,7 @@ class BlockRegistrar implements BlockRegistrarInterface
         }
 
         $relativeFile = substr($metadata[$field], 7);
-        $entryPoint = "resources/blocks/{$slug}/{$relativeFile}";
+        $entryPoint = sprintf('resources/blocks/%s/%s', $slug, $relativeFile);
         $handle = $this->buildHandle($blockName, $field);
         $deps = $field === 'editorScript' ? self::DEFAULT_EDITOR_DEPS : [];
 
@@ -180,7 +184,7 @@ class BlockRegistrar implements BlockRegistrarInterface
         }
 
         $relativeFile = substr($metadata[$field], 7);
-        $entryPoint = "resources/blocks/{$slug}/{$relativeFile}";
+        $entryPoint = sprintf('resources/blocks/%s/%s', $slug, $relativeFile);
         $handle = $this->buildHandle($blockName, $field);
 
         if ($viteManager->isRunningHot()) {
@@ -205,7 +209,7 @@ class BlockRegistrar implements BlockRegistrarInterface
             }
 
             if (! str_contains($tag, 'type="module"')) {
-                $tag = str_replace(' src=', ' type="module" crossorigin src=', $tag);
+                return str_replace(' src=', ' type="module" crossorigin src=', $tag);
             }
 
             return $tag;
@@ -222,11 +226,11 @@ class BlockRegistrar implements BlockRegistrarInterface
     {
         $blocksContainerName = $parentContainerName.'.blocks';
 
-        if ($this->assetManager->getContainer($blocksContainerName) === null) {
+        if (!$this->assetManager->getContainer($blocksContainerName) instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer) {
             $parentContainer = $this->assetManager->getContainer($parentContainerName);
 
-            if ($parentContainer === null) {
-                Log::warning("BlockRegistrar: Asset container '{$parentContainerName}' not found");
+            if (!$parentContainer instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer) {
+                Log::warning(sprintf("BlockRegistrar: Asset container '%s' not found", $parentContainerName));
 
                 return null;
             }
@@ -253,8 +257,8 @@ class BlockRegistrar implements BlockRegistrarInterface
     private function buildHandle(string $blockName, string $field): string
     {
         $base = str_replace('/', '-', $blockName);
-        $suffix = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $field));
+        $suffix = strtolower((string) preg_replace('/([a-z])([A-Z])/', '$1-$2', $field));
 
-        return "{$base}-{$suffix}";
+        return sprintf('%s-%s', $base, $suffix);
     }
 }
