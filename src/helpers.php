@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use Coduo\PHPHumanizer\StringHumanizer;
 use Illuminate\Support\Str;
-use Pollora\Support\RecursiveMenuIterator;
-
 if (! function_exists('mysqli_report')) {
     /**
      * Report MySQL errors.
@@ -25,23 +23,6 @@ if (! function_exists('is_secured')) {
     function is_secured(): bool
     {
         return str_contains((string) config('app.url'), 'https://');
-    }
-}
-
-if (! function_exists('menu')) {
-    /**
-     * Get a {@link RecursiveIteratorIterator} for a WordPress menu.
-     *
-     * @param  string  $name  name of the menu to get
-     * @param  int  $depth  how far to recurse down the nodes
-     * @param  int  $mode  flags to pass to the {@link RecursiveIteratorIterator}
-     */
-    function menu(string $name, $depth = -1, int $mode = RecursiveIteratorIterator::SELF_FIRST): RecursiveIteratorIterator
-    {
-        $iterator = new RecursiveIteratorIterator(new RecursiveMenuIterator($name), $mode);
-        $iterator->setMaxDepth($depth);
-
-        return $iterator;
     }
 }
 

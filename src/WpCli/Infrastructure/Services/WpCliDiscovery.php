@@ -210,7 +210,7 @@ final class WpCliDiscovery implements DiscoveryInterface
     /**
      * Create a callable for a method (handles private/protected methods).
      */
-    private function createCallable(object $instance, ReflectionMethod $method): array
+    private function createCallable(object $instance, ReflectionMethod $method): array|\Closure
     {
         if ($method->isPublic()) {
             // Cas simple : WP-CLI peut appeler directement [instance, 'methodName']
@@ -299,7 +299,7 @@ final class WpCliDiscovery implements DiscoveryInterface
             }
 
             // After short description, collect long description
-            if (isset($description['short']) && ($description['short'] !== '' && $description['short'] !== '0')) {
+            if ($description['short'] !== '' && $description['short'] !== '0') {
                 $inLongDesc = true;
                 if ($line !== '' && $line !== '0' || $longDescLines !== []) {
                     $longDescLines[] = $line;

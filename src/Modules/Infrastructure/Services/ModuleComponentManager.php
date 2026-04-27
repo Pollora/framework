@@ -83,7 +83,7 @@ class ModuleComponentManager
                 }
             }
         } catch (\Throwable $throwable) {
-            if (env('APP_DEBUG', false)) {
+            if (config('app.debug', false)) {
                 throw new \RuntimeException(
                     sprintf('Failed to initialize component %s for module %s: ', $componentClass, $moduleId).$throwable->getMessage(),
                     0,

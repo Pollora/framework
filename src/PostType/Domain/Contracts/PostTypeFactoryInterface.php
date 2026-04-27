@@ -17,5 +17,5 @@ interface PostTypeFactoryInterface
      * @param  string|null  $plural  The plural label for the post type
      * @param  array<string, mixed>  $args  Additional arguments
      */
-    public function make(string $slug, ?string $singular = null, ?string $plural = null, array $args = []): object;
+    public function make(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object;
 }

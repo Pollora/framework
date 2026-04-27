@@ -153,7 +153,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         // Additional fallback: check common WordPress installation paths
         if ($directories === []) {
             $commonPaths = [
-                ABSPATH.'wp-content/themes' ?? '',
+                ABSPATH.'wp-content/themes',
                 __DIR__.'/../../../../../wp-content/themes',
             ];
 
@@ -201,8 +201,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
     private function isFunctionAvailable(string $functionName): bool
     {
         return $functionName !== '' && $functionName !== '0' &&
-            function_exists($functionName) &&
-            is_callable($functionName);
+            function_exists($functionName);
     }
 
     /**

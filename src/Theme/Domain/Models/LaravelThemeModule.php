@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Domain\Models;
 
-use Illuminate\Container\Container;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Str;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
+use Psr\Container\ContainerInterface;
 
 class LaravelThemeModule extends ThemeModule
 {
@@ -19,7 +19,7 @@ class LaravelThemeModule extends ThemeModule
     public function __construct(
         string $name,
         string $path,
-        protected Container $app
+        protected ContainerInterface $app
     ) {
         parent::__construct($name, $path);
     }
@@ -30,7 +30,7 @@ class LaravelThemeModule extends ThemeModule
     public function getCachedServicesPath(): string
     {
         // Check if we are running on a Laravel Vapor managed instance
-        if (! is_null(env('VAPOR_MAINTENANCE_MODE'))) {
+        if (! is_null(config('vapor.maintenance_mode'))) {
             return Str::replaceLast('config.php', $this->getSnakeName().'_theme.php', $this->app->getCachedConfigPath());
         }
 

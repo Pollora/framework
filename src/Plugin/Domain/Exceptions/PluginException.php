@@ -24,11 +24,10 @@ class PluginException extends Exception
      * @param  string  $reason  Reason for activation failure
      * @param  int  $code  Error code
      * @param  Exception|null  $previous  Previous exception
-     * @return static
      */
-    public static function activationFailed(string $pluginName, string $reason, int $code = 0, ?Exception $previous = null): self
+    public static function activationFailed(string $pluginName, string $reason, int $code = 0, ?Exception $previous = null): static
     {
-        return new self(sprintf("Plugin '%s' activation failed: %s", $pluginName, $reason), $code, $previous);
+        return new static(sprintf("Plugin '%s' activation failed: %s", $pluginName, $reason), $code, $previous);
     }
 
     /**
@@ -38,11 +37,10 @@ class PluginException extends Exception
      * @param  string  $reason  Reason for deactivation failure
      * @param  int  $code  Error code
      * @param  Exception|null  $previous  Previous exception
-     * @return static
      */
-    public static function deactivationFailed(string $pluginName, string $reason, int $code = 0, ?Exception $previous = null): self
+    public static function deactivationFailed(string $pluginName, string $reason, int $code = 0, ?Exception $previous = null): static
     {
-        return new self(sprintf("Plugin '%s' deactivation failed: %s", $pluginName, $reason), $code, $previous);
+        return new static(sprintf("Plugin '%s' deactivation failed: %s", $pluginName, $reason), $code, $previous);
     }
 
     /**
@@ -52,11 +50,10 @@ class PluginException extends Exception
      * @param  string  $configIssue  Configuration issue description
      * @param  int  $code  Error code
      * @param  Exception|null  $previous  Previous exception
-     * @return static
      */
-    public static function configurationError(string $pluginName, string $configIssue, int $code = 0, ?Exception $previous = null): self
+    public static function configurationError(string $pluginName, string $configIssue, int $code = 0, ?Exception $previous = null): static
     {
-        return new self(sprintf("Plugin '%s' configuration error: %s", $pluginName, $configIssue), $code, $previous);
+        return new static(sprintf("Plugin '%s' configuration error: %s", $pluginName, $configIssue), $code, $previous);
     }
 
     /**
@@ -66,11 +63,10 @@ class PluginException extends Exception
      * @param  string  $dependencyIssue  Dependency issue description
      * @param  int  $code  Error code
      * @param  Exception|null  $previous  Previous exception
-     * @return static
      */
-    public static function dependencyConflict(string $pluginName, string $dependencyIssue, int $code = 0, ?Exception $previous = null): self
+    public static function dependencyConflict(string $pluginName, string $dependencyIssue, int $code = 0, ?Exception $previous = null): static
     {
-        return new self(sprintf("Plugin '%s' dependency conflict: %s", $pluginName, $dependencyIssue), $code, $previous);
+        return new static(sprintf("Plugin '%s' dependency conflict: %s", $pluginName, $dependencyIssue), $code, $previous);
     }
 
     /**
@@ -80,11 +76,10 @@ class PluginException extends Exception
      * @param  string  $fileSystemIssue  File system issue description
      * @param  int  $code  Error code
      * @param  Exception|null  $previous  Previous exception
-     * @return static
      */
-    public static function fileSystemError(string $pluginName, string $fileSystemIssue, int $code = 0, ?Exception $previous = null): self
+    public static function fileSystemError(string $pluginName, string $fileSystemIssue, int $code = 0, ?Exception $previous = null): static
     {
-        return new self(sprintf("Plugin '%s' file system error: %s", $pluginName, $fileSystemIssue), $code, $previous);
+        return new static(sprintf("Plugin '%s' file system error: %s", $pluginName, $fileSystemIssue), $code, $previous);
     }
 
     /**
@@ -93,11 +88,10 @@ class PluginException extends Exception
      * @param  string  $pluginName  Plugin name
      * @param  int  $code  Error code
      * @param  Exception|null  $previous  Previous exception
-     * @return static
      */
-    public static function pluginNotFound(string $pluginName, int $code = 0, ?Exception $previous = null): self
+    public static function pluginNotFound(string $pluginName, int $code = 0, ?Exception $previous = null): static
     {
-        return new self(sprintf("Plugin '%s' not found", $pluginName), $code, $previous);
+        return new static(sprintf("Plugin '%s' not found", $pluginName), $code, $previous);
     }
 
     /**
@@ -107,10 +101,9 @@ class PluginException extends Exception
      * @param  string  $structureIssue  Structure issue description
      * @param  int  $code  Error code
      * @param  Exception|null  $previous  Previous exception
-     * @return static
      */
-    public static function invalidStructure(string $pluginName, string $structureIssue, int $code = 0, ?Exception $previous = null): self
+    public static function invalidStructure(string $pluginName, string $structureIssue, int $code = 0, ?Exception $previous = null): static
     {
-        return new self(sprintf("Plugin '%s' has invalid structure: %s", $pluginName, $structureIssue), $code, $previous);
+        return new static(sprintf("Plugin '%s' has invalid structure: %s", $pluginName, $structureIssue), $code, $previous);
     }
 }

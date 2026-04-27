@@ -290,17 +290,11 @@ class PluginRegistrar
             // Only register components that can be automatically instantiated
             // Domain entities like PostType, Taxonomy, etc. should not be registered
             // as they require specific constructor parameters
-            $pluginComponents = [
-                // Add service classes here that can be auto-instantiated if needed
-                // Example: \Plugin\MyPlugin\Services\ExampleService::class,
-            ];
-
-            $moduleId = 'plugin.'.$plugin->getLowerName();
-
-            if ($pluginComponents !== []) {
-                $componentManager->registerModuleComponents($moduleId, $pluginComponents);
-                $componentManager->initializeModuleComponents($moduleId);
-            }
+            // To enable, add service classes here and uncomment the registration below:
+            // $pluginComponents = [\Plugin\MyPlugin\Services\ExampleService::class];
+            // $moduleId = 'plugin.'.$plugin->getLowerName();
+            // $componentManager->registerModuleComponents($moduleId, $pluginComponents);
+            // $componentManager->initializeModuleComponents($moduleId);
         } catch (\Exception $exception) {
             $this->logError('Failed to setup plugin components: '.$exception->getMessage());
         }

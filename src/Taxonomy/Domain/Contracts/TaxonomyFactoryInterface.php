@@ -18,5 +18,5 @@ interface TaxonomyFactoryInterface
      * @param  string|null  $plural  The plural label for the taxonomy
      * @param  array<string, mixed>  $args  Additional arguments
      */
-    public function make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = []): mixed;
+    public function make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): mixed;
 }

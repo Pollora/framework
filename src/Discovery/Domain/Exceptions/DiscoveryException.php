@@ -22,7 +22,7 @@ class DiscoveryException extends Exception
      */
     public static function discoveryFailed(string $discoveryClass, ?\Throwable $previous = null): static
     {
-        return new static(
+        return new self(
             message: 'Discovery failed for class: '.$discoveryClass,
             previous: $previous
         );
@@ -36,7 +36,7 @@ class DiscoveryException extends Exception
      */
     public static function applicationFailed(string $discoveryClass, ?\Throwable $previous = null): static
     {
-        return new static(
+        return new self(
             message: 'Failed to apply discovery for class: '.$discoveryClass,
             previous: $previous
         );

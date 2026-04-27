@@ -211,8 +211,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process Taxonomy for class %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            error_log(sprintf('Failed to process Taxonomy for class %s: ', $className).$throwable->getMessage());
         }
     }
 
@@ -261,8 +261,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$throwable->getMessage());
         }
 
         return $config;
@@ -288,8 +288,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$throwable->getMessage());
         }
 
         return $config;
@@ -366,9 +366,9 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     }
                 }
             }
-        } catch (\ReflectionException|\Throwable $e) {
+        } catch (\Throwable $throwable) {
             // Log the error but continue - additional args are optional
-            error_log(sprintf('Failed to process additional args for %s: ', $className).$e->getMessage());
+            error_log(sprintf('Failed to process additional args for %s: ', $className).$throwable->getMessage());
         }
     }
 

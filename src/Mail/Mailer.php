@@ -326,8 +326,8 @@ class Mailer
 
         // Match both quoted and unquoted names
         if (preg_match('/^(?:"?([^"]*?)"?\s*)?<([^>]+)>$/', $email, $matches)) {
-            $name = trim($matches[1] ?? '');
-            $addr = trim($matches[2] ?? '');
+            $name = trim($matches[1]);
+            $addr = trim($matches[2]);
 
             return $name !== ''
                 ? $name.' <'.$addr.'>'
@@ -372,8 +372,8 @@ class Mailer
             return $address;
         }
 
-        $name = trim($matches[1] ?? '');
-        $email = trim($matches[2] ?? '');
+        $name = trim($matches[1]);
+        $email = trim($matches[2]);
 
         // Return array only when a name is present
         return $name !== ''

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Pollora\Plugin\Domain\Models;
 
-use Illuminate\Container\Container;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Str;
 use Pollora\Plugin\Infrastructure\Services\PluginAutoloader;
+use Psr\Container\ContainerInterface;
 
 /**
  * Laravel-specific plugin module implementation.
@@ -28,12 +28,12 @@ class LaravelPluginModule extends PluginModule
      *
      * @param  string  $name  Plugin name
      * @param  string  $path  Plugin path
-     * @param  Container  $app  Laravel application container
+     * @param  ContainerInterface  $app  Laravel application container
      */
     public function __construct(
         string $name,
         string $path,
-        protected Container $app
+        protected ContainerInterface $app
     ) {
         parent::__construct($name, $path);
     }
@@ -46,7 +46,7 @@ class LaravelPluginModule extends PluginModule
     public function getCachedServicesPath(): string
     {
         // Check if we are running on a Laravel Vapor managed instance
-        if (! is_null(env('VAPOR_MAINTENANCE_MODE'))) {
+        if (! is_null(config('vapor.maintenance_mode'))) {
             return Str::replaceLast('config.php', $this->getSnakeName().'_plugin.php', $this->app->getCachedConfigPath());
         }
 

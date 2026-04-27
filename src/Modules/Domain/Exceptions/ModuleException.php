@@ -10,17 +10,17 @@ class ModuleException extends Exception
 {
     public static function notFound(string $name): static
     {
-        return new static(sprintf('Module [%s] not found.', $name));
+        return new self(sprintf('Module [%s] not found.', $name));
     }
 
     public static function alreadyEnabled(string $name): static
     {
-        return new static(sprintf('Module [%s] is already enabled.', $name));
+        return new self(sprintf('Module [%s] is already enabled.', $name));
     }
 
     public static function alreadyDisabled(string $name): static
     {
-        return new static(sprintf('Module [%s] is already disabled.', $name));
+        return new self(sprintf('Module [%s] is already disabled.', $name));
     }
 
     public static function cannotEnable(string $name, string $reason = ''): static
@@ -30,7 +30,7 @@ class ModuleException extends Exception
             $message .= ': '.$reason;
         }
 
-        return new static($message);
+        return new self($message);
     }
 
     public static function cannotDisable(string $name, string $reason = ''): static
@@ -40,6 +40,6 @@ class ModuleException extends Exception
             $message .= ': '.$reason;
         }
 
-        return new static($message);
+        return new self($message);
     }
 }

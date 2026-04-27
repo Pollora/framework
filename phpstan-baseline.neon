@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Constructor of class Pollora\\Asset\\Application\\Services\\AssetManager has an unused parameter \$registrationService\.$#'
-			identifier: constructor.unusedParameter
-			count: 1
-			path: src/Asset/Application/Services/AssetManager.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Foundation\\Vite\:\:getAssetUrls\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -41,30 +35,6 @@ parameters:
 			identifier: attribute.abstract
 			count: 1
 			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/WpCli/AfterInvoke.php
-
-		-
-			message: '#^PHPDoc type for property Pollora\\Attributes\\WpCli\\AfterInvoke\:\:\$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: src/Attributes/WpCli/AfterInvoke.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/WpCli/BeforeInvoke.php
-
-		-
-			message: '#^PHPDoc type for property Pollora\\Attributes\\WpCli\\BeforeInvoke\:\:\$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: src/Attributes/WpCli/BeforeInvoke.php
 
 		-
 			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$classPermission\.$#'
@@ -121,45 +91,51 @@ parameters:
 			path: src/BlockPattern/UI/PatternComponent.php
 
 		-
-			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:filter\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
-			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:map\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
-			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:merge\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
-			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:values\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
-			count: 2
+			count: 4
+			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
+
+		-
+			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\:\:applicationFailed\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\.$#'
+			identifier: return.type
+			count: 1
 			path: src/Discovery/Domain/Exceptions/DiscoveryException.php
 
 		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 2
+			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\:\:discoveryFailed\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Discovery/Domain/Exceptions/DiscoveryException.php
+
+		-
+			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\:\:withClass\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\.$#'
+			identifier: return.type
+			count: 1
 			path: src/Discovery/Domain/Exceptions/DiscoveryNotFoundException.php
 
 		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 3
+			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\:\:withIdentifier\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Discovery/Domain/Exceptions/DiscoveryNotFoundException.php
+
+		-
+			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\:\:duplicateIdentifier\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Discovery/Domain/Exceptions/InvalidDiscoveryException.php
+
+		-
+			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\:\:invalidClass\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Discovery/Domain/Exceptions/InvalidDiscoveryException.php
+
+		-
+			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\:\:missingInterface\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\.$#'
+			identifier: return.type
+			count: 1
 			path: src/Discovery/Domain/Exceptions/InvalidDiscoveryException.php
 
 		-
@@ -179,24 +155,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} and array\{\} will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Class Pollora\\Events\\WordPress\\Installer\\Plugin\\PluginDeleted has an uninitialized readonly property \$networkWide\. Assign it in the constructor\.$#'
-			identifier: property.uninitializedReadonly
-			count: 1
-			path: src/Events/WordPress/Installer/Plugin/PluginDeleted.php
 
 		-
 			message: '#^Variable \$old_value on left side of \?\? is never defined\.$#'
@@ -241,40 +199,10 @@ parameters:
 			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
 
 		-
-			message: '#^Strict comparison using \!\=\= between ''create_robots''\|''update_htaccess''\|''update_robots'' and ''0'' will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: src/Events/WordPress/Plugins/YoastSeo/YoastSeoEventDispatcher.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Exceptions/Infrastructure/Services/ModuleAwareErrorViewResolver.php
-
-		-
-			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/Logging/Application/Services/WordPressErrorLoggingService.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 2
-			path: src/Logging/Infrastructure/Providers/LoggingServiceProvider.php
-
-		-
-			message: '#^Offset 1 on array\{non\-falsy\-string, string, non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: src/Mail/Mailer.php
-
-		-
-			message: '#^Offset 2 on array\{non\-falsy\-string, string, non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: src/Mail/Mailer.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta_value\.$#'
@@ -283,20 +211,38 @@ parameters:
 			path: src/Models/Attachment.php
 
 		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 5
+			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:alreadyDisabled\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Modules/Domain/Exceptions/ModuleException.php
+
+		-
+			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:alreadyEnabled\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Modules/Domain/Exceptions/ModuleException.php
+
+		-
+			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:cannotDisable\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Modules/Domain/Exceptions/ModuleException.php
+
+		-
+			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:cannotEnable\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Modules/Domain/Exceptions/ModuleException.php
+
+		-
+			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:notFound\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
+			identifier: return.type
+			count: 1
 			path: src/Modules/Domain/Exceptions/ModuleException.php
 
 		-
 			message: '#^Call to an undefined method Pollora\\Modules\\Infrastructure\\Services\\FrameworkModuleDiscovery\:\:discoverModule\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Modules/Infrastructure/Services/FrameworkModuleDiscovery.php
-
-		-
-			message: '#^Class Pollora\\Discovery\\Domain\\Models\\DirectoryLocation constructor invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
 			count: 1
 			path: src/Modules/Infrastructure/Services/FrameworkModuleDiscovery.php
 
@@ -319,12 +265,6 @@ parameters:
 			path: src/Modules/Infrastructure/Services/ModuleBootstrap.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: src/Modules/Infrastructure/Services/ModuleComponentManager.php
-
-		-
 			message: '#^Argument of an invalid type Illuminate\\Routing\\RouteCollectionInterface supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 2
@@ -337,86 +277,38 @@ parameters:
 			path: src/Modules/UI/Helpers/discovery_functions.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: src/Option/Application/Services/OptionService.php
-
-		-
 			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
 			identifier: varTag.nativeType
 			count: 1
 			path: src/Plugin/Application/Services/PluginManager.php
 
 		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Domain\\Models\\LaravelPluginModule constructor expects Illuminate\\Container\\Container, Psr\\Container\\ContainerInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugin/Application/Services/PluginRegistrar.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between array\{\} and array\{\} will always evaluate to false\.$#'
-			identifier: notIdentical.alwaysFalse
-			count: 1
-			path: src/Plugin/Application/Services/PluginRegistrar.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:activationFailed\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 7
 			path: src/Plugin/Domain/Exceptions/PluginException.php
 
 		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:configurationError\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:bound\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Plugin/Domain/Models/LaravelPluginModule.php
 
 		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:deactivationFailed\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:dependencyConflict\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:fileSystemError\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:invalidStructure\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:pluginNotFound\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getCachedConfigPath\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Plugin/Domain/Models/LaravelPluginModule.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getCachedServicesPath\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Plugin/Domain/Models/LaravelPluginModule.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:make\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: src/Plugin/Domain/Models/LaravelPluginModule.php
 
@@ -427,20 +319,14 @@ parameters:
 			path: src/Plugin/config/plugin.php
 
 		-
-			message: '#^Method Pollora\\PostType\\Domain\\Contracts\\PostTypeFactoryInterface\:\:make\(\) invoked with 5 parameters, 1\-4 required\.$#'
-			identifier: arguments.count
-			count: 2
-			path: src/PostType/Application/Services/PostTypeService.php
-
-		-
 			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
 			identifier: catch.neverThrown
-			count: 2
+			count: 1
 			path: src/PostType/Infrastructure/Services/PostTypeDiscovery.php
 
 		-
-			message: '#^PHPDoc type mixed of property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh is not covariant with PHPDoc type mysqli\|false\|null of overridden property wpdb\:\:\$dbh\.$#'
-			identifier: property.phpDocType
+			message: '#^Property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh \(mysqli\|false\|null\) does not accept PDO\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: src/Proxy/WordPressDatabase.php
 
@@ -455,18 +341,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Route/Infrastructure/Middleware/WordPressBindings.php
-
-		-
-			message: '#^Call to function method_exists\(\) with Pollora\\Route\\Domain\\Models\\Route and ''getCompiled'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Route/Infrastructure/Middleware/WordPressBodyClass.php
-
-		-
-			message: '#^Method Pollora\\Route\\Infrastructure\\Middleware\\WordPressHeaders\:\:handle\(\) should return Symfony\\Component\\HttpFoundation\\Response but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Route/Infrastructure/Middleware/WordPressHeaders.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Routing\\Route\:\:setCondition\(\)\.$#'
@@ -541,49 +415,13 @@ parameters:
 			path: src/Services/WordPress/Installation/WordPressInstallLoaderService.php
 
 		-
-			message: '#^Access to an undefined property WP_Post\:\:\$children\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Support/RecursiveMenuIterator.php
-
-		-
-			message: '#^Class Pollora\\Support\\RecursiveMenuIterator @extends tag contains incompatible type iterable\<int, WP_Post\>&Pollora\\Support\\AbstractRecursiveIterator\.$#'
-			identifier: generics.notCompatible
-			count: 1
-			path: src/Support/RecursiveMenuIterator.php
-
-		-
-			message: '#^Method Pollora\\Support\\RecursiveMenuIterator\:\:getChildren\(\) has invalid return type Pollora\\Support\\Pollora\\Support\\RecursiveMenuIterator\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Support/RecursiveMenuIterator.php
-
-		-
-			message: '#^PHPDoc tag @return with type Pollora\\Support\\Pollora\\Support\\RecursiveMenuIterator is not subtype of native type Pollora\\Support\\RecursiveMenuIterator\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: src/Support/RecursiveMenuIterator.php
-
-		-
-			message: '#^Trait Pollora\\Support\\Traits\\ArgumentTranslater is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Support/Traits/ArgumentTranslater.php
-
-		-
 			message: '#^Constant WPINC not found\.$#'
 			identifier: constant.notFound
 			count: 1
 			path: src/Support/WordPress.php
 
 		-
-			message: '#^Method Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyFactoryInterface\:\:make\(\) invoked with 6 parameters, 2\-5 required\.$#'
-			identifier: arguments.count
-			count: 2
-			path: src/Taxonomy/Application/Services/TaxonomyService.php
-
-		-
-			message: '#^Method Pollora\\Taxonomy\\Infrastructure\\Adapters\\WordPressTaxonomyRegistry\:\:getAll\(\) should return array\<string, mixed\> but returns array\<int, WP_Taxonomy\>\.$#'
+			message: '#^Method Pollora\\Taxonomy\\Infrastructure\\Adapters\\WordPressTaxonomyRegistry\:\:getAll\(\) should return array\<string, WP_Taxonomy\> but returns array\<int, WP_Taxonomy\>\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php
@@ -591,7 +429,7 @@ parameters:
 		-
 			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
 			identifier: catch.neverThrown
-			count: 2
+			count: 1
 			path: src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php
 
 		-
@@ -613,46 +451,28 @@ parameters:
 			path: src/Theme/Application/Services/ThemeManager.php
 
 		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Theme\\Domain\\Models\\LaravelThemeModule constructor expects Illuminate\\Container\\Container, Psr\\Container\\ContainerInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Theme/Application/Services/ThemeRegistrar.php
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:bound\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Theme/Domain/Models/LaravelThemeModule.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getCachedConfigPath\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Theme/Domain/Models/LaravelThemeModule.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getCachedServicesPath\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Theme/Domain/Models/LaravelThemeModule.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:make\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: src/Theme/Domain/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: src/Theme/Infrastructure/Providers/ThemeComponentProvider.php
-
-		-
-			message: '#^Call to function is_callable\(\) with callable\-string&non\-falsy\-string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Theme/Infrastructure/Services/WordPressThemeAdapter.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: src/Theme/Infrastructure/Services/WordPressThemeAdapter.php
 
 		-
 			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\View\\WooCommerceTemplateResolver not found\.$#'
@@ -671,18 +491,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
-
-		-
-			message: '#^Negated boolean expression is always true\.$#'
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
-
-		-
-			message: '#^Class Pollora\\View\\Infrastructure\\Services\\WordPressTemplateHierarchyFilter constructor invoked with 3 parameters, 2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/View/Infrastructure/Providers/TemplateHierarchyServiceProvider.php
 
 		-
 			message: '#^Anonymous function never returns array so it can be removed from the return type\.$#'
@@ -727,43 +535,7 @@ parameters:
 			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
 
 		-
-			message: '#^Dead catch \- Throwable is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
-
-		-
-			message: '#^Class class@anonymous/WpCli/Infrastructure/Adapters/WpCliMethodWrapper\.php\:58 does not have a constructor and must be instantiated without any parameters\.$#'
-			identifier: new.noConstructor
-			count: 1
-			path: src/WpCli/Infrastructure/Adapters/WpCliMethodWrapper.php
-
-		-
-			message: '#^Expression "new class\(\$this\-\>docComment, \$methodName\)…" on a separate line does not do anything\.$#'
-			identifier: expr.resultUnused
-			count: 1
-			path: src/WpCli/Infrastructure/Adapters/WpCliMethodWrapper.php
-
-		-
-			message: '#^Method Pollora\\WpCli\\Infrastructure\\Services\\WpCliDiscovery\:\:createCallable\(\) should return array but returns Closure\.$#'
-			identifier: return.type
-			count: 1
-			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
-
-		-
-			message: '#^Offset ''short'' on array\{short\: string, long\: ''''\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
-
-		-
 			message: '#^PHPDoc tag @param for parameter \$handler with type array\|object\|string is not subtype of native type array\|string\.$#'
 			identifier: parameter.phpDocType
 			count: 1
 			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
-
-		-
-			message: '#^Parameter \#2 \$mode of class RecursiveIteratorIterator constructor expects 0\|1\|2, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/helpers.php

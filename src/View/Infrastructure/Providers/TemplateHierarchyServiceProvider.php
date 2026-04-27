@@ -59,7 +59,6 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
         $this->app->bind(TemplateHierarchyFilterInterface::class, fn ($app): WordPressTemplateHierarchyFilter => new WordPressTemplateHierarchyFilter(
             $app->make(TemplateFinderInterface::class),
             $app->make(ResolveBladeTemplateUseCase::class),
-            $app->make(Filesystem::class)
         ));
     }
 

@@ -38,25 +38,25 @@ class LaravelCollectionAdapter implements CollectionInterface
     /**
      * Map over each item in the collection.
      */
-    public function map(callable $callback): CollectionInterface
+    public function map(callable $callback): static
     {
-        return new self($this->laravelCollection->map($callback));
+        return new static($this->laravelCollection->map($callback));
     }
 
     /**
      * Filter items in the collection.
      */
-    public function filter(?callable $callback = null): CollectionInterface
+    public function filter(?callable $callback = null): static
     {
-        return new self($this->laravelCollection->filter($callback));
+        return new static($this->laravelCollection->filter($callback));
     }
 
     /**
      * Get the values from a single column in the collection.
      */
-    public function values(): CollectionInterface
+    public function values(): static
     {
-        return new self($this->laravelCollection->values());
+        return new static($this->laravelCollection->values());
     }
 
     /**
@@ -70,9 +70,9 @@ class LaravelCollectionAdapter implements CollectionInterface
     /**
      * Merge the collection with the given items.
      */
-    public function merge(array $items): CollectionInterface
+    public function merge(array $items): static
     {
-        return new self($this->laravelCollection->merge($items));
+        return new static($this->laravelCollection->merge($items));
     }
 
     /**

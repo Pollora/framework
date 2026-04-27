@@ -40,11 +40,8 @@ class WordPressHeaders
      */
     public function handle(Request $request, Closure $next): SymfonyResponse
     {
+        /** @var SymfonyResponse $response */
         $response = $next($request);
-
-        if (! $response instanceof SymfonyResponse) {
-            return $response;
-        }
 
         $this->addFrameworkHeader($response);
 
