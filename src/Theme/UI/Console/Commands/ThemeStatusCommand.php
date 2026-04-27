@@ -86,7 +86,7 @@ class ThemeStatusCommand extends Command
     ): void {
         $activeTheme = $themeService->getActiveTheme();
 
-        if ($activeTheme) {
+        if ($activeTheme instanceof ThemeModuleInterface) {
             $this->info('✓ Active theme via ThemeService:');
             $this->line('  Name: '.$activeTheme->getName());
             $this->line('  Path: '.$activeTheme->getPath());
