@@ -138,7 +138,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
      */
     public function getBladeTemplates(array $templates): array
     {
-        return array_map(fn (string $template): string|array => str_ends_with($template, '.php') && ! str_ends_with($template, '.blade.php')
+        return array_map(fn (string $template): string => str_ends_with($template, '.php') && ! str_ends_with($template, '.blade.php')
             ? str_replace('.php', '.blade.php', $template)
             : $template, $templates);
     }

@@ -114,7 +114,7 @@ final class WpCliAdapter
             return null;
         }
 
-        return WP_CLI_VERSION ?? null;
+        return WP_CLI_VERSION;
     }
 
     /**

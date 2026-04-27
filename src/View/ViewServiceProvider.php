@@ -25,23 +25,6 @@ class ViewServiceProvider extends ViewServiceProviderBase
     public function registerMacros(): void
     {
         /**
-         * Get the compiled path of the view
-         *
-         * @return string
-         */
-        View::macro('getCompiled', function () {
-            /** @var string $file path to file */
-            $file = $this->getPath();
-
-            /** @var Engine $engine */
-            $engine = $this->getEngine();
-
-            return ($engine instanceof CompilerEngine)
-                ? $engine->getCompiler()->getCompiledPath($file)
-                : $file;
-        });
-
-        /**
          * Creates a loader for the view to be called later
          *
          * @return string
@@ -49,7 +32,14 @@ class ViewServiceProvider extends ViewServiceProviderBase
         View::macro('makeLoader', function (): string {
             $view = $this->getName();
             $path = $this->getPath();
-            $id = md5($this->getCompiled());
+
+            /** @var Engine $engine */
+            $engine = $this->getEngine();
+            $compiled = ($engine instanceof CompilerEngine)
+                ? $engine->getCompiler()->getCompiledPath($path)
+                : $path;
+
+            $id = md5($compiled);
             $compiled_path = resolve('config')['view.compiled'];
 
             $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", $view)

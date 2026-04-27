@@ -26,7 +26,7 @@ class WordPressDatabase extends wpdb
     /**
      * Database connection handler.
      *
-     * @var \mysqli|false|null PDO instance from Laravel's connection
+     * @var \PDO|\mysqli|false|null
      */
     public $dbh;
 

@@ -59,6 +59,7 @@ class WordPressTaxonomyRegistry implements TaxonomyRegistryInterface
     public function getAll(): array
     {
         if (function_exists('\get_taxonomies')) {
+            /** @var array<string, \WP_Taxonomy> */
             return \get_taxonomies(['_builtin' => false], 'objects');
         }
 

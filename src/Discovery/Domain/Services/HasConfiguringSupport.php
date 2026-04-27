@@ -58,7 +58,7 @@ trait HasConfiguringSupport
 
             return $entity;
 
-        } catch (\ReflectionException|\Throwable $e) {
+        } catch (\Throwable $e) {
             error_log(
                 sprintf('Failed to process configuring for %s: ', $className).$e->getMessage()
             );

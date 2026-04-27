@@ -13,32 +13,14 @@ parameters:
 			path: src/Asset/Infrastructure/Services/ViteManager.php
 
 		-
-			message: '#^Offset 1 on array\{list\<string\>, list\<non\-empty\-string\>\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/Attributes/WpRestRoute/Method.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta_value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Models/Attachment.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Routing\\RouteCollectionInterface\:\:count\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Modules/UI/Helpers/discovery_functions.php
 
 		-
-			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: src/PostType/Infrastructure/Services/PostTypeDiscovery.php
-
-		-
-			message: '#^Property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh \(mysqli\|false\|null\) does not accept PDO\.$#'
-			identifier: assign.propertyType
+			message: '#^PHPDoc type mysqli\|PDO\|false\|null of property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh is not covariant with PHPDoc type mysqli\|false\|null of overridden property wpdb\:\:\$dbh\.$#'
+			identifier: property.phpDocType
 			count: 1
 			path: src/Proxy/WordPressDatabase.php
 
@@ -73,49 +55,7 @@ parameters:
 			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
 
 		-
-			message: '#^Method Pollora\\Taxonomy\\Infrastructure\\Adapters\\WordPressTaxonomyRegistry\:\:getAll\(\) should return array\<string, WP_Taxonomy\> but returns array\<int, WP_Taxonomy\>\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php
-
-		-
-			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php
-
-		-
 			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\WooCommerce not found\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/ThirdParty/WooCommerce/Infrastructure/Providers/WooCommerceServiceProvider.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Contracts\\View\\View\:\:makeLoader\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
-
-		-
-			message: '#^Anonymous function never returns array so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/View/Infrastructure/Services/FileSystemTemplateFinder.php
-
-		-
-			message: '#^Offset string on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\View\\View\:\:getCompiled\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/View/ViewServiceProvider.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php

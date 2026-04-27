@@ -51,9 +51,10 @@ class Attachment extends \Pollora\Colt\Model\Attachment
      */
     protected function getMetaValue(string $key)
     {
+        /** @var object{meta_value: mixed}|null $meta */
         $meta = $this->meta->where('meta_key', $key)->first();
 
-        return $meta ? $meta->meta_value : null;
+        return $meta?->meta_value;
     }
 
     /**

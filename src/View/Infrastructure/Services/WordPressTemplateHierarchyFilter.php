@@ -124,6 +124,6 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
             wp_cache_add('pollora/theme_templates', $templates, 'themes');
         }
 
-        return $templates[$postType] ?? [];
+        return [];
     }
 }

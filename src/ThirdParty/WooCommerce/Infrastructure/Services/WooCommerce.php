@@ -93,7 +93,8 @@ class WooCommerce implements WooCommerceIntegrationInterface
             return $themeTemplate;
         }
 
-        // Create and return the loader file path
+        // Create and return the loader file path (makeLoader is a View macro registered in ViewServiceProvider)
+        /** @phpstan-ignore method.notFound */
         return $this->viewFactory->make($viewName)->makeLoader();
     }
 
