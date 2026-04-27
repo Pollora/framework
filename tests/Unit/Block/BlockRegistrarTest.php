@@ -30,23 +30,23 @@ beforeEach(function (): void {
     mkdir($this->tempDir.'/card', 0755, true);
 
     $app = Mockery::mock(Container::class)->makePartial();
-    $app->shouldReceive('publicPath')->andReturnUsing(fn ($path = '') => sys_get_temp_dir().($path ? '/'.$path : ''));
+    $app->shouldReceive('publicPath')->andReturnUsing(fn ($path = ''): string => sys_get_temp_dir().($path ? '/'.$path : ''));
     $app->instance('app', $app);
     Container::setInstance($app);
     Facade::setFacadeApplication($app);
     $app->instance('log', new NullLogger);
 
-    \Brain\Monkey\Functions\when('register_block_type')->alias(function ($dir, $args = []) {
+    \Brain\Monkey\Functions\when('register_block_type')->alias(function ($dir, $args = []): true {
         $this->registeredBlocks[] = ['dir' => $dir, 'args' => $args];
 
         return true;
     });
-    \Brain\Monkey\Functions\when('wp_register_script')->alias(function ($handle, $src, $deps = [], $ver = null, $inFooter = false) {
+    \Brain\Monkey\Functions\when('wp_register_script')->alias(function ($handle, $src, $deps = [], $ver = null, $inFooter = false): true {
         $this->registeredScripts[$handle] = ['src' => $src, 'deps' => $deps];
 
         return true;
     });
-    \Brain\Monkey\Functions\when('wp_register_style')->alias(function ($handle, $src, $deps = [], $ver = null) {
+    \Brain\Monkey\Functions\when('wp_register_style')->alias(function ($handle, $src, $deps = [], $ver = null): true {
         $this->registeredStyles[$handle] = ['src' => $src, 'deps' => $deps];
 
         return true;
@@ -68,6 +68,7 @@ afterEach(function (): void {
     foreach ($files as $file) {
         $file->isDir() ? rmdir($file->getRealPath()) : unlink($file->getRealPath());
     }
+
     rmdir($this->tempDir);
 });
 
@@ -75,15 +76,16 @@ function createMockVite(bool $isHot = false): ViteManagerInterface
 {
     $vite = Mockery::mock(ViteManagerInterface::class);
     $vite->shouldReceive('isRunningHot')->andReturn($isHot);
-    $vite->shouldReceive('asset')->andReturnUsing(fn ($path) => "http://localhost:5173/{$path}");
-    $vite->shouldReceive('getAssetUrls')->andReturnUsing(function ($entrypoints) {
+    $vite->shouldReceive('asset')->andReturnUsing(fn ($path): string => 'http://localhost:5173/' . $path);
+    $vite->shouldReceive('getAssetUrls')->andReturnUsing(function ($entrypoints): array {
         $js = [];
         $css = [];
         foreach ($entrypoints as $ep) {
             $ext = pathinfo($ep, PATHINFO_EXTENSION);
-            if (in_array($ext, ['jsx', 'tsx', 'ts', 'js'])) {
+            if (in_array($ext, ['jsx', 'tsx', 'ts', 'js'], true)) {
                 $js[] = 'https://example.com/build/assets/'.basename($ep, '.'.$ext).'-abc123.js';
             }
+
             if ($ext === 'css') {
                 $css[] = 'https://example.com/build/assets/'.basename($ep, '.css').'-abc123.css';
             }
@@ -223,7 +225,6 @@ describe('BlockRegistrar', function (): void {
         $registrar = new BlockRegistrar(Mockery::mock(AssetManager::class));
 
         $method = new ReflectionMethod($registrar, 'buildHandle');
-        $method->setAccessible(true);
 
         expect($method->invoke($registrar, 'acme/hero-banner', 'editorScript'))
             ->toBe('acme-hero-banner-editor-script');
@@ -262,7 +263,7 @@ describe('BlockRegistrar', function (): void {
         $assetManager->shouldReceive('getContainer')->with('theme.blocks')->andReturn(null);
         $assetManager->shouldReceive('getContainer')->with('theme')->andReturn($parentContainer);
         $assetManager->shouldReceive('addContainer')->andReturnUsing(
-            function ($name, $config) use (&$addedContainers) {
+            function ($name, $config) use (&$addedContainers): void {
                 $addedContainers[$name] = $config;
             }
         );
@@ -277,7 +278,6 @@ describe('BlockRegistrar', function (): void {
         expect($parentContainer->getBasePath())->toBe('resources/assets/');
 
         $method = new ReflectionMethod(BlockRegistrar::class, 'getBlocksViteManager');
-        $method->setAccessible(true);
 
         // Use a fresh (non-testable) instance to verify addContainer is called
         $realRegistrar = new BlockRegistrar($assetManager);

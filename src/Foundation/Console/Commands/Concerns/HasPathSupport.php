@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Foundation\Console\Commands\Concerns;
 
+use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputOption;
 
 trait HasPathSupport

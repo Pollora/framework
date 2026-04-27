@@ -52,6 +52,7 @@ afterEach(function (): void {
         foreach ($files as $file) {
             $file->isDir() ? rmdir($file->getRealPath()) : unlink($file->getRealPath());
         }
+
         rmdir($this->tempDir);
     }
 });
