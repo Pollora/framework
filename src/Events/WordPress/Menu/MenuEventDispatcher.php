@@ -76,7 +76,7 @@ class MenuEventDispatcher extends AbstractEventDispatcher
             return;
         }
 
-        $old_locations = $old_value['nav_menu_locations'] ?? [];
+        $old_locations = $oldValue['nav_menu_locations'] ?? [];
         $new_locations = $value['nav_menu_locations'] ?? [];
 
         $this->processLocationChanges($old_locations, $new_locations);

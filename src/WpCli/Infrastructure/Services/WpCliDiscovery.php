@@ -198,7 +198,7 @@ final class WpCliDiscovery implements DiscoveryInterface
      * Register a command through the WP CLI service only.
      * This ensures single responsibility and avoids duplication.
      *
-     * @param  string|array|object  $handler
+     * @param  string|array<int, mixed>  $handler
      * @param  array<string,mixed>  $args
      */
     private function registerCommand(string $commandName, string|array $handler, array $args = []): void

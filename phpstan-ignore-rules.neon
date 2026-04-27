@@ -1,2 +1,85 @@
 parameters:
-    ignoreErrors: []
+    ignoreErrors:
+        # Abstract classes used as PHP attributes — PHP limitation, cannot be avoided
+        -
+            identifier: attribute.abstract
+            paths:
+                - src/Attributes/PostType/PostTypeAttribute.php
+                - src/Attributes/Taxonomy/TaxonomyAttribute.php
+
+        # Attributable dynamic properties — set via reflection/magic in attribute processing
+        -
+            identifier: property.notFound
+            path: src/Attributes/WpRestRoute/Method.php
+
+        # WP_Upgrader_Skin dynamic properties — WordPress core does not declare them
+        -
+            identifier: property.notFound
+            path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
+
+        # Spatie DiscoveredClass::$location — not in official stubs
+        -
+            message: '#Access to an undefined property Spatie\\StructureDiscoverer\\Data\\DiscoveredClass::\$location#'
+            identifier: property.notFound
+
+        # Gravity Forms GFAPI — third-party plugin without stubs
+        -
+            message: '#on an unknown class GFAPI#'
+            identifier: class.notFound
+
+        # WooCommerce classes/functions — third-party plugin without stubs
+        -
+            message: '#(WC_Order|wc_get_order|WooCommerceTemplateResolver|WooCommerce\\\\WooCommerce)#'
+            identifier: class.notFound
+        -
+            message: '#Function wc_get_order not found#'
+            identifier: function.notFound
+
+        # Vite internal methods accessed via macro context — protected in base class
+        -
+            identifier: method.protected
+            path: src/Asset/Infrastructure/Services/ViteManager.php
+
+        # RouteCollectionInterface not iterable — Laravel interface limitation
+        -
+            identifier: foreach.nonIterable
+            path: src/Modules/UI/Helpers/discovery_functions.php
+
+        # ReflectionType methods — ReflectionNamedType is the actual runtime type
+        -
+            message: '#Call to an undefined method ReflectionType::(getName|isBuiltin)#'
+            identifier: method.notFound
+            path: src/Route/Infrastructure/Services/ExtendedRouter.php
+
+        # Route/ConditionResolver interface hierarchy mismatch
+        -
+            identifier: argument.type
+            path: src/Route/Infrastructure/Services/ExtendedRouter.php
+        -
+            identifier: argument.type
+            path: src/Route/Infrastructure/Middleware/WordPressBindings.php
+
+        # plugin.php config file — env() calls are valid in config files
+        -
+            identifier: larastan.noEnvCallsOutsideOfConfig
+            path: src/Plugin/config/plugin.php
+
+        # RouteCollectionInterface not iterable in Route model
+        -
+            identifier: foreach.nonIterable
+            path: src/Route/Domain/Models/Route.php
+
+        # AuthManager::extend() requires non-static closure — workaround for recursion bug
+        -
+            identifier: argument.staticClosure
+            path: src/Auth/AuthServiceProvider.php
+
+        # WP_INSTALLING constant — phpstan-wordpress rule, but usage is valid
+        -
+            identifier: phpstanWP.wpConstant.fetch
+            path: src/BlockPattern/UI/PatternComponent.php
+
+        # PHPStan match exhaustiveness — instanceof always true on last branch
+        -
+            identifier: instanceof.alwaysTrue
+            path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Plugin\Infrastructure\Repositories;
 
-use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Collection\Infrastructure\Adapters\LaravelCollectionAdapter;
@@ -42,11 +42,11 @@ class PluginRepository implements ModuleRepositoryInterface
     /**
      * Create a new PluginRepository instance.
      *
-     * @param  Container  $app  Application container
+     * @param  Application  $app  Application container
      * @param  WordPressPluginParser  $parser  Plugin parser service
      */
     public function __construct(
-        protected Container $app,
+        protected Application $app,
         protected WordPressPluginParser $parser
     ) {
         $this->pluginsPath = $this->getPluginsBasePath();

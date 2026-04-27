@@ -13,7 +13,7 @@ use Pollora\Collection\Domain\Contracts\CollectionInterface;
  * This is a decorator around Laravel's Collection that implements
  * our framework-agnostic CollectionInterface.
  */
-class LaravelCollectionAdapter implements CollectionInterface
+final class LaravelCollectionAdapter implements CollectionInterface
 {
     private readonly LaravelCollection $laravelCollection;
 

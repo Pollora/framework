@@ -174,7 +174,7 @@ class ThemeServiceProvider extends ServiceProvider
 
         // Theme registrar for self-registration pattern
         $this->app->singleton(ThemeRegistrarInterface::class, fn ($app): ThemeRegistrar => new ThemeRegistrar(
-            $app->make(ContainerInterface::class),
+            $app,
             $app->make(WordPressThemeParser::class)
         ));
 

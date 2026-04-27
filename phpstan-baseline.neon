@@ -7,52 +7,10 @@ parameters:
 			path: src/Asset/Infrastructure/Services/ViteManager.php
 
 		-
-			message: '#^Call to protected method assetPath\(\) of class Illuminate\\Foundation\\Vite\.$#'
-			identifier: method.protected
-			count: 2
-			path: src/Asset/Infrastructure/Services/ViteManager.php
-
-		-
-			message: '#^Call to protected method manifest\(\) of class Illuminate\\Foundation\\Vite\.$#'
-			identifier: method.protected
-			count: 1
-			path: src/Asset/Infrastructure/Services/ViteManager.php
-
-		-
 			message: '#^PHPDoc tag @var with type Illuminate\\Foundation\\Vite is not subtype of native type \$this\(Pollora\\Asset\\Infrastructure\\Services\\ViteManager\)\.$#'
 			identifier: varTag.nativeType
 			count: 1
 			path: src/Asset/Infrastructure/Services/ViteManager.php
-
-		-
-			message: '#^Abstract class Pollora\\Attributes\\PostType\\PostTypeAttribute cannot be an Attribute class\.$#'
-			identifier: attribute.abstract
-			count: 1
-			path: src/Attributes/PostType/PostTypeAttribute.php
-
-		-
-			message: '#^Abstract class Pollora\\Attributes\\Taxonomy\\TaxonomyAttribute cannot be an Attribute class\.$#'
-			identifier: attribute.abstract
-			count: 1
-			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
-
-		-
-			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$classPermission\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Attributes/WpRestRoute/Method.php
-
-		-
-			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$namespace\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Attributes/WpRestRoute/Method.php
-
-		-
-			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$route\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Attributes/WpRestRoute/Method.php
 
 		-
 			message: '#^Offset 1 on array\{list\<string\>, list\<non\-empty\-string\>\} on left side of \?\? always exists and is not nullable\.$#'
@@ -61,262 +19,16 @@ parameters:
 			path: src/Attributes/WpRestRoute/Method.php
 
 		-
-			message: '#^Class Pollora\\Auth\\WordPressGuard does not have a constructor and must be instantiated without any parameters\.$#'
-			identifier: new.noConstructor
-			count: 2
-			path: src/Auth/AuthServiceProvider.php
-
-		-
-			message: '#^Parameter \#2 \$callback of method Illuminate\\Auth\\AuthManager\:\:extend\(\) expects bindable closure, static closure given\.$#'
-			identifier: argument.staticClosure
-			count: 1
-			path: src/Auth/AuthServiceProvider.php
-
-		-
-			message: '#^Constant AUTH_COOKIE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Auth/WordPressGuard.php
-
-		-
-			message: '#^Constant SECURE_AUTH_COOKIE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Auth/WordPressGuard.php
-
-		-
-			message: '#^Found usage of constant WP_INSTALLING\. Use wp_installing\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/BlockPattern/UI/PatternComponent.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 4
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
-			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\:\:applicationFailed\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Discovery/Domain/Exceptions/DiscoveryException.php
-
-		-
-			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\:\:discoveryFailed\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Discovery/Domain/Exceptions/DiscoveryException.php
-
-		-
-			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\:\:withClass\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Discovery/Domain/Exceptions/DiscoveryNotFoundException.php
-
-		-
-			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\:\:withIdentifier\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\DiscoveryNotFoundException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Discovery/Domain/Exceptions/DiscoveryNotFoundException.php
-
-		-
-			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\:\:duplicateIdentifier\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Discovery/Domain/Exceptions/InvalidDiscoveryException.php
-
-		-
-			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\:\:invalidClass\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Discovery/Domain/Exceptions/InvalidDiscoveryException.php
-
-		-
-			message: '#^Method Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\:\:missingInterface\(\) should return static\(Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\) but returns Pollora\\Discovery\\Domain\\Exceptions\\InvalidDiscoveryException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Discovery/Domain/Exceptions/InvalidDiscoveryException.php
-
-		-
-			message: '#^Access to an undefined property Spatie\\StructureDiscoverer\\Data\\DiscoveredClass\:\:\$location\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Discovery/Infrastructure/Services/DiscoveryEngine.php
-
-		-
-			message: '#^Access to an undefined property WP_Upgrader_Skin\:\:\$plugin\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Access to an undefined property WP_Upgrader_Skin\:\:\$theme\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Variable \$old_value on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: src/Events/WordPress/Menu/MenuEventDispatcher.php
-
-		-
-			message: '#^Call to static method get_entry\(\) on an unknown class GFAPI\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Events/WordPress/Plugins/GravityForms/GravityFormsEventDispatcher.php
-
-		-
-			message: '#^Call to static method get_form\(\) on an unknown class GFAPI\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Events/WordPress/Plugins/GravityForms/GravityFormsEventDispatcher.php
-
-		-
-			message: '#^Parameter \$order of method Pollora\\Events\\WordPress\\Plugins\\WooCommerce\\OrderStatusChanged\:\:__construct\(\) has invalid type WC_Order\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Events/WordPress/Plugins/WooCommerce/OrderStatusChanged.php
-
-		-
-			message: '#^Property Pollora\\Events\\WordPress\\Plugins\\WooCommerce\\OrderStatusChanged\:\:\$order has unknown class WC_Order as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Events/WordPress/Plugins/WooCommerce/OrderStatusChanged.php
-
-		-
-			message: '#^Class WC_Order not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
-
-		-
-			message: '#^Function wc_get_order not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Exceptions/Infrastructure/Services/ModuleAwareErrorViewResolver.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta_value\.$#'
 			identifier: property.notFound
 			count: 1
 			path: src/Models/Attachment.php
 
 		-
-			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:alreadyDisabled\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Modules/Domain/Exceptions/ModuleException.php
-
-		-
-			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:alreadyEnabled\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Modules/Domain/Exceptions/ModuleException.php
-
-		-
-			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:cannotDisable\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Modules/Domain/Exceptions/ModuleException.php
-
-		-
-			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:cannotEnable\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Modules/Domain/Exceptions/ModuleException.php
-
-		-
-			message: '#^Method Pollora\\Modules\\Domain\\Exceptions\\ModuleException\:\:notFound\(\) should return static\(Pollora\\Modules\\Domain\\Exceptions\\ModuleException\) but returns Pollora\\Modules\\Domain\\Exceptions\\ModuleException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Modules/Domain/Exceptions/ModuleException.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Infrastructure\\Services\\FrameworkModuleDiscovery\:\:discoverModule\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Modules/Infrastructure/Services/FrameworkModuleDiscovery.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Modules/Infrastructure/Services/ModuleAssetManager.php
-
-		-
-			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: src/Modules/Infrastructure/Services/ModuleAssetManager.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Modules/Infrastructure/Services/ModuleBootstrap.php
-
-		-
-			message: '#^Argument of an invalid type Illuminate\\Routing\\RouteCollectionInterface supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 2
-			path: src/Modules/UI/Helpers/discovery_functions.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Routing\\RouteCollectionInterface\:\:count\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Modules/UI/Helpers/discovery_functions.php
-
-		-
-			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: src/Plugin/Application/Services/PluginManager.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 7
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:bound\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Plugin/Domain/Models/LaravelPluginModule.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getCachedConfigPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Plugin/Domain/Models/LaravelPluginModule.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getCachedServicesPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Plugin/Domain/Models/LaravelPluginModule.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:make\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Plugin/Domain/Models/LaravelPluginModule.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 14
-			path: src/Plugin/config/plugin.php
 
 		-
 			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
@@ -329,18 +41,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: src/Proxy/WordPressDatabase.php
-
-		-
-			message: '#^Argument of an invalid type Illuminate\\Routing\\RouteCollectionInterface supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: src/Route/Domain/Models/Route.php
-
-		-
-			message: '#^Parameter \#1 \$route of method Pollora\\Route\\Infrastructure\\Services\\ExtendedRouter\:\:addWordPressBindings\(\) expects Pollora\\Route\\Domain\\Models\\Route, Illuminate\\Routing\\Route given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Route/Infrastructure/Middleware/WordPressBindings.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Routing\\Route\:\:setCondition\(\)\.$#'
@@ -373,54 +73,6 @@ parameters:
 			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
 
 		-
-			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Route/Infrastructure/Services/ExtendedRouter.php
-
-		-
-			message: '#^Call to an undefined method ReflectionType\:\:isBuiltin\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Route/Infrastructure/Services/ExtendedRouter.php
-
-		-
-			message: '#^Parameter \#1 \$resolver of method Pollora\\Route\\Domain\\Models\\Route\:\:setConditionResolver\(\) expects Pollora\\Route\\Domain\\Contracts\\ConditionResolverInterface, Pollora\\Route\\Infrastructure\\Services\\Contracts\\WordPressConditionManagerInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Route/Infrastructure/Services/ExtendedRouter.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Schedule\\Interval\:\:toDisplayString\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Schedule\\Interval\:\:toSeconds\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
-
-		-
-			message: '#^Instanceof between Pollora\\Schedule\\Interval and Pollora\\Schedule\\Interval will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
-
-		-
-			message: '#^Constant WPINC not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Services/WordPress/Installation/WordPressInstallLoaderService.php
-
-		-
-			message: '#^Constant WPINC not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Support/WordPress.php
-
-		-
 			message: '#^Method Pollora\\Taxonomy\\Infrastructure\\Adapters\\WordPressTaxonomyRegistry\:\:getAll\(\) should return array\<string, WP_Taxonomy\> but returns array\<int, WP_Taxonomy\>\.$#'
 			identifier: return.type
 			count: 1
@@ -431,54 +83,6 @@ parameters:
 			identifier: catch.neverThrown
 			count: 1
 			path: src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:bound\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Application/Services/ThemeManager.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:make\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Application/Services/ThemeManager.php
-
-		-
-			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: src/Theme/Application/Services/ThemeManager.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:bound\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Theme/Domain/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getCachedConfigPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Domain/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getCachedServicesPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Domain/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:make\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Domain/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\View\\WooCommerceTemplateResolver not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/ThirdParty/WooCommerce/Infrastructure/Providers/WooCommerceServiceProvider.php
 
 		-
 			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\WooCommerce not found\.$#'
@@ -499,18 +103,6 @@ parameters:
 			path: src/View/Infrastructure/Services/FileSystemTemplateFinder.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/View/Infrastructure/Services/FileSystemTemplateFinder.php
-
-		-
-			message: '#^Cannot call method get\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
-
-		-
 			message: '#^Offset string on array\{\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
@@ -523,19 +115,7 @@ parameters:
 			path: src/View/ViewServiceProvider.php
 
 		-
-			message: '#^Variable \$debugDetector on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: src/WordPress/Bootstrap.php
-
-		-
-			message: '#^Constant WP_CLI_VERSION not found\.$#'
-			identifier: constant.notFound
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
 			count: 1
 			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$handler with type array\|object\|string is not subtype of native type array\|string\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php

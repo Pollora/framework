@@ -17,7 +17,7 @@ use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
-use Psr\Container\ContainerInterface;
+use Illuminate\Foundation\Application;
 
 /**
  * Theme management service implementation.
@@ -73,7 +73,7 @@ class ThemeManager implements ThemeService
     /**
      * Create a new theme manager instance.
      *
-     * @param  ContainerInterface  $app  Application container
+     * @param  Application  $app  Application container
      * @param  ViewFinderInterface  $viewFinder  Laravel view finder for template resolution
      * @param  Loader|null  $localeLoader  Translation loader for theme localization
      * @param  ModuleRepositoryInterface|null  $repository  Module repository for theme management
@@ -81,7 +81,7 @@ class ThemeManager implements ThemeService
      * @param  ConsoleDetectionService|null  $consoleDetectionService  Console environment detection
      */
     public function __construct(
-        protected ContainerInterface $app,
+        protected Application $app,
         protected ViewFinderInterface $viewFinder,
         protected ?Loader $localeLoader,
         protected ?ModuleRepositoryInterface $repository = null,

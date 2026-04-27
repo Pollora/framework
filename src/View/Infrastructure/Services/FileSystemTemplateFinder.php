@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\View\Infrastructure\Services;
 
-use Illuminate\View\ViewFinderInterface;
+use Illuminate\View\FileViewFinder;
 use Pollora\Filesystem\Filesystem;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
@@ -28,7 +28,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
         /**
          * The Laravel ViewFinder instance.
          */
-        protected ViewFinderInterface $finder,
+        protected FileViewFinder $finder,
         /**
          * The Filesystem instance.
          */

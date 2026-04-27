@@ -13,7 +13,7 @@ use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Domain\Models\LaravelPluginModule;
 use Pollora\Plugin\Infrastructure\Repositories\PluginRepository;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
-use Psr\Container\ContainerInterface;
+use Illuminate\Foundation\Application;
 
 /**
  * Plugin registration service.
@@ -34,11 +34,11 @@ class PluginRegistrar
     /**
      * Create a new PluginRegistrar instance.
      *
-     * @param  ContainerInterface  $app  Application container
+     * @param  Application  $app  Application container
      * @param  WordPressPluginParser  $pluginParser  Plugin parser service
      */
     public function __construct(
-        protected ContainerInterface $app,
+        protected Application $app,
         protected WordPressPluginParser $pluginParser
     ) {}
 

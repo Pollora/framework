@@ -18,7 +18,7 @@ use Pollora\Hook\Infrastructure\Services\Filter as HookFilter;
  * 1. Reads the block metadata
  * 2. Creates a dedicated `{parent}.blocks` container (no basePath) for Vite resolution
  * 3. Pre-registers script/style handles via wp_register_script/style with Vite-resolved URLs
- * 4. Calls register_block_type() — WP finds the pre-registered handles and skips its own resolution
+ * 4. Calls \register_block_type() — WP finds the pre-registered handles and skips its own resolution
  */
 class BlockRegistrar implements BlockRegistrarInterface
 {
@@ -68,6 +68,10 @@ class BlockRegistrar implements BlockRegistrarInterface
 
     public function registerBlock(string $blockDir, string $containerName): void
     {
+        if (! function_exists('wp_register_script')) {
+            return;
+        }
+
         $metadataFile = $blockDir.'/block.json';
 
         if (! file_exists($metadataFile)) {
@@ -93,7 +97,7 @@ class BlockRegistrar implements BlockRegistrarInterface
         $slug = basename($blockDir);
         $blockName = $metadata['name'];
 
-        // Pre-register all asset handles BEFORE register_block_type().
+        // Pre-register all asset handles BEFORE \register_block_type().
         // WP's register_block_script_handle() checks wp_script_is($handle, 'registered')
         // and short-circuits when it finds our pre-registered handles.
         foreach (self::SCRIPT_FIELDS as $field) {
@@ -127,7 +131,7 @@ class BlockRegistrar implements BlockRegistrarInterface
             }
         }
 
-        register_block_type($blockDir, $args);
+        \register_block_type($blockDir, $args);
     }
 
     /**
@@ -150,20 +154,20 @@ class BlockRegistrar implements BlockRegistrarInterface
         $deps = $field === 'editorScript' ? self::DEFAULT_EDITOR_DEPS : [];
 
         if ($viteManager->isRunningHot()) {
-            wp_register_script($handle, $viteManager->asset($entryPoint), $deps, null, true);
+            \wp_register_script($handle, $viteManager->asset($entryPoint), $deps, null, true);
             $this->addModuleTypeAttribute($handle);
         } else {
             $urls = $viteManager->getAssetUrls([$entryPoint]);
 
             if (! empty($urls['js'])) {
-                wp_register_script($handle, $urls['js'][0], $deps, null, true);
+                \wp_register_script($handle, $urls['js'][0], $deps, null, true);
                 $this->addModuleTypeAttribute($handle);
             }
 
             // Register extracted CSS from JS entry (Vite code-splits CSS)
             if (! empty($urls['css'])) {
                 foreach ($urls['css'] as $cssUrl) {
-                    wp_register_style($handle.'-style', $cssUrl, [], null);
+                    \wp_register_style($handle.'-style', $cssUrl, [], null);
                 }
             }
         }
@@ -188,12 +192,12 @@ class BlockRegistrar implements BlockRegistrarInterface
         $handle = $this->buildHandle($blockName, $field);
 
         if ($viteManager->isRunningHot()) {
-            wp_register_style($handle, $viteManager->asset($entryPoint), [], null);
+            \wp_register_style($handle, $viteManager->asset($entryPoint), [], null);
         } else {
             $urls = $viteManager->getAssetUrls([$entryPoint]);
 
             if (! empty($urls['css'])) {
-                wp_register_style($handle, $urls['css'][0], [], null);
+                \wp_register_style($handle, $urls['css'][0], [], null);
             }
         }
     }
@@ -250,7 +254,7 @@ class BlockRegistrar implements BlockRegistrarInterface
      * Build a WordPress handle from block name and field.
      *
      * Uses the same format as WordPress's generate_block_asset_handle()
-     * so that register_block_type() finds our pre-registered handles.
+     * so that \register_block_type() finds our pre-registered handles.
      *
      * Example: "acme/hero-banner" + "editorScript" => "acme-hero-banner-editor-script"
      */

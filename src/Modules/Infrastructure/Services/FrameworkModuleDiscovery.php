@@ -107,7 +107,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
                 return;
             }
 
-            $this->discoverModule($moduleName, $modules[$moduleName]);
+            $this->discoverModuleOnly($moduleName, $modules[$moduleName]);
         } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
                 error_log(sprintf('Framework Module discovery error for %s: ', $moduleName).$throwable->getMessage());

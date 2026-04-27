@@ -17,7 +17,7 @@ class DiscoveryNotFoundException extends DiscoveryException
      *
      * @param  string  $identifier  The discovery identifier that was not found
      */
-    public static function withIdentifier(string $identifier): static
+    public static function withIdentifier(string $identifier): self
     {
         return new self('Discovery not found with identifier: '.$identifier);
     }
@@ -27,7 +27,7 @@ class DiscoveryNotFoundException extends DiscoveryException
      *
      * @param  string  $discoveryClass  The discovery class that was not found
      */
-    public static function withClass(string $discoveryClass): static
+    public static function withClass(string $discoveryClass): self
     {
         return new self('Discovery class not found: '.$discoveryClass);
     }

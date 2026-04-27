@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Modules\Infrastructure\Services;
 
-use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use Illuminate\Routing\Router;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 
@@ -19,12 +19,12 @@ class ModuleBootstrap
     /**
      * Create a new module bootstrap instance.
      *
-     * @param  Container  $app  The Laravel application container
+     * @param  Application  $app  The Laravel application container
      * @param  ModuleRepositoryInterface  $repository  The module repository for accessing modules
      * @param  Router  $router  The Laravel router for registering routes
      */
     public function __construct(
-        protected Container $app,
+        protected Application $app,
         protected ModuleRepositoryInterface $repository,
         protected Router $router
     ) {}

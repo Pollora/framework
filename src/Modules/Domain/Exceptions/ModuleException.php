@@ -8,22 +8,22 @@ use Exception;
 
 class ModuleException extends Exception
 {
-    public static function notFound(string $name): static
+    public static function notFound(string $name): self
     {
         return new self(sprintf('Module [%s] not found.', $name));
     }
 
-    public static function alreadyEnabled(string $name): static
+    public static function alreadyEnabled(string $name): self
     {
         return new self(sprintf('Module [%s] is already enabled.', $name));
     }
 
-    public static function alreadyDisabled(string $name): static
+    public static function alreadyDisabled(string $name): self
     {
         return new self(sprintf('Module [%s] is already disabled.', $name));
     }
 
-    public static function cannotEnable(string $name, string $reason = ''): static
+    public static function cannotEnable(string $name, string $reason = ''): self
     {
         $message = sprintf('Cannot enable module [%s]', $name);
         if ($reason !== '' && $reason !== '0') {
@@ -33,7 +33,7 @@ class ModuleException extends Exception
         return new self($message);
     }
 
-    public static function cannotDisable(string $name, string $reason = ''): static
+    public static function cannotDisable(string $name, string $reason = ''): self
     {
         $message = sprintf('Cannot disable module [%s]', $name);
         if ($reason !== '' && $reason !== '0') {

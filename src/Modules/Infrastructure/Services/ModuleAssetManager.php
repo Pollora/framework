@@ -7,7 +7,7 @@ namespace Pollora\Modules\Infrastructure\Services;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Factory;
-use Illuminate\View\ViewFinderInterface;
+use Illuminate\View\FileViewFinder;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Foundation\Support\IncludesFiles;
 
@@ -147,7 +147,7 @@ class ModuleAssetManager
             $viewFactory = $this->app->make('view');
             $viewFinder = $viewFactory->getFinder();
 
-            if (! $viewFinder instanceof ViewFinderInterface) {
+            if (! $viewFinder instanceof FileViewFinder) {
                 return;
             }
 
@@ -211,10 +211,10 @@ class ModuleAssetManager
      * ensuring module views (including error views) are discovered before
      * framework defaults. This enables modules to override default error pages.
      *
-     * @param  ViewFinderInterface  $viewFinder  The view finder instance
+     * @param  FileViewFinder  $viewFinder  The view finder instance
      * @param  string  $viewPath  Path to add with high priority
      */
-    protected function registerViewPathWithPriority(ViewFinderInterface $viewFinder, string $viewPath): void
+    protected function registerViewPathWithPriority(FileViewFinder $viewFinder, string $viewPath): void
     {
         try {
             // Get current paths to preserve order

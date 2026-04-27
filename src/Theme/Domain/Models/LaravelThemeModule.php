@@ -7,7 +7,7 @@ namespace Pollora\Theme\Domain\Models;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Str;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
-use Psr\Container\ContainerInterface;
+use Illuminate\Foundation\Application;
 
 class LaravelThemeModule extends ThemeModule
 {
@@ -19,7 +19,7 @@ class LaravelThemeModule extends ThemeModule
     public function __construct(
         string $name,
         string $path,
-        protected ContainerInterface $app
+        protected Application $app
     ) {
         parent::__construct($name, $path);
     }

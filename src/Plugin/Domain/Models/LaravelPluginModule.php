@@ -7,7 +7,7 @@ namespace Pollora\Plugin\Domain\Models;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Str;
 use Pollora\Plugin\Infrastructure\Services\PluginAutoloader;
-use Psr\Container\ContainerInterface;
+use Illuminate\Foundation\Application;
 
 /**
  * Laravel-specific plugin module implementation.
@@ -28,12 +28,12 @@ class LaravelPluginModule extends PluginModule
      *
      * @param  string  $name  Plugin name
      * @param  string  $path  Plugin path
-     * @param  ContainerInterface  $app  Laravel application container
+     * @param  Application  $app  Laravel application container
      */
     public function __construct(
         string $name,
         string $path,
-        protected ContainerInterface $app
+        protected Application $app
     ) {
         parent::__construct($name, $path);
     }

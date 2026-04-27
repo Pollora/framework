@@ -21,7 +21,7 @@ use Pollora\Theme\Domain\Models\ThemeInitializer;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\Support;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
-use Psr\Container\ContainerInterface;
+use Illuminate\Foundation\Application;
 
 /**
  * Simplified theme self-registration service.
@@ -31,7 +31,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
     private ?ThemeModuleInterface $activeTheme = null;
 
     public function __construct(
-        protected ContainerInterface $app,
+        protected Application $app,
         protected WordPressThemeParser $themeParser
     ) {}
 

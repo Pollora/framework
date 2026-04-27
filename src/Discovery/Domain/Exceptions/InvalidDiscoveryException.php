@@ -18,7 +18,7 @@ class InvalidDiscoveryException extends DiscoveryException
      * @param  string  $discoveryClass  The invalid discovery class
      * @param  string  $reason  The reason why it's invalid
      */
-    public static function invalidClass(string $discoveryClass, string $reason): static
+    public static function invalidClass(string $discoveryClass, string $reason): self
     {
         return new self(sprintf("Invalid discovery class '%s': %s", $discoveryClass, $reason));
     }
@@ -29,7 +29,7 @@ class InvalidDiscoveryException extends DiscoveryException
      * @param  string  $discoveryClass  The discovery class
      * @param  string  $requiredInterface  The required interface
      */
-    public static function missingInterface(string $discoveryClass, string $requiredInterface): static
+    public static function missingInterface(string $discoveryClass, string $requiredInterface): self
     {
         return new self(
             sprintf("Discovery class '%s' must implement '%s'", $discoveryClass, $requiredInterface)
@@ -41,7 +41,7 @@ class InvalidDiscoveryException extends DiscoveryException
      *
      * @param  string  $identifier  The duplicate identifier
      */
-    public static function duplicateIdentifier(string $identifier): static
+    public static function duplicateIdentifier(string $identifier): self
     {
         return new self(sprintf("Discovery identifier '%s' is already registered", $identifier));
     }

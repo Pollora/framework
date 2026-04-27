@@ -56,9 +56,9 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
     /**
      * Add Blade compatibility for theme templates.
      */
-    public function extendThemeTemplates(array $templates, $theme, $post, string $postType): array
+    public function extendThemeTemplates(array $templates, \WP_Theme $theme, ?\WP_Post $post, string $postType): array
     {
-        if (method_exists($theme, 'load_textdomain') && $theme->load_textdomain()) {
+        if ($theme->load_textdomain()) {
             $theme->get('TextDomain');
         }
 

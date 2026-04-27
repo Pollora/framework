@@ -105,8 +105,13 @@ class Method implements HandlesAttributes
         $args = [];
 
         foreach ($method->getParameters() as $param) {
-            $paramName = $param->getName();
-            $args[] = $request->get_param($paramName);
+            $paramType = $param->getType();
+
+            if ($paramType instanceof \ReflectionNamedType && $paramType->getName() === WP_REST_Request::class) {
+                $args[] = $request;
+            } else {
+                $args[] = $request->get_param($param->getName());
+            }
         }
 
         // Get the real instance if available, otherwise use the provided instance

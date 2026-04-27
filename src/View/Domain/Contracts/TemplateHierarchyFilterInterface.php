@@ -32,10 +32,10 @@ interface TemplateHierarchyFilterInterface
      * Add Blade compatibility for theme templates.
      *
      * @param  array<string, string>  $templates  Existing theme templates
-     * @param  mixed  $theme  Current theme object
-     * @param  mixed  $post  Current post object
+     * @param  \WP_Theme  $theme  Current theme object
+     * @param  \WP_Post|null  $post  Current post object
      * @param  string  $postType  Current post type
      * @return array<string, string> Extended templates list
      */
-    public function extendThemeTemplates(array $templates, mixed $theme, mixed $post, string $postType): array;
+    public function extendThemeTemplates(array $templates, \WP_Theme $theme, ?\WP_Post $post, string $postType): array;
 }
