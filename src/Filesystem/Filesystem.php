@@ -12,7 +12,6 @@ use Illuminate\Filesystem\Filesystem as FilesystemBase;
  * This class extends Laravel's base Filesystem class to provide additional
  * functionality specifically designed for WordPress integration, including
  * path normalization and relative path calculation.
- *
  */
 class Filesystem extends FilesystemBase
 {

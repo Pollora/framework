@@ -23,7 +23,6 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Class Menus
- *
  */
 class Menus implements ThemeComponent
 {

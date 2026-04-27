@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Coduo\PHPHumanizer\StringHumanizer;
 use Illuminate\Support\Str;
+
 if (! function_exists('mysqli_report')) {
     /**
      * Report MySQL errors.

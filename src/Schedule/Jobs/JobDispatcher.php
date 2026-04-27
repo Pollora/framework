@@ -12,7 +12,6 @@ use Pollora\Schedule\Contracts\JobDispatcherInterface;
  *
  * Handles the integration between WordPress cron events and Laravel's
  * queue system with proper dependency injection.
- *
  */
 class JobDispatcher implements JobDispatcherInterface
 {

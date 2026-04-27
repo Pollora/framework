@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Plugin\Domain\Models;
 
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Pollora\Plugin\Infrastructure\Services\PluginAutoloader;
-use Illuminate\Foundation\Application;
 
 /**
  * Laravel-specific plugin module implementation.

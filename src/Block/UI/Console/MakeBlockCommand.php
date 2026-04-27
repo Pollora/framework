@@ -67,7 +67,7 @@ class MakeBlockCommand extends Command
         $blockDir = $blocksDir.'/'.$name;
 
         // Check if block already exists
-        if (is_dir($blockDir) && !$this->option('force') && ! $this->components->confirm(sprintf('Block "%s" already exists. Overwrite?', $name))) {
+        if (is_dir($blockDir) && ! $this->option('force') && ! $this->components->confirm(sprintf('Block "%s" already exists. Overwrite?', $name))) {
             return self::FAILURE;
         }
 
@@ -114,7 +114,7 @@ class MakeBlockCommand extends Command
             $path = $this->getPluginPath();
 
             if (! is_dir($path)) {
-                $this->components->error('Plugin directory not found: ' . $path);
+                $this->components->error('Plugin directory not found: '.$path);
 
                 return null;
             }
@@ -140,7 +140,7 @@ class MakeBlockCommand extends Command
         $path = $this->getThemePath($theme);
 
         if (! is_dir($path)) {
-            $this->components->error('Theme directory not found: ' . $path);
+            $this->components->error('Theme directory not found: '.$path);
 
             return null;
         }
@@ -274,7 +274,7 @@ const hasBlocks = Object.keys(blockEntries).length > 0;
 JS;
 
         // Insert before the first export or function declaration
-        if (!str_contains($content, 'blockEntries') && preg_match('/^(export\s|function\s|const\s+\w+\s*=\s*\()/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
+        if (! str_contains($content, 'blockEntries') && preg_match('/^(export\s|function\s|const\s+\w+\s*=\s*\()/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
             $insertPos = $matches[0][1];
             $content = substr($content, 0, $insertPos).$blockEntriesCode."\n\n".substr($content, $insertPos);
         }
@@ -294,7 +294,7 @@ JS;
 
         // 4. Add wordpressPlugin() to plugins array
         // Find plugins: [ ... ] and add before the closing bracket
-        if (!str_contains($content, 'wordpressPlugin') && preg_match('/(plugins:\s*\[)(.*?)(\])/s', $content, $matches)) {
+        if (! str_contains($content, 'wordpressPlugin') && preg_match('/(plugins:\s*\[)(.*?)(\])/s', $content, $matches)) {
             $existingPlugins = rtrim($matches[2]);
             $separator = $existingPlugins !== '' ? ",\n        " : "\n        ";
             $content = str_replace(

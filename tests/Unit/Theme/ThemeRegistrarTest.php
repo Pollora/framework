@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 
-function setupRegistrarMocks(Container $container, $parser): void
+function setupRegistrarMocks(Application $container, $parser): void
 {
     $parser->shouldReceive('parseThemeHeaders')->andReturn(['Name' => 'Test Theme', 'Version' => '1.0.0']);
 }
 
 describe('ThemeRegistrar', function (): void {
     beforeEach(function (): void {
-        $this->container = new Container;
+        $this->container = new Application;
         $this->parser = Mockery::mock(WordPressThemeParser::class)->shouldIgnoreMissing();
         $this->registrar = new ThemeRegistrar($this->container, $this->parser);
     });

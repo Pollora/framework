@@ -31,7 +31,7 @@ final readonly class OptionService
 
         $option = $this->repository->get($key);
 
-        return $option instanceof \Pollora\Option\Domain\Models\Option ? $option->value : $default;
+        return $option instanceof Option ? $option->value : $default;
     }
 
     /**

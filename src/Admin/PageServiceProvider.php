@@ -12,7 +12,6 @@ use Illuminate\Support\ServiceProvider;
  * This provider registers the PageFactory as a singleton in the service container,
  * making it available throughout the application for creating and managing
  * WordPress admin pages in a Laravel-like way.
- *
  */
 class PageServiceProvider extends ServiceProvider
 {

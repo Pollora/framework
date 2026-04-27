@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Models;
 
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
-use Illuminate\Foundation\Application;
 
 class LaravelThemeModule extends ThemeModule
 {

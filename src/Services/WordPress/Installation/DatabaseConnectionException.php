@@ -9,7 +9,6 @@ namespace Pollora\Services\WordPress\Installation;
  *
  * This exception is used to handle database connection errors during
  * WordPress installation or configuration.
- *
  */
 class DatabaseConnectionException extends \RuntimeException
 {

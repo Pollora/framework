@@ -6,7 +6,6 @@ namespace Pollora\Asset\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Asset\Application\Services\AssetManager;
-use Pollora\Asset\Application\Services\AssetRegistrationService;
 use Pollora\Asset\Application\Services\AssetRetrievalService;
 use Pollora\Asset\Domain\Contracts\AssetRepositoryInterface;
 use Pollora\Asset\Infrastructure\Repositories\InMemoryAssetRepository;

@@ -40,7 +40,7 @@ final class LaravelCollectionAdapter implements CollectionInterface
      */
     public function map(callable $callback): static
     {
-        return new static($this->laravelCollection->map($callback));
+        return new self($this->laravelCollection->map($callback));
     }
 
     /**
@@ -48,7 +48,7 @@ final class LaravelCollectionAdapter implements CollectionInterface
      */
     public function filter(?callable $callback = null): static
     {
-        return new static($this->laravelCollection->filter($callback));
+        return new self($this->laravelCollection->filter($callback));
     }
 
     /**
@@ -56,7 +56,7 @@ final class LaravelCollectionAdapter implements CollectionInterface
      */
     public function values(): static
     {
-        return new static($this->laravelCollection->values());
+        return new self($this->laravelCollection->values());
     }
 
     /**
@@ -72,7 +72,7 @@ final class LaravelCollectionAdapter implements CollectionInterface
      */
     public function merge(array $items): static
     {
-        return new static($this->laravelCollection->merge($items));
+        return new self($this->laravelCollection->merge($items));
     }
 
     /**

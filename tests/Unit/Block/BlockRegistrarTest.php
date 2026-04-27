@@ -76,7 +76,7 @@ function createMockVite(bool $isHot = false): ViteManagerInterface
 {
     $vite = Mockery::mock(ViteManagerInterface::class);
     $vite->shouldReceive('isRunningHot')->andReturn($isHot);
-    $vite->shouldReceive('asset')->andReturnUsing(fn ($path): string => 'http://localhost:5173/' . $path);
+    $vite->shouldReceive('asset')->andReturnUsing(fn ($path): string => 'http://localhost:5173/'.$path);
     $vite->shouldReceive('getAssetUrls')->andReturnUsing(function ($entrypoints): array {
         $js = [];
         $css = [];

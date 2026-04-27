@@ -15,7 +15,6 @@ use WP_Error;
  * This class implements Laravel's UserProvider interface to integrate
  * WordPress user management with Laravel's authentication system.
  * It handles user retrieval, credential validation, and token management.
- *
  */
 class WordPressUserProvider implements UserProvider
 {

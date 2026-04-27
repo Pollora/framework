@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\Application\Services;
 
 use Illuminate\Contracts\Translation\Loader;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
@@ -17,7 +18,6 @@ use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
-use Illuminate\Foundation\Application;
 
 /**
  * Theme management service implementation.

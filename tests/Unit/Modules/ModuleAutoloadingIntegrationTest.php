@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use Mockery as m;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 
 beforeEach(function (): void {
-    $this->app = new Container;
+    $this->app = new Application;
 
     // Register autoloader services in the container
     $this->app->singleton(fn ($app): ModuleAutoloader => new ModuleAutoloader($app));
@@ -44,7 +44,7 @@ it('integrates autoloader with theme module registration', function (): void {
     // Create a real LaravelThemeModule instance for integration testing
     $theme = new class($tempDir.'/themes', $this->app) extends LaravelThemeModule
     {
-        public function __construct(string $path, Container $app)
+        public function __construct(string $path, Application $app)
         {
             parent::__construct('TestTheme', $path, $app);
         }

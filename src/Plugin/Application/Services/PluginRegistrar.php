@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Plugin\Application\Services;
 
+use Illuminate\Foundation\Application;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
@@ -13,7 +14,6 @@ use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Domain\Models\LaravelPluginModule;
 use Pollora\Plugin\Infrastructure\Repositories\PluginRepository;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
-use Illuminate\Foundation\Application;
 
 /**
  * Plugin registration service.

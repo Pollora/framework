@@ -126,6 +126,21 @@ class TestTaxonomy implements TaxonomyAttributeInterface
             ]
         );
     }
+
+    public function setAttributeArg(string $key, mixed $value): void
+    {
+        $this->attributeArgs[$key] = $value;
+    }
+
+    public function getAttributeArg(string $key, mixed $default = null): mixed
+    {
+        return $this->attributeArgs[$key] ?? $default;
+    }
+
+    public function getAttributeArgs(): array
+    {
+        return $this->attributeArgs;
+    }
 }
 
 beforeAll(function (): void {
