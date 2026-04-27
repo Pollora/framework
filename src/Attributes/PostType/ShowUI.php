@@ -34,6 +34,6 @@ class ShowUI extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['show_ui'] = $this->value;
+        $postType->setAttributeArg('show_ui', $this->value);
     }
 }

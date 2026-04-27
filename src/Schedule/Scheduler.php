@@ -18,7 +18,6 @@ use WP_Error;
  * Handles all WordPress cron operations with improved reliability,
  * database persistence, and Laravel queue integration.
  *
- * @implements SchedulerInterface
  */
 class Scheduler implements SchedulerInterface
 {

@@ -75,14 +75,42 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
     }
 
     /**
+     * Set an attribute argument.
+     */
+    public function setAttributeArg(string $key, mixed $value): void
+    {
+        $this->attributeArgs[$key] = $value;
+    }
+
+    /**
+     * Get a single attribute argument.
+     */
+    public function getAttributeArg(string $key, mixed $default = null): mixed
+    {
+        return $this->attributeArgs[$key] ?? $default;
+    }
+
+    /**
+     * Get all attribute arguments.
+     *
+     * @return array<string, mixed>
+     */
+    public function getAttributeArgs(): array
+    {
+        return $this->attributeArgs;
+    }
+
+    /**
      * Set a specific argument value.
      *
      * @param  string  $key  The argument key
      * @param  mixed  $value  The argument value
+     *
+     * @deprecated Use setAttributeArg() instead
      */
     public function setArg(string $key, mixed $value): void
     {
-        $this->attributeArgs[$key] = $value;
+        $this->setAttributeArg($key, $value);
     }
 
     /**

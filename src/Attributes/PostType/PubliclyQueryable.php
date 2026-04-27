@@ -33,6 +33,6 @@ class PubliclyQueryable extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['publicly_queryable'] = $this->value;
+        $postType->setAttributeArg('publicly_queryable', $this->value);
     }
 }

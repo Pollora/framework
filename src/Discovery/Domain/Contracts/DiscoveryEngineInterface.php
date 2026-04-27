@@ -113,4 +113,29 @@ interface DiscoveryEngineInterface
      * @return Collection<int, DiscoveryLocationInterface> Collection of discovery locations
      */
     public function getLocations(): Collection;
+
+    /**
+     * Clear all discovery locations
+     *
+     * @return static Returns self for method chaining
+     */
+    public function clearLocations(): static;
+
+    /**
+     * Clear persistent discovery cache
+     *
+     * @return static Returns self for method chaining
+     */
+    public function clearCache(): static;
+
+    /**
+     * Run a specific discovery
+     *
+     * @param  string  $identifier  The discovery identifier
+     * @param  DiscoveryInterface  $discovery  The discovery instance
+     * @return static Returns self for method chaining
+     *
+     * @throws DiscoveryException When discovery or application fails
+     */
+    public function runDiscovery(string $identifier, DiscoveryInterface $discovery): static;
 }

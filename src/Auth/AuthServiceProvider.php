@@ -16,7 +16,6 @@ use Illuminate\Support\ServiceProvider;
  * capabilities with Laravel's Gate system and handles the registration
  * of authentication-related services in the container.
  *
- * @extends ServiceProvider
  */
 class AuthServiceProvider extends ServiceProvider
 {

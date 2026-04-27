@@ -12,6 +12,16 @@ use Pollora\Theme\Domain\Models\ThemeMetadata;
 interface ThemeService
 {
     /**
+     * Get the active theme module.
+     */
+    public function getActiveTheme(): ?ThemeModuleInterface;
+
+    /**
+     * Check if a theme exists.
+     */
+    public function hasTheme(string $name): bool;
+
+    /**
      * Get the current instance
      */
     public function instance(): self;

@@ -34,6 +34,6 @@ class TitlePlaceholder extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['title_placeholder'] = $this->value;
+        $postType->setAttributeArg('title_placeholder', $this->value);
     }
 }

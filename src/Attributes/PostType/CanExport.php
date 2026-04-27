@@ -34,6 +34,6 @@ class CanExport extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['can_export'] = $this->value;
+        $postType->setAttributeArg('can_export', $this->value);
     }
 }

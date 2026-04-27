@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Pollora\WordPress\Commands;
 
 use Illuminate\Console\Command;
+use Pollora\Services\WordPress\Installation\DatabaseConnectionException;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 use Pollora\Services\WordPress\Installation\InstallationService;
+use Pollora\Services\WordPress\Installation\WordPressInstallationException;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;

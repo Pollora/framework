@@ -10,7 +10,6 @@ namespace Pollora\Schedule\Events;
  * Manages events that need to run only once at a specific time,
  * with automatic cleanup after execution.
  *
- * @extends AbstractEvent
  */
 class SingleEvent extends AbstractEvent
 {

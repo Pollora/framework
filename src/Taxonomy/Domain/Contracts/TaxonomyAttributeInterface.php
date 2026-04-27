@@ -41,4 +41,21 @@ interface TaxonomyAttributeInterface extends Attributable
      * @return array<string, mixed> Additional arguments
      */
     public function withArgs(): array;
+
+    /**
+     * Set an attribute argument.
+     */
+    public function setAttributeArg(string $key, mixed $value): void;
+
+    /**
+     * Get a single attribute argument.
+     */
+    public function getAttributeArg(string $key, mixed $default = null): mixed;
+
+    /**
+     * Get all attribute arguments.
+     *
+     * @return array<string, mixed>
+     */
+    public function getAttributeArgs(): array;
 }

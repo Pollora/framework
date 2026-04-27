@@ -24,7 +24,6 @@ use Psr\Container\ContainerInterface;
 /**
  * Class Menus
  *
- * @implements ThemeComponent
  */
 class Menus implements ThemeComponent
 {

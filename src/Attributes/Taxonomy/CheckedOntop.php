@@ -30,10 +30,10 @@ class CheckedOntop extends TaxonomyAttribute
     /**
      * Configure the taxonomy with the checked_ontop parameter.
      *
-     * @param  Taxonomy  $taxonomy  The taxonomy to configure
+     * @param  TaxonomyAttributeInterface  $taxonomy  The taxonomy to configure
      */
     protected function configure(TaxonomyAttributeInterface $taxonomy): void
     {
-        $taxonomy->attributeArgs['checked_ontop'] = $this->value;
+        $taxonomy->setAttributeArg('checked_ontop', $this->value);
     }
 }

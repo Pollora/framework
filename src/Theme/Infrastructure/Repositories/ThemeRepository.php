@@ -198,11 +198,9 @@ class ThemeRepository implements ModuleRepositoryInterface
      * This method is called by the ThemeRegistrar when a new theme is registered
      * to ensure synchronization between the registrar and repository.
      */
-    public function resetCache(): static
+    public function resetCache(): void
     {
         $this->cacheLoaded = false;
         $this->cachedThemes = [];
-
-        return $this;
     }
 }

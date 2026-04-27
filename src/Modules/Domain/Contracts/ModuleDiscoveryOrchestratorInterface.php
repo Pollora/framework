@@ -26,4 +26,38 @@ interface ModuleDiscoveryOrchestratorInterface
      * @return array<string, array> Results grouped by discovery type
      */
     public function discoverAndReturn(string $path): array;
+
+    /**
+     * Discover all enabled Laravel modules.
+     */
+    public function discoverLaravelModules(): void;
+
+    /**
+     * Apply all discovered Laravel modules.
+     */
+    public function applyLaravelModules(): void;
+
+    /**
+     * Get all enabled Laravel modules and their discovery data.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function discoverAndReturnLaravelModules(): array;
+
+    /**
+     * Discover all framework modules.
+     */
+    public function discoverFrameworkModules(): void;
+
+    /**
+     * Apply all discovered framework modules.
+     */
+    public function applyFrameworkModules(): void;
+
+    /**
+     * Get all framework modules and their discovery data.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function discoverAndReturnFrameworkModules(): array;
 }

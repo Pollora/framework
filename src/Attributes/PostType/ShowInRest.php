@@ -35,6 +35,6 @@ class ShowInRest extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['show_in_rest'] = $this->value;
+        $postType->setAttributeArg('show_in_rest', $this->value);
     }
 }

@@ -18,7 +18,7 @@ class Priority extends PostTypeAttribute
     /**
      * Constructor.
      *
-     * @param  init  $priority  The post type priority declaration
+     * @param  int  $priority  The post type priority declaration
      */
     public function __construct(
         public readonly int $priority = 5
@@ -31,6 +31,6 @@ class Priority extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['priority'] = $this->priority;
+        $postType->setAttributeArg('priority', $this->priority);
     }
 }

@@ -34,6 +34,6 @@ class AdminFilters extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['admin_filters'] = $this->value;
+        $postType->setAttributeArg('admin_filters', $this->value);
     }
 }

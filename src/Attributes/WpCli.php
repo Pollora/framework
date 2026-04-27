@@ -26,9 +26,11 @@ final readonly class WpCli
      * Create a new WP CLI attribute.
      *
      * @param  string|null  $commandName  Optional custom command name/slug. If null, generated from class name.
+     * @param  string|null  $description  Optional command description.
      */
     public function __construct(
-        public ?string $commandName = null
+        public ?string $commandName = null,
+        public ?string $description = null,
     ) {}
 
     /**

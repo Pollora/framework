@@ -19,7 +19,6 @@ use WP_Error;
  * It handles user authentication, session management, and WordPress-specific
  * authentication features.
  *
- * @implements StatefulGuard
  *
  * @uses GuardHelpers
  */

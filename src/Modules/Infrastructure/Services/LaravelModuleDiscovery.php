@@ -118,6 +118,21 @@ class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
         return $results;
     }
 
+    public function discoverFrameworkModules(): void
+    {
+        // Not applicable to Laravel module discovery
+    }
+
+    public function applyFrameworkModules(): void
+    {
+        // Not applicable to Laravel module discovery
+    }
+
+    public function discoverAndReturnFrameworkModules(): array
+    {
+        return [];
+    }
+
     /**
      * {@inheritDoc}
      */

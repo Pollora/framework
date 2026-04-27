@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Hook\Hook;
+use Pollora\Hook\Domain\Contracts\HookInterface;
+use Pollora\Hook\Infrastructure\Services\Action as ActionService;
 
 /**
  * Facade for WordPress Action Hooks.
@@ -14,11 +15,11 @@ use Pollora\Hook\Hook;
  * including adding, removing, and executing actions.
  *
  * @method static mixed do(string $hook, mixed $args = null) Execute an action hook
- * @method static Hook add(string|array $hooks, \Closure|string|array $callback, int $priority = 10, int $accepted_args = 3) Add an action hook
+ * @method static HookInterface add(string|array $hooks, \Closure|string|array $callback, int $priority = 10, int $accepted_args = 3) Add an action hook
  * @method static bool exists(string $hook) Check if an action exists
- * @method static Hook|false remove(string $hook, \Closure|string $callback, int $priority = 10) Remove an action hook
+ * @method static HookInterface|false remove(string $hook, \Closure|string $callback, int $priority = 10) Remove an action hook
  *
- * @see Hook
+ * @see ActionService
  */
 class Action extends Facade
 {

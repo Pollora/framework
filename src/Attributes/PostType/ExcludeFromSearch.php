@@ -34,6 +34,6 @@ class ExcludeFromSearch extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['exclude_from_search'] = $this->value;
+        $postType->setAttributeArg('exclude_from_search', $this->value);
     }
 }

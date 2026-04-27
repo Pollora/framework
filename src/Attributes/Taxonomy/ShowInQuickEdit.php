@@ -31,6 +31,6 @@ class ShowInQuickEdit extends TaxonomyAttribute
      */
     protected function configure(TaxonomyAttributeInterface $taxonomy): void
     {
-        $taxonomy->attributeArgs['show_in_quick_edit'] = $this->value;
+        $taxonomy->setAttributeArg('show_in_quick_edit', $this->value);
     }
 }

@@ -45,6 +45,6 @@ class MenuPosition extends PostTypeAttribute
      */
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $postType->attributeArgs['menu_position'] = $this->value;
+        $postType->setAttributeArg('menu_position', $this->value);
     }
 }

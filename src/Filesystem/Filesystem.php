@@ -13,7 +13,6 @@ use Illuminate\Filesystem\Filesystem as FilesystemBase;
  * functionality specifically designed for WordPress integration, including
  * path normalization and relative path calculation.
  *
- * @extends FilesystemBase
  */
 class Filesystem extends FilesystemBase
 {

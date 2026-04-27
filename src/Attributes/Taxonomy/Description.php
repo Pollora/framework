@@ -31,6 +31,6 @@ class Description extends TaxonomyAttribute
      */
     protected function configure(TaxonomyAttributeInterface $taxonomy): void
     {
-        $taxonomy->attributeArgs['description'] = $this->value;
+        $taxonomy->setAttributeArg('description', $this->value);
     }
 }

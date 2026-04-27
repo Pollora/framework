@@ -31,6 +31,6 @@ class ShowTagcloud extends TaxonomyAttribute
      */
     protected function configure(TaxonomyAttributeInterface $taxonomy): void
     {
-        $taxonomy->attributeArgs['show_tagcloud'] = $this->value;
+        $taxonomy->setAttributeArg('show_tagcloud', $this->value);
     }
 }

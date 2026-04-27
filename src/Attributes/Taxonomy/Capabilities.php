@@ -40,6 +40,6 @@ class Capabilities extends TaxonomyAttribute
      */
     protected function configure(TaxonomyAttributeInterface $taxonomy): void
     {
-        $taxonomy->attributeArgs['capabilities'] = $this->value;
+        $taxonomy->setAttributeArg('capabilities', $this->value);
     }
 }

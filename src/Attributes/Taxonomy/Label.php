@@ -31,6 +31,6 @@ class Label extends TaxonomyAttribute
      */
     protected function configure(TaxonomyAttributeInterface $taxonomy): void
     {
-        $taxonomy->attributeArgs['label'] = $this->value;
+        $taxonomy->setAttributeArg('label', $this->value);
     }
 }

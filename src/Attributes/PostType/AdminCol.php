@@ -71,8 +71,8 @@ class AdminCol implements HandlesAttributes
         }
 
         // Initialize admin_cols array if it doesn't exist
-        if (! isset($instance->attributeArgs['admin_cols'])) {
-            $instance->attributeArgs['admin_cols'] = [];
+        if ($instance->getAttributeArg('admin_cols') === null) {
+            $instance->setAttributeArg('admin_cols', []);
         }
 
         // Build column configuration based on extended-cpts options
@@ -136,6 +136,8 @@ class AdminCol implements HandlesAttributes
         }
 
         // Add the column to the admin_cols array
-        $instance->attributeArgs['admin_cols'][$this->key] = $columnConfig;
+        $adminCols = $instance->getAttributeArg('admin_cols', []);
+        $adminCols[$this->key] = $columnConfig;
+        $instance->setAttributeArg('admin_cols', $adminCols);
     }
 }

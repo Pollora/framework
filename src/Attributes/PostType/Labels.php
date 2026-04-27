@@ -94,7 +94,7 @@ class Labels extends PostTypeAttribute
 
     protected function configure(PostTypeAttributeInterface $postType): void
     {
-        $existing = $postType->attributeArgs['labels'] ?? [];
-        $postType->attributeArgs['labels'] = array_merge($existing, $this->labels);
+        $existing = $postType->getAttributeArg('labels', []);
+        $postType->setAttributeArg('labels', array_merge($existing, $this->labels));
     }
 }

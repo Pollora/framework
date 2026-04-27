@@ -31,6 +31,6 @@ class Args extends TaxonomyAttribute
      */
     protected function configure(TaxonomyAttributeInterface $taxonomy): void
     {
-        $taxonomy->attributeArgs['args'] = $this->value;
+        $taxonomy->setAttributeArg('args', $this->value);
     }
 }
