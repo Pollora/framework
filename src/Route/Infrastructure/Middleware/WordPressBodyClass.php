@@ -97,6 +97,9 @@ class WordPressBodyClass
      * @param  Route  $route  Current route instance
      * @return string|false Sanitized token or false when not applicable
      */
+    /**
+     * @param  array<int, mixed>  $token
+     */
     private function handleVariableToken(array $token, Route $route): string|false
     {
         if (isset($token[3]) && $route->hasParameter($paramKey = $token[3])) {

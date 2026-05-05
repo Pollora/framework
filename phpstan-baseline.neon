@@ -1057,11 +1057,6 @@ parameters:
 			count: 1
 			path: src/Route/Domain/Models/Route.php
 
-		-
-			message: '#^Parameter \#1 \$route of method Pollora\\Route\\Infrastructure\\Services\\ExtendedRouter\:\:addWordPressBindings\(\) expects Pollora\\Route\\Domain\\Models\\Route, Illuminate\\Routing\\Route given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Route/Infrastructure/Middleware/WordPressBindings.php
 
 		-
 			message: '#^Call to function method_exists\(\) with Pollora\\Route\\Domain\\Models\\Route and ''getCompiled'' will always evaluate to true\.$#'
@@ -1093,29 +1088,12 @@ parameters:
 			count: 1
 			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
 
-		-
-			message: '#^Call to an undefined method Illuminate\\Routing\\Router\:\:resolveCondition\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
 
 		-
 			message: '#^Call to an undefined static method Illuminate\\Support\\Facades\\Route\:\:wpMatch\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
 			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
-
-		-
-			message: '#^Call to an undefined method ReflectionType\:\:getName\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Route/Infrastructure/Services/ExtendedRouter.php
-
-		-
-			message: '#^Call to an undefined method ReflectionType\:\:isBuiltin\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Route/Infrastructure/Services/ExtendedRouter.php
 
 		-
 			message: '#^Parameter \#1 \$resolver of method Pollora\\Route\\Domain\\Models\\Route\:\:setConditionResolver\(\) expects Pollora\\Route\\Domain\\Contracts\\ConditionResolverInterface, Pollora\\Route\\Infrastructure\\Services\\Contracts\\WordPressConditionManagerInterface given\.$#'

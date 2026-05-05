@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Request;
 use Pollora\Route\Domain\Models\Route;
-use Pollora\Route\Infrastructure\Services\ExtendedRouter;
+use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
+use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
+use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
 
 describe('WordPressRouteResolution', function (): void {
     beforeEach(function (): void {
         $this->container = new Container;
-        $dispatcher = Mockery::mock(Dispatcher::class);
-        $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
         $config = Mockery::mock(Repository::class);
         $config->shouldReceive('get')->andReturnUsing(function ($key, $default = null) {
@@ -38,23 +37,25 @@ describe('WordPressRouteResolution', function (): void {
         });
 
         $this->container->instance('config', $config);
-        $this->router = new ExtendedRouter($dispatcher, $this->container);
+
+        $this->conditionManager = new WordPressConditionManager($this->container);
+        $this->container->instance(WordPressConditionManagerInterface::class, $this->conditionManager);
     });
 
     it('resolves condition aliases correctly', function (): void {
-        expect($this->router->resolveCondition('front'))->toBe('is_front_page');
-        expect($this->router->resolveCondition('home'))->toBe('is_home');
-        expect($this->router->resolveCondition('page'))->toBe('is_page');
-        expect($this->router->resolveCondition('single'))->toBe('is_single');
-        expect($this->router->resolveCondition('author'))->toBe('is_author');
-        expect($this->router->resolveCondition('archive'))->toBe('is_category');
-        expect($this->router->resolveCondition('template'))->toBe('is_page_template');
-        expect($this->router->resolveCondition('404'))->toBe('is_404');
-        expect($this->router->resolveCondition('is_singular'))->toBe('is_singular');
+        expect($this->conditionManager->resolveCondition('front'))->toBe('is_front_page');
+        expect($this->conditionManager->resolveCondition('home'))->toBe('is_home');
+        expect($this->conditionManager->resolveCondition('page'))->toBe('is_page');
+        expect($this->conditionManager->resolveCondition('single'))->toBe('is_single');
+        expect($this->conditionManager->resolveCondition('author'))->toBe('is_author');
+        expect($this->conditionManager->resolveCondition('archive'))->toBe('is_category');
+        expect($this->conditionManager->resolveCondition('template'))->toBe('is_page_template');
+        expect($this->conditionManager->resolveCondition('404'))->toBe('is_404');
+        expect($this->conditionManager->resolveCondition('is_singular'))->toBe('is_singular');
     });
 
     it('marks WordPress route correctly', function (): void {
-        $wpRoute = createWpRoute($this->router, 'front');
+        $wpRoute = createWpRoute($this->conditionManager, 'front');
         $laravelRoute = new Route(['GET'], '/test', fn (): string => 'test');
 
         expect($wpRoute->isWordPressRoute())->toBeTrue();
@@ -62,21 +63,21 @@ describe('WordPressRouteResolution', function (): void {
     });
 
     it('has correct condition on WordPress route', function (): void {
-        $route = createWpRoute($this->router, 'front');
+        $route = createWpRoute($this->conditionManager, 'front');
 
         expect($route->getCondition())->toBe('is_front_page');
         expect($route->hasCondition())->toBeTrue();
     });
 
     it('supports route with parameters', function (): void {
-        $route = createWpRoute($this->router, 'is_singular', ['realisations']);
+        $route = createWpRoute($this->conditionManager, 'is_singular', ['realisations']);
 
         expect($route->getCondition())->toBe('is_singular');
         expect($route->getConditionParameters())->toBe(['realisations']);
     });
 
     it('has correct methods and properties', function (): void {
-        $route = createWpRoute($this->router, 'front');
+        $route = createWpRoute($this->conditionManager, 'front');
 
         expect($route->methods())->toBe(['GET', 'HEAD']);
         expect($route->uri())->toBe('front');
@@ -99,22 +100,22 @@ describe('WordPressRouteResolution', function (): void {
         ];
 
         foreach ($webRoutes as $alias => $expectedCondition) {
-            $route = createWpRoute($this->router, $alias);
+            $route = createWpRoute($this->conditionManager, $alias);
             expect($route->getCondition())->toBe($expectedCondition, sprintf("Route alias '%s' should resolve to '%s'", $alias, $expectedCondition));
         }
     });
 
     it('resolves 404 route condition', function (): void {
-        expect($this->router->resolveCondition('404'))->toBe('is_404');
+        expect($this->conditionManager->resolveCondition('404'))->toBe('is_404');
 
-        $route = createWpRoute($this->router, '404');
+        $route = createWpRoute($this->conditionManager, '404');
         expect($route->getCondition())->toBe('is_404');
         expect($route->isWordPressRoute())->toBeTrue();
     });
 
     it('matches routes with WordPress condition mocking', function (): void {
         Brain\Monkey\Functions\when('is_front_page')->justReturn(true);
-        $frontRoute = createWpRoute($this->router, 'front');
+        $frontRoute = createWpRoute($this->conditionManager, 'front');
         $request = Request::create('/', 'GET');
         expect($frontRoute->matches($request))->toBeTrue();
 
@@ -122,16 +123,16 @@ describe('WordPressRouteResolution', function (): void {
         expect($frontRoute->matches($request))->toBeFalse();
 
         Brain\Monkey\Functions\when('is_single')->justReturn(true);
-        $singleRoute = createWpRoute($this->router, 'single');
+        $singleRoute = createWpRoute($this->conditionManager, 'single');
         expect($singleRoute->matches(Request::create('/blog/article', 'GET')))->toBeTrue();
 
         Brain\Monkey\Functions\when('is_category')->justReturn(true);
-        $categoryRoute = createWpRoute($this->router, 'archive');
+        $categoryRoute = createWpRoute($this->conditionManager, 'archive');
         expect($categoryRoute->matches(Request::create('/category/news', 'GET')))->toBeTrue();
     });
 
     it('matches route with parameters using WordPress mocks', function (): void {
-        $route = createWpRoute($this->router, 'is_singular', ['realisations']);
+        $route = createWpRoute($this->conditionManager, 'is_singular', ['realisations']);
 
         Brain\Monkey\Functions\when('is_singular')->justReturn(true);
         expect($route->matches(Request::create('/realisations/campus-vert', 'GET')))->toBeTrue();
@@ -146,8 +147,8 @@ describe('WordPressRouteResolution', function (): void {
             'is_single' => false, 'is_category' => false, 'is_404' => false,
         ]);
 
-        $frontRoute = createWpRoute($this->router, 'front');
-        $homeRoute = createWpRoute($this->router, 'home');
+        $frontRoute = createWpRoute($this->conditionManager, 'front');
+        $homeRoute = createWpRoute($this->conditionManager, 'home');
         $request = Request::create('/', 'GET');
 
         expect($frontRoute->matches($request))->toBeTrue();
@@ -166,18 +167,19 @@ describe('WordPressRouteResolution', function (): void {
             'is_single' => false, 'is_category' => true, 'is_404' => false,
         ]);
 
-        $categoryRoute = createWpRoute($this->router, 'archive');
+        $categoryRoute = createWpRoute($this->conditionManager, 'archive');
         expect($categoryRoute->matches(Request::create('/blog/category/actus', 'GET')))->toBeTrue();
     });
 });
 
-function createWpRoute(ExtendedRouter $router, string $condition, array $parameters = []): Route
+function createWpRoute(WordPressConditionManagerInterface $conditionManager, string $condition, array $parameters = []): Route
 {
-    $resolvedCondition = $router->resolveCondition($condition);
+    $resolvedCondition = $conditionManager->resolveCondition($condition);
     $route = new Route(['GET'], $condition, fn (): string => 'matched');
     $route->setIsWordPressRoute(true);
     $route->setCondition($resolvedCondition);
     $route->setConditionParameters($parameters);
+    $route->setConditionResolver($conditionManager);
 
     return $route;
 }

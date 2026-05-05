@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Container\Container;
+use Illuminate\Http\Request;
 use Mockery as m;
 use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
@@ -96,7 +97,7 @@ describe('WordPressRoutingService', function (): void {
                 ->andReturn($post);
 
             $route = new Route(['GET'], '/test', fn (WP_Post $post): string => 'test');
-            $route->bind(m::mock(\Illuminate\Http\Request::class));
+            $route->bind(Request::create('/test'));
 
             $this->service->bindWordPressParameters($route);
 
@@ -107,7 +108,7 @@ describe('WordPressRoutingService', function (): void {
             $this->typeResolver->shouldNotReceive('resolve');
 
             $route = new Route(['GET'], '/test', fn (string $name): string => 'test');
-            $route->bind(m::mock(\Illuminate\Http\Request::class));
+            $route->bind(Request::create('/test'));
 
             $this->service->bindWordPressParameters($route);
 
@@ -119,7 +120,7 @@ describe('WordPressRoutingService', function (): void {
                 ->andThrow(new \RuntimeException('WP not loaded'));
 
             $route = new Route(['GET'], '/test', fn (WP_Post $post): string => 'test');
-            $route->bind(m::mock(\Illuminate\Http\Request::class));
+            $route->bind(Request::create('/test'));
 
             // Should not throw
             $this->service->bindWordPressParameters($route);
