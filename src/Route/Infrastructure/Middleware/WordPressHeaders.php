@@ -12,31 +12,16 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
  * Middleware to manage HTTP headers for WordPress responses.
  *
  * Handles framework-specific headers, WordPress header cleanup,
- * and cache control directives.
+ * and cache control directives for non-authenticated visitors.
  */
 class WordPressHeaders
 {
-    /**
-     * Framework name constant for headers.
-     */
     private const string FRAMEWORK_NAME = 'Pollora';
 
-    /**
-     * Framework header name constant.
-     */
     private const string FRAMEWORK_HEADER = 'X-Powered-By';
 
     /**
      * Handle the incoming request.
-     *
-     * Manages response headers including:
-     * - Adding framework identification
-     * - Cleaning up WordPress headers for non-authenticated requests
-     * - Setting appropriate cache control directives
-     *
-     * @param  Request  $request  Incoming HTTP request
-     * @param  Closure  $next  Next middleware handler
-     * @return SymfonyResponse Modified response instance
      */
     public function handle(Request $request, Closure $next): SymfonyResponse
     {
@@ -53,32 +38,17 @@ class WordPressHeaders
         }
 
         if ($this->shouldSetPublicCache()) {
-            header_remove('Cache-Control');
-            $response->headers->remove('Cache-Control');
-            $response->setPublic();
-            $response->headers->addCacheControlDirective('must-revalidate', true);
-            $response->headers->addCacheControlDirective('max-age', '3600');
+            $this->applyPublicCacheHeaders($response);
         }
 
         return $response;
     }
 
-    /**
-     * Add the framework identification header.
-     *
-     * @param  SymfonyResponse  $response  Response being modified
-     */
     private function addFrameworkHeader(SymfonyResponse $response): void
     {
         $response->headers->set(self::FRAMEWORK_HEADER, self::FRAMEWORK_NAME);
     }
 
-    /**
-     * Determine if WordPress headers should be cleaned up.
-     *
-     * @param  Request  $request  Incoming request instance
-     * @return bool True when headers should be removed
-     */
     private function shouldCleanupHeaders(Request $request): bool
     {
         $route = $request->route();
@@ -86,15 +56,10 @@ class WordPressHeaders
         return $route &&
                method_exists($route, 'hasCondition') &&
                ! $route->hasCondition() &&
-               $this->isWordPressFunctionAvailable('is_user_logged_in') &&
+               function_exists('is_user_logged_in') &&
                ! is_user_logged_in();
     }
 
-    /**
-     * Remove WordPress-specific headers from the response.
-     *
-     * @param  SymfonyResponse  $response  Response to clean up
-     */
     private function removeWordPressHeaders(SymfonyResponse $response): void
     {
         $response->headers->remove('Cache-Control');
@@ -102,24 +67,19 @@ class WordPressHeaders
         $response->headers->remove('Content-Type');
     }
 
-    /**
-     * Determine if public cache headers should be set.
-     *
-     * @return bool True when public caching is allowed
-     */
     private function shouldSetPublicCache(): bool
     {
-        return $this->isWordPressFunctionAvailable('is_user_logged_in') && ! is_user_logged_in();
+        return function_exists('is_user_logged_in') && ! is_user_logged_in();
     }
 
-    /**
-     * Check if a WordPress function is available.
-     *
-     * @param  string  $function  Function name to check
-     * @return bool True if the function exists
-     */
-    private function isWordPressFunctionAvailable(string $function): bool
+    private function applyPublicCacheHeaders(SymfonyResponse $response): void
     {
-        return function_exists($function);
+        $response->headers->remove('Cache-Control');
+        $response->setPublic();
+        $response->headers->addCacheControlDirective('must-revalidate', true);
+        $response->headers->addCacheControlDirective(
+            'max-age',
+            (string) config('wordpress.cache.max_age', 3600)
+        );
     }
 }

@@ -1059,11 +1059,6 @@ parameters:
 			count: 1
 			path: src/Route/Infrastructure/Middleware/WordPressBodyClass.php
 
-		-
-			message: '#^Method Pollora\\Route\\Infrastructure\\Middleware\\WordPressHeaders\:\:handle\(\) should return Symfony\\Component\\HttpFoundation\\Response but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Route/Infrastructure/Middleware/WordPressHeaders.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Routing\\Route\:\:setCondition\(\)\.$#'

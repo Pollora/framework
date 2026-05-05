@@ -92,4 +92,17 @@ return [
         'logged_in_salt' => env('LOGGED_IN_SALT'),
         'nonce_salt' => env('NONCE_SALT'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Control
+    |--------------------------------------------------------------------------
+    |
+    | Configure HTTP cache headers for non-authenticated visitors.
+    | These headers are applied by the WordPressHeaders middleware.
+    |
+    */
+    'cache' => [
+        'max_age' => (int) env('WP_CACHE_MAX_AGE', 3600),
+    ],
 ];
