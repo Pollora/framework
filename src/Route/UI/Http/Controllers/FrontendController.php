@@ -23,6 +23,12 @@ use Pollora\View\Domain\Contracts\TemplateFinderInterface;
  */
 class FrontendController
 {
+    /**
+     * Whether the last template resolution used the generic index fallback
+     * (no specific template matched for the current condition).
+     */
+    private bool $usedIndexFallback = false;
+
     public function __construct(
         private readonly TemplateFinderInterface $templateFinder
     ) {}
@@ -34,13 +40,21 @@ class FrontendController
     {
         // Early return if themes are not being used
         if (function_exists('wp_using_themes') && ! wp_using_themes()) {
-            abort(404, 'Themes are disabled');
+            return $this->renderNotFound();
         }
 
         $templatePath = $this->getTemplateFile();
 
         // Convert file path to Laravel view name
         $viewName = $this->templateFinder->getViewNameFromPath($templatePath);
+
+        // For 404 pages: if no dedicated 404 template was found in the hierarchy
+        // (i.e. we fell through to get_index_template()), use Laravel's error page.
+        // A real index.blade.php IS a valid fallback for other request types,
+        // but for 404s it means the theme has no 404 handling at all.
+        if (is_404() && $this->usedIndexFallback) {
+            return $this->renderNotFound();
+        }
 
         if ($viewName && View::exists($viewName)) {
             return response(View::make($viewName), is_404() ? Response::HTTP_NOT_FOUND : Response::HTTP_OK);
@@ -54,8 +68,32 @@ class FrontendController
             return response($content);
         }
 
-        // If no template found, return 404
-        abort(404);
+        // No WordPress template found — fall back to Laravel's error view
+        return $this->renderNotFound();
+    }
+
+    /**
+     * Render a 404 response using Laravel's error views.
+     *
+     * Cascade:
+     *   1. Application view: errors.404 (resources/views/errors/404.blade.php)
+     *   2. Laravel built-in 404 page (via RegisterErrorViewPaths)
+     *   3. Plain text fallback
+     */
+    protected function renderNotFound(): Response
+    {
+        if (View::exists('errors.404')) {
+            return response(View::make('errors.404'), Response::HTTP_NOT_FOUND);
+        }
+
+        // Register Laravel's built-in error view paths (same mechanism as the exception handler)
+        (new \Illuminate\Foundation\Exceptions\RegisterErrorViewPaths())();
+
+        if (View::exists('errors::404')) {
+            return response(View::make('errors::404'), Response::HTTP_NOT_FOUND);
+        }
+
+        return response('Not Found', Response::HTTP_NOT_FOUND);
     }
 
     /**
@@ -66,6 +104,8 @@ class FrontendController
      */
     protected function getTemplateFile(): string
     {
+        $this->usedIndexFallback = false;
+
         if (wp_using_themes()) {
 
             $tag_templates = [
@@ -106,6 +146,7 @@ class FrontendController
 
             if (! $template) {
                 $template = get_index_template();
+                $this->usedIndexFallback = true;
             }
 
             /**
