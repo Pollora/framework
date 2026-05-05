@@ -101,17 +101,13 @@ class RouteServiceProvider extends ServiceProvider
         $this->registerWpMatchMacro();
         $this->registerWpMacro();
 
-        // Listen for the modules.routes.registered event to register fallback route
-        Event::listen('modules.routes.registered', function (): void {
-            $this->bootFallbackRoute();
-        });
+        // Register fallback route after modules have loaded their routes.
+        // Two triggers ensure it works with or without the modules system:
+        // 1. Event from ModuleServiceProvider (when modules are present)
+        // 2. Booted callback (when no modules, or event wasn't dispatched)
+        Event::listen('modules.routes.registered', fn () => $this->bootFallbackRoute());
 
-        // Fallback: if no modules are present, register the fallback route after boot
-        $this->app->booted(function (): void {
-            if (! $this->app->bound('route.fallback.registered')) {
-                $this->bootFallbackRoute();
-            }
-        });
+        $this->app->booted(fn () => $this->bootFallbackRoute());
     }
 
     /**
