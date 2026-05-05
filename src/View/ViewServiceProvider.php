@@ -52,7 +52,7 @@ class ViewServiceProvider extends ViewServiceProviderBase
             $id = md5($this->getCompiled());
             $compiled_path = resolve('config')['view.compiled'];
 
-            $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", $view)
+            $content = "<?= \\view('{$view}', \$data ?? array_filter(get_defined_vars(), fn(\$v, \$k) => !\is_string(\$v) || !\in_array(\$k, ['product', 'post'], true), ARRAY_FILTER_USE_BOTH))->render(); ?>"
                 ."\n<?php /**PATH {$path} ENDPATH**/ ?>";
 
             if (! file_exists($loader = sprintf('%s/%s-loader.php', $compiled_path, $id))) {
