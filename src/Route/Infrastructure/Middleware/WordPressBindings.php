@@ -6,20 +6,19 @@ namespace Pollora\Route\Infrastructure\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Pollora\Route\Infrastructure\Services\ExtendedRouter;
+use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
 
 /**
  * Middleware to handle WordPress-specific route bindings.
  *
  * Adds WordPress-specific objects (like current post and query) to routes
- * that have WordPress conditions.
+ * that have WordPress conditions, enabling type-hinted injection in controllers.
  */
 class WordPressBindings
 {
-    /**
-     * Create a new WordPress bindings middleware instance.
-     */
-    public function __construct(private readonly ExtendedRouter $router) {}
+    public function __construct(
+        private readonly WordPressRoutingService $routingService
+    ) {}
 
     /**
      * Handle the incoming request.
@@ -30,8 +29,8 @@ class WordPressBindings
     {
         $route = $request->route();
 
-        if ($route && method_exists($route, 'hasCondition') && $route->hasCondition()) {
-            $this->router->addWordPressBindings($route);
+        if ($route instanceof \Pollora\Route\Domain\Models\Route && $route->hasCondition()) {
+            $this->routingService->bindWordPressParameters($route);
         }
 
         return $next($request);

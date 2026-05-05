@@ -18,6 +18,7 @@ use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterfa
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
+use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
 
 /**
@@ -35,6 +36,16 @@ class RouteServiceProvider extends ServiceProvider
     public int $priority = -99;
 
     /**
+     * WordPress middleware stack applied to all WordPress routes.
+     */
+    public const WORDPRESS_MIDDLEWARE = [
+        WordPressBindings::class,
+        WordPressHeaders::class,
+        WordPressBodyClass::class,
+        WordPressShutdown::class,
+    ];
+
+    /**
      * Register any application services.
      */
     public function register(): void
@@ -48,22 +59,34 @@ class RouteServiceProvider extends ServiceProvider
         // Bind the domain interface to the same instance
         $this->app->bind(ConditionResolverInterface::class, fn ($app) => $app->make(WordPressConditionManagerInterface::class));
 
-        // Override the default router with our extended version
-        $this->app->extend('router', function ($router, Application $app): ExtendedRouter {
+        // Register the routing service (encapsulates condition resolution and type binding)
+        $this->app->singleton(WordPressRoutingService::class, function ($app): WordPressRoutingService {
             $logger = null;
             try {
                 $logger = $app->make('log');
             } catch (\Exception) {
-                // Logger not available
+                // Logger not available during early bootstrap
             }
 
-            return new ExtendedRouter(
-                $app->make('events'),
-                $app,
+            return new WordPressRoutingService(
                 $app->make(WordPressConditionManagerInterface::class),
                 $app->make(WordPressTypeResolverInterface::class),
                 $logger
             );
+        });
+
+        // Override the default router with our extended version (for custom Route model)
+        $this->app->extend('router', function ($router, Application $app): ExtendedRouter {
+            return new ExtendedRouter(
+                $app->make('events'),
+                $app,
+                $app->make(WordPressConditionManagerInterface::class),
+            );
+        });
+
+        // Register WordPress types in the container for dependency injection
+        $this->app->booted(function (): void {
+            $this->app->make(WordPressRoutingService::class)->registerWordPressTypes($this->app);
         });
     }
 
@@ -72,8 +95,6 @@ class RouteServiceProvider extends ServiceProvider
      *
      * Declares the 'wordpress' macros, enabling the definition of routes specific
      * to various WordPress content types (single, page, archive, etc.).
-     * These macros function similarly to the `any()` method but incorporate
-     * WordPress-specific logic and automatically apply WordPress middleware.
      */
     public function boot(): void
     {
@@ -87,15 +108,8 @@ class RouteServiceProvider extends ServiceProvider
 
         // Fallback: if no modules are present, register the fallback route after boot
         $this->app->booted(function (): void {
-            // Only register if the event hasn't been fired yet
             if (! $this->app->bound('route.fallback.registered')) {
-                // Set a small delay to allow any potential module routes to be registered
-                $this->app->afterResolving('router', function (): void {
-                    if (! $this->app->bound('route.fallback.registered')) {
-                        $this->bootFallbackRoute();
-                        $this->app->instance('route.fallback.registered', true);
-                    }
-                });
+                $this->bootFallbackRoute();
             }
         });
     }
@@ -110,16 +124,14 @@ class RouteServiceProvider extends ServiceProvider
                 throw new \InvalidArgumentException('The wp route requires at least a condition and a callback.');
             }
 
-            // Get the router instance to resolve condition aliases
-            $router = resolve('router');
-            $resolvedCondition = $router->resolveCondition($condition);
+            // Resolve condition alias via the routing service
+            $resolvedCondition = app(WordPressRoutingService::class)->resolveCondition($condition);
 
             // Create a unique URI for the route
             $uri = $condition;
             if (count($args) > 1) {
-                // Hash the parameters to ensure uniqueness
                 $paramHash = md5(serialize(array_slice($args, 0, -1)));
-                $uri .= '_'.$paramHash;
+                $uri .= '_' . $paramHash;
             }
 
             // Last argument is always the callback
@@ -131,21 +143,12 @@ class RouteServiceProvider extends ServiceProvider
             $route->setCondition($resolvedCondition);
 
             // Extract condition parameters (all arguments except the last one)
-            $conditionParams = [];
             if (count($args) > 1) {
-                $conditionParams = array_slice($args, 0, count($args) - 1);
+                $route->setConditionParameters(array_slice($args, 0, count($args) - 1));
             }
 
-            // Set condition parameters
-            $route->setConditionParameters($conditionParams);
-
             // Add WordPress middleware
-            $route->middleware([
-                WordPressBindings::class,
-                WordPressHeaders::class,
-                WordPressBodyClass::class,
-                WordPressShutdown::class,
-            ]);
+            $route->middleware(RouteServiceProvider::WORDPRESS_MIDDLEWARE);
 
             return $route;
         });
@@ -156,29 +159,22 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function registerWpMacro(): void
     {
-        Route::macro('wp', fn (string $condition, ...$args) => Route::wpMatch(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $condition, ...$args)
-        );
+        Route::macro('wp', fn (string $condition, ...$args) => Route::wpMatch(
+            ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+            $condition,
+            ...$args
+        ));
     }
 
     /**
      * Register the WordPress fallback route after all other routes.
-     *
-     * This method is called after module routes have been registered to ensure
-     * it doesn't interfere with module route registration.
      */
     protected function bootFallbackRoute(): void
     {
-        // Mark that the fallback route is being registered
         $this->app->instance('route.fallback.registered', true);
 
-        // Add a catch-all route for WordPress templates (excluding API routes)
         Route::any('{any}', [FrontendController::class, 'handle'])
             ->where('any', '^(?!api/).*')
-            ->middleware([
-                WordPressBindings::class,
-                WordPressHeaders::class,
-                WordPressBodyClass::class,
-                WordPressShutdown::class,
-            ]);
+            ->middleware(self::WORDPRESS_MIDDLEWARE);
     }
 }

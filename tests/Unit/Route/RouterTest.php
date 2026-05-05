@@ -84,42 +84,6 @@ test('router creates new route instances', function (): void {
 });
 
 /**
- * Test that the Router can handle WordPress conditions.
- */
-test('router manages WordPress conditions', function (): void {
-    $setup = setupRouterTest();
-    $router = $setup['router'];
-
-    // Test getting conditions
-    $conditions = $router->getConditions();
-    expect($conditions)->toBeArray();
-    expect($conditions)->toHaveKey('page');
-    expect($conditions['page'])->toBe('is_page');
-
-    // Test resolving conditions
-    expect($router->resolveCondition('page'))->toBe('is_page');
-    expect($router->resolveCondition('unknown'))->toBe('unknown');
-});
-
-/**
- * Test that the Router can add WordPress bindings to routes.
- */
-test('router adds WordPress bindings to routes', function (): void {
-    $setup = setupRouterTest();
-    $router = $setup['router'];
-
-    // Create a route with a closure that has WordPress dependencies
-    $route = new Route(['GET'], 'test', fn (WP_Post $post): string => 'test');
-
-    // Add WordPress bindings
-    $enhancedRoute = $router->addWordPressBindings($route);
-
-    // The method should return the same route instance
-    expect($enhancedRoute)->toBe($route);
-    expect($enhancedRoute)->toBeInstanceOf(Route::class);
-});
-
-/**
  * Test that the Router creates routes with proper configuration.
  */
 test('router creates WordPress-compatible routes', function (): void {
