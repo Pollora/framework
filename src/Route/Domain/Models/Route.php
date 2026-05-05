@@ -13,6 +13,10 @@ use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
  *
  * This class extends Laravel's Route to add WordPress conditional tag support
  * while maintaining full compatibility with Laravel's routing system.
+ *
+ * WordPress conditions are evaluated during route matching: if the condition
+ * function (e.g. is_single(), is_page()) returns true, the route matches.
+ * WordPress must be bootstrapped before route matching occurs (handled by QueryTrait).
  */
 class Route extends IlluminateRoute
 {
@@ -73,25 +77,8 @@ class Route extends IlluminateRoute
     /**
      * Get the resolved WordPress condition function name.
      *
-     * This method returns the WordPress condition function name, resolving
-     * any condition aliases through the injected condition resolver if available.
-     * If no resolver is available, returns the raw condition string.
-     *
-     * The method supports both condition aliases (e.g., 'single', 'page') and
-     * direct WordPress function names (e.g., 'is_single', 'is_page'). When a
-     * condition resolver is available, aliases are automatically resolved to
-     * their corresponding WordPress function names.
-     *
-     * @return string The resolved WordPress condition function name
-     *
-     * @example
-     * // With resolver available:
-     * $route->setCondition('single');
-     * $route->getCondition(); // Returns 'is_single'
-     *
-     * // Without resolver or direct function name:
-     * $route->setCondition('is_single');
-     * $route->getCondition(); // Returns 'is_single'
+     * Resolves condition aliases (e.g., 'single' → 'is_single') through the
+     * injected condition resolver. Returns the raw condition if no resolver is set.
      */
     public function getCondition(): string
     {
@@ -136,11 +123,6 @@ class Route extends IlluminateRoute
     /**
      * Set the condition resolver instance.
      *
-     * This method allows injection of a condition resolver that can translate
-     * condition aliases to actual WordPress function names. The resolver is
-     * used by the getCondition method to provide resolved condition names.
-     *
-     * @param  ConditionResolverInterface  $resolver  The condition resolver instance
      * @return $this
      */
     public function setConditionResolver(ConditionResolverInterface $resolver): self
@@ -159,98 +141,31 @@ class Route extends IlluminateRoute
     {
         $this->compileRoute();
 
-        // If this is a WordPress route, check the condition
+        // WordPress routes match based on WordPress conditional tags
         if ($this->isWordPressRoute() && $this->hasCondition()) {
             return $this->matchesWordPressCondition();
         }
 
-        // Otherwise, use Laravel's default matching
+        // Standard Laravel routes use URI pattern matching
         return parent::matches($request, $includingMethod);
     }
 
     /**
-     * Check if the WordPress condition matches.
+     * Check if the WordPress condition matches the current request.
      *
-     * Priority order:
-     * 1. WordPress routes with "positive" conditions (single, page, archive, etc.)
-     * 2. Laravel routes
-     * 3. WordPress 404 route (fallback)
-     *
-     * This ensures that explicit WordPress content routes take precedence,
-     * while Laravel routes can still handle URLs that don't match any WordPress content.
+     * Evaluates the WordPress conditional function (e.g. is_single(), is_page())
+     * with any configured parameters. WordPress must be bootstrapped before this
+     * is called (ensured by QueryTrait::runWp() in the request lifecycle).
      */
     protected function matchesWordPressCondition(): bool
     {
-        // Ensure WordPress has parsed the request before evaluating conditions
-        $this->ensureWordPressQueryParsed();
-
         $condition = $this->getCondition();
         $parameters = $this->getConditionParameters();
 
-        // Check if the WordPress function exists
         if (! function_exists($condition)) {
             return false;
         }
 
-        // For is_404 condition, let Laravel routes take precedence
-        // This prevents WordPress 404 from capturing URLs that should be handled by Laravel
-        // If a Laravel route exists for this request, don't match the 404 route
-        if ($condition === 'is_404' && $this->hasLaravelRouteForCurrentRequest()) {
-            return false;
-        }
-
-        // Evaluate the WordPress condition
-        return call_user_func_array($condition, $parameters);
-    }
-
-    /**
-     * Check if there's a Laravel route that matches the current request.
-     */
-    protected function hasLaravelRouteForCurrentRequest(): bool
-    {
-        try {
-            $request = request();
-
-            // Get all routes and try to find a non-WordPress match
-            $routes = $this->router->getRoutes();
-
-            foreach ($routes as $route) {
-                // Skip WordPress routes and the current route
-                if ($route === $this) {
-                    continue;
-                }
-
-                if (method_exists($route, 'isWordPressRoute') && $route->isWordPressRoute()) {
-                    continue;
-                }
-
-                // Check if this Laravel route matches the request
-                if ($route->matches($request, false)) {
-                    return true;
-                }
-            }
-        } catch (\Throwable) {
-            // If any error occurs, continue with WordPress logic
-        }
-
-        return false;
-    }
-
-    /**
-     * Ensure WordPress has parsed the current request.
-     */
-    protected function ensureWordPressQueryParsed(): void
-    {
-        global $wp, $wp_query;
-
-        // If WordPress hasn't parsed the request yet, do it now
-        if (function_exists('wp') && isset($wp) && ! $wp->did_permalink && ! $wp_query->is_main_query()) {
-            // Parse the current request URL to set up WordPress query vars
-            if (function_exists('wp_parse_request')) {
-                wp_parse_request();
-            } elseif (method_exists($wp, 'parse_request')) {
-                $wp->parse_request();
-            }
-        }
+        return (bool) call_user_func_array($condition, $parameters);
     }
 }

@@ -1051,11 +1051,6 @@ parameters:
 			count: 1
 			path: src/Proxy/WordPressDatabase.php
 
-		-
-			message: '#^Argument of an invalid type Illuminate\\Routing\\RouteCollectionInterface supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: src/Route/Domain/Models/Route.php
 
 
 		-
