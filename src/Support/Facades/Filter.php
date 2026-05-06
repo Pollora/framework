@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static mixed apply(string $hook, mixed $value, mixed ...$args) Apply a filter hook
  * @method static bool exists(string $hook, ?callable $callback = null, ?int $priority = null) Check if a filter exists
  * @method static self|false remove(string $hook, callable|string|array|null $callback = null, int $priority = 10) Remove a filter hook
- * @method static array|null getCallbacks(string $hook) Get registered callbacks for a hook
+ * @method static array|null callbacks(string $hook) Get registered callbacks for a hook
  *
  * @see \Pollora\Hook\Infrastructure\Services\Filter
  */

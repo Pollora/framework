@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static self do(string $hook, mixed ...$args) Execute an action hook
  * @method static bool exists(string $hook, ?callable $callback = null, ?int $priority = null) Check if an action exists
  * @method static self|false remove(string $hook, callable|string|array|null $callback = null, int $priority = 10) Remove an action hook
- * @method static array|null getCallbacks(string $hook) Get registered callbacks for a hook
+ * @method static array|null callbacks(string $hook) Get registered callbacks for a hook
  *
  * @see \Pollora\Hook\Infrastructure\Services\Action
  */

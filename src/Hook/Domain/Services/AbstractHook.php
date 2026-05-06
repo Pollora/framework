@@ -93,7 +93,7 @@ abstract class AbstractHook implements HookInterface
     {
         // If $callback is null, retrieve the callback from our registered hooks
         if ($callback === null) {
-            $hookData = $this->getCallbacks($hook);
+            $hookData = $this->callbacks($hook);
             // If no hook exists with this name, return false
             if ($hookData === null || $hookData === []) {
                 return false;
@@ -426,12 +426,12 @@ abstract class AbstractHook implements HookInterface
     }
 
     /**
-     * Return the callback registered with the hook.
+     * Get the registered callbacks for a hook.
      *
      * @param  string  $hook  The hook name.
      * @return array|null Returns an array of callbacks or null if the hook doesn't exist
      */
-    public function getCallbacks(string $hook): ?array
+    public function callbacks(string $hook): ?array
     {
         if (! isset($this->hooks[$hook])) {
             return null;

@@ -34,7 +34,7 @@ describe('P0 — Permissive callback resolution', function (): void {
     it('stores a string callback that is not yet callable without throwing', function (): void {
         $this->hook->add('init', 'my_future_function');
 
-        $callbacks = $this->hook->getCallbacks('init');
+        $callbacks = $this->hook->callbacks('init');
         expect($callbacks)->toBeArray()
             ->and($callbacks)->toHaveCount(1)
             ->and($callbacks[0]['callback'])->toBe('my_future_function')
@@ -51,7 +51,7 @@ describe('P0 — Permissive callback resolution', function (): void {
     it('uses provided acceptedArgs for deferred callbacks', function (): void {
         $this->hook->add('init', 'my_future_function', 10, 3);
 
-        $callbacks = $this->hook->getCallbacks('init');
+        $callbacks = $this->hook->callbacks('init');
         expect($callbacks[0]['args'])->toBe(3);
     });
 
@@ -59,7 +59,7 @@ describe('P0 — Permissive callback resolution', function (): void {
         $closure = function (string $a, int $b): string { return $a; };
         $this->hook->add('test_hook', $closure);
 
-        $callbacks = $this->hook->getCallbacks('test_hook');
+        $callbacks = $this->hook->callbacks('test_hook');
         expect($callbacks[0]['callback'])->toBe($closure)
             ->and($callbacks[0]['args'])->toBe(2);
     });
@@ -73,7 +73,7 @@ describe('P0 — Permissive callback resolution', function (): void {
         };
         $this->hook->add('test_hook', [$object, 'handle']);
 
-        $callbacks = $this->hook->getCallbacks('test_hook');
+        $callbacks = $this->hook->callbacks('test_hook');
         expect($callbacks[0]['args'])->toBe(1);
     });
 
@@ -84,7 +84,7 @@ describe('P0 — Permissive callback resolution', function (): void {
 
         $this->hook->add('my_hook', $className);
 
-        $callbacks = $this->hook->getCallbacks('my_hook');
+        $callbacks = $this->hook->callbacks('my_hook');
         expect($callbacks[0]['callback'])->toBeArray()
             ->and($callbacks[0]['callback'][0])->toBeInstanceOf($className)
             ->and($callbacks[0]['callback'][1])->toBe('myHook');
@@ -107,7 +107,7 @@ describe('P1 — CallbackResolverInterface support', function (): void {
         $className = $mockInstance::class;
         $this->hook->add('my_hook', $className);
 
-        $callbacks = $this->hook->getCallbacks('my_hook');
+        $callbacks = $this->hook->callbacks('my_hook');
         expect($callbacks[0]['callback'][0])->toBe($mockInstance);
     });
 
@@ -118,7 +118,7 @@ describe('P1 — CallbackResolverInterface support', function (): void {
         // No resolver set
         $this->hook->add('my_hook', $className);
 
-        $callbacks = $this->hook->getCallbacks('my_hook');
+        $callbacks = $this->hook->callbacks('my_hook');
         expect($callbacks[0]['callback'][0])->toBeInstanceOf($className);
     });
 
