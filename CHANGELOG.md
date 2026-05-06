@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `WordPressHeaders` middleware no longer overwrites response headers set by application code or plugins
   - Content-Type is preserved (was incorrectly removed, breaking PDF/JSON/binary responses)
   - Public cache directives are only applied to cacheable HTML responses (skip JSON, PDF, binary, streamed, redirects)
-  - Explicit `no-store` cache restrictions from plugins are respected
+  - Explicit cache directives (`no-store`, `max-age`, `s-maxage`) from plugins or controllers are respected
 - WordPress `shutdown` hook output now reaches the browser
   - Plugins relying on `shutdown` (Query Monitor toolbar, WP Rocket cache processing) were broken because Laravel's `Response::send()` calls `fastcgi_finish_request()` before PHP shutdown
   - `WordPressShutdown` middleware now fires `do_action('shutdown')` within a controlled output buffer before the response is returned, injecting captured output (e.g. QM toolbar) before `</body>` in HTML responses
