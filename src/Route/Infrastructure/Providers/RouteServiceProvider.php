@@ -60,7 +60,7 @@ class RouteServiceProvider extends ServiceProvider
         $this->app->bind(ConditionResolverInterface::class, fn ($app) => $app->make(WordPressConditionManagerInterface::class));
 
         // Register the routing service (encapsulates condition resolution and type binding)
-        $this->app->singleton(WordPressRoutingService::class, function ($app): WordPressRoutingService {
+        $this->app->singleton(function ($app): WordPressRoutingService {
             $logger = null;
             try {
                 $logger = $app->make('log');
@@ -76,13 +76,11 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         // Override the default router with our extended version (for custom Route model)
-        $this->app->extend('router', function ($router, Application $app): ExtendedRouter {
-            return new ExtendedRouter(
-                $app->make('events'),
-                $app,
-                $app->make(WordPressConditionManagerInterface::class),
-            );
-        });
+        $this->app->extend('router', fn ($router, Application $app): ExtendedRouter => new ExtendedRouter(
+            $app->make('events'),
+            $app,
+            $app->make(WordPressConditionManagerInterface::class),
+        ));
 
         // Register WordPress types in the container for dependency injection
         $this->app->booted(function (): void {
@@ -121,13 +119,13 @@ class RouteServiceProvider extends ServiceProvider
             }
 
             // Resolve condition alias via the routing service
-            $resolvedCondition = app(WordPressRoutingService::class)->resolveCondition($condition);
+            $resolvedCondition = resolve(WordPressRoutingService::class)->resolveCondition($condition);
 
             // Create a unique URI for the route
             $uri = $condition;
             if (count($args) > 1) {
                 $paramHash = md5(serialize(array_slice($args, 0, -1)));
-                $uri .= '_' . $paramHash;
+                $uri .= '_'.$paramHash;
             }
 
             // Last argument is always the callback

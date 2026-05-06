@@ -89,8 +89,11 @@ class WordPressRoutingService
 
             foreach ($reflection->getParameters() as $parameter) {
                 $type = $parameter->getType();
+                if (! $type instanceof \ReflectionNamedType) {
+                    continue;
+                }
 
-                if (! $type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+                if ($type->isBuiltin()) {
                     continue;
                 }
 
@@ -120,8 +123,8 @@ class WordPressRoutingService
                 is_string($callable) && class_exists($callable) => new \ReflectionMethod($callable, '__invoke'),
                 default => null,
             };
-        } catch (\ReflectionException $e) {
-            $this->logError('Failed to get callable reflection', $e, ['callable' => $callable]);
+        } catch (\ReflectionException $reflectionException) {
+            $this->logError('Failed to get callable reflection', $reflectionException, ['callable' => $callable]);
 
             return null;
         }

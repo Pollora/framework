@@ -75,7 +75,7 @@ describe('WordPressRoutingService', function (): void {
         it('resolves types safely without throwing', function (): void {
             $container = new Container;
 
-            $this->typeResolver->shouldReceive('resolvePost')->andThrow(new \RuntimeException('WP not loaded'));
+            $this->typeResolver->shouldReceive('resolvePost')->andThrow(new RuntimeException('WP not loaded'));
             $this->typeResolver->shouldReceive('resolveTerm')->andReturn(null);
             $this->typeResolver->shouldReceive('resolveUser')->andReturn(null);
             $this->typeResolver->shouldReceive('resolveQuery')->andReturn(null);
@@ -117,7 +117,7 @@ describe('WordPressRoutingService', function (): void {
 
         it('handles exceptions gracefully', function (): void {
             $this->typeResolver->shouldReceive('resolve')
-                ->andThrow(new \RuntimeException('WP not loaded'));
+                ->andThrow(new RuntimeException('WP not loaded'));
 
             $route = new Route(['GET'], '/test', fn (WP_Post $post): string => 'test');
             $route->bind(Request::create('/test'));

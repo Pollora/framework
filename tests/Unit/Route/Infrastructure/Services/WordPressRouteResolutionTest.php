@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
-use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
 
 describe('WordPressRouteResolution', function (): void {
     beforeEach(function (): void {

@@ -269,7 +269,7 @@ abstract class AbstractHook implements HookInterface
     {
         try {
             // Resolve through DI container if available, fallback to direct instantiation
-            $instance = $this->callbackResolver !== null
+            $instance = $this->callbackResolver instanceof CallbackResolverInterface
                 ? $this->callbackResolver->resolve($className)
                 : new $className;
 

@@ -44,7 +44,7 @@ class ExtendedRouter extends IlluminateRouter
             ->setRouter($this)
             ->setContainer($this->container);
 
-        if ($this->conditionManager) {
+        if ($this->conditionManager instanceof WordPressConditionManagerInterface) {
             $route->setConditionResolver($this->conditionManager);
         }
 

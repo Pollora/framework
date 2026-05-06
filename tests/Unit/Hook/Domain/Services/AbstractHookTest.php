@@ -56,7 +56,7 @@ describe('P0 — Permissive callback resolution', function (): void {
     });
 
     it('still resolves a valid closure callback normally', function (): void {
-        $closure = function (string $a, int $b): string { return $a; };
+        $closure = (fn (string $a, int $b): string => $a);
         $this->hook->add('test_hook', $closure);
 
         $callbacks = $this->hook->callbacks('test_hook');
@@ -65,13 +65,14 @@ describe('P0 — Permissive callback resolution', function (): void {
     });
 
     it('still resolves a valid array callback normally', function (): void {
-        $object = new class {
+        $object = new class
+        {
             public function handle(string $value): string
             {
                 return $value;
             }
         };
-        $this->hook->add('test_hook', [$object, 'handle']);
+        $this->hook->add('test_hook', $object->handle(...));
 
         $callbacks = $this->hook->callbacks('test_hook');
         expect($callbacks[0]['args'])->toBe(1);
@@ -79,8 +80,8 @@ describe('P0 — Permissive callback resolution', function (): void {
 
     it('still resolves an existing class with matching method', function (): void {
         // Create a class that has a method matching the hook name pattern
-        $className = 'TestHookClass_' . uniqid();
-        eval("class {$className} { public function myHook(\$a) { return \$a; } }");
+        $className = 'TestHookClass_'.uniqid();
+        eval(sprintf('class %s { public function myHook($a) { return $a; } }', $className));
 
         $this->hook->add('my_hook', $className);
 
@@ -93,7 +94,8 @@ describe('P0 — Permissive callback resolution', function (): void {
 
 describe('P1 — CallbackResolverInterface support', function (): void {
     it('uses the resolver when set to instantiate class callbacks', function (): void {
-        $mockInstance = new class {
+        $mockInstance = new class
+        {
             public function myHook(): void {}
         };
 
@@ -112,8 +114,8 @@ describe('P1 — CallbackResolverInterface support', function (): void {
     });
 
     it('falls back to direct instantiation when no resolver is set', function (): void {
-        $className = 'DirectInstantiationTest_' . uniqid();
-        eval("class {$className} { public function myHook() {} }");
+        $className = 'DirectInstantiationTest_'.uniqid();
+        eval(sprintf('class %s { public function myHook() {} }', $className));
 
         // No resolver set
         $this->hook->add('my_hook', $className);
@@ -123,10 +125,10 @@ describe('P1 — CallbackResolverInterface support', function (): void {
     });
 
     it('throws RuntimeException when class method does not exist', function (): void {
-        $className = 'NoMethodClass_' . uniqid();
-        eval("class {$className} {}");
+        $className = 'NoMethodClass_'.uniqid();
+        eval(sprintf('class %s {}', $className));
 
         expect(fn () => $this->hook->add('some_hook', $className))
-            ->toThrow(\RuntimeException::class);
+            ->toThrow(RuntimeException::class);
     });
 });

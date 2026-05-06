@@ -55,7 +55,7 @@ describe('FrontendController', function (): void {
     });
 
     it('falls back to php template', function (): void {
-        $templatePath = __DIR__ . '/test-template.php';
+        $templatePath = __DIR__.'/test-template.php';
         Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
         Brain\Monkey\Functions\when('is_page')->justReturn(true);
         Brain\Monkey\Functions\when('is_404')->justReturn(false);

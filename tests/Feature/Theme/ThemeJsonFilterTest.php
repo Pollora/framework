@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Pollora\Theme\Domain\Contracts\ThemeJsonResolverInterface;
-use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
 use Pollora\Theme\Infrastructure\Services\ThemeJsonResolver;
 
 beforeEach(function (): void {
@@ -18,13 +17,20 @@ afterEach(function (): void {
         if (! is_dir($dir)) {
             return;
         }
+
         foreach (scandir($dir) as $item) {
-            if ($item === '.' || $item === '..') {
+            if ($item === '.') {
                 continue;
             }
+
+            if ($item === '..') {
+                continue;
+            }
+
             $path = $dir.'/'.$item;
             is_dir($path) ? $cleanup($path) : unlink($path);
         }
+
         rmdir($dir);
     };
     $cleanup($this->tempDir);
@@ -33,7 +39,7 @@ afterEach(function (): void {
 describe('ThemeJsonFilter integration', function (): void {
     it('registers ThemeJsonResolverInterface as singleton', function (): void {
         $this->app->singleton('path.public', fn () => $this->tempDir);
-        $this->app->bind(ThemeJsonResolverInterface::class, fn () => new ThemeJsonResolver($this->tempDir));
+        $this->app->bind(ThemeJsonResolverInterface::class, fn (): ThemeJsonResolver => new ThemeJsonResolver($this->tempDir));
 
         $resolver = $this->app->make(ThemeJsonResolverInterface::class);
 

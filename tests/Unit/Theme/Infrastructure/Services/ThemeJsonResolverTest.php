@@ -17,13 +17,20 @@ describe('ThemeJsonResolver', function (): void {
             if (! is_dir($dir)) {
                 return;
             }
+
             foreach (scandir($dir) as $item) {
-                if ($item === '.' || $item === '..') {
+                if ($item === '.') {
                     continue;
                 }
+
+                if ($item === '..') {
+                    continue;
+                }
+
                 $path = $dir.'/'.$item;
                 is_dir($path) ? $cleanup($path) : unlink($path);
             }
+
             rmdir($dir);
         };
         $cleanup($this->tempDir);

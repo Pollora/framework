@@ -7,7 +7,7 @@ use Pollora\Hook\Infrastructure\Services\ContainerCallbackResolver;
 
 describe('ContainerCallbackResolver', function (): void {
     it('delegates to container make()', function (): void {
-        $expected = new \stdClass;
+        $expected = new stdClass;
 
         $container = Mockery::mock(Container::class);
         $container->shouldReceive('make')
@@ -24,11 +24,11 @@ describe('ContainerCallbackResolver', function (): void {
     it('propagates container exceptions', function (): void {
         $container = Mockery::mock(Container::class);
         $container->shouldReceive('make')
-            ->andThrow(new \RuntimeException('Cannot resolve'));
+            ->andThrow(new RuntimeException('Cannot resolve'));
 
         $resolver = new ContainerCallbackResolver($container);
 
-        expect(fn () => $resolver->resolve('App\\Missing'))
-            ->toThrow(\RuntimeException::class, 'Cannot resolve');
+        expect(fn (): object => $resolver->resolve('App\\Missing'))
+            ->toThrow(RuntimeException::class, 'Cannot resolve');
     });
 });
