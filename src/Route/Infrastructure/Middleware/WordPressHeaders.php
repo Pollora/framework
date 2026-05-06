@@ -18,8 +18,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * 2. Strips WordPress-generated cache headers (Cache-Control, Expires)
  *    for non-WordPress routes served to anonymous visitors
  * 3. Sets public cache directives for cacheable HTML responses served
- *    to non-authenticated visitors, using the `wordpress.cache.max_age`
- *    configuration value (default: 3600 seconds)
+ *    to non-authenticated visitors
+ *
+ * Cache TTL is resolved from configuration in this order:
+ * - `wordpress.cache.ttl.<condition>` — per WordPress condition (e.g. `is_front_page`, `is_single`)
+ * - `wordpress.cache.max_age` — global default (default: 3600 seconds)
+ * - `wordpress.cache.shared_max_age` — optional CDN/reverse proxy TTL (adds `s-maxage`)
  *
  * Header cleanup targets routes without a WordPress condition (i.e. pure Laravel
  * routes that pass through the WordPress middleware stack), preventing WordPress
@@ -219,21 +223,71 @@ class WordPressHeaders
     /**
      * Apply public cache control headers for anonymous visitors.
      *
-     * Replaces any existing Cache-Control header with public caching directives:
+     * Replaces any existing Cache-Control and Expires headers with public caching directives:
      * - `public` — allows shared caches (CDN, reverse proxy) to store the response
      * - `must-revalidate` — ensures caches check freshness before serving stale content
-     * - `max-age` — TTL in seconds from `wordpress.cache.max_age` config (default: 3600)
+     * - `max-age` — browser cache TTL resolved from per-condition or global config
+     * - `s-maxage` — optional shared cache TTL from `wordpress.cache.shared_max_age`
+     *
+     * The `Expires` header is always removed when applying public cache to prevent
+     * conflict with `Cache-Control` (WordPress sets `Expires` to a past date via
+     * `WP::send_headers()`, which contradicts the `max-age` directive).
      *
      * @param  SymfonyResponse  $response  The response to configure for caching
      */
     private function applyPublicCacheHeaders(SymfonyResponse $response): void
     {
         $response->headers->remove('Cache-Control');
+        $response->headers->remove('Expires');
         $response->setPublic();
         $response->headers->addCacheControlDirective('must-revalidate', true);
         $response->headers->addCacheControlDirective(
             'max-age',
-            (string) config('wordpress.cache.max_age', 3600)
+            (string) $this->resolveMaxAge()
         );
+
+        $sharedMaxAge = config('wordpress.cache.shared_max_age');
+        if ($sharedMaxAge !== null) {
+            $response->headers->addCacheControlDirective('s-maxage', (string) $sharedMaxAge);
+        }
+    }
+
+    /**
+     * Resolve the max-age value from configuration.
+     *
+     * Checks per-condition TTL overrides first (`wordpress.cache.ttl.<condition>`),
+     * then falls back to the global default (`wordpress.cache.max_age`, default: 3600).
+     *
+     * Per-condition TTL allows different cache durations for different WordPress
+     * content types. For example:
+     *
+     * ```php
+     * // config/wordpress.php
+     * 'cache' => [
+     *     'max_age' => 3600,
+     *     'shared_max_age' => null,
+     *     'ttl' => [
+     *         'is_front_page' => 600,
+     *         'is_single'     => 7200,
+     *         'is_archive'    => 1800,
+     *     ],
+     * ]
+     * ```
+     *
+     * @return int Cache TTL in seconds
+     */
+    private function resolveMaxAge(): int
+    {
+        $ttlMap = config('wordpress.cache.ttl', []);
+
+        if (is_array($ttlMap)) {
+            foreach ($ttlMap as $condition => $ttl) {
+                if (function_exists($condition) && $condition()) {
+                    return (int) $ttl;
+                }
+            }
+        }
+
+        return (int) config('wordpress.cache.max_age', 3600);
     }
 }

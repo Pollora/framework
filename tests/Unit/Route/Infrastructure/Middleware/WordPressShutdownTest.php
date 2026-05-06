@@ -26,7 +26,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('<html><body><p>Hello</p></body></html>', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html><body><p>Hello</p></body></html>', 200, ['Content-Type' => 'text/html'])
         );
 
         $content = $response->getContent();
@@ -47,7 +47,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('<html><p>No body tag</p></html>', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html><p>No body tag</p></html>', 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response->getContent())->toEndWith('shutdown-output');
@@ -66,7 +66,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
         );
 
         expect($response->getContent())->toBe('{"data":true}');
@@ -85,7 +85,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('', 302, ['Location' => '/other'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('', 302, ['Location' => '/other'])
         );
 
         expect($response->getContent())->not->toContain('should-not-appear');
@@ -104,7 +104,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new StreamedResponse(fn () => print('stream'), 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\StreamedResponse => new StreamedResponse(fn (): int => print('stream'), 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response)->toBeInstanceOf(StreamedResponse::class);
@@ -124,14 +124,14 @@ describe('shutdown hook execution', function (): void {
 
         $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
         );
 
         expect($shutdownFired)->toBeTrue();
     });
 
     it('calls remove_all_actions to prevent double shutdown', function (): void {
-        Brain\Monkey\Functions\when('do_action')->justReturn(null);
+        Brain\Monkey\Functions\when('do_action')->justReturn();
         Brain\Monkey\Functions\when('remove_action')->justReturn(true);
         Brain\Monkey\Functions\expect('remove_all_actions')
             ->once()
@@ -141,12 +141,12 @@ describe('shutdown hook execution', function (): void {
 
         $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
         );
     });
 
     it('removes wp_ob_end_flush_all before firing shutdown', function (): void {
-        Brain\Monkey\Functions\when('do_action')->justReturn(null);
+        Brain\Monkey\Functions\when('do_action')->justReturn();
         Brain\Monkey\Functions\when('remove_all_actions')->justReturn(true);
         Brain\Monkey\Functions\expect('remove_action')
             ->once()
@@ -156,7 +156,7 @@ describe('shutdown hook execution', function (): void {
 
         $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
         );
     });
 });
@@ -167,6 +167,7 @@ describe('exception safety', function (): void {
             if ($hook === 'shutdown') {
                 throw new RuntimeException('Plugin error');
             }
+
             throw new RuntimeException('Unexpected hook');
         });
         Brain\Monkey\Functions\when('remove_action')->justReturn(true);
@@ -176,7 +177,7 @@ describe('exception safety', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('<html><body>Hello</body></html>', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html><body>Hello</body></html>', 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response->getContent())->toBe('<html><body>Hello</body></html>');
@@ -190,6 +191,7 @@ describe('exception safety', function (): void {
                 ob_start(); // plugin opens a buffer
                 throw new RuntimeException('Plugin error');
             }
+
             throw new RuntimeException('Unexpected hook');
         });
         Brain\Monkey\Functions\when('remove_action')->justReturn(true);
@@ -199,7 +201,7 @@ describe('exception safety', function (): void {
 
         $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
         );
 
         expect(ob_get_level())->toBe($baseLevel);
@@ -219,11 +221,11 @@ describe('WordPress unavailable', function (): void {
         $inner = new SymfonyResponse('raw content', 200, ['Content-Type' => 'text/plain']);
 
         // With WP stubs active, the middleware processes but doesn't inject (plain text)
-        Brain\Monkey\Functions\when('do_action')->justReturn(null);
+        Brain\Monkey\Functions\when('do_action')->justReturn();
         Brain\Monkey\Functions\when('remove_action')->justReturn(true);
         Brain\Monkey\Functions\when('remove_all_actions')->justReturn(true);
 
-        $response = $this->middleware->handle($request, fn () => $inner);
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
 
         expect($response->getContent())->toBe('raw content');
     });

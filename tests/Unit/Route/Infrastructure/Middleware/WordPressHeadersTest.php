@@ -30,7 +30,7 @@ describe('framework header', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response->headers->get('X-Powered-By'))->toBe('Pollora');
@@ -59,7 +59,7 @@ describe('WordPress header cleanup', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('content', 200, [
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, [
                 'Content-Type' => 'text/html',
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
                 'Expires' => 'Wed, 11 Jan 1984 05:00:00 GMT',
@@ -80,7 +80,7 @@ describe('WordPress header cleanup', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('content', 200, [
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, [
                 'Content-Type' => 'application/pdf',
             ])
         );
@@ -88,7 +88,7 @@ describe('WordPress header cleanup', function (): void {
         expect($response->headers->get('Content-Type'))->toBe('application/pdf');
     });
 
-    it('skips cleanup for routes with WordPress conditions', function (): void {
+    it('skips cleanup for routes with WordPress conditions but still removes Expires on cache', function (): void {
         Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
 
         $route = Mockery::mock(Route::class);
@@ -102,9 +102,11 @@ describe('WordPress header cleanup', function (): void {
             'Expires' => 'Wed, 11 Jan 1984 05:00:00 GMT',
         ]);
 
-        $response = $this->middleware->handle($request, fn () => $inner);
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
 
-        expect($response->headers->has('Expires'))->toBeTrue();
+        // Cleanup is skipped (WP route), but Expires is removed by applyPublicCacheHeaders
+        expect($response->headers->has('Expires'))->toBeFalse()
+            ->and($response->headers->getCacheControlDirective('public'))->toBeTrue();
     });
 
     it('skips cleanup for authenticated users', function (): void {
@@ -121,7 +123,7 @@ describe('WordPress header cleanup', function (): void {
             'Expires' => 'Wed, 11 Jan 1984 05:00:00 GMT',
         ]);
 
-        $response = $this->middleware->handle($request, fn () => $inner);
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
 
         expect($response->headers->has('Expires'))->toBeTrue();
     });
@@ -139,7 +141,7 @@ describe('public cache application', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response->headers->getCacheControlDirective('public'))->toBeTrue()
@@ -155,7 +157,7 @@ describe('public cache application', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response->headers->getCacheControlDirective('public'))->toBeNull();
@@ -172,7 +174,7 @@ describe('public cache application', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
         );
 
         expect($response->headers->getCacheControlDirective('public'))->toBeNull();
@@ -189,7 +191,7 @@ describe('public cache application', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('', 302, ['Location' => '/other'])
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('', 302, ['Location' => '/other'])
         );
 
         expect($response->headers->getCacheControlDirective('public'))->toBeNull();
@@ -206,7 +208,7 @@ describe('public cache application', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new StreamedResponse(fn () => print('stream'), 200, ['Content-Type' => 'text/html'])
+            fn (): \Symfony\Component\HttpFoundation\StreamedResponse => new StreamedResponse(fn (): int => print('stream'), 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response)->toBeInstanceOf(StreamedResponse::class)
@@ -224,7 +226,7 @@ describe('public cache application', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn () => new SymfonyResponse('', 204)
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('', 204)
         );
 
         expect($response->headers->getCacheControlDirective('public'))->toBeNull();
@@ -244,7 +246,7 @@ describe('explicit cache directive detection', function (): void {
         $inner = new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html']);
         $inner->headers->addCacheControlDirective('no-store');
 
-        $response = $this->middleware->handle($request, fn () => $inner);
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
 
         expect($response->headers->getCacheControlDirective('public'))->toBeNull()
             ->and($response->headers->hasCacheControlDirective('no-store'))->toBeTrue();
@@ -262,7 +264,7 @@ describe('explicit cache directive detection', function (): void {
         $inner = new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html']);
         $inner->setMaxAge(300);
 
-        $response = $this->middleware->handle($request, fn () => $inner);
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
 
         expect($response->headers->getCacheControlDirective('max-age'))->toBe('300');
     });
@@ -279,7 +281,7 @@ describe('explicit cache directive detection', function (): void {
         $inner = new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html']);
         $inner->setSharedMaxAge(600);
 
-        $response = $this->middleware->handle($request, fn () => $inner);
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
 
         expect($response->headers->getCacheControlDirective('s-maxage'))->toBe('600');
     });
@@ -297,7 +299,7 @@ describe('explicit cache directive detection', function (): void {
         $inner->setPrivate();
         $inner->setMaxAge(300);
 
-        $response = $this->middleware->handle($request, fn () => $inner);
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
 
         expect($response->headers->getCacheControlDirective('public'))->toBeNull()
             ->and($response->headers->getCacheControlDirective('max-age'))->toBe('300');
@@ -317,10 +319,161 @@ describe('explicit cache directive detection', function (): void {
         $inner->headers->addCacheControlDirective('no-store');
         $inner->headers->addCacheControlDirective('no-cache');
 
-        $response = $this->middleware->handle($request, fn () => $inner);
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
 
         // After cleanup, WordPress nocache is cleared and public cache is applied
         expect($response->headers->getCacheControlDirective('public'))->toBeTrue()
             ->and($response->headers->getCacheControlDirective('max-age'))->toBe('3600');
+    });
+});
+
+describe('Expires header cleanup', function (): void {
+    it('removes Expires header when applying public cache', function (): void {
+        Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+
+        $route = Mockery::mock(Route::class);
+        $route->shouldReceive('hasCondition')->andReturn(true);
+
+        $request = Request::create('/test');
+        $request->setRouteResolver(fn () => $route);
+
+        $inner = new SymfonyResponse('<html></html>', 200, [
+            'Content-Type' => 'text/html',
+            'Expires' => 'Wed, 11 Jan 1984 05:00:00 GMT',
+        ]);
+
+        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
+
+        expect($response->headers->has('Expires'))->toBeFalse()
+            ->and($response->headers->getCacheControlDirective('public'))->toBeTrue();
+    });
+});
+
+describe('per-condition TTL', function (): void {
+    it('uses condition-specific TTL when matching', function (): void {
+        Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+        Brain\Monkey\Functions\when('is_front_page')->justReturn(true);
+
+        $container = Container::getInstance();
+        $container->instance('config', new Repository([
+            'wordpress' => ['cache' => [
+                'max_age' => 3600,
+                'ttl' => ['is_front_page' => 600],
+            ]],
+        ]));
+
+        $route = Mockery::mock(Route::class);
+        $route->shouldReceive('hasCondition')->andReturn(false);
+
+        $request = Request::create('/test');
+        $request->setRouteResolver(fn () => $route);
+
+        $response = $this->middleware->handle(
+            $request,
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
+        );
+
+        expect($response->headers->getCacheControlDirective('max-age'))->toBe('600');
+    });
+
+    it('falls back to global max_age when no condition matches', function (): void {
+        Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+        Brain\Monkey\Functions\when('is_front_page')->justReturn(false);
+
+        $container = Container::getInstance();
+        $container->instance('config', new Repository([
+            'wordpress' => ['cache' => [
+                'max_age' => 3600,
+                'ttl' => ['is_front_page' => 600],
+            ]],
+        ]));
+
+        $route = Mockery::mock(Route::class);
+        $route->shouldReceive('hasCondition')->andReturn(false);
+
+        $request = Request::create('/test');
+        $request->setRouteResolver(fn () => $route);
+
+        $response = $this->middleware->handle(
+            $request,
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
+        );
+
+        expect($response->headers->getCacheControlDirective('max-age'))->toBe('3600');
+    });
+
+    it('uses first matching condition in order', function (): void {
+        Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+        Brain\Monkey\Functions\when('is_front_page')->justReturn(true);
+        Brain\Monkey\Functions\when('is_single')->justReturn(true);
+
+        $container = Container::getInstance();
+        $container->instance('config', new Repository([
+            'wordpress' => ['cache' => [
+                'max_age' => 3600,
+                'ttl' => [
+                    'is_front_page' => 600,
+                    'is_single' => 7200,
+                ],
+            ]],
+        ]));
+
+        $route = Mockery::mock(Route::class);
+        $route->shouldReceive('hasCondition')->andReturn(false);
+
+        $request = Request::create('/test');
+        $request->setRouteResolver(fn () => $route);
+
+        $response = $this->middleware->handle(
+            $request,
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
+        );
+
+        expect($response->headers->getCacheControlDirective('max-age'))->toBe('600');
+    });
+});
+
+describe('shared_max_age (s-maxage)', function (): void {
+    it('adds s-maxage when configured', function (): void {
+        Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+
+        $container = Container::getInstance();
+        $container->instance('config', new Repository([
+            'wordpress' => ['cache' => [
+                'max_age' => 3600,
+                'shared_max_age' => 86400,
+            ]],
+        ]));
+
+        $route = Mockery::mock(Route::class);
+        $route->shouldReceive('hasCondition')->andReturn(false);
+
+        $request = Request::create('/test');
+        $request->setRouteResolver(fn () => $route);
+
+        $response = $this->middleware->handle(
+            $request,
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
+        );
+
+        expect($response->headers->getCacheControlDirective('s-maxage'))->toBe('86400')
+            ->and($response->headers->getCacheControlDirective('max-age'))->toBe('3600');
+    });
+
+    it('does not add s-maxage when not configured', function (): void {
+        Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+
+        $route = Mockery::mock(Route::class);
+        $route->shouldReceive('hasCondition')->andReturn(false);
+
+        $request = Request::create('/test');
+        $request->setRouteResolver(fn () => $route);
+
+        $response = $this->middleware->handle(
+            $request,
+            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
+        );
+
+        expect($response->headers->getCacheControlDirective('s-maxage'))->toBeNull();
     });
 });
