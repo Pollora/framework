@@ -65,6 +65,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Content-Type is preserved (was incorrectly removed, breaking PDF/JSON/binary responses)
   - Public cache directives are only applied to cacheable HTML responses (skip JSON, PDF, binary, streamed, redirects)
   - Explicit cache directives (`no-store`, `max-age`, `s-maxage`) from plugins or controllers are respected
+  - `Expires` header removed when applying public cache (prevents conflict with WordPress's `Expires: 1984` on WP routes)
+  - Per-condition cache TTL via `wordpress.cache.ttl` config (e.g. `is_front_page: 600`, `is_single: 7200`)
+  - Optional CDN/reverse proxy `s-maxage` directive via `wordpress.cache.shared_max_age` config
 - WordPress `shutdown` hook output now reaches the browser
   - Plugins relying on `shutdown` (Query Monitor toolbar, WP Rocket cache processing) were broken because Laravel's `Response::send()` calls `fastcgi_finish_request()` before PHP shutdown
   - `WordPressShutdown` middleware now fires `do_action('shutdown')` within a controlled output buffer before the response is returned, injecting captured output (e.g. QM toolbar) before `</body>` in HTML responses
