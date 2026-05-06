@@ -122,8 +122,9 @@ describe('WordPressRoutingService', function (): void {
             $route = new Route(['GET'], '/test', fn (WP_Post $post): string => 'test');
             $route->bind(Request::create('/test'));
 
-            // Should not throw
             $this->service->bindWordPressParameters($route);
+
+            expect($route->parameter('post'))->toBeNull();
         });
     });
 });
