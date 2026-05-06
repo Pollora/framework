@@ -187,7 +187,7 @@ class WordPressShutdown
     {
         $contentType = $response->headers->get('Content-Type', '');
 
-        return $contentType === '' || str_contains($contentType, 'text/html');
+        return $contentType === '' || str_contains((string) $contentType, 'text/html');
     }
 
     /**
