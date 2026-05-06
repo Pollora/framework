@@ -721,11 +721,6 @@ parameters:
 			count: 1
 			path: src/Discovery/Infrastructure/Adapters/LaravelDiscoveryCache.php
 
-		-
-			message: '#^Access to an undefined property Spatie\\StructureDiscoverer\\Data\\DiscoveredClass\:\:\$location\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Discovery/Infrastructure/Services/DiscoveryEngine.php
 
 		-
 			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:applyFrameworkModules\(\)\.$#'

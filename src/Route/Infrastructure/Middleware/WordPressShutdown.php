@@ -6,6 +6,7 @@ namespace Pollora\Route\Infrastructure\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -33,7 +34,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * finds no callbacks. `wp_cache_close()`, called directly in `shutdown_action_hook()`,
  * remains unaffected.
  *
- * @see \Pollora\Route\Infrastructure\Providers\RouteServiceProvider::WORDPRESS_MIDDLEWARE
+ * @see RouteServiceProvider::WORDPRESS_MIDDLEWARE
  */
 class WordPressShutdown
 {
@@ -212,8 +213,8 @@ class WordPressShutdown
 
         $response->setContent(
             $bodyPos !== false
-                ? substr($content, 0, $bodyPos) . $output . substr($content, $bodyPos)
-                : $content . $output
+                ? substr($content, 0, $bodyPos).$output.substr($content, $bodyPos)
+                : $content.$output
         );
     }
 }

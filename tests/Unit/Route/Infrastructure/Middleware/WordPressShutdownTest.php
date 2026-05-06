@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Http\Request;
 use Pollora\Route\Infrastructure\Middleware\WordPressShutdown;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -26,7 +26,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html><body><p>Hello</p></body></html>', 200, ['Content-Type' => 'text/html'])
+            fn (): Response => new SymfonyResponse('<html><body><p>Hello</p></body></html>', 200, ['Content-Type' => 'text/html'])
         );
 
         $content = $response->getContent();
@@ -47,7 +47,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html><p>No body tag</p></html>', 200, ['Content-Type' => 'text/html'])
+            fn (): Response => new SymfonyResponse('<html><p>No body tag</p></html>', 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response->getContent())->toEndWith('shutdown-output');
@@ -66,7 +66,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
+            fn (): Response => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
         );
 
         expect($response->getContent())->toBe('{"data":true}');
@@ -85,7 +85,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('', 302, ['Location' => '/other'])
+            fn (): Response => new SymfonyResponse('', 302, ['Location' => '/other'])
         );
 
         expect($response->getContent())->not->toContain('should-not-appear');
@@ -104,7 +104,7 @@ describe('shutdown hook execution', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\StreamedResponse => new StreamedResponse(fn (): int => print('stream'), 200, ['Content-Type' => 'text/html'])
+            fn (): StreamedResponse => new StreamedResponse(fn (): int => print ('stream'), 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response)->toBeInstanceOf(StreamedResponse::class);
@@ -124,7 +124,7 @@ describe('shutdown hook execution', function (): void {
 
         $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
+            fn (): Response => new SymfonyResponse('{"data":true}', 200, ['Content-Type' => 'application/json'])
         );
 
         expect($shutdownFired)->toBeTrue();
@@ -141,7 +141,7 @@ describe('shutdown hook execution', function (): void {
 
         $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
+            fn (): Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
         );
     });
 
@@ -156,7 +156,7 @@ describe('shutdown hook execution', function (): void {
 
         $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
+            fn (): Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
         );
     });
 });
@@ -177,7 +177,7 @@ describe('exception safety', function (): void {
 
         $response = $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('<html><body>Hello</body></html>', 200, ['Content-Type' => 'text/html'])
+            fn (): Response => new SymfonyResponse('<html><body>Hello</body></html>', 200, ['Content-Type' => 'text/html'])
         );
 
         expect($response->getContent())->toBe('<html><body>Hello</body></html>');
@@ -201,7 +201,7 @@ describe('exception safety', function (): void {
 
         $this->middleware->handle(
             $request,
-            fn (): \Symfony\Component\HttpFoundation\Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
+            fn (): Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'])
         );
 
         expect(ob_get_level())->toBe($baseLevel);
@@ -225,7 +225,7 @@ describe('WordPress unavailable', function (): void {
         Brain\Monkey\Functions\when('remove_action')->justReturn(true);
         Brain\Monkey\Functions\when('remove_all_actions')->justReturn(true);
 
-        $response = $this->middleware->handle($request, fn (): \Symfony\Component\HttpFoundation\Response => $inner);
+        $response = $this->middleware->handle($request, fn (): Response => $inner);
 
         expect($response->getContent())->toBe('raw content');
     });
