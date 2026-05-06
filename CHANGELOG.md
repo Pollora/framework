@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
 ### Added
+- Dynamic `theme.json` resolution via `wp_theme_json_data_theme` WordPress filter (`ThemeJsonResolver`)
+  - Reads the Vite-built `theme.json` from `public/build/theme/{slug}/assets/theme.json` at runtime
+  - Injects Tailwind-enriched settings (colors, fonts, border-radius) into WordPress without file copy
+  - In-memory caching avoids repeated filesystem reads
+  - Eliminates the `copy-theme-json` Vite plugin hack — source and built `theme.json` are no longer mixed
+- Routing refactoring with dedicated `WordPressRoutingService` for cleaner separation of concerns
+  - Simplified `ExtendedRouter` with extracted WordPress-specific routing logic
+  - Configurable `cache-control` max-age via `wordpress.headers.cache_max_age`
+  - Fixed route parameters shadowing WordPress globals in Blade loaders
 - Gutenberg block registration system with Vite integration (`BlockRegistrar`, `BlockServiceProvider`)
   - Scans `resources/blocks/` directories and pre-registers script/style handles via ViteManager
   - Creates `{parent}.blocks` asset container (no basePath) for direct manifest resolution
