@@ -7,6 +7,7 @@ namespace Pollora\Block\Infrastructure\Services;
 use Illuminate\Support\Facades\Log;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
+use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Block\Domain\Contracts\BlockRegistrarInterface;
 use Pollora\Hook\Infrastructure\Services\Filter as HookFilter;
@@ -71,7 +72,7 @@ class BlockRegistrar implements BlockRegistrarInterface
         $metadataFile = $blockDir.'/block.json';
 
         if (! file_exists($metadataFile)) {
-            Log::warning('BlockRegistrar: block.json not found in ' . $blockDir);
+            Log::warning('BlockRegistrar: block.json not found in '.$blockDir);
 
             return;
         }
@@ -79,14 +80,14 @@ class BlockRegistrar implements BlockRegistrarInterface
         $metadata = json_decode(file_get_contents($metadataFile), true);
 
         if (! is_array($metadata) || ! isset($metadata['name'])) {
-            Log::warning('BlockRegistrar: Invalid block.json in ' . $blockDir);
+            Log::warning('BlockRegistrar: Invalid block.json in '.$blockDir);
 
             return;
         }
 
         $viteManager = $this->getBlocksViteManager($containerName);
 
-        if (!$viteManager instanceof \Pollora\Asset\Domain\Contracts\ViteManagerInterface) {
+        if (! $viteManager instanceof ViteManagerInterface) {
             return;
         }
 
@@ -226,10 +227,10 @@ class BlockRegistrar implements BlockRegistrarInterface
     {
         $blocksContainerName = $parentContainerName.'.blocks';
 
-        if (!$this->assetManager->getContainer($blocksContainerName) instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer) {
+        if (! $this->assetManager->getContainer($blocksContainerName) instanceof AssetContainer) {
             $parentContainer = $this->assetManager->getContainer($parentContainerName);
 
-            if (!$parentContainer instanceof \Pollora\Asset\Infrastructure\Repositories\AssetContainer) {
+            if (! $parentContainer instanceof AssetContainer) {
                 Log::warning(sprintf("BlockRegistrar: Asset container '%s' not found", $parentContainerName));
 
                 return null;

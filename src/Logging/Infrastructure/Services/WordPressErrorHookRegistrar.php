@@ -30,11 +30,11 @@ class WordPressErrorHookRegistrar implements WordPressErrorHookRegistrarInterfac
             $this->resolveLoggingService()?->handleDeprecatedArgument($function, $message, $version);
         }, 10, 3);
 
-        $this->filter->add('doing_it_wrong_trigger_error', fn () => $this->resolveLoggingService()?->disableTriggerError() ?? true, PHP_INT_MAX, 4);
+        $this->filter->add('doing_it_wrong_trigger_error', fn (): bool => $this->resolveLoggingService()?->disableTriggerError() ?? true, PHP_INT_MAX, 4);
 
-        $this->filter->add('deprecated_function_trigger_error', fn () => $this->resolveLoggingService()?->disableTriggerError() ?? true, PHP_INT_MAX, 4);
+        $this->filter->add('deprecated_function_trigger_error', fn (): bool => $this->resolveLoggingService()?->disableTriggerError() ?? true, PHP_INT_MAX, 4);
 
-        $this->filter->add('deprecated_argument_trigger_error', fn () => $this->resolveLoggingService()?->disableTriggerError() ?? true, PHP_INT_MAX, 4);
+        $this->filter->add('deprecated_argument_trigger_error', fn (): bool => $this->resolveLoggingService()?->disableTriggerError() ?? true, PHP_INT_MAX, 4);
     }
 
     /**
@@ -47,7 +47,7 @@ class WordPressErrorHookRegistrar implements WordPressErrorHookRegistrarInterfac
     private function resolveLoggingService(): ?WordPressErrorLoggingService
     {
         try {
-            return app(WordPressErrorLoggingService::class);
+            return resolve(WordPressErrorLoggingService::class);
         } catch (\Throwable) {
             return null;
         }

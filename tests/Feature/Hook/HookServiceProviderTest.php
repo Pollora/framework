@@ -7,6 +7,7 @@ use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
+use Pollora\Hook\Domain\Contracts\CallbackResolverInterface;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Hook\Infrastructure\Services\Action;
@@ -66,5 +67,19 @@ describe('HookServiceProvider', function (): void {
         $engine = $this->app->make(DiscoveryEngineInterface::class);
 
         expect($engine->getDiscoveries())->toHaveKey('hooks');
+    });
+
+    it('injects CallbackResolver into Action singleton', function (): void {
+        $action = $this->app->make(Action::class);
+        $reflection = new ReflectionProperty($action, 'callbackResolver');
+
+        expect($reflection->getValue($action))->toBeInstanceOf(CallbackResolverInterface::class);
+    });
+
+    it('injects CallbackResolver into Filter singleton', function (): void {
+        $filter = $this->app->make(Filter::class);
+        $reflection = new ReflectionProperty($filter, 'callbackResolver');
+
+        expect($reflection->getValue($filter))->toBeInstanceOf(CallbackResolverInterface::class);
     });
 });

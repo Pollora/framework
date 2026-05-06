@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Route\UI\Http\Controllers;
 
+use Illuminate\Foundation\Exceptions\RegisterErrorViewPaths;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
@@ -87,7 +88,7 @@ class FrontendController
         }
 
         // Register Laravel's built-in error view paths (same mechanism as the exception handler)
-        (new \Illuminate\Foundation\Exceptions\RegisterErrorViewPaths())();
+        (new RegisterErrorViewPaths)();
 
         if (View::exists('errors::404')) {
             return response(View::make('errors::404'), Response::HTTP_NOT_FOUND);

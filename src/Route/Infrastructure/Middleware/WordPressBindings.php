@@ -6,6 +6,7 @@ namespace Pollora\Route\Infrastructure\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
 
 /**
@@ -29,7 +30,7 @@ class WordPressBindings
     {
         $route = $request->route();
 
-        if ($route instanceof \Pollora\Route\Domain\Models\Route && $route->hasCondition()) {
+        if ($route instanceof Route && $route->hasCondition()) {
             $this->routingService->bindWordPressParameters($route);
         }
 

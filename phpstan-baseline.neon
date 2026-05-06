@@ -1182,34 +1182,10 @@ parameters:
 			path: src/Services/WordPress/Installation/WordPressInstallationException.php
 
 		-
-			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Action\:\:add\(\) return type contains unknown class Pollora\\Hook\\Hook\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Support/Facades/Action.php
-
-		-
-			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Action\:\:remove\(\) return type contains unknown class Pollora\\Hook\\Hook\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Support/Facades/Action.php
-
-		-
 			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Ajax\:\:listen\(\) return type contains unknown class Pollora\\Ajax\\Ajax\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Support/Facades/Ajax.php
-
-		-
-			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Filter\:\:add\(\) return type contains unknown class Pollora\\Hook\\Hook\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Support/Facades/Filter.php
-
-		-
-			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Filter\:\:remove\(\) return type contains unknown class Pollora\\Hook\\Hook\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Support/Facades/Filter.php
 
 		-
 			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Mail\:\:send\(\) return type contains unknown class Pollora\\Support\\Facades\\SentMessage\.$#'

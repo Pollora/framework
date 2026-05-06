@@ -35,4 +35,12 @@ interface HookInterface
      * @param  string  $hook  Hook name
      */
     public function exists(string $hook): bool;
+
+    /**
+     * Get the registered callbacks for a hook.
+     *
+     * @param  string  $hook  Hook name
+     * @return array|null Callbacks or null if hook doesn't exist
+     */
+    public function callbacks(string $hook): ?array;
 }
