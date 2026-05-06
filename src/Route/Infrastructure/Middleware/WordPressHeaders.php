@@ -26,9 +26,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * from imposing `no-cache` defaults on content it doesn't own.
  *
  * The middleware respects application-level headers: Content-Type is never modified,
- * and explicit `no-store` cache restrictions set by controllers or plugins are
- * preserved. Non-HTML responses (JSON, PDF, binary downloads) are left untouched
- * by the cache logic.
+ * and explicit cache directives (`no-store`, `max-age`, `s-maxage`) set by controllers
+ * or plugins are preserved. Non-HTML responses (JSON, PDF, binary downloads) are
+ * left untouched by the cache logic.
  *
  * @see \Pollora\Route\Infrastructure\Providers\RouteServiceProvider::WORDPRESS_MIDDLEWARE
  */
@@ -69,15 +69,15 @@ class WordPressHeaders
         // Capture application-level cache restriction BEFORE cleanup,
         // since removeWordPressHeaders resets Cache-Control and Symfony
         // regenerates a default `no-cache, private` that is not intentional.
-        $hasExplicitRestriction = $this->hasCacheRestriction($response);
+        $hasExplicitCacheConfig = $this->hasExplicitCacheDirectives($response);
 
         if ($this->shouldCleanupHeaders($request)) {
             $this->removeWordPressHeaders($response);
-            // WordPress nocache headers were the restriction — not application intent
-            $hasExplicitRestriction = false;
+            // WordPress nocache headers were the source — not application intent
+            $hasExplicitCacheConfig = false;
         }
 
-        if (! $hasExplicitRestriction && $this->shouldApplyPublicCache($response)) {
+        if (! $hasExplicitCacheConfig && $this->shouldApplyPublicCache($response)) {
             $this->applyPublicCacheHeaders($response);
         }
 
@@ -184,22 +184,36 @@ class WordPressHeaders
     }
 
     /**
-     * Check if the response has an explicit cache restriction set by application code.
+     * Check if the response has explicit cache directives set by application code.
      *
-     * Detects the `no-store` directive in the Cache-Control header, which indicates
-     * that a controller, plugin, or middleware has explicitly declared that this
-     * response must not be cached at all. This directive is respected and not overridden.
+     * Detects cache directives that go beyond Symfony's default (`no-cache, private`)
+     * to determine if a controller, plugin, or middleware has intentionally configured
+     * caching behavior. The following directives indicate explicit configuration:
      *
-     * Note: `private` is not checked because Symfony's ResponseHeaderBag always
-     * includes it as a default on responses without explicit Cache-Control, making
-     * it unreliable as an indicator of application intent.
+     * - `no-store` — response must not be cached at all
+     * - `max-age` — specific browser cache TTL was set (e.g. `$response->setMaxAge(300)`)
+     * - `s-maxage` — specific shared/CDN cache TTL was set (e.g. `$response->setSharedMaxAge(600)`)
+     *
+     * Symfony's `private` directive alone is NOT considered explicit because
+     * ResponseHeaderBag always includes it as a default on responses without
+     * explicit Cache-Control. However, `private` combined with `max-age` IS
+     * detected (via the `max-age` check), covering the use case of
+     * `$response->setPrivate()->setMaxAge(300)`.
      *
      * @param  SymfonyResponse  $response  The response to inspect
-     * @return bool True if a no-store directive is present
+     * @return bool True if explicit cache directives are present
      */
-    private function hasCacheRestriction(SymfonyResponse $response): bool
+    private function hasExplicitCacheDirectives(SymfonyResponse $response): bool
     {
-        return $response->headers->hasCacheControlDirective('no-store');
+        if ($response->headers->hasCacheControlDirective('no-store')) {
+            return true;
+        }
+
+        if ($response->headers->hasCacheControlDirective('max-age')) {
+            return true;
+        }
+
+        return $response->headers->hasCacheControlDirective('s-maxage');
     }
 
     /**
