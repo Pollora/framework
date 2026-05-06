@@ -15,6 +15,7 @@ use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
+use Pollora\Theme\Domain\Contracts\ThemeJsonResolverInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
@@ -24,6 +25,7 @@ use Pollora\Theme\Domain\Support\ThemeConfig;
 use Pollora\Theme\Infrastructure\Adapters\DomainContainerAdapter;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
+use Pollora\Theme\Infrastructure\Services\ThemeJsonResolver;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
@@ -203,6 +205,11 @@ class ThemeServiceProvider extends ServiceProvider
 
         // WordPress theme parser
         $this->app->singleton(WordPressThemeParser::class);
+
+        // Theme JSON resolver - reads built theme.json from Vite output
+        $this->app->singleton(ThemeJsonResolverInterface::class, fn ($app): ThemeJsonResolver => new ThemeJsonResolver(
+            $app->make('path.public')
+        ));
 
         // Deprecated theme repository - kept for backward compatibility only
         $this->app->singleton('theme.repository', fn ($app): ThemeRepository => new ThemeRepository(
@@ -387,6 +394,7 @@ class ThemeServiceProvider extends ServiceProvider
     private function setupThemeBoot(): void
     {
         $this->registerBladeDirectives();
+        $this->registerThemeJsonFilter();
     }
 
     /**
@@ -405,6 +413,27 @@ class ThemeServiceProvider extends ServiceProvider
             $themeManager = resolve(ThemeService::class);
 
             return $themeManager->hasTheme($name);
+        });
+    }
+
+    /**
+     * Register the wp_theme_json_data_theme filter to inject built theme.json data.
+     *
+     * Uses the Vite-built theme.json (which includes Tailwind CSS variables)
+     * instead of relying on a file copy hack in vite.config.js.
+     */
+    private function registerThemeJsonFilter(): void
+    {
+        $this->filter->add('wp_theme_json_data_theme', function ($themeJson) {
+            $themeSlug = get_stylesheet();
+            $resolver = $this->app->make(ThemeJsonResolverInterface::class);
+            $builtData = $resolver->resolve($themeSlug);
+
+            if ($builtData === null) {
+                return $themeJson;
+            }
+
+            return new \WP_Theme_JSON_Data($builtData, 'theme');
         });
     }
 
