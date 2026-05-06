@@ -59,8 +59,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Generated `pollora.pot` translation template with all framework strings
 - Translations: French (fr_FR), Spanish (es_ES), German (de_DE), Portuguese Brazil (pt_BR), Italian (it_IT), Dutch (nl_NL), Japanese (ja)
 
+### Fixed
+- WordPress `shutdown` hook output now reaches the browser
+  - Plugins relying on `shutdown` (Query Monitor toolbar, WP Rocket cache processing) were broken because Laravel's `Response::send()` calls `fastcgi_finish_request()` before PHP shutdown
+  - `WordPressShutdown` middleware now fires `do_action('shutdown')` within a controlled output buffer before the response is returned, injecting captured output (e.g. QM toolbar) before `</body>` in HTML responses
+  - Prevents double execution by clearing shutdown callbacks after firing; `wp_cache_close()` remains unaffected
+  - Exception-safe buffer management following Laravel's `PhpEngine` pattern
+
 ### Changed
 - Renamed `src/Taxonomy/config/post-types.php` to `taxonomies.php` (fixes inconsistent naming)
+- Added comprehensive PHPDoc to `WordPressShutdown` and `WordPressHeaders` middlewares
 
 ### Removed
 - Config-based post type and taxonomy registration (`config/post-types.php`, `config/taxonomies.php`) — use `#[PostType]` / `#[Taxonomy]` attributes instead
