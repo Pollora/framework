@@ -9,8 +9,10 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Hook\Domain\Contracts\Action as ActionContract;
+use Pollora\Hook\Domain\Contracts\CallbackResolverInterface;
 use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
 use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Infrastructure\Services\ContainerCallbackResolver;
 use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Hook\Infrastructure\Services\HookDiscovery;
 use Pollora\Hook\UI\Console\ActionMakeCommand;
@@ -50,9 +52,22 @@ class HookServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Bind concrete classes
-        $this->app->singleton(Action::class);
-        $this->app->singleton(Filter::class);
+        // Callback resolver for dependency injection in hook callbacks
+        $this->app->singleton(CallbackResolverInterface::class, fn ($app): ContainerCallbackResolver => new ContainerCallbackResolver($app));
+
+        // Bind concrete classes with resolver injection
+        $this->app->singleton(Action::class, function ($app): Action {
+            $action = new Action;
+            $action->setCallbackResolver($app->make(CallbackResolverInterface::class));
+
+            return $action;
+        });
+        $this->app->singleton(Filter::class, function ($app): Filter {
+            $filter = new Filter;
+            $filter->setCallbackResolver($app->make(CallbackResolverInterface::class));
+
+            return $filter;
+        });
 
         // Bind interfaces to implementations
         $this->app->bind(ActionContract::class, Action::class);

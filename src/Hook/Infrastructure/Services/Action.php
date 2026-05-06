@@ -11,35 +11,26 @@ use Pollora\Hook\Domain\Services\AbstractHook;
  * Laravel/WordPress adapter for Action hooks.
  *
  * Implements the Action contract and delegates to WordPress functions.
+ * Uses hook-point methods (addHookEvent/removeHookEvent) to avoid
+ * double callback resolution.
  */
 class Action extends AbstractHook implements ActionContract
 {
     /**
-     * Add one or multiple action hooks and register with WordPress.
+     * Register a hook event with WordPress.
      */
-    public function add(string|array $hooks, callable|string|array $callback, int $priority = 10, ?int $acceptedArgs = null): self
+    protected function addHookEvent(string $hook, callable|string|array $callback, int $priority, int $acceptedArgs): void
     {
-        parent::add($hooks, $callback, $priority, $acceptedArgs);
-        foreach ((array) $hooks as $hook) {
-            $resolved = $this->resolveCallback($hook, $callback, $acceptedArgs);
-            add_action($hook, $resolved['callable'], $priority, $resolved['args']);
-        }
-
-        return $this;
+        parent::addHookEvent($hook, $callback, $priority, $acceptedArgs);
+        add_action($hook, $callback, $priority, $acceptedArgs);
     }
 
     /**
-     * Remove an action hook and unregister from WordPress.
+     * Unregister a hook event from WordPress.
      */
-    public function remove(string $hook, callable|string|array|null $callback = null, int $priority = 10): self|false
+    protected function removeHookEvent(string $hook, callable|string|array $callback, int $priority): void
     {
-        $result = parent::remove($hook, $callback, $priority);
-        if ($callback !== null) {
-            $resolved = $this->resolveCallback($hook, $callback, null);
-            remove_action($hook, $resolved['callable'], $priority);
-        }
-
-        return $result;
+        remove_action($hook, $callback, $priority);
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Hook\Domain\Services;
 
+use Pollora\Hook\Domain\Contracts\CallbackResolverInterface;
 use Pollora\Hook\Domain\Contracts\HookInterface;
 
 /**
@@ -39,6 +40,26 @@ abstract class AbstractHook implements HookInterface
      * ]
      */
     protected static array $reflectionCache = [];
+
+    /**
+     * Optional callback resolver for dependency injection support.
+     *
+     * When set, class-based callbacks are resolved through this interface
+     * instead of direct instantiation, enabling constructor injection.
+     */
+    protected ?CallbackResolverInterface $callbackResolver = null;
+
+    /**
+     * Set the callback resolver for dependency injection support.
+     *
+     * When a resolver is set, class-based callbacks are instantiated
+     * through it instead of direct `new $className`, enabling
+     * constructor dependency injection.
+     */
+    public function setCallbackResolver(CallbackResolverInterface $resolver): void
+    {
+        $this->callbackResolver = $resolver;
+    }
 
     /**
      * Add one or multiple hooks with a callback.
@@ -83,9 +104,13 @@ abstract class AbstractHook implements HookInterface
             // Extract callback details
             $callback = $firstHook['callback'];
             $priority = (int) $firstHook['priority'];
+            // Notify subclasses before removing
+            $this->removeHookEvent($hook, $callback, $priority);
             // Remove from our collection
             unset($this->hooks[$hook]);
         } elseif (isset($this->hooks[$hook])) {
+            // Notify subclasses before removing
+            $this->removeHookEvent($hook, $callback, $priority);
             // Remove the specific hook with the corresponding callback and priority
             $hookCallbacks = $this->hooks[$hook];
             // Find and remove the matching callback using our improved comparison function
@@ -221,7 +246,13 @@ abstract class AbstractHook implements HookInterface
             ];
         }
 
-        throw new \InvalidArgumentException('Invalid callback provided for hook: '.$hook);
+        // Store the callback as-is for deferred resolution.
+        // WordPress does not validate callbacks at registration time — a function
+        // or class may be defined later (e.g., by a plugin loaded after this call).
+        return [
+            'callable' => $callback,
+            'args' => $acceptedArgs ?? 1,
+        ];
     }
 
     /**
@@ -237,8 +268,10 @@ abstract class AbstractHook implements HookInterface
     protected function resolveClassMethodCallback(string $hook, string $className, ?int $acceptedArgs): array
     {
         try {
-            // Create a new instance without using dependency injection
-            $instance = new $className;
+            // Resolve through DI container if available, fallback to direct instantiation
+            $instance = $this->callbackResolver !== null
+                ? $this->callbackResolver->resolve($className)
+                : new $className;
 
             // Prepare the method name (similar to Laravel's Str::studly but without dependency)
             $hook = preg_replace('/[^a-zA-Z0-9_]+/', '_', $hook);
@@ -344,11 +377,11 @@ abstract class AbstractHook implements HookInterface
      * Add a single hook event.
      *
      * @param  string  $hook  The hook name
-     * @param  callable  $callback  The resolved callback function
+     * @param  callable|string|array  $callback  The callback (may not be callable yet for deferred resolution)
      * @param  int  $priority  The priority of the hook
      * @param  int  $acceptedArgs  The number of arguments accepted by the callback
      */
-    protected function addHookEvent(string $hook, callable $callback, int $priority, int $acceptedArgs): void
+    protected function addHookEvent(string $hook, callable|string|array $callback, int $priority, int $acceptedArgs): void
     {
         // Store hook details in an organized structure
         $hookData = [
@@ -365,6 +398,21 @@ abstract class AbstractHook implements HookInterface
 
         // Add this hook data to the array
         $this->hooks[$hook][] = $hookData;
+    }
+
+    /**
+     * Remove a single hook event.
+     *
+     * Override in subclasses to perform platform-specific unregistration
+     * (e.g., WordPress remove_action/remove_filter).
+     *
+     * @param  string  $hook  The hook name
+     * @param  callable|string|array  $callback  The callback to remove
+     * @param  int  $priority  The priority of the hook
+     */
+    protected function removeHookEvent(string $hook, callable|string|array $callback, int $priority): void
+    {
+        // No-op in domain layer. Infrastructure subclasses override this.
     }
 
     /**
