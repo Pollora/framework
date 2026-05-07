@@ -29,7 +29,7 @@ use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
-use Pollora\Permalink\RewriteServiceProvider;
+use Pollora\Permalink\Infrastructure\Providers\PermalinkServiceProvider;
 use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
@@ -106,7 +106,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
 
-        $this->app->register(RewriteServiceProvider::class);
+        $this->app->register(PermalinkServiceProvider::class);
         $this->app->register(PageServiceProvider::class);
         $this->app->register(ThemeServiceProvider::class);
         $this->app->register(PluginServiceProvider::class);
