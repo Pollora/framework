@@ -108,21 +108,24 @@ abstract class AbstractHook implements HookInterface
             $this->removeHookEvent($hook, $callback, $priority);
             // Remove from our collection
             unset($this->hooks[$hook]);
-        } elseif (isset($this->hooks[$hook])) {
-            // Notify subclasses before removing
+        } else {
+            // Always notify subclasses to perform platform-specific unregistration
+            // (e.g., WordPress remove_action/remove_filter), even for hooks not
+            // registered through this class (e.g., hooks added by WooCommerce core).
             $this->removeHookEvent($hook, $callback, $priority);
-            // Remove the specific hook with the corresponding callback and priority
-            $hookCallbacks = $this->hooks[$hook];
-            // Find and remove the matching callback using our improved comparison function
-            $filteredCallbacks = array_values(array_filter(
-                $hookCallbacks,
-                fn (array $item): bool => ! ($item['priority'] === $priority && $this->compareCallbacks($item['callback'], $callback))
-            ));
-            // Update or remove the hook entry
-            if ($filteredCallbacks === []) {
-                unset($this->hooks[$hook]);
-            } else {
-                $this->hooks[$hook] = $filteredCallbacks;
+
+            // Also clean up our internal tracking if we have it
+            if (isset($this->hooks[$hook])) {
+                $hookCallbacks = $this->hooks[$hook];
+                $filteredCallbacks = array_values(array_filter(
+                    $hookCallbacks,
+                    fn (array $item): bool => ! ($item['priority'] === $priority && $this->compareCallbacks($item['callback'], $callback))
+                ));
+                if ($filteredCallbacks === []) {
+                    unset($this->hooks[$hook]);
+                } else {
+                    $this->hooks[$hook] = $filteredCallbacks;
+                }
             }
         }
 
