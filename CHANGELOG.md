@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
 ### Added
+- Trailing slash removal at URL source via `user_trailingslashit` filter
+  - All WordPress-generated URLs (posts, pages, terms, archives, feeds, pagination) are now consistent with no trailing slash
+  - Previously only canonical redirects were handled, leaving in-page links with trailing slashes
+  - Refactored `Permalink` module to DDD architecture (Domain contracts, services, Infrastructure providers)
+  - `RewriteServiceProvider` renamed to `PermalinkServiceProvider` with DI for hook services
 - Dynamic `theme.json` resolution via `wp_theme_json_data_theme` WordPress filter (`ThemeJsonResolver`)
   - Reads the Vite-built `theme.json` from `public/build/theme/{slug}/assets/theme.json` at runtime
   - Injects Tailwind-enriched settings (colors, fonts, border-radius) into WordPress without file copy
