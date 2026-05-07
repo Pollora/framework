@@ -111,9 +111,10 @@ class BlockRegistrar implements BlockRegistrarInterface
 
         if (isset($metadata['render']) && str_starts_with((string) $metadata['render'], 'file:./')) {
             $renderFile = $blockDir.'/'.substr((string) $metadata['render'], 7);
+            $realRenderFile = realpath($renderFile);
 
-            if (file_exists($renderFile)) {
-                $args['render_callback'] = function (array $attributes, string $content, \WP_Block $block) use ($renderFile): string {
+            if ($realRenderFile !== false && str_starts_with($realRenderFile, realpath($blockDir).DIRECTORY_SEPARATOR)) {
+                $args['render_callback'] = function (array $attributes, string $content, \WP_Block $block) use ($realRenderFile): string {
                     ob_start();
                     // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
                     extract([
@@ -121,7 +122,7 @@ class BlockRegistrar implements BlockRegistrarInterface
                         'content' => $content,
                         'block' => $block,
                     ]);
-                    include $renderFile;
+                    include $realRenderFile;
 
                     return ob_get_clean();
                 };

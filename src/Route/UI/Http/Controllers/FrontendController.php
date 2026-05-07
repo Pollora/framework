@@ -61,7 +61,7 @@ class FrontendController
             return response(View::make($viewName), is_404() ? Response::HTTP_NOT_FOUND : Response::HTTP_OK);
         }
 
-        if (file_exists($templatePath)) {
+        if (file_exists($templatePath) && $this->isAllowedTemplatePath($templatePath)) {
             ob_start();
             include $templatePath;
             $content = ob_get_clean();
@@ -95,6 +95,37 @@ class FrontendController
         }
 
         return response('Not Found', Response::HTTP_NOT_FOUND);
+    }
+
+    /**
+     * Validate that a template path is within allowed directories
+     * to prevent local file inclusion via malicious template_include filters.
+     */
+    private function isAllowedTemplatePath(string $templatePath): bool
+    {
+        // Only enforce path validation when WordPress is loaded (ABSPATH defined).
+        // Without WordPress, there is no template_include filter to exploit.
+        if (! defined('ABSPATH')) {
+            return true;
+        }
+
+        $realPath = realpath($templatePath);
+        if ($realPath === false) {
+            return false;
+        }
+
+        $allowedPaths = array_filter([
+            realpath(ABSPATH) ?: null,
+            realpath(resolve('config')['view.compiled'] ?? '') ?: null,
+        ]);
+
+        foreach ($allowedPaths as $allowedPath) {
+            if (str_starts_with($realPath, $allowedPath)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -52,7 +52,7 @@ class ViewServiceProvider extends ViewServiceProviderBase
             $id = md5($this->getCompiled());
             $compiled_path = resolve('config')['view.compiled'];
 
-            $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", $view)
+            $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", addslashes($view))
                 ."\n<?php /**PATH {$path} ENDPATH**/ ?>";
 
             if (! file_exists($loader = sprintf('%s/%s-loader.php', $compiled_path, $id))) {
