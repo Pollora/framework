@@ -132,3 +132,69 @@ describe('P1 — CallbackResolverInterface support', function (): void {
             ->toThrow(RuntimeException::class);
     });
 });
+
+describe('P2 — Remove hooks not registered through Pollora', function (): void {
+    it('calls removeHookEvent even when hook is not in internal tracking', function (): void {
+        // Use a testable subclass that tracks removeHookEvent calls
+        $hook = new class extends AbstractHook
+        {
+            public array $removedEvents = [];
+
+            public function do(string $hook, mixed ...$args): self
+            {
+                return $this;
+            }
+
+            public function apply(string $hook, mixed $value, mixed ...$args): mixed
+            {
+                return $value;
+            }
+
+            protected function removeHookEvent(string $hook, callable|string|array $callback, int $priority): void
+            {
+                $this->removedEvents[] = ['hook' => $hook, 'callback' => $callback, 'priority' => $priority];
+            }
+        };
+
+        // Remove a hook that was never added through this class (simulates WooCommerce core hooks)
+        $hook->remove('woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20);
+
+        expect($hook->removedEvents)->toHaveCount(1)
+            ->and($hook->removedEvents[0]['hook'])->toBe('woocommerce_after_single_product_summary')
+            ->and($hook->removedEvents[0]['callback'])->toBe('woocommerce_output_related_products')
+            ->and($hook->removedEvents[0]['priority'])->toBe(20);
+    });
+
+    it('also cleans internal tracking when hook was registered through Pollora', function (): void {
+        $hook = new class extends AbstractHook
+        {
+            public array $removedEvents = [];
+
+            public function do(string $hook, mixed ...$args): self
+            {
+                return $this;
+            }
+
+            public function apply(string $hook, mixed $value, mixed ...$args): mixed
+            {
+                return $value;
+            }
+
+            protected function removeHookEvent(string $hook, callable|string|array $callback, int $priority): void
+            {
+                $this->removedEvents[] = ['hook' => $hook, 'callback' => $callback, 'priority' => $priority];
+            }
+        };
+
+        // Add a hook through Pollora, then remove it
+        $closure = fn () => null;
+        $hook->add('my_hook', $closure, 15);
+
+        expect($hook->callbacks('my_hook'))->toHaveCount(1);
+
+        $hook->remove('my_hook', $closure, 15);
+
+        expect($hook->removedEvents)->toHaveCount(1)
+            ->and($hook->callbacks('my_hook'))->toBeNull();
+    });
+});
