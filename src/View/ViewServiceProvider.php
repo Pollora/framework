@@ -49,19 +49,16 @@ class ViewServiceProvider extends ViewServiceProviderBase
         View::macro('makeLoader', function (): string {
             $view = $this->getName();
             $path = $this->getPath();
+            $id = md5($path);
             $compiled_path = resolve('config')['view.compiled'];
 
-            // Use file modification time in the hash so loaders invalidate when templates change
-            $viewHash = md5($path);
-            $timeHash = substr(md5((string) (file_exists($path) ? filemtime($path) : 0)), 0, 8);
-            $loader = sprintf('%s/%s-%s-loader.php', $compiled_path, $viewHash, $timeHash);
-
+            // The loader is a stable passthrough file that delegates to view()->render().
+            // Blade recompilation is handled by Laravel's CompilerEngine::isExpired(),
+            // so the loader itself never needs to be invalidated.
             $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", addslashes($view))
                 ."\n<?php /**PATH {$path} ENDPATH**/ ?>";
 
-            if (! file_exists($loader)) {
-                // Clean up stale loaders for this view before creating the new one
-                array_map('unlink', glob(sprintf('%s/%s-*-loader.php', $compiled_path, $viewHash)) ?: []);
+            if (! file_exists($loader = sprintf('%s/%s-loader.php', $compiled_path, $id))) {
                 file_put_contents($loader, $content);
             }
 
