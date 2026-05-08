@@ -52,8 +52,10 @@ class ModuleDownloader
      */
     public function __construct(string $repository)
     {
-        if (! str_contains($repository, '/')) {
-            throw new Exception("Repository must be in the format 'owner/repo'");
+        if (! preg_match('/^[a-zA-Z0-9][a-zA-Z0-9\-_.]*\/[a-zA-Z0-9][a-zA-Z0-9\-_.]*$/', $repository)) {
+            throw new \InvalidArgumentException(
+                "Repository must be in 'owner/repo' format with alphanumeric characters, hyphens, underscores, and dots only."
+            );
         }
 
         $this->repository = $repository;

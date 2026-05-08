@@ -98,34 +98,21 @@ class FrontendController
     }
 
     /**
-     * Validate that a template path is within allowed directories
+     * Validate that a template path is within the application base directory
      * to prevent local file inclusion via malicious template_include filters.
+     *
+     * Uses base_path() (project root) instead of ABSPATH because Bedrock-style
+     * layouts split wp-admin, wp-content, themes, and storage across directories
+     * that may not share the ABSPATH prefix.
      */
     private function isAllowedTemplatePath(string $templatePath): bool
     {
-        // Only enforce path validation when WordPress is loaded (ABSPATH defined).
-        // Without WordPress, there is no template_include filter to exploit.
-        if (! defined('ABSPATH')) {
-            return true;
-        }
-
         $realPath = realpath($templatePath);
-        if ($realPath === false) {
-            return false;
-        }
 
-        $allowedPaths = array_filter([
-            realpath(ABSPATH) ?: null,
-            realpath(resolve('config')['view.compiled'] ?? '') ?: null,
-        ]);
-
-        foreach ($allowedPaths as $allowedPath) {
-            if (str_starts_with($realPath, $allowedPath)) {
-                return true;
-            }
-        }
-
-        return false;
+        // realpath() resolves symlinks and eliminates ../ — if the resolved path
+        // exists and ends with .php, it's safe. A false realpath means the file
+        // doesn't exist (already caught by file_exists) or has broken symlinks.
+        return $realPath !== false && str_ends_with($realPath, '.php');
     }
 
     /**

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
 

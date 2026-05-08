@@ -19,6 +19,13 @@ use Pollora\View\Domain\Contracts\TemplateFinderInterface;
  */
 class WooCommerce implements WooCommerceIntegrationInterface
 {
+    /**
+     * Request-level cache for template resolution results.
+     *
+     * @var array<string, string>
+     */
+    private array $templateCache = [];
+
     public function __construct(
         private readonly TemplateFinderInterface $templateFinder,
         private readonly ViewFactory $viewFactory,
@@ -61,6 +68,11 @@ class WooCommerce implements WooCommerceIntegrationInterface
      */
     public function template(string $template, string $templateName = ''): string
     {
+        $cacheKey = $template.'|'.$templateName;
+        if (isset($this->templateCache[$cacheKey])) {
+            return $this->templateCache[$cacheKey];
+        }
+
         // Determine the template to locate, giving priority to the full path
         $templateToLocate = $this->determineTemplateToLocate($template, $templateName);
 
@@ -69,7 +81,7 @@ class WooCommerce implements WooCommerceIntegrationInterface
 
         // If no theme template was found, return the original template
         if ($themeTemplate === '' || $themeTemplate === '0') {
-            return $template;
+            return $this->templateCache[$cacheKey] = $template;
         }
 
         // Return filename for WooCommerce status screen
@@ -78,23 +90,23 @@ class WooCommerce implements WooCommerceIntegrationInterface
             $this->adapter->isDoingAjax(),
             $this->adapter->getCurrentScreen()
         )) {
-            return $themeTemplate;
+            return $this->templateCache[$cacheKey] = $themeTemplate;
         }
 
         // Include directly unless it's a Blade file
         if (! Str::endsWith($themeTemplate, '.blade.php')) {
-            return $themeTemplate;
+            return $this->templateCache[$cacheKey] = $themeTemplate;
         }
 
         // We have a Blade template, get the view name and create a loader
         $viewName = $this->getViewNameFromTemplate($themeTemplate);
 
         if (in_array($viewName, [null, '', '0'], true) || ! $this->viewFactory->exists($viewName)) {
-            return $themeTemplate;
+            return $this->templateCache[$cacheKey] = $themeTemplate;
         }
 
         // Create and return the loader file path
-        return $this->viewFactory->make($viewName)->makeLoader();
+        return $this->templateCache[$cacheKey] = $this->viewFactory->make($viewName)->makeLoader();
     }
 
     /**

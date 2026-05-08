@@ -22,6 +22,13 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
     protected ?string $path = null;
 
     /**
+     * Request-level cache for locate() results.
+     *
+     * @var array<string, array<string>>
+     */
+    private static array $locateCache = [];
+
+    /**
      * Create new FileSystemTemplateFinder instance.
      */
     public function __construct(
@@ -66,6 +73,11 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
             return array_merge(...array_map($this->locate(...), $templateNames));
         }
 
+        // Return cached result if available
+        if (isset(self::$locateCache[$templateNames])) {
+            return self::$locateCache[$templateNames];
+        }
+
         // Convert PHP template to Blade template
         $bladeTemplate = str_ends_with($templateNames, '.php') && ! str_ends_with($templateNames, '.blade.php')
             ? str_replace('.php', '.blade.php', $templateNames)
@@ -92,7 +104,15 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
             }
         }
 
-        return array_unique(array_filter($found));
+        return self::$locateCache[$templateNames] = array_unique(array_filter($found));
+    }
+
+    /**
+     * Clear the request-level locate cache.
+     */
+    public static function clearLocateCache(): void
+    {
+        self::$locateCache = [];
     }
 
     /**

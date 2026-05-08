@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Pollora\WordPress;
 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\InstallationService;
 use Pollora\Services\WordPress\Installation\LanguageService;
@@ -77,28 +76,14 @@ class WordPressServiceProvider extends ServiceProvider
 
     /**
      * Force HTTPS protocol handling for WordPress requests.
+     *
+     * Proxy header handling (X-Forwarded-Proto) is delegated to Laravel's
+     * TrustProxies middleware which should be configured in the application.
      */
     private function handleHttpsProtocol(): void
     {
         if (is_secured()) {
             URL::forceScheme('https');
         }
-
-        $forwardedProto = Request::server('HTTP_X_FORWARDED_PROTO') ?? Request::server('X_FORWARDED_PROTO') ?? null;
-
-        if ($forwardedProto) {
-            $this->setHttpsBasedOnProxy($forwardedProto);
-        }
-    }
-
-    /**
-     * Determines whether HTTPS should be forced based on proxy headers.
-     */
-    private function setHttpsBasedOnProxy(string $forwardedProtocols): void
-    {
-        $protocols = array_map(trim(...), explode(',', $forwardedProtocols));
-
-        // Check if the last protocol is HTTPS
-        $_SERVER['HTTPS'] = end($protocols) === 'https' ? 'on' : 'off';
     }
 }

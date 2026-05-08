@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static self|false remove(string $hook, callable|string|array|null $callback = null, int $priority = 10) Remove an action hook
  * @method static array|null callbacks(string $hook) Get registered callbacks for a hook
  *
- * @see \Pollora\Hook\Infrastructure\Services\Action
+ * @see \Pollora\Hook\Domain\Contracts\Action
  */
 class Action extends Facade
 {
@@ -27,6 +27,6 @@ class Action extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return \Pollora\Hook\Infrastructure\Services\Action::class;
+        return \Pollora\Hook\Domain\Contracts\Action::class;
     }
 }
