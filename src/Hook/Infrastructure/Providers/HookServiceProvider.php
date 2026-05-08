@@ -69,9 +69,10 @@ class HookServiceProvider extends ServiceProvider
             return $filter;
         });
 
-        // Bind interfaces to implementations
-        $this->app->bind(ActionContract::class, Action::class);
-        $this->app->bind(FilterContract::class, Filter::class);
+        // Alias interfaces to singleton implementations so all resolution
+        // paths (Facade, DI, manual make) return the same instance
+        $this->app->alias(Action::class, ActionContract::class);
+        $this->app->alias(Filter::class, FilterContract::class);
 
         // Register Hook Discovery
         $this->app->singleton(HookDiscovery::class, fn ($app): HookDiscovery => new HookDiscovery(

@@ -93,12 +93,18 @@ class WordPressHeaders
      * Add the framework identification header to the response.
      *
      * Sets `X-Powered-By: Pollora` to identify responses served through
-     * the Pollora framework, replacing any existing X-Powered-By value.
+     * the Pollora framework. Can be disabled via wordpress.headers.x_powered_by config.
      *
      * @param  SymfonyResponse  $response  The response to modify
      */
     private function addFrameworkHeader(SymfonyResponse $response): void
     {
+        if (config('wordpress.headers.x_powered_by', true) === false) {
+            $response->headers->remove(self::FRAMEWORK_HEADER);
+
+            return;
+        }
+
         $response->headers->set(self::FRAMEWORK_HEADER, self::FRAMEWORK_NAME);
     }
 

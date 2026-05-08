@@ -32,6 +32,13 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
     private array $conditions = [];
 
     /**
+     * Reverse index for O(1) alias lookups: alias => wordpress_function.
+     *
+     * @var array<string, string>
+     */
+    private array $reverseIndex = [];
+
+    /**
      * Indicates whether conditions have been loaded from all sources.
      */
     private bool $loaded = false;
@@ -68,26 +75,13 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
     {
         $this->ensureConditionsLoaded();
 
-        // First check if it's already a WordPress function (key in conditions)
+        // Check if it's already a WordPress function (key in conditions)
         if (array_key_exists($condition, $this->conditions)) {
             return $condition;
         }
 
-        // Search through aliases to find the WordPress function
-        foreach ($this->conditions as $wpFunction => $aliases) {
-            // Handle single alias (string)
-            if (is_string($aliases) && $aliases === $condition) {
-                return $wpFunction;
-            }
-
-            // Handle single alias (string)
-            if (is_array($aliases) && in_array($condition, $aliases, true)) {
-                return $wpFunction;
-            }
-        }
-
-        // Return original condition if not found (passthrough)
-        return $condition;
+        // O(1) lookup via reverse index
+        return $this->reverseIndex[$condition] ?? $condition;
     }
 
     /**
@@ -100,6 +94,7 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
     {
         $this->ensureConditionsLoaded();
         $this->conditions[$function] = $alias;
+        $this->reverseIndex[$alias] = $function;
     }
 
     /**
@@ -116,8 +111,24 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
 
         $this->loadDefaultConditions();
         $this->loadConfigConditions();
+        $this->buildReverseIndex();
 
         $this->loaded = true;
+    }
+
+    /**
+     * Build the reverse index (alias → wordpress_function) for O(1) lookups.
+     */
+    private function buildReverseIndex(): void
+    {
+        $this->reverseIndex = [];
+
+        foreach ($this->conditions as $wpFunction => $aliases) {
+            foreach ((array) $aliases as $alias) {
+                // First match wins, consistent with linear search iteration order
+                $this->reverseIndex[$alias] ??= $wpFunction;
+            }
+        }
     }
 
     /**
