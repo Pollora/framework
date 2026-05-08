@@ -6,7 +6,7 @@ namespace Pollora\View\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Filesystem\Filesystem;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\View\Application\Services\TemplateHierarchyService;
 use Pollora\View\Application\UseCases\RegisterTemplateHierarchyFiltersUseCase;
 use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
@@ -59,7 +59,7 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
         $this->app->bind(TemplateHierarchyFilterInterface::class, fn ($app): WordPressTemplateHierarchyFilter => new WordPressTemplateHierarchyFilter(
             $app->make(TemplateFinderInterface::class),
             $app->make(ResolveBladeTemplateUseCase::class),
-            $app->make(Filesystem::class)
+            $app->get('view')->getFinder()
         ));
     }
 

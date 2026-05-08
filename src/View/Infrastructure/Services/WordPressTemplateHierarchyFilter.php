@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\View\Infrastructure\Services;
 
 use Illuminate\Support\Str;
+use Illuminate\View\ViewFinderInterface;
 use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 use Pollora\View\Domain\Contracts\TemplateHierarchyFilterInterface;
@@ -20,7 +21,8 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
 {
     public function __construct(
         private readonly TemplateFinderInterface $templateFinder,
-        private readonly ResolveBladeTemplateUseCase $resolveBladeTemplateUseCase
+        private readonly ResolveBladeTemplateUseCase $resolveBladeTemplateUseCase,
+        private readonly ViewFinderInterface $viewFinder
     ) {}
 
     /**
@@ -101,8 +103,11 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
     /**
      * Get Blade theme templates with Template Name headers.
      *
+     * Scans view paths for .blade.php files containing a
+     * {{-- Template Name: ... --}} header (WordPress convention).
+     *
      * @param  string  $postType  Post type to get templates for
-     * @return array<string, string>
+     * @return array<string, string> Relative path => template name
      */
     private function getBladeThemeTemplates(string $postType = ''): array
     {
@@ -114,16 +119,76 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
             }
         }
 
-        $templates = [];
+        $allTemplates = [];
 
-        // This would need access to ViewFinder paths - we'll implement this
-        // in a more complete version or inject the ViewFinder paths
+        foreach ($this->viewFinder->getPaths() as $viewPath) {
+            if (! is_dir($viewPath)) {
+                continue;
+            }
 
-        // Cache the results
-        if (function_exists('wp_cache_add')) {
-            wp_cache_add('pollora/theme_templates', $templates, 'themes');
+            $this->scanDirectoryForTemplates($viewPath, $viewPath, $allTemplates);
         }
 
-        return $templates[$postType] ?? [];
+        // Filter by post type
+        $filtered = [];
+        foreach ($allTemplates as $file => $data) {
+            if ($postType === '' || in_array($postType, $data['post_types'], true)) {
+                $filtered[$file] = $data['name'];
+            }
+        }
+
+        // Cache per post type
+        if (function_exists('wp_cache_set')) {
+            $existing = [];
+            if (function_exists('wp_cache_get')) {
+                $existing = wp_cache_get('pollora/theme_templates', 'themes') ?: [];
+            }
+            $existing[$postType] = $filtered;
+            wp_cache_set('pollora/theme_templates', $existing, 'themes');
+        }
+
+        return $filtered;
+    }
+
+    /**
+     * Scan a directory recursively for Blade templates with Template Name headers.
+     *
+     * @param  string  $directory  Directory to scan
+     * @param  string  $basePath  Base path for relative path calculation
+     * @param  array<string, array{name: string, post_types: array<string>}>  $templates  Collected templates
+     */
+    private function scanDirectoryForTemplates(string $directory, string $basePath, array &$templates): void
+    {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if (! $file->isFile() || ! str_ends_with($file->getFilename(), '.blade.php')) {
+                continue;
+            }
+
+            $content = file_get_contents($file->getPathname(), false, null, 0, 8192);
+            if ($content === false) {
+                continue;
+            }
+
+            // Match: {{-- Template Name: My Template --}}
+            if (! preg_match('/\{\{--\s*Template Name:\s*(.+?)\s*--\}\}/', $content, $matches)) {
+                continue;
+            }
+
+            $relativePath = ltrim(str_replace($basePath, '', $file->getPathname()), '/\\');
+
+            $postTypes = ['page'];
+            if (preg_match('/\{\{--\s*Template Post Type:\s*(.+?)\s*--\}\}/', $content, $ptMatches)) {
+                $postTypes = array_map('trim', explode(',', $ptMatches[1]));
+            }
+
+            $templates[$relativePath] = [
+                'name' => trim($matches[1]),
+                'post_types' => $postTypes,
+            ];
+        }
     }
 }
