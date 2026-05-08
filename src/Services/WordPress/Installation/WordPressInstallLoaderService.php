@@ -6,7 +6,7 @@ namespace Pollora\Services\WordPress\Installation;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Config;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contracts\Filter;
 
 /**
  * Service for loading WordPress core files and initializing the environment.

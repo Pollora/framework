@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Ajax\Infrastructure\Services;
 
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contracts\Action;
 
 /**
  * Infrastructure service to inject the AJAX URL as a JS variable in the HTML head.

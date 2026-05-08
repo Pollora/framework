@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Mockery as m;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\Theme\Infrastructure\Services\Support;
 use Psr\Container\ContainerInterface;
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Logging\Infrastructure\Services;
 
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\Logging\Application\Services\WordPressErrorLoggingService;
 use Pollora\Logging\Domain\Contracts\WordPressErrorHookRegistrarInterface;
 

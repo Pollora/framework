@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\ThirdParty\WooCommerce\Application\UseCases;
 
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
 

@@ -6,8 +6,8 @@ namespace Pollora\Theme\Domain\Models;
 
 use Pollora\Asset\Infrastructure\Services\AssetFile;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;

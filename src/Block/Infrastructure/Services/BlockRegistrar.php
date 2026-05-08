@@ -10,7 +10,7 @@ use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Block\Domain\Contracts\BlockRegistrarInterface;
-use Pollora\Hook\Infrastructure\Services\Filter as HookFilter;
+use Pollora\Hook\Domain\Contracts\Filter as HookFilter;
 
 /**
  * Scans block directories and registers Gutenberg blocks using the Asset system.
@@ -40,6 +40,7 @@ class BlockRegistrar implements BlockRegistrarInterface
 
     public function __construct(
         private readonly AssetManager $assetManager,
+        private readonly HookFilter $filter,
     ) {}
 
     public function registerDirectory(string $directory, string $containerName): void
@@ -205,7 +206,7 @@ class BlockRegistrar implements BlockRegistrarInterface
      */
     private function addModuleTypeAttribute(string $handle): void
     {
-        resolve(HookFilter::class)->add('script_loader_tag', function (string $tag, string $tagHandle) use ($handle): string {
+        $this->filter->add('script_loader_tag', function (string $tag, string $tagHandle) use ($handle): string {
             if ($tagHandle !== $handle) {
                 return $tag;
             }

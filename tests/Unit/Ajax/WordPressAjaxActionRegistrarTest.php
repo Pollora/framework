@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Mockery as m;
 use Pollora\Ajax\Domain\Models\AjaxAction;
 use Pollora\Ajax\Infrastructure\Repositories\WordPressAjaxActionRegistrar;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\Support\Facades\Action as ActionFacade;
 use Psr\Container\ContainerInterface;
 

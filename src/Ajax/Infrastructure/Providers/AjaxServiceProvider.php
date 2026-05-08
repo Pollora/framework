@@ -10,7 +10,7 @@ use Pollora\Ajax\Domain\Contracts\AjaxActionRegistrarInterface;
 use Pollora\Ajax\Infrastructure\Repositories\WordPressAjaxActionRegistrar;
 use Pollora\Ajax\Infrastructure\Services\AjaxFactory;
 use Pollora\Ajax\Infrastructure\Services\ScriptInjectionService;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contracts\Action;
 
 class AjaxServiceProvider extends ServiceProvider
 {

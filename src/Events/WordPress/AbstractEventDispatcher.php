@@ -6,7 +6,7 @@ namespace Pollora\Events\WordPress;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Str;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contracts\Action;
 
 /**
  * Abstract base class for WordPress event dispatchers.

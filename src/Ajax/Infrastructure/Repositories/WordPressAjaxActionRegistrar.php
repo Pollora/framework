@@ -6,7 +6,7 @@ namespace Pollora\Ajax\Infrastructure\Repositories;
 
 use Pollora\Ajax\Domain\Contracts\AjaxActionRegistrarInterface;
 use Pollora\Ajax\Domain\Models\AjaxAction;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contracts\Action;
 use Psr\Container\ContainerInterface;
 
 /**

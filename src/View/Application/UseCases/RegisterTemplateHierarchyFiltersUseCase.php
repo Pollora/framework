@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\View\Application\UseCases;
 
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\View\Domain\Contracts\TemplateHierarchyFilterInterface;
 
 /**
