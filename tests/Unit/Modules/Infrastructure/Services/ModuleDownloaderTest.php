@@ -22,7 +22,7 @@ describe('ModuleDownloader validation', function (): void {
 
     it('rejects invalid repository names', function (string $repo): void {
         expect(fn () => new ModuleDownloader($repo))
-            ->toThrow(\InvalidArgumentException::class);
+            ->toThrow(InvalidArgumentException::class);
     })->with([
         'no slash' => ['owner-repo'],
         'empty repo' => ['owner/'],

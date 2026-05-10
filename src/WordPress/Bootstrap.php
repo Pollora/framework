@@ -27,7 +27,7 @@ class Bootstrap
      */
     private array $db;
 
-    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, protected \Pollora\Hook\Domain\Contracts\Action $action)
+    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, protected Action $action)
     {
         $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
         $this->debugDetector = $debugDetector ?? resolve(DebugDetectorInterface::class);

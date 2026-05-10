@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Config\Repository;
 use Illuminate\View\Engines\CompilerEngine;
 use Illuminate\View\View;
 
@@ -23,10 +24,10 @@ describe('View::makeLoader()', function (): void {
         ]));
 
         // Configure compiled path
-        app()['config'] = new \Illuminate\Config\Repository(['view' => ['compiled' => $tempDir]]);
+        app()['config'] = new Repository(['view' => ['compiled' => $tempDir]]);
 
         // Call the macro
-        $makeLoader = \Closure::bind(function () use ($view, $tempDir) {
+        $makeLoader = Closure::bind(function () use ($view, $tempDir) {
             $viewName = $view->getName();
             $path = $view->getPath();
             $id = md5($path);
@@ -65,7 +66,7 @@ describe('View::makeLoader()', function (): void {
         $tempDir = sys_get_temp_dir().'/pollora-view-test-'.uniqid();
         mkdir($tempDir, 0755, true);
 
-        $viewName = "woocommerce.single-product.add-to-cart.variable";
+        $viewName = 'woocommerce.single-product.add-to-cart.variable';
         $path = $tempDir.'/variable.blade.php';
         file_put_contents($path, '<div>Variable</div>');
 

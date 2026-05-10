@@ -143,6 +143,7 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
             if (function_exists('wp_cache_get')) {
                 $existing = wp_cache_get('pollora/theme_templates', 'themes') ?: [];
             }
+
             $existing[$postType] = $filtered;
             wp_cache_set('pollora/theme_templates', $existing, 'themes');
         }
@@ -164,10 +165,12 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
         );
 
         foreach ($iterator as $file) {
-            if (! $file->isFile() || ! str_ends_with($file->getFilename(), '.blade.php')) {
+            if (! $file->isFile()) {
                 continue;
             }
-
+            if (! str_ends_with((string) $file->getFilename(), '.blade.php')) {
+                continue;
+            }
             $content = file_get_contents($file->getPathname(), false, null, 0, 8192);
             if ($content === false) {
                 continue;
@@ -182,7 +185,7 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
 
             $postTypes = ['page'];
             if (preg_match('/\{\{--\s*Template Post Type:\s*(.+?)\s*--\}\}/', $content, $ptMatches)) {
-                $postTypes = array_map('trim', explode(',', $ptMatches[1]));
+                $postTypes = array_map(trim(...), explode(',', $ptMatches[1]));
             }
 
             $templates[$relativePath] = [

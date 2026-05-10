@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Contracts\View\View;
+use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerce;
@@ -27,7 +27,7 @@ describe('WooCommerce::template()', function (): void {
     it('returns original template when no theme template found', function (): void {
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')->andReturn('woocommerce/');
         $this->domainService->shouldReceive('createTemplate')->andReturn(
-            \Pollora\ThirdParty\WooCommerce\Domain\Models\Template::fromPath('/wc/templates/single-product.php')
+            Template::fromPath('/wc/templates/single-product.php')
         );
         $this->domainService->shouldReceive('getAllTemplatePaths')->andReturn(['/wc/templates/']);
         $this->templateFinder->shouldReceive('locate')->andReturn([]);
@@ -40,7 +40,7 @@ describe('WooCommerce::template()', function (): void {
     it('returns non-blade theme template directly', function (): void {
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')->andReturn('woocommerce/');
         $this->domainService->shouldReceive('createTemplate')->andReturn(
-            \Pollora\ThirdParty\WooCommerce\Domain\Models\Template::fromPath('/wc/templates/single-product.php')
+            Template::fromPath('/wc/templates/single-product.php')
         );
         $this->domainService->shouldReceive('getAllTemplatePaths')->andReturn(['/wc/templates/']);
         $this->domainService->shouldReceive('isWooCommerceStatusScreen')->andReturn(false);
@@ -58,7 +58,7 @@ describe('WooCommerce::template()', function (): void {
     it('caches template resolution results per request', function (): void {
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')->once()->andReturn('woocommerce/');
         $this->domainService->shouldReceive('createTemplate')->once()->andReturn(
-            \Pollora\ThirdParty\WooCommerce\Domain\Models\Template::fromPath('/wc/templates/single-product.php')
+            Template::fromPath('/wc/templates/single-product.php')
         );
         $this->domainService->shouldReceive('getAllTemplatePaths')->once()->andReturn(['/wc/templates/']);
         $this->templateFinder->shouldReceive('locate')->once()->andReturn([]);
@@ -78,10 +78,10 @@ describe('WooCommerce::template()', function (): void {
 
         $this->domainService->shouldReceive('createTemplate')
             ->with('/wc/templates/single-product.php')
-            ->andReturn(\Pollora\ThirdParty\WooCommerce\Domain\Models\Template::fromPath('/wc/templates/single-product.php'));
+            ->andReturn(Template::fromPath('/wc/templates/single-product.php'));
         $this->domainService->shouldReceive('createTemplate')
             ->with('/wc/templates/archive-product.php')
-            ->andReturn(\Pollora\ThirdParty\WooCommerce\Domain\Models\Template::fromPath('/wc/templates/archive-product.php'));
+            ->andReturn(Template::fromPath('/wc/templates/archive-product.php'));
 
         $this->templateFinder->shouldReceive('locate')->andReturn([]);
 
@@ -99,7 +99,7 @@ describe('WooCommerce::determineTemplateToLocate()', function (): void {
         $this->domainService->shouldReceive('getWooCommerceTemplatePath')->andReturn('woocommerce/');
         $this->domainService->shouldReceive('createTemplate')
             ->with('/full/path/to/template.php')
-            ->andReturn(\Pollora\ThirdParty\WooCommerce\Domain\Models\Template::fromPath('/full/path/to/template.php'));
+            ->andReturn(Template::fromPath('/full/path/to/template.php'));
         $this->domainService->shouldReceive('getAllTemplatePaths')->andReturn([]);
         $this->templateFinder->shouldReceive('locate')->andReturn([]);
 
