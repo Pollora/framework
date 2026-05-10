@@ -9,8 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollora\Admin\PageServiceProvider;
 use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
-use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
-use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
+use Pollora\Application\Infrastructure\Providers\ApplicationServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\Block\Infrastructure\Providers\BlockServiceProvider;
@@ -71,10 +70,9 @@ class PolloraServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Generic service providers
-        $this->app->register(ConsoleServiceProvider::class);
+        $this->app->register(ApplicationServiceProvider::class);
         $this->app->register(ArtisanServiceProvider::class);
         $this->app->register(LoggingServiceProvider::class);
-        $this->app->register(DebugServiceProvider::class);
         $this->app->register(DiscoveryServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
