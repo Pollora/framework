@@ -56,7 +56,7 @@ class ThemeComponentProvider
             $instance = $this->app->make($component);
             $instance->register();
         } catch (\Throwable $throwable) {
-            if (env('APP_DEBUG', false)) {
+            if (config('app.debug')) {
                 throw new \RuntimeException(
                     sprintf('Failed to register component %s: ', $component).$throwable->getMessage(),
                     0,
