@@ -114,6 +114,28 @@ describe('FrontendController', function (): void {
         expect($response->getStatusCode())->toBe(404);
     });
 
+    it('rejects non-php template paths for security', function (): void {
+        $nonPhpPath = __DIR__.'/../../../../../../composer.json';
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\when('is_page')->justReturn(true);
+        Brain\Monkey\Functions\when('is_404')->justReturn(false);
+        Brain\Monkey\Functions\when('get_page_template')->justReturn($nonPhpPath);
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
+
+        $this->templateFinder->shouldReceive('getViewNameFromPath')
+            ->andReturn(null);
+
+        View::shouldReceive('exists')->andReturn(false);
+        View::shouldReceive('replaceNamespace')->andReturnNull();
+        View::shouldReceive('addNamespace')->andReturnNull();
+
+        $request = Request::create('/test');
+        $response = $this->controller->handle($request);
+
+        // Should return 404 because non-.php file is rejected by isAllowedTemplatePath
+        expect($response->getStatusCode())->toBe(404);
+    });
+
     it('renders Laravel error page when 404 with index fallback', function (): void {
         Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
 
