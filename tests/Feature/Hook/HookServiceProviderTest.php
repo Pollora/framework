@@ -82,4 +82,18 @@ describe('HookServiceProvider', function (): void {
 
         expect($reflection->getValue($filter))->toBeInstanceOf(CallbackResolverInterface::class);
     });
+
+    it('resolves same Action singleton via Domain contract and Infrastructure class', function (): void {
+        $viaConcrete = $this->app->make(Action::class);
+        $viaContract = $this->app->make(ActionContract::class);
+
+        expect($viaContract)->toBe($viaConcrete);
+    });
+
+    it('resolves same Filter singleton via Domain contract and Infrastructure class', function (): void {
+        $viaConcrete = $this->app->make(Filter::class);
+        $viaContract = $this->app->make(FilterContract::class);
+
+        expect($viaContract)->toBe($viaConcrete);
+    });
 });
