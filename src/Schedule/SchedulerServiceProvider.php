@@ -28,11 +28,6 @@ class SchedulerServiceProvider extends ServiceProvider
     {
         $this->app->singleton(SchedulerInterface::class, Scheduler::class);
         $this->app->singleton(ScheduleDiscovery::class, fn (): ScheduleDiscovery => new ScheduleDiscovery);
-
-        if (config('wordpress.use_laravel_scheduler', false)) {
-            $scheduler = $this->app->make(SchedulerInterface::class);
-            $this->registerFilters($scheduler);
-        }
     }
 
     /**
@@ -40,6 +35,10 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('wordpress.use_laravel_scheduler', false)) {
+            $this->registerFilters($this->app->make(SchedulerInterface::class));
+        }
+
         $this->registerScheduleDiscovery();
 
         $this->app->booted(function (): void {
