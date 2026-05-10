@@ -678,7 +678,6 @@ parameters:
 			count: 1
 			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
 
-
 		-
 			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryEngineInterface\:\:clearCache\(\)\.$#'
 			identifier: method.notFound
@@ -720,7 +719,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Discovery/Infrastructure/Adapters/LaravelDiscoveryCache.php
-
 
 		-
 			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:applyFrameworkModules\(\)\.$#'
@@ -1046,14 +1044,11 @@ parameters:
 			count: 1
 			path: src/Proxy/WordPressDatabase.php
 
-
-
 		-
 			message: '#^Call to function method_exists\(\) with Pollora\\Route\\Domain\\Models\\Route and ''getCompiled'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Route/Infrastructure/Middleware/WordPressBodyClass.php
-
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Routing\\Route\:\:setCondition\(\)\.$#'
@@ -1072,7 +1067,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
-
 
 		-
 			message: '#^Call to an undefined static method Illuminate\\Support\\Facades\\Route\:\:wpMatch\(\)\.$#'
@@ -1109,18 +1103,6 @@ parameters:
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Schedule/Events/SingleEvent.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Schedule\\Interval\:\:toDisplayString\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Schedule\\Interval\:\:toSeconds\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
 
 		-
 			message: '#^Instanceof between Pollora\\Schedule\\Interval and Pollora\\Schedule\\Interval will always evaluate to true\.$#'
@@ -1375,12 +1357,6 @@ parameters:
 			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
 
 		-
-			message: '#^Class Pollora\\View\\Infrastructure\\Services\\WordPressTemplateHierarchyFilter constructor invoked with 3 parameters, 2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/View/Infrastructure/Providers/TemplateHierarchyServiceProvider.php
-
-		-
 			message: '#^Anonymous function never returns array so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
@@ -1393,28 +1369,16 @@ parameters:
 			path: src/View/Infrastructure/Services/FileSystemTemplateFinder.php
 
 		-
+			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
+
+		-
 			message: '#^Cannot call method get\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
-
-		-
-			message: '#^Offset string on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\View\\View\:\:getCompiled\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/View/ViewServiceProvider.php
-
-		-
-			message: '#^Method Pollora\\Hook\\Domain\\Contracts\\HookInterface\:\:add\(\) invoked with 4 parameters, 2\-3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/WordPress/Bootstrap.php
 
 		-
 			message: '#^Variable \$debugDetector on left side of \?\? always exists and is not nullable\.$#'
