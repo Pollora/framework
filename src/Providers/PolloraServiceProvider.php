@@ -7,7 +7,6 @@ namespace Pollora\Providers;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
-use Pollora\Admin\PageServiceProvider;
 use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
 use Pollora\Application\Infrastructure\Providers\ApplicationServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
@@ -100,7 +99,6 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(HookServiceProvider::class);
 
         $this->app->register(PermalinkServiceProvider::class);
-        $this->app->register(PageServiceProvider::class);
         $this->app->register(ThemeServiceProvider::class);
         $this->app->register(PluginServiceProvider::class);
         $this->app->register(AssetServiceProvider::class);
