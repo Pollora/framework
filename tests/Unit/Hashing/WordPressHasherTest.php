@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Hashing\Hasher;
 use Pollora\Hashing\WordPressHasher;
 
 beforeEach(function (): void {
@@ -10,7 +11,7 @@ beforeEach(function (): void {
 
 describe('WordPressHasher', function (): void {
     it('implements Laravel Hasher contract', function (): void {
-        expect($this->hasher)->toBeInstanceOf(\Illuminate\Contracts\Hashing\Hasher::class);
+        expect($this->hasher)->toBeInstanceOf(Hasher::class);
     });
 
     it('hashes value via wp_hash_password', function (): void {

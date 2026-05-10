@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Collection;
 use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Collection\Infrastructure\Adapters\LaravelCollectionAdapter;
 use Pollora\Collection\Infrastructure\Services\LaravelCollectionFactory;
@@ -66,7 +67,7 @@ describe('LaravelCollectionAdapter', function (): void {
     it('exposes underlying Laravel Collection', function (): void {
         $collection = new LaravelCollectionAdapter([1, 2]);
 
-        expect($collection->getLaravelCollection())->toBeInstanceOf(\Illuminate\Support\Collection::class);
+        expect($collection->getLaravelCollection())->toBeInstanceOf(Collection::class);
     });
 
     it('supports array access', function (): void {

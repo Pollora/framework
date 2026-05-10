@@ -7,7 +7,7 @@ use Pollora\Logging\Domain\Models\WordPressErrorType;
 
 describe('WordPressError', function (): void {
     it('creates doing_it_wrong error via factory method', function (): void {
-    
+
         $error = WordPressError::doingItWrong('my_function', 'Do not call this', '6.0');
 
         expect($error->type)->toBe(WordPressErrorType::DOING_IT_WRONG);
@@ -33,7 +33,7 @@ describe('WordPressError', function (): void {
     });
 
     it('creates deprecated argument error via factory method', function (): void {
-    
+
         $error = WordPressError::deprecatedArgument('some_func', 'Arg X is deprecated', '6.1');
 
         expect($error->type)->toBe(WordPressErrorType::DEPRECATED_ARGUMENT);
@@ -56,7 +56,7 @@ describe('WordPressError', function (): void {
     });
 
     it('returns log context with all fields', function (): void {
-    
+
         $error = WordPressError::doingItWrong('func', 'msg', '6.0', ['extra' => 'data']);
         $context = $error->getLogContext();
 

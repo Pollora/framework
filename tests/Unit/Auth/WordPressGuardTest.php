@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Pollora\Auth\WordPressGuard;
 use Pollora\Models\User;
@@ -13,7 +15,7 @@ beforeEach(function (): void {
 
 describe('WordPressGuard', function (): void {
     it('implements StatefulGuard interface', function (): void {
-        expect($this->guard)->toBeInstanceOf(\Illuminate\Contracts\Auth\StatefulGuard::class);
+        expect($this->guard)->toBeInstanceOf(StatefulGuard::class);
     });
 
     it('checks if user is logged in via WordPress', function (): void {
@@ -37,7 +39,7 @@ describe('WordPressGuard', function (): void {
     });
 
     it('returns false on invalid credentials', function (): void {
-        $error = Mockery::mock(\WP_Error::class);
+        $error = Mockery::mock(WP_Error::class);
         Brain\Monkey\Functions\when('wp_authenticate')->justReturn($error);
 
         expect($this->guard->validate(['username' => 'bad', 'password' => 'bad']))->toBeFalse();
@@ -65,7 +67,7 @@ describe('WordPressGuard', function (): void {
     });
 
     it('ignores non-User authenticatable in setUser', function (): void {
-        $user = Mockery::mock(\Illuminate\Contracts\Auth\Authenticatable::class);
+        $user = Mockery::mock(Authenticatable::class);
 
         // Should not call wp_set_current_user for non-User objects
         $result = $this->guard->setUser($user);
