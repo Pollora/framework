@@ -14,8 +14,6 @@ use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\Block\Infrastructure\Providers\BlockServiceProvider;
-use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
-use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Dashboard\Infrastructure\Providers\DashboardServiceProvider;
@@ -34,7 +32,6 @@ use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\Jobs\JobDispatcher;
-use Pollora\Schedule\SchedulerDiscoveryServiceProvider;
 use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
@@ -98,10 +95,8 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(CollectionServiceProvider::class);
         $this->app->register(OptionServiceProvider::class);
 
-        // Block features
+        // Block features (blocks, categories, patterns)
         $this->app->register(BlockServiceProvider::class);
-        $this->app->register(BlockCategoryServiceProvider::class);
-        $this->app->register(BlockPatternServiceProvider::class);
 
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
@@ -121,11 +116,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(TemplateHierarchyServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
-        if (config('wordpress.use_laravel_scheduler', false)) {
-            $this->app->register(SchedulerServiceProvider::class);
-        }
-
-        $this->app->register(SchedulerDiscoveryServiceProvider::class);
+        $this->app->register(SchedulerServiceProvider::class);
         $this->app->singleton(JobDispatcher::class, fn ($app): JobDispatcher => new JobDispatcher($app->make(Dispatcher::class)));
 
         // Authentication service provider

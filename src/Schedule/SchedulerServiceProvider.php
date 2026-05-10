@@ -7,9 +7,11 @@ namespace Pollora\Schedule;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\TestCase;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Events\RecurringEvent;
+use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
 
 /**
  * Service provider for WordPress cron scheduler functionality.
@@ -25,10 +27,12 @@ class SchedulerServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SchedulerInterface::class, Scheduler::class);
+        $this->app->singleton(ScheduleDiscovery::class, fn (): ScheduleDiscovery => new ScheduleDiscovery);
 
-        $scheduler = $this->app->make(SchedulerInterface::class);
-
-        $this->registerFilters($scheduler);
+        if (config('wordpress.use_laravel_scheduler', false)) {
+            $scheduler = $this->app->make(SchedulerInterface::class);
+            $this->registerFilters($scheduler);
+        }
     }
 
     /**
@@ -36,6 +40,8 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerScheduleDiscovery();
+
         $this->app->booted(function (): void {
             $this->scheduleRecurringEvents();
         });
@@ -85,6 +91,17 @@ class SchedulerServiceProvider extends ServiceProvider
 
         $schedule = $this->app->make(Schedule::class);
         RecurringEvent::scheduleAllEvents($schedule);
+    }
+
+    /**
+     * Register Schedule discovery with the discovery engine.
+     */
+    private function registerScheduleDiscovery(): void
+    {
+        if ($this->app->bound(DiscoveryEngineInterface::class)) {
+            $engine = $this->app->make(DiscoveryEngineInterface::class);
+            $engine->addDiscovery('schedules', $this->app->make(ScheduleDiscovery::class));
+        }
     }
 
     /**
