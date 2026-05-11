@@ -21,6 +21,16 @@ abstract class AbstractTaxonomy implements TaxonomyAttributeInterface
      */
     public array $attributeArgs = [];
 
+    public function setArg(string $key, mixed $value): void
+    {
+        $this->attributeArgs[$key] = $value;
+    }
+
+    public function getArg(string $key, mixed $default = null): mixed
+    {
+        return $this->attributeArgs[$key] ?? $default;
+    }
+
     /**
      * The taxonomy slug.
      */

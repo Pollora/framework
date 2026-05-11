@@ -59,6 +59,16 @@ class TestTaxonomy implements TaxonomyAttributeInterface
 {
     public array $attributeArgs = [];
 
+    public function setArg(string $key, mixed $value): void
+    {
+        $this->attributeArgs[$key] = $value;
+    }
+
+    public function getArg(string $key, mixed $default = null): mixed
+    {
+        return $this->attributeArgs[$key] ?? $default;
+    }
+
     protected string $slug = 'test-taxonomy';
 
     protected array $objectType = ['post'];
