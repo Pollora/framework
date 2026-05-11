@@ -30,7 +30,7 @@ class Bootstrap
     public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, protected Action $action)
     {
         $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
-        $this->debugDetector = $debugDetector ?? resolve(DebugDetectorInterface::class);
+        $this->debugDetector = $debugDetector;
     }
 
     /**

@@ -107,7 +107,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
                 return;
             }
 
-            $this->discoverModule($moduleName, $modules[$moduleName]);
+            $this->discoverModuleOnly($moduleName, $modules[$moduleName]);
         } catch (\Throwable $throwable) {
             if (function_exists('error_log')) {
                 error_log(sprintf('Framework Module discovery error for %s: ', $moduleName).$throwable->getMessage());
@@ -327,7 +327,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
      */
     protected function addModuleDiscoveryLocations(DiscoveryEngineInterface $engine, string $moduleName, string $modulePath): void
     {
-        $location = new DirectoryLocation($modulePath, 'App');
+        $location = new DirectoryLocation($modulePath);
         $engine->addLocation($location);
     }
 

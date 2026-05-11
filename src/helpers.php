@@ -38,6 +38,7 @@ if (! function_exists('menu')) {
      */
     function menu(string $name, $depth = -1, int $mode = RecursiveIteratorIterator::SELF_FIRST): RecursiveIteratorIterator
     {
+        /** @var 0|1|2 $mode */
         $iterator = new RecursiveIteratorIterator(new RecursiveMenuIterator($name), $mode);
         $iterator->setMaxDepth($depth);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
+use Illuminate\Contracts\Container\Container as ContainerContract;
 use Pollora\BlockPattern\UI\PatternComponent;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
@@ -21,7 +22,6 @@ use Pollora\Theme\Domain\Models\ThemeInitializer;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\Support;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
-use Psr\Container\ContainerInterface;
 
 /**
  * Simplified theme self-registration service.
@@ -31,7 +31,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
     private ?ThemeModuleInterface $activeTheme = null;
 
     public function __construct(
-        protected ContainerInterface $app,
+        protected ContainerContract $app,
         protected WordPressThemeParser $themeParser
     ) {}
 

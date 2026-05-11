@@ -151,12 +151,6 @@ parameters:
 			path: src/Attributes/PostType/MenuPosition.php
 
 		-
-			message: '#^Abstract class Pollora\\Attributes\\PostType\\PostTypeAttribute cannot be an Attribute class\.$#'
-			identifier: attribute.abstract
-			count: 1
-			path: src/Attributes/PostType/PostTypeAttribute.php
-
-		-
 			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
 			identifier: property.notFound
 			count: 1
@@ -463,12 +457,6 @@ parameters:
 			path: src/Attributes/Taxonomy/Sort.php
 
 		-
-			message: '#^Abstract class Pollora\\Attributes\\Taxonomy\\TaxonomyAttribute cannot be an Attribute class\.$#'
-			identifier: attribute.abstract
-			count: 1
-			path: src/Attributes/Taxonomy/TaxonomyAttribute.php
-
-		-
 			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
 			identifier: property.notFound
 			count: 1
@@ -529,12 +517,6 @@ parameters:
 			path: src/BlockPattern/UI/PatternComponent.php
 
 		-
-			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface\:\:__serialize\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/Infrastructure/Adapters/LaravelDiscoveryCache.php
-
-		-
 			message: '#^Access to an undefined property WP_Upgrader_Skin\:\:\$plugin\.$#'
 			identifier: property.notFound
 			count: 1
@@ -545,24 +527,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} and array\{\} will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Variable \$old_value on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: src/Events/WordPress/Menu/MenuEventDispatcher.php
 
 		-
 			message: '#^Call to static method get_entry\(\) on an unknown class GFAPI\.$#'
@@ -601,52 +565,16 @@ parameters:
 			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
 
 		-
-			message: '#^Strict comparison using \!\=\= between ''create_robots''\|''update_htaccess''\|''update_robots'' and ''0'' will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: src/Events/WordPress/Plugins/YoastSeo/YoastSeoEventDispatcher.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Exceptions/Infrastructure/Services/ModuleAwareErrorViewResolver.php
 
 		-
-			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/Logging/Application/Services/WordPressErrorLoggingService.php
-
-		-
-			message: '#^Offset 1 on array\{non\-falsy\-string, string, non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: src/Mail/Mailer.php
-
-		-
-			message: '#^Offset 2 on array\{non\-falsy\-string, string, non\-empty\-string\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: src/Mail/Mailer.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta_value\.$#'
 			identifier: property.notFound
 			count: 1
 			path: src/Models/Attachment.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Infrastructure\\Services\\FrameworkModuleDiscovery\:\:discoverModule\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Modules/Infrastructure/Services/FrameworkModuleDiscovery.php
-
-		-
-			message: '#^Class Pollora\\Discovery\\Domain\\Models\\DirectoryLocation constructor invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Modules/Infrastructure/Services/FrameworkModuleDiscovery.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
@@ -667,20 +595,8 @@ parameters:
 			path: src/Modules/UI/Helpers/discovery_functions.php
 
 		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleRepositoryInterface\:\:resetCache\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Plugin/Application/Services/PluginManager.php
-
-		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Domain\\Models\\LaravelPluginModule constructor expects Illuminate\\Container\\Container, Psr\\Container\\ContainerInterface given\.$#'
+			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Domain\\Models\\LaravelPluginModule constructor expects Illuminate\\Container\\Container, Illuminate\\Contracts\\Container\\Container given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Plugin/Application/Services/PluginRegistrar.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between array\{\} and array\{\} will always evaluate to false\.$#'
-			identifier: notIdentical.alwaysFalse
 			count: 1
 			path: src/Plugin/Application/Services/PluginRegistrar.php
 
@@ -707,12 +623,6 @@ parameters:
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 14
 			path: src/Plugin/config/plugin.php
-
-		-
-			message: '#^Method Pollora\\PostType\\Domain\\Contracts\\PostTypeFactoryInterface\:\:make\(\) invoked with 5 parameters, 1\-4 required\.$#'
-			identifier: arguments.count
-			count: 2
-			path: src/PostType/Application/Services/PostTypeService.php
 
 		-
 			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
@@ -751,12 +661,6 @@ parameters:
 			path: src/Route/Infrastructure/Providers/RouteServiceProvider.php
 
 		-
-			message: '#^Parameter \#1 \$resolver of method Pollora\\Route\\Domain\\Models\\Route\:\:setConditionResolver\(\) expects Pollora\\Route\\Domain\\Contracts\\ConditionResolverInterface, Pollora\\Route\\Infrastructure\\Services\\Contracts\\WordPressConditionManagerInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Route/Infrastructure/Services/ExtendedRouter.php
-
-		-
 			message: '#^Constant WPINC not found\.$#'
 			identifier: constant.notFound
 			count: 2
@@ -793,13 +697,7 @@ parameters:
 			path: src/Support/WordPress.php
 
 		-
-			message: '#^Method Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyFactoryInterface\:\:make\(\) invoked with 6 parameters, 2\-5 required\.$#'
-			identifier: arguments.count
-			count: 2
-			path: src/Taxonomy/Application/Services/TaxonomyService.php
-
-		-
-			message: '#^Method Pollora\\Taxonomy\\Infrastructure\\Adapters\\WordPressTaxonomyRegistry\:\:getAll\(\) should return array\<string, mixed\> but returns array\<int, WP_Taxonomy\>\.$#'
+			message: '#^Method Pollora\\Taxonomy\\Infrastructure\\Adapters\\WordPressTaxonomyRegistry\:\:getAll\(\) should return array\<string, WP_Taxonomy\> but returns array\<int, WP_Taxonomy\>\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php
@@ -811,25 +709,7 @@ parameters:
 			path: src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php
 
 		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleRepositoryInterface\:\:resetCache\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Application/Services/ThemeManager.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:bound\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Application/Services/ThemeManager.php
-
-		-
-			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:make\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Application/Services/ThemeManager.php
-
-		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Theme\\Domain\\Models\\LaravelThemeModule constructor expects Illuminate\\Container\\Container, Psr\\Container\\ContainerInterface given\.$#'
+			message: '#^Parameter \#3 \$app of class Pollora\\Theme\\Domain\\Models\\LaravelThemeModule constructor expects Illuminate\\Container\\Container, Illuminate\\Contracts\\Container\\Container given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Theme/Application/Services/ThemeRegistrar.php
@@ -851,24 +731,6 @@ parameters:
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
 			path: src/Theme/Domain/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Theme\\Domain\\Contracts\\ThemeService\:\:hasTheme\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Infrastructure/Providers/ThemeServiceProvider.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: src/Theme/Infrastructure/Services/WordPressThemeAdapter.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Theme\\Domain\\Contracts\\ThemeService\:\:getActiveTheme\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/UI/Console/Commands/ThemeStatusCommand.php
 
 		-
 			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\View\\WooCommerceTemplateResolver not found\.$#'
@@ -907,12 +769,6 @@ parameters:
 			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
 
 		-
-			message: '#^Variable \$debugDetector on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: src/WordPress/Bootstrap.php
-
-		-
 			message: '#^Class Pollora\\WordPress\\Commands\\DatabaseConnectionException not found\.$#'
 			identifier: class.notFound
 			count: 1
@@ -935,21 +791,3 @@ parameters:
 			identifier: catch.neverThrown
 			count: 1
 			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
-
-		-
-			message: '#^Method Pollora\\WpCli\\Infrastructure\\Services\\WpCliDiscovery\:\:createCallable\(\) should return array but returns Closure\.$#'
-			identifier: return.type
-			count: 1
-			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
-
-		-
-			message: '#^Offset ''short'' on array\{short\: string, long\: ''''\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
-
-		-
-			message: '#^Parameter \#2 \$mode of class RecursiveIteratorIterator constructor expects 0\|1\|2, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/helpers.php

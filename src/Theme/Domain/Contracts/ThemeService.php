@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Domain\Contracts;
 
+use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 /**
@@ -50,4 +51,14 @@ interface ThemeService
      * Get a list of all available themes
      */
     public function getAvailableThemes(): array;
+
+    /**
+     * Check if a theme is registered.
+     */
+    public function hasTheme(string $name): bool;
+
+    /**
+     * Get the active theme module.
+     */
+    public function getActiveTheme(): ?ModuleInterface;
 }

@@ -69,7 +69,7 @@ class WordPressErrorLoggingService
                 $index,
                 $item['class'] ?? '',
                 isset($item['class']) ? $item['type'] : '',
-                $item['function'] ?? 'unknown',
+                $item['function'],
                 $item['file'] ?? 'unknown',
                 $item['line'] ?? 0
             );
