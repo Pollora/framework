@@ -1,27 +1,26 @@
 <?php
 
-/**
- * Class MakeThemeCommand
- *
- * Artisan command to scaffold a new theme directory structure by downloading from GitHub repository,
- * perform string replacements, run npm install/build, and optionally set the theme as the active WordPress theme.
- */
 declare(strict_types=1);
 
 namespace Pollora\Theme\UI\Console;
 
-use Illuminate\Config\Repository;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
-use Illuminate\Support\Facades\File;
 use Pollora\Console\Concerns\PromptsForMissingOption;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
-use Pollora\Modules\Infrastructure\Services\ModuleDownloader;
+use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Support\NpmRunner;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
+/**
+ * Artisan command to scaffold a new theme directory structure.
+ *
+ * This command creates a new theme by downloading from a GitHub repository,
+ * performing string replacements, running npm install/build, and optionally
+ * setting the theme as the active WordPress theme.
+ */
 class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
     use PromptsForMissingOption;
@@ -41,13 +40,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected $description = 'Generate theme structure by downloading from GitHub repository';
 
     /**
-     * List of file extensions considered as text for replacements.
-     *
-     * @var array<int, string>
-     */
-    protected $textExtensions = ['php', 'js', 'css', 'html', 'htm', 'xml', 'txt', 'md', 'json', 'yaml', 'yml', 'svg', 'twig', 'blade.php', 'stub'];
-
-    /**
      * The ThemeMetadata instance representing the theme being created.
      */
     protected ThemeMetadata $theme;
@@ -60,10 +52,16 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected array $containerFolder;
 
     /**
+     * The module scaffolder service.
+     */
+    protected ModuleScaffolderService $scaffolder;
+
+    /**
      * Handle the command execution.
      */
-    public function handle(): int
+    public function handle(ModuleScaffolderService $scaffolder): int
     {
+        $this->scaffolder = $scaffolder;
         $this->theme = $this->makeTheme($this->argument('name'));
 
         if (! $this->validateThemeName() || ! $this->canGenerateTheme()) {
@@ -73,52 +71,29 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $this->setupContainerFolders();
 
         $repository = $this->promptForRepository();
+        $repo = ! in_array($repository, [null, '', '0'], true) ? $repository : 'pollora/theme-default';
 
-        if (! in_array($repository, [null, '', '0'], true)) {
-            $this->downloadFromRepository($repository);
-        } else {
-            // Use default repository instead of local stubs
-            $this->downloadFromRepository('pollora/theme-default');
+        $success = $this->scaffolder->downloadAndScaffold(
+            repository: $repo,
+            basePath: $this->getThemesPath(),
+            targetPath: $this->theme->getBasePath(),
+            replacements: $this->getReplacements(),
+            version: $this->option('repo-version'),
+            output: $this->getOutput(),
+            removeDirs: ['bin'],
+        );
+
+        if (! $success) {
+            $this->scaffolder->copyDirectory(
+                $this->getTemplatePath('common'),
+                $this->theme->getBasePath()
+            );
         }
 
         $this->info(sprintf('Theme "%s" created successfully.', $this->theme->getName()));
 
-        // Run npm install and npm run build in the frontend directory of the new theme
-        if (is_dir($this->theme->getBasePath())) {
-            $this->info('Running npm install and npm run build in '.$this->theme->getBasePath().' ...');
-            try {
-                (new NpmRunner($this->theme->getBasePath()))
-                    ->install()
-                    ->build();
-                $this->info('npm install and build completed.');
-            } catch (\Throwable $e) {
-                $this->error('npm install or build failed: '.$e->getMessage());
-                // Continue script even if npm fails
-            }
-        } else {
-            $this->info('No frontend directory found at '.$this->theme->getBasePath().', skipping npm install/build.');
-        }
-
-        // Prompt to set this theme as the active WordPress theme
-        $shouldSetActive = select(
-            label: 'Do you want to set "'.$this->theme->getName().'" as the active WordPress theme?',
-            options: [
-                'yes' => 'Yes',
-                'no' => 'No',
-            ],
-            default: 'yes',
-            hint: 'Selecting "Yes" will set this theme as the active one in WordPress.'
-        );
-        if ($shouldSetActive === 'yes') {
-            // Set the theme as active in WordPress (update the stylesheet and template options)
-            if (function_exists('update_option')) {
-                update_option('stylesheet', $this->theme->getName());
-                update_option('template', $this->theme->getName());
-                $this->info('Theme "'.$this->theme->getName().'" is now set as the active WordPress theme.');
-            } else {
-                $this->warn('Unable to set the theme as active: WordPress functions are not available in this context.');
-            }
-        }
+        $this->runNpmIfNeeded();
+        $this->promptAndSetActiveTheme();
 
         return self::SUCCESS;
     }
@@ -148,8 +123,8 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
 
         $name = $this->theme->getName();
-
         $this->error(sprintf('Theme "%s" already exists.', $name));
+
         if ($this->option('force')) {
             return true;
         }
@@ -159,8 +134,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     /**
      * Setup container folders.
-     *
-     * @return $this
      */
     protected function setupContainerFolders(): self
     {
@@ -177,257 +150,48 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
-     * Generate theme structure from stubs.
+     * Run npm install and build in the theme directory.
      */
-    protected function generateThemeStructure(): void
+    protected function runNpmIfNeeded(): void
     {
-        $this->copyDirectory($this->getTemplatePath('common'), $this->theme->getBasePath());
-    }
-
-    /**
-     * Download theme from GitHub repository.
-     */
-    protected function downloadFromRepository(string $repository): void
-    {
-        $version = $this->option('repo-version');
-
-        try {
-            $downloader = new ModuleDownloader($repository);
-
-            if ($version) {
-                $downloader->setVersion($version);
+        if (is_dir($this->theme->getBasePath())) {
+            $this->info('Running npm install and npm run build in '.$this->theme->getBasePath().' ...');
+            try {
+                (new NpmRunner($this->theme->getBasePath()))
+                    ->install()
+                    ->build();
+                $this->info('npm install and build completed.');
+            } catch (\Throwable $e) {
+                $this->error('npm install or build failed: '.$e->getMessage());
             }
-
-            $this->info('Downloading theme from '.$repository.($version ? sprintf(' (version: %s)', $version) : '').'...');
-
-            $extractedPath = $downloader->downloadAndExtract($this->getThemesPath());
-
-            // Move contents from extracted folder to theme folder
-            $this->moveExtractedTheme($extractedPath);
-
-            $this->info('Theme downloaded and extracted successfully.');
-
-        } catch (\Exception $exception) {
-            $this->error('Failed to download theme: '.$exception->getMessage());
-
-            // Fallback to generating structure if download fails
-            $this->warn('Falling back to generating default theme structure...');
-            $this->generateThemeStructure();
         }
     }
 
     /**
-     * Move extracted theme contents to the proper theme directory.
+     * Prompt to set the theme as active and do so if confirmed.
      */
-    protected function moveExtractedTheme(string $extractedPath): void
+    protected function promptAndSetActiveTheme(): void
     {
-        $targetPath = $this->theme->getBasePath();
+        $shouldSetActive = select(
+            label: 'Do you want to set "'.$this->theme->getName().'" as the active WordPress theme?',
+            options: ['yes' => 'Yes', 'no' => 'No'],
+            default: 'yes',
+            hint: 'Selecting "Yes" will set this theme as the active one in WordPress.'
+        );
 
-        // Ensure target directory exists
-        $this->ensureDirectoryExists($targetPath);
-
-        // Move all contents from extracted path to target path with replacements
-        $this->copyDirectoryWithReplacements($extractedPath, $targetPath);
-
-        // Remove development-only directories that shouldn't be in generated themes
-        $this->removeDirectory($targetPath.'/bin');
-
-        // Clean up the extracted directory
-        $this->removeDirectory(dirname($extractedPath));
-    }
-
-    /**
-     * Remove directory recursively.
-     */
-    protected function removeDirectory(string $path): void
-    {
-        if (is_dir($path)) {
-            File::deleteDirectory($path);
+        if ($shouldSetActive === 'yes') {
+            if (function_exists('update_option')) {
+                update_option('stylesheet', $this->theme->getName());
+                update_option('template', $this->theme->getName());
+                $this->info('Theme "'.$this->theme->getName().'" is now set as the active WordPress theme.');
+            } else {
+                $this->warn('Unable to set the theme as active: WordPress functions are not available in this context.');
+            }
         }
     }
 
     /**
-     * Copy directory.
-     *
-     * @param  string  $source
-     */
-    protected function copyDirectory($source, string $destination): void
-    {
-        if (! File::isDirectory($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
-
-        foreach (File::allFiles($source) as $item) {
-            $this->processFile($item, $destination);
-        }
-    }
-
-    /**
-     * Copy directory with replacements applied to all files.
-     *
-     * @param  string  $source
-     */
-    protected function copyDirectoryWithReplacements($source, string $destination): void
-    {
-        if (! File::isDirectory($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
-
-        foreach (File::allFiles($source) as $item) {
-            $this->processFileWithReplacements($item, $destination);
-        }
-    }
-
-    /**
-     * Process file.
-     *
-     * @param  object  $item
-     */
-    protected function processFile($item, string $destination): void
-    {
-        $relativePath = $item->getRelativePath();
-        $targetInfo = $this->getTargetPathInfo($item, $destination, $relativePath);
-
-        $this->ensureDirectoryExists($targetInfo['dir']);
-
-        if ($item->isDir()) {
-            $this->copyDirectory($item->getRealPath(), $targetInfo['path']);
-        } else {
-            $this->handleFileCopy($item, $targetInfo['path']);
-        }
-    }
-
-    /**
-     * Process file with replacements.
-     *
-     * @param  object  $item
-     */
-    protected function processFileWithReplacements($item, string $destination): void
-    {
-        $relativePath = $item->getRelativePath();
-        $targetInfo = $this->getTargetPathInfo($item, $destination, $relativePath);
-
-        $this->ensureDirectoryExists($targetInfo['dir']);
-
-        if ($item->isDir()) {
-            $this->copyDirectoryWithReplacements($item->getRealPath(), $targetInfo['path']);
-        } else {
-            // Always copy with replacements for downloaded files
-            $this->copyFileWithReplacements($item->getRealPath(), $targetInfo['path']);
-        }
-    }
-
-    /**
-     * Get target path info.
-     *
-     * @param  object  $item
-     */
-    protected function getTargetPathInfo($item, string $destination, string $relativePath): array
-    {
-        $targetDir = $destination.($relativePath !== '' && $relativePath !== '0' ? '/'.$relativePath : '');
-        $targetPath = $targetDir.'/'.$item->getFilename();
-        $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
-
-        if (str_starts_with($relativePath, 'app/')) {
-            $relativePath = str_replace('app/Themes/', '', $relativePath);
-            $targetDir = $this->theme->getThemeAppDir($relativePath);
-            $targetPath = $targetDir.DIRECTORY_SEPARATOR.basename((string) $targetPath);
-        }
-
-        return [
-            'dir' => $targetDir,
-            'path' => $targetPath,
-        ];
-    }
-
-    /**
-     * Handle file copy.
-     *
-     * @param  object  $item
-     */
-    protected function handleFileCopy($item, string $targetPath): void
-    {
-        if (File::exists($targetPath) &&
-            ! $this->option('force') &&
-            ! $this->confirm(sprintf('File %s already exists. Do you want to overwrite it?', $targetPath))
-        ) {
-            return;
-        }
-
-        $this->copyFileWithReplacements($item->getRealPath(), $targetPath);
-    }
-
-    /**
-     * Ensure directory exists.
-     */
-    protected function ensureDirectoryExists(string $directory): void
-    {
-        if (! File::isDirectory($directory)) {
-            File::makeDirectory($directory, 0755, true);
-        }
-    }
-
-    /**
-     * Copy file with replacements.
-     *
-     * @param  string  $sourcePath
-     * @param  string  $destinationPath
-     */
-    protected function copyFileWithReplacements($sourcePath, $destinationPath): void
-    {
-        $extension = pathinfo((string) $destinationPath, PATHINFO_EXTENSION);
-
-        if ($this->isTextFile($sourcePath, $extension)) {
-            $content = File::get($sourcePath);
-            $replacements = $this->getReplacements();
-
-            // Apply placeholder replacements
-            $content = str_replace(
-                array_keys($replacements),
-                array_values($replacements),
-                $content
-            );
-
-            // Write the modified content to the destination file
-            File::put($destinationPath, $content);
-        } else {
-            // Simply copy non-text files without modification
-            File::copy($sourcePath, $destinationPath);
-        }
-    }
-
-    /**
-     * Check if file is text file.
-     *
-     * @param  string  $filePath
-     * @param  string  $extension
-     */
-    protected function isTextFile($filePath, $extension): bool
-    {
-        if (in_array(strtolower((string) $extension), $this->textExtensions)) {
-            return true;
-        }
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $filePath);
-        finfo_close($finfo);
-
-        $textMimeTypes = [
-            'text/plain',
-            'text/html',
-            'text/css',
-            'text/javascript',
-            'application/javascript',
-            'application/json',
-            'application/xml',
-            'application/x-httpd-php',
-        ];
-
-        return in_array($mimeType, $textMimeTypes, true) || str_starts_with($mimeType, 'text/');
-    }
-
-    /**
-     * Get replacements.
+     * Get placeholder replacements for scaffolding.
      */
     protected function getReplacements(): array
     {
@@ -516,7 +280,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
                     if (empty($value)) {
                         return 'Repository is required';
                     }
-
                     if (! str_contains($value, '/')) {
                         return 'Repository must be in owner/repo format';
                     }
@@ -540,29 +303,5 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             $this->files->isDirectory($this->makeTheme($value)->getBasePath()) => sprintf('Theme "%s" already exists.', $value),
             default => null,
         };
-    }
-
-    /**
-     * Get template path.
-     */
-    protected function getTemplatePath(string $templateName): string
-    {
-        return realpath(__DIR__.'/../../stubs/'.$templateName);
-    }
-
-    /**
-     * Make theme.
-     */
-    protected function makeTheme(string $name): ThemeMetadata
-    {
-        return new ThemeMetadata($name, $this->getThemesPath());
-    }
-
-    /**
-     * Get themes path.
-     */
-    protected function getThemesPath(): string
-    {
-        return $this->config->get('theme.directory', base_path('themes'));
     }
 }
