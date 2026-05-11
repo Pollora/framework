@@ -8,6 +8,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
+use Pollora\Route\Application\UseCases\RegisterWordPressTypesUseCase;
 use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
 use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
 use Pollora\Route\Infrastructure\Middleware\WordPressBodyClass;
@@ -50,42 +52,9 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register the WordPress type resolver
-        $this->app->singleton(WordPressTypeResolverInterface::class, WordPressTypeResolver::class);
-
-        // Register the condition manager (implements both interfaces)
-        $this->app->singleton(WordPressConditionManagerInterface::class, fn ($app): WordPressConditionManager => new WordPressConditionManager($app));
-
-        // Bind the domain interface to the same instance
-        $this->app->bind(ConditionResolverInterface::class, fn ($app) => $app->make(WordPressConditionManagerInterface::class));
-
-        // Register the routing service (encapsulates condition resolution and type binding)
-        $this->app->singleton(function ($app): WordPressRoutingService {
-            $logger = null;
-            try {
-                $logger = $app->make('log');
-            } catch (\Exception) {
-                // Logger not available during early bootstrap
-            }
-
-            return new WordPressRoutingService(
-                $app->make(WordPressConditionManagerInterface::class),
-                $app->make(WordPressTypeResolverInterface::class),
-                $logger
-            );
-        });
-
-        // Override the default router with our extended version (for custom Route model)
-        $this->app->extend('router', fn ($router, Application $app): ExtendedRouter => new ExtendedRouter(
-            $app->make('events'),
-            $app,
-            $app->make(WordPressConditionManagerInterface::class),
-        ));
-
-        // Register WordPress types in the container for dependency injection
-        $this->app->booted(function (): void {
-            $this->app->make(WordPressRoutingService::class)->registerWordPressTypes($this->app);
-        });
+        $this->registerDomainContracts();
+        $this->registerUseCases();
+        $this->registerApplicationServices();
     }
 
     /**
@@ -106,6 +75,80 @@ class RouteServiceProvider extends ServiceProvider
         Event::listen('modules.routes.registered', fn () => $this->bootFallbackRoute());
 
         $this->app->booted(fn () => $this->bootFallbackRoute());
+    }
+
+    /**
+     * Register domain contracts with their infrastructure implementations.
+     */
+    private function registerDomainContracts(): void
+    {
+        // Register the WordPress type resolver
+        $this->app->singleton(WordPressTypeResolverInterface::class, WordPressTypeResolver::class);
+
+        // Register the condition manager (implements both interfaces)
+        $this->app->singleton(WordPressConditionManagerInterface::class, fn ($app): WordPressConditionManager => new WordPressConditionManager($app));
+
+        // Bind the domain interface to the same instance
+        $this->app->bind(ConditionResolverInterface::class, fn ($app) => $app->make(WordPressConditionManagerInterface::class));
+
+        // Override the default router with our extended version (for custom Route model)
+        $this->app->extend('router', fn ($router, Application $app): ExtendedRouter => new ExtendedRouter(
+            $app->make('events'),
+            $app,
+            $app->make(WordPressConditionManagerInterface::class),
+        ));
+    }
+
+    /**
+     * Register application use cases.
+     */
+    private function registerUseCases(): void
+    {
+        $this->app->singleton(RegisterWordPressTypesUseCase::class, function ($app): RegisterWordPressTypesUseCase {
+            $logger = null;
+            try {
+                $logger = $app->make('log');
+            } catch (\Exception) {
+                // Logger not available during early bootstrap
+            }
+
+            return new RegisterWordPressTypesUseCase(
+                $app->make(WordPressTypeResolverInterface::class),
+                $logger
+            );
+        });
+
+        $this->app->singleton(BindWordPressParametersUseCase::class, function ($app): BindWordPressParametersUseCase {
+            $logger = null;
+            try {
+                $logger = $app->make('log');
+            } catch (\Exception) {
+                // Logger not available during early bootstrap
+            }
+
+            return new BindWordPressParametersUseCase(
+                $app->make(WordPressTypeResolverInterface::class),
+                $logger
+            );
+        });
+    }
+
+    /**
+     * Register application services.
+     */
+    private function registerApplicationServices(): void
+    {
+        // Register the routing service (orchestrates condition resolution and use cases)
+        $this->app->singleton(WordPressRoutingService::class, fn ($app): WordPressRoutingService => new WordPressRoutingService(
+            $app->make(WordPressConditionManagerInterface::class),
+            $app->make(RegisterWordPressTypesUseCase::class),
+            $app->make(BindWordPressParametersUseCase::class),
+        ));
+
+        // Register WordPress types in the container for dependency injection
+        $this->app->booted(function (): void {
+            $this->app->make(RegisterWordPressTypesUseCase::class)->execute($this->app);
+        });
     }
 
     /**
