@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\DB;
  *
  * Manages events that need to run on a schedule (hourly, daily, etc.)
  * with database persistence and Laravel queue integration.
- *
- * @extends AbstractEvent
  */
 class RecurringEvent extends AbstractEvent
 {

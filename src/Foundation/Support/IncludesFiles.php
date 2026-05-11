@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Foundation\Support;
 
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * Trait providing file inclusion functionality.
@@ -43,7 +44,7 @@ trait IncludesFiles
     public function includes(string|array $path, string $pattern = '*.php'): void
     {
         foreach (Finder::create()->files()->name($pattern)->in($path)->sortByName() as $file) {
-            /** @var \SplFileInfo $file */
+            /** @var SplFileInfo $file */
             @include $file->getRealPath();
         }
     }

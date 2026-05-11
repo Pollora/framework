@@ -201,8 +201,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
     private function isFunctionAvailable(string $functionName): bool
     {
         return $functionName !== '' && $functionName !== '0' &&
-            function_exists($functionName) &&
-            is_callable($functionName);
+            function_exists($functionName);
     }
 
     /**

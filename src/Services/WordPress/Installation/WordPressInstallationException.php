@@ -9,8 +9,6 @@ namespace Pollora\Services\WordPress\Installation;
  *
  * This exception is used to handle WordPress-specific installation errors
  * and provides conversion from WordPress WP_Error objects.
- *
- * @extends \RuntimeException
  */
 class WordPressInstallationException extends \RuntimeException
 {

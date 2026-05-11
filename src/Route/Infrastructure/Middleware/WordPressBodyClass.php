@@ -71,10 +71,6 @@ class WordPressBodyClass
      */
     private function getRouteTokens(Route $route): array
     {
-        if (! method_exists($route, 'getCompiled')) {
-            return [];
-        }
-
         $compiled = $route->getCompiled();
         if (! $compiled || ! method_exists($compiled, 'getTokens')) {
             return [];

@@ -24,9 +24,9 @@ class WordPressDatabase extends wpdb
     protected Connection $eloquentConnection;
 
     /**
-     * Database connection handler.
+     * Database connection handler (PDO instance from Laravel's connection).
      *
-     * @var mixed PDO instance from Laravel's connection
+     * @var \PDO|\mysqli|false|null
      */
     public $dbh;
 

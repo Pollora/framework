@@ -1,44 +1,20 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^PHPDoc tag @extends has invalid value \(ServiceProvider\)\: Unexpected token "\\n ", expected ''\<'' at offset 302 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Admin/PageServiceProvider.php
-
-		-
-			message: '#^Constructor of class Pollora\\Asset\\Application\\Services\\AssetManager has an unused parameter \$registrationService\.$#'
-			identifier: constructor.unusedParameter
-			count: 1
-			path: src/Asset/Application/Services/AssetManager.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$content$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Asset/Domain/Models/AssetFile.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Foundation\\Vite\:\:getAssetUrls\(\)\.$#'
 			identifier: method.notFound
 			count: 2
 			path: src/Asset/Infrastructure/Services/ViteManager.php
 
 		-
-			message: '#^Call to protected method assetPath\(\) of class Illuminate\\Foundation\\Vite\.$#'
-			identifier: method.protected
+			message: '#^Call to an undefined method Pollora\\Asset\\Infrastructure\\Services\\ViteManager\:\:assetPath\(\)\.$#'
+			identifier: method.notFound
 			count: 2
 			path: src/Asset/Infrastructure/Services/ViteManager.php
 
 		-
-			message: '#^Call to protected method manifest\(\) of class Illuminate\\Foundation\\Vite\.$#'
-			identifier: method.protected
-			count: 1
-			path: src/Asset/Infrastructure/Services/ViteManager.php
-
-		-
-			message: '#^PHPDoc tag @var with type Illuminate\\Foundation\\Vite is not subtype of native type \$this\(Pollora\\Asset\\Infrastructure\\Services\\ViteManager\)\.$#'
-			identifier: varTag.nativeType
+			message: '#^Call to an undefined method Pollora\\Asset\\Infrastructure\\Services\\ViteManager\:\:manifest\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: src/Asset/Infrastructure/Services/ViteManager.php
 
@@ -183,30 +159,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Pollora\\PostType\\Domain\\Contracts\\PostTypeAttributeInterface\:\:\$attributeArgs\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Attributes/PostType/Priority.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$priority with type Pollora\\Attributes\\PostType\\init is incompatible with native type int\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/PostType/Priority.php
-
-		-
-			message: '#^PHPDoc type for property Pollora\\Attributes\\PostType\\Priority\:\:\$priority with type Pollora\\Attributes\\PostType\\init is incompatible with native type int\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: src/Attributes/PostType/Priority.php
-
-		-
-			message: '#^Parameter \$priority of method Pollora\\Attributes\\PostType\\Priority\:\:__construct\(\) has invalid type Pollora\\Attributes\\PostType\\init\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Attributes/PostType/Priority.php
-
-		-
-			message: '#^Property Pollora\\Attributes\\PostType\\Priority\:\:\$priority has unknown class Pollora\\Attributes\\PostType\\init as its type\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Attributes/PostType/Priority.php
 
@@ -367,18 +319,6 @@ parameters:
 			path: src/Attributes/Taxonomy/CheckedOntop.php
 
 		-
-			message: '#^PHPDoc tag @param for parameter \$taxonomy with type Pollora\\Attributes\\Taxonomy\\Taxonomy is not subtype of native type Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/Taxonomy/CheckedOntop.php
-
-		-
-			message: '#^Parameter \$taxonomy of method Pollora\\Attributes\\Taxonomy\\CheckedOntop\:\:configure\(\) has invalid type Pollora\\Attributes\\Taxonomy\\Taxonomy\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Attributes/Taxonomy/CheckedOntop.php
-
-		-
 			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
 			identifier: property.notFound
 			count: 1
@@ -435,30 +375,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Pollora\\Taxonomy\\Domain\\Contracts\\TaxonomyAttributeInterface\:\:\$attributeArgs\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Attributes/Taxonomy/Priority.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$priority with type Pollora\\Attributes\\Taxonomy\\init is incompatible with native type int\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/Taxonomy/Priority.php
-
-		-
-			message: '#^PHPDoc type for property Pollora\\Attributes\\Taxonomy\\Priority\:\:\$priority with type Pollora\\Attributes\\Taxonomy\\init is incompatible with native type int\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: src/Attributes/Taxonomy/Priority.php
-
-		-
-			message: '#^Parameter \$priority of method Pollora\\Attributes\\Taxonomy\\Priority\:\:__construct\(\) has invalid type Pollora\\Attributes\\Taxonomy\\init\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Attributes/Taxonomy/Priority.php
-
-		-
-			message: '#^Property Pollora\\Attributes\\Taxonomy\\Priority\:\:\$priority has unknown class Pollora\\Attributes\\Taxonomy\\init as its type\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Attributes/Taxonomy/Priority.php
 
@@ -559,30 +475,6 @@ parameters:
 			path: src/Attributes/Taxonomy/UpdateCountCallback.php
 
 		-
-			message: '#^PHPDoc tag @param for parameter \$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/WpCli/AfterInvoke.php
-
-		-
-			message: '#^PHPDoc type for property Pollora\\Attributes\\WpCli\\AfterInvoke\:\:\$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: src/Attributes/WpCli/AfterInvoke.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Attributes/WpCli/BeforeInvoke.php
-
-		-
-			message: '#^PHPDoc type for property Pollora\\Attributes\\WpCli\\BeforeInvoke\:\:\$callback with type \(callable\)\|string is not subtype of native type array\|string\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: src/Attributes/WpCli/BeforeInvoke.php
-
-		-
 			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$classPermission\.$#'
 			identifier: property.notFound
 			count: 1
@@ -613,12 +505,6 @@ parameters:
 			path: src/Auth/AuthServiceProvider.php
 
 		-
-			message: '#^PHPDoc tag @extends has invalid value \(ServiceProvider\)\: Unexpected token "\\n ", expected ''\<'' at offset 375 on line 9$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Auth/AuthServiceProvider.php
-
-		-
 			message: '#^Parameter \#2 \$callback of method Illuminate\\Auth\\AuthManager\:\:extend\(\) expects bindable closure, static closure given\.$#'
 			identifier: argument.staticClosure
 			count: 1
@@ -635,18 +521,6 @@ parameters:
 			identifier: constant.notFound
 			count: 1
 			path: src/Auth/WordPressGuard.php
-
-		-
-			message: '#^PHPDoc tag @implements has invalid value \(StatefulGuard\)\: Unexpected token "\\n \*", expected ''\<'' at offset 343 on line 9$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Auth/WordPressGuard.php
-
-		-
-			message: '#^PHPDoc tag @implements has invalid value \(UserProvider\)\: Unexpected token "\\n ", expected ''\<'' at offset 305 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Auth/WordPressUserProvider.php
 
 		-
 			message: '#^Found usage of constant WP_INSTALLING\. Use wp_installing\(\) instead\.$#'
@@ -841,12 +715,6 @@ parameters:
 			path: src/Exceptions/Infrastructure/Services/ModuleAwareErrorViewResolver.php
 
 		-
-			message: '#^PHPDoc tag @extends has invalid value \(FilesystemBase\)\: Unexpected token "\\n ", expected ''\<'' at offset 305 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Filesystem/Filesystem.php
-
-		-
 			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
@@ -895,12 +763,6 @@ parameters:
 			path: src/Modules/Infrastructure/Services/ModuleAssetManager.php
 
 		-
-			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: src/Modules/Infrastructure/Services/ModuleAssetManager.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -919,20 +781,8 @@ parameters:
 			path: src/Modules/UI/Helpers/discovery_functions.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: src/Option/Application/Services/OptionService.php
-
-		-
 			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleRepositoryInterface\:\:resetCache\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Plugin/Application/Services/PluginManager.php
-
-		-
-			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
-			identifier: varTag.nativeType
 			count: 1
 			path: src/Plugin/Application/Services/PluginManager.php
 
@@ -1027,16 +877,10 @@ parameters:
 			path: src/PostType/Infrastructure/Services/PostTypeDiscovery.php
 
 		-
-			message: '#^PHPDoc type mixed of property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh is not covariant with PHPDoc type mysqli\|false\|null of overridden property wpdb\:\:\$dbh\.$#'
+			message: '#^PHPDoc type mysqli\|PDO\|false\|null of property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh is not covariant with PHPDoc type mysqli\|false\|null of overridden property wpdb\:\:\$dbh\.$#'
 			identifier: property.phpDocType
 			count: 1
 			path: src/Proxy/WordPressDatabase.php
-
-		-
-			message: '#^Call to function method_exists\(\) with Pollora\\Route\\Domain\\Models\\Route and ''getCompiled'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Route/Infrastructure/Middleware/WordPressBodyClass.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Routing\\Route\:\:setCondition\(\)\.$#'
@@ -1069,82 +913,10 @@ parameters:
 			path: src/Route/Infrastructure/Services/ExtendedRouter.php
 
 		-
-			message: '#^PHPDoc tag @implements has invalid value \(EventInterface\)\: Unexpected token "\\n \* ", expected ''\<'' at offset 222 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Schedule/Events/AbstractEvent.php
-
-		-
-			message: '#^PHPDoc tag @implements has invalid value \(ShouldQueue\)\: Unexpected token "\\n ", expected ''\<'' at offset 249 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Schedule/Events/AbstractEvent.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(AbstractEvent\)\: Unexpected token "\\n ", expected ''\<'' at offset 221 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Schedule/Events/RecurringEvent.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(AbstractEvent\)\: Unexpected token "\\n ", expected ''\<'' at offset 197 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Schedule/Events/SingleEvent.php
-
-		-
-			message: '#^Instanceof between Pollora\\Schedule\\Interval and Pollora\\Schedule\\Interval will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: src/Schedule/Infrastructure/Services/ScheduleDiscovery.php
-
-		-
-			message: '#^PHPDoc tag @implements has invalid value \(JobDispatcherInterface\)\: Unexpected token "\\n ", expected ''\<'' at offset 231 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Schedule/Jobs/JobDispatcher.php
-
-		-
-			message: '#^PHPDoc tag @implements has invalid value \(SchedulerInterface\)\: Unexpected token "\\n ", expected ''\<'' at offset 222 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Schedule/Scheduler.php
-
-		-
-			message: '#^Instantiated class Pollora\\Services\\WordPress\\Database\\DatabaseConnectionException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Services/WordPress/Database/DatabaseConnectionService.php
-
-		-
-			message: '#^PHPDoc tag @throws with type Pollora\\Services\\WordPress\\Database\\DatabaseConnectionException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: src/Services/WordPress/Database/DatabaseConnectionService.php
-
-		-
-			message: '#^Throwing object of an unknown class Pollora\\Services\\WordPress\\Database\\DatabaseConnectionException\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Services/WordPress/Database/DatabaseConnectionService.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(\\RuntimeException\)\: Unexpected token "\\n ", expected ''\<'' at offset 205 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Services/WordPress/Installation/DatabaseConnectionException.php
-
-		-
 			message: '#^Constant WPINC not found\.$#'
 			identifier: constant.notFound
 			count: 2
 			path: src/Services/WordPress/Installation/WordPressInstallLoaderService.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(\\RuntimeException\)\: Unexpected token "\\n ", expected ''\<'' at offset 229 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Services/WordPress/Installation/WordPressInstallationException.php
 
 		-
 			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Ajax\:\:listen\(\) return type contains unknown class Pollora\\Ajax\\Ajax\.$#'
@@ -1169,24 +941,6 @@ parameters:
 			identifier: generics.notCompatible
 			count: 1
 			path: src/Support/RecursiveMenuIterator.php
-
-		-
-			message: '#^Method Pollora\\Support\\RecursiveMenuIterator\:\:getChildren\(\) has invalid return type Pollora\\Support\\Pollora\\Support\\RecursiveMenuIterator\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Support/RecursiveMenuIterator.php
-
-		-
-			message: '#^PHPDoc tag @return with type Pollora\\Support\\Pollora\\Support\\RecursiveMenuIterator is not subtype of native type Pollora\\Support\\RecursiveMenuIterator\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: src/Support/RecursiveMenuIterator.php
-
-		-
-			message: '#^Trait Pollora\\Support\\Traits\\ArgumentTranslater is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Support/Traits/ArgumentTranslater.php
 
 		-
 			message: '#^Constant WPINC not found\.$#'
@@ -1231,34 +985,10 @@ parameters:
 			path: src/Theme/Application/Services/ThemeManager.php
 
 		-
-			message: '#^PHPDoc tag @var with type SplFileInfo is not subtype of native type Symfony\\Component\\Finder\\SplFileInfo\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: src/Theme/Application/Services/ThemeManager.php
-
-		-
 			message: '#^Parameter \#3 \$app of class Pollora\\Theme\\Domain\\Models\\LaravelThemeModule constructor expects Illuminate\\Container\\Container, Psr\\Container\\ContainerInterface given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Theme/Application/Services/ThemeRegistrar.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$themeData$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Theme/Domain/Contracts/ThemeRegistrarInterface.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$themeName$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Theme/Domain/Contracts/ThemeRegistrarInterface.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$themePath$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Theme/Domain/Contracts/ThemeRegistrarInterface.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
@@ -1279,28 +1009,10 @@ parameters:
 			path: src/Theme/Domain/Models/LaravelThemeModule.php
 
 		-
-			message: '#^PHPDoc tag @implements has invalid value \(ThemeComponent\)\: Unexpected token "\\n ", expected ''\<'' at offset 51 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Theme/Domain/Models/Menus.php
-
-		-
-			message: '#^PHPDoc tag @implements has invalid value \(ContainerInterface\)\: Unexpected token "\\n ", expected ''\<'' at offset 633 on line 18$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Theme/Infrastructure/Adapters/DomainContainerAdapter.php
-
-		-
 			message: '#^Call to an undefined method Pollora\\Theme\\Domain\\Contracts\\ThemeService\:\:hasTheme\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Theme/Infrastructure/Providers/ThemeServiceProvider.php
-
-		-
-			message: '#^Call to function is_callable\(\) with callable\-string&non\-falsy\-string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Theme/Infrastructure/Services/WordPressThemeAdapter.php
 
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
@@ -1331,18 +1043,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
-
-		-
-			message: '#^Negated boolean expression is always true\.$#'
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
-
-		-
-			message: '#^Anonymous function never returns array so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/View/Infrastructure/Services/FileSystemTemplateFinder.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
@@ -1405,18 +1105,6 @@ parameters:
 			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
 
 		-
-			message: '#^Class class@anonymous/WpCli/Infrastructure/Adapters/WpCliMethodWrapper\.php\:58 does not have a constructor and must be instantiated without any parameters\.$#'
-			identifier: new.noConstructor
-			count: 1
-			path: src/WpCli/Infrastructure/Adapters/WpCliMethodWrapper.php
-
-		-
-			message: '#^Expression "new class\(\$this\-\>docComment, \$methodName\)…" on a separate line does not do anything\.$#'
-			identifier: expr.resultUnused
-			count: 1
-			path: src/WpCli/Infrastructure/Adapters/WpCliMethodWrapper.php
-
-		-
 			message: '#^Method Pollora\\WpCli\\Infrastructure\\Services\\WpCliDiscovery\:\:createCallable\(\) should return array but returns Closure\.$#'
 			identifier: return.type
 			count: 1
@@ -1425,12 +1113,6 @@ parameters:
 		-
 			message: '#^Offset ''short'' on array\{short\: string, long\: ''''\} in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.offset
-			count: 1
-			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$handler with type array\|object\|string is not subtype of native type array\|string\.$#'
-			identifier: parameter.phpDocType
 			count: 1
 			path: src/WpCli/Infrastructure/Services/WpCliDiscovery.php
 

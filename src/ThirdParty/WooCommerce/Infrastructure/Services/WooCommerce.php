@@ -128,8 +128,8 @@ class WooCommerce implements WooCommerceIntegrationInterface
             return $templateName;
         }
 
-        // Priority 3: If $templateName is provided and $template looks like just a file name
-        if ($templateName !== '' && $templateName !== '0' && ! str_contains($template, '/')) {
+        // Priority 3: If $templateName is provided, use it
+        if ($templateName !== '' && $templateName !== '0') {
             return $templateName;
         }
 

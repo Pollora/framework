@@ -17,9 +17,6 @@ use Pollora\Schedule\Jobs\JobDispatcher;
  *
  * Provides common functionality for handling WordPress cron events with
  * Laravel queue integration and database persistence.
- *
- * @implements EventInterface
- * @implements ShouldQueue
  */
 abstract class AbstractEvent implements EventInterface, ShouldQueue
 {

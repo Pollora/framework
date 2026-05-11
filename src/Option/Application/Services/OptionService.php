@@ -31,7 +31,7 @@ final readonly class OptionService
 
         $option = $this->repository->get($key);
 
-        return $option?->value ?? $default;
+        return $option !== null ? $option->value : $default;
     }
 
     /**
