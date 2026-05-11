@@ -58,9 +58,6 @@ class ThemeInitializer implements ThemeComponent
         $this->wpTheme = $this->app->get(WordPressThemeInterface::class);
         $this->registrar = $this->app->get(ThemeRegistrarInterface::class);
 
-        // $this->filter->add('template_directory', $this->overrideThemeDirectory(...), 90, 3);
-        // $this->filter->add('stylesheet_directory', $this->overrideThemeDirectory(...), 90, 3);
-        // Handle custom theme roots.
         $this->filter->add('pre_option_stylesheet_root', $this->resetThemeRootOption(...));
         $this->filter->add('pre_option_template_root', $this->resetThemeRootOption(...));
     }
@@ -87,34 +84,16 @@ class ThemeInitializer implements ThemeComponent
     }
 
     /**
-     * Register the theme initializer
+     * Register the theme initializer.
+     *
+     * Hooks into 'after_setup_theme' at priority 1 to initialize the theme
+     * early in the WordPress lifecycle, and overrides the theme URI for
+     * proper asset resolution.
      */
     public function register(): void
     {
-        // @TODO clean
-        $this->action->add('after_setup_theme', function (): void {
-            $this->initializeTheme();
-        }, 1);
-
+        $this->action->add('after_setup_theme', $this->initializeTheme(...), 1);
         $this->overrideThemeUri();
-    }
-
-    /**
-     * Override the stylesheet directory URI
-     *
-     * @TODO : clean
-     */
-    public function overrideThemeDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
-    {
-        // Get the active theme from the registrar
-        $activeTheme = $this->registrar->getActiveTheme();
-
-        if ($activeTheme instanceof ThemeModuleInterface) {
-            return str_replace($themeRootUri, $activeTheme->getPath(), $stylesheetDirUri);
-        }
-
-        // No fallback - theme must be self-registered
-        return $stylesheetDirUri;
     }
 
     /**
