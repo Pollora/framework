@@ -41,6 +41,7 @@ use Pollora\Colt\Model\Collection\MetaCollection;
  * @property string $caption
  * @property string|null $alt
  * @property MetaCollection $meta
+ * @property mixed $meta_value
  */
 class Attachment extends \Pollora\Colt\Model\Attachment
 {

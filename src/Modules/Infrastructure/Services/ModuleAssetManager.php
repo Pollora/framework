@@ -7,6 +7,7 @@ namespace Pollora\Modules\Infrastructure\Services;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Factory;
+use Illuminate\View\FileViewFinder;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Foundation\Support\IncludesFiles;
@@ -218,6 +219,7 @@ class ModuleAssetManager
     {
         try {
             // Get current paths to preserve order
+            /** @var FileViewFinder $viewFinder */
             $currentPaths = $viewFinder->getPaths();
 
             // Check if path is already registered to avoid duplicates

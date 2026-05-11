@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Plugin\Application\Services;
 
 use Illuminate\Contracts\Container\Container as ContainerContract;
+use Illuminate\Foundation\Application;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
@@ -200,11 +201,10 @@ class PluginRegistrar
      */
     protected function createPluginModule(string $pluginName, string $pluginPath): LaravelPluginModule
     {
-        if ($this->app->has('app') && method_exists($this->app->get('app'), 'make')) {
-            return new LaravelPluginModule($pluginName, $pluginPath, $this->app->get('app'));
-        }
+        /** @var Application $app */
+        $app = $this->app->has('app') ? $this->app->get('app') : $this->app;
 
-        return new LaravelPluginModule($pluginName, $pluginPath, $this->app);
+        return new LaravelPluginModule($pluginName, $pluginPath, $app);
     }
 
     /**

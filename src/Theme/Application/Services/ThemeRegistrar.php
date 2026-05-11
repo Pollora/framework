@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\Application\Services;
 
 use Illuminate\Contracts\Container\Container as ContainerContract;
+use Illuminate\Foundation\Application;
 use Pollora\BlockPattern\UI\PatternComponent;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
@@ -81,11 +82,10 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     protected function createThemeModule(string $themeName, string $themePath): LaravelThemeModule
     {
-        if ($this->app->has('app') && method_exists($this->app->get('app'), 'make')) {
-            return new LaravelThemeModule($themeName, $themePath, $this->app->get('app'));
-        }
+        /** @var Application $app */
+        $app = $this->app->has('app') ? $this->app->get('app') : $this->app;
 
-        return new LaravelThemeModule($themeName, $themePath, $this->app);
+        return new LaravelThemeModule($themeName, $themePath, $app);
     }
 
     /**

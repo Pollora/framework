@@ -41,16 +41,13 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerWordPressAuthDriver(AuthManager $auth): void
     {
-        // Use static closures to prevent Laravel 13's RebindsCallbacksToSelf
-        // from rebinding them to AuthManager. Without static, $this becomes
-        // the AuthManager instance, causing __call → guard() infinite recursion.
-        $auth->extend('wp', static function ($app, $name, array $config) use ($auth): WordPressGuard {
+        $auth->extend('wp', function ($app, $name, array $config) use ($auth): WordPressGuard {
             $provider = $auth->createUserProvider($config['provider'] ?? null);
 
             return new WordPressGuard($provider);
         });
 
-        $auth->provider('wp', static fn ($app, $config): WordPressUserProvider => new WordPressUserProvider);
+        $auth->provider('wp', fn ($app, $config): WordPressUserProvider => new WordPressUserProvider);
 
         $this->registerWordPressGate();
     }

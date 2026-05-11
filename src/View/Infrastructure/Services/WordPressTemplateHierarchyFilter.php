@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\View\Infrastructure\Services;
 
 use Illuminate\Support\Str;
+use Illuminate\View\FileViewFinder;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
@@ -60,7 +61,8 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
      */
     public function extendThemeTemplates(array $templates, $theme, $post, string $postType): array
     {
-        if (method_exists($theme, 'load_textdomain') && $theme->load_textdomain()) {
+        if (is_object($theme) && method_exists($theme, 'load_textdomain') && $theme->load_textdomain()) {
+            /** @var \WP_Theme $theme */
             $theme->get('TextDomain');
         }
 
@@ -121,7 +123,9 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
 
         $allTemplates = [];
 
-        foreach ($this->viewFinder->getPaths() as $viewPath) {
+        /** @var FileViewFinder $viewFinder */
+        $viewFinder = $this->viewFinder;
+        foreach ($viewFinder->getPaths() as $viewPath) {
             if (! is_dir($viewPath)) {
                 continue;
             }

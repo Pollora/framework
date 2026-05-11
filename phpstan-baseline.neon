@@ -37,24 +37,6 @@ parameters:
 			path: src/Attributes/WpRestRoute/Method.php
 
 		-
-			message: '#^Offset 1 on array\{list\<string\>, list\<non\-empty\-string\>\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/Attributes/WpRestRoute/Method.php
-
-		-
-			message: '#^Class Pollora\\Auth\\WordPressGuard does not have a constructor and must be instantiated without any parameters\.$#'
-			identifier: new.noConstructor
-			count: 2
-			path: src/Auth/AuthServiceProvider.php
-
-		-
-			message: '#^Parameter \#2 \$callback of method Illuminate\\Auth\\AuthManager\:\:extend\(\) expects bindable closure, static closure given\.$#'
-			identifier: argument.staticClosure
-			count: 1
-			path: src/Auth/AuthServiceProvider.php
-
-		-
 			message: '#^Constant AUTH_COOKIE not found\.$#'
 			identifier: constant.notFound
 			count: 1
@@ -65,12 +47,6 @@ parameters:
 			identifier: constant.notFound
 			count: 1
 			path: src/Auth/WordPressGuard.php
-
-		-
-			message: '#^Found usage of constant WP_INSTALLING\. Use wp_installing\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/BlockPattern/UI/PatternComponent.php
 
 		-
 			message: '#^Access to an undefined property WP_Upgrader_Skin\:\:\$plugin\.$#'
@@ -121,58 +97,22 @@ parameters:
 			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Exceptions/Infrastructure/Services/ModuleAwareErrorViewResolver.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta_value\.$#'
 			identifier: property.notFound
 			count: 1
 			path: src/Models/Attachment.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Modules/Infrastructure/Services/ModuleAssetManager.php
-
-		-
-			message: '#^Argument of an invalid type Illuminate\\Routing\\RouteCollectionInterface supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 2
-			path: src/Modules/UI/Helpers/discovery_functions.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Routing\\RouteCollectionInterface\:\:count\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Modules/UI/Helpers/discovery_functions.php
-
-		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Domain\\Models\\LaravelPluginModule constructor expects Illuminate\\Container\\Container, Illuminate\\Contracts\\Container\\Container given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Plugin/Application/Services/PluginRegistrar.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Plugin/Domain/Models/LaravelPluginModule.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Plugin/Domain/Models/LaravelPluginModule.php
-
-		-
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
 			path: src/Plugin/Domain/Models/LaravelPluginModule.php
+
+		-
+			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Domain\\Models\\LaravelPluginModule constructor expects Illuminate\\Foundation\\Application, Illuminate\\Container\\Container given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Plugin/Infrastructure/Repositories/PluginRepository.php
 
 		-
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
@@ -187,8 +127,8 @@ parameters:
 			path: src/PostType/Infrastructure/Services/PostTypeDiscovery.php
 
 		-
-			message: '#^PHPDoc type mysqli\|PDO\|false\|null of property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh is not covariant with PHPDoc type mysqli\|false\|null of overridden property wpdb\:\:\$dbh\.$#'
-			identifier: property.phpDocType
+			message: '#^Property Pollora\\Proxy\\WordPressDatabase\:\:\$dbh \(mysqli\|false\|null\) does not accept PDO\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: src/Proxy/WordPressDatabase.php
 
@@ -223,18 +163,6 @@ parameters:
 			path: src/Services/WordPress/Installation/WordPressInstallLoaderService.php
 
 		-
-			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Ajax\:\:listen\(\) return type contains unknown class Pollora\\Ajax\\Ajax\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Support/Facades/Ajax.php
-
-		-
-			message: '#^PHPDoc tag @method for method Pollora\\Support\\Facades\\Mail\:\:send\(\) return type contains unknown class Pollora\\Support\\Facades\\SentMessage\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Support/Facades/Mail.php
-
-		-
 			message: '#^Access to an undefined property WP_Post\:\:\$children\.$#'
 			identifier: property.notFound
 			count: 2
@@ -265,24 +193,6 @@ parameters:
 			path: src/Taxonomy/Infrastructure/Services/TaxonomyDiscovery.php
 
 		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Theme\\Domain\\Models\\LaravelThemeModule constructor expects Illuminate\\Container\\Container, Illuminate\\Contracts\\Container\\Container given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Theme/Application/Services/ThemeRegistrar.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Domain/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Theme/Domain/Models/LaravelThemeModule.php
-
-		-
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
@@ -307,43 +217,7 @@ parameters:
 			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/View/Infrastructure/Services/FileSystemTemplateFinder.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
-
-		-
-			message: '#^Cannot call method get\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/View/Infrastructure/Services/WordPressTemplateHierarchyFilter.php
-
-		-
-			message: '#^Class Pollora\\WordPress\\Commands\\DatabaseConnectionException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/WordPress/Commands/LaunchPadInstallCommand.php
-
-		-
-			message: '#^Class Pollora\\WordPress\\Commands\\WordPressInstallationException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/WordPress/Commands/LaunchPadInstallCommand.php
-
-		-
 			message: '#^Constant WP_CLI_VERSION not found\.$#'
 			identifier: constant.notFound
-			count: 1
-			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
-
-		-
-			message: '#^Dead catch \- Throwable is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
 			count: 1
 			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php

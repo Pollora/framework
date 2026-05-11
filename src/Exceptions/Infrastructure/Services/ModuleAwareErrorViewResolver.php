@@ -7,6 +7,7 @@ namespace Pollora\Exceptions\Infrastructure\Services;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Request;
+use Illuminate\View\FileViewFinder;
 use Illuminate\View\ViewFinderInterface;
 use Throwable;
 
@@ -251,7 +252,8 @@ class ModuleAwareErrorViewResolver
         }
 
         $viewFinder = $this->viewFactory->getFinder();
-        $viewPaths = $viewFinder instanceof ViewFinderInterface ? $viewFinder->getPaths() : [];
+        /** @var FileViewFinder|ViewFinderInterface $viewFinder */
+        $viewPaths = $viewFinder instanceof FileViewFinder ? $viewFinder->getPaths() : [];
 
         return [
             'status_code' => $statusCode,

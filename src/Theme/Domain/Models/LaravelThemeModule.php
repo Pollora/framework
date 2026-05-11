@@ -6,6 +6,7 @@ namespace Pollora\Theme\Domain\Models;
 
 use Illuminate\Container\Container;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 
@@ -16,6 +17,9 @@ class LaravelThemeModule extends ThemeModule
      */
     protected array $delayedConfigs = [];
 
+    /**
+     * @param  Application  $app  Laravel application instance
+     */
     public function __construct(
         string $name,
         string $path,

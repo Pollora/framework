@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Ajax\Ajax as AjaxBuilder;
+use Pollora\Ajax\Domain\Models\AjaxAction;
+use Pollora\Ajax\Infrastructure\Services\AjaxFactory;
 
 /**
  * Facade for WordPress AJAX functionality.
@@ -13,9 +14,9 @@ use Pollora\Ajax\Ajax as AjaxBuilder;
  * Provides a clean interface for registering and handling WordPress AJAX actions
  * with improved type safety and modern PHP syntax.
  *
- * @method static AjaxBuilder listen(string $action, callable|string $callback) Register an AJAX action handler
+ * @method static AjaxAction listen(string $action, callable|string $callback) Register an AJAX action handler
  *
- * @see AjaxBuilder
+ * @see AjaxFactory
  */
 class Ajax extends Facade
 {

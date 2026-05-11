@@ -261,7 +261,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $reflectionException) {
+        } catch (\Throwable $reflectionException) {
             error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
         }
 
@@ -288,7 +288,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $reflectionException) {
+        } catch (\Throwable $reflectionException) {
             error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
         }
 

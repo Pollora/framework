@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Routing\RouteCollection;
 use Illuminate\Routing\Router;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 
@@ -174,6 +175,7 @@ if (! function_exists('pollora_debug_route_registration')) {
             $router = resolve('router');
             $routes = $router->getRoutes();
 
+            /** @var RouteCollection $routes */
             $debug['routes_count'] = $routes->count();
             $debug['fallback_registered'] = app()->bound('route.fallback.registered');
 
@@ -222,6 +224,7 @@ if (! function_exists('pollora_list_module_routes')) {
             $router = resolve('router');
             $routes = $router->getRoutes();
 
+            /** @var RouteCollection $routes */
             foreach ($routes as $route) {
                 // Skip the fallback route
                 if ($route->uri() === '{any}') {

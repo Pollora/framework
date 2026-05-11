@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\View\Infrastructure\Services;
 
+use Illuminate\View\FileViewFinder;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Filesystem\Filesystem;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
@@ -86,7 +87,9 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
         $found = [];
 
         // Check each view path for the template
-        foreach ($this->finder->getPaths() as $path) {
+        /** @var FileViewFinder $finder */
+        $finder = $this->finder;
+        foreach ($finder->getPaths() as $path) {
             // Check for Blade version first
             $bladePath = $path.DIRECTORY_SEPARATOR.$bladeTemplate;
             if (file_exists($bladePath)) {
@@ -135,7 +138,9 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
         $viewName = trim($viewName, '/\\');
 
         // Remove view directory prefixes
-        foreach ($this->finder->getPaths() as $viewPath) {
+        /** @var FileViewFinder $finder2 */
+        $finder2 = $this->finder;
+        foreach ($finder2->getPaths() as $viewPath) {
             if ($themePath !== '' && $themePath !== '0') {
                 $relativePath = $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $viewPath);
                 if (str_starts_with($viewName, $relativePath)) {
