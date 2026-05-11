@@ -9,6 +9,7 @@ use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Laravel Application Module Discovery Service
@@ -34,6 +35,8 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
      */
     protected string $basePath;
 
+    private ?LoggerInterface $logger = null;
+
     /**
      * Laravel Application Module Discovery constructor
      *
@@ -43,6 +46,11 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
         protected Container $container
     ) {
         $this->basePath = app_path();
+
+        try {
+            $this->logger = $container->make(LoggerInterface::class);
+        } catch (\Throwable) {
+        }
     }
 
     /**
@@ -60,9 +68,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
         try {
             $this->discoverModuleOnly('app', $this->basePath);
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module discovery error: '.$throwable->getMessage());
-            }
+            $this->logger?->error('Framework Module discovery error', ['exception' => $throwable]);
         }
     }
 
@@ -83,9 +89,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
                 $moduleData['engine']->apply();
             }
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module apply error: '.$throwable->getMessage());
-            }
+            $this->logger?->error('Framework Module apply error', ['exception' => $throwable]);
         }
     }
 
@@ -109,9 +113,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
 
             $this->discoverModuleOnly($moduleName, $modules[$moduleName]);
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Framework Module discovery error for %s: ', $moduleName).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Framework Module discovery error for %s', $moduleName), ['exception' => $throwable]);
         }
     }
 
@@ -138,9 +140,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
                 }
             }
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module discovery error: '.$throwable->getMessage());
-            }
+            $this->logger?->error('Framework Module discovery error', ['exception' => $throwable]);
         }
 
         return $results;
@@ -204,9 +204,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
                 }
             }
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log('Error scanning framework modules: '.$throwable->getMessage());
-            }
+            $this->logger?->error('Error scanning framework modules', ['exception' => $throwable]);
         }
 
         return $modules;
@@ -267,9 +265,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
                 'engine' => $engine,
             ];
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Discovery error for framework module %s: ', $moduleName).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Discovery error for framework module %s', $moduleName), ['exception' => $throwable]);
         }
     }
 
@@ -310,9 +306,7 @@ class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
 
             return $results;
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Discovery error for framework module %s: ', $moduleName).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Discovery error for framework module %s', $moduleName), ['exception' => $throwable]);
 
             return [];
         }

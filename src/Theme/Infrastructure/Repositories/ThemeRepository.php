@@ -13,6 +13,7 @@ use Pollora\Modules\Domain\Exceptions\ModuleException;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
+use Psr\Log\LoggerInterface;
 
 /**
  * Theme repository implementation for the modular theme system.
@@ -183,8 +184,11 @@ class ThemeRepository implements ModuleRepositoryInterface
                 }
             } catch (\Exception $e) {
                 // Log error but don't break the repository functionality
-                if (function_exists('error_log')) {
-                    error_log('Failed to load active theme from registrar: '.$e->getMessage());
+                try {
+                    $this->app->make(LoggerInterface::class)->error(
+                        'Failed to load active theme from registrar: '.$e->getMessage()
+                    );
+                } catch (\Throwable) {
                 }
             }
         }

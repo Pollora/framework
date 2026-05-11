@@ -9,6 +9,7 @@ use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
+use Psr\Log\LoggerInterface;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
@@ -23,6 +24,16 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 final class ServiceProviderDiscovery implements DiscoveryInterface
 {
     use IsDiscovery;
+
+    private ?LoggerInterface $logger = null;
+
+    public function __construct()
+    {
+        try {
+            $this->logger = resolve(LoggerInterface::class);
+        } catch (\Throwable) {
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -69,7 +80,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
                 $this->registerServiceProvider($className);
             } catch (\Throwable $e) {
                 // Log the error but continue with other service providers
-                error_log(sprintf('Failed to register service provider %s: ', $className).$e->getMessage());
+                $this->logger?->error(sprintf('Failed to register service provider %s', $className), ['exception' => $e]);
             }
         }
     }
@@ -127,7 +138,7 @@ final class ServiceProviderDiscovery implements DiscoveryInterface
                 app()->register($className);
             }
         } catch (\Throwable $throwable) {
-            error_log(sprintf('Failed to register service provider %s: ', $className).$throwable->getMessage());
+            $this->logger?->error(sprintf('Failed to register service provider %s', $className), ['exception' => $throwable]);
         }
     }
 

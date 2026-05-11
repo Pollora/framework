@@ -59,9 +59,7 @@ trait HasConfiguringSupport
             return $entity;
 
         } catch (\ReflectionException|\Throwable $e) {
-            error_log(
-                sprintf('Failed to process configuring for %s: ', $className).$e->getMessage()
-            );
+            $this->logger?->error(sprintf('Failed to process configuring for %s', $className), ['exception' => $e]);
 
             return null;
         }

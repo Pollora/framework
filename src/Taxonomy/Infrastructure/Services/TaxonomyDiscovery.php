@@ -16,6 +16,7 @@ use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter;
 use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
@@ -44,7 +45,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  TaxonomyServiceInterface  $taxonomyService  The taxonomy service for registration
      */
     public function __construct(
-        private readonly TaxonomyServiceInterface $taxonomyService
+        private readonly TaxonomyServiceInterface $taxonomyService,
+        private readonly ?LoggerInterface $logger = null
     ) {}
 
     /**
@@ -141,7 +143,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $this->processTaxonomy($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other taxonomies
-                error_log(sprintf('Failed to register Taxonomy from class %s: ', $className).$e->getMessage());
+                $this->logger?->error(sprintf('Failed to register Taxonomy from class %s', $className), ['exception' => $e]);
             }
         }
     }
@@ -212,7 +214,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
 
         } catch (\Throwable $throwable) {
-            error_log(sprintf('Failed to process Taxonomy for class %s: ', $className).$throwable->getMessage());
+            $this->logger?->error(sprintf('Failed to process Taxonomy for class %s', $className), ['exception' => $throwable]);
         }
     }
 
@@ -262,7 +264,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 }
             }
         } catch (\Throwable $reflectionException) {
-            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
+            $this->logger?->error(sprintf('Failed to process class-level attributes for %s', $className), ['exception' => $reflectionException]);
         }
 
         return $config;
@@ -289,7 +291,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 }
             }
         } catch (\Throwable $reflectionException) {
-            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
+            $this->logger?->error(sprintf('Failed to process method-level attributes for %s', $className), ['exception' => $reflectionException]);
         }
 
         return $config;
@@ -368,7 +370,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
         } catch (\ReflectionException|\Throwable $e) {
             // Log the error but continue - additional args are optional
-            error_log(sprintf('Failed to process additional args for %s: ', $className).$e->getMessage());
+            $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $e]);
         }
     }
 

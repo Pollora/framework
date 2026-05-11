@@ -25,9 +25,7 @@ if (! function_exists('pollora_discover_module')) {
 
             return $discoveryService->discoverAndReturn($modulePath);
         } catch (Exception $exception) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_module error: '.$exception->getMessage());
-            }
+            report($exception);
 
             return [];
         }
@@ -53,9 +51,7 @@ if (! function_exists('pollora_discover_theme')) {
 
             return $discoveryService->discoverAndReturn($themePath);
         } catch (Exception $exception) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_theme error: '.$exception->getMessage());
-            }
+            report($exception);
 
             return [];
         }
@@ -81,9 +77,7 @@ if (! function_exists('pollora_discover_plugin')) {
 
             return $discoveryService->discoverAndReturn($pluginPath);
         } catch (Exception $exception) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_plugin error: '.$exception->getMessage());
-            }
+            report($exception);
 
             return [];
         }
@@ -109,9 +103,7 @@ if (! function_exists('pollora_discover_in_path')) {
 
             return $discoveryService->discoverAndReturn($path);
         } catch (Exception $exception) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_in_path error: '.$exception->getMessage());
-            }
+            report($exception);
 
             return [];
         }
@@ -136,9 +128,7 @@ if (! function_exists('pollora_discover_all_in_path')) {
 
             return $discoveryService->discoverAndReturn($path);
         } catch (Exception $exception) {
-            if (function_exists('error_log')) {
-                error_log('pollora_discover_all_in_path error: '.$exception->getMessage());
-            }
+            report($exception);
 
             return [];
         }

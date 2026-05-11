@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
-use Psr\Container\ContainerInterface;
 use Illuminate\Foundation\Application;
 use Pollora\BlockPattern\UI\PatternComponent;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
@@ -23,6 +22,8 @@ use Pollora\Theme\Domain\Models\ThemeInitializer;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\Support;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
+use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Simplified theme self-registration service.
@@ -206,8 +207,9 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     protected function logError(string $message): void
     {
-        if (function_exists('error_log')) {
-            error_log($message);
+        try {
+            $this->app->get(LoggerInterface::class)->error($message);
+        } catch (\Throwable) {
         }
     }
 

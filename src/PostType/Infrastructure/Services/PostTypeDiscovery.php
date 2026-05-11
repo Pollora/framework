@@ -16,6 +16,7 @@ use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Entity\Adapter\Out\WordPress\PostTypeRegistryAdapter;
 use Pollora\Entity\Domain\Model\PostType as EntityPostType;
 use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
@@ -44,7 +45,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  PostTypeServiceInterface  $postTypeService  The post type service for registration
      */
     public function __construct(
-        private readonly PostTypeServiceInterface $postTypeService
+        private readonly PostTypeServiceInterface $postTypeService,
+        private readonly ?LoggerInterface $logger = null
     ) {}
 
     /**
@@ -138,7 +140,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $this->processPostType($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other post types
-                error_log(sprintf('Failed to register PostType from class %s: ', $className).$e->getMessage());
+                $this->logger?->error(sprintf('Failed to register PostType from class %s', $className), ['exception' => $e]);
             }
         }
     }
@@ -208,7 +210,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
 
         } catch (\Throwable $throwable) {
-            error_log(sprintf('Failed to process PostType for class %s: ', $className).$throwable->getMessage());
+            $this->logger?->error(sprintf('Failed to process PostType for class %s', $className), ['exception' => $throwable]);
         }
     }
 
@@ -257,7 +259,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 }
             }
         } catch (\Throwable $reflectionException) {
-            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
+            $this->logger?->error(sprintf('Failed to process class-level attributes for %s', $className), ['exception' => $reflectionException]);
         }
 
         return $config;
@@ -284,7 +286,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 }
             }
         } catch (\Throwable $reflectionException) {
-            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
+            $this->logger?->error(sprintf('Failed to process method-level attributes for %s', $className), ['exception' => $reflectionException]);
         }
 
         return $config;
@@ -363,7 +365,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             }
         } catch (\ReflectionException|\Throwable $e) {
             // Log the error but continue - additional args are optional
-            error_log(sprintf('Failed to process additional args for %s: ', $className).$e->getMessage());
+            $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $e]);
         }
     }
 

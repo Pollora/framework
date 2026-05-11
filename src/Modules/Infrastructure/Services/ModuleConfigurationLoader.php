@@ -7,6 +7,7 @@ namespace Pollora\Modules\Infrastructure\Services;
 use Illuminate\Contracts\Container\Container;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contracts\Action;
+use Psr\Log\LoggerInterface;
 
 /**
  * Generic module configuration loader.
@@ -20,11 +21,18 @@ class ModuleConfigurationLoader
 
     protected Action $actionService;
 
+    private ?LoggerInterface $logger = null;
+
     public function __construct(
         protected Container $app,
         protected ConfigRepositoryInterface $configRepository
     ) {
         $this->action = $this->app->get(Action::class);
+
+        try {
+            $this->logger = $app->make(LoggerInterface::class);
+        } catch (\Throwable) {
+        }
     }
 
     /**
@@ -97,7 +105,7 @@ class ModuleConfigurationLoader
                 $this->configRepository->set($configKey, $configData);
             }
         } catch (\Throwable $throwable) {
-            error_log(sprintf('Failed to load %s config %s: ', $moduleType, $configFile).$throwable->getMessage());
+            $this->logger?->error(sprintf('Failed to load %s config %s', $moduleType, $configFile), ['exception' => $throwable]);
         }
     }
 

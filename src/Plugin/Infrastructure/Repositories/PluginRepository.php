@@ -13,6 +13,7 @@ use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Domain\Models\LaravelPluginModule;
 use Pollora\Plugin\Domain\Support\PluginCollection;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
+use Psr\Log\LoggerInterface;
 
 /**
  * Plugin repository implementation.
@@ -465,8 +466,9 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     protected function logError(string $message): void
     {
-        if (function_exists('error_log')) {
-            error_log('[PluginRepository] '.$message);
+        try {
+            $this->app->make(LoggerInterface::class)->error('[PluginRepository] '.$message);
+        } catch (\Throwable) {
         }
     }
 }

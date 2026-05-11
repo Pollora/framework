@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Container\Container;
+use Psr\Log\LoggerInterface;
 
 /**
  * Generic module component manager.
@@ -16,9 +17,16 @@ class ModuleComponentManager
 {
     protected array $registeredComponents = [];
 
+    private ?LoggerInterface $logger = null;
+
     public function __construct(
         protected Container $app
-    ) {}
+    ) {
+        try {
+            $this->logger = $app->make(LoggerInterface::class);
+        } catch (\Throwable) {
+        }
+    }
 
     /**
      * Register components for a specific module.
@@ -61,9 +69,7 @@ class ModuleComponentManager
                 $this->app->singleton($serviceKey, $componentClass);
             }
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Failed to register component %s for module %s: ', $componentClass, $moduleId).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Failed to register component %s for module %s', $componentClass, $moduleId), ['exception' => $throwable]);
         }
     }
 
@@ -91,9 +97,7 @@ class ModuleComponentManager
                 );
             }
 
-            if (function_exists('error_log')) {
-                error_log(sprintf('Component initialization failed: %s for module %s - ', $componentClass, $moduleId).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Component initialization failed: %s for module %s', $componentClass, $moduleId), ['exception' => $throwable]);
         }
     }
 

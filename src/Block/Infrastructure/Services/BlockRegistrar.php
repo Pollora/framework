@@ -45,7 +45,7 @@ class BlockRegistrar implements BlockRegistrarInterface
 
     public function registerDirectory(string $directory, string $containerName): void
     {
-        if (! is_dir($directory)) {
+        if (! is_dir($directory) || ! function_exists('register_block_type')) {
             return;
         }
 

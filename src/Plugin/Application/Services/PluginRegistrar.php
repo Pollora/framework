@@ -14,6 +14,7 @@ use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Domain\Models\LaravelPluginModule;
 use Pollora\Plugin\Infrastructure\Repositories\PluginRepository;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
+use Psr\Log\LoggerInterface;
 
 /**
  * Plugin registration service.
@@ -356,8 +357,9 @@ class PluginRegistrar
      */
     protected function logError(string $message): void
     {
-        if (function_exists('error_log')) {
-            error_log($message);
+        try {
+            $this->app->get(LoggerInterface::class)->error($message);
+        } catch (\Throwable) {
         }
     }
 }
