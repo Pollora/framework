@@ -18,22 +18,16 @@ interface CollectionInterface extends \ArrayAccess, \Countable, \IteratorAggrega
 
     /**
      * Map over each item in the collection.
-     *
-     * @return static
      */
     public function map(callable $callback): self;
 
     /**
      * Filter items in the collection.
-     *
-     * @return static
      */
     public function filter(?callable $callback = null): self;
 
     /**
      * Get the values from a single column in the collection.
-     *
-     * @return static
      */
     public function values(): self;
 
@@ -44,8 +38,6 @@ interface CollectionInterface extends \ArrayAccess, \Countable, \IteratorAggrega
 
     /**
      * Merge the collection with the given items.
-     *
-     * @return static
      */
     public function merge(array $items): self;
 }

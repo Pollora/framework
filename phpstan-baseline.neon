@@ -529,106 +529,10 @@ parameters:
 			path: src/BlockPattern/UI/PatternComponent.php
 
 		-
-			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:filter\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
-			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:map\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
-			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:merge\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
-			message: '#^Method Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\:\:values\(\) should return static\(Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\) but returns Pollora\\Collection\\Infrastructure\\Adapters\\LaravelCollectionAdapter\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Collection/Infrastructure/Adapters/LaravelCollectionAdapter.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryEngineInterface\:\:clearCache\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/Application/Services/DiscoveryManager.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryEngineInterface\:\:clearLocations\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Discovery/Application/Services/DiscoveryManager.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryEngineInterface\:\:runDiscovery\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/Application/Services/DiscoveryManager.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 2
-			path: src/Discovery/Domain/Exceptions/DiscoveryException.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 2
-			path: src/Discovery/Domain/Exceptions/DiscoveryNotFoundException.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 3
-			path: src/Discovery/Domain/Exceptions/InvalidDiscoveryException.php
-
-		-
 			message: '#^Call to an undefined method Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface\:\:__serialize\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Discovery/Infrastructure/Adapters/LaravelDiscoveryCache.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:applyFrameworkModules\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/UI/Console/DiscoveryCommand.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:applyLaravelModules\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/UI/Console/DiscoveryCommand.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:discoverAndReturnFrameworkModules\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/UI/Console/DiscoveryCommand.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:discoverAndReturnLaravelModules\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/UI/Console/DiscoveryCommand.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:discoverFrameworkModules\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/UI/Console/DiscoveryCommand.php
-
-		-
-			message: '#^Call to an undefined method Pollora\\Modules\\Domain\\Contracts\\ModuleDiscoveryOrchestratorInterface\:\:discoverLaravelModules\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Discovery/UI/Console/DiscoveryCommand.php
 
 		-
 			message: '#^Access to an undefined property WP_Upgrader_Skin\:\:\$plugin\.$#'
@@ -653,12 +557,6 @@ parameters:
 			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Events/WordPress/Installer/InstallerEventDispatcher.php
-
-		-
-			message: '#^Class Pollora\\Events\\WordPress\\Installer\\Plugin\\PluginDeleted has an uninitialized readonly property \$networkWide\. Assign it in the constructor\.$#'
-			identifier: property.uninitializedReadonly
-			count: 1
-			path: src/Events/WordPress/Installer/Plugin/PluginDeleted.php
 
 		-
 			message: '#^Variable \$old_value on left side of \?\? is never defined\.$#'
@@ -739,12 +637,6 @@ parameters:
 			path: src/Models/Attachment.php
 
 		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 5
-			path: src/Modules/Domain/Exceptions/ModuleException.php
-
-		-
 			message: '#^Call to an undefined method Pollora\\Modules\\Infrastructure\\Services\\FrameworkModuleDiscovery\:\:discoverModule\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -791,48 +683,6 @@ parameters:
 			identifier: notIdentical.alwaysFalse
 			count: 1
 			path: src/Plugin/Application/Services/PluginRegistrar.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:activationFailed\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:configurationError\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:deactivationFailed\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:dependencyConflict\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:fileSystemError\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:invalidStructure\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
-
-		-
-			message: '#^Method Pollora\\Plugin\\Domain\\Exceptions\\PluginException\:\:pluginNotFound\(\) should return static\(Pollora\\Plugin\\Domain\\Exceptions\\PluginException\) but returns Pollora\\Plugin\\Domain\\Exceptions\\PluginException\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Plugin/Domain/Exceptions/PluginException.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
@@ -1073,18 +923,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/WordPress/Commands/LaunchPadInstallCommand.php
-
-		-
-			message: '#^Access to an undefined property Pollora\\Attributes\\WpCli\:\:\$description\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/WpCli/Domain/Models/WordpressCommand.php
-
-		-
-			message: '#^Access to an undefined property Pollora\\Attributes\\WpCli\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/WpCli/Domain/Models/WordpressCommand.php
 
 		-
 			message: '#^Constant WP_CLI_VERSION not found\.$#'

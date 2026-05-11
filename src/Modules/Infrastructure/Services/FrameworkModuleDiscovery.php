@@ -8,7 +8,7 @@ use Illuminate\Container\Container;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
-use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Domain\Contracts\ModuleDiscoveryInterface;
 
 /**
  * Laravel Application Module Discovery Service
@@ -20,7 +20,7 @@ use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
  * Unlike LaravelModuleDiscovery which handles external nwidart/laravel-modules,
  * this service handles the Laravel application's own internal module structure.
  */
-class FrameworkModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
+class FrameworkModuleDiscovery implements ModuleDiscoveryInterface
 {
     /**
      * Array of discovered framework modules with their discovery engines

@@ -10,20 +10,39 @@ namespace Pollora\Modules\Domain\Contracts;
  * This interface defines the contract for services that can orchestrate
  * the discovery of structures within specific paths (modules, themes, plugins, etc.).
  */
-interface ModuleDiscoveryOrchestratorInterface
+interface ModuleDiscoveryOrchestratorInterface extends ModuleDiscoveryInterface
 {
     /**
-     * Discover and apply all structures in a given path.
-     *
-     * @param  string  $path  The path to explore
+     * Discover all enabled Laravel modules from nwidart/laravel-modules.
      */
-    public function discover(string $path): void;
+    public function discoverLaravelModules(): void;
 
     /**
-     * Discover all structure types in a given path and return results.
-     *
-     * @param  string  $path  The path to explore
-     * @return array<string, array> Results grouped by discovery type
+     * Apply all discovered Laravel modules.
      */
-    public function discoverAndReturn(string $path): array;
+    public function applyLaravelModules(): void;
+
+    /**
+     * Get all enabled Laravel modules and their discovery data.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function discoverAndReturnLaravelModules(): array;
+
+    /**
+     * Discover all framework modules from the app/ directory.
+     */
+    public function discoverFrameworkModules(): void;
+
+    /**
+     * Apply all discovered framework modules.
+     */
+    public function applyFrameworkModules(): void;
+
+    /**
+     * Get all framework modules and their discovery data.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function discoverAndReturnFrameworkModules(): array;
 }

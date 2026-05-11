@@ -207,8 +207,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process PostType for class %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            error_log(sprintf('Failed to process PostType for class %s: ', $className).$throwable->getMessage());
         }
     }
 

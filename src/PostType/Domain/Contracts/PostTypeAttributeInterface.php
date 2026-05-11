@@ -11,6 +11,8 @@ use Pollora\Attributes\Attributable;
  *
  * Classes implementing this interface can be automatically discovered and registered
  * as WordPress custom post types using PHP 8 attributes for configuration.
+ *
+ * @property array<string, mixed> $attributeArgs Accumulator for attribute-defined registration arguments
  */
 interface PostTypeAttributeInterface extends Attributable
 {

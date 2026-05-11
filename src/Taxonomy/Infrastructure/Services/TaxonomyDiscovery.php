@@ -211,8 +211,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process Taxonomy for class %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            error_log(sprintf('Failed to process Taxonomy for class %s: ', $className).$throwable->getMessage());
         }
     }
 

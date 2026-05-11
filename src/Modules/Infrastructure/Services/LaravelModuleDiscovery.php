@@ -10,7 +10,7 @@ use Nwidart\Modules\Module;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
-use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Domain\Contracts\ModuleDiscoveryInterface;
 
 /**
  * Laravel Module Discovery Service
@@ -18,7 +18,7 @@ use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
  * This service handles discovery for Laravel Modules created with nwidart/laravel-modules.
  * It integrates with the Module facade to find enabled modules and run discovery on them.
  */
-class LaravelModuleDiscovery implements ModuleDiscoveryOrchestratorInterface
+class LaravelModuleDiscovery implements ModuleDiscoveryInterface
 {
     protected array $discoveredModules = [];
 
