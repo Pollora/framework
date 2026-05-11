@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Providers;
 
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
@@ -399,21 +398,11 @@ class ThemeServiceProvider extends ServiceProvider
 
     /**
      * Register custom Blade directives for theme functionality.
-     *
-     * Adds the @theme directive for checking theme existence in templates.
      */
     private function registerBladeDirectives(): void
     {
-        if (! class_exists(Blade::class)) {
-            return;
-        }
-
-        Blade::if('theme', function (string $name) {
-            /** @var ThemeService $themeManager */
-            $themeManager = resolve(ThemeService::class);
-
-            return $themeManager->hasTheme($name);
-        });
+        // No framework-level Blade directives currently needed.
+        // Module-specific directives are loaded via ModuleAssetManager::registerModuleBladeDirectives().
     }
 
     /**
