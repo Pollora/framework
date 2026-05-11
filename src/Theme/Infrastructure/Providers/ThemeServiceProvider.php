@@ -18,10 +18,10 @@ use Pollora\Theme\Domain\Contracts\ThemeJsonResolverInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
-use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Domain\Support\ThemeCollection;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 use Pollora\Theme\Infrastructure\Adapters\DomainContainerAdapter;
+use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\ThemeJsonResolver;
@@ -228,9 +228,12 @@ class ThemeServiceProvider extends ServiceProvider
         // Legacy service alias
         $this->app->singleton('theme', fn ($app) => $app->make(ThemeService::class));
 
-        // Legacy class alias for module system
+        // Legacy class aliases for backward compatibility
         if (! class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
             class_alias(LaravelThemeModule::class, 'Pollora\\Modules\\Domain\\Models\\LaravelThemeModule');
+        }
+        if (! class_exists('Pollora\\Theme\\Domain\\Models\\LaravelThemeModule')) {
+            class_alias(LaravelThemeModule::class, 'Pollora\\Theme\\Domain\\Models\\LaravelThemeModule');
         }
     }
 

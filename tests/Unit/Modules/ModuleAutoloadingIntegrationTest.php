@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Mockery as m;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
-use Pollora\Theme\Domain\Models\LaravelThemeModule;
+use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 
 beforeEach(function (): void {

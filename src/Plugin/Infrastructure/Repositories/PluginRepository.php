@@ -10,8 +10,8 @@ use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Collection\Infrastructure\Adapters\LaravelCollectionAdapter;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
-use Pollora\Plugin\Domain\Models\LaravelPluginModule;
 use Pollora\Plugin\Domain\Support\PluginCollection;
+use Pollora\Plugin\Infrastructure\Models\LaravelPluginModule;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
 use Psr\Log\LoggerInterface;
 

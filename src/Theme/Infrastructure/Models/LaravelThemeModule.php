@@ -2,22 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Plugin\Domain\Models;
+namespace Pollora\Theme\Infrastructure\Models;
 
 use Illuminate\Container\Container;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
-use Pollora\Plugin\Infrastructure\Services\PluginAutoloader;
+use Pollora\Theme\Domain\Models\ThemeModule;
+use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 
-/**
- * Laravel-specific plugin module implementation.
- *
- * Extends the base PluginModule to provide Laravel-specific functionality
- * including service provider registration, autoloading, configuration management,
- * and dependency injection integration.
- */
-class LaravelPluginModule extends PluginModule
+class LaravelThemeModule extends ThemeModule
 {
     /**
      * Configurations that are delayed until WordPress is ready for translations.
@@ -25,10 +19,6 @@ class LaravelPluginModule extends PluginModule
     protected array $delayedConfigs = [];
 
     /**
-     * Create a new LaravelPluginModule instance.
-     *
-     * @param  string  $name  Plugin name
-     * @param  string  $path  Plugin path
      * @param  Application  $app  Laravel application instance
      */
     public function __construct(
@@ -40,22 +30,20 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get the cached services path for this plugin.
-     *
-     * @return string Cached services path
+     * Get the cached services path for this theme.
      */
     public function getCachedServicesPath(): string
     {
         // Check if we are running on a Laravel Vapor managed instance
         if (! is_null(config('vapor.maintenance_mode', env('VAPOR_MAINTENANCE_MODE')))) {
-            return Str::replaceLast('config.php', $this->getSnakeName().'_plugin.php', $this->app->getCachedConfigPath());
+            return Str::replaceLast('config.php', $this->getSnakeName().'_theme.php', $this->app->getCachedConfigPath());
         }
 
-        return Str::replaceLast('services.php', $this->getSnakeName().'_plugin.php', $this->app->getCachedServicesPath());
+        return Str::replaceLast('services.php', $this->getSnakeName().'_theme.php', $this->app->getCachedServicesPath());
     }
 
     /**
-     * Register the plugin's service providers.
+     * Register the theme's service providers.
      */
     public function register(): void
     {
@@ -68,7 +56,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Boot the plugin.
+     * Boot the theme.
      */
     public function boot(): void
     {
@@ -77,18 +65,18 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Register plugin autoloading using fixed namespace convention.
+     * Register theme autoloading using fixed namespace convention.
      */
     public function registerAutoloading(): void
     {
-        if ($this->app->bound(PluginAutoloader::class)) {
-            $autoloader = $this->app->make(PluginAutoloader::class);
-            $autoloader->registerPluginModule($this);
+        if ($this->app->bound(ThemeAutoloader::class)) {
+            $autoloader = $this->app->make(ThemeAutoloader::class);
+            $autoloader->registerThemeModule($this);
         }
     }
 
     /**
-     * Register plugin aliases.
+     * Register theme aliases.
      */
     protected function registerAliases(): void
     {
@@ -106,7 +94,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Register plugin files.
+     * Register theme files.
      */
     protected function registerFiles(): void
     {
@@ -121,7 +109,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Register plugin translations.
+     * Register theme translations.
      */
     protected function registerTranslations(): void
     {
@@ -133,7 +121,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Register plugin configuration.
+     * Register theme configuration.
      */
     protected function registerConfig(): void
     {
@@ -144,11 +132,12 @@ class LaravelPluginModule extends PluginModule
         }
 
         $configFiles = glob($configPath.'/*.php');
-        $translationDependentConfigs = ['admin-menu.php', 'settings.php'];
+
+        $translationDependentConfigs = ['menus.php', 'sidebars.php', 'templates.php'];
 
         foreach ($configFiles as $configFile) {
             $configName = basename($configFile, '.php');
-            $key = 'plugin.'.$configName;
+            $key = 'theme.'.$configName;
             $fileName = basename($configFile);
 
             // Delay loading of configs that use translations until WordPress is ready
@@ -173,9 +162,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin service providers.
-     *
-     * @return array Service providers array
+     * Get theme service providers.
      */
     public function getProviders(): array
     {
@@ -183,9 +170,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin aliases.
-     *
-     * @return array Aliases array
+     * Get theme aliases.
      */
     public function getAliases(): array
     {
@@ -193,9 +178,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin files to load.
-     *
-     * @return array Files array
+     * Get theme files to load.
      */
     public function getFiles(): array
     {
@@ -203,9 +186,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin routes directory.
-     *
-     * @return string Plugin routes directory path
+     * Get theme routes directory.
      */
     public function getRoutesPath(): string
     {
@@ -213,9 +194,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin views directory.
-     *
-     * @return string Plugin views directory path
+     * Get theme views directory.
      */
     public function getViewsPath(): string
     {
@@ -223,9 +202,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin config directory.
-     *
-     * @return string Plugin config directory path
+     * Get theme config directory.
      */
     public function getConfigPath(): string
     {
@@ -233,9 +210,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin migrations directory.
-     *
-     * @return string Plugin migrations directory path
+     * Get theme migrations directory.
      */
     public function getMigrationsPath(): string
     {
@@ -243,9 +218,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin factories directory.
-     *
-     * @return string Plugin factories directory path
+     * Get theme factories directory.
      */
     public function getFactoriesPath(): string
     {
@@ -253,9 +226,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin seeders directory.
-     *
-     * @return string Plugin seeders directory path
+     * Get theme seeders directory.
      */
     public function getSeedersPath(): string
     {
@@ -263,9 +234,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get plugin assets directory.
-     *
-     * @return string Plugin assets directory path
+     * Get theme assets directory.
      */
     public function getAssetsPath(): string
     {
@@ -273,9 +242,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Check if plugin has migrations.
-     *
-     * @return bool True if plugin has migrations
+     * Check if theme has migrations.
      */
     public function hasMigrations(): bool
     {
@@ -285,9 +252,7 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Check if plugin has routes.
-     *
-     * @return bool True if plugin has routes
+     * Check if theme has routes.
      */
     public function hasRoutes(): bool
     {
@@ -295,15 +260,12 @@ class LaravelPluginModule extends PluginModule
 
         return is_dir($routesPath) && (
             file_exists($routesPath.'/web.php') ||
-            file_exists($routesPath.'/api.php') ||
-            file_exists($routesPath.'/admin.php')
+            file_exists($routesPath.'/api.php')
         );
     }
 
     /**
-     * Check if plugin has views.
-     *
-     * @return bool True if plugin has views
+     * Check if theme has views.
      */
     public function hasViews(): bool
     {
@@ -311,63 +273,10 @@ class LaravelPluginModule extends PluginModule
     }
 
     /**
-     * Get extra path for plugin directory structure.
-     *
-     * @param  string  $path  Path to append
-     * @return string Full path
+     * Get extra path for theme directory structure.
      */
     public function getExtraPath(string $path): string
     {
         return $this->getPath().($path !== '' && $path !== '0' ? '/'.trim($path, '/') : '');
-    }
-
-    /**
-     * Get plugin admin directory.
-     *
-     * @return string Plugin admin directory path
-     */
-    public function getAdminPath(): string
-    {
-        return $this->getPath().'/admin';
-    }
-
-    /**
-     * Get plugin public directory.
-     *
-     * @return string Plugin public directory path
-     */
-    public function getPublicPath(): string
-    {
-        return $this->getPath().'/public';
-    }
-
-    /**
-     * Get plugin includes directory.
-     *
-     * @return string Plugin includes directory path
-     */
-    public function getIncludesPath(): string
-    {
-        return $this->getPath().'/includes';
-    }
-
-    /**
-     * Check if plugin has admin functionality.
-     *
-     * @return bool True if plugin has admin functionality
-     */
-    public function hasAdmin(): bool
-    {
-        return is_dir($this->getAdminPath());
-    }
-
-    /**
-     * Check if plugin has public functionality.
-     *
-     * @return bool True if plugin has public functionality
-     */
-    public function hasPublic(): bool
-    {
-        return is_dir($this->getPublicPath());
     }
 }

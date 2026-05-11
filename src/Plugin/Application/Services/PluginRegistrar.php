@@ -11,7 +11,7 @@ use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
-use Pollora\Plugin\Domain\Models\LaravelPluginModule;
+use Pollora\Plugin\Infrastructure\Models\LaravelPluginModule;
 use Pollora\Plugin\Infrastructure\Repositories\PluginRepository;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
 use Psr\Log\LoggerInterface;

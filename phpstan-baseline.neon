@@ -106,10 +106,10 @@ parameters:
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
-			path: src/Plugin/Domain/Models/LaravelPluginModule.php
+			path: src/Plugin/Infrastructure/Models/LaravelPluginModule.php
 
 		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Domain\\Models\\LaravelPluginModule constructor expects Illuminate\\Foundation\\Application, Illuminate\\Container\\Container given\.$#'
+			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Infrastructure\\Models\\LaravelPluginModule constructor expects Illuminate\\Foundation\\Application, Illuminate\\Container\\Container given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Plugin/Infrastructure/Repositories/PluginRepository.php
@@ -196,7 +196,7 @@ parameters:
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
-			path: src/Theme/Domain/Models/LaravelThemeModule.php
+			path: src/Theme/Infrastructure/Models/LaravelThemeModule.php
 
 		-
 			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\View\\WooCommerceTemplateResolver not found\.$#'

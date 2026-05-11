@@ -6,8 +6,8 @@ namespace Pollora\Theme\Infrastructure\Services;
 
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
-use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Domain\Models\ThemeModule;
+use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 
 class WordPressThemeParser
 {
