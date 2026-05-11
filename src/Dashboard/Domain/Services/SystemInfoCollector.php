@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Dashboard\Domain\Services;
 
-use Illuminate\Support\Str;
 use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
+use Pollora\Support\Domain\StringHelper;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
@@ -123,7 +123,7 @@ final readonly class SystemInfoCollector
                 }
 
                 $class = $item['class'];
-                $slug = Str::kebab(class_basename($class));
+                $slug = StringHelper::kebab(class_basename($class));
                 $label = $this->getPostTypeLabel($slug, $class);
 
                 $result[] = [
@@ -154,7 +154,7 @@ final readonly class SystemInfoCollector
                 }
 
                 $class = $item['class'];
-                $slug = Str::kebab(class_basename($class));
+                $slug = StringHelper::kebab(class_basename($class));
                 $label = $this->getTaxonomyLabel($slug, $class);
 
                 $result[] = [
@@ -180,7 +180,7 @@ final readonly class SystemInfoCollector
             }
         }
 
-        return Str::headline(class_basename($class));
+        return StringHelper::headline(class_basename($class));
     }
 
     private function getTaxonomyLabel(string $slug, string $class): string
@@ -193,7 +193,7 @@ final readonly class SystemInfoCollector
             }
         }
 
-        return Str::headline(class_basename($class));
+        return StringHelper::headline(class_basename($class));
     }
 
     /**

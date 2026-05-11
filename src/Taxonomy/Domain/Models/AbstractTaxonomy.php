@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Taxonomy\Domain\Models;
 
 use Illuminate\Support\Str;
+use Pollora\Support\Domain\StringHelper;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyAttributeInterface;
 
 /**
@@ -55,7 +56,7 @@ abstract class AbstractTaxonomy implements TaxonomyAttributeInterface
             $className = class_basename($this);
 
             // Convert to kebab-case
-            return Str::kebab($className);
+            return StringHelper::kebab($className);
         }
 
         return $this->slug;
@@ -73,7 +74,7 @@ abstract class AbstractTaxonomy implements TaxonomyAttributeInterface
         $className = class_basename($this);
 
         // Convert to snake_case first
-        $snakeCase = Str::snake($className);
+        $snakeCase = StringHelper::snake($className);
 
         // Then humanize it (convert snake_case to words with spaces and capitalize first letter)
         $humanized = ucfirst(str_replace('_', ' ', $snakeCase));
