@@ -74,4 +74,51 @@ describe('WordPressGuard', function (): void {
 
         expect($result)->toBe($this->guard);
     });
+
+    it('attempt returns false on invalid credentials', function (): void {
+        $error = Mockery::mock(WP_Error::class);
+        Brain\Monkey\Functions\when('wp_authenticate')->justReturn($error);
+
+        expect($this->guard->attempt(['username' => 'bad', 'password' => 'bad']))->toBeFalse();
+    });
+
+    it('once returns false on invalid credentials', function (): void {
+        $error = Mockery::mock(WP_Error::class);
+        Brain\Monkey\Functions\when('wp_authenticate')->justReturn($error);
+
+        expect($this->guard->once(['username' => 'bad', 'password' => 'bad']))->toBeFalse();
+    });
+
+    it('login calls wp_set_auth_cookie for User instances', function (): void {
+        if (! class_exists('WP_User')) {
+            eval('class WP_User { public int $ID = 0; }');
+        }
+        $wpUser = new WP_User;
+        $wpUser->ID = 7;
+
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->ID = 7;
+        $user->user_login = 'admin';
+        $user->shouldReceive('toWpUser')->andReturn($wpUser);
+
+        Brain\Monkey\Functions\expect('wp_set_auth_cookie')->once()->with(7, true);
+        Brain\Monkey\Functions\expect('wp_set_current_user')->atLeast()->once()->with(7);
+
+        $this->guard->login($user, true);
+    });
+
+    it('login ignores non-User authenticatable', function (): void {
+        $user = Mockery::mock(Authenticatable::class);
+
+        // Should not call any WordPress functions
+        $this->guard->login($user);
+
+        expect(true)->toBeTrue();
+    });
+
+    it('can be constructed without provider', function (): void {
+        $guard = new WordPressGuard;
+
+        expect($guard)->toBeInstanceOf(StatefulGuard::class);
+    });
 });
