@@ -14,13 +14,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Schedule**: `RegisterSchedulerFiltersUseCase` and `RegisterScheduleDiscoveryUseCase` extracted from `SchedulerServiceProvider`
   - All three service providers restructured with `registerDomainContracts()` / `registerUseCases()` / `registerApplicationServices()` pattern (following View module architecture)
   - 31 new unit tests covering all use cases
+- `setArg()` / `getArg()` methods on `PostTypeAttributeInterface` and `TaxonomyAttributeInterface` for type-safe attribute argument access
+- `ModuleDiscoveryInterface` extracted from `ModuleDiscoveryOrchestratorInterface` for specialized discovery services
+- Missing methods added to domain interfaces: `ModuleRepositoryInterface::resetCache()`, `ThemeService::hasTheme()/getActiveTheme()`, `DiscoveryItemsInterface::__serialize()`, `DiscoveryEngineInterface::clearCache()/clearLocations()/runDiscovery()`
+- `$priority` parameter added to `PostTypeFactoryInterface::make()` and `TaxonomyFactoryInterface::make()` (matching existing implementations)
+- `WordPressConditionManagerInterface` now extends `ConditionResolverInterface`
+
+### Changed
+- All 74 PostType/Taxonomy attribute classes refactored from direct `$attributeArgs` property access to `setArg()`/`getArg()` method calls
+- PHPStan baseline reduced from 186 to 37 entries (−80%), fixing ~150 real type errors
+- Exception classes `ModuleException`, `PluginException`, `DiscoveryNotFoundException`, `InvalidDiscoveryException` made `final`
+- `FrameworkModuleDiscovery` and `LaravelModuleDiscovery` now implement `ModuleDiscoveryInterface` instead of the full `ModuleDiscoveryOrchestratorInterface`
 
 ### Removed
 - Legacy `ModuleBootstrap` and `ModuleManifest` classes (empty shells with no dependents)
 - Defensive `method_exists()` checks and redundant `bound()` guards in `ModuleServiceProvider`
+- **BREAKING**: `@theme` Blade directive removed — conflicted with Tailwind CSS v4 `@theme` at-rule, had zero usage. Use `app('theme.service')->hasTheme($name)` if needed.
 
 ### Fixed
 - Typo `isOrchastraTest` → `isOrchestraTest` in `SchedulerServiceProvider`
+- `ThemeRegistrar` container type restored to `ContainerInterface` (was incorrectly narrowed, causing TypeError at boot)
+- `WpCli\WordpressCommand` accessing non-existent `$attribute->name` and `$attribute->description` on `WpCli` attribute
+- `PluginDeleted` redundant readonly property redeclaration removed
+- Dead catches widened from `ReflectionException` to `Throwable` in PostTypeDiscovery/TaxonomyDiscovery
+- `WordPressDatabase::$dbh` PHPDoc type aligned with parent `wpdb`
+- `LaunchPadInstallCommand` exception imports fixed
+- `Ajax` and `Mail` facade `@method` PHPDoc annotations fixed
 
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
