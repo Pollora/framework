@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Pollora\Dashboard\Domain\Services;
 
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
+use Psr\Container\ContainerInterface;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
 
 /**
@@ -24,7 +23,8 @@ final readonly class SystemInfoCollector
     public function __construct(
         private VersionComparator $versionComparator,
         private DiscoveryManager $discoveryManager,
-        private Container $container,
+        private ContainerInterface $container,
+        private string $laravelVersion = '',
     ) {}
 
     /**
@@ -69,7 +69,7 @@ final readonly class SystemInfoCollector
 
         return [
             'php' => PHP_VERSION,
-            'laravel' => Application::VERSION,
+            'laravel' => $this->laravelVersion,
             'wordpress' => $wpVersion,
         ];
     }
@@ -326,7 +326,7 @@ final readonly class SystemInfoCollector
     {
         try {
             /** @var RepositoryInterface $modules */
-            $modules = $this->container->make('modules');
+            $modules = $this->container->get('modules');
             $all = $modules->all();
             $enabled = $modules->allEnabled();
             $disabled = $modules->allDisabled();

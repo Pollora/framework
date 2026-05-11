@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Pollora\Dashboard\Infrastructure\Providers;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Dashboard\UI\Console\StatusCommand;
 use Pollora\Dashboard\UI\Http\DashboardController;
+use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 
@@ -22,7 +24,12 @@ class DashboardServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(SystemInfoCollector::class);
+        $this->app->singleton(SystemInfoCollector::class, fn ($app): SystemInfoCollector => new SystemInfoCollector(
+            $app->make(VersionComparator::class),
+            $app->make(DiscoveryManager::class),
+            $app,
+            Application::VERSION,
+        ));
 
         if ($this->app->runningInConsole()) {
             $this->commands([StatusCommand::class]);

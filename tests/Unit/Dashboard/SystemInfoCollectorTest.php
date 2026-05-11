@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Foundation\Application;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
@@ -12,13 +10,15 @@ use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Models\DiscoveryItems;
 use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
+use Psr\Container\ContainerInterface;
 use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
 
 function createCollector(
     ?VersionComparator $comparator = null,
     ?DiscoveryManager $manager = null,
-    ?Container $container = null,
+    ?ContainerInterface $container = null,
+    string $laravelVersion = '11.0.0',
 ): SystemInfoCollector {
     $comparator ??= new VersionComparator(
         Mockery::mock(VersionCheckerInterface::class, [
@@ -28,9 +28,9 @@ function createCollector(
     );
 
     $manager ??= Mockery::mock(DiscoveryManager::class);
-    $container ??= Mockery::mock(Container::class);
+    $container ??= Mockery::mock(ContainerInterface::class);
 
-    return new SystemInfoCollector($comparator, $manager, $container);
+    return new SystemInfoCollector($comparator, $manager, $container, $laravelVersion);
 }
 
 describe('SystemInfoCollector', function (): void {
@@ -82,7 +82,7 @@ describe('SystemInfoCollector', function (): void {
             $info = $collector->collectEnvironmentInfo();
 
             expect($info['php'])->toBe(PHP_VERSION);
-            expect($info['laravel'])->toBe(Application::VERSION);
+            expect($info['laravel'])->toBe('11.0.0');
             expect($info)->toHaveKeys(['php', 'laravel', 'wordpress']);
         });
     });
@@ -255,8 +255,8 @@ describe('SystemInfoCollector', function (): void {
 
     describe('collectModulesInfo', function (): void {
         it('falls back when modules not available', function (): void {
-            $container = Mockery::mock(Container::class);
-            $container->shouldReceive('make')
+            $container = Mockery::mock(ContainerInterface::class);
+            $container->shouldReceive('get')
                 ->with('modules')
                 ->andThrow(new RuntimeException('Not bound'));
 
@@ -292,8 +292,8 @@ describe('SystemInfoCollector', function (): void {
             $manager->shouldReceive('getEngine')->andReturn($engine);
             $manager->shouldReceive('getPerformanceStats')->andReturn([]);
 
-            $container = Mockery::mock(Container::class);
-            $container->shouldReceive('make')
+            $container = Mockery::mock(ContainerInterface::class);
+            $container->shouldReceive('get')
                 ->with('modules')
                 ->andThrow(new RuntimeException('Not bound'));
 
