@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.0...develop)
 
+### Added
+- DDD Application layer (UseCases) for Route, Modules, and Schedule modules
+  - **Route**: `RegisterWordPressTypesUseCase` and `BindWordPressParametersUseCase` extracted from `WordPressRoutingService`
+  - **Modules**: `DiscoverModulesUseCase` and `ApplyModulesUseCase` extracted from `ModuleServiceProvider` boot logic
+  - **Schedule**: `RegisterSchedulerFiltersUseCase` and `RegisterScheduleDiscoveryUseCase` extracted from `SchedulerServiceProvider`
+  - All three service providers restructured with `registerDomainContracts()` / `registerUseCases()` / `registerApplicationServices()` pattern (following View module architecture)
+  - 31 new unit tests covering all use cases
+
+### Removed
+- Legacy `ModuleBootstrap` and `ModuleManifest` classes (empty shells with no dependents)
+- Defensive `method_exists()` checks and redundant `bound()` guards in `ModuleServiceProvider`
+
+### Fixed
+- Typo `isOrchastraTest` → `isOrchestraTest` in `SchedulerServiceProvider`
+
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
 ### Added
