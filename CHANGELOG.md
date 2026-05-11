@@ -7,40 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.0...develop)
 
-### Added
-- DDD Application layer (UseCases) for Route, Modules, and Schedule modules
-  - **Route**: `RegisterWordPressTypesUseCase` and `BindWordPressParametersUseCase` extracted from `WordPressRoutingService`
-  - **Modules**: `DiscoverModulesUseCase` and `ApplyModulesUseCase` extracted from `ModuleServiceProvider` boot logic
-  - **Schedule**: `RegisterSchedulerFiltersUseCase` and `RegisterScheduleDiscoveryUseCase` extracted from `SchedulerServiceProvider`
-  - All three service providers restructured with `registerDomainContracts()` / `registerUseCases()` / `registerApplicationServices()` pattern (following View module architecture)
-  - 31 new unit tests covering all use cases
-- `setArg()` / `getArg()` methods on `PostTypeAttributeInterface` and `TaxonomyAttributeInterface` for type-safe attribute argument access
-- `ModuleDiscoveryInterface` extracted from `ModuleDiscoveryOrchestratorInterface` for specialized discovery services
-- Missing methods added to domain interfaces: `ModuleRepositoryInterface::resetCache()`, `ThemeService::hasTheme()/getActiveTheme()`, `DiscoveryItemsInterface::__serialize()`, `DiscoveryEngineInterface::clearCache()/clearLocations()/runDiscovery()`
-- `$priority` parameter added to `PostTypeFactoryInterface::make()` and `TaxonomyFactoryInterface::make()` (matching existing implementations)
-- `WordPressConditionManagerInterface` now extends `ConditionResolverInterface`
-
-### Changed
-- All 74 PostType/Taxonomy attribute classes refactored from direct `$attributeArgs` property access to `setArg()`/`getArg()` method calls
-- PHPStan baseline reduced from 186 to 37 entries (−80%), fixing ~150 real type errors
-- Exception classes `ModuleException`, `PluginException`, `DiscoveryNotFoundException`, `InvalidDiscoveryException` made `final`
-- `FrameworkModuleDiscovery` and `LaravelModuleDiscovery` now implement `ModuleDiscoveryInterface` instead of the full `ModuleDiscoveryOrchestratorInterface`
-
-### Removed
-- Legacy `ModuleBootstrap` and `ModuleManifest` classes (empty shells with no dependents)
-- Defensive `method_exists()` checks and redundant `bound()` guards in `ModuleServiceProvider`
-- **BREAKING**: `@theme` Blade directive removed — conflicted with Tailwind CSS v4 `@theme` at-rule, had zero usage. Use `app('theme.service')->hasTheme($name)` if needed.
-
-### Fixed
-- Typo `isOrchastraTest` → `isOrchestraTest` in `SchedulerServiceProvider`
-- `ThemeRegistrar` container type restored to `ContainerInterface` (was incorrectly narrowed, causing TypeError at boot)
-- `WpCli\WordpressCommand` accessing non-existent `$attribute->name` and `$attribute->description` on `WpCli` attribute
-- `PluginDeleted` redundant readonly property redeclaration removed
-- Dead catches widened from `ReflectionException` to `Throwable` in PostTypeDiscovery/TaxonomyDiscovery
-- `WordPressDatabase::$dbh` PHPDoc type aligned with parent `wpdb`
-- `LaunchPadInstallCommand` exception imports fixed
-- `Ajax` and `Mail` facade `@method` PHPDoc annotations fixed
-
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
 ### Added
@@ -97,6 +63,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `load_textdomain('pollora')` in `PolloraServiceProvider::boot()` with user override via `wp-content/languages/pollora/`
 - Generated `pollora.pot` translation template with all framework strings
 - Translations: French (fr_FR), Spanish (es_ES), German (de_DE), Portuguese Brazil (pt_BR), Italian (it_IT), Dutch (nl_NL), Japanese (ja)
+- DDD Application layer (UseCases) for Route, Modules, and Schedule modules
+  - **Route**: `RegisterWordPressTypesUseCase` and `BindWordPressParametersUseCase` extracted from `WordPressRoutingService`
+  - **Modules**: `DiscoverModulesUseCase` and `ApplyModulesUseCase` extracted from `ModuleServiceProvider` boot logic
+  - **Schedule**: `RegisterSchedulerFiltersUseCase` and `RegisterScheduleDiscoveryUseCase` extracted from `SchedulerServiceProvider`
+  - All three service providers restructured with `registerDomainContracts()` / `registerUseCases()` / `registerApplicationServices()` pattern (following View module architecture)
+  - 31 new unit tests covering all use cases
+- `setArg()` / `getArg()` methods on `PostTypeAttributeInterface` and `TaxonomyAttributeInterface` for type-safe attribute argument access
+- `ModuleDiscoveryInterface` extracted from `ModuleDiscoveryOrchestratorInterface` for specialized discovery services
+- Missing methods added to domain interfaces: `ModuleRepositoryInterface::resetCache()`, `ThemeService::hasTheme()/getActiveTheme()`, `DiscoveryItemsInterface::__serialize()`, `DiscoveryEngineInterface::clearCache()/clearLocations()/runDiscovery()`
+- `$priority` parameter added to `PostTypeFactoryInterface::make()` and `TaxonomyFactoryInterface::make()` (matching existing implementations)
+- `WordPressConditionManagerInterface` now extends `ConditionResolverInterface`
 
 ### Fixed
 - PHP 8.2+ deprecation warning for dynamic property creation on `Spatie\StructureDiscoverer\Data\DiscoveredClass` in `DiscoveryEngine` — replaced dynamic `$structure->location` assignment with an associative array pairing structures with their discovery locations
@@ -112,12 +89,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `WordPressShutdown` middleware now fires `do_action('shutdown')` within a controlled output buffer before the response is returned, injecting captured output (e.g. QM toolbar) before `</body>` in HTML responses
   - Prevents double execution by clearing shutdown callbacks after firing; `wp_cache_close()` remains unaffected
   - Exception-safe buffer management following Laravel's `PhpEngine` pattern
+- Typo `isOrchastraTest` → `isOrchestraTest` in `SchedulerServiceProvider`
+- `ThemeRegistrar` container type restored to `ContainerInterface` (was incorrectly narrowed, causing TypeError at boot)
+- `WpCli\WordpressCommand` accessing non-existent `$attribute->name` and `$attribute->description` on `WpCli` attribute
+- `PluginDeleted` redundant readonly property redeclaration removed
+- Dead catches widened from `ReflectionException` to `Throwable` in PostTypeDiscovery/TaxonomyDiscovery
+- `WordPressDatabase::$dbh` PHPDoc type aligned with parent `wpdb`
+- `LaunchPadInstallCommand` exception imports fixed
+- `Ajax` and `Mail` facade `@method` PHPDoc annotations fixed
+- `BlockRegistrar` crash in WP-CLI context (`wp_register_script()` called before WordPress script API loaded)
 
 ### Changed
+- All 74 PostType/Taxonomy attribute classes refactored from direct `$attributeArgs` property access to `setArg()`/`getArg()` method calls
+- PHPStan baseline reduced from 186 to 37 entries (−80%), fixing ~150 real type errors
+- Exception classes `ModuleException`, `PluginException`, `DiscoveryNotFoundException`, `InvalidDiscoveryException` made `final`
+- `FrameworkModuleDiscovery` and `LaravelModuleDiscovery` now implement `ModuleDiscoveryInterface` instead of the full `ModuleDiscoveryOrchestratorInterface`
+- All 65 `error_log()` calls replaced with PSR-3 `LoggerInterface` across 27 files
 - Renamed `src/Taxonomy/config/post-types.php` to `taxonomies.php` (fixes inconsistent naming)
 - Added comprehensive PHPDoc to `WordPressShutdown` and `WordPressHeaders` middlewares
 
 ### Removed
+- Legacy `ModuleBootstrap` and `ModuleManifest` classes (empty shells with no dependents)
+- Defensive `method_exists()` checks and redundant `bound()` guards in `ModuleServiceProvider`
+- **BREAKING**: `@theme` Blade directive removed — conflicted with Tailwind CSS v4 `@theme` at-rule, had zero usage. Use `app('theme.service')->hasTheme($name)` if needed
 - Config-based post type and taxonomy registration (`config/post-types.php`, `config/taxonomies.php`) — use `#[PostType]` / `#[Taxonomy]` attributes instead
 - Replaced `'textdomain'` placeholder with `sprintf(__('Edit %s', 'pollora'), $singular)` pattern for extractible i18n
 - Replaced manual WordPress mock system with Brain Monkey (`tests/Unit/helpers.php`: 1302 → 416 lines)
