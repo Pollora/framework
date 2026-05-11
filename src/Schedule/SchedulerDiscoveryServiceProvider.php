@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Pollora\Schedule;
 
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
+use Pollora\Schedule\Application\UseCases\RegisterScheduleDiscoveryUseCase;
 use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
 
 /**
- * Service provider for WordPress cron scheduler functionality.
+ * Service provider for schedule discovery functionality only.
  *
- * Registers and bootstraps the scheduler services, including filters
- * and recurring event scheduling.
+ * A lighter alternative to SchedulerServiceProvider when only
+ * schedule attribute discovery is needed (no cron filter registration).
  */
 class SchedulerDiscoveryServiceProvider extends ServiceProvider
 {
@@ -22,8 +22,12 @@ class SchedulerDiscoveryServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register Schedule Discovery
         $this->app->singleton(ScheduleDiscovery::class, fn (): ScheduleDiscovery => new ScheduleDiscovery);
+
+        $this->app->bind(RegisterScheduleDiscoveryUseCase::class, fn ($app): RegisterScheduleDiscoveryUseCase => new RegisterScheduleDiscoveryUseCase(
+            $app->make(DiscoveryEngineInterface::class),
+            $app->make(ScheduleDiscovery::class)
+        ));
     }
 
     /**
@@ -31,21 +35,8 @@ class SchedulerDiscoveryServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register Schedule discovery with the discovery engine
-        $this->registerScheduleDiscovery();
-    }
-
-    /**
-     * Register Schedule discovery with the discovery engine.
-     */
-    private function registerScheduleDiscovery(): void
-    {
         if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            /** @var DiscoveryEngineInterface $engine */
-            $engine = $this->app->make(DiscoveryEngineInterface::class);
-            $scheduleDiscovery = $this->app->make(ScheduleDiscovery::class);
-
-            $engine->addDiscovery('schedules', $scheduleDiscovery);
+            $this->app->make(RegisterScheduleDiscoveryUseCase::class)->execute();
         }
     }
 }
