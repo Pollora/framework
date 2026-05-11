@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
-use Illuminate\Contracts\Container\Container as ContainerContract;
+use Psr\Container\ContainerInterface;
 use Illuminate\Foundation\Application;
 use Pollora\BlockPattern\UI\PatternComponent;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
@@ -32,7 +32,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
     private ?ThemeModuleInterface $activeTheme = null;
 
     public function __construct(
-        protected ContainerContract $app,
+        protected ContainerInterface $app,
         protected WordPressThemeParser $themeParser
     ) {}
 
