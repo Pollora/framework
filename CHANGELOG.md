@@ -75,7 +75,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `$priority` parameter added to `PostTypeFactoryInterface::make()` and `TaxonomyFactoryInterface::make()` (matching existing implementations)
 - `WordPressConditionManagerInterface` now extends `ConditionResolverInterface`
 
+### Added
+- `Support\Domain\StringHelper` — framework-agnostic string utilities (`studly`, `kebab`, `snake`, `headline`, `singular`, `plural`) replacing `Illuminate\Support\Str` in the Domain layer
+- `Modules\Infrastructure\Services\ModuleScaffolderService` — shared service for file scaffolding, eliminating ~300 lines of duplication between `MakePluginCommand` and `MakeThemeCommand`
+- `Discovery\Infrastructure\Services\DiscoveryCacheManager` — extracted Spatie cache orchestration from `DiscoveryEngine` (665 → 560 lines)
+- Unit tests for `Filesystem`, `Mailer` (headers, attachments, from parsing), `WordPressGuard` (attempt, once, login), `PageServiceProvider`, `SchedulerServiceProvider`, `BlockServiceProvider`, `PluginServiceProvider`, `DiscoveryEngine`, `PluginManager`, `StringHelper` (+92 unit tests)
+- Feature tests for `AssetEnqueuer` (fluent builder, type detection, context hooks, localize, Vite skip) (+23 feature tests)
+- Backward-compatible class alias for `Pollora\Theme\Domain\Models\LaravelThemeModule` (moved to Infrastructure)
+- Type hints on closure parameters in 17 ServiceProviders (type coverage 98.1% → 98.7%)
+
 ### Fixed
+- Flaky `VersionCheckServiceProviderTest` — narrowed mock assertions to specific hook names instead of blanket `shouldNotReceive('add')`
+- Risky `AssetEnqueuerTest` — replaced manual `__destruct` invocation with full chain integration test
+- `RecursiveMenuIterator` invalid `@extends` PHPDoc tag removed
+- `WordPressTaxonomyRegistry::getAll()` return type annotation corrected to `array<int|string, WP_Taxonomy>`
+- `WordPressThemeParser` — replaced `app()` service locator with constructor-injected `Container`
 - PHP 8.2+ deprecation warning for dynamic property creation on `Spatie\StructureDiscoverer\Data\DiscoveredClass` in `DiscoveryEngine` — replaced dynamic `$structure->location` assignment with an associative array pairing structures with their discovery locations
 - `WordPressHeaders` middleware no longer overwrites response headers set by application code or plugins
   - Content-Type is preserved (was incorrectly removed, breaking PDF/JSON/binary responses)
@@ -100,8 +114,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `BlockRegistrar` crash in WP-CLI context (`wp_register_script()` called before WordPress script API loaded)
 
 ### Changed
+- **DDD Domain purity**: `LaravelPluginModule` and `LaravelThemeModule` moved from `Domain/Models/` to `Infrastructure/Models/` — they use `config()`, `env()`, `add_action()`, `AliasLoader` directly, which are infrastructure concerns
+- **DDD Domain purity**: `SystemInfoCollector` refactored — `Application::VERSION` replaced with injected `$laravelVersion`, `Illuminate\Contracts\Container\Container` replaced with `Psr\Container\ContainerInterface`
+- **DDD Domain purity**: `Illuminate\Support\Str` replaced with `Support\Domain\StringHelper` in `AbstractModule`, `AbstractTaxonomy`, `SystemInfoCollector` — only `AbstractTaxonomy` retains `Str` for `singular`/`plural` (Doctrine Inflector, now also in StringHelper)
+- **DDD Domain purity**: `add_action()` direct calls in `LaravelPluginModule`/`LaravelThemeModule` replaced with framework `Action` service via container
+- `MakePluginCommand` reduced from 782 → 447 lines, `MakeThemeCommand` from 568 → 307 lines (shared `ModuleScaffolderService`)
+- `DiscoveryEngine` reduced from 665 → 560 lines (extracted `DiscoveryCacheManager`)
+- `ThemeInitializer::register()` cleaned up — anonymous closure replaced with method reference, unused `overrideThemeDirectory()` removed
+- PHPStan baseline reduced from 186 to 36 entries (−81%), fixing ~150 real type errors
+- Rector auto-fixes applied: arrow function return types and newline-after-statement across 34 files
 - All 74 PostType/Taxonomy attribute classes refactored from direct `$attributeArgs` property access to `setArg()`/`getArg()` method calls
-- PHPStan baseline reduced from 186 to 37 entries (−80%), fixing ~150 real type errors
 - Exception classes `ModuleException`, `PluginException`, `DiscoveryNotFoundException`, `InvalidDiscoveryException` made `final`
 - `FrameworkModuleDiscovery` and `LaravelModuleDiscovery` now implement `ModuleDiscoveryInterface` instead of the full `ModuleDiscoveryOrchestratorInterface`
 - All 65 `error_log()` calls replaced with PSR-3 `LoggerInterface` across 27 files
