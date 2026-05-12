@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\UI\Console\Commands;
 
 use Illuminate\Console\Command;
+use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -86,7 +87,7 @@ class ThemeStatusCommand extends Command
     ): void {
         $activeTheme = $themeService->getActiveTheme();
 
-        if ($activeTheme) {
+        if ($activeTheme instanceof ModuleInterface) {
             $this->info('✓ Active theme via ThemeService:');
             $this->line('  Name: '.$activeTheme->getName());
             $this->line('  Path: '.$activeTheme->getPath());

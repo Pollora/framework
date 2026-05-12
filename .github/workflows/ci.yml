@@ -27,12 +27,6 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           coverage: pcov
 
-      - name: Debug Packagist resolution
-        run: |
-          composer --version
-          composer show pollora/wordpress-args --available --all 2>&1 | head -5 || true
-          composer show pollora/entity --available --all 2>&1 | head -5 || true
-
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
@@ -64,12 +58,6 @@ jobs:
           php-version: '8.4'
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           coverage: none
-
-      - name: Debug Packagist resolution
-        run: |
-          composer --version
-          composer show pollora/wordpress-args --available --all 2>&1 | head -5 || true
-          composer show pollora/entity --available --all 2>&1 | head -5 || true
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
