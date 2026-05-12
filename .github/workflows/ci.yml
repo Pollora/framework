@@ -27,10 +27,14 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           coverage: pcov
 
-      - name: Install Composer dependencies
+      - name: Debug Packagist resolution
         run: |
-          composer self-update
-          composer install --prefer-dist --no-interaction --no-progress
+          composer --version
+          composer show pollora/wordpress-args --available --all 2>&1 | head -5 || true
+          composer show pollora/entity --available --all 2>&1 | head -5 || true
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Execute unit tests
         run: composer test:unit
@@ -61,10 +65,14 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           coverage: none
 
-      - name: Install Composer dependencies
+      - name: Debug Packagist resolution
         run: |
-          composer self-update
-          composer install --prefer-dist --no-interaction --no-progress
+          composer --version
+          composer show pollora/wordpress-args --available --all 2>&1 | head -5 || true
+          composer show pollora/entity --available --all 2>&1 | head -5 || true
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Check code style
         run: composer test:lint
