@@ -8,6 +8,7 @@ use Illuminate\Container\Container;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
+use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\Plugin\Domain\Models\PluginModule;
 use Pollora\Plugin\Infrastructure\Services\PluginAutoloader;
 
@@ -152,24 +153,31 @@ class LaravelPluginModule extends PluginModule
             $key = 'plugin.'.$configName;
             $fileName = basename($configFile);
 
-            // Delay loading of configs that use translations until WordPress is ready
-            // @TODO : make this better
             if (in_array($fileName, $translationDependentConfigs, true)) {
-                // Use WordPress hook to delay loading until translations are available
-                if (function_exists('add_action')) {
-                    add_action('init', function () use ($configFile, $key): void {
-                        if (file_exists($configFile)) {
-                            $this->app['config']->set($key, require $configFile);
-                        }
-                    });
-                } else {
-                    // Fallback: store for later loading
-                    $this->delayedConfigs[$key] = $configFile;
-                }
+                $this->loadDeferredConfiguration($configFile, $key);
             } elseif (file_exists($configFile)) {
-                // Load immediately for configs that don't use translations
                 $this->app['config']->set($key, require $configFile);
             }
+        }
+    }
+
+    /**
+     * Defer loading of a config file until WordPress translations are available.
+     *
+     * Some config files (admin-menu.php, settings.php) use translation functions
+     * like __() which require WordPress to be fully initialized. These configs
+     * are loaded on the 'init' hook to ensure translations work correctly.
+     */
+    protected function loadDeferredConfiguration(string $configFile, string $key): void
+    {
+        if ($this->app->bound(Action::class)) {
+            $this->app->make(Action::class)->add('init', function () use ($configFile, $key): void {
+                if (file_exists($configFile)) {
+                    $this->app['config']->set($key, require $configFile);
+                }
+            });
+        } else {
+            $this->delayedConfigs[$key] = $configFile;
         }
     }
 
