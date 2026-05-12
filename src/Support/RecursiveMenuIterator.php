@@ -12,7 +12,6 @@ use WP_Post;
  *
  * This class provides an interface for iterating over WordPress menu items,
  * supporting nested menu structures and hierarchical navigation.
- *
  */
 final class RecursiveMenuIterator extends AbstractRecursiveIterator
 {
