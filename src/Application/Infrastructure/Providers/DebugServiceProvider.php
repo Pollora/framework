@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Application\Infrastructure\Providers;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Application\Infrastructure\Services\LaravelDebugDetector;
@@ -18,6 +19,6 @@ class DebugServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(DebugDetectorInterface::class, fn ($app): LaravelDebugDetector => new LaravelDebugDetector($app));
+        $this->app->singleton(DebugDetectorInterface::class, fn (Application $app): LaravelDebugDetector => new LaravelDebugDetector($app));
     }
 }

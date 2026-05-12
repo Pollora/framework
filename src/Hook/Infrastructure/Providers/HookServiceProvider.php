@@ -38,7 +38,7 @@ class HookServiceProvider extends ServiceProvider
      */
     protected ConsoleDetectionService $consoleDetectionService;
 
-    public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
+    public function __construct(Application $app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
         $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
@@ -53,16 +53,16 @@ class HookServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Callback resolver for dependency injection in hook callbacks
-        $this->app->singleton(CallbackResolverInterface::class, fn ($app): ContainerCallbackResolver => new ContainerCallbackResolver($app));
+        $this->app->singleton(CallbackResolverInterface::class, fn (Application $app): ContainerCallbackResolver => new ContainerCallbackResolver($app));
 
         // Bind concrete classes with resolver injection
-        $this->app->singleton(Action::class, function ($app): Action {
+        $this->app->singleton(Action::class, function (Application $app): Action {
             $action = new Action;
             $action->setCallbackResolver($app->make(CallbackResolverInterface::class));
 
             return $action;
         });
-        $this->app->singleton(Filter::class, function ($app): Filter {
+        $this->app->singleton(Filter::class, function (Application $app): Filter {
             $filter = new Filter;
             $filter->setCallbackResolver($app->make(CallbackResolverInterface::class));
 
@@ -75,7 +75,7 @@ class HookServiceProvider extends ServiceProvider
         $this->app->alias(Filter::class, FilterContract::class);
 
         // Register Hook Discovery
-        $this->app->singleton(HookDiscovery::class, fn ($app): HookDiscovery => new HookDiscovery(
+        $this->app->singleton(HookDiscovery::class, fn (Application $app): HookDiscovery => new HookDiscovery(
             $app->make(ActionContract::class),
             $app->make(FilterContract::class)
         ));

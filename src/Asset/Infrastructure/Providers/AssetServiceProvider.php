@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Asset\Infrastructure\Providers;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Application\Services\AssetRetrievalService;
@@ -28,11 +29,11 @@ class AssetServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AssetRepositoryInterface::class, InMemoryAssetRepository::class);
-        $this->app->singleton(AssetManager::class, fn ($app): AssetManager => new AssetManager(
+        $this->app->singleton(AssetManager::class, fn (Application $app): AssetManager => new AssetManager(
             $app->make(AssetRetrievalService::class)
         ));
-        $this->app->bind(AssetEnqueuer::class, fn ($app): AssetEnqueuer => new AssetEnqueuer($app));
-        $this->app->singleton(RootAssetManager::class, fn ($app): RootAssetManager => new RootAssetManager(
+        $this->app->bind(AssetEnqueuer::class, fn (Application $app): AssetEnqueuer => new AssetEnqueuer($app));
+        $this->app->singleton(RootAssetManager::class, fn (Application $app): RootAssetManager => new RootAssetManager(
             $app->make(AssetManager::class)
         ));
     }

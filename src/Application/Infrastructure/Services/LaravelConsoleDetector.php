@@ -14,14 +14,12 @@ class LaravelConsoleDetector implements ConsoleDetectorInterface
 {
     /**
      * Constructor.
-     *
-     * @param  Application  $app
      */
     public function __construct(
         /**
          * The Laravel application instance.
          */
-        protected $app
+        protected Application $app
     ) {}
 
     /**

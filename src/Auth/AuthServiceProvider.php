@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Auth;
 
 use Illuminate\Auth\AuthManager;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -41,13 +42,13 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerWordPressAuthDriver(AuthManager $auth): void
     {
-        $auth->extend('wp', function ($app, $name, array $config) use ($auth): WordPressGuard {
+        $auth->extend('wp', function (Application $app, string $name, array $config) use ($auth): WordPressGuard {
             $provider = $auth->createUserProvider($config['provider'] ?? null);
 
             return new WordPressGuard($provider);
         });
 
-        $auth->provider('wp', fn ($app, $config): WordPressUserProvider => new WordPressUserProvider);
+        $auth->provider('wp', fn (Application $app, array $config): WordPressUserProvider => new WordPressUserProvider);
 
         $this->registerWordPressGate();
     }
