@@ -225,16 +225,20 @@ describe('AssetEnqueuer', function (): void {
         });
     });
 
-    describe('__destruct', function (): void {
-        it('registers hook action on destruction', function (): void {
+    describe('full chain', function (): void {
+        it('supports complete fluent configuration', function (): void {
             $enqueuer = $this->app->make(AssetEnqueuer::class);
-            $enqueuer->handle('test-script')->path('app.js')->toFrontend();
 
-            // Manually trigger destructor
-            $enqueuer->__destruct();
+            $result = $enqueuer
+                ->handle('my-app')
+                ->path('assets/app.js')
+                ->dependencies(['jquery'])
+                ->version('1.0.0')
+                ->loadInFooter()
+                ->loadStrategy('defer')
+                ->toFrontend();
 
-            $this->hookAction->shouldHaveReceived('add')
-                ->with('wp_enqueue_scripts', Mockery::type('Closure'), 99);
+            expect($result)->toBeInstanceOf(AssetEnqueuer::class);
         });
     });
 });

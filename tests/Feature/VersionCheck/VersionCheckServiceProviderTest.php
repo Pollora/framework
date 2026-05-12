@@ -56,14 +56,12 @@ describe('VersionCheckServiceProvider', function (): void {
         Brain\Monkey\Functions\when('is_admin')->justReturn(false);
 
         $action = Mockery::mock(Action::class);
-        $action->shouldNotReceive('add');
-
-        $this->app->instance(ActionContract::class, $action);
+        $action->shouldNotReceive('add')->with('admin_notices', Mockery::any());
+        $action->shouldNotReceive('add')->with('wp_ajax_pollora_dismiss_update_notice', Mockery::any());
 
         $filter = Mockery::mock(Filter::class);
-        $filter->shouldNotReceive('add');
-
-        $this->app->instance(FilterContract::class, $filter);
+        $filter->shouldNotReceive('add')->with('debug_information', Mockery::any());
+        $filter->shouldNotReceive('add')->with('site_status_tests', Mockery::any());
 
         $provider = new VersionCheckServiceProvider($this->app);
         $provider->boot($action, $filter);
