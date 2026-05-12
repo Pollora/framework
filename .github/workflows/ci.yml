@@ -28,7 +28,7 @@ jobs:
           coverage: pcov
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
+        run: composer install --prefer-dist --no-interaction --no-progress --no-cache
 
       - name: Execute unit tests
         run: composer test:unit
@@ -60,7 +60,7 @@ jobs:
           coverage: none
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
+        run: composer install --prefer-dist --no-interaction --no-progress --no-cache
 
       - name: Check code style
         run: composer test:lint
