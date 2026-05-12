@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
 ### Added
+- `WordPressRouteInterface` in `Route\Domain\Contracts` — pure domain contract for WordPress routing capabilities (`isWordPressRoute`, `setCondition`, `hasCondition`, etc.), decoupling the Domain layer from `Illuminate\Routing`
 - Trailing slash removal at URL source via `user_trailingslashit` filter
   - All WordPress-generated URLs (posts, pages, terms, archives, feeds, pagination) are now consistent with no trailing slash
   - Previously only canonical redirects were handled, leaving in-page links with trailing slashes
@@ -114,6 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `BlockRegistrar` crash in WP-CLI context (`wp_register_script()` called before WordPress script API loaded)
 
 ### Changed
+- **DDD Domain purity**: `Route` moved from `Route\Domain\Models` to `Route\Infrastructure\Models` — extends `Illuminate\Routing\Route`, now implements `WordPressRouteInterface`. Consumers type-hint the interface (Domain) or concrete class (Infrastructure) depending on layer. Middlewares use `instanceof WordPressRouteInterface` for condition checks
 - **DDD Domain purity**: `LaravelPluginModule` and `LaravelThemeModule` moved from `Domain/Models/` to `Infrastructure/Models/` — they use `config()`, `env()`, `add_action()`, `AliasLoader` directly, which are infrastructure concerns
 - **DDD Domain purity**: `SystemInfoCollector` refactored — `Application::VERSION` replaced with injected `$laravelVersion`, `Illuminate\Contracts\Container\Container` replaced with `Psr\Container\ContainerInterface`
 - **DDD Domain purity**: `Illuminate\Support\Str` replaced with `Support\Domain\StringHelper` in `AbstractModule`, `AbstractTaxonomy`, `SystemInfoCollector` — only `AbstractTaxonomy` retains `Str` for `singular`/`plural` (Doctrine Inflector, now also in StringHelper)
@@ -133,6 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Legacy `ModuleBootstrap` and `ModuleManifest` classes (empty shells with no dependents)
 - Defensive `method_exists()` checks and redundant `bound()` guards in `ModuleServiceProvider`
+- **BREAKING**: `Pollora\Route\Domain\Models\Route` moved to `Pollora\Route\Infrastructure\Models\Route` — update imports in any code referencing the old namespace
 - **BREAKING**: `@theme` Blade directive removed — conflicted with Tailwind CSS v4 `@theme` at-rule, had zero usage. Use `app('theme.service')->hasTheme($name)` if needed
 - Config-based post type and taxonomy registration (`config/post-types.php`, `config/taxonomies.php`) — use `#[PostType]` / `#[Taxonomy]` attributes instead
 - Replaced `'textdomain'` placeholder with `sprintf(__('Edit %s', 'pollora'), $singular)` pattern for extractible i18n
