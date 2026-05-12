@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Modules\Infrastructure\Providers;
 
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
@@ -54,10 +56,10 @@ class ModuleServiceProvider extends ServiceProvider
     private function registerDomainContracts(): void
     {
         // Register ModuleAutoloader service
-        $this->app->singleton(ModuleAutoloader::class, fn ($app): ModuleAutoloader => new ModuleAutoloader($app));
+        $this->app->singleton(ModuleAutoloader::class, fn (Container $app): ModuleAutoloader => new ModuleAutoloader($app));
 
         // Register ModuleDiscoveryOrchestrator
-        $this->app->singleton(ModuleDiscoveryOrchestrator::class, fn ($app): ModuleDiscoveryOrchestrator => new ModuleDiscoveryOrchestrator($app));
+        $this->app->singleton(ModuleDiscoveryOrchestrator::class, fn (Container $app): ModuleDiscoveryOrchestrator => new ModuleDiscoveryOrchestrator($app));
 
         // Register interface binding
         $this->app->bind(ModuleDiscoveryOrchestratorInterface::class, ModuleDiscoveryOrchestrator::class);
@@ -71,7 +73,7 @@ class ModuleServiceProvider extends ServiceProvider
      */
     private function registerUseCases(): void
     {
-        $this->app->singleton(DiscoverModulesUseCase::class, function ($app): DiscoverModulesUseCase {
+        $this->app->singleton(DiscoverModulesUseCase::class, function (Application $app): DiscoverModulesUseCase {
             $logger = null;
             try {
                 $logger = $app->make('log');
@@ -85,7 +87,7 @@ class ModuleServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(ApplyModulesUseCase::class, function ($app): ApplyModulesUseCase {
+        $this->app->singleton(ApplyModulesUseCase::class, function (Application $app): ApplyModulesUseCase {
             $logger = null;
             try {
                 $logger = $app->make('log');
@@ -105,14 +107,14 @@ class ModuleServiceProvider extends ServiceProvider
      */
     private function registerApplicationServices(): void
     {
-        $this->app->singleton(ModuleConfigurationLoader::class, fn ($app): ModuleConfigurationLoader => new ModuleConfigurationLoader(
+        $this->app->singleton(ModuleConfigurationLoader::class, fn (Container $app): ModuleConfigurationLoader => new ModuleConfigurationLoader(
             $app,
             $app->make(ConfigRepositoryInterface::class)
         ));
 
-        $this->app->singleton(ModuleComponentManager::class, fn ($app): ModuleComponentManager => new ModuleComponentManager($app));
+        $this->app->singleton(ModuleComponentManager::class, fn (Container $app): ModuleComponentManager => new ModuleComponentManager($app));
 
-        $this->app->singleton(ModuleAssetManager::class, fn ($app): ModuleAssetManager => new ModuleAssetManager($app));
+        $this->app->singleton(ModuleAssetManager::class, fn (Container $app): ModuleAssetManager => new ModuleAssetManager($app));
     }
 
     /**

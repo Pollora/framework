@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Schedule;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Schedule\Application\UseCases\RegisterScheduleDiscoveryUseCase;
@@ -24,7 +25,7 @@ class SchedulerDiscoveryServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ScheduleDiscovery::class, fn (): ScheduleDiscovery => new ScheduleDiscovery);
 
-        $this->app->bind(RegisterScheduleDiscoveryUseCase::class, fn ($app): RegisterScheduleDiscoveryUseCase => new RegisterScheduleDiscoveryUseCase(
+        $this->app->bind(RegisterScheduleDiscoveryUseCase::class, fn (Application $app): RegisterScheduleDiscoveryUseCase => new RegisterScheduleDiscoveryUseCase(
             $app->make(DiscoveryEngineInterface::class),
             $app->make(ScheduleDiscovery::class)
         ));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Admin;
 
+use Illuminate\Container\Container;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -25,7 +26,7 @@ class PageServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             'wp.admin.page',
-            fn ($app): PageFactory => new PageFactory(new Page($app))
+            fn (Container $app): PageFactory => new PageFactory(new Page($app))
         );
     }
 }

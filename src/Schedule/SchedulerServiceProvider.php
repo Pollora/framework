@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Schedule;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\TestCase;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
@@ -64,12 +65,12 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     private function registerUseCases(): void
     {
-        $this->app->bind(RegisterSchedulerFiltersUseCase::class, fn ($app): RegisterSchedulerFiltersUseCase => new RegisterSchedulerFiltersUseCase(
+        $this->app->bind(RegisterSchedulerFiltersUseCase::class, fn (Application $app): RegisterSchedulerFiltersUseCase => new RegisterSchedulerFiltersUseCase(
             $app->make(Filter::class),
             $app->make(SchedulerInterface::class)
         ));
 
-        $this->app->bind(RegisterScheduleDiscoveryUseCase::class, fn ($app): RegisterScheduleDiscoveryUseCase => new RegisterScheduleDiscoveryUseCase(
+        $this->app->bind(RegisterScheduleDiscoveryUseCase::class, fn (Application $app): RegisterScheduleDiscoveryUseCase => new RegisterScheduleDiscoveryUseCase(
             $app->make(DiscoveryEngineInterface::class),
             $app->make(ScheduleDiscovery::class)
         ));

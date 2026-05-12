@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Option\Infrastructure\Providers;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Option\Application\Services\OptionService;
 use Pollora\Option\Domain\Contracts\OptionRepositoryInterface;
@@ -27,7 +28,7 @@ final class OptionServiceProvider extends ServiceProvider
 
         $this->app->singleton(OptionValidationService::class);
 
-        $this->app->singleton(OptionService::class, fn ($app): OptionService => new OptionService(
+        $this->app->singleton(OptionService::class, fn (Application $app): OptionService => new OptionService(
             $app->make(OptionRepositoryInterface::class),
             $app->make(OptionValidationService::class)
         ));
