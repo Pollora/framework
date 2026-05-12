@@ -6,7 +6,7 @@ namespace Pollora\Route\Infrastructure\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Pollora\Route\Domain\Models\Route;
+use Pollora\Route\Infrastructure\Models\Route;
 use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
 
 /**

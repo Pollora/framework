@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mockery as m;
-use Pollora\Route\Domain\Models\Route;
+use Pollora\Route\Infrastructure\Models\Route;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
 
 /**

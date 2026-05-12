@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Http\Request;
 use Mockery as m;
-use Pollora\Route\Domain\Models\Route;
+use Pollora\Route\Infrastructure\Models\Route;
 
 /**
  * Setup function to create test environment for route tests

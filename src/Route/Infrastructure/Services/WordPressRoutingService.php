@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Route\Infrastructure\Services;
 
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Routing\Route;
 use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
 use Pollora\Route\Application\UseCases\RegisterWordPressTypesUseCase;
-use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 
 /**

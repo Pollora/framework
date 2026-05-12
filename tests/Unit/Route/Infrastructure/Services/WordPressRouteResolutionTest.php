@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
-use Pollora\Route\Domain\Models\Route;
+use Pollora\Route\Infrastructure\Models\Route;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 use Pollora\Route\Infrastructure\Services\WordPressConditionManager;
 

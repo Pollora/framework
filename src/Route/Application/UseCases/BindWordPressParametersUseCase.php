@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Route\Application\UseCases;
 
-use Pollora\Route\Domain\Models\Route;
+use Illuminate\Routing\Route;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
 use Psr\Log\LoggerInterface;
 

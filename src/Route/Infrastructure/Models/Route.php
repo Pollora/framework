@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Route\Domain\Models;
+namespace Pollora\Route\Infrastructure\Models;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route as IlluminateRoute;
 use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
+use Pollora\Route\Domain\Contracts\WordPressRouteInterface;
 
 /**
  * Extended Route class with WordPress condition support.
@@ -18,7 +19,7 @@ use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
  * function (e.g. is_single(), is_page()) returns true, the route matches.
  * WordPress must be bootstrapped before route matching occurs (handled by QueryTrait).
  */
-class Route extends IlluminateRoute
+class Route extends IlluminateRoute implements WordPressRouteInterface
 {
     /**
      * Whether this is a WordPress route.
@@ -47,7 +48,7 @@ class Route extends IlluminateRoute
      *
      * @return $this
      */
-    public function setIsWordPressRoute(bool $isWordPressRoute): self
+    public function setIsWordPressRoute(bool $isWordPressRoute): static
     {
         $this->isWordPressRoute = $isWordPressRoute;
 
@@ -67,7 +68,7 @@ class Route extends IlluminateRoute
      *
      * @return $this
      */
-    public function setCondition(string $condition): self
+    public function setCondition(string $condition): static
     {
         $this->condition = $condition;
 
@@ -103,7 +104,7 @@ class Route extends IlluminateRoute
      * @param  array<mixed>  $parameters
      * @return $this
      */
-    public function setConditionParameters(array $parameters): self
+    public function setConditionParameters(array $parameters): static
     {
         $this->conditionParameters = $parameters;
 
@@ -125,7 +126,7 @@ class Route extends IlluminateRoute
      *
      * @return $this
      */
-    public function setConditionResolver(ConditionResolverInterface $resolver): self
+    public function setConditionResolver(ConditionResolverInterface $resolver): static
     {
         $this->conditionResolver = $resolver;
 

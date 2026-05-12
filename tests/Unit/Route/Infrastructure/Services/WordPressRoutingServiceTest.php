@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Mockery as m;
 use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
 use Pollora\Route\Application\UseCases\RegisterWordPressTypesUseCase;
-use Pollora\Route\Domain\Models\Route;
+use Pollora\Route\Infrastructure\Models\Route;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
 

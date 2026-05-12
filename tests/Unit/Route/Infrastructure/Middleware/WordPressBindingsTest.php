@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Http\Request;
-use Pollora\Route\Domain\Models\Route;
 use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
+use Pollora\Route\Infrastructure\Models\Route;
 use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
 
 describe('WordPressBindings middleware', function (): void {

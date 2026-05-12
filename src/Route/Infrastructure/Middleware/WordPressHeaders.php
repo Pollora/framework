@@ -6,6 +6,7 @@ namespace Pollora\Route\Infrastructure\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Pollora\Route\Domain\Contracts\WordPressRouteInterface;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -112,7 +113,7 @@ class WordPressHeaders
      * Determine if WordPress-generated headers should be removed.
      *
      * Returns true when all of the following conditions are met:
-     * - The route exists and exposes the `hasCondition()` method
+     * - The route implements `WordPressRouteInterface`
      * - The route has no WordPress condition (pure Laravel route)
      * - The visitor is not authenticated (WordPress `is_user_logged_in()` returns false)
      *
@@ -126,8 +127,7 @@ class WordPressHeaders
     {
         $route = $request->route();
 
-        return $route &&
-               method_exists($route, 'hasCondition') &&
+        return $route instanceof WordPressRouteInterface &&
                ! $route->hasCondition() &&
                function_exists('is_user_logged_in') &&
                ! is_user_logged_in();

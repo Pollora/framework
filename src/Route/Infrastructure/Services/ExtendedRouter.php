@@ -7,7 +7,7 @@ namespace Pollora\Route\Infrastructure\Services;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Routing\Router as IlluminateRouter;
-use Pollora\Route\Domain\Models\Route;
+use Pollora\Route\Infrastructure\Models\Route;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 
 /**
