@@ -55,4 +55,124 @@ final class StringHelper
 
         return ucwords(strtolower($words));
     }
+
+    /**
+     * Get the singular form of an English word.
+     *
+     * Handles common English inflection rules. For edge cases,
+     * classes can override the method that calls this.
+     *
+     * @example StringHelper::singular('Categories') // 'Category'
+     * @example StringHelper::singular('Posts') // 'Post'
+     * @example StringHelper::singular('Addresses') // 'Address'
+     */
+    public static function singular(string $value): string
+    {
+        if ($value === '') {
+            return $value;
+        }
+
+        $lower = strtolower($value);
+
+        // Uncountable words
+        if (in_array($lower, ['media', 'news', 'series', 'species', 'information', 'data'], true)) {
+            return $value;
+        }
+
+        // Irregular plurals
+        $irregulars = [
+            'people' => 'person', 'men' => 'man', 'women' => 'woman',
+            'children' => 'child', 'mice' => 'mouse', 'geese' => 'goose',
+            'teeth' => 'tooth', 'feet' => 'foot', 'oxen' => 'ox',
+        ];
+
+        if (isset($irregulars[$lower])) {
+            return self::matchCase($value, $irregulars[$lower]);
+        }
+
+        // Rule-based singularization (order matters)
+        $rules = [
+            '/(quiz)zes$/i' => '$1',
+            '/(matr|vert|append)ices$/i' => '$1ix',
+            '/(alias|status)es$/i' => '$1',
+            '/(x|ch|ss|sh)es$/i' => '$1',
+            '/ies$/i' => 'y',
+            '/ves$/i' => 'fe',
+            '/([^s])s$/i' => '$1',
+        ];
+
+        foreach ($rules as $pattern => $replacement) {
+            if (preg_match($pattern, $value)) {
+                return (string) preg_replace($pattern, $replacement, $value);
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get the plural form of an English word.
+     *
+     * Handles common English inflection rules.
+     *
+     * @example StringHelper::plural('Category') // 'Categories'
+     * @example StringHelper::plural('Post') // 'Posts'
+     * @example StringHelper::plural('Address') // 'Addresses'
+     */
+    public static function plural(string $value): string
+    {
+        if ($value === '') {
+            return $value;
+        }
+
+        $lower = strtolower($value);
+
+        // Uncountable words
+        if (in_array($lower, ['media', 'news', 'series', 'species', 'information', 'data'], true)) {
+            return $value;
+        }
+
+        // Irregular plurals
+        $irregulars = [
+            'person' => 'people', 'man' => 'men', 'woman' => 'women',
+            'child' => 'children', 'mouse' => 'mice', 'goose' => 'geese',
+            'tooth' => 'teeth', 'foot' => 'feet', 'ox' => 'oxen',
+        ];
+
+        if (isset($irregulars[$lower])) {
+            return self::matchCase($value, $irregulars[$lower]);
+        }
+
+        // Rule-based pluralization (order matters)
+        $rules = [
+            '/(quiz)$/i' => '$1zes',
+            '/(matr|vert|append)ix$/i' => '$1ices',
+            '/(alias|status)$/i' => '$1es',
+            '/(x|ch|ss|sh)$/i' => '$1es',
+            '/([^aeiouy])y$/i' => '$1ies',
+            '/(fe?)$/i' => 'ves',
+            '/s$/i' => 'ses',
+            '/$/' => 's',
+        ];
+
+        foreach ($rules as $pattern => $replacement) {
+            if (preg_match($pattern, $value)) {
+                return (string) preg_replace($pattern, $replacement, $value);
+            }
+        }
+
+        return $value.'s';
+    }
+
+    /**
+     * Match the case of the original word to the replacement.
+     */
+    private static function matchCase(string $original, string $replacement): string
+    {
+        if (ctype_upper($original[0])) {
+            return ucfirst($replacement);
+        }
+
+        return $replacement;
+    }
 }

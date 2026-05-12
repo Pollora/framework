@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Taxonomy\Domain\Models;
 
-use Illuminate\Support\Str;
 use Pollora\Support\Domain\StringHelper;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyAttributeInterface;
 
@@ -80,7 +79,7 @@ abstract class AbstractTaxonomy implements TaxonomyAttributeInterface
         $humanized = ucfirst(str_replace('_', ' ', $snakeCase));
 
         // Ensure it's singular
-        return Str::singular($humanized);
+        return StringHelper::singular($humanized);
     }
 
     /**
@@ -91,7 +90,7 @@ abstract class AbstractTaxonomy implements TaxonomyAttributeInterface
      */
     public function getPluralName(): string
     {
-        return Str::plural($this->getName());
+        return StringHelper::plural($this->getName());
     }
 
     /**
