@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Foundation\Console;
 
+use Illuminate\Console\Application;
 use Illuminate\Console\Application as Artisan;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
@@ -13,6 +14,9 @@ use Symfony\Component\Console\Command\Command as SymfonyCommand;
  * When the `pollora` binary is used (POLLORA_BINARY=true), this manager:
  * 1. Remaps `pollora:*` command signatures to shorter aliases (e.g. `pollora:make-plugin` → `make-plugin`)
  * 2. Filters the command list to only show Pollora-related commands
+ *
+ * Transformations are applied lazily via setArtisan() + applyIfNeeded(),
+ * because commands are not yet loaded when Artisan::starting() fires.
  */
 final class PolloraBinaryManager
 {
@@ -42,6 +46,10 @@ final class PolloraBinaryManager
         'pollora:theme:status' => 'theme:status',
     ];
 
+    private static ?Artisan $artisan = null;
+
+    private static bool $applied = false;
+
     public static function isPolloraBinary(): bool
     {
         return defined('POLLORA_BINARY') && POLLORA_BINARY === true;
@@ -56,16 +64,33 @@ final class PolloraBinaryManager
     }
 
     /**
-     * Remap command signatures for the Pollora binary.
-     *
-     * Adds short aliases while keeping the original `pollora:*` names as hidden aliases.
+     * Store the Artisan instance for later transformation.
      */
-    public static function remapCommands(Artisan $artisan): void
+    public static function setArtisan(Artisan $artisan): void
     {
-        if (! self::isPolloraBinary()) {
+        self::$artisan = $artisan;
+    }
+
+    /**
+     * Apply transformations if not yet applied.
+     * Called at a point where all commands are loaded.
+     */
+    public static function applyIfNeeded(): void
+    {
+        if (self::$applied || ! self::$artisan instanceof Application || ! self::isPolloraBinary()) {
             return;
         }
 
+        self::$applied = true;
+        self::remapCommands(self::$artisan);
+        self::filterCommands(self::$artisan);
+    }
+
+    /**
+     * Remap command signatures for the Pollora binary.
+     */
+    public static function remapCommands(Artisan $artisan): void
+    {
         /** @var array<string, SymfonyCommand> $commands */
         $commands = $artisan->all();
 
@@ -76,12 +101,14 @@ final class PolloraBinaryManager
 
             $command = $commands[$original];
 
-            // Add the short name as the primary name
             $command->setAliases(array_merge(
                 $command->getAliases(),
                 [$original]
             ));
             $command->setName($short);
+
+            // Re-register so the application indexes the command under its new name
+            $artisan->add($command);
         }
     }
 
@@ -105,10 +132,6 @@ final class PolloraBinaryManager
      */
     public static function filterCommands(Artisan $artisan): void
     {
-        if (! self::isPolloraBinary()) {
-            return;
-        }
-
         $visible = self::getVisibleCommands();
 
         /** @var array<string, SymfonyCommand> $commands */
@@ -122,7 +145,7 @@ final class PolloraBinaryManager
     }
 
     /**
-     * Apply all Pollora binary transformations.
+     * Apply all Pollora binary transformations directly.
      */
     public static function boot(Artisan $artisan): void
     {
@@ -132,5 +155,14 @@ final class PolloraBinaryManager
 
         self::remapCommands($artisan);
         self::filterCommands($artisan);
+    }
+
+    /**
+     * Reset state (for testing).
+     */
+    public static function reset(): void
+    {
+        self::$artisan = null;
+        self::$applied = false;
     }
 }
