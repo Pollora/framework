@@ -62,7 +62,7 @@ class ResolvesLocationTestHelper
         getResolvedNamespace as public;
     }
 
-    public function option($key = null)
+    public function option($key = null): null
     {
         return null;
     }

@@ -21,7 +21,7 @@ describe('IncludesFiles', function (): void {
     afterEach(function (): void {
         // Clean up temp files
         if (is_dir($this->tempDir)) {
-            array_map('unlink', glob($this->tempDir.'/*'));
+            array_map(unlink(...), glob($this->tempDir.'/*'));
             rmdir($this->tempDir);
         }
     });
@@ -74,7 +74,7 @@ describe('IncludesFiles', function (): void {
         expect($GLOBALS['from_second_dir'] ?? false)->toBeTrue();
 
         unset($GLOBALS['from_first_dir'], $GLOBALS['from_second_dir']);
-        array_map('unlink', glob($secondDir.'/*'));
+        array_map(unlink(...), glob($secondDir.'/*'));
         rmdir($secondDir);
     });
 });

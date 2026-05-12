@@ -38,8 +38,6 @@ class ModuleScaffolderService
         'application/x-httpd-php',
     ];
 
-    public function __construct() {}
-
     /**
      * Download a module from a GitHub repository and scaffold it into the target directory.
      *
@@ -213,10 +211,8 @@ class ModuleScaffolderService
         bool $force = false,
         ?callable $confirmCallback = null
     ): void {
-        if (File::exists($targetPath) && ! $force) {
-            if ($confirmCallback !== null && ! $confirmCallback(sprintf('File %s already exists. Do you want to overwrite it?', $targetPath))) {
-                return;
-            }
+        if (File::exists($targetPath) && ! $force && ($confirmCallback !== null && ! $confirmCallback(sprintf('File %s already exists. Do you want to overwrite it?', $targetPath)))) {
+            return;
         }
 
         $this->copyFileWithReplacements($item->getRealPath(), $targetPath, $replacements);

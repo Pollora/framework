@@ -16,7 +16,7 @@ describe('WordPressErrorHandler', function (): void {
     it('handles doing_it_wrong by logging error', function (): void {
         $this->logger->shouldReceive('logError')
             ->once()
-            ->with(Mockery::on(fn (WordPressError $e) => $e->type === WordPressErrorType::DOING_IT_WRONG
+            ->with(Mockery::on(fn (WordPressError $e): bool => $e->type === WordPressErrorType::DOING_IT_WRONG
                 && $e->function === 'bad_function'
                 && $e->message === 'Wrong usage'
             ));
@@ -27,7 +27,7 @@ describe('WordPressErrorHandler', function (): void {
     it('handles deprecated function by logging error', function (): void {
         $this->logger->shouldReceive('logError')
             ->once()
-            ->with(Mockery::on(fn (WordPressError $e) => $e->type === WordPressErrorType::DEPRECATED_FUNCTION
+            ->with(Mockery::on(fn (WordPressError $e): bool => $e->type === WordPressErrorType::DEPRECATED_FUNCTION
                 && $e->function === 'old_func'
                 && $e->replacement === 'new_func'
             ));
@@ -38,7 +38,7 @@ describe('WordPressErrorHandler', function (): void {
     it('handles deprecated argument by logging error', function (): void {
         $this->logger->shouldReceive('logError')
             ->once()
-            ->with(Mockery::on(fn (WordPressError $e) => $e->type === WordPressErrorType::DEPRECATED_ARGUMENT
+            ->with(Mockery::on(fn (WordPressError $e): bool => $e->type === WordPressErrorType::DEPRECATED_ARGUMENT
                 && $e->function === 'some_func'
             ));
 
@@ -48,7 +48,7 @@ describe('WordPressErrorHandler', function (): void {
     it('passes extra context to error', function (): void {
         $this->logger->shouldReceive('logError')
             ->once()
-            ->with(Mockery::on(fn (WordPressError $e) => isset($e->context['trace']) && $e->context['trace'] === 'stack'
+            ->with(Mockery::on(fn (WordPressError $e): bool => isset($e->context['trace']) && $e->context['trace'] === 'stack'
             ));
 
         $this->handler->handleDoingItWrong('f', 'msg', '1.0', ['trace' => 'stack']);

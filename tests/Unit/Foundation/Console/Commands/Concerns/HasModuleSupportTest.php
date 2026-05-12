@@ -30,7 +30,7 @@ describe('HasModuleSupport', function (): void {
                 $this->moduleOption = $value;
             }
 
-            public function option($key = null)
+            public function option($key = null): ?string
             {
                 return $this->moduleOption;
             }
@@ -118,7 +118,7 @@ describe('HasModuleSupport', function (): void {
 if (! class_exists('FoundationTestApp')) {
     class FoundationTestApp extends Container
     {
-        public function basePath($path = ''): string
+        public function basePath(?string $path = ''): string
         {
             return '/base'.($path ? DIRECTORY_SEPARATOR.$path : '');
         }

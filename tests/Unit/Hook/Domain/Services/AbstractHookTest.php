@@ -187,7 +187,7 @@ describe('P2 — Remove hooks not registered through Pollora', function (): void
         };
 
         // Add a hook through Pollora, then remove it
-        $closure = fn () => null;
+        $closure = fn (): null => null;
         $hook->add('my_hook', $closure, 15);
 
         expect($hook->callbacks('my_hook'))->toHaveCount(1);

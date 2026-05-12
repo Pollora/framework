@@ -172,9 +172,11 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
             if (! $file->isFile()) {
                 continue;
             }
+
             if (! str_ends_with((string) $file->getFilename(), '.blade.php')) {
                 continue;
             }
+
             $content = file_get_contents($file->getPathname(), false, null, 0, 8192);
             if ($content === false) {
                 continue;

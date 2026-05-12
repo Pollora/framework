@@ -21,7 +21,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
 
         $this->viewFinder->shouldReceive('getPaths')->once()->andReturn([$tempDir]);
         $this->filesystem->shouldReceive('getRelativePath')->andReturnUsing(
-            fn ($base, $path) => basename($path)
+            fn ($base, $path): string => basename($path)
         );
 
         $finder = new FileSystemTemplateFinder($this->viewFinder, $this->filesystem, $tempDir);
@@ -47,7 +47,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
 
         $this->viewFinder->shouldReceive('getPaths')->andReturn([$tempDir]);
         $this->filesystem->shouldReceive('getRelativePath')->andReturnUsing(
-            fn ($base, $path) => basename($path)
+            fn ($base, $path): string => basename($path)
         );
 
         $finder = new FileSystemTemplateFinder($this->viewFinder, $this->filesystem, $tempDir);
@@ -72,7 +72,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
 
         $this->viewFinder->shouldReceive('getPaths')->andReturn([$tempDir]);
         $this->filesystem->shouldReceive('getRelativePath')->andReturnUsing(
-            fn ($base, $path) => basename($path)
+            fn ($base, $path): string => basename($path)
         );
 
         $finder = new FileSystemTemplateFinder($this->viewFinder, $this->filesystem, $tempDir);
@@ -99,7 +99,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
 
         $this->viewFinder->shouldReceive('getPaths')->andReturn([$tempDir]);
         $this->filesystem->shouldReceive('getRelativePath')->andReturnUsing(
-            fn ($base, $path) => basename($path)
+            fn ($base, $path): string => basename($path)
         );
 
         $finder = new FileSystemTemplateFinder($this->viewFinder, $this->filesystem, $tempDir);

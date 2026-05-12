@@ -14,7 +14,7 @@ describe('WpRocketServiceProvider', function (): void {
         $this->registeredFilters = [];
 
         // Override Brain Monkey's add_filter stub to capture calls
-        Brain\Monkey\Functions\when('add_filter')->alias(function ($hook, $callback) {
+        Brain\Monkey\Functions\when('add_filter')->alias(function ($hook, $callback): true {
             $this->registeredFilters[$hook] = $callback;
 
             return true;

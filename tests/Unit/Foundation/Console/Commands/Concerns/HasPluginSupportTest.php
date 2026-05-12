@@ -31,7 +31,7 @@ describe('HasPluginSupport', function (): void {
                 $this->pluginOption = $value;
             }
 
-            public function option($key = null)
+            public function option($key = null): ?string
             {
                 return $this->pluginOption;
             }

@@ -73,7 +73,7 @@ class ModuleServiceProvider extends ServiceProvider
      */
     private function registerUseCases(): void
     {
-        $this->app->singleton(DiscoverModulesUseCase::class, function (Application $app): DiscoverModulesUseCase {
+        $this->app->singleton(function (Application $app): DiscoverModulesUseCase {
             $logger = null;
             try {
                 $logger = $app->make('log');
@@ -87,7 +87,7 @@ class ModuleServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(ApplyModulesUseCase::class, function (Application $app): ApplyModulesUseCase {
+        $this->app->singleton(function (Application $app): ApplyModulesUseCase {
             $logger = null;
             try {
                 $logger = $app->make('log');

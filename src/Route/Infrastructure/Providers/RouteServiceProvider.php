@@ -104,7 +104,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     private function registerUseCases(): void
     {
-        $this->app->singleton(RegisterWordPressTypesUseCase::class, function ($app): RegisterWordPressTypesUseCase {
+        $this->app->singleton(function ($app): RegisterWordPressTypesUseCase {
             $logger = null;
             try {
                 $logger = $app->make('log');
@@ -118,7 +118,7 @@ class RouteServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(BindWordPressParametersUseCase::class, function ($app): BindWordPressParametersUseCase {
+        $this->app->singleton(function ($app): BindWordPressParametersUseCase {
             $logger = null;
             try {
                 $logger = $app->make('log');

@@ -68,7 +68,7 @@ describe('WooCommerceTemplateResolver', function (): void {
         $result = $this->resolver->extendTemplateLoaderFiles($templates, 'product.blade.php');
 
         // No resources/views paths should be added since blade path === original path
-        $resourceViews = array_filter($result, fn ($t) => str_starts_with($t, 'resources/views/'));
+        $resourceViews = array_filter($result, fn ($t): bool => str_starts_with($t, 'resources/views/'));
         expect($resourceViews)->toBeEmpty();
         expect($result)->toContain('single-product.php');
     });

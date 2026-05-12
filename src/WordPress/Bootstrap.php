@@ -20,17 +20,14 @@ class Bootstrap
 
     protected ConsoleDetectionService $consoleDetectionService;
 
-    protected DebugDetectorInterface $debugDetector;
-
     /**
      * Database configuration array.
      */
     private array $db;
 
-    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, protected Action $action)
+    public function __construct(?ConsoleDetectionService $consoleDetectionService, protected DebugDetectorInterface $debugDetector, protected Action $action)
     {
         $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
-        $this->debugDetector = $debugDetector;
     }
 
     /**

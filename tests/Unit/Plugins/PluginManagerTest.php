@@ -18,7 +18,7 @@ function createPluginManager(
     $app = Mockery::mock(ContainerInterface::class);
     $app->shouldReceive('get')->andReturn(null)->byDefault();
 
-    if (! $consoleDetection) {
+    if (! $consoleDetection instanceof ConsoleDetectionService) {
         $consoleDetection = Mockery::mock(ConsoleDetectionService::class);
         $consoleDetection->shouldReceive('isConsole')->andReturn(true)->byDefault();
     }

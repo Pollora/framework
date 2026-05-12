@@ -17,25 +17,11 @@ use Pollora\Proxy\WordPressDatabase;
 if (! class_exists('wpdb')) {
     class wpdb
     {
-        public string $dbuser = '';
-
-        public string $dbpassword = '';
-
-        public string $dbname = '';
-
-        public string $dbhost = '';
-
         public $dbh;
 
         public string $prefix = 'wp_';
 
-        public function __construct(string $dbuser, string $dbpassword, string $dbname, string $dbhost)
-        {
-            $this->dbuser = $dbuser;
-            $this->dbpassword = $dbpassword;
-            $this->dbname = $dbname;
-            $this->dbhost = $dbhost;
-        }
+        public function __construct(public string $dbuser, public string $dbpassword, public string $dbname, public string $dbhost) {}
     }
 }
 

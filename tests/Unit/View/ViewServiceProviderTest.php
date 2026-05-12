@@ -27,7 +27,7 @@ describe('View::makeLoader()', function (): void {
         app()['config'] = new Repository(['view' => ['compiled' => $tempDir]]);
 
         // Call the macro
-        $makeLoader = Closure::bind(function () use ($view, $tempDir) {
+        $makeLoader = Closure::bind(function () use ($view, $tempDir): string {
             $viewName = $view->getName();
             $path = $view->getPath();
             $id = md5($path);
@@ -58,7 +58,7 @@ describe('View::makeLoader()', function (): void {
         expect($loaderPath2)->toBe($loaderPath);
 
         // Cleanup
-        array_map('unlink', glob($tempDir.'/*'));
+        array_map(unlink(...), glob($tempDir.'/*'));
         rmdir($tempDir);
     });
 
@@ -83,7 +83,7 @@ describe('View::makeLoader()', function (): void {
         expect($loaderContent)->not->toContain("');");
 
         // Cleanup
-        array_map('unlink', glob($tempDir.'/*'));
+        array_map(unlink(...), glob($tempDir.'/*'));
         rmdir($tempDir);
     });
 

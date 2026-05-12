@@ -41,7 +41,7 @@ describe('RegisterWooCommerceHooksUseCase', function (): void {
 
         $capturedCallback = null;
         $this->action->shouldReceive('add')
-            ->with('plugins_loaded', Mockery::on(function ($callback) use (&$capturedCallback) {
+            ->with('plugins_loaded', Mockery::on(function ($callback) use (&$capturedCallback): true {
                 $capturedCallback = $callback;
 
                 return true;
@@ -65,7 +65,7 @@ describe('RegisterWooCommerceHooksUseCase', function (): void {
 
         $capturedCallback = null;
         $this->action->shouldReceive('add')
-            ->with('plugins_loaded', Mockery::on(function ($callback) use (&$capturedCallback) {
+            ->with('plugins_loaded', Mockery::on(function ($callback) use (&$capturedCallback): true {
                 $capturedCallback = $callback;
 
                 return true;

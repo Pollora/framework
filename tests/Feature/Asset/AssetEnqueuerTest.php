@@ -15,7 +15,7 @@ beforeEach(function (): void {
     $detector->shouldReceive('isWpCli')->andReturn(false);
 
     $this->app->instance(ConsoleDetectorInterface::class, $detector);
-    $this->app->singleton(ConsoleDetectionService::class, fn () => new ConsoleDetectionService($detector));
+    $this->app->singleton(ConsoleDetectionService::class, fn (): ConsoleDetectionService => new ConsoleDetectionService($detector));
 
     // Bind AssetManager
     $this->assetManager = Mockery::mock(AssetManager::class);

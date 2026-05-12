@@ -96,7 +96,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         }
 
         $repository = $this->promptForRepository();
-        $repo = ! in_array($repository, [null, '', '0'], true) ? $repository : 'pollora/plugin-default';
+        $repo = in_array($repository, [null, '', '0'], true) ? 'pollora/plugin-default' : $repository;
 
         $success = $this->scaffolder->downloadAndScaffold(
             repository: $repo,
@@ -105,7 +105,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
             replacements: $this->getReplacements(),
             version: $this->option('repo-version'),
             output: $this->getOutput(),
-            fileFilter: fn ($item): bool => ! $this->shouldExcludeAssetFile($item),
+            fileFilter: fn (object $item): bool => ! $this->shouldExcludeAssetFile($item),
         );
 
         if (! $success) {
@@ -392,6 +392,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
                     if (empty($value)) {
                         return 'Repository is required';
                     }
+
                     if (! str_contains($value, '/')) {
                         return 'Repository must be in owner/repo format';
                     }

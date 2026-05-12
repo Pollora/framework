@@ -232,6 +232,7 @@ class ThemeServiceProvider extends ServiceProvider
         if (! class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
             class_alias(LaravelThemeModule::class, 'Pollora\\Modules\\Domain\\Models\\LaravelThemeModule');
         }
+
         if (! class_exists('Pollora\\Theme\\Domain\\Models\\LaravelThemeModule')) {
             class_alias(LaravelThemeModule::class, 'Pollora\\Theme\\Domain\\Models\\LaravelThemeModule');
         }

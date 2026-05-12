@@ -40,6 +40,6 @@ final class ModuleException extends Exception
             $message .= ': '.$reason;
         }
 
-        return new static($message);
+        return new self($message);
     }
 }

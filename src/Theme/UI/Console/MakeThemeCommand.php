@@ -71,7 +71,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $this->setupContainerFolders();
 
         $repository = $this->promptForRepository();
-        $repo = ! in_array($repository, [null, '', '0'], true) ? $repository : 'pollora/theme-default';
+        $repo = in_array($repository, [null, '', '0'], true) ? 'pollora/theme-default' : $repository;
 
         $success = $this->scaffolder->downloadAndScaffold(
             repository: $repo,
@@ -280,6 +280,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
                     if (empty($value)) {
                         return 'Repository is required';
                     }
+
                     if (! str_contains($value, '/')) {
                         return 'Repository must be in owner/repo format';
                     }

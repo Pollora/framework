@@ -66,7 +66,7 @@ describe('AbstractEventDispatcher', function (): void {
     it('dispatches Laravel events from WordPress action handlers', function (): void {
         $this->events->shouldReceive('dispatch')
             ->once()
-            ->with(Mockery::on(fn ($event) => $event instanceof TestSavePostEvent && $event->postId === 42));
+            ->with(Mockery::on(fn ($event): bool => $event instanceof TestSavePostEvent && $event->postId === 42));
 
         $this->dispatcher->handleSavePost(42);
     });
@@ -74,7 +74,7 @@ describe('AbstractEventDispatcher', function (): void {
     it('dispatches delete event with correct payload', function (): void {
         $this->events->shouldReceive('dispatch')
             ->once()
-            ->with(Mockery::on(fn ($event) => $event instanceof TestDeletePostEvent && $event->postId === 99));
+            ->with(Mockery::on(fn ($event): bool => $event instanceof TestDeletePostEvent && $event->postId === 99));
 
         $this->dispatcher->handleDeletePost(99);
     });

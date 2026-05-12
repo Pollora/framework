@@ -36,7 +36,7 @@ describe('LaravelCollectionAdapter', function (): void {
     it('maps items and returns new CollectionInterface', function (): void {
         $collection = new LaravelCollectionAdapter([1, 2, 3]);
 
-        $mapped = $collection->map(fn ($item) => $item * 2);
+        $mapped = $collection->map(fn ($item): int|float => $item * 2);
 
         expect($mapped)->toBeInstanceOf(CollectionInterface::class);
         expect($mapped->all())->toBe([2, 4, 6]);
@@ -45,7 +45,7 @@ describe('LaravelCollectionAdapter', function (): void {
     it('filters items and returns new CollectionInterface', function (): void {
         $collection = new LaravelCollectionAdapter([1, 2, 3, 4]);
 
-        $filtered = $collection->filter(fn ($item) => $item > 2);
+        $filtered = $collection->filter(fn ($item): bool => $item > 2);
 
         expect($filtered)->toBeInstanceOf(CollectionInterface::class);
         expect($filtered->values()->all())->toBe([3, 4]);
@@ -88,6 +88,7 @@ describe('LaravelCollectionAdapter', function (): void {
         foreach ($collection as $item) {
             $items[] = $item;
         }
+
         expect($items)->toBe([10, 20, 30]);
     });
 });

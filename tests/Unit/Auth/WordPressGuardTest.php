@@ -93,6 +93,7 @@ describe('WordPressGuard', function (): void {
         if (! class_exists('WP_User')) {
             eval('class WP_User { public int $ID = 0; }');
         }
+
         $wpUser = new WP_User;
         $wpUser->ID = 7;
 

@@ -258,8 +258,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\Throwable $reflectionException) {
-            $this->logger?->error(sprintf('Failed to process class-level attributes for %s', $className), ['exception' => $reflectionException]);
+        } catch (\Throwable $throwable) {
+            $this->logger?->error(sprintf('Failed to process class-level attributes for %s', $className), ['exception' => $throwable]);
         }
 
         return $config;
@@ -285,8 +285,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\Throwable $reflectionException) {
-            $this->logger?->error(sprintf('Failed to process method-level attributes for %s', $className), ['exception' => $reflectionException]);
+        } catch (\Throwable $throwable) {
+            $this->logger?->error(sprintf('Failed to process method-level attributes for %s', $className), ['exception' => $throwable]);
         }
 
         return $config;
