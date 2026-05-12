@@ -35,5 +35,9 @@ class ArtisanServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../Console/pollora.stub' => $this->app->basePath('pollora'),
         ], 'pollora-binary');
+
+        $this->publishes([
+            __DIR__.'/../Console/ddev-pollora.stub' => $this->app->basePath('.ddev/commands/web/pollora'),
+        ], 'pollora-ddev');
     }
 }

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+## Description: Run Pollora CLI commands
+## Usage: pollora [command] [flags]
+## Example: ddev pollora status\nddev pollora make-plugin MyPlugin\nddev pollora list
+## ProjectTypes: wordpress
+
+if [ -f /var/www/html/pollora ]; then
+    php /var/www/html/pollora "$@"
+elif [ -f /var/www/html/artisan ]; then
+    # Fallback: proxy to artisan with pollora: prefix
+    COMMAND="${1}"
+    shift
+    php /var/www/html/artisan "pollora:${COMMAND}" "$@"
+else
+    echo "Error: No Pollora binary or artisan found in this project."
+    exit 1
+fi
