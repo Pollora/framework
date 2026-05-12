@@ -54,7 +54,7 @@ class WordPressTaxonomyRegistry implements TaxonomyRegistryInterface
     /**
      * Get all registered taxonomies from WordPress.
      *
-     * @return array<string, \WP_Taxonomy> The registered taxonomies
+     * @return array<int|string, \WP_Taxonomy> The registered taxonomies
      */
     public function getAll(): array
     {

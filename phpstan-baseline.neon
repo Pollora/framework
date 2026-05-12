@@ -187,22 +187,10 @@ parameters:
 			path: src/Support/RecursiveMenuIterator.php
 
 		-
-			message: '#^Class Pollora\\Support\\RecursiveMenuIterator @extends tag contains incompatible type iterable\<int, WP_Post\>&Pollora\\Support\\AbstractRecursiveIterator\.$#'
-			identifier: generics.notCompatible
-			count: 1
-			path: src/Support/RecursiveMenuIterator.php
-
-		-
 			message: '#^Constant WPINC not found\.$#'
 			identifier: constant.notFound
 			count: 1
 			path: src/Support/WordPress.php
-
-		-
-			message: '#^Method Pollora\\Taxonomy\\Infrastructure\\Adapters\\WordPressTaxonomyRegistry\:\:getAll\(\) should return array\<string, WP_Taxonomy\> but returns array\<int, WP_Taxonomy\>\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php
 
 		-
 			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
