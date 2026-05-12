@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Services;
 
+use Illuminate\Container\Container;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeModule;
@@ -11,6 +12,10 @@ use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 
 class WordPressThemeParser
 {
+    public function __construct(
+        private readonly ?Container $container = null
+    ) {}
+
     /**
      * Parse WordPress theme headers from style.css file.
      */
@@ -44,9 +49,9 @@ class WordPressThemeParser
         $styleCssPath = $path.'/style.css';
         $headers = $this->parseThemeHeaders($styleCssPath);
 
-        // Try to create Laravel-enhanced theme module if container is available
-        if (function_exists('app') && app()->bound('app')) {
-            $theme = new LaravelThemeModule($name, $path, app());
+        // Create Laravel-enhanced theme module if container is available
+        if ($this->container instanceof Container) {
+            $theme = new LaravelThemeModule($name, $path, $this->container);
         } else {
             $theme = new ThemeModule($name, $path);
         }
