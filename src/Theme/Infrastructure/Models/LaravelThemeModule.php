@@ -20,7 +20,7 @@ class LaravelThemeModule extends ThemeModule
     protected array $delayedConfigs = [];
 
     /**
-     * @param  Application  $app  Laravel application instance
+     * @param  Container  $app  Laravel container (Application in runtime)
      */
     public function __construct(
         string $name,

@@ -109,16 +109,28 @@ parameters:
 			path: src/Plugin/Infrastructure/Models/LaravelPluginModule.php
 
 		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Plugin\\Infrastructure\\Models\\LaravelPluginModule constructor expects Illuminate\\Foundation\\Application, Illuminate\\Container\\Container given\.$#'
-			identifier: argument.type
+			message: '#^Call to an undefined method Illuminate\\Container\\Container::getCachedConfigPath\(\)\.$#'
+			identifier: method.notFound
 			count: 1
-			path: src/Plugin/Infrastructure/Repositories/PluginRepository.php
+			path: src/Plugin/Infrastructure/Models/LaravelPluginModule.php
 
 		-
-			message: '#^Parameter \#3 \$app of class Pollora\\Theme\\Infrastructure\\Models\\LaravelThemeModule constructor expects Illuminate\\Foundation\\Application, Illuminate\\Container\\Container given\.$#'
-			identifier: argument.type
+			message: '#^Call to an undefined method Illuminate\\Container\\Container::getCachedServicesPath\(\)\.$#'
+			identifier: method.notFound
 			count: 1
-			path: src/Theme/Infrastructure/Services/WordPressThemeParser.php
+			path: src/Plugin/Infrastructure/Models/LaravelPluginModule.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Container\\Container::getCachedConfigPath\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/Infrastructure/Models/LaravelThemeModule.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Container\\Container::getCachedServicesPath\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Theme/Infrastructure/Models/LaravelThemeModule.php
 
 		-
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'

@@ -31,7 +31,7 @@ class LaravelPluginModule extends PluginModule
      *
      * @param  string  $name  Plugin name
      * @param  string  $path  Plugin path
-     * @param  Application  $app  Laravel application instance
+     * @param  Container  $app  Laravel container (Application in runtime)
      */
     public function __construct(
         string $name,
