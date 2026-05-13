@@ -6,6 +6,7 @@ namespace Pollora\Schedule;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\TestCase;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
@@ -81,12 +82,16 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     protected function scheduleRecurringEvents(): void
     {
-        if ($this->isOrchestraTest() || defined('WP_CLI') || defined('WP_INSTALLING')) {
+        if ($this->isOrchestraTest() || defined('WP_CLI')) {
             return;
         }
 
-        $schedule = $this->app->make(Schedule::class);
-        RecurringEvent::scheduleAllEvents($schedule);
+        try {
+            $schedule = $this->app->make(Schedule::class);
+            RecurringEvent::scheduleAllEvents($schedule);
+        } catch (QueryException) {
+            // WordPress tables may not exist yet during initial installation
+        }
     }
 
     /**
