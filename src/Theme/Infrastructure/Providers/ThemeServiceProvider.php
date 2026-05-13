@@ -248,8 +248,8 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $baseThemePath = $this->getBaseThemePath();
 
-        // Hook into WordPress option system to reset theme root when needed
-        $this->filter->add('option_stylesheet_root', $this->resetThemeRootOption(...), PHP_INT_MAX);
+        // Fix theme_root when WordPress resolves an incorrect absolute path from the transient
+        $this->filter->add('theme_root', $this->fixThemeRoot(...), PHP_INT_MAX);
         $this->filter->add('site_transient_theme_roots', $this->handleThemeRootsTransient(...), PHP_INT_MAX);
 
         if ($this->isValidThemeDirectory($baseThemePath)) {
@@ -306,11 +306,6 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function resolveThemePath(string $themePath): string
     {
-        // Si le chemin existe déjà, on le garde
-        if (file_exists($themePath)) {
-            return $themePath;
-        }
-
         // Si c'est un chemin WordPress standard, utiliser le répertoire par défaut
         if ($this->isWordPressThemePath($themePath)) {
             return WP_CONTENT_DIR.'/themes';
@@ -368,25 +363,23 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
-     * WordPress filter callback to reset theme root option.
+     * WordPress filter callback to fix theme root resolution.
      *
-     * Forces template and stylesheet root to be false when the path
-     * doesn't exist, ensuring WordPress rescans for theme directories.
+     * Ensures the theme root always points to the correct base theme path,
+     * regardless of stale absolute paths stored in the theme_roots transient.
      *
-     * @param  string|bool  $path  Current theme root path from database
-     * @return string|bool Original path if exists, false otherwise
+     * @param  string  $themeRoot  Theme root path resolved by WordPress
+     * @return string Corrected theme root path
      */
-    private function resetThemeRootOption(string|bool $path): string|bool
+    private function fixThemeRoot(string $themeRoot): string
     {
-        if (file_exists($path)) {
-            return $path;
+        $baseThemePath = $this->getBaseThemePath();
+
+        if ($themeRoot !== $baseThemePath && ! $this->isWordPressThemePath($themeRoot)) {
+            return $baseThemePath;
         }
 
-        // Clear cached WordPress options to force rescan
-        delete_option('stylesheet_root');
-        delete_option('template_root');
-
-        return false;
+        return $themeRoot;
     }
 
     /**

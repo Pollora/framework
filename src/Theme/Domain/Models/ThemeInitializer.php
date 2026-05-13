@@ -97,11 +97,14 @@ class ThemeInitializer implements ThemeComponent
     }
 
     /**
-     * Force template and stylesheet root to be false when called from the database
+     * Force template and stylesheet root to the configured theme path.
+     *
+     * Overrides any stale absolute path stored in wp_options,
+     * ensuring WordPress always uses the correct theme root.
      */
-    protected function resetThemeRootOption(string|bool $path): bool
+    protected function resetThemeRootOption(string|bool $path): string
     {
-        return false;
+        return $this->themeRoot;
     }
 
     /**
