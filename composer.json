@@ -60,7 +60,7 @@
                 "Rename __ and wp_mail functions": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/wordpress-stubs.patch"
             },
             "mockery/mockery": {
-                "Fix PHP 8.4 implicit nullable deprecations": "patches/mockery-php84-nullable.patch"
+                "Fix PHP 8.4 implicit nullable deprecations": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/mockery-php84-nullable.patch"
             }
         },
         "laravel": {
