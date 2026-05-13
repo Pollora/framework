@@ -15,6 +15,7 @@ use Pollora\Schedule\Application\UseCases\RegisterSchedulerFiltersUseCase;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Events\RecurringEvent;
 use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
+use Pollora\Services\WordPress\Installation\DatabaseService;
 
 /**
  * Service provider for WordPress cron scheduler functionality.
@@ -82,6 +83,11 @@ class SchedulerServiceProvider extends ServiceProvider
     protected function scheduleRecurringEvents(): void
     {
         if ($this->isOrchestraTest() || defined('WP_CLI')) {
+            return;
+        }
+
+        // TODO: find a better way to check if the database schema is ready
+        if (! $this->app->make(DatabaseService::class)->isConfigured()) {
             return;
         }
 
