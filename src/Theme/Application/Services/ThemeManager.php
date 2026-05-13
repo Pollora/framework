@@ -167,8 +167,11 @@ class ThemeManager implements ThemeService
                 $theme->getName()
             );
         } else {
-            // Fallback to direct registration if ModuleAssetManager is not available
-            $this->viewFinder->addLocation($theme->getViewPath());
+            // Fallback: resolve the finder from the view factory at call time
+            // to ensure we get the same instance Laravel uses (not the one
+            // captured at construction time, which may be a different instance)
+            $finder = $this->app->make('view')->getFinder();
+            $finder->addLocation($theme->getViewPath());
         }
     }
 
