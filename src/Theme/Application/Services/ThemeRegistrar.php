@@ -13,6 +13,7 @@ use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
+use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\Menus;
 use Pollora\Theme\Domain\Models\Sidebar;
@@ -70,6 +71,11 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
         // Setup theme assets and includes
         $this->setupThemeAssets($theme);
+
+        // Load theme view paths via ThemeManager
+        if ($this->app->has(ThemeService::class)) {
+            $this->app->get(ThemeService::class)->load($themeName);
+        }
 
         // Register and boot the theme
         $theme->register();
