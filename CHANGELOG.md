@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.3.0...develop)
 
+### Fixed
+- `WordPressHeaders` middleware now respects the `DONOTCACHEPAGE` constant set by WooCommerce and compatible cache plugins, preventing public cache headers on cart, checkout, and account pages.
+
 ## [v13.3.0](https://github.com/Pollora/framework/compare/v13.2.0...v13.3.0) - 2026-04-22
 
 ### Added

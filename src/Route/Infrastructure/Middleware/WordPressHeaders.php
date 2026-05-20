@@ -109,7 +109,19 @@ class WordPressHeaders
      */
     private function shouldSetPublicCache(): bool
     {
-        return $this->isWordPressFunctionAvailable('is_user_logged_in') && ! is_user_logged_in();
+        return $this->isWordPressFunctionAvailable('is_user_logged_in')
+            && ! is_user_logged_in()
+            && ! $this->isNocacheRequested();
+    }
+
+    /**
+     * Check if a cache plugin (e.g. WooCommerce) has requested no-cache via DONOTCACHEPAGE.
+     *
+     * @return bool True when caching must be suppressed
+     */
+    private function isNocacheRequested(): bool
+    {
+        return defined('DONOTCACHEPAGE') && (bool) DONOTCACHEPAGE;
     }
 
     /**
