@@ -178,6 +178,10 @@ function setupWordPressMocks(): void
         ->byDefault()
         ->andReturn(false);
 
+    WP::$wpFunctions->shouldReceive('is_user_logged_in')
+        ->andReturn(false)
+        ->byDefault();
+
     WP::$wpFunctions->shouldReceive('is_embed')
         ->byDefault()
         ->andReturn(false);
@@ -1217,6 +1221,13 @@ if (! function_exists('is_wp_error')) {
     function is_wp_error($thing)
     {
         return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_wp_error($thing) : ($thing instanceof WP_Error);
+    }
+}
+
+if (! function_exists('is_user_logged_in')) {
+    function is_user_logged_in()
+    {
+        return isset(WP::$wpFunctions) ? WP::$wpFunctions->is_user_logged_in() : false;
     }
 }
 
