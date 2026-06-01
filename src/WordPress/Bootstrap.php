@@ -152,9 +152,97 @@ class Bootstrap
             define('SHORTINIT', true);
         }
 
+        // Apply lightweight mode filters before WordPress loads
+        if ($this->isLightweightRequest()) {
+            $this->applyLightweightFilters();
+        }
+
         if (! $this->consoleDetectionService->isWpCli()) {
             require_once ABSPATH.'wp-settings.php';
         }
+    }
+
+    /**
+     * Determine if the current request should load WordPress in lightweight mode.
+     *
+     * API routes (prefixed /api/) trigger lightweight mode, which skips loading
+     * most plugins and prevents WordPress from running its full query cycle.
+     * The theme is still loaded so that theme-registered routes and services work.
+     */
+    private function isLightweightRequest(): bool
+    {
+        if ($this->consoleDetectionService->isConsole()) {
+            return false;
+        }
+
+        $uri = parse_url((string) request()->server('REQUEST_URI', ''), PHP_URL_PATH) ?? '';
+
+        return str_starts_with($uri, '/api/');
+    }
+
+    /**
+     * Apply WordPress filters that reduce the bootstrap footprint.
+     *
+     * These filters are placed BEFORE wp-settings.php is loaded, so they
+     * intercept WordPress at the right moment:
+     *
+     * - `pre_option_active_plugins`: returns empty array → no plugins loaded
+     * - WP_USE_THEMES is already false for /api/ requests (set in defineWordPressConstants)
+     *
+     * The theme itself is still loaded (needed for routes, controllers, services).
+     * Plugins that are needed for specific API routes can be loaded on-demand
+     * via the 'wordpress.api_plugins' config key.
+     */
+    private function applyLightweightFilters(): void
+    {
+        $apiPlugins = config('wordpress.api_plugins');
+
+        // null = disabled, load all plugins normally
+        if ($apiPlugins === null) {
+            return;
+        }
+
+        $apiPlugins = (array) $apiPlugins;
+
+        // No plugins allowed: short-circuit immediately
+        if ($apiPlugins === []) {
+            add_filter('pre_option_active_plugins', '__return_empty_array');
+
+            return;
+        }
+
+        // Selective loading: read the real list via DB to avoid recursion,
+        // then filter it down to only the allowed plugins.
+        $allowedPlugins = $this->resolveAllowedPlugins($apiPlugins);
+
+        add_filter('pre_option_active_plugins', function () use ($allowedPlugins): array {
+            return $allowedPlugins;
+        });
+    }
+
+    /**
+     * Read active plugins from the database and filter to only allowed ones.
+     *
+     * Uses a direct DB query to avoid triggering the pre_option filter recursion.
+     */
+    private function resolveAllowedPlugins(array $apiPlugins): array
+    {
+        try {
+            $raw = \Illuminate\Support\Facades\DB::table('options')
+                ->where('option_name', 'active_plugins')
+                ->value('option_value');
+
+            $allPlugins = $raw ? (array) @unserialize($raw) : [];
+        } catch (\Throwable) {
+            return [];
+        }
+
+        return array_values(array_filter($allPlugins, function (string $plugin) use ($apiPlugins): bool {
+            $pluginDir = dirname($plugin);
+
+            return in_array($pluginDir, $apiPlugins, true)
+                || in_array($plugin, $apiPlugins, true);
+        }));
     }
 
     /**

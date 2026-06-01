@@ -81,6 +81,25 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Lightweight API Mode
+    |--------------------------------------------------------------------------
+    |
+    | Requests to /api/* automatically load WordPress in lightweight mode:
+    | no plugins are loaded by default, dramatically reducing bootstrap time.
+    |
+    | If specific API routes need a plugin (e.g., WooCommerce for product data),
+    | list its directory name here. Only these plugins will be loaded for /api/ requests.
+    |
+    | Examples:
+    |   'api_plugins' => ['woocommerce', 'advanced-custom-fields-pro'],
+    |
+    | Set to null to disable lightweight mode (load all plugins for /api/ too).
+    |
+    */
+    'api_plugins' => [],
+
     'constants' => [
         // WordPress authentication keys and salts
         'auth_key' => env('AUTH_KEY'),
