@@ -10,7 +10,8 @@ use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOption
 use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Support\NpmRunner;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
-
+use Pollora\Translation\Domain\Contracts\TranslationCompilerInterface;
+use Pollora\Translation\Infrastructure\Services\GettextMoCompiler;
 use Symfony\Component\Process\Process;
 
 use function Laravel\Prompts\confirm;
@@ -96,6 +97,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         $this->info(sprintf('Theme "%s" created successfully.', $this->theme->getName()));
 
+        $this->compileTranslations();
         $this->installRequirementsIfNeeded();
         $this->runNpmIfNeeded();
         $this->promptAndSetActiveTheme();
@@ -152,6 +154,32 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         ];
 
         return $this;
+    }
+
+    /**
+     * Compile .po translation files into .mo binary format.
+     *
+     * Scans the theme's languages directory and compiles every .po file
+     * found using a pure-PHP gettext compiler (no system tools required).
+     */
+    protected function compileTranslations(): void
+    {
+        $langDir = $this->theme->getBasePath().'/languages';
+
+        if (! is_dir($langDir) || glob($langDir.'/*.po') === []) {
+            return;
+        }
+
+        /** @var TranslationCompilerInterface $compiler */
+        $compiler = $this->laravel->bound(TranslationCompilerInterface::class)
+            ? $this->laravel->make(TranslationCompilerInterface::class)
+            : new GettextMoCompiler;
+
+        $compiled = $compiler->compileDirectory($langDir);
+
+        if ($compiled > 0) {
+            $this->info(sprintf('Compiled %d translation file(s).', $compiled));
+        }
     }
 
     /**
