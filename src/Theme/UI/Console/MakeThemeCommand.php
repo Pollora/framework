@@ -232,10 +232,147 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         if ($process->isSuccessful()) {
             $this->info('Composer packages installed successfully.');
+            $this->activateWordPressPlugins($selected);
         } else {
             $this->error('Failed to install some Composer packages. You can install them manually:');
             $this->line('  composer require '.implode(' ', $selected));
         }
+    }
+
+    /**
+     * Detect WordPress plugins among installed packages and offer to activate them.
+     *
+     * Uses `composer show` to inspect each package type. Packages of type
+     * `wordpress-plugin` are collected and, if `activate_plugin()` is available,
+     * the user is prompted to activate them in WordPress.
+     *
+     * @param  array<int, string>  $packages  Composer package names that were just installed.
+     */
+    protected function activateWordPressPlugins(array $packages): void
+    {
+        if (! function_exists('activate_plugin')) {
+            return;
+        }
+
+        $plugins = $this->resolveWordPressPlugins($packages);
+
+        if ($plugins === []) {
+            return;
+        }
+
+        $shouldActivate = confirm(
+            label: count($plugins) === 1
+                ? sprintf('Activate the WordPress plugin "%s"?', array_values($plugins)[0])
+                : sprintf('Activate %d WordPress plugins?', count($plugins)),
+            default: true,
+        );
+
+        if (! $shouldActivate) {
+            return;
+        }
+
+        foreach ($plugins as $package => $slug) {
+            $pluginFile = $this->findPluginEntryFile($slug);
+
+            if ($pluginFile === null) {
+                $this->warn(sprintf('Could not find entry file for plugin "%s".', $slug));
+
+                continue;
+            }
+
+            $result = activate_plugin($pluginFile);
+
+            if (is_wp_error($result)) {
+                $this->error(sprintf('Failed to activate "%s": %s', $slug, $result->get_error_message()));
+            } else {
+                $this->info(sprintf('Plugin "%s" activated.', $slug));
+            }
+        }
+    }
+
+    /**
+     * Filter a list of Composer packages to only those of type `wordpress-plugin`.
+     *
+     * Inspects each package via `composer show --format=json` and extracts the
+     * plugin slug (the portion after the vendor prefix, e.g. "woocommerce"
+     * from "wpackagist-plugin/woocommerce").
+     *
+     * @param  array<int, string>  $packages  Composer package names.
+     * @return array<string, string> Map of package name => plugin directory slug.
+     */
+    private function resolveWordPressPlugins(array $packages): array
+    {
+        $plugins = [];
+
+        foreach ($packages as $package) {
+            $process = new Process(['composer', 'show', $package, '--format=json'], base_path());
+            $process->setTimeout(30);
+            $process->run();
+
+            if (! $process->isSuccessful()) {
+                continue;
+            }
+
+            $info = json_decode($process->getOutput(), true);
+
+            if (($info['type'] ?? '') === 'wordpress-plugin') {
+                // The plugin slug is the package name without the vendor prefix
+                $slug = substr($package, (int) strpos($package, '/') + 1);
+                $plugins[$package] = $slug;
+            }
+        }
+
+        return $plugins;
+    }
+
+    /**
+     * Find the main PHP entry file for a WordPress plugin.
+     *
+     * Scans the plugin directory for the file containing the `Plugin Name:`
+     * header, which WordPress uses to identify the plugin entry point.
+     *
+     * @param  string  $slug  The plugin directory name (e.g. "woocommerce").
+     * @return string|null The plugin-relative path (e.g. "woocommerce/woocommerce.php"), or null if not found.
+     */
+    private function findPluginEntryFile(string $slug): ?string
+    {
+        $pluginDir = defined('WP_PLUGIN_DIR')
+            ? WP_PLUGIN_DIR.'/'.$slug
+            : base_path('public/content/plugins/'.$slug);
+
+        if (! is_dir($pluginDir)) {
+            return null;
+        }
+
+        // Check the conventional entry file first (slug.php)
+        $conventionalFile = $pluginDir.'/'.$slug.'.php';
+        if (file_exists($conventionalFile) && $this->isPluginFile($conventionalFile)) {
+            return $slug.'/'.$slug.'.php';
+        }
+
+        // Fallback: scan top-level PHP files for the Plugin Name header
+        foreach (glob($pluginDir.'/*.php') as $file) {
+            if ($this->isPluginFile($file)) {
+                return $slug.'/'.basename($file);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check whether a PHP file contains the WordPress `Plugin Name:` header.
+     *
+     * Only reads the first 8 KB of the file (the maximum WordPress inspects)
+     * to avoid loading large files into memory.
+     *
+     * @param  string  $filePath  Absolute path to the PHP file.
+     */
+    private function isPluginFile(string $filePath): bool
+    {
+        $content = file_get_contents($filePath, false, null, 0, 8192);
+
+        return $content !== false && str_contains($content, 'Plugin Name:');
     }
 
     /**
