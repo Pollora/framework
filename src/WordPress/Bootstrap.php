@@ -244,8 +244,19 @@ class Bootstrap
         return array_values(array_filter($allPlugins, function (string $plugin) use ($apiPlugins): bool {
             $pluginDir = dirname($plugin);
 
-            return in_array($pluginDir, $apiPlugins, true)
-                || in_array($plugin, $apiPlugins, true);
+            foreach ($apiPlugins as $pattern) {
+                // Exact match on directory or full basename
+                if ($pattern === $pluginDir || $pattern === $plugin) {
+                    return true;
+                }
+
+                // Glob-style wildcard (e.g. 'woocommerce*' matches 'woocommerce-subscriptions')
+                if (str_contains($pattern, '*') && fnmatch($pattern, $pluginDir)) {
+                    return true;
+                }
+            }
+
+            return false;
         }));
     }
 

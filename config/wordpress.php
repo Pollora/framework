@@ -92,7 +92,8 @@ return [
     | If specific API routes need a plugin (e.g., WooCommerce for product data),
     | list its directory name here. Only these plugins will be loaded for /api/ requests.
     |
-    | Examples:
+    | Glob patterns are supported:
+    |   'api_plugins' => ['woocommerce*'],  // woocommerce, woocommerce-subscriptions, etc.
     |   'api_plugins' => ['woocommerce', 'advanced-custom-fields-pro'],
     |
     | Use ['*'] or null to load all plugins (disable lightweight mode).
