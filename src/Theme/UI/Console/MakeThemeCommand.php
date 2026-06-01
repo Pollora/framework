@@ -11,6 +11,10 @@ use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Support\NpmRunner;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
+use Symfony\Component\Process\Process;
+
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\multiselect;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
@@ -71,7 +75,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $this->setupContainerFolders();
 
         $repository = $this->promptForRepository();
-        $repo = in_array($repository, [null, '', '0'], true) ? 'pollora/theme-default' : $repository;
+        $repo = in_array($repository, [null, '', '0'], true) ? self::TEMPLATES['default'] : $repository;
 
         $success = $this->scaffolder->downloadAndScaffold(
             repository: $repo,
@@ -92,6 +96,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         $this->info(sprintf('Theme "%s" created successfully.', $this->theme->getName()));
 
+        $this->installRequirementsIfNeeded();
         $this->runNpmIfNeeded();
         $this->promptAndSetActiveTheme();
 
@@ -150,6 +155,62 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
+     * Check for theme requirements and offer to install them.
+     */
+    protected function installRequirementsIfNeeded(): void
+    {
+        $requirementsFile = $this->theme->getBasePath().'/requirements.json';
+
+        if (! file_exists($requirementsFile)) {
+            return;
+        }
+
+        $requirements = json_decode(file_get_contents($requirementsFile), true);
+        $composerPackages = $requirements['composer'] ?? [];
+
+        if (empty($composerPackages)) {
+            return;
+        }
+
+        $this->newLine();
+        $this->info('This theme requires the following Composer packages:');
+
+        $options = [];
+        foreach ($composerPackages as $package => $description) {
+            $options[$package] = "{$package} — {$description}";
+        }
+
+        $selected = multiselect(
+            label: 'Which packages would you like to install?',
+            options: $options,
+            default: array_keys($options),
+            hint: 'Press space to toggle, enter to confirm. Leave empty to skip.',
+        );
+
+        if (empty($selected)) {
+            $this->info('Skipping package installation.');
+
+            return;
+        }
+
+        $this->info('Installing Composer packages...');
+
+        $command = ['composer', 'require', '-W', ...$selected];
+        $process = new Process($command, base_path());
+        $process->setTimeout(300);
+        $process->run(function ($type, $buffer): void {
+            $this->getOutput()->write($buffer);
+        });
+
+        if ($process->isSuccessful()) {
+            $this->info('Composer packages installed successfully.');
+        } else {
+            $this->error('Failed to install some Composer packages. You can install them manually:');
+            $this->line('  composer require '.implode(' ', $selected));
+        }
+    }
+
+    /**
      * Run npm install and build in the theme directory.
      */
     protected function runNpmIfNeeded(): void
@@ -197,6 +258,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     {
         return [
             '%theme_name%' => $this->theme->getName(),
+            '%theme_camel%' => $this->theme->getThemeCamelCase(),
             '%theme_author%' => $this->option('theme-author'),
             '%theme_author_uri%' => $this->option('theme-author-uri'),
             '%theme_uri%' => $this->option('theme-uri'),
@@ -255,6 +317,14 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
+     * Built-in theme templates mapped to their GitHub repositories.
+     */
+    protected const TEMPLATES = [
+        'default' => 'pollora/theme-default',
+        'ecommerce' => 'pollora/theme-apiary',
+    ];
+
+    /**
      * Prompt for repository if not provided.
      */
     protected function promptForRepository(): ?string
@@ -263,16 +333,17 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return $this->option('repository');
         }
 
-        $useRepository = select(
-            label: 'How would you like to create the theme?',
+        $choice = select(
+            label: 'Which theme template would you like to use?',
             options: [
-                'repository' => 'Download from GitHub repository',
-                'default' => 'Use default theme template',
+                'default' => 'Default — Basic starter theme',
+                'ecommerce' => 'E-commerce — WooCommerce theme (Tailwind CSS, Alpine.js)',
+                'repository' => 'Custom — Download from a GitHub repository',
             ],
             default: 'default'
         );
 
-        if ($useRepository === 'repository') {
+        if ($choice === 'repository') {
             return text(
                 label: 'Enter the GitHub repository (owner/repo format):',
                 placeholder: 'pollora/theme-default',
@@ -290,7 +361,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             );
         }
 
-        return null;
+        return self::TEMPLATES[$choice] ?? null;
     }
 
     /**

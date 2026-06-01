@@ -165,6 +165,14 @@ class ThemeMetadata
     }
 
     /**
+     * Get the theme name in camelCase format.
+     */
+    public function getThemeCamelCase(): string
+    {
+        return lcfirst($this->studlify($this->getName()));
+    }
+
+    /**
      * Convert a string to StudlyCase format
      */
     protected function studlify(string $value): string
