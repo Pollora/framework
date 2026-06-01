@@ -99,9 +99,7 @@ return [
     | Use ['*'] or null to load all plugins (disable lightweight mode).
     |
     */
-    'api_plugins' => [
-        '*'
-    ],
+    'api_plugins' => [],
 
     'constants' => [
         // WordPress authentication keys and salts
