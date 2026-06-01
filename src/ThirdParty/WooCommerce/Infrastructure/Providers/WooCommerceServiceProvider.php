@@ -10,11 +10,13 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\ComingSoonHandlerInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerce;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\ComingSoonHandler;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerceTemplateResolver;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
@@ -74,6 +76,12 @@ class WooCommerceServiceProvider extends ServiceProvider
             $app->make(WooCommerceService::class)
         ));
 
+        // Register the Coming Soon handler
+        $this->app->singleton(ComingSoonHandlerInterface::class, fn (Container $app): ComingSoonHandler => new ComingSoonHandler(
+            $app->make(ViewFactory::class),
+            $app->make(TemplateFinderInterface::class)
+        ));
+
         // Maintain backward compatibility by binding the old class name
         $this->app->singleton(\Pollora\ThirdParty\WooCommerce\WooCommerce::class, fn (Container $app) => $app->make(WooCommerceIntegrationInterface::class));
 
@@ -89,7 +97,8 @@ class WooCommerceServiceProvider extends ServiceProvider
             $app->make(Action::class),
             $app->make(Filter::class),
             $app->make(WooCommerceIntegrationInterface::class),
-            $app->make(TemplateResolverInterface::class)
+            $app->make(TemplateResolverInterface::class),
+            $app->make(ComingSoonHandlerInterface::class)
         ));
     }
 

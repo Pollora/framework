@@ -6,8 +6,10 @@ namespace Pollora\ThirdParty\WooCommerce\Application\UseCases;
 
 use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\ComingSoonHandlerInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\ComingSoonHandler;
 
 /**
  * Use case for registering WooCommerce hooks and filters.
@@ -21,7 +23,8 @@ class RegisterWooCommerceHooksUseCase
         private readonly Action $action,
         private readonly Filter $filter,
         private readonly WooCommerceIntegrationInterface $woocommerceIntegration,
-        private readonly TemplateResolverInterface $templateResolver
+        private readonly TemplateResolverInterface $templateResolver,
+        private readonly ComingSoonHandlerInterface $comingSoonHandler
     ) {}
 
     /**
@@ -40,6 +43,7 @@ class RegisterWooCommerceHooksUseCase
         $this->action->add('plugins_loaded', function (): void {
             if (defined('WC_ABSPATH')) {
                 $this->registerTemplateFilters();
+                $this->registerComingSoonFilter();
                 $this->registerSetupActions();
             }
         });
@@ -88,6 +92,29 @@ class RegisterWooCommerceHooksUseCase
             'comments_template',
             $this->woocommerceIntegration->reviewsTemplate(...),
             11
+        );
+    }
+
+    /**
+     * Replace WooCommerce's Coming Soon template handler with Blade-compatible version.
+     *
+     * WC's ComingSoonRequestHandler renders a block-based template and calls exit(),
+     * bypassing the Blade rendering pipeline. We remove it and replace it with a
+     * handler that returns a Blade template path for FrontendController to render.
+     */
+    private function registerComingSoonFilter(): void
+    {
+        // Remove WC's handler on wp_loaded (after WC has registered its hooks)
+        $this->action->add('wp_loaded', function (): void {
+            ComingSoonHandler::removeWooCommerceHandler();
+        });
+
+        // Add our Blade-compatible handler after WC_Template_Loader (priority 10)
+        // but before Pollora's resolveTemplateInclude (priority 100)
+        $this->filter->add(
+            'template_include',
+            $this->comingSoonHandler->handleTemplateInclude(...),
+            20
         );
     }
 
