@@ -197,12 +197,16 @@ class Bootstrap
     {
         $apiPlugins = config('wordpress.api_plugins');
 
-        // null = disabled, load all plugins normally
+        // null or ['*'] = load all plugins normally
         if ($apiPlugins === null) {
             return;
         }
 
         $apiPlugins = (array) $apiPlugins;
+
+        if (in_array('*', $apiPlugins, true)) {
+            return;
+        }
 
         // No plugins allowed: short-circuit immediately
         if ($apiPlugins === []) {

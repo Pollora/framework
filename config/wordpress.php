@@ -95,10 +95,12 @@ return [
     | Examples:
     |   'api_plugins' => ['woocommerce', 'advanced-custom-fields-pro'],
     |
-    | Set to null to disable lightweight mode (load all plugins for /api/ too).
+    | Use ['*'] or null to load all plugins (disable lightweight mode).
     |
     */
-    'api_plugins' => [],
+    'api_plugins' => [
+        '*'
+    ],
 
     'constants' => [
         // WordPress authentication keys and salts
