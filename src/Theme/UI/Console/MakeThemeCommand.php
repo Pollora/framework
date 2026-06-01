@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\UI\Console;
 
 use Illuminate\Contracts\Console\PromptsForMissingInput;
+use Composer\InstalledVersions;
 use Pollora\Console\Concerns\PromptsForMissingOption;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
 use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
@@ -293,30 +294,20 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     /**
      * Filter a list of Composer packages to only those of type `wordpress-plugin`.
      *
-     * Inspects each package via `composer show --format=json` and extracts the
-     * plugin slug (the portion after the vendor prefix, e.g. "woocommerce"
-     * from "wpackagist-plugin/woocommerce").
+     * Uses Composer's runtime API ({@see InstalledVersions}) to check package
+     * types without spawning a subprocess. Extracts the plugin slug from the
+     * package name (e.g. "woocommerce" from "wpackagist-plugin/woocommerce").
      *
      * @param  array<int, string>  $packages  Composer package names.
      * @return array<string, string> Map of package name => plugin directory slug.
      */
     private function resolveWordPressPlugins(array $packages): array
     {
+        $installedPlugins = InstalledVersions::getInstalledPackagesByType('wordpress-plugin');
         $plugins = [];
 
         foreach ($packages as $package) {
-            $process = new Process(['composer', 'show', $package, '--format=json'], base_path());
-            $process->setTimeout(30);
-            $process->run();
-
-            if (! $process->isSuccessful()) {
-                continue;
-            }
-
-            $info = json_decode($process->getOutput(), true);
-
-            if (($info['type'] ?? '') === 'wordpress-plugin') {
-                // The plugin slug is the package name without the vendor prefix
+            if (in_array($package, $installedPlugins, true)) {
                 $slug = substr($package, (int) strpos($package, '/') + 1);
                 $plugins[$package] = $slug;
             }
