@@ -10,6 +10,7 @@ use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
+use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Infrastructure\Models\LaravelPluginModule;
 use Pollora\Plugin\Infrastructure\Repositories\PluginRepository;
@@ -77,6 +78,9 @@ class PluginRegistrar
 
         // Setup plugin assets and includes
         $this->setupPluginAssets($plugin);
+
+        // Load plugin routes (api.php, web.php)
+        $this->loadPluginRoutes($plugin);
 
         // Register and boot the plugin
         $plugin->register();
@@ -278,6 +282,26 @@ class PluginRegistrar
      * @param  PluginModuleInterface  $plugin  Plugin module
      */
     protected function setupPluginComponents(PluginModuleInterface $plugin): void {}
+
+    /**
+     * Load plugin routes (api.php, web.php).
+     *
+     * @param  PluginModuleInterface  $plugin  Plugin module
+     */
+    protected function loadPluginRoutes(PluginModuleInterface $plugin): void
+    {
+        if (! $this->app->has(ModuleRouteLoader::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleRouteLoader $routeLoader */
+            $routeLoader = $this->app->get(ModuleRouteLoader::class);
+            $routeLoader->loadModuleRoutes($plugin);
+        } catch (\Exception $exception) {
+            $this->logError('Failed to load plugin routes: ' . $exception->getMessage());
+        }
+    }
 
     /**
      * Setup plugin assets and includes.

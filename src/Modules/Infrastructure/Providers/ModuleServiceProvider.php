@@ -17,6 +17,7 @@ use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
+use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 
 /**
  * Main service provider for the generic module system.
@@ -115,6 +116,8 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleComponentManager::class, fn (Container $app): ModuleComponentManager => new ModuleComponentManager($app));
 
         $this->app->singleton(ModuleAssetManager::class, fn (Container $app): ModuleAssetManager => new ModuleAssetManager($app));
+
+        $this->app->singleton(ModuleRouteLoader::class, fn (Container $app): ModuleRouteLoader => new ModuleRouteLoader($app));
     }
 
     /**

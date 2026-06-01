@@ -11,6 +11,7 @@ use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
+use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -71,6 +72,9 @@ class ThemeRegistrar implements ThemeRegistrarInterface
 
         // Setup theme assets and includes
         $this->setupThemeAssets($theme);
+
+        // Load theme routes (api.php, web.php)
+        $this->loadThemeRoutes($theme);
 
         // Load theme view paths via ThemeManager
         if ($this->app->has(ThemeService::class)) {
@@ -271,6 +275,24 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             $componentManager->initializeModuleComponents($moduleId);
         } catch (\Exception $exception) {
             $this->logError('Failed to setup theme components: '.$exception->getMessage());
+        }
+    }
+
+    /**
+     * Load theme routes (api.php, web.php).
+     */
+    protected function loadThemeRoutes(ThemeModuleInterface $theme): void
+    {
+        if (! $this->app->has(ModuleRouteLoader::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleRouteLoader $routeLoader */
+            $routeLoader = $this->app->get(ModuleRouteLoader::class);
+            $routeLoader->loadModuleRoutes($theme);
+        } catch (\Exception $exception) {
+            $this->logError('Failed to load theme routes: ' . $exception->getMessage());
         }
     }
 
