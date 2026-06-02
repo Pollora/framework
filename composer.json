@@ -101,7 +101,7 @@
         "symplify/vendor-patches": "^12.0",
         "mockery/mockery": "^1.6",
         "wp-cli/wp-cli": "^2.12",
-        "larastan/larastan": "^3.0",
+        "larastan/larastan": "^3.10",
         "orchestra/testbench": "^10.0|^11.0"
     },
     "autoload-dev": {
