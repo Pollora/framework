@@ -10,8 +10,8 @@ use Symfony\Component\Console\Input\InputArgument;
 /**
  * Artisan command to generate a new custom post type class.
  *
- * This command creates a new PHP class that implements the PostType interface
- * and is configured with PHP attributes for WordPress custom post type registration.
+ * This command creates a new PHP class decorated with the #[PostType] attribute
+ * and other PHP attributes for WordPress custom post type registration.
  */
 class PostTypeMakeCommand extends AbstractGeneratorCommand
 {
