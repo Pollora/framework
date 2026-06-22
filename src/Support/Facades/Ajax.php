@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Ajax\Domain\Models\AjaxAction;
-use Pollora\Ajax\Infrastructure\Services\AjaxFactory;
+use Pollora\Ajax\Domain\Model\AjaxAction;
+use Pollora\Ajax\Factory\AjaxFactory;
 
 /**
  * Facade for WordPress AJAX functionality.

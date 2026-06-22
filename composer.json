@@ -29,6 +29,7 @@
         "illuminate/database": "^13.5",
         "illuminate/routing": "^13.5",
         "illuminate/console": "^13.5",
+        "pollora/ajax": "^1.0",
         "pollora/entity": "^1.2",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^1.7",
