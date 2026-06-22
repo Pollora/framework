@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Ajax\Infrastructure\Services;
 
+use Pollora\Ajax\Domain\Model\AjaxAccess;
 use Pollora\Ajax\Factory\AjaxFactory;
 use Pollora\Attributes\Ajax;
-use Pollora\Attributes\AjaxAccess;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
