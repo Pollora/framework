@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Ajax\Domain\Model\AjaxAction;
+use Pollora\Ajax\AjaxAction;
 use Pollora\Ajax\Factory\AjaxFactory;
+use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
 
 /**
  * Laravel facade for WordPress AJAX action management.
@@ -23,7 +24,7 @@ use Pollora\Ajax\Factory\AjaxFactory;
  * @method static AjaxAction listen(string $action, callable|string $callback) Register an AJAX action handler.
  *
  * @see AjaxFactory
- * @see \Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider
+ * @see AjaxServiceProvider
  */
 class Ajax extends Facade
 {
