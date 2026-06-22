@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Option\Domain\Models;
+namespace Pollora\Option;
 
 /**
  * Represents an immutable WordPress option value object.

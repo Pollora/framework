@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\UI\Console;
 
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Composer\InstalledVersions;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Pollora\Console\Concerns\PromptsForMissingOption;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
 use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Support\NpmRunner;
-use Pollora\Theme\Domain\Models\ThemeMetadata;
+use Pollora\Theme\ThemeMetadata;
 use Pollora\Translation\Domain\Contracts\TranslationCompilerInterface;
 use Pollora\Translation\Infrastructure\Services\GettextMoCompiler;
 use Symfony\Component\Process\Process;

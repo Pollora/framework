@@ -7,7 +7,7 @@ namespace Pollora\Theme\UI\Console;
 use Illuminate\Config\Repository;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Pollora\Theme\Domain\Models\ThemeMetadata;
+use Pollora\Theme\ThemeMetadata;
 
 /**
  * Base command class used by theme related CLI commands.

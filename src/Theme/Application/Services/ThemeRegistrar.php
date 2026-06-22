@@ -292,7 +292,7 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             $routeLoader = $this->app->get(ModuleRouteLoader::class);
             $routeLoader->loadModuleRoutes($theme);
         } catch (\Exception $exception) {
-            $this->logError('Failed to load theme routes: ' . $exception->getMessage());
+            $this->logError('Failed to load theme routes: '.$exception->getMessage());
         }
     }
 

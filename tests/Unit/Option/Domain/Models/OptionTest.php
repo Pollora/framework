@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Option\Domain\Models\Option;
+use Pollora\Option\Option;
 
 describe('Option', function (): void {
     it('can create option with default autoload', function (): void {

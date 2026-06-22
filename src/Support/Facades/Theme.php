@@ -21,7 +21,7 @@ use Pollora\Theme\Domain\Contracts\ThemeService;
  * @method static void load(string $themeName) Load a theme by name
  * @method static string path(string $path) Get path relative to the active theme
  * @method static string|bool active() Get the active theme name
- * @method static \Pollora\Theme\Domain\Models\ThemeMetadata|null theme() Get the theme metadata object
+ * @method static \Pollora\Theme\ThemeMetadata|null theme() Get the theme metadata object
  */
 class Theme extends Facade
 {

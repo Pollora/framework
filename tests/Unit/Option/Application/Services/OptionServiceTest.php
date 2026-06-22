@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Pollora\Option\Application\Services\OptionService;
 use Pollora\Option\Domain\Contracts\OptionRepositoryInterface;
-use Pollora\Option\Domain\Models\Option;
 use Pollora\Option\Domain\Services\OptionValidationService;
+use Pollora\Option\Option;
 
 describe('OptionService', function (): void {
     beforeEach(function (): void {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Option\Infrastructure\Repositories;
 
 use Pollora\Option\Domain\Contracts\OptionRepositoryInterface;
-use Pollora\Option\Domain\Models\Option;
+use Pollora\Option\Option;
 
 /**
  * WordPress implementation of the option repository.

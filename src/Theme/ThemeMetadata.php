@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Theme\Domain\Models;
+namespace Pollora\Theme;
 
 /**
  * Represents metadata for a WordPress theme

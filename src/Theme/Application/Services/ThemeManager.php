@@ -17,7 +17,7 @@ use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
-use Pollora\Theme\Domain\Models\ThemeMetadata;
+use Pollora\Theme\ThemeMetadata;
 
 /**
  * Theme management service implementation.

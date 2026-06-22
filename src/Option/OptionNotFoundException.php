@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Option\Domain\Exceptions;
+namespace Pollora\Option;
 
 use Exception;
 

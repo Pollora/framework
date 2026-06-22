@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Pollora\Option\Domain\Models\Option;
 use Pollora\Option\Infrastructure\Repositories\WordPressOptionRepository;
+use Pollora\Option\Option;
 
 describe('WordPressOptionRepository', function (): void {
     beforeEach(function (): void {
