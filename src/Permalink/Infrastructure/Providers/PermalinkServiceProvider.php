@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Permalink\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Hook\Domain\Contracts\Action;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Permalink\Domain\Contracts\UrlNormalizerInterface;
 use Pollora\Permalink\Domain\Services\UrlNormalizer;
 use Pollora\Permalink\Infrastructure\Services\PermalinkManager;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Hook\Infrastructure\Services;
 
 use Illuminate\Contracts\Container\Container;
-use Pollora\Hook\Domain\Contracts\CallbackResolverInterface;
+use Pollora\Hook\Domain\Contract\CallbackResolverInterface;
 
 /**
  * Resolves hook callback class instances via the Laravel container.

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Facade;
 use Pollora\Attributes\Action;
-use Pollora\Hook\Domain\Contracts\Action as ActionService;
+use Pollora\Hook\Domain\Contract\Action as ActionService;
 
 beforeEach(function (): void {
     // Mock Action service

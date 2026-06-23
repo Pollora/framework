@@ -6,12 +6,12 @@ use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
-use Pollora\Hook\Domain\Contracts\Action as ActionContract;
-use Pollora\Hook\Domain\Contracts\CallbackResolverInterface;
-use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
+use Pollora\Hook\Adapter\Out\WordPress\Action;
+use Pollora\Hook\Adapter\Out\WordPress\Filter;
+use Pollora\Hook\Domain\Contract\Action as ActionContract;
+use Pollora\Hook\Domain\Contract\CallbackResolverInterface;
+use Pollora\Hook\Domain\Contract\Filter as FilterContract;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
 use Pollora\Hook\Infrastructure\Services\HookDiscovery;
 
 beforeEach(function (): void {

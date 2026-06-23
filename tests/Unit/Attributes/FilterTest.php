@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Facade;
 use Pollora\Attributes\Filter;
-use Pollora\Hook\Domain\Contracts\Filter as FilterService;
+use Pollora\Hook\Domain\Contract\Filter as FilterService;
 
 beforeEach(function (): void {
     // Mock Filter service

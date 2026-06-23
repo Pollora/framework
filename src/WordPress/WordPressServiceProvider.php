@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\InstallationService;
 use Pollora\Services\WordPress\Installation\LanguageService;

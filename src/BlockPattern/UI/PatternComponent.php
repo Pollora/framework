@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\BlockPattern\UI;
 
 use Pollora\BlockPattern\Domain\Contracts\PatternServiceInterface;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Psr\Container\ContainerInterface;
 

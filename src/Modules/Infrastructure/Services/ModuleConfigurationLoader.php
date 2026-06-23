@@ -6,7 +6,7 @@ namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Contracts\Container\Container;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Psr\Log\LoggerInterface;
 
 /**

@@ -8,7 +8,7 @@ use Illuminate\Container\Container;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Plugin\Domain\Models\PluginModule;
 use Pollora\Plugin\Infrastructure\Services\PluginAutoloader;
 

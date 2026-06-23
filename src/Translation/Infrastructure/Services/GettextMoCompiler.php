@@ -218,7 +218,7 @@ class GettextMoCompiler implements TranslationCompilerInterface
         // Assemble the file: header + tables + strings
         $header = pack(
             'V7',
-            0x950412de,               // Magic number (little-endian)
+            0x950412DE,               // Magic number (little-endian)
             0,                         // Revision
             $count,                    // Number of strings
             $originalsTableOffset,     // Offset of originals table

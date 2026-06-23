@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Mockery as m;
 use Pollora\BlockPattern\Domain\Contracts\PatternServiceInterface;
 use Pollora\BlockPattern\UI\PatternComponent;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Psr\Container\ContainerInterface;
 
 require_once __DIR__.'/../helpers.php';

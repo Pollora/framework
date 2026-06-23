@@ -9,7 +9,7 @@ use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Application\Services\ThemeRegistrar;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Mockery as m;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Hook\Domain\Contracts\Action;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Theme\Domain\Models\Menus;
 use Psr\Container\ContainerInterface;
 

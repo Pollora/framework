@@ -10,7 +10,7 @@ use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Dashboard\UI\Console\StatusCommand;
 use Pollora\Dashboard\UI\Http\DashboardController;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 
 /**

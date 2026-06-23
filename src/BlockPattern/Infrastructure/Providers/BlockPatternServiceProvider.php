@@ -13,7 +13,7 @@ use Pollora\BlockPattern\Domain\Contracts\PatternServiceInterface;
 use Pollora\BlockPattern\Infrastructure\Adapters\WordPressPatternDataExtractor;
 use Pollora\BlockPattern\Infrastructure\Registrars\WordPressPatternCategoryRegistrar;
 use Pollora\BlockPattern\Infrastructure\Registrars\WordPressPatternRegistrar;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 
 /**
  * Service provider for BlockPattern feature bindings.

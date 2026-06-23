@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Mail;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 
 /**
  * Class WordPressMailServiceProvider

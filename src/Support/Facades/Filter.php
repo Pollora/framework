@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static self|false remove(string $hook, callable|string|array|null $callback = null, int $priority = 10) Remove a filter hook
  * @method static array|null callbacks(string $hook) Get registered callbacks for a hook
  *
- * @see \Pollora\Hook\Domain\Contracts\Filter
+ * @see \Pollora\Hook\Domain\Contract\Filter
  */
 class Filter extends Facade
 {
@@ -27,6 +27,6 @@ class Filter extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return \Pollora\Hook\Domain\Contracts\Filter::class;
+        return \Pollora\Hook\Domain\Contract\Filter::class;
     }
 }

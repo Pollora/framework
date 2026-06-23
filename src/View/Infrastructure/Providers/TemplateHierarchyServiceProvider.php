@@ -7,7 +7,7 @@ namespace Pollora\View\Infrastructure\Providers;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Filesystem\Filesystem;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\View\Application\Services\TemplateHierarchyService;
 use Pollora\View\Application\UseCases\RegisterTemplateHierarchyFiltersUseCase;
 use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;

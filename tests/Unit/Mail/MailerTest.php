@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Foundation\Application;
 use Illuminate\Mail\Message;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Mail\Mailer;
 
 beforeEach(function (): void {

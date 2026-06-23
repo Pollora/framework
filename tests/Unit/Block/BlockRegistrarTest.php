@@ -9,7 +9,7 @@ use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Block\Infrastructure\Services\BlockRegistrar;
-use Pollora\Hook\Domain\Contracts\Filter as HookFilter;
+use Pollora\Hook\Domain\Contract\Filter as HookFilter;
 use Psr\Log\NullLogger;
 
 /**

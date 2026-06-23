@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Models;
 
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Hook\Domain\Contracts\Action;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Services\Translater;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Support\ThemeConfig;

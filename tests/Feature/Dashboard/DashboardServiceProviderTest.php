@@ -7,9 +7,9 @@ use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Dashboard\Infrastructure\Providers\DashboardServiceProvider;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
-use Pollora\Hook\Domain\Contracts\Action as ActionContract;
+use Pollora\Hook\Adapter\Out\WordPress\Action;
+use Pollora\Hook\Domain\Contract\Action as ActionContract;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
-use Pollora\Hook\Infrastructure\Services\Action;
 use Pollora\VersionCheck\Infrastructure\Providers\VersionCheckServiceProvider;
 
 beforeEach(function (): void {

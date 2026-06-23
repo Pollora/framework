@@ -39,7 +39,7 @@ class ModuleRouteLoader
      */
     public function loadModuleRoutes(ModuleInterface $module): void
     {
-        $routesPath = $module->getPath() . '/routes';
+        $routesPath = $module->getPath().'/routes';
 
         if (! is_dir($routesPath)) {
             return;
@@ -57,7 +57,7 @@ class ModuleRouteLoader
      */
     protected function loadApiRoutes(string $routesPath): void
     {
-        $apiFile = $routesPath . '/api.php';
+        $apiFile = $routesPath.'/api.php';
 
         if (! file_exists($apiFile)) {
             return;
@@ -67,7 +67,7 @@ class ModuleRouteLoader
             Route::prefix('api')
                 ->group($apiFile);
         } catch (\Throwable $throwable) {
-            $this->logger?->error('Failed to load API routes: ' . $throwable->getMessage(), [
+            $this->logger?->error('Failed to load API routes: '.$throwable->getMessage(), [
                 'file' => $apiFile,
                 'exception' => $throwable,
             ]);
@@ -81,7 +81,7 @@ class ModuleRouteLoader
      */
     protected function loadWebRoutes(string $routesPath): void
     {
-        $webFile = $routesPath . '/web.php';
+        $webFile = $routesPath.'/web.php';
 
         if (! file_exists($webFile)) {
             return;
@@ -90,7 +90,7 @@ class ModuleRouteLoader
         try {
             Route::group([], $webFile);
         } catch (\Throwable $throwable) {
-            $this->logger?->error('Failed to load web routes: ' . $throwable->getMessage(), [
+            $this->logger?->error('Failed to load web routes: '.$throwable->getMessage(), [
                 'file' => $webFile,
                 'exception' => $throwable,
             ]);

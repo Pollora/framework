@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
 
@@ -232,7 +232,7 @@ class Bootstrap
     private function resolveAllowedPlugins(array $apiPlugins): array
     {
         try {
-            $raw = \Illuminate\Support\Facades\DB::table('options')
+            $raw = DB::table('options')
                 ->where('option_name', 'active_plugins')
                 ->value('option_value');
 

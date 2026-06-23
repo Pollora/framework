@@ -10,7 +10,7 @@ use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Block\Domain\Contracts\BlockRegistrarInterface;
-use Pollora\Hook\Domain\Contracts\Filter as HookFilter;
+use Pollora\Hook\Domain\Contract\Filter as HookFilter;
 
 /**
  * Scans block directories and registers Gutenberg blocks using the Asset system.

@@ -32,16 +32,16 @@ describe('ModuleRouteLoader', function (): void {
     });
 
     it('loads api.php when it exists', function (): void {
-        $tempDir = sys_get_temp_dir() . '/test_routes_api_' . uniqid();
-        mkdir($tempDir . '/routes', 0777, true);
-        file_put_contents($tempDir . '/routes/api.php', '<?php // api routes');
+        $tempDir = sys_get_temp_dir().'/test_routes_api_'.uniqid();
+        mkdir($tempDir.'/routes', 0777, true);
+        file_put_contents($tempDir.'/routes/api.php', '<?php // api routes');
 
         $module = createMockModuleForRouteLoader($tempDir);
 
         $pendingGroup = Mockery::mock();
         $pendingGroup->shouldReceive('group')
             ->once()
-            ->with($tempDir . '/routes/api.php');
+            ->with($tempDir.'/routes/api.php');
 
         Route::shouldReceive('prefix')
             ->once()
@@ -50,15 +50,15 @@ describe('ModuleRouteLoader', function (): void {
 
         $this->loader->loadModuleRoutes($module);
 
-        unlink($tempDir . '/routes/api.php');
-        rmdir($tempDir . '/routes');
+        unlink($tempDir.'/routes/api.php');
+        rmdir($tempDir.'/routes');
         rmdir($tempDir);
     });
 
     it('loads web.php when it exists', function (): void {
-        $tempDir = sys_get_temp_dir() . '/test_routes_web_' . uniqid();
-        mkdir($tempDir . '/routes', 0777, true);
-        file_put_contents($tempDir . '/routes/web.php', '<?php // web routes');
+        $tempDir = sys_get_temp_dir().'/test_routes_web_'.uniqid();
+        mkdir($tempDir.'/routes', 0777, true);
+        file_put_contents($tempDir.'/routes/web.php', '<?php // web routes');
 
         $module = createMockModuleForRouteLoader($tempDir);
 
@@ -66,29 +66,29 @@ describe('ModuleRouteLoader', function (): void {
 
         Route::shouldReceive('group')
             ->once()
-            ->with([], $tempDir . '/routes/web.php');
+            ->with([], $tempDir.'/routes/web.php');
 
         $this->loader->loadModuleRoutes($module);
 
-        expect(file_exists($tempDir . '/routes/web.php'))->toBeTrue();
+        expect(file_exists($tempDir.'/routes/web.php'))->toBeTrue();
 
-        unlink($tempDir . '/routes/web.php');
-        rmdir($tempDir . '/routes');
+        unlink($tempDir.'/routes/web.php');
+        rmdir($tempDir.'/routes');
         rmdir($tempDir);
     });
 
     it('loads both api.php and web.php when both exist', function (): void {
-        $tempDir = sys_get_temp_dir() . '/test_routes_both_' . uniqid();
-        mkdir($tempDir . '/routes', 0777, true);
-        file_put_contents($tempDir . '/routes/api.php', '<?php // api');
-        file_put_contents($tempDir . '/routes/web.php', '<?php // web');
+        $tempDir = sys_get_temp_dir().'/test_routes_both_'.uniqid();
+        mkdir($tempDir.'/routes', 0777, true);
+        file_put_contents($tempDir.'/routes/api.php', '<?php // api');
+        file_put_contents($tempDir.'/routes/web.php', '<?php // web');
 
         $module = createMockModuleForRouteLoader($tempDir);
 
         $pendingGroup = Mockery::mock();
         $pendingGroup->shouldReceive('group')
             ->once()
-            ->with($tempDir . '/routes/api.php');
+            ->with($tempDir.'/routes/api.php');
 
         Route::shouldReceive('prefix')
             ->once()
@@ -97,19 +97,19 @@ describe('ModuleRouteLoader', function (): void {
 
         Route::shouldReceive('group')
             ->once()
-            ->with([], $tempDir . '/routes/web.php');
+            ->with([], $tempDir.'/routes/web.php');
 
         $this->loader->loadModuleRoutes($module);
 
-        unlink($tempDir . '/routes/api.php');
-        unlink($tempDir . '/routes/web.php');
-        rmdir($tempDir . '/routes');
+        unlink($tempDir.'/routes/api.php');
+        unlink($tempDir.'/routes/web.php');
+        rmdir($tempDir.'/routes');
         rmdir($tempDir);
     });
 
     it('skips missing route files gracefully', function (): void {
-        $tempDir = sys_get_temp_dir() . '/test_routes_empty_' . uniqid();
-        mkdir($tempDir . '/routes', 0777, true);
+        $tempDir = sys_get_temp_dir().'/test_routes_empty_'.uniqid();
+        mkdir($tempDir.'/routes', 0777, true);
 
         $module = createMockModuleForRouteLoader($tempDir);
 
@@ -120,7 +120,7 @@ describe('ModuleRouteLoader', function (): void {
 
         expect(true)->toBeTrue(); // explicit assertion: no routes loaded
 
-        rmdir($tempDir . '/routes');
+        rmdir($tempDir.'/routes');
         rmdir($tempDir);
     });
 });

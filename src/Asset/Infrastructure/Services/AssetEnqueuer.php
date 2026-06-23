@@ -10,8 +10,8 @@ use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Exceptions\AssetException;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
-use Pollora\Hook\Domain\Contracts\Action as HookAction;
-use Pollora\Hook\Domain\Contracts\Filter as HookFilter;
+use Pollora\Hook\Domain\Contract\Action as HookAction;
+use Pollora\Hook\Domain\Contract\Filter as HookFilter;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.

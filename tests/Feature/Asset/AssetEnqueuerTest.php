@@ -6,7 +6,7 @@ use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\ConsoleDetectorInterface;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Infrastructure\Services\AssetEnqueuer;
-use Pollora\Hook\Domain\Contracts\Action as HookAction;
+use Pollora\Hook\Domain\Contract\Action as HookAction;
 
 beforeEach(function (): void {
     // Bind console detection to always return true (prevents WP calls)

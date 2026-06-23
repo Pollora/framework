@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Mockery as m;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Schedule\Application\UseCases\RegisterSchedulerFiltersUseCase;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Schedule\Application\UseCases\RegisterScheduleDiscoveryUseCase;
 use Pollora\Schedule\Application\UseCases\RegisterSchedulerFiltersUseCase;
 use Pollora\Schedule\Contracts\SchedulerInterface;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Pollora\Events\WordPress\AbstractEventDispatcher;
-use Pollora\Hook\Domain\Contracts\Action;
+use Pollora\Hook\Domain\Contract\Action;
 
 // Concrete test implementation
 class TestEventDispatcher extends AbstractEventDispatcher

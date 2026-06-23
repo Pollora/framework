@@ -9,7 +9,7 @@ use Illuminate\Mail\Message;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Mail;
 use Pollora\Container\Domain\ServiceLocator;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 
 /**
  * Class Mailer

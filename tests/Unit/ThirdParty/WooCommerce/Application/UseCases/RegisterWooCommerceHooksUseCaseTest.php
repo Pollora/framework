@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Pollora\Hook\Domain\Contracts\Action;
-use Pollora\Hook\Domain\Contracts\Filter;
-use Pollora\Hook\Domain\Contracts\HookInterface;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
+use Pollora\Hook\Domain\Contract\HookInterface;
 use Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;

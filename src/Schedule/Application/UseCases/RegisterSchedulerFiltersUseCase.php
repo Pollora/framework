@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Schedule\Application\UseCases;
 
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 
 /**

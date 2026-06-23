@@ -299,7 +299,7 @@ class PluginRegistrar
             $routeLoader = $this->app->get(ModuleRouteLoader::class);
             $routeLoader->loadModuleRoutes($plugin);
         } catch (\Exception $exception) {
-            $this->logError('Failed to load plugin routes: ' . $exception->getMessage());
+            $this->logError('Failed to load plugin routes: '.$exception->getMessage());
         }
     }
 
