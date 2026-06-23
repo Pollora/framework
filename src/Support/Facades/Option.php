@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Option\Application\Services\OptionService;
+use Pollora\Option\Application\Service\OptionService;
 
 /**
  * Facade for WordPress option management.
