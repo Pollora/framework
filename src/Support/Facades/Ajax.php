@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Ajax\AjaxAction;
+use Pollora\Ajax\Domain\Model\AjaxAction;
 use Pollora\Ajax\Factory\AjaxFactory;
 use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
 

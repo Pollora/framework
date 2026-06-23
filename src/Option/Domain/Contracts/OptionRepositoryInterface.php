@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Option\Domain\Contracts;
 
-use Pollora\Option\Option;
+use Pollora\Option\Domain\Models\Option;
 
 /**
  * Contract for WordPress option data access.

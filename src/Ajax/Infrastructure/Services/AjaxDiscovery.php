@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Ajax\Infrastructure\Services;
 
-use Pollora\Ajax\AjaxAccess;
+use Pollora\Ajax\Domain\Model\AjaxAccess;
 use Pollora\Ajax\Factory\AjaxFactory;
 use Pollora\Attributes\Ajax;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;

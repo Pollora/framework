@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Option\Application\Services;
 
 use Pollora\Option\Domain\Contracts\OptionRepositoryInterface;
+use Pollora\Option\Domain\Models\Option;
 use Pollora\Option\Domain\Services\OptionValidationService;
-use Pollora\Option\Option;
 
 /**
  * Application service for managing WordPress options.

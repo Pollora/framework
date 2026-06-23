@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use Pollora\Option\Domain\Exceptions\InvalidOptionException;
 use Pollora\Option\Domain\Services\OptionValidationService;
-use Pollora\Option\InvalidOptionException;
 
 describe('OptionValidationService', function (): void {
     beforeEach(function (): void {

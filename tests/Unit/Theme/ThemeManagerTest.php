@@ -10,7 +10,7 @@ use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
-use Pollora\Theme\ThemeMetadata;
+use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 beforeEach(function (): void {
     // Create mock container with config property

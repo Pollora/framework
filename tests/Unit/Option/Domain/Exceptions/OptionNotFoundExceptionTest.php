@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Option\OptionNotFoundException;
+use Pollora\Option\Domain\Exceptions\OptionNotFoundException;
 
 describe('OptionNotFoundException', function (): void {
     it('creates exception with formatted message', function (): void {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Option\Domain\Services;
 
-use Pollora\Option\InvalidOptionException;
+use Pollora\Option\Domain\Exceptions\InvalidOptionException;
 
 /**
  * Service for validating option keys and values.

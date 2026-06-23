@@ -10,7 +10,7 @@ use Pollora\Console\Concerns\PromptsForMissingOption;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
 use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Support\NpmRunner;
-use Pollora\Theme\ThemeMetadata;
+use Pollora\Theme\Domain\Models\ThemeMetadata;
 use Pollora\Translation\Domain\Contracts\TranslationCompilerInterface;
 use Pollora\Translation\Infrastructure\Services\GettextMoCompiler;
 use Symfony\Component\Process\Process;

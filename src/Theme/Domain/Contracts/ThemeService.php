@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Contracts;
 
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
-use Pollora\Theme\ThemeMetadata;
+use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 /**
  * Interface for WordPress Theme management service

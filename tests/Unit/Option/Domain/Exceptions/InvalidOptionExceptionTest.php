@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Option\InvalidOptionException;
+use Pollora\Option\Domain\Exceptions\InvalidOptionException;
 
 describe('InvalidOptionException', function (): void {
     it('creates exception with custom message', function (): void {
