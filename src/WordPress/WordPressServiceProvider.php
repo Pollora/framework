@@ -84,6 +84,7 @@ class WordPressServiceProvider extends ServiceProvider
     {
         if (is_secured()) {
             URL::forceScheme('https');
+            $_SERVER['HTTPS'] = 'on';
         }
     }
 }
