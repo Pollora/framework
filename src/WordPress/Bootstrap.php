@@ -406,10 +406,11 @@ class Bootstrap
             Constant::queue('ABSPATH', $basePath.$wpPath);
         }
 
-        Constant::queue('WP_SITEURL', url(str_replace('public/', '', $wpPath)));
-        Constant::queue('WP_HOME', url('/'));
+        $appUrl = config('app.url');
+        Constant::queue('WP_SITEURL', rtrim($appUrl, '/').'/'.ltrim(str_replace('public/', '', $wpPath), '/'));
+        Constant::queue('WP_HOME', $appUrl);
         Constant::queue('WP_CONTENT_DIR', $basePath.$contentPath);
-        Constant::queue('WP_CONTENT_URL', url('content'));
+        Constant::queue('WP_CONTENT_URL', rtrim($appUrl, '/').'/content');
 
         // Apply constants once all are queued
         Constant::apply();
