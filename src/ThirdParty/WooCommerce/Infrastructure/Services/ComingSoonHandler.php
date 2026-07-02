@@ -24,12 +24,12 @@ class ComingSoonHandler implements ComingSoonHandlerInterface
     /**
      * Blade view name for the coming soon page.
      */
-    private const VIEW_NAME = 'woocommerce.coming-soon';
+    private const string VIEW_NAME = 'woocommerce.coming-soon';
 
     /**
      * Blade view name for the store-only coming soon page.
      */
-    private const STORE_ONLY_VIEW_NAME = 'woocommerce.coming-soon-store-only';
+    private const string STORE_ONLY_VIEW_NAME = 'woocommerce.coming-soon-store-only';
 
     public function __construct(
         private readonly ViewFactory $viewFactory
@@ -136,11 +136,8 @@ class ComingSoonHandler implements ComingSoonHandlerInterface
         }
 
         $termsPageId = wc_terms_and_conditions_page_id();
-        if ($termsPageId > 0 && is_page($termsPageId)) {
-            return true;
-        }
 
-        return false;
+        return $termsPageId > 0 && is_page($termsPageId);
     }
 
     /**
@@ -193,7 +190,7 @@ class ComingSoonHandler implements ComingSoonHandlerInterface
         }
 
         foreach ($wp_filter['template_include']->callbacks as $priority => $callbacks) {
-            foreach ($callbacks as $id => $callback) {
+            foreach ($callbacks as $callback) {
                 if (! is_array($callback['function'] ?? null)) {
                     continue;
                 }

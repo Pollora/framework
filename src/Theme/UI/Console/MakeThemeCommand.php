@@ -206,7 +206,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
         $options = [];
         foreach ($composerPackages as $package => $description) {
-            $options[$package] = "{$package} — {$description}";
+            $options[$package] = sprintf('%s — %s', $package, $description);
         }
 
         $selected = multiselect(
@@ -216,7 +216,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             hint: 'Press space to toggle, enter to confirm. Leave empty to skip.',
         );
 
-        if (empty($selected)) {
+        if ($selected === []) {
             $this->info('Skipping package installation.');
 
             return;
@@ -227,7 +227,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $command = ['composer', 'require', '-W', ...$selected];
         $process = new Process($command, base_path());
         $process->setTimeout(300);
-        $process->run(function ($type, $buffer): void {
+        $process->run(function ($type, string|iterable $buffer): void {
             $this->getOutput()->write($buffer);
         });
 
@@ -272,7 +272,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return;
         }
 
-        foreach ($plugins as $package => $slug) {
+        foreach ($plugins as $slug) {
             $pluginFile = $this->findPluginEntryFile($slug);
 
             if ($pluginFile === null) {

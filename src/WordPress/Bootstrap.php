@@ -219,9 +219,7 @@ class Bootstrap
         // then filter it down to only the allowed plugins.
         $allowedPlugins = $this->resolveAllowedPlugins($apiPlugins);
 
-        add_filter('pre_option_active_plugins', function () use ($allowedPlugins): array {
-            return $allowedPlugins;
-        });
+        add_filter('pre_option_active_plugins', fn (): array => $allowedPlugins);
     }
 
     /**
@@ -407,10 +405,10 @@ class Bootstrap
         }
 
         $appUrl = config('app.url');
-        Constant::queue('WP_SITEURL', rtrim($appUrl, '/').'/'.ltrim(str_replace('public/', '', $wpPath), '/'));
+        Constant::queue('WP_SITEURL', rtrim((string) $appUrl, '/').'/'.ltrim(str_replace('public/', '', $wpPath), '/'));
         Constant::queue('WP_HOME', $appUrl);
         Constant::queue('WP_CONTENT_DIR', $basePath.$contentPath);
-        Constant::queue('WP_CONTENT_URL', rtrim($appUrl, '/').'/content');
+        Constant::queue('WP_CONTENT_URL', rtrim((string) $appUrl, '/').'/content');
 
         // Apply constants once all are queued
         Constant::apply();
