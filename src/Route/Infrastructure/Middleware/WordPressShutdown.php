@@ -121,7 +121,7 @@ class WordPressShutdown
             ob_end_flush();
         }
 
-        $output = (string) ob_get_clean();
+        $output = ob_get_clean() ?: '';
 
         // Restore output buffer depth to pre-execution baseline,
         // cleaning any WordPress buffers opened during bootstrap
