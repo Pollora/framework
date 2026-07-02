@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Plugin\UI\Console;
 
 use Illuminate\Config\Repository;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
@@ -24,16 +26,8 @@ use function Laravel\Prompts\text;
  * performing string replacements, running npm install/build, and setting up
  * the plugin structure following WordPress and Laravel conventions.
  */
-class MakePluginCommand extends Command implements PromptsForMissingInput, PromptsForMissingOptionContract
-{
-    use PromptsForMissingOption;
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'pollora:make:plugin {name}
+#[Description('Generate plugin structure by downloading from GitHub repository')]
+#[Signature('pollora:make:plugin {name}
     {--plugin-author= : Plugin author name}
     {--plugin-author-uri= : Plugin author URI}
     {--plugin-uri= : Plugin URI}
@@ -43,14 +37,10 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     {--repo-version= : Specific version/tag to download}
     {--asset= : Include asset files (JS/CSS) with ViteJS compilation (true/false)}
     {--activate-plugin= : Activate the plugin after creation (yes/no)}
-    {--force : Force create plugin with same name}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Generate plugin structure by downloading from GitHub repository';
+    {--force : Force create plugin with same name}')]
+class MakePluginCommand extends Command implements PromptsForMissingInput, PromptsForMissingOptionContract
+{
+    use PromptsForMissingOption;
 
     /**
      * List of files and directories to exclude when --asset is false.

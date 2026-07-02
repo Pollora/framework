@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Block\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Pollora\Foundation\Console\Commands\Concerns\HasPluginSupport;
@@ -18,14 +19,13 @@ use Symfony\Component\Console\Input\InputOption;
  * and bootstraps the Vite infrastructure on first use (vite.config.js patching,
  * npm dependencies, BlocksServiceProvider).
  */
+#[Description('Create a new Gutenberg block in a theme or plugin')]
 class MakeBlockCommand extends Command
 {
     use HasPluginSupport;
     use HasThemeSupport;
 
     protected $name = 'pollora:make:block';
-
-    protected $description = 'Create a new Gutenberg block in a theme or plugin';
 
     /**
      * npm dependencies to add for block development.

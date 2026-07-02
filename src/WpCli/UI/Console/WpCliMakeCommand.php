@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\WpCli\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
 use Illuminate\Support\Str;
 use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,6 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
  * Command to generate a new WP CLI command class.
  * This command creates a new WP CLI command class in the specified location (app, theme, or plugin).
  */
+#[Description('Create a new WP CLI command class')]
 class WpCliMakeCommand extends AbstractGeneratorCommand
 {
     /**
@@ -20,13 +22,6 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
      * @var string
      */
     protected $name = 'pollora:make:wp-cli';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a new WP CLI command class';
 
     /**
      * The type of class being generated.

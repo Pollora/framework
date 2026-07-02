@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Foundation\Console\Commands;
 
+use Illuminate\Console\Attributes\Description;
 use Illuminate\Support\Str;
 use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,6 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
  * Command to generate a new Eloquent model class.
  * This command creates a new model class in the specified location (app, theme, plugin, or module).
  */
+#[Description('Create a new Eloquent model class')]
 class MakeModelCommand extends AbstractGeneratorCommand
 {
     /**
@@ -20,13 +22,6 @@ class MakeModelCommand extends AbstractGeneratorCommand
      * @var string
      */
     protected $name = 'pollora:make:model';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a new Eloquent model class';
 
     /**
      * The type of class being generated.

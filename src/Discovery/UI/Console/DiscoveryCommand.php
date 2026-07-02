@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Discovery\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
@@ -15,26 +17,14 @@ use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
  * Provides CLI commands for managing the discovery system including
  * running discovery, clearing caches, and inspecting discovered items.
  */
-final class DiscoveryCommand extends Command
-{
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'discovery:run
+#[Description('Run the discovery process to find and register framework components')]
+#[Signature('discovery:run
                             {--clear-cache : Clear discovery cache before running}
                             {--discovery= : Run only specific discovery (optional)}
                             {--stats : Show performance statistics}
-                            {--verbose-errors : Show detailed error information}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Run the discovery process to find and register framework components';
-
+                            {--verbose-errors : Show detailed error information}')]
+final class DiscoveryCommand extends Command
+{
     /**
      * Discovery counts collected before applying
      *

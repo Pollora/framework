@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Filesystem\Filesystem;
 
 /**
  * Console command used to remove an existing theme from the filesystem.
  */
+#[Description('Remove an existing theme')]
+#[Signature('pollora:theme:delete {name : Name of the theme to remove}')]
 class RemoveThemeCommand extends BaseThemeCommand
 {
-    protected $signature = 'pollora:theme:delete {name : Name of the theme to remove}';
-
-    protected $description = 'Remove an existing theme';
-
     /**
      * Execute the command.
      *

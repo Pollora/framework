@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\WordPress\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
@@ -11,12 +13,10 @@ use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 
+#[Description('Configure environment for WordPress installation')]
+#[Signature('pollora:env:setup {--install : Suppress some informational output}')]
 class LaunchPadSetupCommand extends Command
 {
-    protected $signature = 'pollora:env:setup {--install : Suppress some informational output}';
-
-    protected $description = 'Configure environment for WordPress installation';
-
     public function __construct(
         private readonly DatabaseService $databaseService
     ) {

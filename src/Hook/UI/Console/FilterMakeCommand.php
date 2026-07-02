@@ -6,12 +6,15 @@ declare(strict_types=1);
 
 namespace Pollora\Hook\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
+
 /**
  * Class FilterMakeCommand
  *
  * Command to create a new filter hook class (feature UI layer).
  * Supports generation in different locations (app, theme, plugin) through traits.
  */
+#[Description('Create a new filter hook class')]
 class FilterMakeCommand extends AttributeMakeCommand
 {
     /**
@@ -20,13 +23,6 @@ class FilterMakeCommand extends AttributeMakeCommand
      * @var string
      */
     protected $name = 'pollora:make:filter {name}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a new filter hook class';
 
     /**
      * The type of the attribute.

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Taxonomy\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
 use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Input\InputOption;
  * This command creates a new PHP class that implements the Taxonomy interface
  * and is configured with PHP attributes for WordPress custom taxonomy registration.
  */
+#[Description('Create a new WordPress custom taxonomy class')]
 class TaxonomyMakeCommand extends AbstractGeneratorCommand
 {
     const OBJECT_TYPE_OPTION = 'object-type';
@@ -26,13 +28,6 @@ class TaxonomyMakeCommand extends AbstractGeneratorCommand
      * @var string
      */
     protected $name = 'pollora:make:taxonomy';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a new WordPress custom taxonomy class';
 
     /**
      * The type of class being generated.

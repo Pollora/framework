@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Dashboard\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 
@@ -14,12 +16,10 @@ use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
  * environment, discovery stats, and cache state. Supports --json for
  * machine-readable output (useful for AI agents and CI pipelines).
  */
+#[Description('Display Pollora framework status and system information')]
+#[Signature('pollora:status {--json : Output as JSON}')]
 final class StatusCommand extends Command
 {
-    protected $signature = 'pollora:status {--json : Output as JSON}';
-
-    protected $description = 'Display Pollora framework status and system information';
-
     public function handle(SystemInfoCollector $collector): int
     {
         $info = $collector->collect();
