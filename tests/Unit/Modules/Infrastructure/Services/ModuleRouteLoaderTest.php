@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Container\Container;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Route;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
@@ -20,6 +21,10 @@ describe('ModuleRouteLoader', function (): void {
     beforeEach(function (): void {
         $this->app = new Container;
         $this->loader = new ModuleRouteLoader($this->app);
+
+        // Ensure facades can create Mockery mocks via shouldReceive()
+        // by clearing any stale application reference from previous tests.
+        Facade::setFacadeApplication(null);
     });
 
     it('does nothing when routes directory does not exist', function (): void {
