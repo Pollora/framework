@@ -6,7 +6,6 @@ namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Services;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\ComingSoonHandlerInterface;
-use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 /**
  * Handles WooCommerce Coming Soon page rendering with Blade templates.
@@ -33,8 +32,7 @@ class ComingSoonHandler implements ComingSoonHandlerInterface
     private const STORE_ONLY_VIEW_NAME = 'woocommerce.coming-soon-store-only';
 
     public function __construct(
-        private readonly ViewFactory $viewFactory,
-        private readonly TemplateFinderInterface $templateFinder
+        private readonly ViewFactory $viewFactory
     ) {}
 
     /**
@@ -121,8 +119,10 @@ class ComingSoonHandler implements ComingSoonHandlerInterface
             return false;
         }
 
-        // Core WooCommerce page checks
-        if (is_woocommerce() || is_cart() || is_checkout() || is_account_page()) {
+        if (is_woocommerce()
+            || (function_exists('is_cart') && is_cart())
+            || (function_exists('is_checkout') && is_checkout())
+            || (function_exists('is_account_page') && is_account_page())) {
             return true;
         }
 
@@ -131,7 +131,10 @@ class ComingSoonHandler implements ComingSoonHandlerInterface
             return true;
         }
 
-        // Check WooCommerce terms page
+        if (! function_exists('wc_terms_and_conditions_page_id')) {
+            return false;
+        }
+
         $termsPageId = wc_terms_and_conditions_page_id();
         if ($termsPageId > 0 && is_page($termsPageId)) {
             return true;
@@ -148,11 +151,13 @@ class ComingSoonHandler implements ComingSoonHandlerInterface
         $storeOnly = get_option('woocommerce_store_pages_only') === 'yes';
 
         // Try store-only variant first if applicable
+        /** @phpstan-ignore method.impossibleType */
         if ($storeOnly && $this->viewFactory->exists(self::STORE_ONLY_VIEW_NAME)) {
             return self::STORE_ONLY_VIEW_NAME;
         }
 
         // Fall back to generic coming soon template
+        /** @phpstan-ignore method.impossibleType */
         if ($this->viewFactory->exists(self::VIEW_NAME)) {
             return self::VIEW_NAME;
         }
@@ -166,6 +171,7 @@ class ComingSoonHandler implements ComingSoonHandlerInterface
     private function getTemplatePathForView(string $viewName): ?string
     {
         try {
+            /** @phpstan-ignore method.notFound */
             return $this->viewFactory->make($viewName)->getPath();
         } catch (\InvalidArgumentException) {
             return null;

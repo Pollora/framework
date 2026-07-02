@@ -78,8 +78,7 @@ class WooCommerceServiceProvider extends ServiceProvider
 
         // Register the Coming Soon handler
         $this->app->singleton(ComingSoonHandlerInterface::class, fn (Container $app): ComingSoonHandler => new ComingSoonHandler(
-            $app->make(ViewFactory::class),
-            $app->make(TemplateFinderInterface::class)
+            $app->make(ViewFactory::class)
         ));
 
         // Maintain backward compatibility by binding the old class name
