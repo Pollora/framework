@@ -17,6 +17,7 @@ use Tests\TestCase;
 
 uses(TestCase::class)->in('Feature/Modules', 'Feature/Option');
 uses(TestCase::class)->in('Unit');
+uses()->in('Benchmark');
 uses(Orchestra\Testbench\TestCase::class)
     ->beforeEach(function (): void {
         \Brain\Monkey\setUp();
