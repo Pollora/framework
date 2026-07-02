@@ -17,14 +17,6 @@
     "type": "project",
     "repositories": [
         {
-            "type": "path",
-            "url": "../ajax"
-        },
-        {
-            "type": "path",
-            "url": "../option"
-        },
-        {
             "type": "composer",
             "url": "https://wpackagist.org"
         }
@@ -37,10 +29,10 @@
         "illuminate/database": "^13.5",
         "illuminate/routing": "^13.5",
         "illuminate/console": "^13.5",
-        "pollora/ajax": "^1.0 || dev-main",
+        "pollora/ajax": "^1.0",
         "pollora/entity": "^1.2",
         "pollora/hook": "^1.0",
-        "pollora/option": "^1.0 || dev-main",
+        "pollora/option": "^1.0",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^1.7",
         "pollora/colt": "^10.0",
