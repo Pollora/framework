@@ -19,7 +19,7 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-wp-cli';
+    protected $name = 'pollora:make:wp-cli';
 
     /**
      * The console command description.

@@ -25,7 +25,7 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-hook';
+    protected $name = 'pollora:make:hook';
 
     /**
      * The console command description.

@@ -13,7 +13,7 @@ use function Laravel\Prompts\info;
 
 class LaunchPadSetupCommand extends Command
 {
-    protected $signature = 'pollora:env-setup {--install : Suppress some informational output}';
+    protected $signature = 'pollora:env:setup {--install : Suppress some informational output}';
 
     protected $description = 'Configure environment for WordPress installation';
 

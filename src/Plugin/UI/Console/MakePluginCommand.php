@@ -33,7 +33,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
      *
      * @var string
      */
-    protected $signature = 'pollora:make-plugin {name}
+    protected $signature = 'pollora:make:plugin {name}
     {--plugin-author= : Plugin author name}
     {--plugin-author-uri= : Plugin author URI}
     {--plugin-uri= : Plugin URI}

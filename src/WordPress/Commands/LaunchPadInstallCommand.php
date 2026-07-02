@@ -96,7 +96,7 @@ class LaunchPadInstallCommand extends Command
 
     private function installTheme(): void
     {
-        $this->call('pollora:make-theme');
+        $this->call('pollora:make:theme');
     }
 
     public function runMigrations(): void

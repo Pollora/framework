@@ -25,7 +25,7 @@ class TaxonomyMakeCommand extends AbstractGeneratorCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-taxonomy';
+    protected $name = 'pollora:make:taxonomy';
 
     /**
      * The console command description.

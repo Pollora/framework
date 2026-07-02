@@ -23,7 +23,7 @@ class MakeBlockCommand extends Command
     use HasPluginSupport;
     use HasThemeSupport;
 
-    protected $name = 'pollora:make-block';
+    protected $name = 'pollora:make:block';
 
     protected $description = 'Create a new Gutenberg block in a theme or plugin';
 

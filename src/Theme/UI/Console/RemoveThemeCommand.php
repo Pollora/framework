@@ -11,7 +11,7 @@ use Illuminate\Filesystem\Filesystem;
  */
 class RemoveThemeCommand extends BaseThemeCommand
 {
-    protected $signature = 'pollora:delete-theme {name : Name of the theme to remove}';
+    protected $signature = 'pollora:theme:delete {name : Name of the theme to remove}';
 
     protected $description = 'Remove an existing theme';
 

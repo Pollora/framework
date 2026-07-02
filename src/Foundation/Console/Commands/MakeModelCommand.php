@@ -19,7 +19,7 @@ class MakeModelCommand extends AbstractGeneratorCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-model';
+    protected $name = 'pollora:make:model';
 
     /**
      * The console command description.
