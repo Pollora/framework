@@ -127,9 +127,7 @@ class AssetEnqueuer
     /**
      * Sets the asset handle (unique identifier).
      *
-     * @param  string  $handle  Unique identifier for the asset
-     * @return $this
-     */
+     * @param  string  $handle  Unique identifier for the asset\n     */
     public function handle(string $handle): self
     {
         $this->handle = $handle;
@@ -140,9 +138,7 @@ class AssetEnqueuer
     /**
      * Sets the asset path and determines the type.
      *
-     * @param  string  $path  Path to the asset file
-     * @return $this
-     */
+     * @param  string  $path  Path to the asset file\n     */
     public function path(string $path): self
     {
         $this->path = $path;
@@ -179,9 +175,7 @@ class AssetEnqueuer
     /**
      * Sets asset dependencies.
      *
-     * @param  array  $dependencies  Array of dependency handles
-     * @return $this
-     */
+     * @param  array  $dependencies  Array of dependency handles\n     */
     public function dependencies(array $dependencies): self
     {
         $this->dependencies = $dependencies;
@@ -190,9 +184,7 @@ class AssetEnqueuer
     }
 
     /**
-     * Enables Vite.js integration for this asset.
-     *
-     * @return $this
+     * Enables Vite.js integration for this asset.\n     *
      *
      * @throws \RuntimeException If no asset container is defined
      */
@@ -215,9 +207,7 @@ class AssetEnqueuer
     /**
      * Sets the asset version for cache busting.
      *
-     * @param  string  $version  Version string
-     * @return $this
-     */
+     * @param  string  $version  Version string\n     */
     public function version(string $version): self
     {
         $this->version = $version;
@@ -228,9 +218,7 @@ class AssetEnqueuer
     /**
      * Sets the media type for stylesheets.
      *
-     * @param  string  $media  Media query string
-     * @return $this
-     */
+     * @param  string  $media  Media query string\n     */
     public function media(string $media): self
     {
         $this->media = $media;
@@ -239,10 +227,7 @@ class AssetEnqueuer
     }
 
     /**
-     * Sets script to load in the footer.
-     *
-     * @return $this
-     */
+     * Sets script to load in the footer.\n     */
     public function loadInFooter(): self
     {
         $this->loadInFooter = true;
@@ -253,9 +238,7 @@ class AssetEnqueuer
     /**
      * Sets the loading strategy for scripts.
      *
-     * @param  string  $strategy  Loading strategy (e.g., 'defer', 'async')
-     * @return $this
-     */
+     * @param  string  $strategy  Loading strategy (e.g., 'defer', 'async')\n     */
     public function loadStrategy(string $strategy): self
     {
         $this->loadStrategy = $strategy;
@@ -266,9 +249,7 @@ class AssetEnqueuer
     /**
      * Sets the asset type manually.
      *
-     * @param  string  $type  The asset type ('css' or 'js')
-     * @return $this
-     */
+     * @param  string  $type  The asset type ('css' or 'js')\n     */
     public function setType(string $type): self
     {
         $this->type = $type;
@@ -277,50 +258,35 @@ class AssetEnqueuer
     }
 
     /**
-     * Enqueues the asset in WordPress frontend (wp_enqueue_scripts).
-     *
-     * @return $this
-     */
+     * Enqueues the asset in WordPress frontend (wp_enqueue_scripts).\n     */
     public function toFrontend(): self
     {
         return $this->addHook('wp_enqueue_scripts');
     }
 
     /**
-     * Enqueues the asset in WordPress admin area (admin_enqueue_scripts).
-     *
-     * @return $this
-     */
+     * Enqueues the asset in WordPress admin area (admin_enqueue_scripts).\n     */
     public function toBackend(): self
     {
         return $this->addHook('admin_enqueue_scripts');
     }
 
     /**
-     * Enqueues the asset on the login screen (login_enqueue_scripts).
-     *
-     * @return $this
-     */
+     * Enqueues the asset on the login screen (login_enqueue_scripts).\n     */
     public function toLoginScreen(): self
     {
         return $this->addHook('login_enqueue_scripts');
     }
 
     /**
-     * Enqueues the asset in the customizer preview (customize_preview_init).
-     *
-     * @return $this
-     */
+     * Enqueues the asset in the customizer preview (customize_preview_init).\n     */
     public function toCustomizer(): self
     {
         return $this->addHook('customize_preview_init');
     }
 
     /**
-     * Enqueues the asset in the block editor (enqueue_block_editor_assets).
-     *
-     * @return $this
-     */
+     * Enqueues the asset in the block editor (enqueue_block_editor_assets).\n     */
     public function toEditor(): self
     {
         return $this->addHook('enqueue_block_editor_assets');
@@ -330,9 +296,7 @@ class AssetEnqueuer
      * Localizes a JavaScript file with data.
      *
      * @param  string  $objectName  JavaScript object name
-     * @param  array  $data  Data to localize
-     * @return $this
-     */
+     * @param  array  $data  Data to localize\n     */
     public function localize(string $objectName, array $data): self
     {
         if ($this->type === 'js') {
@@ -346,9 +310,7 @@ class AssetEnqueuer
      * Adds inline content to the asset.
      *
      * @param  string  $content  Inline CSS/JS content
-     * @param  string  $position  Position ('before' or 'after')
-     * @return $this
-     */
+     * @param  string  $position  Position ('before' or 'after')\n     */
     public function inline(string $content, string $position = 'after'): self
     {
         $this->inlineContent = $content;
@@ -398,9 +360,7 @@ class AssetEnqueuer
     /**
      * Adds a WordPress hook for asset enqueuing.
      *
-     * @param  string  $hook  WordPress hook name
-     * @return $this
-     */
+     * @param  string  $hook  WordPress hook name\n     */
     protected function addHook(string $hook): self
     {
         $this->hooks[] = $hook;

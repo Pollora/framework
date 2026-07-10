@@ -44,10 +44,7 @@ class Route extends IlluminateRoute implements WordPressRouteInterface
     protected ?ConditionResolverInterface $conditionResolver = null;
 
     /**
-     * Set whether this is a WordPress route.
-     *
-     * @return $this
-     */
+     * Set whether this is a WordPress route.\n     */
     public function setIsWordPressRoute(bool $isWordPressRoute): static
     {
         $this->isWordPressRoute = $isWordPressRoute;
@@ -64,10 +61,7 @@ class Route extends IlluminateRoute implements WordPressRouteInterface
     }
 
     /**
-     * Set the WordPress condition.
-     *
-     * @return $this
-     */
+     * Set the WordPress condition.\n     */
     public function setCondition(string $condition): static
     {
         $this->condition = $condition;
@@ -101,9 +95,7 @@ class Route extends IlluminateRoute implements WordPressRouteInterface
     /**
      * Set the condition parameters.
      *
-     * @param  array<mixed>  $parameters
-     * @return $this
-     */
+     * @param  array<mixed>  $parameters\n     */
     public function setConditionParameters(array $parameters): static
     {
         $this->conditionParameters = $parameters;
@@ -122,10 +114,7 @@ class Route extends IlluminateRoute implements WordPressRouteInterface
     }
 
     /**
-     * Set the condition resolver instance.
-     *
-     * @return $this
-     */
+     * Set the condition resolver instance.\n     */
     public function setConditionResolver(ConditionResolverInterface $resolver): static
     {
         $this->conditionResolver = $resolver;

@@ -19,10 +19,7 @@ interface WordPressRouteInterface
     public function isWordPressRoute(): bool;
 
     /**
-     * Set whether this is a WordPress route.
-     *
-     * @return $this
-     */
+     * Set whether this is a WordPress route.\n     */
     public function setIsWordPressRoute(bool $isWordPressRoute): static;
 
     /**
@@ -31,10 +28,7 @@ interface WordPressRouteInterface
     public function getCondition(): string;
 
     /**
-     * Set the WordPress condition.
-     *
-     * @return $this
-     */
+     * Set the WordPress condition.\n     */
     public function setCondition(string $condition): static;
 
     /**
@@ -52,15 +46,10 @@ interface WordPressRouteInterface
     /**
      * Set the condition parameters.
      *
-     * @param  array<mixed>  $parameters
-     * @return $this
-     */
+     * @param  array<mixed>  $parameters\n     */
     public function setConditionParameters(array $parameters): static;
 
     /**
-     * Set the condition resolver instance.
-     *
-     * @return $this
-     */
+     * Set the condition resolver instance.\n     */
     public function setConditionResolver(ConditionResolverInterface $resolver): static;
 }

@@ -32,9 +32,7 @@ class RecurringEvent extends AbstractEvent
     /**
      * Create and persist a new recurring job instance.
      *
-     * @param  object  $event  WordPress event object
-     * @return static
-     */
+     * @param  object  $event  WordPress event object\n     */
     public static function createJob(object $event): self
     {
         $job = new static($event);
