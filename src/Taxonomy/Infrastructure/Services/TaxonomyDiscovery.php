@@ -276,9 +276,9 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * Scans all public methods of the class for method-level attributes like
      * MetaBoxCb and UpdateCountCallback, building the appropriate callback configurations.
      *
-     * @param  ReflectionClass  $reflectionClass  The reflection class
      * @param  string  $className  The class name to process
      * @param  TaxonomyConfiguration  $config  The current configuration
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      * @return TaxonomyConfiguration The updated configuration
      */
     private function processMethodLevelAttributes(string $className, TaxonomyConfiguration $config, ?ReflectionCacheInterface $reflectionCache = null): TaxonomyConfiguration
@@ -368,9 +368,9 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     }
                 }
             }
-        } catch (\ReflectionException|\Throwable $e) {
+        } catch (\Throwable $throwable) {
             // Log the error but continue - additional args are optional
-            $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $e]);
+            $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $throwable]);
         }
     }
 

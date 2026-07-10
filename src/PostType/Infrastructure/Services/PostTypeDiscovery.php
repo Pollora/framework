@@ -271,9 +271,9 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * Scans all public methods of the class for method-level attributes like
      * AdminCol and RegisterMetaBoxCb, building the appropriate callback configurations.
      *
-     * @param  ReflectionClass  $reflectionClass  The reflection class
      * @param  string  $className  The class name to process
      * @param  PostTypeConfiguration  $config  The current configuration
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      * @return PostTypeConfiguration The updated configuration
      */
     private function processMethodLevelAttributes(string $className, PostTypeConfiguration $config, ?ReflectionCacheInterface $reflectionCache = null): PostTypeConfiguration
@@ -363,9 +363,9 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     }
                 }
             }
-        } catch (\ReflectionException|\Throwable $e) {
+        } catch (\Throwable $throwable) {
             // Log the error but continue - additional args are optional
-            $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $e]);
+            $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $throwable]);
         }
     }
 
