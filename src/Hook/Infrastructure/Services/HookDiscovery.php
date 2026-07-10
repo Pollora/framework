@@ -14,7 +14,6 @@ use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Hook\Domain\Contract\Action as ActionContract;
 use Pollora\Hook\Domain\Contract\Filter as FilterContract;
 use Psr\Log\LoggerInterface;
-use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
@@ -63,9 +62,7 @@ final class HookDiscovery implements DiscoveryInterface
 
         try {
             $className = $structure->namespace.'\\'.$structure->name;
-
-            $reflectionClass = $reflectionCache->getClassReflection($className);
-            $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+            $methods = $reflectionCache->getPublicMethods($className);
 
             foreach ($methods as $method) {
                 // Check for Action attributes

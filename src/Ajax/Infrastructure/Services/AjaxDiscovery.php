@@ -14,7 +14,6 @@ use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Hook\Infrastructure\Services\HookDiscovery;
 use Psr\Log\LoggerInterface;
-use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
@@ -68,9 +67,8 @@ final class AjaxDiscovery implements DiscoveryInterface
 
         try {
             $className = $structure->namespace.'\\'.$structure->name;
-            $reflectionClass = $reflectionCache->getClassReflection($className);
 
-            foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            foreach ($reflectionCache->getPublicMethods($className) as $method) {
                 foreach ($method->getAttributes(Ajax::class) as $attribute) {
                     $this->getItems()->add($location, [
                         'class' => $className,

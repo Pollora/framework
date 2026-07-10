@@ -178,7 +178,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             $config = $this->processClassLevelAttributes($reflectionClass, $className, $config);
 
             // Process method-level attributes
-            $config = $this->processMethodLevelAttributes($reflectionClass, $className, $config);
+            $config = $this->processMethodLevelAttributes($className, $config, $reflectionCache);
 
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config, $reflectionCache);
@@ -276,10 +276,10 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  PostTypeConfiguration  $config  The current configuration
      * @return PostTypeConfiguration The updated configuration
      */
-    private function processMethodLevelAttributes(ReflectionClass $reflectionClass, string $className, PostTypeConfiguration $config): PostTypeConfiguration
+    private function processMethodLevelAttributes(string $className, PostTypeConfiguration $config, ?ReflectionCacheInterface $reflectionCache = null): PostTypeConfiguration
     {
         try {
-            foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            foreach ($reflectionCache->getPublicMethods($className) as $method) {
                 foreach ($method->getAttributes() as $attribute) {
                     // Process all method-level attributes that have a handle method
                     $this->processMethodAttribute($method, $attribute, $config);

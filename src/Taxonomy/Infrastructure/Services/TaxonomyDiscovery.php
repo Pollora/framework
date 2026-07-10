@@ -181,7 +181,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             $config = $this->processClassLevelAttributes($reflectionClass, $className, $config);
 
             // Process method-level attributes
-            $config = $this->processMethodLevelAttributes($reflectionClass, $className, $config);
+            $config = $this->processMethodLevelAttributes($className, $config, $reflectionCache);
 
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config, $reflectionCache);
@@ -281,10 +281,10 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  TaxonomyConfiguration  $config  The current configuration
      * @return TaxonomyConfiguration The updated configuration
      */
-    private function processMethodLevelAttributes(ReflectionClass $reflectionClass, string $className, TaxonomyConfiguration $config): TaxonomyConfiguration
+    private function processMethodLevelAttributes(string $className, TaxonomyConfiguration $config, ?ReflectionCacheInterface $reflectionCache = null): TaxonomyConfiguration
     {
         try {
-            foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            foreach ($reflectionCache->getPublicMethods($className) as $method) {
                 foreach ($method->getAttributes() as $attribute) {
                     // Process all method-level attributes that have a handle method
                     $this->processMethodAttribute($method, $attribute, $config);
