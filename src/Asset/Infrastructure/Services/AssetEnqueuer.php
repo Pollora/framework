@@ -151,7 +151,6 @@ class AssetEnqueuer
      * Sets the asset container by name.
      *
      * @param  string  $containerName  Name of the container
-     * @return $this
      *
      * @throws \RuntimeException If the container is not found
      */
