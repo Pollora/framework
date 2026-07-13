@@ -33,6 +33,8 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->mergeConfigFrom(__DIR__.'/../../../../config/discovery.php', 'discovery');
+
         $this->registerOptimizedServices();
         $this->registerDiscoveryEngine();
         $this->registerDiscoveryManager();
@@ -44,6 +46,10 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->publishes([
+            __DIR__.'/../../../../config/discovery.php' => config_path('discovery.php'),
+        ], 'pollora-config');
+
         $this->setupDiscoveryEngine();
     }
 
@@ -85,7 +91,9 @@ final class DiscoveryServiceProvider extends ServiceProvider
             container: $app,
             debugDetector: $app->make(DebugDetectorInterface::class),
             reflectionCache: $app->make(ReflectionCacheInterface::class),
-            instancePool: $app->make(InstancePool::class)
+            instancePool: $app->make(InstancePool::class),
+            skipClasses: (array) config('discovery.skip_classes', []),
+            skipPaths: (array) config('discovery.skip_paths', []),
         ));
     }
 
