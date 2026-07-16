@@ -55,10 +55,8 @@ describe('DiscoveryServiceProvider', function (): void {
         expect($this->app->make(DiscoveryManager::class))->toBe($manager);
     });
 
-    it('registers service_providers core discovery', function (): void {
-        $engine = $this->app->make(DiscoveryEngineInterface::class);
-
-        expect($engine->getDiscoveries())->toHaveKey('service_providers');
+    it('registers ServiceProviderDiscovery as singleton for auto-registration', function (): void {
+        expect($this->app->bound(\Pollora\Discovery\Infrastructure\Services\ServiceProviderDiscovery::class))->toBeTrue();
     });
 
     it('declares provided services', function (): void {

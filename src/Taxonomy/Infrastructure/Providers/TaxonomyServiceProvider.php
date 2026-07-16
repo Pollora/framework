@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Taxonomy\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Taxonomy\Application\Services\TaxonomyService;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyRegistryInterface;
@@ -58,28 +57,6 @@ class TaxonomyServiceProvider extends ServiceProvider
             $this->commands([
                 TaxonomyMakeCommand::class,
             ]);
-        }
-    }
-
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
-    {
-        $this->registerTaxonomyDiscovery();
-    }
-
-    /**
-     * Register Taxonomy discovery with the discovery engine.
-     */
-    private function registerTaxonomyDiscovery(): void
-    {
-        if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            /** @var DiscoveryEngineInterface $engine */
-            $engine = $this->app->make(DiscoveryEngineInterface::class);
-            $taxonomyDiscovery = $this->app->make(TaxonomyDiscovery::class);
-
-            $engine->addDiscovery('taxonomies', $taxonomyDiscovery);
         }
     }
 }

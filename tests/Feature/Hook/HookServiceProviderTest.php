@@ -63,10 +63,8 @@ describe('HookServiceProvider', function (): void {
         expect($this->app->make(HookDiscovery::class))->toBe($discovery);
     });
 
-    it('registers hooks discovery with engine', function (): void {
-        $engine = $this->app->make(DiscoveryEngineInterface::class);
-
-        expect($engine->getDiscoveries())->toHaveKey('hooks');
+    it('registers HookDiscovery as singleton for auto-registration', function (): void {
+        expect($this->app->bound(HookDiscovery::class))->toBeTrue();
     });
 
     it('injects CallbackResolver into Action singleton', function (): void {

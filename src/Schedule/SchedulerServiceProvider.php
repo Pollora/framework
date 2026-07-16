@@ -9,9 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\TestCase;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Hook\Domain\Contract\Filter;
-use Pollora\Schedule\Application\UseCases\RegisterScheduleDiscoveryUseCase;
 use Pollora\Schedule\Application\UseCases\RegisterSchedulerFiltersUseCase;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Events\RecurringEvent;
@@ -43,10 +41,6 @@ class SchedulerServiceProvider extends ServiceProvider
             $this->app->make(RegisterSchedulerFiltersUseCase::class)->execute();
         }
 
-        if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            $this->app->make(RegisterScheduleDiscoveryUseCase::class)->execute();
-        }
-
         $this->app->booted(function (): void {
             $this->scheduleRecurringEvents();
         });
@@ -71,10 +65,6 @@ class SchedulerServiceProvider extends ServiceProvider
             $app->make(SchedulerInterface::class)
         ));
 
-        $this->app->bind(RegisterScheduleDiscoveryUseCase::class, fn (Application $app): RegisterScheduleDiscoveryUseCase => new RegisterScheduleDiscoveryUseCase(
-            $app->make(DiscoveryEngineInterface::class),
-            $app->make(ScheduleDiscovery::class)
-        ));
     }
 
     /**

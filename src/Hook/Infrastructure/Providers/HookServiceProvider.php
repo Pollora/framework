@@ -7,7 +7,6 @@ namespace Pollora\Hook\Infrastructure\Providers;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Hook\Adapter\Out\WordPress\Action;
 use Pollora\Hook\Adapter\Out\WordPress\Filter;
 use Pollora\Hook\Domain\Contract\Action as ActionContract;
@@ -85,29 +84,6 @@ class HookServiceProvider extends ServiceProvider
                 ActionMakeCommand::class,
                 FilterMakeCommand::class,
             ]);
-        }
-    }
-
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
-    {
-        // Register Hook discovery with the discovery engine
-        $this->registerHookDiscovery();
-    }
-
-    /**
-     * Register Hook discovery with the discovery engine.
-     */
-    private function registerHookDiscovery(): void
-    {
-        if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            /** @var DiscoveryEngineInterface $engine */
-            $engine = $this->app->make(DiscoveryEngineInterface::class);
-            $hookDiscovery = $this->app->make(HookDiscovery::class);
-
-            $engine->addDiscovery('hooks', $hookDiscovery);
         }
     }
 }

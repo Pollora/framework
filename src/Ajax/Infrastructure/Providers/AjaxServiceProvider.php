@@ -13,7 +13,6 @@ use Pollora\Ajax\Factory\AjaxFactory;
 use Pollora\Ajax\Infrastructure\Services\AjaxDiscovery;
 use Pollora\Ajax\Port\Out\AjaxActionRegistrarPort;
 use Pollora\Attributes\Ajax;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 
 /**
  * Laravel service provider that bridges the `pollora/ajax` package into the framework.
@@ -50,26 +49,10 @@ class AjaxServiceProvider extends ServiceProvider
     /**
      * Boot the AJAX services.
      *
-     * Injects the `Pollora.ajaxurl` JavaScript global via `wp_head`
-     * and registers the `#[Ajax]` attribute discovery with the engine.
+     * Injects the `Pollora.ajaxurl` JavaScript global via `wp_head`.
      */
     public function boot(): void
     {
         (new ScriptInjectionAdapter)->registerAjaxUrlScript();
-        $this->registerAjaxDiscovery();
-    }
-
-    /**
-     * Register the Ajax attribute discovery with the discovery engine.
-     */
-    private function registerAjaxDiscovery(): void
-    {
-        if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            /** @var DiscoveryEngineInterface $engine */
-            $engine = $this->app->make(DiscoveryEngineInterface::class);
-            $ajaxDiscovery = $this->app->make(AjaxDiscovery::class);
-
-            $engine->addDiscovery('ajax', $ajaxDiscovery);
-        }
     }
 }

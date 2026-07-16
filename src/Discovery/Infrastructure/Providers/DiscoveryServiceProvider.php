@@ -80,6 +80,9 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
         // Register instance pool as singleton to maintain state across discoveries
         $this->app->singleton(InstancePool::class);
+
+        // Register ServiceProviderDiscovery so the DiscoveryRegistrar can find it
+        $this->app->singleton(ServiceProviderDiscovery::class);
     }
 
     /**
@@ -115,22 +118,8 @@ final class DiscoveryServiceProvider extends ServiceProvider
         /** @var DiscoveryEngineInterface $engine */
         $engine = $this->app->make(DiscoveryEngineInterface::class);
 
-        // Cache is now handled natively by Spatie's Discover class
-
-        // Register core discovery classes
-        $this->registerCoreDiscoveries($engine);
-
         // Add default Laravel app paths for discovery
         $this->addDefaultDiscoveryLocations($engine);
-    }
-
-    /**
-     * Register core discovery classes
-     */
-    private function registerCoreDiscoveries(DiscoveryEngineInterface $engine): void
-    {
-        // Register ServiceProviderDiscovery
-        $engine->addDiscovery('service_providers', ServiceProviderDiscovery::class);
     }
 
     /**

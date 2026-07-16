@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\PostType\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 use Pollora\PostType\Domain\Contracts\PostTypeRegistryInterface;
@@ -58,28 +57,6 @@ class PostTypeServiceProvider extends ServiceProvider
             $this->commands([
                 PostTypeMakeCommand::class,
             ]);
-        }
-    }
-
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
-    {
-        $this->registerPostTypeDiscovery();
-    }
-
-    /**
-     * Register PostType discovery with the discovery engine.
-     */
-    private function registerPostTypeDiscovery(): void
-    {
-        if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            /** @var DiscoveryEngineInterface $engine */
-            $engine = $this->app->make(DiscoveryEngineInterface::class);
-            $postTypeDiscovery = $this->app->make(PostTypeDiscovery::class);
-
-            $engine->addDiscovery('post_types', $postTypeDiscovery);
         }
     }
 }
