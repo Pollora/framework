@@ -4,7 +4,61 @@ declare(strict_types=1);
 
 use Coduo\PHPHumanizer\StringHumanizer;
 use Illuminate\Support\Str;
+use Pollora\Modules\Domain\Enums\ModuleType;
+use Pollora\Plugin\Application\Services\PluginRegistrar;
 use Pollora\Support\RecursiveMenuIterator;
+use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
+
+if (! function_exists('pollora_register')) {
+    /**
+     * Register a module with the Pollora framework.
+     *
+     * This is the entry point for themes and plugins to declare themselves
+     * to the framework. It replaces manual service resolution and error
+     * handling with a single, type-safe call.
+     *
+     * **Theme** — auto-detects name and path from the active WordPress stylesheet:
+     *
+     *     use Pollora\Modules\Domain\Enums\ModuleType;
+     *     pollora_register(ModuleType::Theme);
+     *
+     * **Plugin** — requires the plugin slug and directory path:
+     *
+     *     use Pollora\Modules\Domain\Enums\ModuleType;
+     *     pollora_register(ModuleType::Plugin, 'my-plugin', __DIR__);
+     *
+     * Registration triggers autoloading, discovery, configuration loading,
+     * asset setup, and route loading for the module. Errors are silently
+     * logged — a failed registration does not crash the application.
+     *
+     * @param  ModuleType  $type  The type of module to register
+     * @param  string|null  $name  The module name/slug (required for plugins, ignored for themes)
+     * @param  string|null  $path  The module root directory (required for plugins, ignored for themes)
+     *
+     * @see ThemeRegistrarInterface  Handles theme registration
+     * @see PluginRegistrar  Handles plugin registration
+     * @see ModuleType  Available module types
+     */
+    function pollora_register(ModuleType $type, ?string $name = null, ?string $path = null): void
+    {
+        if (! function_exists('app')) {
+            return;
+        }
+
+        try {
+            match ($type) {
+                ModuleType::Theme => resolve(ThemeRegistrarInterface::class)->register(),
+                ModuleType::Plugin => resolve(PluginRegistrar::class)->register($name, $path),
+            };
+        } catch (Throwable $throwable) {
+            if (app()->bound('log')) {
+                resolve('log')->error(sprintf('Pollora: failed to register %s%s', $type->value, $name ? sprintf(' [%s]', $name) : ''), [
+                    'error' => $throwable->getMessage(),
+                ]);
+            }
+        }
+    }
+}
 
 if (! function_exists('mysqli_report')) {
     /**

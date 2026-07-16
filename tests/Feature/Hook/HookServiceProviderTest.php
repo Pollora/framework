@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Hook\Adapter\Out\WordPress\Action;
 use Pollora\Hook\Adapter\Out\WordPress\Filter;

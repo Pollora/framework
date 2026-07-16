@@ -10,6 +10,7 @@ use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryEngine;
 use Pollora\Discovery\Infrastructure\Services\InstancePool;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
+use Pollora\Discovery\Infrastructure\Services\ServiceProviderDiscovery;
 
 beforeEach(function (): void {
     // DiscoveryServiceProvider depends on DebugDetectorInterface
@@ -56,7 +57,7 @@ describe('DiscoveryServiceProvider', function (): void {
     });
 
     it('registers ServiceProviderDiscovery as singleton for auto-registration', function (): void {
-        expect($this->app->bound(\Pollora\Discovery\Infrastructure\Services\ServiceProviderDiscovery::class))->toBeTrue();
+        expect($this->app->bound(ServiceProviderDiscovery::class))->toBeTrue();
     });
 
     it('declares provided services', function (): void {

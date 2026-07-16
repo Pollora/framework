@@ -37,7 +37,11 @@ final readonly class DiscoveryRegistrar
         $registered = [];
 
         foreach ($this->container->getBindings() as $abstract => $binding) {
-            if (! is_string($abstract) || ! $this->looksLikeDiscovery($abstract)) {
+            if (! is_string($abstract)) {
+                continue;
+            }
+
+            if (! $this->looksLikeDiscovery($abstract)) {
                 continue;
             }
 

@@ -64,7 +64,7 @@ describe('DiscoveryRegistrar', function (): void {
 
     it('registers a discovery found in container bindings', function (): void {
         $discovery = createFakeDiscovery('test_discovery');
-        $this->container->singleton('App\\TestDiscovery', fn () => $discovery);
+        $this->container->singleton('App\\TestDiscovery', fn (): DiscoveryInterface => $discovery);
 
         $engine = createMockRegistrarEngine();
         $engine->shouldReceive('addDiscovery')
@@ -77,7 +77,7 @@ describe('DiscoveryRegistrar', function (): void {
     });
 
     it('only checks bindings ending with Discovery', function (): void {
-        $this->container->singleton('App\\SomeService', fn () => new stdClass);
+        $this->container->singleton('App\\SomeService', fn (): stdClass => new stdClass);
 
         $engine = createMockRegistrarEngine();
         $engine->shouldNotReceive('addDiscovery');
@@ -89,7 +89,7 @@ describe('DiscoveryRegistrar', function (): void {
 
     it('skips already registered discoveries', function (): void {
         $discovery = createFakeDiscovery('already_registered');
-        $this->container->singleton('App\\AlreadyRegisteredDiscovery', fn () => $discovery);
+        $this->container->singleton('App\\AlreadyRegisteredDiscovery', fn (): DiscoveryInterface => $discovery);
 
         $engine = Mockery::mock(DiscoveryEngineInterface::class);
         $engine->shouldReceive('getDiscoveries')
@@ -113,7 +113,7 @@ describe('DiscoveryRegistrar', function (): void {
     });
 
     it('skips non-DiscoveryInterface instances', function (): void {
-        $this->container->singleton('App\\FakeDiscovery', fn () => new stdClass);
+        $this->container->singleton('App\\FakeDiscovery', fn (): stdClass => new stdClass);
 
         $engine = createMockRegistrarEngine();
         $engine->shouldNotReceive('addDiscovery');
