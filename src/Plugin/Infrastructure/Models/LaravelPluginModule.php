@@ -69,8 +69,6 @@ class LaravelPluginModule extends PluginModule
         parent::register();
     }
 
-
-
     /**
      * Register plugin autoloading using fixed namespace convention.
      */

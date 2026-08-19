@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Collection\Domain\Contracts\CollectionInterface;
@@ -9,14 +10,16 @@ use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Plugin\Application\Services\PluginManager;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Domain\Exceptions\PluginException;
-use Psr\Container\ContainerInterface;
+
+if (! defined('WP_PLUGIN_DIR')) {
+    define('WP_PLUGIN_DIR', sys_get_temp_dir().'/wp-content/plugins');
+}
 
 function createPluginManager(
     ?ModuleRepositoryInterface $repository = null,
     ?ConsoleDetectionService $consoleDetection = null
 ): PluginManager {
-    $app = Mockery::mock(ContainerInterface::class);
-    $app->shouldReceive('get')->andReturn(null)->byDefault();
+    $app = new Container;
 
     if (! $consoleDetection instanceof ConsoleDetectionService) {
         $consoleDetection = Mockery::mock(ConsoleDetectionService::class);
