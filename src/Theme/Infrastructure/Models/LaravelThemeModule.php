@@ -57,15 +57,6 @@ class LaravelThemeModule extends ThemeModule
     }
 
     /**
-     * Boot the theme.
-     */
-    public function boot(): void
-    {
-        // Providers are now handled by ModuleBootstrap via the scout
-        parent::boot();
-    }
-
-    /**
      * Register theme autoloading using fixed namespace convention.
      */
     public function registerAutoloading(): void

@@ -69,14 +69,7 @@ class LaravelPluginModule extends PluginModule
         parent::register();
     }
 
-    /**
-     * Boot the plugin.
-     */
-    public function boot(): void
-    {
-        // Providers are now handled by ModuleBootstrap via the scout
-        parent::boot();
-    }
+
 
     /**
      * Register plugin autoloading using fixed namespace convention.
