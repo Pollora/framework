@@ -5,7 +5,55 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.2...develop)
+
+### Added
+- `#[SkipDiscovery]` attribute to exclude classes from the discovery engine
+  - Classes annotated with `#[SkipDiscovery]` are completely invisible to all discoveries — no reflection loaded, no attributes scanned
+  - `except` parameter for selective exclusion: `#[SkipDiscovery(except: [HookDiscovery::class])]` skips all discoveries except the listed ones
+- Publishable `config/discovery.php` with `skip_classes` and `skip_paths` arrays for config-level exclusions (third-party packages, vendor classes)
+- `DiscoveryRegistrar` — automatically registers Discovery classes from the service container, eliminating manual `addDiscovery()` calls in ServiceProviders
+- `pollora_register()` helper with `ModuleType` enum for simplified theme/plugin registration
+  - Themes: `pollora_register(ModuleType::Theme)` — 3 lines in `functions.php`, auto-detects theme name and path
+  - Plugins: `pollora_register(ModuleType::Plugin, 'my-plugin', __DIR__)` — replaces manual `PluginRegistrar` wiring
+- `#[Ajax]` attribute for declarative AJAX action registration with security-by-default
+- Discovery system performance benchmark suite (`tests/Benchmark/`) with realistic attribute complexity and multi-location DDD scenarios
+- Public method caching in `ReflectionCache::getPublicMethods()` — avoids redundant `getMethods(IS_PUBLIC)` reflection calls
+
+### Changed
+- **BREAKING**: Ajax module extracted to `pollora/ajax` package
+- **BREAKING**: Option module extracted to `pollora/option` package
+- **BREAKING**: Hook domain and adapters extracted to `pollora/hook` package
+- Domain layer paths restored for hexagonal architecture consistency
+- Public API types exposed for Theme and Option modules
+- All manual `addDiscovery()` calls removed from ServiceProviders — replaced by `DiscoveryRegistrar` auto-registration
+- Empty `boot()` methods removed from `LaravelPluginModule` and `LaravelThemeModule` (Rector `RemoveParentDelegatingClassMethodRector`)
+- Artisan command signatures renamed to Laravel colon convention (e.g. `pollora:make:theme`)
+- `DiscoveryItems::all()` optimized — replaced spread-in-loop with `array_merge`
+- Redundant reflection pre-loading removed from `DiscoveryEngine`
+
+### Fixed
+- `$_SERVER['HTTPS']` now forced when `APP_URL` uses HTTPS scheme
+- `WP_HOME`/`WP_SITEURL` now use `config('app.url')` instead of `url()` to avoid circular dependency
+- `PluginManagerTest` isolation — real `Container` with dynamic `WP_PLUGIN_DIR` replaces fragile `ContainerInterface` mock
+- WooCommerce hooks test updated for `ComingSoonHandler` dependency
+- PHPStan dead catches widened, redundant `@return $this` docblocks removed
+- `OptionService` namespace aligned with extracted package
+
+### Removed
+- Unfinished Admin Pages module
+- Manual `addDiscovery()` boot logic in HookServiceProvider, PostTypeServiceProvider, TaxonomyServiceProvider, WpRestAttributeServiceProvider, SchedulerDiscoveryServiceProvider
+- `RegisterScheduleDiscoveryUseCase` (superseded by `DiscoveryRegistrar`)
+
+## [v13.4.2](https://github.com/Pollora/framework/compare/v13.4.1...v13.4.2) - 2026-06-23
+
+### Fixed
+- Force `$_SERVER['HTTPS']` when `APP_URL` uses HTTPS scheme
+
+## [v13.4.1](https://github.com/Pollora/framework/compare/v13.4.0...v13.4.1) - 2026-06-23
+
+### Fixed
+- Use `config('app.url')` for `WP_HOME`/`WP_SITEURL` instead of `url()` helper
 
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
