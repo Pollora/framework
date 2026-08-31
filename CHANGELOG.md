@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.2...develop)
 
 ### Added
+- WordPress Abilities API support through the new [`pollora/abilities`](https://github.com/Pollora/abilities) package (requires WordPress 6.9)
+  - `Ability` facade for fluent declaration: `Ability::define('acme/get-posts')->description(…)->category(…)->can(…)->using(…)`
+  - `#[Ability]` attribute on classes implementing `AbilityHandler`, discovered automatically
+  - `Ability::category()` for the categories abilities file under, declared for you when an ability names one nobody registered
+  - Behaviour annotations (`reads`/`creates`/`updates`/`deletes`) published to AI clients as `readOnlyHint`, `destructiveHint` and `idempotentHint`
+  - Typed `SchemaBuilder` for input and output JSON Schema, and a defensive `Input` reader
+  - Permission checks receive the same input as the body, allowing per-object capability checks; they default to refusing
 - `#[SkipDiscovery]` attribute to exclude classes from the discovery engine
   - Classes annotated with `#[SkipDiscovery]` are completely invisible to all discoveries — no reflection loaded, no attributes scanned
   - `except` parameter for selective exclusion: `#[SkipDiscovery(except: [HookDiscovery::class])]` skips all discoveries except the listed ones
