@@ -5,7 +5,26 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.3...develop)
+
+## [v13.4.3](https://github.com/Pollora/framework/compare/v13.4.2...v13.4.3) - 2026-08-31
+
+### Fixed
+- Theme Gutenberg patterns are registered again ([#295](https://github.com/Pollora/framework/issues/295)) — `PatternService` resolved the pattern directory from `WP_Theme::get_theme_root()`, which bypasses the `theme_root` filter and pointed at `WP_CONTENT_DIR/themes` instead of the configured `theme.path`; the directory is now derived from `ThemeMetadata`
+- Patterns are discovered across the full theme ancestry (ancestors first, so the active theme can override an inherited slug) instead of a single parent level
+
+### Removed
+- `Pollora\BlockPattern\Infrastructure\Registrars\PatternRegistrar` — dead duplicate of `PatternService` carrying the same theme-root resolution bug
+
+## [v13.4.2](https://github.com/Pollora/framework/compare/v13.4.1...v13.4.2) - 2026-06-29
+
+### Fixed
+- Force `$_SERVER['HTTPS']` when `APP_URL` uses HTTPS scheme
+
+## [v13.4.1](https://github.com/Pollora/framework/compare/v13.4.0...v13.4.1) - 2026-06-29
+
+### Fixed
+- Use `config('app.url')` for `WP_HOME`/`WP_SITEURL` instead of `url()` helper
 
 ## [v13.4.0](https://github.com/Pollora/framework/compare/v13.3.0...v13.4.0) - 2026-04-22
 
