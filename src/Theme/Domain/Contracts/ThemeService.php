@@ -43,7 +43,9 @@ interface ThemeService
     public function parent(): ?string;
 
     /**
-     * Get all parent themes
+     * Get all parent themes, closest ancestor first
+     *
+     * @return array<int, ThemeMetadata>
      */
     public function getParentThemes(): array;
 

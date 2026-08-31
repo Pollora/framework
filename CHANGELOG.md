@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Redundant reflection pre-loading removed from `DiscoveryEngine`
 
 ### Fixed
+- Theme Gutenberg patterns are registered again ([#295](https://github.com/Pollora/framework/issues/295)) — `PatternService` resolved the pattern directory from `WP_Theme::get_theme_root()`, which bypasses the `theme_root` filter and pointed at `WP_CONTENT_DIR/themes` instead of the configured `theme.path`; the directory is now derived from `ThemeMetadata`
+- Patterns are discovered across the full theme ancestry (ancestors first, so the active theme can override an inherited slug) instead of a single parent level
 - `$_SERVER['HTTPS']` now forced when `APP_URL` uses HTTPS scheme
 - `WP_HOME`/`WP_SITEURL` now use `config('app.url')` instead of `url()` to avoid circular dependency
 - `PluginManagerTest` isolation — real `Container` with dynamic `WP_PLUGIN_DIR` replaces fragile `ContainerInterface` mock
@@ -41,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OptionService` namespace aligned with extracted package
 
 ### Removed
+- `Pollora\BlockPattern\Infrastructure\Registrars\PatternRegistrar` — dead duplicate of `PatternService` carrying the same theme-root resolution bug
 - Unfinished Admin Pages module
 - Manual `addDiscovery()` boot logic in HookServiceProvider, PostTypeServiceProvider, TaxonomyServiceProvider, WpRestAttributeServiceProvider, SchedulerDiscoveryServiceProvider
 - `RegisterScheduleDiscoveryUseCase` (superseded by `DiscoveryRegistrar`)

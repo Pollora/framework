@@ -245,6 +245,9 @@ class ThemeManager implements ThemeService
         return $this->theme;
     }
 
+    /**
+     * @return array<int, ThemeMetadata>
+     */
     public function getParentThemes(): array
     {
         return $this->parentThemes;
