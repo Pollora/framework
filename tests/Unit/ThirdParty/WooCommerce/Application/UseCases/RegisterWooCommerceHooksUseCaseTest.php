@@ -6,6 +6,7 @@ use Pollora\Hook\Domain\Contracts\Action;
 use Pollora\Hook\Domain\Contracts\Filter;
 use Pollora\Hook\Domain\Contracts\HookInterface;
 use Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\ComingSoonHandlerInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
 
@@ -15,6 +16,7 @@ describe('RegisterWooCommerceHooksUseCase', function (): void {
         $this->filter = Mockery::mock(Filter::class);
         $this->integration = Mockery::mock(WooCommerceIntegrationInterface::class);
         $this->templateResolver = Mockery::mock(TemplateResolverInterface::class);
+        $this->comingSoonHandler = Mockery::mock(ComingSoonHandlerInterface::class);
 
         $this->hookReturn = Mockery::mock(HookInterface::class);
 
@@ -23,6 +25,7 @@ describe('RegisterWooCommerceHooksUseCase', function (): void {
             $this->filter,
             $this->integration,
             $this->templateResolver,
+            $this->comingSoonHandler,
         );
     });
 
@@ -49,11 +52,15 @@ describe('RegisterWooCommerceHooksUseCase', function (): void {
 
         $this->useCase->execute();
 
-        // 6 filter.add calls: template_loader_files, locate_template, locate_core_template, template_part, get_template, comments_template
-        $this->filter->shouldReceive('add')->times(6)->andReturn($this->hookReturn);
+        // 7 filter.add calls: 6 template filters + template_include (coming soon)
+        $this->filter->shouldReceive('add')->times(7)->andReturn($this->hookReturn);
         $this->integration->shouldReceive('loadThemeTemplateHooks')->once();
         $this->action->shouldReceive('add')
             ->with('after_setup_theme', Mockery::any());
+        // Coming soon handler registers wp_loaded action
+        $this->action->shouldReceive('add')
+            ->with('wp_loaded', Mockery::type('Closure'));
+        $this->comingSoonHandler->shouldReceive('handleTemplateInclude');
 
         $capturedCallback();
     });
@@ -84,6 +91,10 @@ describe('RegisterWooCommerceHooksUseCase', function (): void {
         $this->integration->shouldReceive('loadThemeTemplateHooks');
         $this->action->shouldReceive('add')
             ->with('after_setup_theme', Mockery::any());
+        // Coming soon handler registers wp_loaded action
+        $this->action->shouldReceive('add')
+            ->with('wp_loaded', Mockery::type('Closure'));
+        $this->comingSoonHandler->shouldReceive('handleTemplateInclude');
 
         $capturedCallback();
 
@@ -93,5 +104,6 @@ describe('RegisterWooCommerceHooksUseCase', function (): void {
         expect($registeredFilters)->toContain('wc_get_template_part');
         expect($registeredFilters)->toContain('wc_get_template');
         expect($registeredFilters)->toContain('comments_template');
+        expect($registeredFilters)->toContain('template_include');
     });
 });
