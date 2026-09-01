@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Redundant reflection pre-loading removed from `DiscoveryEngine`
 
 ### Fixed
+- **The `Loop` and `Query` facade aliases no longer crash a page that uses them.** Both were still declared in `extra.laravel.aliases` after their facade classes had been deleted — `Loop` since `9a50cac` (2026-04-21), `Query` since `9c0cb42` (2024-08-05). Laravel registers an alias without checking its target and only calls `class_alias()` the first time the short name is used, so the package installed and booted cleanly and then threw `Class "Pollora\Support\Facades\Loop" not found` on whichever page happened to call it. Present in every v13.4.x release. See the migration note below for what replaces `Loop`.
 - Theme Gutenberg patterns are registered again ([#295](https://github.com/Pollora/framework/issues/295)) — `PatternService` resolved the pattern directory from `WP_Theme::get_theme_root()`, which bypasses the `theme_root` filter and pointed at `WP_CONTENT_DIR/themes` instead of the configured `theme.path`; the directory is now derived from `ThemeMetadata`
 - Patterns are discovered across the full theme ancestry (ancestors first, so the active theme can override an inherited slug) instead of a single parent level
 - `$_SERVER['HTTPS']` now forced when `APP_URL` uses HTTPS scheme
@@ -50,7 +51,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OptionService` namespace aligned with extracted package
 
 ### Removed
+- The `Loop` and `Query` entries in `extra.laravel.aliases`, whose facade classes no longer exist
 - `Pollora\BlockPattern\Infrastructure\Registrars\PatternRegistrar` — dead duplicate of `PatternService` carrying the same theme-root resolution bug
+
+### Migrating from `Loop`
+
+`Loop::` was removed in `9a50cac` as a breaking change, but the alias stayed
+behind and the removal was never written down — so a project only found out when
+a page 500'd. This is that note, late.
+
+In Blade, the replacement is [Sage Directives](https://github.com/Log1x/sage-directives)
+(`log1x/sage-directives`, registered by `PolloraServiceProvider`): `@title`,
+`@content`, `@excerpt`, `@permalink`, `@published`, `@posts` and the rest.
+
+In PHP, `Pollora\View\Loop` was only ever a proxy over WordPress functions. The
+full mapping, read off the deleted source rather than reconstructed:
+
+| Removed | Replacement |
+|---|---|
+| `Loop::id()` | `get_the_ID()` |
+| `Loop::title($post)` | `get_the_title($post)` |
+| `Loop::author()` | `get_the_author()` |
+| `Loop::authorMeta($field, $userId)` | `get_the_author_meta($field, $userId)` |
+| `Loop::content($moreText, $stripTeaser)` | `apply_filters('the_content', get_the_content($moreText, $stripTeaser))`, then `str_replace(']]>', ']]&gt;', …)` |
+| `Loop::excerpt($post)` | `apply_filters('the_excerpt', get_the_excerpt($post))` |
+| `Loop::thumbnail($size, $attr, $post)` | `get_the_post_thumbnail($post, $size, $attr)` |
+| `Loop::thumbnailUrl($size, $icon)` | `wp_get_attachment_image_src(get_post_thumbnail_id(), $size, $icon)[0] ?? null` |
+| `Loop::link($post, $leavename)` | `get_permalink($post, $leavename)` |
+| `Loop::category($id)` | `get_the_category($id)` |
+| `Loop::tags($id)` | `get_the_tags($id) ?: []` |
+| `Loop::terms($taxonomy, $post)` | `get_the_terms($post, $taxonomy) ?: []` |
+| `Loop::date($format, $post)` | `get_the_date($format, $post)` |
+| `Loop::postClass($class, $postId)` | `'class="'.implode(' ', get_post_class($class, $postId)).'"'` |
+| `Loop::nextPage($label, $maxPage)` | `get_next_posts_link($label, $maxPage)` |
+| `Loop::previousPage($label)` | `get_previous_posts_link($label)` |
+| `Loop::paginate($args)` | `paginate_links($args)` |
+
+Four of these are not straight renames, and a blind substitution breaks them:
+
+- `thumbnail()` and `terms()` **reorder their arguments** — the post moves from
+  last to first — and both defaulted the post to the one in the loop.
+- `postClass()` returned a ready-made `class="…"` attribute string, where
+  `get_post_class()` returns an array.
+- `content()` and `excerpt()` applied `the_content` / `the_excerpt` themselves;
+  dropping the filter silently strips whatever other plugins add there.
+- `tags()` and `terms()` normalised `false` to an empty array.
+
+`Query::` has no replacement to document — the facade was already gone before
+v13, and the alias outlived it by two years.
 - Unfinished Admin Pages module
 - Manual `addDiscovery()` boot logic in HookServiceProvider, PostTypeServiceProvider, TaxonomyServiceProvider, WpRestAttributeServiceProvider, SchedulerDiscoveryServiceProvider
 - `RegisterScheduleDiscoveryUseCase` (superseded by `DiscoveryRegistrar`)
