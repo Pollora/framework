@@ -5,11 +5,17 @@ declare(strict_types=1);
 namespace Pollora\Services;
 
 /**
- * Service for handling translations in WordPress.
+ * Translates the string values of a configuration array in place.
  *
- * This class provides functionality to translate arrays of strings using WordPress's
- * translation system. It supports nested arrays, wildcards, and domain-specific
- * translations.
+ * Each value is looked up as `{$domain}.{$value}`, so a plain config array such
+ * as `['menu-header' => 'Header menu']` can be translated through a Laravel
+ * group file named after the domain (`lang/{locale}/menus.php`) without the
+ * config itself calling `__()`. Values with no entry come back unchanged.
+ *
+ * Config files may equally call `__($text, 'my-theme')` directly and skip this
+ * class entirely — which is what the default theme does, and the clearer of the
+ * two options. Note that only the theme config files Pollora defers to `init`
+ * (`menus.php`, `sidebars.php`, `templates.php`) may safely call `__()` at all.
  */
 class Translater
 {
@@ -17,11 +23,11 @@ class Translater
      * Create a new translator instance.
      *
      * @param  array<string, mixed>  $items  The items to be used in translations
-     * @param  string  $domain  The translation domain (defaults to 'wordpress')
+     * @param  string  $domain  Group name prefixing every lookup, e.g. 'menus'
      */
     public function __construct(
-        protected array $items = [],
-        protected string $domain = 'wordpress'
+        protected array $items,
+        protected string $domain
     ) {}
 
     /**
@@ -117,13 +123,28 @@ class Translater
     }
 
     /**
-     * Translate a single string value using WordPress translation function.
+     * Translate a single value, leaving anything that is not a string alone.
      *
-     * @param  string  $value  The string to translate
-     * @return string The translated string
+     * A config array reached through a wildcard holds more than strings —
+     * booleans and ints among them — and this class declares strict types, so
+     * non-strings are passed through rather than coerced.
+     *
+     * @param  mixed  $value  The value to translate
+     * @return mixed The translated string, or the value untouched
      */
-    protected function translateItem(string $value): string
+    protected function translateItem(mixed $value): mixed
     {
-        return str_replace($this->domain.'.', '', __($this->domain.'.'.$value));
+        if (! is_string($value)) {
+            return $value;
+        }
+
+        $prefix = $this->domain.'.';
+        $line = __($prefix.$value);
+
+        // Anchored to the start: a plain str_replace() would also strip the
+        // prefix from the middle of a translated line that happens to contain it.
+        return str_starts_with($line, $prefix)
+            ? substr($line, strlen($prefix))
+            : $line;
     }
 }
