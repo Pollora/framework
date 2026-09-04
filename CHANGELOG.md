@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public method caching in `ReflectionCache::getPublicMethods()` — avoids redundant `getMethods(IS_PUBLIC)` reflection calls
 
 ### Changed
+- **BREAKING**: `Pollora\Services\Translater` now requires its `$domain` argument. The old `'wordpress'` default existed only to pair with the `wordpress.` key prefix that [`pollora/helper-overrider`](https://github.com/Pollora/helper-overrider) 1.2.0 removed — it prefixed every lookup as `__('wordpress.'.$value)` and relied on the resolver stripping it before the gettext call, so with 1.2.0 installed it silently returned values untranslated. Nothing in the framework used it (`Sidebar` and `Menus` both pass `'sidebars'`/`'menus'` explicitly); pass `__($value, 'default')` if you want WordPress's core catalogue. Two latent bugs went with it: the prefix was stripped with an unanchored `str_replace()`, so a value such as `'Go to menus.example'` came back as `'Go to example'`, and `translateItem()` was typed `string` under `declare(strict_types=1)`, so a wildcard `translate(['*'])` over a config array holding an int or bool raised a `TypeError`
 - **BREAKING**: Ajax module extracted to `pollora/ajax` package
 - **BREAKING**: Option module extracted to `pollora/option` package
 - **BREAKING**: Hook domain and adapters extracted to `pollora/hook` package
