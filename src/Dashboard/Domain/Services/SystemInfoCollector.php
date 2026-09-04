@@ -43,7 +43,95 @@ final readonly class SystemInfoCollector
             'cache' => $this->collectCacheInfo(),
             'modules' => $this->collectModulesInfo(),
             'theme' => $this->collectThemeInfo(),
+            'translations' => $this->collectTranslationInfo(),
         ];
+    }
+
+    /**
+     * Report whether the `__()` override is the one actually installed.
+     *
+     * `laravel/framework` declares `__()` behind the same `function_exists()`
+     * guard as `pollora/helper-overrider`, and Composer emits `autoload.files`
+     * in dependency order — so whichever file it loads first wins. When Laravel
+     * wins, nothing errors: WordPress catalogues simply stop resolving and every
+     * core, theme and plugin string silently renders untranslated. There is no
+     * other signal for it, which is why it is surfaced here.
+     *
+     * @return array{override_active: bool, helper_file: string, wordpress_locale: string, laravel_locale: string}
+     */
+    public function collectTranslationInfo(): array
+    {
+        $wordpressLocale = function_exists('get_locale') && function_exists('wp_cache_get')
+            ? (string) get_locale()
+            : 'Unknown';
+
+        return [
+            'override_active' => $this->isTranslationOverrideActive(),
+            'helper_file' => $this->translationHelperFile() ?? 'Unknown',
+            'wordpress_locale' => $wordpressLocale !== '' ? $wordpressLocale : 'Unknown',
+            'laravel_locale' => $this->collectLaravelLocale(),
+        ];
+    }
+
+    /**
+     * Whether `__()` resolves to Pollora's override rather than Laravel's.
+     *
+     * The override and its resolver factory are declared in the same
+     * `helpers.php`, so matching file names prove the package won the race.
+     * Comparing files rather than matching on a vendor path keeps this working
+     * whatever the install layout.
+     */
+    private function isTranslationOverrideActive(): bool
+    {
+        $helperFile = $this->translationHelperFile();
+
+        if ($helperFile === null || ! function_exists('pollora_translation_resolver')) {
+            return false;
+        }
+
+        try {
+            return (new \ReflectionFunction('pollora_translation_resolver'))->getFileName() === $helperFile;
+        } catch (\ReflectionException) {
+            return false;
+        }
+    }
+
+    /**
+     * The file declaring the active `__()`, or null when it cannot be resolved.
+     */
+    private function translationHelperFile(): ?string
+    {
+        if (! function_exists('__')) {
+            return null;
+        }
+
+        try {
+            $file = (new \ReflectionFunction('__'))->getFileName();
+        } catch (\ReflectionException) {
+            return null;
+        }
+
+        return $file === false ? null : $file;
+    }
+
+    /**
+     * The locale Laravel's translator reports, which may differ from WordPress's.
+     */
+    private function collectLaravelLocale(): string
+    {
+        try {
+            $translator = $this->container->get('translator');
+        } catch (\Throwable) {
+            return 'Unknown';
+        }
+
+        if (! is_object($translator) || ! method_exists($translator, 'getLocale')) {
+            return 'Unknown';
+        }
+
+        $locale = $translator->getLocale();
+
+        return is_string($locale) && $locale !== '' ? $locale : 'Unknown';
     }
 
     /**

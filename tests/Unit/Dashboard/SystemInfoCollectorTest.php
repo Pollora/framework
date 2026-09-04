@@ -282,6 +282,67 @@ describe('SystemInfoCollector', function (): void {
         });
     });
 
+    describe('collectTranslationInfo', function (): void {
+        // laravel/framework declares __() behind the same function_exists()
+        // guard as pollora/helper-overrider, and Pest loads the autoloader from
+        // its own binary, so Laravel's __() is the one installed here. That is
+        // precisely the misconfiguration this check exists to catch, so the
+        // suite runs against the failing side and proves the detection
+        // discriminates instead of always answering yes.
+        it('reports the override as inactive when __() is not the package helper', function (): void {
+            $info = createCollector()->collectTranslationInfo();
+
+            expect($info['override_active'])->toBeFalse()
+                ->and($info['helper_file'])->toEndWith('helpers.php');
+        });
+
+        it('names the file __() actually resolves from', function (): void {
+            $info = createCollector()->collectTranslationInfo();
+
+            expect($info['helper_file'])
+                ->toBe((new ReflectionFunction('__'))->getFileName());
+        });
+
+        it('reports the WordPress locale', function (): void {
+            \Brain\Monkey\Functions\when('get_locale')->justReturn('fr_FR');
+
+            expect(createCollector()->collectTranslationInfo()['wordpress_locale'])->toBe('fr_FR');
+        });
+
+        it('reports the locale the bound translator declares', function (): void {
+            $container = Mockery::mock(ContainerInterface::class);
+            $container->shouldReceive('get')->with('translator')->andReturn(
+                new class
+                {
+                    public function getLocale(): string
+                    {
+                        return 'de';
+                    }
+                }
+            );
+
+            expect(createCollector(container: $container)->collectTranslationInfo()['laravel_locale'])
+                ->toBe('de');
+        });
+
+        it('falls back to Unknown when no translator is bound', function (): void {
+            $container = Mockery::mock(ContainerInterface::class);
+            $container->shouldReceive('get')->with('translator')
+                ->andThrow(new RuntimeException('Not bound'));
+
+            expect(createCollector(container: $container)->collectTranslationInfo()['laravel_locale'])
+                ->toBe('Unknown');
+        });
+
+        it('falls back to Unknown when the binding cannot report a locale', function (): void {
+            $container = Mockery::mock(ContainerInterface::class);
+            $container->shouldReceive('get')->with('translator')->andReturn(new stdClass);
+
+            expect(createCollector(container: $container)->collectTranslationInfo()['laravel_locale'])
+                ->toBe('Unknown');
+        });
+    });
+
     describe('collect', function (): void {
         it('returns all sections', function (): void {
             $engine = Mockery::mock(DiscoveryEngineInterface::class);
@@ -303,6 +364,7 @@ describe('SystemInfoCollector', function (): void {
             expect($info)->toHaveKeys([
                 'framework', 'environment', 'wordpress',
                 'discovery', 'performance', 'cache', 'modules', 'theme',
+                'translations',
             ]);
         });
     });

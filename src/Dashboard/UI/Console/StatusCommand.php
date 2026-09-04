@@ -38,8 +38,33 @@ final class StatusCommand extends Command
         $this->renderCache($info['cache']);
         $this->renderPerformance($info['performance']);
         $this->renderTheme($info['theme']);
+        $this->renderTranslations($info['translations']);
 
         return self::SUCCESS;
+    }
+
+    /**
+     * @param  array{override_active: bool, helper_file: string, wordpress_locale: string, laravel_locale: string}  $translations
+     */
+    private function renderTranslations(array $translations): void
+    {
+        $this->line(sprintf(
+            '  Locales: WordPress %s | Laravel %s',
+            $translations['wordpress_locale'],
+            $translations['laravel_locale']
+        ));
+
+        if ($translations['override_active']) {
+            $this->line('  Translations: __() override active');
+
+            return;
+        }
+
+        // Not a warning for its own sake: with Laravel's __() in place, every
+        // WordPress catalogue lookup silently returns the untranslated string.
+        $this->newLine();
+        $this->warn('  Translations: __() override INACTIVE — WordPress catalogues will not resolve.');
+        $this->warn(sprintf('  __() resolves from %s', $translations['helper_file']));
     }
 
     /**

@@ -182,6 +182,9 @@ function setupDefaultWordPressStubs(): void
     ]);
 
     // Text functions
+    \Brain\Monkey\Functions\stubs([
+        'get_locale' => 'en_US',
+    ]);
     \Brain\Monkey\Functions\when('translate')->alias(fn ($text) => $text);
     \Brain\Monkey\Functions\when('translate_with_gettext_context')->alias(fn ($text) => $text);
     \Brain\Monkey\Functions\when('_cleanup_header_comment')->alias(fn ($str): string => trim((string) $str));

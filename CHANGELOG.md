@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.2...develop)
 
 ### Added
+- Translation diagnostics in `pollora:status` and the admin dashboard — reports whether the `__()` override is the one actually installed, alongside the WordPress and Laravel locales. `laravel/framework` declares `__()` behind the same `function_exists()` guard as [`pollora/helper-overrider`](https://github.com/Pollora/helper-overrider) and Composer emits `autoload.files` in dependency order, so whichever loads first wins; when Laravel wins nothing errors, WordPress catalogues simply stop resolving and every core, theme and plugin string silently renders untranslated. Detection compares the file declaring `__()` against the one declaring `pollora_translation_resolver()` — they ship in the same `helpers.php`, so matching paths prove the package won the race whatever the install layout
 - WordPress Abilities API support through the new [`pollora/abilities`](https://github.com/Pollora/abilities) package (requires WordPress 6.9)
   - `Ability` facade for fluent declaration: `Ability::define('acme/get-posts')->description(…)->category(…)->can(…)->using(…)`
   - `#[Ability]` attribute on classes implementing `AbilityHandler`, discovered automatically

@@ -42,6 +42,7 @@ final readonly class DashboardController
         $this->renderCacheCard($info['cache']);
         $this->renderPerformanceCard($info['performance']);
         $this->renderThemeCard($info['theme']);
+        $this->renderTranslationsCard($info['translations']);
 
         echo '</div>';
         echo '</div>';
@@ -435,6 +436,36 @@ final readonly class DashboardController
         printf('<tr><td>%s</td><td>%s</td></tr>', __('Version', 'pollora'), esc_html($theme['version']));
         printf('<tr><td>%s</td><td><code>%s</code></td></tr>', __('Template', 'pollora'), esc_html($theme['template']));
         echo '</table>';
+        echo '</div>';
+    }
+
+    /**
+     * @param  array{override_active: bool, helper_file: string, wordpress_locale: string, laravel_locale: string}  $translations
+     */
+    private function renderTranslationsCard(array $translations): void
+    {
+        $overrideBadge = $translations['override_active']
+            ? '<span class="pollora-badge pollora-badge--green">'.__('Active', 'pollora').'</span>'
+            : '<span class="pollora-badge pollora-badge--orange">'.__('Inactive', 'pollora').'</span>';
+
+        echo '<div class="pollora-card">';
+        echo '<h2>'.__('Translations', 'pollora').'</h2>';
+        echo '<table>';
+        printf('<tr><td>%s</td><td>%s</td></tr>', __('__() override', 'pollora'), $overrideBadge);
+        printf('<tr><td>%s</td><td><code>%s</code></td></tr>', __('WordPress locale', 'pollora'), esc_html($translations['wordpress_locale']));
+        printf('<tr><td>%s</td><td><code>%s</code></td></tr>', __('Laravel locale', 'pollora'), esc_html($translations['laravel_locale']));
+        echo '</table>';
+
+        if (! $translations['override_active']) {
+            // Silent otherwise: with Laravel's __() in place, every WordPress
+            // catalogue lookup returns the untranslated string.
+            printf(
+                '<p><strong>%s</strong><br><code>%s</code></p>',
+                esc_html__('WordPress catalogues will not resolve. __() resolves from:', 'pollora'),
+                esc_html($translations['helper_file'])
+            );
+        }
+
         echo '</div>';
     }
 }
