@@ -5,7 +5,11 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.3...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta...develop)
+
+## [v13.32.0-beta](https://github.com/Pollora/framework/compare/v13.4.3...v13.32.0-beta) - 2026-09-17
+
+Pollora now follows Laravel's version numbers: this release requires Laravel 13.32.
 
 ### Added
 - Translation diagnostics in `pollora:status` and the admin dashboard — reports whether the `__()` override is the one actually installed, alongside the WordPress and Laravel locales. `laravel/framework` declares `__()` behind the same `function_exists()` guard as [`pollora/helper-overrider`](https://github.com/Pollora/helper-overrider) and Composer emits `autoload.files` in dependency order, so whichever loads first wins; when Laravel wins nothing errors, WordPress catalogues simply stop resolving and every core, theme and plugin string silently renders untranslated. Detection compares the file declaring `__()` against the one declaring `pollora_translation_resolver()` — they ship in the same `helpers.php`, so matching paths prove the package won the race whatever the install layout
@@ -29,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public method caching in `ReflectionCache::getPublicMethods()` — avoids redundant `getMethods(IS_PUBLIC)` reflection calls
 
 ### Changed
+- **BREAKING**: requires Laravel 13.32 (`illuminate/*` `^13.32`). The framework version now tracks the Laravel release it targets, hence the jump from v13.4.3
 - **BREAKING**: `Pollora\Services\Translater` now requires its `$domain` argument. The old `'wordpress'` default existed only to pair with the `wordpress.` key prefix that [`pollora/helper-overrider`](https://github.com/Pollora/helper-overrider) 1.2.0 removed — it prefixed every lookup as `__('wordpress.'.$value)` and relied on the resolver stripping it before the gettext call, so with 1.2.0 installed it silently returned values untranslated. Nothing in the framework used it (`Sidebar` and `Menus` both pass `'sidebars'`/`'menus'` explicitly); pass `__($value, 'default')` if you want WordPress's core catalogue. Two latent bugs went with it: the prefix was stripped with an unanchored `str_replace()`, so a value such as `'Go to menus.example'` came back as `'Go to example'`, and `translateItem()` was typed `string` under `declare(strict_types=1)`, so a wildcard `translate(['*'])` over a config array holding an int or bool raised a `TypeError`
 - **BREAKING**: Ajax module extracted to `pollora/ajax` package
 - **BREAKING**: Option module extracted to `pollora/option` package
@@ -49,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WooCommerce hooks test updated for `ComingSoonHandler` dependency
 - PHPStan dead catches widened, redundant `@return $this` docblocks removed
 - `OptionService` namespace aligned with extracted package
+- GitHub releases are created again on tag push — the Deploy workflow lacked `contents: write`; suffixed tags (`-beta`, `-rc.1`) are now published as pre-releases
 
 ### Removed
 - The `Loop` and `Query` entries in `extra.laravel.aliases`, whose facade classes no longer exist
