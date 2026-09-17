@@ -381,7 +381,7 @@ class MakeBlockCommand extends Command
 
         return "const blockEntries = globSync([\n".implode("\n", $patterns)."\n])\n"
             ."    .reduce((acc, file) => {\n"
-            ."        // Keyed by path, so a block left in both locations keeps both entries\n"
+            ."        // Keyed by path: blocks sharing a file name never overwrite each other\n"
             ."        acc[file.replace(/^\\.\\//, '').replace(/\\.\\w+$/, '')] = file;\n"
             ."        return acc;\n"
             .'    }, {});';
