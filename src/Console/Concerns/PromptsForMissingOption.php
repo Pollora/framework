@@ -40,6 +40,42 @@ use function Laravel\Prompts\text;
 trait PromptsForMissingOption
 {
     /**
+     * Fill missing options with their prompt defaults when the command cannot prompt.
+     *
+     * Symfony skips interact() for non-interactive input (--no-interaction, CI,
+     * piped stdin), which would otherwise leave every prompted option null.
+     */
+    protected function initialize(InputInterface $input, OutputInterface $output): void
+    {
+        parent::initialize($input, $output);
+
+        if (! $input->isInteractive() && $this instanceof PromptsForMissingOptionContract) {
+            $this->applyMissingOptionDefaults($input);
+        }
+    }
+
+    /**
+     * Set each missing option that declares a prompt default to that default.
+     */
+    protected function applyMissingOptionDefaults(InputInterface $input): void
+    {
+        foreach ($this->promptForMissingOptionsUsing() as $optionName => $configuration) {
+            if (! is_array($configuration) || ! $this->getDefinition()->hasOption($optionName)) {
+                continue;
+            }
+
+            $default = $configuration['default'] ?? $configuration[1] ?? null;
+            $current = $input->getOption($optionName);
+
+            if ($default === null || ! in_array($current, [null, false, []], true)) {
+                continue;
+            }
+
+            $input->setOption($optionName, $this->getDefinition()->getOption($optionName)->isArray() ? [$default] : $default);
+        }
+    }
+
+    /**
      * Interact with the user before validating the input.
      */
     protected function interact(InputInterface $input, OutputInterface $output): void

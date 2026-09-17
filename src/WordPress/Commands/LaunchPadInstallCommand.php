@@ -25,9 +25,17 @@ use function Laravel\Prompts\info;
         {--admin-email= : Admin email}
         {--admin-password= : Admin password}
         {--locale= : Site locale (e.g. en_US, fr_FR)}
-        {--public= : Allow search engine indexing (true/false)}')]
+        {--public= : Allow search engine indexing (true/false)}
+        {--theme= : Name of the theme to generate (defaults to "default" from pollora/theme-default without interaction)}')]
 class LaunchPadInstallCommand extends Command
 {
+    /**
+     * Name of the theme generated when the install cannot prompt for one.
+     *
+     * Matches WP_DEFAULT_THEME, which WordPress activates on install.
+     */
+    private const string DEFAULT_THEME = 'default';
+
     public function __construct(
         private readonly InstallationService $installationService,
         private readonly DatabaseService $databaseService
@@ -96,7 +104,21 @@ class LaunchPadInstallCommand extends Command
 
     private function installTheme(): void
     {
-        $this->call('pollora:make:theme');
+        $arguments = [];
+        $theme = $this->option('theme');
+
+        if (is_string($theme) && $theme !== '') {
+            $arguments['name'] = $theme;
+        }
+
+        if (! $this->input->isInteractive()) {
+            // A nested call only inherits an explicit --no-interaction flag, not a
+            // non-interactive input detected by Symfony (CI, piped stdin)
+            $arguments['name'] ??= self::DEFAULT_THEME;
+            $arguments['--no-interaction'] = true;
+        }
+
+        $this->call('pollora:make:theme', $arguments);
     }
 
     public function runMigrations(): void
