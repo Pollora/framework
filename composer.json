@@ -1,7 +1,7 @@
 {
     "name": "pollora/framework",
     "description": "Laravel & WordPress blend for coding as sweet as honey. Join the hive!",
-    "license": "GPL-2.0-or-later",
+    "license": "MIT",
     "authors": [
         {
             "name": "Olivier Gorzalka",

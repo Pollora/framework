@@ -70,4 +70,6 @@ All notable changes are documented in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-Pollora is open-sourced software licensed under the [GPL-2.0-or-later](LICENSE).
+Pollora is open-sourced software licensed under the [MIT license](LICENSE).
+
+Parts of the WordPress integration (`Pollora\Support\WordPress`, `Pollora\Hashing\WordPressHasher`) originate from work by Jordan Doyle, released under the 0BSD and WTFPL licenses.
