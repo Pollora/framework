@@ -124,11 +124,14 @@ class LaunchPadInstallCommand extends Command
     public function runMigrations(): void
     {
         info('Running migration.');
-        $this->call('migrate');
+
+        // Installing is the intent to migrate: without --force, migrate asks for
+        // confirmation in production and cancels when it cannot prompt
+        if ($this->call('migrate', ['--force' => true]) !== self::SUCCESS) {
+            throw new WordPressInstallationException('Database migrations failed.');
+        }
 
         info('Migration completed successfully.');
-        info('WordPress has been successfully installed!');
-
     }
 
     private function displaySuccessMessage(): void

@@ -18,9 +18,9 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * migrate are replaced by commands recording the input they receive.
  *
  * @param  array<string, mixed>  $parameters
- * @return array{exit: int, theme: array<string, mixed>|null}
+ * @return array{exit: int, theme: array<string, mixed>|null, migrate: array<string, mixed>|null}
  */
-function runInstallCommand(array $parameters, bool $interactive): array
+function runInstallCommand(array $parameters, bool $interactive, int $migrateExit = 0): array
 {
     $installation = Mockery::mock(InstallationService::class);
     $installation->shouldReceive('isInstalled')->andReturn(false);
@@ -45,13 +45,21 @@ function runInstallCommand(array $parameters, bool $interactive): array
         }
     };
 
-    $migrate = new #[Signature('migrate')] class extends Command
+    $migrate = new #[Signature('migrate {--force}')] class extends Command
     {
+        public int $exit = self::SUCCESS;
+
+        /** @var array<string, mixed>|null */
+        public ?array $received = null;
+
         public function handle(): int
         {
-            return self::SUCCESS;
+            $this->received = ['force' => $this->option('force')];
+
+            return $this->exit;
         }
     };
+    $migrate->exit = $migrateExit;
 
     // Laravel commands ask their container whether unit tests are running
     $container = new class extends Container
@@ -60,7 +68,15 @@ function runInstallCommand(array $parameters, bool $interactive): array
         {
             return false;
         }
+
+        public function isLocal(): bool
+        {
+            return false;
+        }
     };
+    // handleError() resolves app() to check the environment
+    $previousContainer = Container::getInstance();
+    Container::setInstance($container);
     $application = new Application($container, new Dispatcher($container), 'testing');
     $application->setAutoExit(false);
 
@@ -72,9 +88,13 @@ function runInstallCommand(array $parameters, bool $interactive): array
     $input = new ArrayInput(['command' => 'pollora:install', ...$parameters]);
     $input->setInteractive($interactive);
 
-    $exit = $application->find('pollora:install')->run($input, new BufferedOutput);
+    try {
+        $exit = $application->find('pollora:install')->run($input, new BufferedOutput);
+    } finally {
+        Container::setInstance($previousContainer);
+    }
 
-    return ['exit' => $exit, 'theme' => $recorder->received];
+    return ['exit' => $exit, 'theme' => $recorder->received, 'migrate' => $migrate->received];
 }
 
 describe('pollora:install theme generation', function (): void {
@@ -110,5 +130,35 @@ describe('pollora:install theme generation', function (): void {
         $result = runInstallCommand($this->installOptions, interactive: true);
 
         expect($result['theme']['name'])->toBeNull();
+    });
+});
+
+describe('pollora:install migrations', function (): void {
+    beforeEach(function (): void {
+        Brain\Monkey\Functions\when('admin_url')->justReturn('https://example.test/wp-admin/');
+
+        $this->installOptions = [
+            '--install' => true,
+            '--title' => 'Pollora',
+            '--description' => 'Test',
+            '--admin-user' => 'admin',
+            '--admin-email' => 'admin@example.com',
+            '--admin-password' => 'secret123',
+            '--locale' => 'en_US',
+            '--public' => 'false',
+        ];
+    });
+
+    it('forces migrations so production does not cancel them without a prompt', function (): void {
+        $result = runInstallCommand($this->installOptions, interactive: false);
+
+        expect($result['migrate'])->toBe(['force' => true]);
+    });
+
+    it('fails instead of reporting success when migrations fail', function (): void {
+        $result = runInstallCommand($this->installOptions, interactive: false, migrateExit: 1);
+
+        expect($result['exit'])->toBe(1)
+            ->and($result['theme'])->toBeNull();
     });
 });
