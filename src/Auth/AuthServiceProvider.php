@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Auth;
 
 use Illuminate\Auth\AuthManager;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,8 +16,6 @@ use Illuminate\Support\ServiceProvider;
  * including custom guards and user providers. It integrates WordPress
  * capabilities with Laravel's Gate system and handles the registration
  * of authentication-related services in the container.
- *
- * @extends ServiceProvider
  */
 class AuthServiceProvider extends ServiceProvider
 {
@@ -43,16 +42,13 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerWordPressAuthDriver(AuthManager $auth): void
     {
-        // Use static closures to prevent Laravel 13's RebindsCallbacksToSelf
-        // from rebinding them to AuthManager. Without static, $this becomes
-        // the AuthManager instance, causing __call → guard() infinite recursion.
-        $auth->extend('wp', static function ($app, $name, array $config) use ($auth): WordPressGuard {
+        $auth->extend('wp', function (Application $app, string $name, array $config) use ($auth): WordPressGuard {
             $provider = $auth->createUserProvider($config['provider'] ?? null);
 
             return new WordPressGuard($provider);
         });
 
-        $auth->provider('wp', static fn ($app, $config): WordPressUserProvider => new WordPressUserProvider);
+        $auth->provider('wp', fn (Application $app, array $config): WordPressUserProvider => new WordPressUserProvider);
 
         $this->registerWordPressGate();
     }

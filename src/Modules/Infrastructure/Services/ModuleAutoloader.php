@@ -132,7 +132,6 @@ class ModuleAutoloader
 
         foreach ($autoloadFunctions as $function) {
             if (is_array($function) &&
-                isset($function[0]) &&
                 $function[0] instanceof ClassLoader
             ) {
                 // Bind it to the container for future use

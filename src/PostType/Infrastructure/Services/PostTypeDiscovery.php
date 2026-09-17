@@ -16,6 +16,7 @@ use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Entity\Adapter\Out\WordPress\PostTypeRegistryAdapter;
 use Pollora\Entity\Domain\Model\PostType as EntityPostType;
 use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
@@ -44,7 +45,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  PostTypeServiceInterface  $postTypeService  The post type service for registration
      */
     public function __construct(
-        private readonly PostTypeServiceInterface $postTypeService
+        private readonly PostTypeServiceInterface $postTypeService,
+        private readonly ?LoggerInterface $logger = null
     ) {}
 
     /**
@@ -53,14 +55,10 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
     public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): EntityPostType
     {
         // Generate singular name if not provided
-        if ($singular === null) {
-            $singular = $this->generateSingular($slug, null);
-        }
+        $singular ??= $this->generateSingular($slug, null);
 
         // Generate plural name if not provided
-        if ($plural === null) {
-            $plural = Str::plural($singular);
-        }
+        $plural ??= Str::plural($singular);
 
         // Create the Entity PostType instance directly without auto-registration
         $postType = new EntityPostType($slug, $singular, $plural);
@@ -138,7 +136,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $this->processPostType($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other post types
-                error_log(sprintf('Failed to register PostType from class %s: ', $className).$e->getMessage());
+                $this->logger?->error(sprintf('Failed to register PostType from class %s', $className), ['exception' => $e]);
             }
         }
     }
@@ -176,7 +174,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             $config = $this->processClassLevelAttributes($reflectionClass, $className, $config);
 
             // Process method-level attributes
-            $config = $this->processMethodLevelAttributes($reflectionClass, $className, $config);
+            $config = $this->processMethodLevelAttributes($className, $config, $reflectionCache);
 
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config, $reflectionCache);
@@ -207,8 +205,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process PostType for class %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->logger?->error(sprintf('Failed to process PostType for class %s', $className), ['exception' => $throwable]);
         }
     }
 
@@ -227,9 +225,11 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
         $slug = $this->generateSlug($className, $postType->slug);
         $singular = $this->generateSingular($className, $postType->singular);
         $plural = $this->generatePlural($postType->plural, $singular);
+        $textDomain = $postType->textDomain ?? 'pollora';
 
         $initialArgs = [
-            'labels' => $this->generateLabels($singular, $plural),
+            'labels' => $this->generateLabels($singular, $plural, $textDomain),
+            'text_domain' => $textDomain,
         ];
 
         return new PostTypeConfiguration($slug, $singular, $plural, $initialArgs);
@@ -254,8 +254,8 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->logger?->error(sprintf('Failed to process class-level attributes for %s', $className), ['exception' => $throwable]);
         }
 
         return $config;
@@ -267,22 +267,22 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * Scans all public methods of the class for method-level attributes like
      * AdminCol and RegisterMetaBoxCb, building the appropriate callback configurations.
      *
-     * @param  ReflectionClass  $reflectionClass  The reflection class
      * @param  string  $className  The class name to process
      * @param  PostTypeConfiguration  $config  The current configuration
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      * @return PostTypeConfiguration The updated configuration
      */
-    private function processMethodLevelAttributes(ReflectionClass $reflectionClass, string $className, PostTypeConfiguration $config): PostTypeConfiguration
+    private function processMethodLevelAttributes(string $className, PostTypeConfiguration $config, ?ReflectionCacheInterface $reflectionCache = null): PostTypeConfiguration
     {
         try {
-            foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            foreach ($reflectionCache->getPublicMethods($className) as $method) {
                 foreach ($method->getAttributes() as $attribute) {
                     // Process all method-level attributes that have a handle method
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->logger?->error(sprintf('Failed to process method-level attributes for %s', $className), ['exception' => $throwable]);
         }
 
         return $config;
@@ -359,9 +359,9 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
                     }
                 }
             }
-        } catch (\ReflectionException|\Throwable $e) {
+        } catch (\Throwable $throwable) {
             // Log the error but continue - additional args are optional
-            error_log(sprintf('Failed to process additional args for %s: ', $className).$e->getMessage());
+            $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $throwable]);
         }
     }
 
@@ -426,26 +426,41 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  string  $plural  The plural name
      * @return array<string, string> The labels array
      */
-    private function generateLabels(string $singular, string $plural): array
+    private function generateLabels(string $singular, string $plural, string $textDomain = 'pollora'): array
     {
         return [
             'name' => $plural,
             'singular_name' => $singular,
-            'add_new' => 'Add New',
-            'add_new_item' => 'Add New '.$singular,
-            'edit_item' => 'Edit '.$singular,
-            'new_item' => 'New '.$singular,
-            'view_item' => 'View '.$singular,
-            'view_items' => 'View '.$plural,
-            'search_items' => 'Search '.$plural,
-            'not_found' => sprintf('No %s found', $plural),
-            'not_found_in_trash' => sprintf('No %s found in Trash', $plural),
-            'parent_item_colon' => sprintf('Parent %s:', $singular),
-            'all_items' => 'All '.$plural,
-            'archives' => $singular.' Archives',
-            'attributes' => $singular.' Attributes',
-            'insert_into_item' => 'Insert into '.$singular,
-            'uploaded_to_this_item' => 'Uploaded to this '.$singular,
+            /* translators: %s: post type general name (plural) */
+            'add_new' => __('Add New', $textDomain),
+            /* translators: %s: post type singular name */
+            'add_new_item' => sprintf(__('Add New %s', $textDomain), $singular),
+            /* translators: %s: post type singular name */
+            'edit_item' => sprintf(__('Edit %s', $textDomain), $singular),
+            /* translators: %s: post type singular name */
+            'new_item' => sprintf(__('New %s', $textDomain), $singular),
+            /* translators: %s: post type singular name */
+            'view_item' => sprintf(__('View %s', $textDomain), $singular),
+            /* translators: %s: post type general name (plural) */
+            'view_items' => sprintf(__('View %s', $textDomain), $plural),
+            /* translators: %s: post type general name (plural) */
+            'search_items' => sprintf(__('Search %s', $textDomain), $plural),
+            /* translators: %s: post type general name (plural) */
+            'not_found' => sprintf(__('No %s found', $textDomain), $plural),
+            /* translators: %s: post type general name (plural) */
+            'not_found_in_trash' => sprintf(__('No %s found in Trash', $textDomain), $plural),
+            /* translators: %s: post type singular name */
+            'parent_item_colon' => sprintf(__('Parent %s:', $textDomain), $singular),
+            /* translators: %s: post type general name (plural) */
+            'all_items' => sprintf(__('All %s', $textDomain), $plural),
+            /* translators: %s: post type singular name */
+            'archives' => sprintf(__('%s Archives', $textDomain), $singular),
+            /* translators: %s: post type singular name */
+            'attributes' => sprintf(__('%s Attributes', $textDomain), $singular),
+            /* translators: %s: post type singular name */
+            'insert_into_item' => sprintf(__('Insert into %s', $textDomain), $singular),
+            /* translators: %s: post type singular name */
+            'uploaded_to_this_item' => sprintf(__('Uploaded to this %s', $textDomain), $singular),
         ];
     }
 

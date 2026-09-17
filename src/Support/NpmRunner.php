@@ -20,10 +20,7 @@ class NpmRunner
     public function __construct(protected string $workingDirectory) {}
 
     /**
-     * Run `npm install` in the working directory.
-     *
-     * @return $this
-     */
+     * Run `npm install` in the working directory.\n     */
     public function install(): self
     {
         $this->runCommand(['npm', 'install']);
@@ -32,10 +29,7 @@ class NpmRunner
     }
 
     /**
-     * Run `npm run build` in the working directory.
-     *
-     * @return $this
-     */
+     * Run `npm run build` in the working directory.\n     */
     public function build(): self
     {
         $this->runCommand(['npm', 'run', 'build']);

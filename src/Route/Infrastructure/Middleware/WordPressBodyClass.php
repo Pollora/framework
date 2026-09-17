@@ -6,7 +6,7 @@ namespace Pollora\Route\Infrastructure\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Pollora\Route\Domain\Models\Route;
+use Pollora\Route\Infrastructure\Models\Route;
 
 /**
  * Middleware to manage WordPress body classes.
@@ -71,10 +71,6 @@ class WordPressBodyClass
      */
     private function getRouteTokens(Route $route): array
     {
-        if (! method_exists($route, 'getCompiled')) {
-            return [];
-        }
-
         $compiled = $route->getCompiled();
         if (! $compiled || ! method_exists($compiled, 'getTokens')) {
             return [];
@@ -96,6 +92,9 @@ class WordPressBodyClass
      * @param  array  $token  Token definition from the compiled route
      * @param  Route  $route  Current route instance
      * @return string|false Sanitized token or false when not applicable
+     */
+    /**
+     * @param  array<int, mixed>  $token
      */
     private function handleVariableToken(array $token, Route $route): string|false
     {

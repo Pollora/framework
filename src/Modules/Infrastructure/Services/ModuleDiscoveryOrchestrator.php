@@ -9,6 +9,7 @@ use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Models\DirectoryLocation;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Module Discovery Orchestrator Service
@@ -23,9 +24,16 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
 
     protected ?FrameworkModuleDiscovery $frameworkModuleDiscovery = null;
 
+    private ?LoggerInterface $logger = null;
+
     public function __construct(
         protected Container $container
-    ) {}
+    ) {
+        try {
+            $this->logger = $container->make(LoggerInterface::class);
+        } catch (\Throwable) {
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -43,9 +51,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
             $location = new DirectoryLocation($path);
             $engine->addLocation($location)->discover()->apply();
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Discovery error for path %s: ', $path).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Discovery error for path %s', $path), ['exception' => $throwable]);
         }
     }
 
@@ -66,9 +72,7 @@ class ModuleDiscoveryOrchestrator implements ModuleDiscoveryOrchestratorInterfac
 
             return $manager->discoverAllInLocation($location);
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Discovery error for path %s: ', $path).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Discovery error for path %s', $path), ['exception' => $throwable]);
 
             return [];
         }

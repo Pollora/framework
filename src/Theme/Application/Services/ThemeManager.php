@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
+use Illuminate\Contracts\Container\Container as ContainerContract;
 use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Support\Str;
 use Illuminate\View\ViewFinderInterface;
@@ -17,7 +18,6 @@ use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
-use Psr\Container\ContainerInterface;
 
 /**
  * Theme management service implementation.
@@ -73,7 +73,7 @@ class ThemeManager implements ThemeService
     /**
      * Create a new theme manager instance.
      *
-     * @param  ContainerInterface  $app  Application container
+     * @param  ContainerContract  $app  Application container
      * @param  ViewFinderInterface  $viewFinder  Laravel view finder for template resolution
      * @param  Loader|null  $localeLoader  Translation loader for theme localization
      * @param  ModuleRepositoryInterface|null  $repository  Module repository for theme management
@@ -81,7 +81,7 @@ class ThemeManager implements ThemeService
      * @param  ConsoleDetectionService|null  $consoleDetectionService  Console environment detection
      */
     public function __construct(
-        protected ContainerInterface $app,
+        protected ContainerContract $app,
         protected ViewFinderInterface $viewFinder,
         protected ?Loader $localeLoader,
         protected ?ModuleRepositoryInterface $repository = null,
@@ -167,8 +167,11 @@ class ThemeManager implements ThemeService
                 $theme->getName()
             );
         } else {
-            // Fallback to direct registration if ModuleAssetManager is not available
-            $this->viewFinder->addLocation($theme->getViewPath());
+            // Fallback: resolve the finder from the view factory at call time
+            // to ensure we get the same instance Laravel uses (not the one
+            // captured at construction time, which may be a different instance)
+            $finder = $this->app->make('view')->getFinder();
+            $finder->addLocation($theme->getViewPath());
         }
     }
 
@@ -242,6 +245,9 @@ class ThemeManager implements ThemeService
         return $this->theme;
     }
 
+    /**
+     * @return array<int, ThemeMetadata>
+     */
     public function getParentThemes(): array
     {
         return $this->parentThemes;

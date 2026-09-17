@@ -6,6 +6,7 @@ namespace Pollora\Exceptions\Infrastructure\Providers;
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Exceptions\Infrastructure\Handlers\ModuleAwareExceptionHandler;
 use Pollora\Exceptions\Infrastructure\Services\ModuleAwareErrorViewResolver;
@@ -59,7 +60,7 @@ class ExceptionServiceProvider extends ServiceProvider
      */
     protected function registerErrorViewResolver(): void
     {
-        $this->app->singleton(function ($app): ModuleAwareErrorViewResolver {
+        $this->app->singleton(function (Application $app): ModuleAwareErrorViewResolver {
             /** @var Factory $viewFactory */
             $viewFactory = $app->make('view');
 
@@ -75,7 +76,7 @@ class ExceptionServiceProvider extends ServiceProvider
      */
     protected function registerExceptionHandler(): void
     {
-        $this->app->singleton(ExceptionHandler::class, fn ($app): ModuleAwareExceptionHandler => new ModuleAwareExceptionHandler($app));
+        $this->app->singleton(ExceptionHandler::class, fn (Application $app): ModuleAwareExceptionHandler => new ModuleAwareExceptionHandler($app));
     }
 
     /**

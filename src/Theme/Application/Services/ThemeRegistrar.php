@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Application\Services;
 
+use Illuminate\Foundation\Application;
 use Pollora\BlockPattern\UI\PatternComponent;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
+use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
+use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Models\ImageSize;
-use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Domain\Models\Menus;
 use Pollora\Theme\Domain\Models\Sidebar;
 use Pollora\Theme\Domain\Models\Templates;
 use Pollora\Theme\Domain\Models\ThemeInitializer;
+use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\Support;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Simplified theme self-registration service.
@@ -69,6 +73,14 @@ class ThemeRegistrar implements ThemeRegistrarInterface
         // Setup theme assets and includes
         $this->setupThemeAssets($theme);
 
+        // Load theme routes (api.php, web.php)
+        $this->loadThemeRoutes($theme);
+
+        // Load theme view paths via ThemeManager
+        if ($this->app->has(ThemeService::class)) {
+            $this->app->get(ThemeService::class)->load($themeName);
+        }
+
         // Register and boot the theme
         $theme->register();
         $theme->boot();
@@ -81,11 +93,10 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     protected function createThemeModule(string $themeName, string $themePath): LaravelThemeModule
     {
-        if ($this->app->has('app') && method_exists($this->app->get('app'), 'make')) {
-            return new LaravelThemeModule($themeName, $themePath, $this->app->get('app'));
-        }
+        /** @var Application $app */
+        $app = $this->app->has('app') ? $this->app->get('app') : $this->app;
 
-        return new LaravelThemeModule($themeName, $themePath, $this->app);
+        return new LaravelThemeModule($themeName, $themePath, $app);
     }
 
     /**
@@ -206,8 +217,9 @@ class ThemeRegistrar implements ThemeRegistrarInterface
      */
     protected function logError(string $message): void
     {
-        if (function_exists('error_log')) {
-            error_log($message);
+        try {
+            $this->app->get(LoggerInterface::class)->error($message);
+        } catch (\Throwable) {
         }
     }
 
@@ -263,6 +275,24 @@ class ThemeRegistrar implements ThemeRegistrarInterface
             $componentManager->initializeModuleComponents($moduleId);
         } catch (\Exception $exception) {
             $this->logError('Failed to setup theme components: '.$exception->getMessage());
+        }
+    }
+
+    /**
+     * Load theme routes (api.php, web.php).
+     */
+    protected function loadThemeRoutes(ThemeModuleInterface $theme): void
+    {
+        if (! $this->app->has(ModuleRouteLoader::class)) {
+            return;
+        }
+
+        try {
+            /** @var ModuleRouteLoader $routeLoader */
+            $routeLoader = $this->app->get(ModuleRouteLoader::class);
+            $routeLoader->loadModuleRoutes($theme);
+        } catch (\Exception $exception) {
+            $this->logError('Failed to load theme routes: '.$exception->getMessage());
         }
     }
 

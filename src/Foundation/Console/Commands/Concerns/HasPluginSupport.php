@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Foundation\Console\Commands\Concerns;
 
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputOption;
 
 trait HasPluginSupport
@@ -54,9 +55,9 @@ trait HasPluginSupport
     }
 
     /**
-     * Resolve plugin name.
+     * Get the plugin path.
      *
-     * @return string|null The resolved plugin name
+     * @return string The plugin path, or empty string if no plugin specified
      */
     protected function getPluginPath(): string
     {
@@ -91,7 +92,7 @@ trait HasPluginSupport
     /**
      * Resolve plugin location.
      *
-     * @return array{type: string, path: string, namespace: string, name: string}
+     * @return array{type: string, path: string, namespace: string, name: string, source_path: string, source_namespace: string}
      *
      * @throws InvalidArgumentException When plugin is not found or support not implemented
      */
@@ -106,6 +107,7 @@ trait HasPluginSupport
         return [
             'type' => 'plugin',
             'path' => $this->getPluginPath(),
+            'name' => $plugin,
             'namespace' => $this->getPluginNamespace(),
             'source_path' => $this->getPluginSourcePath(),
             'source_namespace' => $this->getPluginSourceNamespace(),

@@ -1,51 +1,39 @@
 <?php
 
-/**
- * Class MakeThemeCommand
- *
- * Artisan command to scaffold a new theme directory structure by downloading from GitHub repository,
- * perform string replacements, run npm install/build, and optionally set the theme as the active WordPress theme.
- */
 declare(strict_types=1);
 
 namespace Pollora\Theme\UI\Console;
 
-use Illuminate\Config\Repository;
+use Composer\InstalledVersions;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
-use Illuminate\Support\Facades\File;
 use Pollora\Console\Concerns\PromptsForMissingOption;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
-use Pollora\Modules\Infrastructure\Services\ModuleDownloader;
+use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Support\NpmRunner;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
+use Pollora\Translation\Domain\Contracts\TranslationCompilerInterface;
+use Pollora\Translation\Infrastructure\Services\GettextMoCompiler;
+use Symfony\Component\Process\Process;
 
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\multiselect;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
+/**
+ * Artisan command to scaffold a new theme directory structure.
+ *
+ * This command creates a new theme by downloading from a GitHub repository,
+ * performing string replacements, running npm install/build, and optionally
+ * setting the theme as the active WordPress theme.
+ */
+#[Description('Generate theme structure by downloading from GitHub repository')]
+#[Signature('pollora:make:theme {name} {--theme-author= : Theme author name} {--theme-author-uri= : Theme author URI} {--theme-uri= : Theme URI} {--theme-description= : Theme description} {--theme-version= : Theme version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create theme with same name}')]
 class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
     use PromptsForMissingOption;
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'pollora:make-theme {name} {--theme-author= : Theme author name} {--theme-author-uri= : Theme author URI} {--theme-uri= : Theme URI} {--theme-description= : Theme description} {--theme-version= : Theme version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create theme with same name}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Generate theme structure by downloading from GitHub repository';
-
-    /**
-     * List of file extensions considered as text for replacements.
-     *
-     * @var array<int, string>
-     */
-    protected $textExtensions = ['php', 'js', 'css', 'html', 'htm', 'xml', 'txt', 'md', 'json', 'yaml', 'yml', 'svg', 'twig', 'blade.php', 'stub'];
 
     /**
      * The ThemeMetadata instance representing the theme being created.
@@ -60,10 +48,16 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected array $containerFolder;
 
     /**
+     * The module scaffolder service.
+     */
+    protected ModuleScaffolderService $scaffolder;
+
+    /**
      * Handle the command execution.
      */
-    public function handle(): int
+    public function handle(ModuleScaffolderService $scaffolder): int
     {
+        $this->scaffolder = $scaffolder;
         $this->theme = $this->makeTheme($this->argument('name'));
 
         if (! $this->validateThemeName() || ! $this->canGenerateTheme()) {
@@ -73,52 +67,31 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $this->setupContainerFolders();
 
         $repository = $this->promptForRepository();
+        $repo = in_array($repository, [null, '', '0'], true) ? self::TEMPLATES['default'] : $repository;
 
-        if (! in_array($repository, [null, '', '0'], true)) {
-            $this->downloadFromRepository($repository);
-        } else {
-            // Use default repository instead of local stubs
-            $this->downloadFromRepository('pollora/theme-default');
+        $success = $this->scaffolder->downloadAndScaffold(
+            repository: $repo,
+            basePath: $this->getThemesPath(),
+            targetPath: $this->theme->getBasePath(),
+            replacements: $this->getReplacements(),
+            version: $this->option('repo-version'),
+            output: $this->getOutput(),
+            removeDirs: ['bin'],
+        );
+
+        if (! $success) {
+            $this->scaffolder->copyDirectory(
+                $this->getTemplatePath('common'),
+                $this->theme->getBasePath()
+            );
         }
 
         $this->info(sprintf('Theme "%s" created successfully.', $this->theme->getName()));
 
-        // Run npm install and npm run build in the frontend directory of the new theme
-        if (is_dir($this->theme->getBasePath())) {
-            $this->info('Running npm install and npm run build in '.$this->theme->getBasePath().' ...');
-            try {
-                (new NpmRunner($this->theme->getBasePath()))
-                    ->install()
-                    ->build();
-                $this->info('npm install and build completed.');
-            } catch (\Throwable $e) {
-                $this->error('npm install or build failed: '.$e->getMessage());
-                // Continue script even if npm fails
-            }
-        } else {
-            $this->info('No frontend directory found at '.$this->theme->getBasePath().', skipping npm install/build.');
-        }
-
-        // Prompt to set this theme as the active WordPress theme
-        $shouldSetActive = select(
-            label: 'Do you want to set "'.$this->theme->getName().'" as the active WordPress theme?',
-            options: [
-                'yes' => 'Yes',
-                'no' => 'No',
-            ],
-            default: 'yes',
-            hint: 'Selecting "Yes" will set this theme as the active one in WordPress.'
-        );
-        if ($shouldSetActive === 'yes') {
-            // Set the theme as active in WordPress (update the stylesheet and template options)
-            if (function_exists('update_option')) {
-                update_option('stylesheet', $this->theme->getName());
-                update_option('template', $this->theme->getName());
-                $this->info('Theme "'.$this->theme->getName().'" is now set as the active WordPress theme.');
-            } else {
-                $this->warn('Unable to set the theme as active: WordPress functions are not available in this context.');
-            }
-        }
+        $this->compileTranslations();
+        $this->installRequirementsIfNeeded();
+        $this->runNpmIfNeeded();
+        $this->promptAndSetActiveTheme();
 
         return self::SUCCESS;
     }
@@ -148,8 +121,8 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
 
         $name = $this->theme->getName();
-
         $this->error(sprintf('Theme "%s" already exists.', $name));
+
         if ($this->option('force')) {
             return true;
         }
@@ -159,8 +132,6 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     /**
      * Setup container folders.
-     *
-     * @return $this
      */
     protected function setupContainerFolders(): self
     {
@@ -177,262 +148,263 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
-     * Generate theme structure from stubs.
-     */
-    protected function generateThemeStructure(): void
-    {
-        $this->copyDirectory($this->getTemplatePath('common'), $this->theme->getBasePath());
-    }
-
-    /**
-     * Download theme from GitHub repository.
-     */
-    protected function downloadFromRepository(string $repository): void
-    {
-        $version = $this->option('repo-version');
-
-        try {
-            $downloader = new ModuleDownloader($repository);
-
-            if ($version) {
-                $downloader->setVersion($version);
-            }
-
-            $this->info('Downloading theme from '.$repository.($version ? sprintf(' (version: %s)', $version) : '').'...');
-
-            $extractedPath = $downloader->downloadAndExtract($this->getThemesPath());
-
-            // Move contents from extracted folder to theme folder
-            $this->moveExtractedTheme($extractedPath);
-
-            $this->info('Theme downloaded and extracted successfully.');
-
-        } catch (\Exception $exception) {
-            $this->error('Failed to download theme: '.$exception->getMessage());
-
-            // Fallback to generating structure if download fails
-            $this->warn('Falling back to generating default theme structure...');
-            $this->generateThemeStructure();
-        }
-    }
-
-    /**
-     * Move extracted theme contents to the proper theme directory.
-     */
-    protected function moveExtractedTheme(string $extractedPath): void
-    {
-        $targetPath = $this->theme->getBasePath();
-
-        // Ensure target directory exists
-        $this->ensureDirectoryExists($targetPath);
-
-        // Move all contents from extracted path to target path with replacements
-        $this->copyDirectoryWithReplacements($extractedPath, $targetPath);
-
-        // Remove development-only directories that shouldn't be in generated themes
-        $this->removeDirectory($targetPath.'/bin');
-
-        // Clean up the extracted directory
-        $this->removeDirectory(dirname($extractedPath));
-    }
-
-    /**
-     * Remove directory recursively.
-     */
-    protected function removeDirectory(string $path): void
-    {
-        if (is_dir($path)) {
-            File::deleteDirectory($path);
-        }
-    }
-
-    /**
-     * Copy directory.
+     * Compile .po translation files into .mo binary format.
      *
-     * @param  string  $source
+     * Scans the theme's languages directory and compiles every .po file
+     * found using a pure-PHP gettext compiler (no system tools required).
      */
-    protected function copyDirectory($source, string $destination): void
+    protected function compileTranslations(): void
     {
-        if (! File::isDirectory($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
+        $langDir = $this->theme->getBasePath().'/languages';
 
-        foreach (File::allFiles($source) as $item) {
-            $this->processFile($item, $destination);
-        }
-    }
-
-    /**
-     * Copy directory with replacements applied to all files.
-     *
-     * @param  string  $source
-     */
-    protected function copyDirectoryWithReplacements($source, string $destination): void
-    {
-        if (! File::isDirectory($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
-
-        foreach (File::allFiles($source) as $item) {
-            $this->processFileWithReplacements($item, $destination);
-        }
-    }
-
-    /**
-     * Process file.
-     *
-     * @param  object  $item
-     */
-    protected function processFile($item, string $destination): void
-    {
-        $relativePath = $item->getRelativePath();
-        $targetInfo = $this->getTargetPathInfo($item, $destination, $relativePath);
-
-        $this->ensureDirectoryExists($targetInfo['dir']);
-
-        if ($item->isDir()) {
-            $this->copyDirectory($item->getRealPath(), $targetInfo['path']);
-        } else {
-            $this->handleFileCopy($item, $targetInfo['path']);
-        }
-    }
-
-    /**
-     * Process file with replacements.
-     *
-     * @param  object  $item
-     */
-    protected function processFileWithReplacements($item, string $destination): void
-    {
-        $relativePath = $item->getRelativePath();
-        $targetInfo = $this->getTargetPathInfo($item, $destination, $relativePath);
-
-        $this->ensureDirectoryExists($targetInfo['dir']);
-
-        if ($item->isDir()) {
-            $this->copyDirectoryWithReplacements($item->getRealPath(), $targetInfo['path']);
-        } else {
-            // Always copy with replacements for downloaded files
-            $this->copyFileWithReplacements($item->getRealPath(), $targetInfo['path']);
-        }
-    }
-
-    /**
-     * Get target path info.
-     *
-     * @param  object  $item
-     */
-    protected function getTargetPathInfo($item, string $destination, string $relativePath): array
-    {
-        $targetDir = $destination.($relativePath !== '' && $relativePath !== '0' ? '/'.$relativePath : '');
-        $targetPath = $targetDir.'/'.$item->getFilename();
-        $targetPath = preg_replace('/\.stub$/', '.php', $targetPath);
-
-        if (str_starts_with($relativePath, 'app/')) {
-            $relativePath = str_replace('app/Themes/', '', $relativePath);
-            $targetDir = $this->theme->getThemeAppDir($relativePath);
-            $targetPath = $targetDir.DIRECTORY_SEPARATOR.basename((string) $targetPath);
-        }
-
-        return [
-            'dir' => $targetDir,
-            'path' => $targetPath,
-        ];
-    }
-
-    /**
-     * Handle file copy.
-     *
-     * @param  object  $item
-     */
-    protected function handleFileCopy($item, string $targetPath): void
-    {
-        if (File::exists($targetPath) &&
-            ! $this->option('force') &&
-            ! $this->confirm(sprintf('File %s already exists. Do you want to overwrite it?', $targetPath))
-        ) {
+        if (! is_dir($langDir) || glob($langDir.'/*.po') === []) {
             return;
         }
 
-        $this->copyFileWithReplacements($item->getRealPath(), $targetPath);
-    }
+        /** @var TranslationCompilerInterface $compiler */
+        $compiler = $this->laravel->bound(TranslationCompilerInterface::class)
+            ? $this->laravel->make(TranslationCompilerInterface::class)
+            : new GettextMoCompiler;
 
-    /**
-     * Ensure directory exists.
-     */
-    protected function ensureDirectoryExists(string $directory): void
-    {
-        if (! File::isDirectory($directory)) {
-            File::makeDirectory($directory, 0755, true);
+        $compiled = $compiler->compileDirectory($langDir);
+
+        if ($compiled > 0) {
+            $this->info(sprintf('Compiled %d translation file(s).', $compiled));
         }
     }
 
     /**
-     * Copy file with replacements.
-     *
-     * @param  string  $sourcePath
-     * @param  string  $destinationPath
+     * Check for theme requirements and offer to install them.
      */
-    protected function copyFileWithReplacements($sourcePath, $destinationPath): void
+    protected function installRequirementsIfNeeded(): void
     {
-        $extension = pathinfo((string) $destinationPath, PATHINFO_EXTENSION);
+        $requirementsFile = $this->theme->getBasePath().'/requirements.json';
 
-        if ($this->isTextFile($sourcePath, $extension)) {
-            $content = File::get($sourcePath);
-            $replacements = $this->getReplacements();
+        if (! file_exists($requirementsFile)) {
+            return;
+        }
 
-            // Apply placeholder replacements
-            $content = str_replace(
-                array_keys($replacements),
-                array_values($replacements),
-                $content
-            );
+        $requirements = json_decode(file_get_contents($requirementsFile), true);
+        $composerPackages = $requirements['composer'] ?? [];
 
-            // Write the modified content to the destination file
-            File::put($destinationPath, $content);
+        if (empty($composerPackages)) {
+            return;
+        }
+
+        $this->newLine();
+        $this->info('This theme requires the following Composer packages:');
+
+        $options = [];
+        foreach ($composerPackages as $package => $description) {
+            $options[$package] = sprintf('%s — %s', $package, $description);
+        }
+
+        $selected = multiselect(
+            label: 'Which packages would you like to install?',
+            options: $options,
+            default: array_keys($options),
+            hint: 'Press space to toggle, enter to confirm. Leave empty to skip.',
+        );
+
+        if ($selected === []) {
+            $this->info('Skipping package installation.');
+
+            return;
+        }
+
+        $this->info('Installing Composer packages...');
+
+        $command = ['composer', 'require', '-W', ...$selected];
+        $process = new Process($command, base_path());
+        $process->setTimeout(300);
+        $process->run(function ($type, string|iterable $buffer): void {
+            $this->getOutput()->write($buffer);
+        });
+
+        if ($process->isSuccessful()) {
+            $this->info('Composer packages installed successfully.');
+            $this->activateWordPressPlugins($selected);
         } else {
-            // Simply copy non-text files without modification
-            File::copy($sourcePath, $destinationPath);
+            $this->error('Failed to install some Composer packages. You can install them manually:');
+            $this->line('  composer require '.implode(' ', $selected));
         }
     }
 
     /**
-     * Check if file is text file.
+     * Detect WordPress plugins among installed packages and offer to activate them.
      *
-     * @param  string  $filePath
-     * @param  string  $extension
+     * Uses `composer show` to inspect each package type. Packages of type
+     * `wordpress-plugin` are collected and, if `activate_plugin()` is available,
+     * the user is prompted to activate them in WordPress.
+     *
+     * @param  array<int, string>  $packages  Composer package names that were just installed.
      */
-    protected function isTextFile($filePath, $extension): bool
+    protected function activateWordPressPlugins(array $packages): void
     {
-        if (in_array(strtolower((string) $extension), $this->textExtensions)) {
-            return true;
+        if (! function_exists('activate_plugin')) {
+            return;
         }
 
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $filePath);
-        finfo_close($finfo);
+        $plugins = $this->resolveWordPressPlugins($packages);
 
-        $textMimeTypes = [
-            'text/plain',
-            'text/html',
-            'text/css',
-            'text/javascript',
-            'application/javascript',
-            'application/json',
-            'application/xml',
-            'application/x-httpd-php',
-        ];
+        if ($plugins === []) {
+            return;
+        }
 
-        return in_array($mimeType, $textMimeTypes, true) || str_starts_with($mimeType, 'text/');
+        $shouldActivate = confirm(
+            label: count($plugins) === 1
+                ? sprintf('Activate the WordPress plugin "%s"?', array_values($plugins)[0])
+                : sprintf('Activate %d WordPress plugins?', count($plugins)),
+            default: true,
+        );
+
+        if (! $shouldActivate) {
+            return;
+        }
+
+        foreach ($plugins as $slug) {
+            $pluginFile = $this->findPluginEntryFile($slug);
+
+            if ($pluginFile === null) {
+                $this->warn(sprintf('Could not find entry file for plugin "%s".', $slug));
+
+                continue;
+            }
+
+            $result = activate_plugin($pluginFile);
+
+            if (is_wp_error($result)) {
+                $this->error(sprintf('Failed to activate "%s": %s', $slug, $result->get_error_message()));
+            } else {
+                $this->info(sprintf('Plugin "%s" activated.', $slug));
+            }
+        }
     }
 
     /**
-     * Get replacements.
+     * Filter a list of Composer packages to only those of type `wordpress-plugin`.
+     *
+     * Uses Composer's runtime API ({@see InstalledVersions}) to check package
+     * types without spawning a subprocess. Extracts the plugin slug from the
+     * package name (e.g. "woocommerce" from "wpackagist-plugin/woocommerce").
+     *
+     * @param  array<int, string>  $packages  Composer package names.
+     * @return array<string, string> Map of package name => plugin directory slug.
+     */
+    private function resolveWordPressPlugins(array $packages): array
+    {
+        $installedPlugins = InstalledVersions::getInstalledPackagesByType('wordpress-plugin');
+        $plugins = [];
+
+        foreach ($packages as $package) {
+            if (in_array($package, $installedPlugins, true)) {
+                $slug = substr($package, (int) strpos($package, '/') + 1);
+                $plugins[$package] = $slug;
+            }
+        }
+
+        return $plugins;
+    }
+
+    /**
+     * Find the main PHP entry file for a WordPress plugin.
+     *
+     * Scans the plugin directory for the file containing the `Plugin Name:`
+     * header, which WordPress uses to identify the plugin entry point.
+     *
+     * @param  string  $slug  The plugin directory name (e.g. "woocommerce").
+     * @return string|null The plugin-relative path (e.g. "woocommerce/woocommerce.php"), or null if not found.
+     */
+    private function findPluginEntryFile(string $slug): ?string
+    {
+        $pluginDir = defined('WP_PLUGIN_DIR')
+            ? WP_PLUGIN_DIR.'/'.$slug
+            : base_path('public/content/plugins/'.$slug);
+
+        if (! is_dir($pluginDir)) {
+            return null;
+        }
+
+        // Check the conventional entry file first (slug.php)
+        $conventionalFile = $pluginDir.'/'.$slug.'.php';
+        if (file_exists($conventionalFile) && $this->isPluginFile($conventionalFile)) {
+            return $slug.'/'.$slug.'.php';
+        }
+
+        // Fallback: scan top-level PHP files for the Plugin Name header
+        foreach (glob($pluginDir.'/*.php') as $file) {
+            if ($this->isPluginFile($file)) {
+                return $slug.'/'.basename($file);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check whether a PHP file contains the WordPress `Plugin Name:` header.
+     *
+     * Only reads the first 8 KB of the file (the maximum WordPress inspects)
+     * to avoid loading large files into memory.
+     *
+     * @param  string  $filePath  Absolute path to the PHP file.
+     */
+    private function isPluginFile(string $filePath): bool
+    {
+        $content = file_get_contents($filePath, false, null, 0, 8192);
+
+        return $content !== false && str_contains($content, 'Plugin Name:');
+    }
+
+    /**
+     * Run npm install and build in the theme directory.
+     */
+    protected function runNpmIfNeeded(): void
+    {
+        if (is_dir($this->theme->getBasePath())) {
+            $this->info('Running npm install and npm run build in '.$this->theme->getBasePath().' ...');
+            try {
+                (new NpmRunner($this->theme->getBasePath()))
+                    ->install()
+                    ->build();
+                $this->info('npm install and build completed.');
+            } catch (\Throwable $e) {
+                $this->error('npm install or build failed: '.$e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompt to set the theme as active and do so if confirmed.
+     */
+    protected function promptAndSetActiveTheme(): void
+    {
+        $shouldSetActive = select(
+            label: 'Do you want to set "'.$this->theme->getName().'" as the active WordPress theme?',
+            options: ['yes' => 'Yes', 'no' => 'No'],
+            default: 'yes',
+            hint: 'Selecting "Yes" will set this theme as the active one in WordPress.'
+        );
+
+        if ($shouldSetActive === 'yes') {
+            if (function_exists('update_option')) {
+                update_option('stylesheet', $this->theme->getName());
+                update_option('template', $this->theme->getName());
+                $this->info('Theme "'.$this->theme->getName().'" is now set as the active WordPress theme.');
+            } else {
+                $this->warn('Unable to set the theme as active: WordPress functions are not available in this context.');
+            }
+        }
+    }
+
+    /**
+     * Get placeholder replacements for scaffolding.
      */
     protected function getReplacements(): array
     {
         return [
             '%theme_name%' => $this->theme->getName(),
+            '%theme_camel%' => $this->theme->getThemeCamelCase(),
             '%theme_author%' => $this->option('theme-author'),
             '%theme_author_uri%' => $this->option('theme-author-uri'),
             '%theme_uri%' => $this->option('theme-uri'),
@@ -491,6 +463,14 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
+     * Built-in theme templates mapped to their GitHub repositories.
+     */
+    protected const TEMPLATES = [
+        'default' => 'pollora/theme-default',
+        'ecommerce' => 'pollora/theme-apiary',
+    ];
+
+    /**
      * Prompt for repository if not provided.
      */
     protected function promptForRepository(): ?string
@@ -499,16 +479,17 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return $this->option('repository');
         }
 
-        $useRepository = select(
-            label: 'How would you like to create the theme?',
+        $choice = select(
+            label: 'Which theme template would you like to use?',
             options: [
-                'repository' => 'Download from GitHub repository',
-                'default' => 'Use default theme template',
+                'default' => 'Default — Basic starter theme',
+                'ecommerce' => 'E-commerce — WooCommerce theme (Tailwind CSS, Alpine.js)',
+                'repository' => 'Custom — Download from a GitHub repository',
             ],
             default: 'default'
         );
 
-        if ($useRepository === 'repository') {
+        if ($choice === 'repository') {
             return text(
                 label: 'Enter the GitHub repository (owner/repo format):',
                 placeholder: 'pollora/theme-default',
@@ -526,7 +507,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             );
         }
 
-        return null;
+        return self::TEMPLATES[$choice] ?? null;
     }
 
     /**
@@ -540,29 +521,5 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             $this->files->isDirectory($this->makeTheme($value)->getBasePath()) => sprintf('Theme "%s" already exists.', $value),
             default => null,
         };
-    }
-
-    /**
-     * Get template path.
-     */
-    protected function getTemplatePath(string $templateName): string
-    {
-        return realpath(__DIR__.'/../../stubs/'.$templateName);
-    }
-
-    /**
-     * Make theme.
-     */
-    protected function makeTheme(string $name): ThemeMetadata
-    {
-        return new ThemeMetadata($name, $this->getThemesPath());
-    }
-
-    /**
-     * Get themes path.
-     */
-    protected function getThemesPath(): string
-    {
-        return $this->config->get('theme.directory', base_path('themes'));
     }
 }

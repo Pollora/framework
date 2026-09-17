@@ -4,26 +4,27 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Providers;
 
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
+use Pollora\Theme\Domain\Contracts\ThemeJsonResolverInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
-use Pollora\Theme\Domain\Models\LaravelThemeModule;
 use Pollora\Theme\Domain\Support\ThemeCollection;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 use Pollora\Theme\Infrastructure\Adapters\DomainContainerAdapter;
+use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
+use Pollora\Theme\Infrastructure\Services\ThemeJsonResolver;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
@@ -204,6 +205,11 @@ class ThemeServiceProvider extends ServiceProvider
         // WordPress theme parser
         $this->app->singleton(WordPressThemeParser::class);
 
+        // Theme JSON resolver - reads built theme.json from Vite output
+        $this->app->singleton(ThemeJsonResolverInterface::class, fn ($app): ThemeJsonResolver => new ThemeJsonResolver(
+            $app->make('path.public')
+        ));
+
         // Deprecated theme repository - kept for backward compatibility only
         $this->app->singleton('theme.repository', fn ($app): ThemeRepository => new ThemeRepository(
             $app,
@@ -222,9 +228,13 @@ class ThemeServiceProvider extends ServiceProvider
         // Legacy service alias
         $this->app->singleton('theme', fn ($app) => $app->make(ThemeService::class));
 
-        // Legacy class alias for module system
+        // Legacy class aliases for backward compatibility
         if (! class_exists('Pollora\\Modules\\Domain\\Models\\LaravelThemeModule')) {
             class_alias(LaravelThemeModule::class, 'Pollora\\Modules\\Domain\\Models\\LaravelThemeModule');
+        }
+
+        if (! class_exists('Pollora\\Theme\\Domain\\Models\\LaravelThemeModule')) {
+            class_alias(LaravelThemeModule::class, 'Pollora\\Theme\\Domain\\Models\\LaravelThemeModule');
         }
     }
 
@@ -238,8 +248,8 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $baseThemePath = $this->getBaseThemePath();
 
-        // Hook into WordPress option system to reset theme root when needed
-        $this->filter->add('option_stylesheet_root', $this->resetThemeRootOption(...), PHP_INT_MAX);
+        // Fix theme_root when WordPress resolves an incorrect absolute path from the transient
+        $this->filter->add('theme_root', $this->fixThemeRoot(...), PHP_INT_MAX);
         $this->filter->add('site_transient_theme_roots', $this->handleThemeRootsTransient(...), PHP_INT_MAX);
 
         if ($this->isValidThemeDirectory($baseThemePath)) {
@@ -296,11 +306,6 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function resolveThemePath(string $themePath): string
     {
-        // Si le chemin existe déjà, on le garde
-        if (file_exists($themePath)) {
-            return $themePath;
-        }
-
         // Si c'est un chemin WordPress standard, utiliser le répertoire par défaut
         if ($this->isWordPressThemePath($themePath)) {
             return WP_CONTENT_DIR.'/themes';
@@ -358,25 +363,23 @@ class ThemeServiceProvider extends ServiceProvider
     }
 
     /**
-     * WordPress filter callback to reset theme root option.
+     * WordPress filter callback to fix theme root resolution.
      *
-     * Forces template and stylesheet root to be false when the path
-     * doesn't exist, ensuring WordPress rescans for theme directories.
+     * Ensures the theme root always points to the correct base theme path,
+     * regardless of stale absolute paths stored in the theme_roots transient.
      *
-     * @param  string|bool  $path  Current theme root path from database
-     * @return string|bool Original path if exists, false otherwise
+     * @param  string  $themeRoot  Theme root path resolved by WordPress
+     * @return string Corrected theme root path
      */
-    private function resetThemeRootOption(string|bool $path): string|bool
+    private function fixThemeRoot(string $themeRoot): string
     {
-        if (file_exists($path)) {
-            return $path;
+        $baseThemePath = $this->getBaseThemePath();
+
+        if ($themeRoot !== $baseThemePath && ! $this->isWordPressThemePath($themeRoot)) {
+            return $baseThemePath;
         }
 
-        // Clear cached WordPress options to force rescan
-        delete_option('stylesheet_root');
-        delete_option('template_root');
-
-        return false;
+        return $themeRoot;
     }
 
     /**
@@ -387,24 +390,36 @@ class ThemeServiceProvider extends ServiceProvider
     private function setupThemeBoot(): void
     {
         $this->registerBladeDirectives();
+        $this->registerThemeJsonFilter();
     }
 
     /**
      * Register custom Blade directives for theme functionality.
-     *
-     * Adds the @theme directive for checking theme existence in templates.
      */
     private function registerBladeDirectives(): void
     {
-        if (! class_exists(Blade::class)) {
-            return;
-        }
+        // No framework-level Blade directives currently needed.
+        // Module-specific directives are loaded via ModuleAssetManager::registerModuleBladeDirectives().
+    }
 
-        Blade::if('theme', function (string $name) {
-            /** @var ThemeService $themeManager */
-            $themeManager = resolve(ThemeService::class);
+    /**
+     * Register the wp_theme_json_data_theme filter to inject built theme.json data.
+     *
+     * Uses the Vite-built theme.json (which includes Tailwind CSS variables)
+     * instead of relying on a file copy hack in vite.config.js.
+     */
+    private function registerThemeJsonFilter(): void
+    {
+        $this->filter->add('wp_theme_json_data_theme', function ($themeJson) {
+            $themeSlug = get_stylesheet();
+            $resolver = $this->app->make(ThemeJsonResolverInterface::class);
+            $builtData = $resolver->resolve($themeSlug);
 
-            return $themeManager->hasTheme($name);
+            if ($builtData === null) {
+                return $themeJson;
+            }
+
+            return new \WP_Theme_JSON_Data($builtData, 'theme');
         });
     }
 

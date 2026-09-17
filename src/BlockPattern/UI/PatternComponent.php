@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\BlockPattern\UI;
 
 use Pollora\BlockPattern\Domain\Contracts\PatternServiceInterface;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Psr\Container\ContainerInterface;
 
@@ -38,7 +38,7 @@ class PatternComponent implements ThemeComponent
     public function register(): void
     {
         $this->action->add('init', function (): void {
-            if (defined('WP_INSTALLING') && WP_INSTALLING) {
+            if (function_exists('wp_installing') && wp_installing()) {
                 return;
             }
 

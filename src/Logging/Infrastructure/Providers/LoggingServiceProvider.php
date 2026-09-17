@@ -49,8 +49,8 @@ class LoggingServiceProvider extends ServiceProvider
             'wordpress' => [
                 'driver' => 'single',
                 'path' => storage_path('logs/wordpress.log'),
-                'level' => env('WORDPRESS_LOG_LEVEL', 'debug'),
-                'days' => env('WORDPRESS_LOG_DAYS', 7),
+                'level' => config('logging.channels.wordpress.level', 'debug'),
+                'days' => config('logging.channels.wordpress.days', 7),
                 'replace_placeholders' => true,
             ],
         ];

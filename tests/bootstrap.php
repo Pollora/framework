@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-// Load WordPress function stubs BEFORE Composer autoload so they take
-// precedence over the real implementations from laravel/framework.
-// Both use function_exists() guards, so first-loaded wins.
+// Load Patchwork BEFORE anything else so Brain Monkey can redefine functions
+require_once __DIR__.'/../vendor/antecedent/patchwork/Patchwork.php';
+
+// Load test helpers (classes, utility functions)
 require_once __DIR__.'/Unit/helpers.php';
 
 require_once __DIR__.'/../vendor/autoload.php';

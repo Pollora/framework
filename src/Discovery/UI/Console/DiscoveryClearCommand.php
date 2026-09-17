@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Discovery\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
@@ -13,22 +15,10 @@ use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
  *
  * Console command for clearing discovery caches.
  */
+#[Description('Clear all discovery caches')]
+#[Signature('discovery:clear')]
 final class DiscoveryClearCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'discovery:clear';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Clear all discovery caches';
-
     /**
      * Execute the console command
      *

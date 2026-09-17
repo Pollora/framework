@@ -72,4 +72,9 @@ interface ModuleRepositoryInterface
      * Count modules.
      */
     public function count(): int;
+
+    /**
+     * Reset the module cache.
+     */
+    public function resetCache(): void;
 }

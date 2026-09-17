@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\PostType\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 use Pollora\PostType\Domain\Contracts\PostTypeRegistryInterface;
@@ -58,68 +57,6 @@ class PostTypeServiceProvider extends ServiceProvider
             $this->commands([
                 PostTypeMakeCommand::class,
             ]);
-        }
-    }
-
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
-    {
-        // Publish configuration
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../../config/post-types.php' => config_path('post-types.php'),
-            ], 'pollora-posttype-config');
-        }
-
-        // Register post types from configuration
-        $this->registerConfiguredPostTypes();
-
-        // Register PostType discovery with the discovery engine
-        $this->registerPostTypeDiscovery();
-    }
-
-    /**
-     * Register post types defined in the configuration.
-     */
-    private function registerConfiguredPostTypes(): void
-    {
-        // Get the post types from the config
-        $postTypes = $this->app['config']->get('post-types', []);
-
-        if (empty($postTypes)) {
-            return;
-        }
-
-        // Resolve the service from the container using the interface
-        $postTypeService = $this->app->make(PostTypeServiceInterface::class);
-
-        // Register each post type
-        foreach ($postTypes as $slug => $config) {
-            if (! is_array($config)) {
-                continue;
-            }
-
-            $singular = $config['names']['singular'] ?? null;
-            $plural = $config['names']['plural'] ?? null;
-            $args = $config['args'] ?? [];
-
-            $postTypeService->register($slug, $singular, $plural, $args);
-        }
-    }
-
-    /**
-     * Register PostType discovery with the discovery engine.
-     */
-    private function registerPostTypeDiscovery(): void
-    {
-        if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            /** @var DiscoveryEngineInterface $engine */
-            $engine = $this->app->make(DiscoveryEngineInterface::class);
-            $postTypeDiscovery = $this->app->make(PostTypeDiscovery::class);
-
-            $engine->addDiscovery('post_types', $postTypeDiscovery);
         }
     }
 }

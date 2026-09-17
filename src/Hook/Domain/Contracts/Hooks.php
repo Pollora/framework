@@ -7,10 +7,10 @@ namespace Pollora\Hook\Domain\Contracts;
 use Pollora\Attributes\Attributable;
 
 /**
- * Base interface for WordPress hooks.
- * Marker interface that allows a class to be interpreted for PHP attributes.
+ * Marker interface for hookable classes.
  *
- * Classes implementing this interface can be processed by discovery services
- * to analyze and handle their attributes dynamically.
+ * Classes implementing this interface signal that they contain
+ * hook-related PHP attributes (#[Action], #[Filter]) and can be
+ * processed by the discovery system.
  */
 interface Hooks extends Attributable {}

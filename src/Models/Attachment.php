@@ -41,6 +41,7 @@ use Pollora\Colt\Model\Collection\MetaCollection;
  * @property string $caption
  * @property string|null $alt
  * @property MetaCollection $meta
+ * @property mixed $meta_value
  */
 class Attachment extends \Pollora\Colt\Model\Attachment
 {
@@ -113,7 +114,7 @@ class Attachment extends \Pollora\Colt\Model\Attachment
         }
 
         // WordPress stores this as a serialized array
-        $unserialized = is_string($metaValue) ? unserialize($metaValue) : null;
+        $unserialized = is_string($metaValue) ? unserialize($metaValue, ['allowed_classes' => false]) : null;
         if (! is_array($unserialized)) {
             return [];
         }

@@ -36,14 +36,10 @@ class PostTypeFactory implements PostTypeFactoryInterface
     public function make(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object
     {
         // Generate singular name if not provided
-        if ($singular === null) {
-            $singular = $this->generateSingularName($slug);
-        }
+        $singular ??= $this->generateSingularName($slug);
 
         // Generate plural name if not provided
-        if ($plural === null) {
-            $plural = $this->generatePluralName($singular);
-        }
+        $plural ??= $this->generatePluralName($singular);
 
         // Create the Entity PostType instance directly (without auto-registration)
         $postType = new EntityPostType($slug, $singular, $plural);

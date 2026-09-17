@@ -1,0 +1,241 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Pollora Framework\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Pollora Team\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2026-04-23 17:30+0200\n"
+"X-Generator: Pollora\n"
+"X-Domain: pollora\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Pollora"
+msgstr "Pollora"
+
+msgid "Unknown"
+msgstr "不明"
+
+msgid "available"
+msgstr "利用可能"
+
+msgid "Environment"
+msgstr "環境"
+
+msgid "Enabled"
+msgstr "有効"
+
+msgid "Disabled"
+msgstr "無効"
+
+msgid "Yes"
+msgstr "はい"
+
+msgid "No"
+msgstr "いいえ"
+
+msgid "WordPress Config"
+msgstr "WordPress設定"
+
+msgid "Multisite"
+msgstr "マルチサイト"
+
+msgid "Permalinks"
+msgstr "パーマリンク"
+
+msgid "Post Types"
+msgstr "投稿タイプ"
+
+msgid "Taxonomies"
+msgstr "タクソノミー"
+
+msgid "None discovered."
+msgstr "検出されませんでした。"
+
+msgid "Hooks"
+msgstr "フック"
+
+msgid "Actions"
+msgstr "アクション"
+
+msgid "Filters"
+msgstr "フィルター"
+
+msgid "REST API Routes"
+msgstr "REST APIルート"
+
+msgid "WP-CLI Commands"
+msgstr "WP-CLIコマンド"
+
+msgid "Scheduled Tasks"
+msgstr "スケジュールタスク"
+
+msgid "Auto-discovered Providers"
+msgstr "自動検出されたプロバイダー"
+
+msgid "Modules"
+msgstr "モジュール"
+
+msgid "No modules installed."
+msgstr "モジュールがインストールされていません。"
+
+msgid "On"
+msgstr "オン"
+
+msgid "Off"
+msgstr "オフ"
+
+msgid "Discovery Cache"
+msgstr "ディスカバリーキャッシュ"
+
+msgid "Driver"
+msgstr "ドライバー"
+
+msgid "Status"
+msgstr "ステータス"
+
+msgid "Discovery Performance"
+msgstr "ディスカバリーパフォーマンス"
+
+msgid "No performance data available."
+msgstr "パフォーマンスデータがありません。"
+
+msgid "Cache hits"
+msgstr "キャッシュヒット"
+
+msgid "Cache misses"
+msgstr "キャッシュミス"
+
+msgid "Classes processed"
+msgstr "処理済みクラス"
+
+msgid "Discoveries executed"
+msgstr "実行済みディスカバリー"
+
+msgid "Instance pool size"
+msgstr "インスタンスプールサイズ"
+
+msgid "Static cache entries"
+msgstr "静的キャッシュエントリ"
+
+msgid "Active Theme"
+msgstr "有効なテーマ"
+
+msgid "Name"
+msgstr "名前"
+
+msgid "Version"
+msgstr "バージョン"
+
+msgid "Template"
+msgstr "テンプレート"
+
+#, php-format
+msgid "All %s"
+msgstr "%sの一覧"
+
+msgid "Add New"
+msgstr "新規追加"
+
+#, php-format
+msgid "Add New %s"
+msgstr "%sを追加"
+
+#, php-format
+msgid "Edit %s"
+msgstr "%sを編集"
+
+#, php-format
+msgid "New %s"
+msgstr "新規%s"
+
+#, php-format
+msgid "View %s"
+msgstr "%sを表示"
+
+#, php-format
+msgid "Search %s"
+msgstr "%sを検索"
+
+#, php-format
+msgid "No %s found"
+msgstr "%sが見つかりませんでした"
+
+#, php-format
+msgid "No %s found in trash"
+msgstr "ゴミ箱に%sが見つかりませんでした"
+
+#, php-format
+msgid "Parent %s:"
+msgstr "親%s:"
+
+#, php-format
+msgid "Update %s"
+msgstr "%sを更新"
+
+#, php-format
+msgid "New %s Name"
+msgstr "新しい%s名"
+
+#, php-format
+msgid "Popular %s"
+msgstr "人気の%s"
+
+#, php-format
+msgid "Separate %s with commas"
+msgstr "%sをカンマで区切ってください"
+
+#, php-format
+msgid "Add or remove %s"
+msgstr "%sの追加または削除"
+
+#, php-format
+msgid "Choose from the most used %s"
+msgstr "よく使われている%sから選択"
+
+#, php-format
+msgid "Parent %s"
+msgstr "親%s"
+
+#, php-format
+msgid "<strong>Pollora %1$s</strong> is available (you are using %2$s). <a href=\"%3$s\" target=\"_blank\" rel=\"noopener noreferrer\">View changelog</a>."
+msgstr "<strong>Pollora %1$s</strong>が利用可能です（現在%2$sを使用中）。<a href=\"%3$s\" target=\"_blank\" rel=\"noopener noreferrer\">変更履歴を見る</a>。"
+
+msgid "unknown"
+msgstr "不明"
+
+msgid "Installed version"
+msgstr "インストール済みバージョン"
+
+msgid "Latest version"
+msgstr "最新バージョン"
+
+msgid "Up to date"
+msgstr "最新"
+
+msgid "Pollora is up to date"
+msgstr "Polloraは最新です"
+
+msgid "Unable to determine Pollora version status"
+msgstr "Polloraのバージョン状態を確認できません"
+
+msgid "Could not determine the current or latest Pollora version. Check your internet connection."
+msgstr "Polloraの現在のバージョンまたは最新バージョンを確認できませんでした。インターネット接続を確認してください。"
+
+#, php-format
+msgid "You are running Pollora %s, which is the latest version."
+msgstr "Pollora %sを使用しています。これは最新バージョンです。"
+
+#, php-format
+msgid "Pollora %s is available"
+msgstr "Pollora %sが利用可能です"
+
+#, php-format
+msgid "You are running Pollora %1$s. The latest version is %2$s. %3$sView changelog%4$s."
+msgstr "Pollora %1$sを使用しています。最新バージョンは%2$sです。%3$s変更履歴を見る%4$s。"
+
+msgid "Learn more about updating Pollora"
+msgstr "Polloraの更新について詳しく見る"

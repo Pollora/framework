@@ -11,9 +11,9 @@ use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Discovery\Domain\Services\HasInstancePool;
 use Pollora\Discovery\Domain\Services\IsDiscovery;
-use Pollora\Hook\Domain\Contracts\Action as ActionContract;
-use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
-use ReflectionMethod;
+use Pollora\Hook\Domain\Contract\Action as ActionContract;
+use Pollora\Hook\Domain\Contract\Filter as FilterContract;
+use Psr\Log\LoggerInterface;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
@@ -38,7 +38,8 @@ final class HookDiscovery implements DiscoveryInterface
      */
     public function __construct(
         private readonly ActionContract $actionService,
-        private readonly FilterContract $filterService
+        private readonly FilterContract $filterService,
+        private readonly ?LoggerInterface $logger = null
     ) {}
 
     /**
@@ -61,9 +62,7 @@ final class HookDiscovery implements DiscoveryInterface
 
         try {
             $className = $structure->namespace.'\\'.$structure->name;
-
-            $reflectionClass = $reflectionCache->getClassReflection($className);
-            $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+            $methods = $reflectionCache->getPublicMethods($className);
 
             foreach ($methods as $method) {
                 // Check for Action attributes
@@ -140,8 +139,7 @@ final class HookDiscovery implements DiscoveryInterface
                 }
             } catch (\Throwable $e) {
                 // Log the error but continue with other hooks
-                // In a production environment, you might want to use a proper logger
-                error_log(sprintf('Failed to register %s hook from method %s::%s: ', $hookType, $className, $methodName).$e->getMessage());
+                $this->logger?->error(sprintf('Failed to register %s hook from method %s::%s', $hookType, $className, $methodName), ['exception' => $e]);
             }
         }
     }

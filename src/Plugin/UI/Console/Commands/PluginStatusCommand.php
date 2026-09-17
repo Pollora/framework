@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Plugin\UI\Console\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Pollora\Plugin\Application\Services\PluginManager;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
@@ -14,29 +16,17 @@ use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
  * Shows a comprehensive overview of all plugins including their status,
  * version, author, and other metadata. Provides both summary and detailed views.
  */
-class PluginStatusCommand extends Command
-{
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'pollora:plugin:status 
+#[Description('Display plugin status and information')]
+#[Signature('pollora:plugin:status 
                             {plugin? : Specific plugin name to show details for}
                             {--active : Show only active plugins}
                             {--inactive : Show only inactive plugins}
                             {--enabled : Show only enabled plugins}
                             {--disabled : Show only disabled plugins}
                             {--detailed : Show detailed information}
-                            {--json : Output as JSON}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Display plugin status and information';
-
+                            {--json : Output as JSON}')]
+class PluginStatusCommand extends Command
+{
     /**
      * Create a new command instance.
      *

@@ -81,6 +81,26 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Lightweight API Mode
+    |--------------------------------------------------------------------------
+    |
+    | Requests to /api/* automatically load WordPress in lightweight mode:
+    | no plugins are loaded by default, dramatically reducing bootstrap time.
+    |
+    | If specific API routes need a plugin (e.g., WooCommerce for product data),
+    | list its directory name here. Only these plugins will be loaded for /api/ requests.
+    |
+    | Glob patterns are supported:
+    |   'api_plugins' => ['woocommerce*'],  // woocommerce, woocommerce-subscriptions, etc.
+    |   'api_plugins' => ['woocommerce', 'advanced-custom-fields-pro'],
+    |
+    | Use ['*'] or null to load all plugins (disable lightweight mode).
+    |
+    */
+    'api_plugins' => [],
+
     'constants' => [
         // WordPress authentication keys and salts
         'auth_key' => env('AUTH_KEY'),
@@ -91,5 +111,18 @@ return [
         'secure_auth_salt' => env('SECURE_AUTH_SALT'),
         'logged_in_salt' => env('LOGGED_IN_SALT'),
         'nonce_salt' => env('NONCE_SALT'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Control
+    |--------------------------------------------------------------------------
+    |
+    | Configure HTTP cache headers for non-authenticated visitors.
+    | These headers are applied by the WordPressHeaders middleware.
+    |
+    */
+    'cache' => [
+        'max_age' => (int) env('WP_CACHE_MAX_AGE', 3600),
     ],
 ];

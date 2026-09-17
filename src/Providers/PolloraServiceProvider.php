@@ -7,16 +7,15 @@ namespace Pollora\Providers;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
-use Pollora\Admin\PageServiceProvider;
+use Pollora\Ability\Infrastructure\Providers\AbilityServiceProvider;
 use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
-use Pollora\Application\Infrastructure\Providers\ConsoleServiceProvider;
-use Pollora\Application\Infrastructure\Providers\DebugServiceProvider;
+use Pollora\Application\Infrastructure\Providers\ApplicationServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
-use Pollora\BlockCategory\Infrastructure\Providers\BlockCategoryServiceProvider;
-use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
+use Pollora\Block\Infrastructure\Providers\BlockServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
+use Pollora\Dashboard\Infrastructure\Providers\DashboardServiceProvider;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
@@ -27,12 +26,11 @@ use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
-use Pollora\Permalink\RewriteServiceProvider;
+use Pollora\Permalink\Infrastructure\Providers\PermalinkServiceProvider;
 use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\Jobs\JobDispatcher;
-use Pollora\Schedule\SchedulerDiscoveryServiceProvider;
 use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
@@ -72,10 +70,9 @@ class PolloraServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Generic service providers
-        $this->app->register(ConsoleServiceProvider::class);
+        $this->app->register(ApplicationServiceProvider::class);
         $this->app->register(ArtisanServiceProvider::class);
         $this->app->register(LoggingServiceProvider::class);
-        $this->app->register(DebugServiceProvider::class);
         $this->app->register(DiscoveryServiceProvider::class);
         $this->app->register(ModuleServiceProvider::class);
         $this->app->register(ConstantServiceProvider::class);
@@ -96,19 +93,18 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(CollectionServiceProvider::class);
         $this->app->register(OptionServiceProvider::class);
 
-        // Block features
-        $this->app->register(BlockCategoryServiceProvider::class);
-        $this->app->register(BlockPatternServiceProvider::class);
+        // Block features (blocks, categories, patterns)
+        $this->app->register(BlockServiceProvider::class);
 
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
 
-        $this->app->register(RewriteServiceProvider::class);
-        $this->app->register(PageServiceProvider::class);
+        $this->app->register(PermalinkServiceProvider::class);
         $this->app->register(ThemeServiceProvider::class);
         $this->app->register(PluginServiceProvider::class);
         $this->app->register(AssetServiceProvider::class);
         $this->app->register(AjaxServiceProvider::class);
+        $this->app->register(AbilityServiceProvider::class);
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
@@ -118,11 +114,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(TemplateHierarchyServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
-        if (config('wordpress.use_laravel_scheduler', false)) {
-            $this->app->register(SchedulerServiceProvider::class);
-        }
-
-        $this->app->register(SchedulerDiscoveryServiceProvider::class);
+        $this->app->register(SchedulerServiceProvider::class);
         $this->app->singleton(JobDispatcher::class, fn ($app): JobDispatcher => new JobDispatcher($app->make(Dispatcher::class)));
 
         // Authentication service provider
@@ -134,6 +126,9 @@ class PolloraServiceProvider extends ServiceProvider
 
         // Version check notifications
         $this->app->register(VersionCheckServiceProvider::class);
+
+        // Dashboard
+        $this->app->register(DashboardServiceProvider::class);
     }
 
     /**
@@ -147,5 +142,31 @@ class PolloraServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../public/wp-config.php' => public_path(),
         ], 'public');
+
+        $this->loadPolloraTextDomain();
+    }
+
+    /**
+     * Load the 'pollora' text domain for framework translations.
+     *
+     * Checks for user-provided translations in `wp-content/languages/pollora/`
+     * first, then falls back to the framework's bundled translations.
+     */
+    private function loadPolloraTextDomain(): void
+    {
+        if (! function_exists('load_textdomain')) {
+            return;
+        }
+
+        $locale = determine_locale();
+        $moFile = sprintf('pollora-%s.mo', $locale);
+
+        // User-provided translations take priority
+        $loaded = load_textdomain('pollora', WP_LANG_DIR.'/pollora/'.$moFile);
+
+        // Fall back to bundled translations
+        if (! $loaded) {
+            load_textdomain('pollora', dirname(__DIR__, 2).'/resources/languages/'.$moFile);
+        }
     }
 }

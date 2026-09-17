@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\DB;
  *
  * Manages events that need to run on a schedule (hourly, daily, etc.)
  * with database persistence and Laravel queue integration.
- *
- * @extends AbstractEvent
  */
 class RecurringEvent extends AbstractEvent
 {
@@ -34,9 +32,7 @@ class RecurringEvent extends AbstractEvent
     /**
      * Create and persist a new recurring job instance.
      *
-     * @param  object  $event  WordPress event object
-     * @return static
-     */
+     * @param  object  $event  WordPress event object\n     */
     public static function createJob(object $event): self
     {
         $job = new static($event);

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollora\VersionCheck\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Pollora\Hook\Domain\Contracts\Action;
-use Pollora\Hook\Domain\Contracts\Filter;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Pollora\VersionCheck\Infrastructure\Services\PackagistVersionChecker;

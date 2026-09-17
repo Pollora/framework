@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
 
@@ -20,17 +20,14 @@ class Bootstrap
 
     protected ConsoleDetectionService $consoleDetectionService;
 
-    protected DebugDetectorInterface $debugDetector;
-
     /**
      * Database configuration array.
      */
     private array $db;
 
-    public function __construct(?ConsoleDetectionService $consoleDetectionService, DebugDetectorInterface $debugDetector, protected \Pollora\Hook\Domain\Contracts\Action $action)
+    public function __construct(?ConsoleDetectionService $consoleDetectionService, protected DebugDetectorInterface $debugDetector, protected Action $action)
     {
         $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
-        $this->debugDetector = $debugDetector ?? resolve(DebugDetectorInterface::class);
     }
 
     /**
@@ -155,9 +152,110 @@ class Bootstrap
             define('SHORTINIT', true);
         }
 
+        // Apply lightweight mode filters before WordPress loads
+        if ($this->isLightweightRequest()) {
+            $this->applyLightweightFilters();
+        }
+
         if (! $this->consoleDetectionService->isWpCli()) {
             require_once ABSPATH.'wp-settings.php';
         }
+    }
+
+    /**
+     * Determine if the current request should load WordPress in lightweight mode.
+     *
+     * API routes (prefixed /api/) trigger lightweight mode, which skips loading
+     * most plugins and prevents WordPress from running its full query cycle.
+     * The theme is still loaded so that theme-registered routes and services work.
+     */
+    private function isLightweightRequest(): bool
+    {
+        if ($this->consoleDetectionService->isConsole()) {
+            return false;
+        }
+
+        $uri = parse_url((string) request()->server('REQUEST_URI', ''), PHP_URL_PATH) ?? '';
+
+        return str_starts_with($uri, '/api/');
+    }
+
+    /**
+     * Apply WordPress filters that reduce the bootstrap footprint.
+     *
+     * These filters are placed BEFORE wp-settings.php is loaded, so they
+     * intercept WordPress at the right moment:
+     *
+     * - `pre_option_active_plugins`: returns empty array → no plugins loaded
+     * - WP_USE_THEMES is already false for /api/ requests (set in defineWordPressConstants)
+     *
+     * The theme itself is still loaded (needed for routes, controllers, services).
+     * Plugins that are needed for specific API routes can be loaded on-demand
+     * via the 'wordpress.api_plugins' config key.
+     */
+    private function applyLightweightFilters(): void
+    {
+        $apiPlugins = config('wordpress.api_plugins');
+
+        // null or ['*'] = load all plugins normally
+        if ($apiPlugins === null) {
+            return;
+        }
+
+        $apiPlugins = (array) $apiPlugins;
+
+        if (in_array('*', $apiPlugins, true)) {
+            return;
+        }
+
+        // No plugins allowed: short-circuit immediately
+        if ($apiPlugins === []) {
+            add_filter('pre_option_active_plugins', '__return_empty_array');
+
+            return;
+        }
+
+        // Selective loading: read the real list via DB to avoid recursion,
+        // then filter it down to only the allowed plugins.
+        $allowedPlugins = $this->resolveAllowedPlugins($apiPlugins);
+
+        add_filter('pre_option_active_plugins', fn (): array => $allowedPlugins);
+    }
+
+    /**
+     * Read active plugins from the database and filter to only allowed ones.
+     *
+     * Uses a direct DB query to avoid triggering the pre_option filter recursion.
+     */
+    private function resolveAllowedPlugins(array $apiPlugins): array
+    {
+        try {
+            $raw = DB::table('options')
+                ->where('option_name', 'active_plugins')
+                ->value('option_value');
+
+            $allPlugins = $raw ? (array) @unserialize($raw) : [];
+        } catch (\Throwable) {
+            return [];
+        }
+
+        return array_values(array_filter($allPlugins, function (string $plugin) use ($apiPlugins): bool {
+            $pluginDir = dirname($plugin);
+
+            foreach ($apiPlugins as $pattern) {
+                // Exact match on directory or full basename
+                if ($pattern === $pluginDir || $pattern === $plugin) {
+                    return true;
+                }
+
+                // Glob-style wildcard (e.g. 'woocommerce*' matches 'woocommerce-subscriptions')
+                if (str_contains($pattern, '*') && fnmatch($pattern, $pluginDir)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }));
     }
 
     /**
@@ -306,10 +404,11 @@ class Bootstrap
             Constant::queue('ABSPATH', $basePath.$wpPath);
         }
 
-        Constant::queue('WP_SITEURL', url(str_replace('public/', '', $wpPath)));
-        Constant::queue('WP_HOME', url('/'));
+        $appUrl = config('app.url');
+        Constant::queue('WP_SITEURL', rtrim((string) $appUrl, '/').'/'.ltrim(str_replace('public/', '', $wpPath), '/'));
+        Constant::queue('WP_HOME', $appUrl);
         Constant::queue('WP_CONTENT_DIR', $basePath.$contentPath);
-        Constant::queue('WP_CONTENT_URL', url('content'));
+        Constant::queue('WP_CONTENT_URL', rtrim((string) $appUrl, '/').'/content');
 
         // Apply constants once all are queued
         Constant::apply();

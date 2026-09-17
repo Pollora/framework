@@ -53,10 +53,17 @@ class AdminNotice
         $nonce = wp_create_nonce(self::NONCE_ACTION);
         $changelogUrl = 'https://github.com/Pollora/framework/releases/tag/v'.$latest;
 
+        /* translators: 1: latest version, 2: current version, 3: changelog URL */
+        $message = sprintf(
+            __('<strong>Pollora %1$s</strong> is available (you are using %2$s). <a href="%3$s" target="_blank" rel="noopener noreferrer">View changelog</a>.', 'pollora'),
+            esc_html($latest),
+            esc_html($current ?? __('unknown', 'pollora')),
+            esc_url($changelogUrl)
+        );
+
         printf(
             '<div class="notice notice-warning is-dismissible pollora-update-notice" data-version="%s" data-nonce="%s">'
-            .'<p><strong>Pollora %s</strong> is available (you are using %s). '
-            .'<a href="%s" target="_blank" rel="noopener noreferrer">View changelog</a>.</p>'
+            .'<p>%s</p>'
             .'</div>'
             .'<script>jQuery(function($){'
             .'$(document).on("click",".pollora-update-notice .notice-dismiss",function(){'
@@ -66,9 +73,7 @@ class AdminNotice
             .'});</script>',
             esc_attr($latest),
             esc_attr($nonce),
-            esc_html($latest),
-            esc_html($current ?? 'unknown'),
-            esc_url($changelogUrl)
+            $message
         );
     }
 

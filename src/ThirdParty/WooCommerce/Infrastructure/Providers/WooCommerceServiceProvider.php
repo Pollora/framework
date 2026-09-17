@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Providers;
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\ComingSoonHandlerInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\ComingSoonHandler;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerce;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Services\WooCommerceTemplateResolver;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
@@ -61,7 +64,7 @@ class WooCommerceServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressWooCommerceAdapter::class);
 
         // Register the main WooCommerce integration implementation
-        $this->app->singleton(WooCommerceIntegrationInterface::class, fn ($app): WooCommerce => new WooCommerce(
+        $this->app->singleton(WooCommerceIntegrationInterface::class, fn (Container $app): WooCommerce => new WooCommerce(
             $app->make(TemplateFinderInterface::class),
             $app->make(ViewFactory::class),
             $app->make(WooCommerceService::class),
@@ -69,14 +72,19 @@ class WooCommerceServiceProvider extends ServiceProvider
         ));
 
         // Register the template resolver implementation
-        $this->app->singleton(TemplateResolverInterface::class, fn ($app): WooCommerceTemplateResolver => new WooCommerceTemplateResolver(
+        $this->app->singleton(TemplateResolverInterface::class, fn (Container $app): WooCommerceTemplateResolver => new WooCommerceTemplateResolver(
             $app->make(WooCommerceService::class)
         ));
 
-        // Maintain backward compatibility by binding the old class name
-        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\WooCommerce::class, fn ($app) => $app->make(WooCommerceIntegrationInterface::class));
+        // Register the Coming Soon handler
+        $this->app->singleton(ComingSoonHandlerInterface::class, fn (Container $app): ComingSoonHandler => new ComingSoonHandler(
+            $app->make(ViewFactory::class)
+        ));
 
-        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver::class, fn ($app) => $app->make(TemplateResolverInterface::class));
+        // Maintain backward compatibility by binding the old class name
+        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\WooCommerce::class, fn (Container $app) => $app->make(WooCommerceIntegrationInterface::class));
+
+        $this->app->singleton(\Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver::class, fn (Container $app) => $app->make(TemplateResolverInterface::class));
     }
 
     /**
@@ -84,11 +92,12 @@ class WooCommerceServiceProvider extends ServiceProvider
      */
     private function registerApplicationServices(): void
     {
-        $this->app->singleton(RegisterWooCommerceHooksUseCase::class, fn ($app): RegisterWooCommerceHooksUseCase => new RegisterWooCommerceHooksUseCase(
+        $this->app->singleton(RegisterWooCommerceHooksUseCase::class, fn (Container $app): RegisterWooCommerceHooksUseCase => new RegisterWooCommerceHooksUseCase(
             $app->make(Action::class),
             $app->make(Filter::class),
             $app->make(WooCommerceIntegrationInterface::class),
-            $app->make(TemplateResolverInterface::class)
+            $app->make(TemplateResolverInterface::class),
+            $app->make(ComingSoonHandlerInterface::class)
         ));
     }
 

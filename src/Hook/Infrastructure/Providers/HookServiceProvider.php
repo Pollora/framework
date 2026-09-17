@@ -7,11 +7,12 @@ namespace Pollora\Hook\Infrastructure\Providers;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
-use Pollora\Hook\Domain\Contracts\Action as ActionContract;
-use Pollora\Hook\Domain\Contracts\Filter as FilterContract;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Adapter\Out\WordPress\Action;
+use Pollora\Hook\Adapter\Out\WordPress\Filter;
+use Pollora\Hook\Domain\Contract\Action as ActionContract;
+use Pollora\Hook\Domain\Contract\CallbackResolverInterface;
+use Pollora\Hook\Domain\Contract\Filter as FilterContract;
+use Pollora\Hook\Infrastructure\Services\ContainerCallbackResolver;
 use Pollora\Hook\Infrastructure\Services\HookDiscovery;
 use Pollora\Hook\UI\Console\ActionMakeCommand;
 use Pollora\Hook\UI\Console\FilterMakeCommand;
@@ -36,7 +37,7 @@ class HookServiceProvider extends ServiceProvider
      */
     protected ConsoleDetectionService $consoleDetectionService;
 
-    public function __construct($app, ?ConsoleDetectionService $consoleDetectionService = null)
+    public function __construct(Application $app, ?ConsoleDetectionService $consoleDetectionService = null)
     {
         parent::__construct($app);
         $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
@@ -50,16 +51,30 @@ class HookServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Bind concrete classes
-        $this->app->singleton(Action::class);
-        $this->app->singleton(Filter::class);
+        // Callback resolver for dependency injection in hook callbacks
+        $this->app->singleton(CallbackResolverInterface::class, fn (Application $app): ContainerCallbackResolver => new ContainerCallbackResolver($app));
 
-        // Bind interfaces to implementations
-        $this->app->bind(ActionContract::class, Action::class);
-        $this->app->bind(FilterContract::class, Filter::class);
+        // Bind concrete classes with resolver injection
+        $this->app->singleton(Action::class, function (Application $app): Action {
+            $action = new Action;
+            $action->setCallbackResolver($app->make(CallbackResolverInterface::class));
+
+            return $action;
+        });
+        $this->app->singleton(Filter::class, function (Application $app): Filter {
+            $filter = new Filter;
+            $filter->setCallbackResolver($app->make(CallbackResolverInterface::class));
+
+            return $filter;
+        });
+
+        // Alias interfaces to singleton implementations so all resolution
+        // paths (Facade, DI, manual make) return the same instance
+        $this->app->alias(Action::class, ActionContract::class);
+        $this->app->alias(Filter::class, FilterContract::class);
 
         // Register Hook Discovery
-        $this->app->singleton(HookDiscovery::class, fn ($app): HookDiscovery => new HookDiscovery(
+        $this->app->singleton(HookDiscovery::class, fn (Application $app): HookDiscovery => new HookDiscovery(
             $app->make(ActionContract::class),
             $app->make(FilterContract::class)
         ));
@@ -69,29 +84,6 @@ class HookServiceProvider extends ServiceProvider
                 ActionMakeCommand::class,
                 FilterMakeCommand::class,
             ]);
-        }
-    }
-
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
-    {
-        // Register Hook discovery with the discovery engine
-        $this->registerHookDiscovery();
-    }
-
-    /**
-     * Register Hook discovery with the discovery engine.
-     */
-    private function registerHookDiscovery(): void
-    {
-        if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            /** @var DiscoveryEngineInterface $engine */
-            $engine = $this->app->make(DiscoveryEngineInterface::class);
-            $hookDiscovery = $this->app->make(HookDiscovery::class);
-
-            $engine->addDiscovery('hooks', $hookDiscovery);
         }
     }
 }

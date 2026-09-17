@@ -6,7 +6,6 @@ namespace Pollora\WpCli\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\WpCli\Application\Services\WpCliService;
 use Pollora\WpCli\Infrastructure\Adapters\WpCliAdapter;
 use Pollora\WpCli\Infrastructure\Services\WpCliDiscovery;
@@ -63,36 +62,8 @@ class WpCliServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register WP CLI discovery with the discovery engine
-        $this->registerWpCliDiscovery();
-
-        // Initialize commands if WP CLI is available
-        $this->initializeWpCliCommands();
-    }
-
-    /**
-     * Register WP CLI discovery with the discovery engine.
-     */
-    private function registerWpCliDiscovery(): void
-    {
-        if ($this->app->bound(DiscoveryEngineInterface::class)) {
-            /** @var DiscoveryEngineInterface $engine */
-            $engine = $this->app->make(DiscoveryEngineInterface::class);
-            $wpCliDiscovery = $this->app->make(WpCliDiscovery::class);
-
-            $engine->addDiscovery('wp_cli_commands', $wpCliDiscovery);
-        }
-    }
-
-    /**
-     * Initialize WP CLI commands if WP CLI is available.
-     */
-    private function initializeWpCliCommands(): void
-    {
-        // Only initialize if we're in a WP CLI context
         if (\defined('WP_CLI') && WP_CLI) {
-            $wpCliService = $this->app->make(WpCliService::class);
-            $wpCliService->initializeCommands();
+            $this->app->make(WpCliService::class)->initializeCommands();
         }
     }
 }

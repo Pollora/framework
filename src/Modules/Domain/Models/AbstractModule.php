@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Modules\Domain\Models;
 
-use Illuminate\Support\Str;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
+use Pollora\Support\Domain\StringHelper;
 
 abstract class AbstractModule implements \Stringable, ModuleInterface
 {
@@ -28,17 +28,17 @@ abstract class AbstractModule implements \Stringable, ModuleInterface
 
     public function getStudlyName(): string
     {
-        return Str::studly($this->name);
+        return StringHelper::studly($this->name);
     }
 
     public function getKebabName(): string
     {
-        return Str::kebab($this->name);
+        return StringHelper::kebab($this->name);
     }
 
     public function getSnakeName(): string
     {
-        return Str::snake($this->name);
+        return StringHelper::snake($this->name);
     }
 
     public function getPath(): string

@@ -10,6 +10,7 @@ use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Pollora\Exceptions\Infrastructure\Services\ModuleAwareErrorViewResolver;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
@@ -67,8 +68,11 @@ class ModuleAwareExceptionHandler extends Handler
                 $this->errorViewResolver = new ModuleAwareErrorViewResolver($this->container, $viewFactory);
             } catch (Throwable $e) {
                 // Log error but don't fail - fall back to default behavior
-                if (function_exists('error_log')) {
-                    error_log('Failed to initialize ModuleAwareErrorViewResolver: '.$e->getMessage());
+                try {
+                    $this->container->make(LoggerInterface::class)->error(
+                        'Failed to initialize ModuleAwareErrorViewResolver: '.$e->getMessage()
+                    );
+                } catch (Throwable) {
                 }
             }
         }
@@ -133,8 +137,11 @@ class ModuleAwareExceptionHandler extends Handler
 
         } catch (Throwable $throwable) {
             // Log rendering error but don't fail - fall back to default behavior
-            if (function_exists('error_log')) {
-                error_log('Failed to render module error view: '.$throwable->getMessage());
+            try {
+                $this->container->make(LoggerInterface::class)->error(
+                    'Failed to render module error view: '.$throwable->getMessage()
+                );
+            } catch (Throwable) {
             }
 
             return null;

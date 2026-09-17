@@ -7,9 +7,11 @@ namespace Pollora\Modules\Infrastructure\Services;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Factory;
+use Illuminate\View\FileViewFinder;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Foundation\Support\IncludesFiles;
+use Psr\Log\LoggerInterface;
 
 /**
  * Generic module asset manager.
@@ -21,9 +23,16 @@ class ModuleAssetManager
 {
     use IncludesFiles;
 
+    private ?LoggerInterface $logger = null;
+
     public function __construct(
         protected Container $app
-    ) {}
+    ) {
+        try {
+            $this->logger = $app->make(LoggerInterface::class);
+        } catch (\Throwable) {
+        }
+    }
 
     /**
      * Setup asset management for a specific module.
@@ -53,9 +62,7 @@ class ModuleAssetManager
             $this->registerModuleViewPaths($modulePath, $moduleType, $moduleSlug);
 
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Failed to setup assets for module %s (%s): ', $moduleName, $moduleType).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Failed to setup assets for module %s (%s)', $moduleName, $moduleType), ['exception' => $throwable]);
         }
     }
 
@@ -118,9 +125,7 @@ class ModuleAssetManager
                 }
             }
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Failed to register Blade directives for module %s: ', $modulePath).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Failed to register Blade directives for module %s', $modulePath), ['exception' => $throwable]);
         }
     }
 
@@ -167,9 +172,7 @@ class ModuleAssetManager
             }
 
         } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log(sprintf('Failed to register view paths for module %s (%s): ', $modulePath, $moduleType).$throwable->getMessage());
-            }
+            $this->logger?->error(sprintf('Failed to register view paths for module %s (%s)', $modulePath, $moduleType), ['exception' => $throwable]);
         }
     }
 
@@ -218,6 +221,7 @@ class ModuleAssetManager
     {
         try {
             // Get current paths to preserve order
+            /** @var FileViewFinder $viewFinder */
             $currentPaths = $viewFinder->getPaths();
 
             // Check if path is already registered to avoid duplicates
@@ -240,11 +244,8 @@ class ModuleAssetManager
             // Fallback to standard registration if priority registration fails
             try {
                 $viewFinder->addLocation($viewPath);
-            } catch (\Throwable) {
-                // Silent fail to prevent breaking the application
-                if (function_exists('error_log')) {
-                    error_log('Failed to register view path with priority: '.$viewPath);
-                }
+            } catch (\Throwable $throwable) {
+                $this->logger?->error(sprintf('Failed to register view path with priority: %s', $viewPath), ['exception' => $throwable]);
             }
         }
     }

@@ -12,6 +12,7 @@ use Pollora\Theme\Domain\Models\Sidebar;
 use Pollora\Theme\Domain\Models\Templates;
 use Pollora\Theme\Domain\Models\ThemeInitializer;
 use Pollora\Theme\Infrastructure\Services\Support;
+use Psr\Log\LoggerInterface;
 
 /**
  * Simplified provider for registering and bootstrapping theme components.
@@ -56,7 +57,7 @@ class ThemeComponentProvider
             $instance = $this->app->make($component);
             $instance->register();
         } catch (\Throwable $throwable) {
-            if (env('APP_DEBUG', false)) {
+            if (config('app.debug')) {
                 throw new \RuntimeException(
                     sprintf('Failed to register component %s: ', $component).$throwable->getMessage(),
                     0,
@@ -65,8 +66,11 @@ class ThemeComponentProvider
             }
 
             // Log error but continue in production
-            if (function_exists('error_log')) {
-                error_log(sprintf('Theme component registration failed: %s - ', $component).$throwable->getMessage());
+            try {
+                $this->app->make(LoggerInterface::class)->error(
+                    sprintf('Theme component registration failed: %s - ', $component).$throwable->getMessage()
+                );
+            } catch (\Throwable) {
             }
         }
     }

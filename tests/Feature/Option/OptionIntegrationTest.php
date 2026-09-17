@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Option\Application\Services\OptionService;
+use Pollora\Option\Application\Service\OptionService;
 use Pollora\Support\Facades\Option;
 
 describe('OptionIntegration', function (): void {

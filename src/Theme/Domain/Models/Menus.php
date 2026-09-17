@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Models;
 
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Services\Translater;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Support\ThemeConfig;
@@ -23,8 +23,6 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Class Menus
- *
- * @implements ThemeComponent
  */
 class Menus implements ThemeComponent
 {

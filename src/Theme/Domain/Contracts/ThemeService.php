@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Domain\Contracts;
 
+use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 /**
@@ -42,7 +43,9 @@ interface ThemeService
     public function parent(): ?string;
 
     /**
-     * Get all parent themes
+     * Get all parent themes, closest ancestor first
+     *
+     * @return array<int, ThemeMetadata>
      */
     public function getParentThemes(): array;
 
@@ -50,4 +53,14 @@ interface ThemeService
      * Get a list of all available themes
      */
     public function getAvailableThemes(): array;
+
+    /**
+     * Check if a theme is registered.
+     */
+    public function hasTheme(string $name): bool;
+
+    /**
+     * Get the active theme module.
+     */
+    public function getActiveTheme(): ?ModuleInterface;
 }
