@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\View\Infrastructure\Services;
 
+use Illuminate\View\FileViewFinder;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Filesystem\Filesystem;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
@@ -20,6 +21,13 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
      * Base path for theme in which views are located.
      */
     protected ?string $path = null;
+
+    /**
+     * Request-level cache for locate() results.
+     *
+     * @var array<string, array<string>>
+     */
+    private static array $locateCache = [];
 
     /**
      * Create new FileSystemTemplateFinder instance.
@@ -66,6 +74,11 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
             return array_merge(...array_map($this->locate(...), $templateNames));
         }
 
+        // Return cached result if available
+        if (isset(self::$locateCache[$templateNames])) {
+            return self::$locateCache[$templateNames];
+        }
+
         // Convert PHP template to Blade template
         $bladeTemplate = str_ends_with($templateNames, '.php') && ! str_ends_with($templateNames, '.blade.php')
             ? str_replace('.php', '.blade.php', $templateNames)
@@ -74,7 +87,9 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
         $found = [];
 
         // Check each view path for the template
-        foreach ($this->finder->getPaths() as $path) {
+        /** @var FileViewFinder $finder */
+        $finder = $this->finder;
+        foreach ($finder->getPaths() as $path) {
             // Check for Blade version first
             $bladePath = $path.DIRECTORY_SEPARATOR.$bladeTemplate;
             if (file_exists($bladePath)) {
@@ -92,7 +107,15 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
             }
         }
 
-        return array_unique(array_filter($found));
+        return self::$locateCache[$templateNames] = array_unique(array_filter($found));
+    }
+
+    /**
+     * Clear the request-level locate cache.
+     */
+    public static function clearLocateCache(): void
+    {
+        self::$locateCache = [];
     }
 
     /**
@@ -115,7 +138,9 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
         $viewName = trim($viewName, '/\\');
 
         // Remove view directory prefixes
-        foreach ($this->finder->getPaths() as $viewPath) {
+        /** @var FileViewFinder $finder2 */
+        $finder2 = $this->finder;
+        foreach ($finder2->getPaths() as $viewPath) {
             if ($themePath !== '' && $themePath !== '0') {
                 $relativePath = $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $viewPath);
                 if (str_starts_with($viewName, $relativePath)) {
@@ -138,7 +163,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
      */
     public function getBladeTemplates(array $templates): array
     {
-        return array_map(fn (string $template): string|array => str_ends_with($template, '.php') && ! str_ends_with($template, '.blade.php')
+        return array_map(fn (string $template): string => str_ends_with($template, '.php') && ! str_ends_with($template, '.blade.php')
             ? str_replace('.php', '.blade.php', $template)
             : $template, $templates);
     }

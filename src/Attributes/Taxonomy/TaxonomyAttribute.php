@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Attributes\Taxonomy;
 
-use Attribute;
 use Pollora\Attributes\Attributable;
 use Pollora\Attributes\Contracts\HandlesAttributes;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyAttributeInterface;
@@ -19,7 +18,6 @@ use ReflectionMethod;
  *
  * @Attribute
  */
-#[Attribute(Attribute::TARGET_CLASS)]
 abstract class TaxonomyAttribute implements HandlesAttributes
 {
     /**
@@ -48,7 +46,7 @@ abstract class TaxonomyAttribute implements HandlesAttributes
      * This method should be implemented by child classes to set specific
      * configuration options on the taxonomy instance.
      *
-     * @param  Taxonomy  $taxonomy  The taxonomy instance to configure
+     * @param  TaxonomyAttributeInterface  $taxonomy  The taxonomy instance to configure
      */
     abstract protected function configure(TaxonomyAttributeInterface $taxonomy): void;
 }

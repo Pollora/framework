@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Plugin\UI\Console\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Pollora\Plugin\Application\Services\PluginManager;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
@@ -15,14 +17,8 @@ use Pollora\Plugin\Domain\Support\PluginCollection;
  * Displays a list of plugins with filtering and sorting options.
  * Provides various output formats including table, list, and JSON.
  */
-class PluginListCommand extends Command
-{
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'pollora:plugin:list 
+#[Description('List all available plugins with filtering and sorting options')]
+#[Signature('pollora:plugin:list 
                             {--active : Show only active plugins}
                             {--inactive : Show only inactive plugins}
                             {--enabled : Show only enabled plugins}
@@ -32,15 +28,9 @@ class PluginListCommand extends Command
                             {--search= : Search in plugin names and descriptions}
                             {--sort=name : Sort by (name, version, author, status)}
                             {--direction=asc : Sort direction (asc, desc)}
-                            {--format=table : Output format (table, list, json)}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'List all available plugins with filtering and sorting options';
-
+                            {--format=table : Output format (table, list, json)}')]
+class PluginListCommand extends Command
+{
     /**
      * Create a new command instance.
      *

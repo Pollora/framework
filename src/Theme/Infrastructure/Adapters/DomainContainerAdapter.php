@@ -23,8 +23,6 @@ use Pollora\Theme\Domain\Contracts\ContainerInterface;
  * @author  Pollora Team
  *
  * @since   1.0.0
- *
- * @implements ContainerInterface
  */
 class DomainContainerAdapter implements ContainerInterface
 {

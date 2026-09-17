@@ -160,7 +160,7 @@ class ViteManager implements ViteManagerInterface
     {
         $viteManager = $this;
         ViteFacade::macro('getAssetUrls', function (array $entrypoints) use ($viteManager) {
-            /** @var Vite $this */
+
             $buildDirectory = $viteManager->container()->getBuildDirectory();
 
             $manifest = $this->manifest($buildDirectory);
@@ -169,7 +169,7 @@ class ViteManager implements ViteManagerInterface
                 ->map(fn ($entrypoint) => $manifest[$entrypoint] ?? null)
                 ->filter()
                 ->reduce(function (array $assets, array $chunk) use ($buildDirectory): array {
-                    /** @var Vite $this */
+
                     $file = $chunk['file'];
                     $filePath = $this->assetPath(sprintf('%s/%s', $buildDirectory, $file));
 

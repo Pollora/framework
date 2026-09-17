@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
+use RectorLaravel\Rector\MethodCall\ContainerBindConcreteWithClosureOnlyRector;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
 
@@ -14,6 +15,9 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        ContainerBindConcreteWithClosureOnlyRector::class => [
+            __DIR__.'/src/Hook/Infrastructure/Providers/HookServiceProvider.php',
+        ],
         __DIR__.'/tests/Unit/helpers.php',
     ])
     ->withPreparedSets(

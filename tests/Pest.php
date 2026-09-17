@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 use Tests\TestCase;
 
 /*
@@ -16,7 +17,16 @@ use Tests\TestCase;
 
 uses(TestCase::class)->in('Feature/Modules', 'Feature/Option');
 uses(TestCase::class)->in('Unit');
-uses(Orchestra\Testbench\TestCase::class)->in('Feature/Route', 'Feature/Theme');
+uses()->in('Benchmark');
+uses(Orchestra\Testbench\TestCase::class)
+    ->beforeEach(function (): void {
+        \Brain\Monkey\setUp();
+        setupDefaultWordPressStubs();
+    })
+    ->afterEach(function (): void {
+        \Brain\Monkey\tearDown();
+    })
+    ->in('Feature/Route', 'Feature/Theme', 'Feature/Discovery', 'Feature/Hook', 'Feature/VersionCheck', 'Feature/Dashboard', 'Feature/Schedule', 'Feature/Block', 'Feature/Plugin', 'Feature/Asset');
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +56,3 @@ function something(): void
 {
     // ..
 }
-
-// Load helper functions
-require_once __DIR__.'/Unit/helpers.php';

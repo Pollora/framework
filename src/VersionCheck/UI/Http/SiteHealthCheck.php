@@ -42,16 +42,16 @@ class SiteHealthCheck
             'label' => 'Pollora',
             'fields' => [
                 'version' => [
-                    'label' => 'Installed version',
+                    'label' => __('Installed version', 'pollora'),
                     'value' => $current,
                 ],
                 'latest_version' => [
-                    'label' => 'Latest version',
+                    'label' => __('Latest version', 'pollora'),
                     'value' => $latest,
                 ],
                 'up_to_date' => [
-                    'label' => 'Up to date',
-                    'value' => $this->comparator->isUpdateAvailable() ? 'No' : 'Yes',
+                    'label' => __('Up to date', 'pollora'),
+                    'value' => $this->comparator->isUpdateAvailable() ? __('No', 'pollora') : __('Yes', 'pollora'),
                 ],
             ],
         ];
@@ -71,7 +71,7 @@ class SiteHealthCheck
     public function addTests(array $tests): array
     {
         $tests['direct']['pollora_update'] = [
-            'label' => 'Pollora is up to date',
+            'label' => __('Pollora is up to date', 'pollora'),
             'test' => $this->testVersionStatus(...),
         ];
 
@@ -95,47 +95,48 @@ class SiteHealthCheck
 
         if ($current === null || $latest === null) {
             return [
-                'label' => 'Unable to determine Pollora version status',
+                'label' => __('Unable to determine Pollora version status', 'pollora'),
                 'status' => 'recommended',
                 'badge' => [
                     'label' => 'Pollora',
                     'color' => 'orange',
                 ],
-                'description' => '<p>Could not determine the current or latest Pollora version. Check your internet connection.</p>',
+                'description' => '<p>'.__('Could not determine the current or latest Pollora version. Check your internet connection.', 'pollora').'</p>',
                 'test' => 'pollora_update',
             ];
         }
 
         if (! $this->comparator->isUpdateAvailable()) {
             return [
-                'label' => 'Pollora is up to date',
+                'label' => __('Pollora is up to date', 'pollora'),
                 'status' => 'good',
                 'badge' => [
                     'label' => 'Pollora',
                     'color' => 'blue',
                 ],
-                'description' => sprintf('<p>You are running Pollora %s, which is the latest version.</p>', $current),
+                /* translators: %s: currently installed version */
+                'description' => '<p>'.sprintf(__('You are running Pollora %s, which is the latest version.', 'pollora'), $current).'</p>',
                 'test' => 'pollora_update',
             ];
         }
 
         return [
-            'label' => sprintf('Pollora %s is available', $latest),
+            /* translators: %s: latest available version */
+            'label' => sprintf(__('Pollora %s is available', 'pollora'), $latest),
             'status' => 'recommended',
             'badge' => [
                 'label' => 'Pollora',
                 'color' => 'orange',
             ],
-            'description' => sprintf(
-                '<p>You are running Pollora %s. The latest version is %s. <a href="%s" target="_blank" rel="noopener noreferrer">View changelog</a>.</p>',
+            'description' => '<p>'.sprintf(
+                /* translators: 1: current version, 2: latest version, 3: opening link tag, 4: closing link tag */
+                __('You are running Pollora %1$s. The latest version is %2$s. %3$sView changelog%4$s.', 'pollora'),
                 $current,
                 $latest,
-                'https://github.com/Pollora/framework/releases/tag/v'.$latest
-            ),
-            'actions' => sprintf(
-                '<p><a href="%s" target="_blank" rel="noopener noreferrer">Learn more about updating Pollora</a></p>',
-                'https://github.com/Pollora/framework/blob/main/CHANGELOG.md'
-            ),
+                '<a href="'.esc_url('https://github.com/Pollora/framework/releases/tag/v'.$latest).'" target="_blank" rel="noopener noreferrer">',
+                '</a>'
+            ).'</p>',
+            'actions' => '<p><a href="'.esc_url('https://github.com/Pollora/framework/blob/main/CHANGELOG.md').'" target="_blank" rel="noopener noreferrer">'.__('Learn more about updating Pollora', 'pollora').'</a></p>',
             'test' => 'pollora_update',
         ];
     }

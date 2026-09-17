@@ -6,13 +6,9 @@ use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 
-require_once dirname(__DIR__, 2).'/Unit/helpers.php';
-
 beforeEach(function (): void {
-    setupWordPressMocks();
-
-    setWordPressFunction('get_stylesheet', fn (): string => 'my-theme');
-    setWordPressFunction('get_stylesheet_directory', fn (): string => __DIR__.'/fixtures/my-theme');
+    Brain\Monkey\Functions\when('get_stylesheet')->justReturn('my-theme');
+    Brain\Monkey\Functions\when('get_stylesheet_directory')->justReturn(__DIR__.'/fixtures/my-theme');
 
     // Create a minimal theme fixture
     $fixturePath = __DIR__.'/fixtures/my-theme';

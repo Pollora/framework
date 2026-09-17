@@ -171,13 +171,13 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         $deleteThemeCall = null;
 
         foreach ($backtrace as $call) {
-            if (isset($call['function']) && $call['function'] === 'delete_theme') {
+            if ($call['function'] === 'delete_theme') {
                 $deleteThemeCall = $call;
                 break;
             }
         }
 
-        if ($deleteThemeCall === null || $deleteThemeCall === []) {
+        if ($deleteThemeCall === null) {
             return;
         }
 

@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 use Pollora\VersionCheck\Infrastructure\Services\PackagistVersionChecker;
 
-require_once dirname(__DIR__).'/helpers.php';
-
-beforeEach(function (): void {
-    setupWordPressMocks();
-});
-
 describe('PackagistVersionChecker', function (): void {
     it('returns the currently installed version', function (): void {
         $checker = new PackagistVersionChecker;
@@ -20,7 +14,7 @@ describe('PackagistVersionChecker', function (): void {
     });
 
     it('returns cached version from transient', function (): void {
-        setWordPressFunction('get_transient', fn (): string => '99.0.0');
+        Brain\Monkey\Functions\when('get_transient')->justReturn('99.0.0');
 
         $checker = new PackagistVersionChecker;
 
@@ -28,16 +22,16 @@ describe('PackagistVersionChecker', function (): void {
     });
 
     it('fetches from packagist when no cache and stores in transient', function (): void {
-        setWordPressFunction('get_transient', fn (): false => false);
+        Brain\Monkey\Functions\when('get_transient')->justReturn(false);
 
         $storedVersion = null;
-        setWordPressFunction('set_transient', function ($key, $value, $ttl) use (&$storedVersion): true {
+        Brain\Monkey\Functions\when('set_transient')->alias(function ($key, $value, $ttl) use (&$storedVersion): true {
             $storedVersion = $value;
 
             return true;
         });
 
-        setWordPressFunction('wp_remote_get', fn (): array => [
+        Brain\Monkey\Functions\when('wp_remote_get')->alias(fn (): array => [
             'body' => json_encode([
                 'packages' => [
                     'pollora/framework' => [
@@ -49,8 +43,8 @@ describe('PackagistVersionChecker', function (): void {
             'response' => ['code' => 200],
         ]);
 
-        setWordPressFunction('wp_remote_retrieve_body', fn ($response) => $response['body']);
-        setWordPressFunction('is_wp_error', fn (): false => false);
+        Brain\Monkey\Functions\when('wp_remote_retrieve_body')->alias(fn ($response) => $response['body']);
+        Brain\Monkey\Functions\when('is_wp_error')->justReturn(false);
 
         $checker = new PackagistVersionChecker;
 
@@ -59,10 +53,10 @@ describe('PackagistVersionChecker', function (): void {
     });
 
     it('skips dev and pre-release versions', function (): void {
-        setWordPressFunction('get_transient', fn (): false => false);
-        setWordPressFunction('set_transient', fn (): true => true);
+        Brain\Monkey\Functions\when('get_transient')->justReturn(false);
+        Brain\Monkey\Functions\when('set_transient')->justReturn(true);
 
-        setWordPressFunction('wp_remote_get', fn (): array => [
+        Brain\Monkey\Functions\when('wp_remote_get')->alias(fn (): array => [
             'body' => json_encode([
                 'packages' => [
                     'pollora/framework' => [
@@ -76,8 +70,8 @@ describe('PackagistVersionChecker', function (): void {
             'response' => ['code' => 200],
         ]);
 
-        setWordPressFunction('wp_remote_retrieve_body', fn ($response) => $response['body']);
-        setWordPressFunction('is_wp_error', fn (): false => false);
+        Brain\Monkey\Functions\when('wp_remote_retrieve_body')->alias(fn ($response) => $response['body']);
+        Brain\Monkey\Functions\when('is_wp_error')->justReturn(false);
 
         $checker = new PackagistVersionChecker;
 
@@ -85,9 +79,9 @@ describe('PackagistVersionChecker', function (): void {
     });
 
     it('returns null on API error', function (): void {
-        setWordPressFunction('get_transient', fn (): false => false);
-        setWordPressFunction('is_wp_error', fn (): true => true);
-        setWordPressFunction('wp_remote_get', fn (): stdClass => new stdClass);
+        Brain\Monkey\Functions\when('get_transient')->justReturn(false);
+        Brain\Monkey\Functions\when('is_wp_error')->justReturn(true);
+        Brain\Monkey\Functions\when('wp_remote_get')->justReturn(new stdClass);
 
         $checker = new PackagistVersionChecker;
 

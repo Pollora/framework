@@ -49,10 +49,13 @@ class ViewServiceProvider extends ViewServiceProviderBase
         View::macro('makeLoader', function (): string {
             $view = $this->getName();
             $path = $this->getPath();
-            $id = md5($this->getCompiled());
+            $id = md5($path);
             $compiled_path = resolve('config')['view.compiled'];
 
-            $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", $view)
+            // The loader is a stable passthrough file that delegates to view()->render().
+            // Blade recompilation is handled by Laravel's CompilerEngine::isExpired(),
+            // so the loader itself never needs to be invalidated.
+            $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", addslashes($view))
                 ."\n<?php /**PATH {$path} ENDPATH**/ ?>";
 
             if (! file_exists($loader = sprintf('%s/%s-loader.php', $compiled_path, $id))) {

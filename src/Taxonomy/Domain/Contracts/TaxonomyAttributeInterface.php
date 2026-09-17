@@ -11,6 +11,8 @@ use Pollora\Attributes\Attributable;
  *
  * Classes implementing this interface can be automatically discovered and registered
  * as WordPress custom taxonomies using PHP 8 attributes for configuration.
+ *
+ * @property array<string, mixed> $attributeArgs Accumulator for attribute-defined registration arguments
  */
 interface TaxonomyAttributeInterface extends Attributable
 {
@@ -41,4 +43,14 @@ interface TaxonomyAttributeInterface extends Attributable
      * @return array<string, mixed> Additional arguments
      */
     public function withArgs(): array;
+
+    /**
+     * Set a single attribute argument.
+     */
+    public function setArg(string $key, mixed $value): void;
+
+    /**
+     * Get a single attribute argument.
+     */
+    public function getArg(string $key, mixed $default = null): mixed;
 }

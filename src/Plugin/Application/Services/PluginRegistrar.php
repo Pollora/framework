@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Pollora\Plugin\Application\Services;
 
+use Illuminate\Contracts\Container\Container as ContainerContract;
+use Illuminate\Foundation\Application;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
-use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
+use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
-use Pollora\Plugin\Domain\Models\LaravelPluginModule;
+use Pollora\Plugin\Infrastructure\Models\LaravelPluginModule;
 use Pollora\Plugin\Infrastructure\Repositories\PluginRepository;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
-use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Plugin registration service.
@@ -34,11 +36,11 @@ class PluginRegistrar
     /**
      * Create a new PluginRegistrar instance.
      *
-     * @param  ContainerInterface  $app  Application container
+     * @param  ContainerContract  $app  Application container
      * @param  WordPressPluginParser  $pluginParser  Plugin parser service
      */
     public function __construct(
-        protected ContainerInterface $app,
+        protected ContainerContract $app,
         protected WordPressPluginParser $pluginParser
     ) {}
 
@@ -76,6 +78,9 @@ class PluginRegistrar
 
         // Setup plugin assets and includes
         $this->setupPluginAssets($plugin);
+
+        // Load plugin routes (api.php, web.php)
+        $this->loadPluginRoutes($plugin);
 
         // Register and boot the plugin
         $plugin->register();
@@ -201,11 +206,10 @@ class PluginRegistrar
      */
     protected function createPluginModule(string $pluginName, string $pluginPath): LaravelPluginModule
     {
-        if ($this->app->has('app') && method_exists($this->app->get('app'), 'make')) {
-            return new LaravelPluginModule($pluginName, $pluginPath, $this->app->get('app'));
-        }
+        /** @var Application $app */
+        $app = $this->app->has('app') ? $this->app->get('app') : $this->app;
 
-        return new LaravelPluginModule($pluginName, $pluginPath, $this->app);
+        return new LaravelPluginModule($pluginName, $pluginPath, $app);
     }
 
     /**
@@ -277,32 +281,25 @@ class PluginRegistrar
      *
      * @param  PluginModuleInterface  $plugin  Plugin module
      */
-    protected function setupPluginComponents(PluginModuleInterface $plugin): void
+    protected function setupPluginComponents(PluginModuleInterface $plugin): void {}
+
+    /**
+     * Load plugin routes (api.php, web.php).
+     *
+     * @param  PluginModuleInterface  $plugin  Plugin module
+     */
+    protected function loadPluginRoutes(PluginModuleInterface $plugin): void
     {
-        if (! $this->app->has(ModuleComponentManager::class)) {
+        if (! $this->app->has(ModuleRouteLoader::class)) {
             return;
         }
 
         try {
-            /** @var ModuleComponentManager $componentManager */
-            $componentManager = $this->app->get(ModuleComponentManager::class);
-
-            // Only register components that can be automatically instantiated
-            // Domain entities like PostType, Taxonomy, etc. should not be registered
-            // as they require specific constructor parameters
-            $pluginComponents = [
-                // Add service classes here that can be auto-instantiated if needed
-                // Example: \Plugin\MyPlugin\Services\ExampleService::class,
-            ];
-
-            $moduleId = 'plugin.'.$plugin->getLowerName();
-
-            if ($pluginComponents !== []) {
-                $componentManager->registerModuleComponents($moduleId, $pluginComponents);
-                $componentManager->initializeModuleComponents($moduleId);
-            }
+            /** @var ModuleRouteLoader $routeLoader */
+            $routeLoader = $this->app->get(ModuleRouteLoader::class);
+            $routeLoader->loadModuleRoutes($plugin);
         } catch (\Exception $exception) {
-            $this->logError('Failed to setup plugin components: '.$exception->getMessage());
+            $this->logError('Failed to load plugin routes: '.$exception->getMessage());
         }
     }
 
@@ -384,8 +381,9 @@ class PluginRegistrar
      */
     protected function logError(string $message): void
     {
-        if (function_exists('error_log')) {
-            error_log($message);
+        try {
+            $this->app->get(LoggerInterface::class)->error($message);
+        } catch (\Throwable) {
         }
     }
 }

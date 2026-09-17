@@ -23,13 +23,17 @@
     ],
     "require": {
         "php": "^8.3",
-        "pollora/helper-overrider": "^1.0",
-        "illuminate/auth": "^13.5",
-        "illuminate/support": "^13.5",
-        "illuminate/database": "^13.5",
-        "illuminate/routing": "^13.5",
-        "illuminate/console": "^13.5",
+        "pollora/helper-overrider": "^1.2",
+        "illuminate/auth": "^13.32",
+        "illuminate/support": "^13.32",
+        "illuminate/database": "^13.32",
+        "illuminate/routing": "^13.32",
+        "illuminate/console": "^13.32",
+        "pollora/abilities": "^1.0",
+        "pollora/ajax": "^1.0",
         "pollora/entity": "^1.2",
+        "pollora/hook": "^1.0",
+        "pollora/option": "^1.0",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^1.7",
         "pollora/colt": "^10.0",
@@ -40,7 +44,7 @@
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.0",
         "symfony/process": "^7.4 || ^8.0",
-        "illuminate/config": "^13.5",
+        "illuminate/config": "^13.32",
         "laravel/prompts": "^0.3.17"
     },
     "autoload": {
@@ -60,7 +64,7 @@
                 "Rename __ and wp_mail functions": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/wordpress-stubs.patch"
             },
             "mockery/mockery": {
-                "Fix PHP 8.4 implicit nullable deprecations": "patches/mockery-php84-nullable.patch"
+                "Fix PHP 8.4 implicit nullable deprecations": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/mockery-php84-nullable.patch"
             }
         },
         "laravel": {
@@ -71,9 +75,8 @@
                 "Wordpress": "Pollora\\Support\\WordPress",
                 "Action": "Pollora\\Support\\Facades\\Action",
                 "Filter": "Pollora\\Support\\Facades\\Filter",
-                "Query": "Pollora\\Support\\Facades\\Query",
                 "Hash": "Pollora\\Support\\Facades\\WPHash",
-                "Loop": "Pollora\\Support\\Facades\\Loop",
+                "Ability": "Pollora\\Support\\Facades\\Ability",
                 "Ajax": "Pollora\\Support\\Facades\\Ajax",
                 "PostType": "Pollora\\Support\\Facades\\PostType",
                 "Taxonomy": "Pollora\\Support\\Facades\\Taxonomy",
@@ -99,10 +102,11 @@
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "6.*",
         "symplify/vendor-patches": "^12.0",
+        "brain/monkey": "^2.6",
         "mockery/mockery": "^1.6",
         "wp-cli/wp-cli": "^2.12",
         "larastan/larastan": "^3.0",
-        "orchestra/testbench": "^10.0|^11.0"
+        "orchestra/testbench": "^11.0"
     },
     "autoload-dev": {
         "psr-4": {
@@ -127,11 +131,13 @@
         "test:lint": "pint --test",
         "test:types": "phpstan analyse --ansi",
         "test:unit": "pest --colors=always --min=100",
+        "test:type-coverage": "pest --type-coverage --min=98",
         "test": [
             "@test:refacto",
             "@test:lint",
             "@test:types",
-            "@test:unit"
+            "@test:unit",
+            "@test:type-coverage"
         ]
     }
 }

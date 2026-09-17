@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\Infrastructure\Services;
 
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * WordPress implementation of the WordPressThemeInterface.
@@ -51,8 +52,11 @@ class WordPressThemeAdapter implements WordPressThemeInterface
             return \register_theme_directory($sanitizedPath);
         } catch (\Throwable $throwable) {
             // Log error if logging is available but don't break execution
-            if ($this->isFunctionAvailable('error_log')) {
-                \error_log('Failed to register theme directory: '.$throwable->getMessage());
+            try {
+                resolve(LoggerInterface::class)->error(
+                    'Failed to register theme directory: '.$throwable->getMessage()
+                );
+            } catch (\Throwable) {
             }
 
             return false;
@@ -153,7 +157,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
         // Additional fallback: check common WordPress installation paths
         if ($directories === []) {
             $commonPaths = [
-                ABSPATH.'wp-content/themes' ?? '',
+                ABSPATH.'wp-content/themes',
                 __DIR__.'/../../../../../wp-content/themes',
             ];
 
@@ -201,8 +205,7 @@ class WordPressThemeAdapter implements WordPressThemeInterface
     private function isFunctionAvailable(string $functionName): bool
     {
         return $functionName !== '' && $functionName !== '0' &&
-            function_exists($functionName) &&
-            is_callable($functionName);
+            function_exists($functionName);
     }
 
     /**

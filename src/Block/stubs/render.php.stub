@@ -1,0 +1,14 @@
+<?php
+/**
+ * Server-side rendering for the {{ blockFullName }} block.
+ *
+ * @var array    $attributes Block attributes.
+ * @var string   $content    Block default content.
+ * @var WP_Block $block      Block instance.
+ *
+ * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#render
+ */
+?>
+<div <?php echo get_block_wrapper_attributes(); ?>>
+    <p><?php echo esc_html__('{{ title }}', '{{ targetSlug }}'); ?></p>
+</div>

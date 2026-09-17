@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Pollora\Hook\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
+
 /**
  * Class ActionMakeCommand
  *
  * Command to create a new action hook class (feature UI layer).
  * Supports generation in different locations (app, theme, plugin) through traits.
  */
+#[Description('Create a new action hook class')]
 class ActionMakeCommand extends AttributeMakeCommand
 {
     /**
@@ -17,14 +20,7 @@ class ActionMakeCommand extends AttributeMakeCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-action {name}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a new action hook class';
+    protected $name = 'pollora:make:action {name}';
 
     /**
      * The type of the attribute.

@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace Pollora\WordPress\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Pollora\Services\WordPress\Installation\DatabaseConnectionException;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 use Pollora\Services\WordPress\Installation\InstallationService;
+use Pollora\Services\WordPress\Installation\WordPressInstallationException;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 
-class LaunchPadInstallCommand extends Command
-{
-    protected $signature = 'pollora:install
+#[Description('Install and configure WordPress')]
+#[Signature('pollora:install
         {--install : Suppress informational output for automated runs}
         {--title= : Site title}
         {--description= : Site description}
@@ -22,10 +25,9 @@ class LaunchPadInstallCommand extends Command
         {--admin-email= : Admin email}
         {--admin-password= : Admin password}
         {--locale= : Site locale (e.g. en_US, fr_FR)}
-        {--public= : Allow search engine indexing (true/false)}';
-
-    protected $description = 'Install and configure WordPress';
-
+        {--public= : Allow search engine indexing (true/false)}')]
+class LaunchPadInstallCommand extends Command
+{
     public function __construct(
         private readonly InstallationService $installationService,
         private readonly DatabaseService $databaseService
@@ -94,7 +96,7 @@ class LaunchPadInstallCommand extends Command
 
     private function installTheme(): void
     {
-        $this->call('pollora:make-theme');
+        $this->call('pollora:make:theme');
     }
 
     public function runMigrations(): void

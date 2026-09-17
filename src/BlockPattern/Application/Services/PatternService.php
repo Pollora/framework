@@ -12,6 +12,7 @@ use Pollora\BlockPattern\Domain\Models\Pattern;
 use Pollora\BlockPattern\Domain\Support\PatternConstants;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
+use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 /**
  * Application service for pattern use cases.
@@ -84,24 +85,18 @@ class PatternService implements PatternServiceInterface
      */
     private function registerPatterns(): void
     {
-        if (! function_exists('wp_get_theme')) {
-            return;
-        }
-
         $theme = $this->themeService->theme();
 
-        if (! function_exists('get_stylesheet_directory') || ! $theme) {
+        if (! $theme instanceof ThemeMetadata) {
             return;
         }
 
-        $parentTheme = $theme->getParentTheme();
-
-        if ($parentTheme) {
-            $this->registerPattern($parentTheme);
+        // Ancestors first, so the active theme can override an inherited pattern slug.
+        foreach (array_reverse($this->themeService->getParentThemes()) as $parentTheme) {
+            $this->registerPatternsFromTheme($parentTheme);
         }
 
-        $this->registerPattern($theme->getName());
-
+        $this->registerPatternsFromTheme($theme);
     }
 
     /**
@@ -111,26 +106,77 @@ class PatternService implements PatternServiceInterface
      * directory, following the established directory structure.
      *
      * @param  string  $themeName  Name of the theme to process
-     *
-     * @throws \RuntimeException If WordPress functions are not available
      */
     public function registerPattern(string $themeName): void
     {
-        if (! function_exists('wp_get_theme')) {
-            return;
+        $theme = $this->resolveTheme($themeName);
+
+        if ($theme instanceof ThemeMetadata) {
+            $this->registerPatternsFromTheme($theme);
         }
+    }
 
-        $theme = wp_get_theme($themeName);
-        $themeRoot = $theme->get_theme_root();
-
-        $patternDir = $themeRoot.DIRECTORY_SEPARATOR.$themeName.PatternConstants::PATTERN_DIRECTORY;
+    /**
+     * Register every pattern shipped by the given theme.
+     *
+     * The pattern directory is resolved from the theme metadata rather than from
+     * WordPress: `WP_Theme::get_theme_root()` returns the raw theme root and never
+     * goes through the `theme_root` filter Pollora installs, so it points at
+     * `WP_CONTENT_DIR/themes` instead of the configured `theme.path`.
+     */
+    private function registerPatternsFromTheme(ThemeMetadata $theme): void
+    {
+        $patternDir = $theme->getBasePath().PatternConstants::PATTERN_DIRECTORY;
 
         // Skip if directory doesn't exist
         if (! is_dir($patternDir)) {
             return;
         }
 
-        $this->registerPatternsFromDirectory($patternDir, $theme);
+        $this->registerPatternsFromDirectory($patternDir, $this->wordPressTheme($theme));
+    }
+
+    /**
+     * Find the metadata of a theme by name within the active theme hierarchy.
+     *
+     * Falls back to a metadata instance built from the active theme's root for
+     * themes that are not part of the current hierarchy.
+     */
+    private function resolveTheme(string $themeName): ?ThemeMetadata
+    {
+        $activeTheme = $this->themeService->theme();
+
+        $hierarchy = $activeTheme instanceof ThemeMetadata
+            ? [$activeTheme, ...$this->themeService->getParentThemes()]
+            : $this->themeService->getParentThemes();
+
+        foreach ($hierarchy as $theme) {
+            if ($theme->getName() === $themeName) {
+                return $theme;
+            }
+        }
+
+        if (! $activeTheme instanceof ThemeMetadata) {
+            return null;
+        }
+
+        return new ThemeMetadata($themeName, dirname($activeTheme->getBasePath()));
+    }
+
+    /**
+     * Get the WordPress theme instance backing a theme, for metadata translation.
+     *
+     * The theme root is passed explicitly so WordPress resolves the theme from
+     * Pollora's theme path instead of its own default one. Returns the metadata
+     * itself when WordPress is unavailable; the extractor then skips translation.
+     */
+    private function wordPressTheme(ThemeMetadata $theme): object
+    {
+        if (! function_exists('wp_get_theme')) {
+            return $theme;
+        }
+
+        return \wp_get_theme($theme->getName(), dirname($theme->getBasePath()));
     }
 
     /**

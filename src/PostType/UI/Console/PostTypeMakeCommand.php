@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Pollora\PostType\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
 use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 /**
  * Artisan command to generate a new custom post type class.
  *
- * This command creates a new PHP class that implements the PostType interface
- * and is configured with PHP attributes for WordPress custom post type registration.
+ * This command creates a new PHP class decorated with the #[PostType] attribute
+ * and other PHP attributes for WordPress custom post type registration.
  */
+#[Description('Create a new WordPress custom post type class')]
 class PostTypeMakeCommand extends AbstractGeneratorCommand
 {
     /**
@@ -20,14 +22,7 @@ class PostTypeMakeCommand extends AbstractGeneratorCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-posttype';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a new WordPress custom post type class';
+    protected $name = 'pollora:make:post-type';
 
     /**
      * The type of class being generated.

@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Pollora\Schedule;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\ServiceProvider;
 use Orchestra\Testbench\TestCase;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contract\Filter;
+use Pollora\Schedule\Application\UseCases\RegisterSchedulerFiltersUseCase;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Events\RecurringEvent;
+use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
 
 /**
  * Service provider for WordPress cron scheduler functionality.
@@ -24,11 +28,8 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(SchedulerInterface::class, Scheduler::class);
-
-        $scheduler = $this->app->make(SchedulerInterface::class);
-
-        $this->registerFilters($scheduler);
+        $this->registerDomainContracts();
+        $this->registerUseCases();
     }
 
     /**
@@ -36,42 +37,34 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('wordpress.use_laravel_scheduler', false)) {
+            $this->app->make(RegisterSchedulerFiltersUseCase::class)->execute();
+        }
+
         $this->app->booted(function (): void {
             $this->scheduleRecurringEvents();
         });
     }
 
     /**
-     * Register WordPress filters for the scheduler.
-     *
-     * @param  SchedulerInterface  $scheduler  Scheduler instance
+     * Register domain contracts with their infrastructure implementations.
      */
-    protected function registerFilters(SchedulerInterface $scheduler): void
+    private function registerDomainContracts(): void
     {
-        /** @var Filter $filter */
-        $filter = $this->app->make(Filter::class);
-        $filters = [
-            'pre_get_scheduled_event' => 'preGetScheduledEvent',
-            'pre_get_ready_cron_jobs' => 'preGetReadyCronJobs',
-        ];
+        $this->app->singleton(SchedulerInterface::class, Scheduler::class);
+        $this->app->singleton(ScheduleDiscovery::class, fn (): ScheduleDiscovery => new ScheduleDiscovery);
+    }
 
-        foreach ($filters as $hook => $method) {
-            $filter->add($hook, [$scheduler, $method], 10, 5);
-        }
+    /**
+     * Register application use cases.
+     */
+    private function registerUseCases(): void
+    {
+        $this->app->bind(RegisterSchedulerFiltersUseCase::class, fn (Application $app): RegisterSchedulerFiltersUseCase => new RegisterSchedulerFiltersUseCase(
+            $app->make(Filter::class),
+            $app->make(SchedulerInterface::class)
+        ));
 
-        $filters = [
-            'pre_update_option_cron' => 'preUpdateOptionCron',
-            'pre_option_cron' => 'preOptionCron',
-            'pre_schedule_event' => 'preScheduleEvent',
-            'pre_reschedule_event' => 'preRescheduleEvent',
-            'pre_unschedule_event' => 'preUnscheduleEvent',
-            'pre_clear_scheduled_hook' => 'preClearScheduledHook',
-            'pre_unschedule_hook' => 'preUnscheduleHook',
-        ];
-
-        foreach ($filters as $hook => $method) {
-            $filter->add($hook, [$scheduler, $method], 10, 5);
-        }
     }
 
     /**
@@ -79,18 +72,22 @@ class SchedulerServiceProvider extends ServiceProvider
      */
     protected function scheduleRecurringEvents(): void
     {
-        if ($this->isOrchastraTest() || defined('WP_CLI')) {
+        if ($this->isOrchestraTest() || defined('WP_CLI')) {
             return;
         }
 
-        $schedule = $this->app->make(Schedule::class);
-        RecurringEvent::scheduleAllEvents($schedule);
+        try {
+            $schedule = $this->app->make(Schedule::class);
+            RecurringEvent::scheduleAllEvents($schedule);
+        } catch (QueryException) {
+            // WordPress tables may not exist yet during initial installation
+        }
     }
 
     /**
      * Check if we're running in an Orchestra test environment.
      */
-    private function isOrchastraTest(): bool
+    private function isOrchestraTest(): bool
     {
         return defined('LARAVEL_START') && class_exists(TestCase::class);
     }

@@ -7,6 +7,7 @@ namespace Pollora\Auth;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Facades\Request;
 use Pollora\Models\User;
 use WP_Error;
@@ -19,8 +20,6 @@ use WP_Error;
  * It handles user authentication, session management, and WordPress-specific
  * authentication features.
  *
- * @implements StatefulGuard
- *
  * @uses GuardHelpers
  */
 class WordPressGuard implements StatefulGuard
@@ -31,6 +30,16 @@ class WordPressGuard implements StatefulGuard
      * The last attempted user authentication.
      */
     private ?User $lastAttempted = null;
+
+    /**
+     * Create a new WordPress guard instance.
+     *
+     * @param  UserProvider|null  $provider  The user provider
+     */
+    public function __construct(?UserProvider $provider = null)
+    {
+        $this->provider = $provider;
+    }
 
     /**
      * Check if a user is currently authenticated.

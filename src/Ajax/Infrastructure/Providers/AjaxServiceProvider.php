@@ -4,26 +4,55 @@ declare(strict_types=1);
 
 namespace Pollora\Ajax\Infrastructure\Providers;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
-use Pollora\Ajax\Application\Services\RegisterAjaxActionService;
-use Pollora\Ajax\Domain\Contracts\AjaxActionRegistrarInterface;
-use Pollora\Ajax\Infrastructure\Repositories\WordPressAjaxActionRegistrar;
-use Pollora\Ajax\Infrastructure\Services\AjaxFactory;
-use Pollora\Ajax\Infrastructure\Services\ScriptInjectionService;
-use Pollora\Hook\Infrastructure\Services\Action;
+use Pollora\Ajax\Adapter\Out\WordPress\ScriptInjectionAdapter;
+use Pollora\Ajax\Adapter\Out\WordPress\WordPressAjaxActionRegistrar;
+use Pollora\Ajax\Application\Service\RegisterAjaxActionService;
+use Pollora\Ajax\Factory\AjaxFactory;
+use Pollora\Ajax\Infrastructure\Services\AjaxDiscovery;
+use Pollora\Ajax\Port\Out\AjaxActionRegistrarPort;
+use Pollora\Attributes\Ajax;
 
+/**
+ * Laravel service provider that bridges the `pollora/ajax` package into the framework.
+ *
+ * Wires the package's hexagonal components (port, service, factory) into the
+ * Laravel service container, registers the `#[Ajax]` attribute discovery,
+ * and boots the frontend AJAX URL script injection.
+ *
+ * Bindings:
+ *  - {@see AjaxActionRegistrarPort} → {@see WordPressAjaxActionRegistrar} (singleton)
+ *  - {@see RegisterAjaxActionService} (singleton)
+ *  - `wp.ajax` → {@see AjaxFactory} (singleton, used by the Ajax facade)
+ *  - {@see AjaxDiscovery} (singleton, plugged into the discovery engine)
+ *
+ * @see \Pollora\Support\Facades\Ajax  The Laravel facade resolved via `wp.ajax`.
+ * @see Ajax       The PHP attribute discovered by this provider.
+ */
 class AjaxServiceProvider extends ServiceProvider
 {
+    /**
+     * Register AJAX bindings into the container.
+     */
     public function register(): void
     {
-        $this->app->singleton(AjaxActionRegistrarInterface::class, WordPressAjaxActionRegistrar::class);
-        $this->app->singleton(RegisterAjaxActionService::class, fn ($app): RegisterAjaxActionService => new RegisterAjaxActionService($app->make(AjaxActionRegistrarInterface::class)));
-        $this->app->singleton('wp.ajax', fn ($app): AjaxFactory => new AjaxFactory($app->make(RegisterAjaxActionService::class)));
-        $this->app->singleton(ScriptInjectionService::class, fn ($app): ScriptInjectionService => new ScriptInjectionService($app->make(Action::class)));
+        $this->app->singleton(AjaxActionRegistrarPort::class, WordPressAjaxActionRegistrar::class);
+        $this->app->singleton(RegisterAjaxActionService::class, fn (Application $app): RegisterAjaxActionService => new RegisterAjaxActionService($app->make(AjaxActionRegistrarPort::class)));
+        $this->app->singleton('wp.ajax', fn (Application $app): AjaxFactory => new AjaxFactory($app->make(RegisterAjaxActionService::class)));
+
+        $this->app->singleton(AjaxDiscovery::class, fn (Application $app): AjaxDiscovery => new AjaxDiscovery(
+            $app->make('wp.ajax')
+        ));
     }
 
+    /**
+     * Boot the AJAX services.
+     *
+     * Injects the `Pollora.ajaxurl` JavaScript global via `wp_head`.
+     */
     public function boot(): void
     {
-        $this->app->get(ScriptInjectionService::class)->registerAjaxUrlScript();
+        (new ScriptInjectionAdapter)->registerAjaxUrlScript();
     }
 }

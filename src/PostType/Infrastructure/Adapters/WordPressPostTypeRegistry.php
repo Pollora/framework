@@ -98,24 +98,29 @@ class WordPressPostTypeRegistry implements PostTypeRegistryInterface
      */
     private function generateLabels(string $singular, string $plural): array
     {
-        // Convert to lowercase for labels where the name is not in first position
-        $lowerSingular = strtolower($singular);
-        $lowerPlural = strtolower($plural);
-
         return [
             'name' => $plural,
             'singular_name' => $singular,
             'menu_name' => $plural,
-            'all_items' => __('All '.$lowerPlural, 'textdomain'),
-            'add_new' => __('Add New', 'textdomain'),
-            'add_new_item' => __('Add New '.$lowerSingular, 'textdomain'),
-            'edit_item' => __('Edit '.$lowerSingular, 'textdomain'),
-            'new_item' => __('New '.$lowerSingular, 'textdomain'),
-            'view_item' => __('View '.$lowerSingular, 'textdomain'),
-            'search_items' => __('Search '.$lowerPlural, 'textdomain'),
-            'not_found' => __('No '.$lowerPlural.' found', 'textdomain'),
-            'not_found_in_trash' => __('No '.$lowerPlural.' found in trash', 'textdomain'),
-            'parent_item_colon' => __('Parent '.$lowerSingular.':', 'textdomain'),
+            /* translators: %s: post type general name (plural) */
+            'all_items' => sprintf(__('All %s', 'pollora'), $plural),
+            'add_new' => __('Add New', 'pollora'),
+            /* translators: %s: post type singular name */
+            'add_new_item' => sprintf(__('Add New %s', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'edit_item' => sprintf(__('Edit %s', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'new_item' => sprintf(__('New %s', 'pollora'), $singular),
+            /* translators: %s: post type singular name */
+            'view_item' => sprintf(__('View %s', 'pollora'), $singular),
+            /* translators: %s: post type general name (plural) */
+            'search_items' => sprintf(__('Search %s', 'pollora'), $plural),
+            /* translators: %s: post type general name (plural) */
+            'not_found' => sprintf(__('No %s found', 'pollora'), $plural),
+            /* translators: %s: post type general name (plural) */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'pollora'), $plural),
+            /* translators: %s: post type singular name */
+            'parent_item_colon' => sprintf(__('Parent %s:', 'pollora'), $singular),
         ];
     }
 }

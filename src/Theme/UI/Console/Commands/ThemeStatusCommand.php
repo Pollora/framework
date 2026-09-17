@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\UI\Console\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -12,18 +15,10 @@ use Pollora\Theme\Domain\Contracts\ThemeService;
 /**
  * Simplified command to display theme registration status.
  */
+#[Description('Display the current theme registration status')]
+#[Signature('pollora:theme:status')]
 class ThemeStatusCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     */
-    protected $signature = 'pollora:theme:status';
-
-    /**
-     * The console command description.
-     */
-    protected $description = 'Display the current theme registration status';
-
     /**
      * Execute the console command.
      */
@@ -86,7 +81,7 @@ class ThemeStatusCommand extends Command
     ): void {
         $activeTheme = $themeService->getActiveTheme();
 
-        if ($activeTheme) {
+        if ($activeTheme instanceof ModuleInterface) {
             $this->info('✓ Active theme via ThemeService:');
             $this->line('  Name: '.$activeTheme->getName());
             $this->line('  Path: '.$activeTheme->getPath());
@@ -103,7 +98,7 @@ class ThemeStatusCommand extends Command
     {
         $registeredTheme = $registrar->getActiveTheme();
 
-        if ($registeredTheme && $activeTheme->getName() === $registeredTheme->getName()) {
+        if ($registeredTheme instanceof ThemeModuleInterface && $activeTheme->getName() === $registeredTheme->getName()) {
             $this->info('  ✓ Theme service and registrar are in sync');
         } else {
             $this->warn('  ✗ Theme service and registrar are out of sync');

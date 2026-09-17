@@ -6,8 +6,8 @@ namespace Pollora\Theme\Domain\Models;
 
 use Pollora\Asset\Infrastructure\Services\AssetFile;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
-use Pollora\Hook\Infrastructure\Services\Action;
-use Pollora\Hook\Infrastructure\Services\Filter;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
@@ -58,9 +58,6 @@ class ThemeInitializer implements ThemeComponent
         $this->wpTheme = $this->app->get(WordPressThemeInterface::class);
         $this->registrar = $this->app->get(ThemeRegistrarInterface::class);
 
-        // $this->filter->add('template_directory', $this->overrideThemeDirectory(...), 90, 3);
-        // $this->filter->add('stylesheet_directory', $this->overrideThemeDirectory(...), 90, 3);
-        // Handle custom theme roots.
         $this->filter->add('pre_option_stylesheet_root', $this->resetThemeRootOption(...));
         $this->filter->add('pre_option_template_root', $this->resetThemeRootOption(...));
     }
@@ -87,42 +84,27 @@ class ThemeInitializer implements ThemeComponent
     }
 
     /**
-     * Register the theme initializer
+     * Register the theme initializer.
+     *
+     * Hooks into 'after_setup_theme' at priority 1 to initialize the theme
+     * early in the WordPress lifecycle, and overrides the theme URI for
+     * proper asset resolution.
      */
     public function register(): void
     {
-        // @TODO clean
-        $this->action->add('after_setup_theme', function (): void {
-            $this->initializeTheme();
-        }, 1);
-
+        $this->action->add('after_setup_theme', $this->initializeTheme(...), 1);
         $this->overrideThemeUri();
     }
 
     /**
-     * Override the stylesheet directory URI
+     * Force template and stylesheet root to the configured theme path.
      *
-     * @TODO : clean
+     * Overrides any stale absolute path stored in wp_options,
+     * ensuring WordPress always uses the correct theme root.
      */
-    public function overrideThemeDirectory(string $stylesheetDirUri, string $stylesheet, string $themeRootUri): string
+    protected function resetThemeRootOption(string|bool $path): string
     {
-        // Get the active theme from the registrar
-        $activeTheme = $this->registrar->getActiveTheme();
-
-        if ($activeTheme instanceof ThemeModuleInterface) {
-            return str_replace($themeRootUri, $activeTheme->getPath(), $stylesheetDirUri);
-        }
-
-        // No fallback - theme must be self-registered
-        return $stylesheetDirUri;
-    }
-
-    /**
-     * Force template and stylesheet root to be false when called from the database
-     */
-    protected function resetThemeRootOption(string|bool $path): bool
-    {
-        return false;
+        return $this->themeRoot;
     }
 
     /**

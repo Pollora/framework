@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Application\Infrastructure\Providers;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Domain\Contracts\ConsoleDetectorInterface;
 use Pollora\Application\Infrastructure\Services\LaravelConsoleDetector;
@@ -18,6 +19,6 @@ class ConsoleServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(ConsoleDetectorInterface::class, fn ($app): LaravelConsoleDetector => new LaravelConsoleDetector($app));
+        $this->app->singleton(ConsoleDetectorInterface::class, fn (Application $app): LaravelConsoleDetector => new LaravelConsoleDetector($app));
     }
 }

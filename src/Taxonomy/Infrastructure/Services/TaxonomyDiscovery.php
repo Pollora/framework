@@ -16,6 +16,7 @@ use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter;
 use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
@@ -44,7 +45,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  TaxonomyServiceInterface  $taxonomyService  The taxonomy service for registration
      */
     public function __construct(
-        private readonly TaxonomyServiceInterface $taxonomyService
+        private readonly TaxonomyServiceInterface $taxonomyService,
+        private readonly ?LoggerInterface $logger = null
     ) {}
 
     /**
@@ -53,14 +55,10 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
     public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): EntityTaxonomy
     {
         // Generate singular name if not provided
-        if ($singular === null) {
-            $singular = $this->generateSingular($slug, null);
-        }
+        $singular ??= $this->generateSingular($slug, null);
 
         // Generate plural name if not provided
-        if ($plural === null) {
-            $plural = Str::plural($singular);
-        }
+        $plural ??= Str::plural($singular);
 
         // Extract object type from args, default to ['post']
         $objectType = $args['object_type'] ?? ['post'];
@@ -141,7 +139,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 $this->processTaxonomy($className, $reflectionCache);
             } catch (\Throwable $e) {
                 // Log the error but continue with other taxonomies
-                error_log(sprintf('Failed to register Taxonomy from class %s: ', $className).$e->getMessage());
+                $this->logger?->error(sprintf('Failed to register Taxonomy from class %s', $className), ['exception' => $e]);
             }
         }
     }
@@ -179,7 +177,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
             $config = $this->processClassLevelAttributes($reflectionClass, $className, $config);
 
             // Process method-level attributes
-            $config = $this->processMethodLevelAttributes($reflectionClass, $className, $config);
+            $config = $this->processMethodLevelAttributes($className, $config, $reflectionCache);
 
             // Get additional arguments from the class instance if it has a withArgs method
             $this->processAdditionalArgs($className, $config, $reflectionCache);
@@ -211,8 +209,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                 );
             }
 
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process Taxonomy for class %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->logger?->error(sprintf('Failed to process Taxonomy for class %s', $className), ['exception' => $throwable]);
         }
     }
 
@@ -232,9 +230,11 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
         $singular = $this->generateSingular($className, $taxonomy->singular);
         $plural = $this->generatePlural($taxonomy->plural, $singular);
         $objectType = $taxonomy->objectType ?? ['post'];
+        $textDomain = $taxonomy->textDomain ?? 'pollora';
 
         $initialArgs = [
-            'labels' => $this->generateLabels($singular, $plural),
+            'labels' => $this->generateLabels($singular, $plural, $textDomain),
+            'text_domain' => $textDomain,
         ];
 
         return new TaxonomyConfiguration($slug, $singular, $plural, $objectType, $initialArgs);
@@ -259,8 +259,8 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     $this->processClassAttribute($reflectionClass, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process class-level attributes for %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->logger?->error(sprintf('Failed to process class-level attributes for %s', $className), ['exception' => $throwable]);
         }
 
         return $config;
@@ -272,22 +272,22 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * Scans all public methods of the class for method-level attributes like
      * MetaBoxCb and UpdateCountCallback, building the appropriate callback configurations.
      *
-     * @param  ReflectionClass  $reflectionClass  The reflection class
      * @param  string  $className  The class name to process
      * @param  TaxonomyConfiguration  $config  The current configuration
+     * @param  ReflectionCacheInterface|null  $reflectionCache  Optional reflection cache
      * @return TaxonomyConfiguration The updated configuration
      */
-    private function processMethodLevelAttributes(ReflectionClass $reflectionClass, string $className, TaxonomyConfiguration $config): TaxonomyConfiguration
+    private function processMethodLevelAttributes(string $className, TaxonomyConfiguration $config, ?ReflectionCacheInterface $reflectionCache = null): TaxonomyConfiguration
     {
         try {
-            foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            foreach ($reflectionCache->getPublicMethods($className) as $method) {
                 foreach ($method->getAttributes() as $attribute) {
                     // Process all method-level attributes that have a handle method
                     $this->processMethodAttribute($method, $attribute, $config);
                 }
             }
-        } catch (\ReflectionException $reflectionException) {
-            error_log(sprintf('Failed to process method-level attributes for %s: ', $className).$reflectionException->getMessage());
+        } catch (\Throwable $throwable) {
+            $this->logger?->error(sprintf('Failed to process method-level attributes for %s', $className), ['exception' => $throwable]);
         }
 
         return $config;
@@ -364,9 +364,9 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
                     }
                 }
             }
-        } catch (\ReflectionException|\Throwable $e) {
+        } catch (\Throwable $throwable) {
             // Log the error but continue - additional args are optional
-            error_log(sprintf('Failed to process additional args for %s: ', $className).$e->getMessage());
+            $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $throwable]);
         }
     }
 
@@ -431,26 +431,40 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
      * @param  string  $plural  The plural name
      * @return array<string, string> The labels array
      */
-    private function generateLabels(string $singular, string $plural): array
+    private function generateLabels(string $singular, string $plural, string $textDomain = 'pollora'): array
     {
         return [
             'name' => $plural,
             'singular_name' => $singular,
             'menu_name' => $plural,
-            'all_items' => 'All '.$plural,
-            'edit_item' => 'Edit '.$singular,
-            'view_item' => 'View '.$singular,
-            'update_item' => 'Update '.$singular,
-            'add_new_item' => 'Add New '.$singular,
-            'new_item_name' => sprintf('New %s Name', $singular),
-            'search_items' => 'Search '.$plural,
-            'popular_items' => 'Popular '.$plural,
-            'separate_items_with_commas' => sprintf('Separate %s with commas', $plural),
-            'add_or_remove_items' => 'Add or remove '.$plural,
-            'choose_from_most_used' => 'Choose from the most used '.$plural,
-            'not_found' => sprintf('No %s found', $plural),
-            'parent_item' => 'Parent '.$singular,
-            'parent_item_colon' => sprintf('Parent %s:', $singular),
+            /* translators: %s: taxonomy general name (plural) */
+            'all_items' => sprintf(__('All %s', $textDomain), $plural),
+            /* translators: %s: taxonomy singular name */
+            'edit_item' => sprintf(__('Edit %s', $textDomain), $singular),
+            /* translators: %s: taxonomy singular name */
+            'view_item' => sprintf(__('View %s', $textDomain), $singular),
+            /* translators: %s: taxonomy singular name */
+            'update_item' => sprintf(__('Update %s', $textDomain), $singular),
+            /* translators: %s: taxonomy singular name */
+            'add_new_item' => sprintf(__('Add New %s', $textDomain), $singular),
+            /* translators: %s: taxonomy singular name */
+            'new_item_name' => sprintf(__('New %s Name', $textDomain), $singular),
+            /* translators: %s: taxonomy general name (plural) */
+            'search_items' => sprintf(__('Search %s', $textDomain), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'popular_items' => sprintf(__('Popular %s', $textDomain), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'separate_items_with_commas' => sprintf(__('Separate %s with commas', $textDomain), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'add_or_remove_items' => sprintf(__('Add or remove %s', $textDomain), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'choose_from_most_used' => sprintf(__('Choose from the most used %s', $textDomain), $plural),
+            /* translators: %s: taxonomy general name (plural) */
+            'not_found' => sprintf(__('No %s found', $textDomain), $plural),
+            /* translators: %s: taxonomy singular name */
+            'parent_item' => sprintf(__('Parent %s', $textDomain), $singular),
+            /* translators: %s: taxonomy singular name */
+            'parent_item_colon' => sprintf(__('Parent %s:', $textDomain), $singular),
         ];
     }
 

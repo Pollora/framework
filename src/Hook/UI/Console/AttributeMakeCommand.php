@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace Pollora\Hook\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -18,6 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
  * Command to generate a new hook attribute class.
  * This command creates a new hook attribute class in the specified location (app, theme, or plugin).
  */
+#[Description('Create a new hook attribute class')]
 class AttributeMakeCommand extends AbstractGeneratorCommand
 {
     /**
@@ -25,14 +27,7 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make-hook';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create a new hook attribute class';
+    protected $name = 'pollora:make:hook';
 
     /**
      * The type of class being generated.

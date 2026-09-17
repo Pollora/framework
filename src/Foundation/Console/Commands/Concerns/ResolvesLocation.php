@@ -15,7 +15,7 @@ trait ResolvesLocation
     /**
      * Resolve the target location for the generated file.
      *
-     * @return array{type: string, path: string, namespace: string, source_path: string, source_namespace: string}
+     * @return array{type: string, path: string, namespace: string, name?: string, source_path?: string, source_namespace?: string}
      */
     protected function resolveTargetLocation(): array
     {
@@ -46,7 +46,7 @@ trait ResolvesLocation
     /**
      * Get the resolved file path.
      *
-     * @param  array{type: string, path: string, namespace: string, source_path: string, source_namespace: string}  $location
+     * @param  array{type: string, path: string, namespace: string, name?: string, source_path?: string, source_namespace?: string}  $location
      */
     protected function getResolvedFilePath(array $location, string $className, string $subPath = ''): string
     {
@@ -62,7 +62,7 @@ trait ResolvesLocation
     /**
      * Get the resolved namespace.
      *
-     * @param  array{type: string, path: string, namespace: string, source_path: string, source_namespace: string}  $location
+     * @param  array{type: string, path: string, namespace: string, name?: string, source_path?: string, source_namespace?: string}  $location
      */
     protected function getResolvedNamespace(array $location, string $subPath = ''): string
     {

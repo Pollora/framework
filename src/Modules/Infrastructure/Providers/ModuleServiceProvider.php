@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace Pollora\Modules\Infrastructure\Providers;
 
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Routing\Router;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
+use Pollora\Modules\Application\UseCases\ApplyModulesUseCase;
+use Pollora\Modules\Application\UseCases\DiscoverModulesUseCase;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
-use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
-use Pollora\Modules\Infrastructure\Services\ModuleBootstrap;
 use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
-use Pollora\Modules\Infrastructure\Services\ModuleManifest;
+use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 
 /**
  * Main service provider for the generic module system.
@@ -29,65 +28,96 @@ class ModuleServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->registerDomainContracts();
+        $this->registerUseCases();
+        $this->registerApplicationServices();
+
+        // Merge configuration
+        $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');
+    }
+
+    public function boot(): void
+    {
+        // Load helper functions
+        $this->loadHelperFunctions();
+
+        // Discover and apply all modules
+        $this->app->make(DiscoverModulesUseCase::class)->execute();
+        $this->app->make(ApplyModulesUseCase::class)->execute();
+
+        // Fire event when modules are ready
+        $this->app->booted(function (): void {
+            Event::dispatch('modules.routes.registered');
+        });
+    }
+
+    /**
+     * Register domain contracts with their infrastructure implementations.
+     */
+    private function registerDomainContracts(): void
+    {
         // Register ModuleAutoloader service
-        $this->app->singleton(ModuleAutoloader::class, fn ($app): ModuleAutoloader => new ModuleAutoloader($app));
+        $this->app->singleton(ModuleAutoloader::class, fn (Container $app): ModuleAutoloader => new ModuleAutoloader($app));
 
         // Register ModuleDiscoveryOrchestrator
-        $this->app->singleton(ModuleDiscoveryOrchestrator::class, fn ($app): ModuleDiscoveryOrchestrator => new ModuleDiscoveryOrchestrator($app));
+        $this->app->singleton(ModuleDiscoveryOrchestrator::class, fn (Container $app): ModuleDiscoveryOrchestrator => new ModuleDiscoveryOrchestrator($app));
 
         // Register interface binding
         $this->app->bind(ModuleDiscoveryOrchestratorInterface::class, ModuleDiscoveryOrchestrator::class);
 
         // Register alias for easier access
         $this->app->alias(ModuleDiscoveryOrchestrator::class, 'modules.discovery');
+    }
 
-        // Register new generic module services
-        $this->app->singleton(ModuleConfigurationLoader::class, fn ($app): ModuleConfigurationLoader => new ModuleConfigurationLoader(
+    /**
+     * Register application use cases.
+     */
+    private function registerUseCases(): void
+    {
+        $this->app->singleton(function (Application $app): DiscoverModulesUseCase {
+            $logger = null;
+            try {
+                $logger = $app->make('log');
+            } catch (\Exception) {
+                // Logger not available during early bootstrap
+            }
+
+            return new DiscoverModulesUseCase(
+                $app->make(ModuleDiscoveryOrchestrator::class),
+                $logger
+            );
+        });
+
+        $this->app->singleton(function (Application $app): ApplyModulesUseCase {
+            $logger = null;
+            try {
+                $logger = $app->make('log');
+            } catch (\Exception) {
+                // Logger not available during early bootstrap
+            }
+
+            return new ApplyModulesUseCase(
+                $app->make(ModuleDiscoveryOrchestrator::class),
+                $logger
+            );
+        });
+    }
+
+    /**
+     * Register application services.
+     */
+    private function registerApplicationServices(): void
+    {
+        $this->app->singleton(ModuleConfigurationLoader::class, fn (Container $app): ModuleConfigurationLoader => new ModuleConfigurationLoader(
             $app,
             $app->make(ConfigRepositoryInterface::class)
         ));
 
-        $this->app->singleton(ModuleComponentManager::class, fn ($app): ModuleComponentManager => new ModuleComponentManager($app));
+        $this->app->singleton(ModuleComponentManager::class, fn (Container $app): ModuleComponentManager => new ModuleComponentManager($app));
 
-        $this->app->singleton(ModuleAssetManager::class, fn ($app): ModuleAssetManager => new ModuleAssetManager($app));
+        $this->app->singleton(ModuleAssetManager::class, fn (Container $app): ModuleAssetManager => new ModuleAssetManager($app));
 
-        // Merge configuration
-        $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');
-    }
-
-    public function boot(Router $router): void
-    {
-        // Load helper functions
-        $this->loadHelperFunctions();
-
-        // Legacy services kept for compatibility but simplified
-        $this->app->singleton(ModuleManifest::class, fn ($app): ModuleManifest => new ModuleManifest(
-            new Filesystem,
-            $this->getModulePaths(),
-            $this->getCachedModulePath(),
-            $app->make(ModuleRepositoryInterface::class) // No longer using legacy scout
-        ));
-
-        $this->app->singleton(ModuleBootstrap::class, fn ($app): ModuleBootstrap => new ModuleBootstrap(
-            $app,
-            $app->make(ModuleRepositoryInterface::class),
-            $router
-        ));
-
-        // Discover Laravel modules but don't apply yet
-        $this->discoverLaravelModules();
-        $this->applyLaravelModules();
-
-        // Discover framework modules
-        $this->discoverFrameworkModules();
-        $this->applyFrameworkModules();
-
-        // Setup Laravel Module discovery only
-        $this->app->booted(function (): void {
-
-            // Fire event to notify that modules are ready
-            Event::dispatch('modules.routes.registered');
-        });
+        $this->app->singleton(ModuleRouteLoader::class, fn (Container $app): ModuleRouteLoader => new ModuleRouteLoader($app));
     }
 
     /**
@@ -96,117 +126,5 @@ class ModuleServiceProvider extends ServiceProvider
     protected function loadHelperFunctions(): void
     {
         require_once __DIR__.'/../../UI/Helpers/discovery_functions.php';
-    }
-
-    /**
-     * Get module paths from configuration.
-     */
-    protected function getModulePaths(): array
-    {
-        return [$this->app['config']->get('modules.paths.modules', base_path('modules'))];
-    }
-
-    /**
-     * Get the cached module path.
-     */
-    protected function getCachedModulePath(): string
-    {
-        return Str::replaceLast('services.php', 'modules.php', $this->app->getCachedServicesPath());
-    }
-
-    /**
-     * Discover Laravel modules using nwidart/laravel-modules (discovery only, no apply).
-     */
-    protected function discoverLaravelModules(): void
-    {
-        if (! $this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
-            return;
-        }
-
-        try {
-            /** @var ModuleDiscoveryOrchestratorInterface $orchestrator */
-            $orchestrator = $this->app->make(ModuleDiscoveryOrchestratorInterface::class);
-
-            // Check if orchestrator has Laravel module discovery capability
-            if (method_exists($orchestrator, 'discoverLaravelModules')) {
-                $orchestrator->discoverLaravelModules();
-            }
-        } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log('Laravel Module discovery error in ModuleServiceProvider: '.$throwable->getMessage());
-            }
-        }
-    }
-
-    /**
-     * Apply discovered Laravel modules.
-     */
-    protected function applyLaravelModules(): void
-    {
-        if (! $this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
-            return;
-        }
-
-        try {
-            /** @var ModuleDiscoveryOrchestratorInterface $orchestrator */
-            $orchestrator = $this->app->make(ModuleDiscoveryOrchestratorInterface::class);
-
-            // Check if orchestrator has Laravel module application capability
-            if (method_exists($orchestrator, 'applyLaravelModules')) {
-                $orchestrator->applyLaravelModules();
-            }
-        } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log('Laravel Module apply error in ModuleServiceProvider: '.$throwable->getMessage());
-            }
-        }
-    }
-
-    /**
-     * Discover framework modules from the src/ directory (discovery only, no apply).
-     */
-    protected function discoverFrameworkModules(): void
-    {
-        if (! $this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
-            return;
-        }
-
-        try {
-            /** @var ModuleDiscoveryOrchestratorInterface $orchestrator */
-            $orchestrator = $this->app->make(ModuleDiscoveryOrchestratorInterface::class);
-
-            // Check if orchestrator has framework module discovery capability
-            if (method_exists($orchestrator, 'discoverFrameworkModules')) {
-                $orchestrator->discoverFrameworkModules();
-            }
-        } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module discovery error in ModuleServiceProvider: '.$throwable->getMessage());
-            }
-        }
-    }
-
-    /**
-     * Apply discovered framework modules.
-     */
-    protected function applyFrameworkModules(): void
-    {
-        if (! $this->app->bound(ModuleDiscoveryOrchestratorInterface::class)) {
-            return;
-        }
-
-        try {
-            /** @var ModuleDiscoveryOrchestratorInterface $orchestrator */
-            $orchestrator = $this->app->make(ModuleDiscoveryOrchestratorInterface::class);
-
-            // Check if orchestrator has framework module application capability
-            if (method_exists($orchestrator, 'applyFrameworkModules')) {
-                $orchestrator->applyFrameworkModules();
-            }
-        } catch (\Throwable $throwable) {
-            if (function_exists('error_log')) {
-                error_log('Framework Module apply error in ModuleServiceProvider: '.$throwable->getMessage());
-            }
-        }
     }
 }

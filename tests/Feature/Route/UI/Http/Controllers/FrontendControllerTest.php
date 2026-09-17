@@ -7,30 +7,33 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-
-require_once dirname(__DIR__, 5).'/Unit/helpers.php';
 
 beforeEach(function (): void {
-    setupWordPressMocks();
     $this->templateFinder = Mockery::mock(TemplateFinderInterface::class);
     $this->controller = new FrontendController($this->templateFinder);
 });
 
 describe('FrontendController', function (): void {
-    it('aborts when themes disabled', function (): void {
-        setWordPressFunction('wp_using_themes', fn (): false => false);
-        $request = Request::create('/test');
+    it('returns 404 when themes disabled', function (): void {
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(false);
 
-        expect(fn () => $this->controller->handle($request))
-            ->toThrow(HttpException::class, 'Themes are disabled');
+        View::shouldReceive('exists')->andReturn(false);
+        View::shouldReceive('replaceNamespace')->andReturnNull();
+        View::shouldReceive('addNamespace')->andReturnNull();
+
+        $request = Request::create('/test');
+        $response = $this->controller->handle($request);
+
+        expect($response)->toBeInstanceOf(Response::class);
+        expect($response->getStatusCode())->toBe(404);
     });
 
     it('renders blade view when available', function (): void {
-        setWordPressFunction('wp_using_themes', fn (): true => true);
-        setWordPressFunction('is_page', fn (): true => true);
-        setWordPressFunction('get_page_template', fn (): string => '/theme/page.php');
-        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\when('is_page')->justReturn(true);
+        Brain\Monkey\Functions\when('is_404')->justReturn(false);
+        Brain\Monkey\Functions\when('get_page_template')->justReturn('/theme/page.php');
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')
             ->with('/theme/page.php')
@@ -48,14 +51,16 @@ describe('FrontendController', function (): void {
 
         expect($response)->toBeInstanceOf(Response::class);
         expect($response->getContent())->toBe('<html>Blade page content</html>');
+        expect($response->getStatusCode())->toBe(200);
     });
 
     it('falls back to php template', function (): void {
         $templatePath = __DIR__.'/test-template.php';
-        setWordPressFunction('wp_using_themes', fn (): true => true);
-        setWordPressFunction('is_page', fn (): true => true);
-        setWordPressFunction('get_page_template', fn (): string => $templatePath);
-        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\when('is_page')->justReturn(true);
+        Brain\Monkey\Functions\when('is_404')->justReturn(false);
+        Brain\Monkey\Functions\when('get_page_template')->justReturn($templatePath);
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')
             ->with($templatePath)
@@ -68,10 +73,10 @@ describe('FrontendController', function (): void {
         expect($response->getContent())->toBe('This is a PHP template');
     });
 
-    it('throws 404 when no template', function (): void {
-        setWordPressFunction('wp_using_themes', fn (): true => true);
+    it('returns 404 response when no template found', function (): void {
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
 
-        setWordPressConditions([
+        Brain\Monkey\Functions\stubs([
             'is_page' => false,
             'is_singular' => false,
             'is_archive' => false,
@@ -91,16 +96,91 @@ describe('FrontendController', function (): void {
             'is_embed' => false,
         ]);
 
-        setWordPressFunction('get_index_template', fn (): string => '');
-        setWordPressFunction('apply_filters', fn ($filter, $value) => $value);
+        Brain\Monkey\Functions\when('get_index_template')->justReturn('');
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
 
         $this->templateFinder->shouldReceive('getViewNameFromPath')
             ->with('')
             ->andReturn(null);
 
-        $request = Request::create('/test');
+        View::shouldReceive('exists')->andReturn(false);
+        View::shouldReceive('replaceNamespace')->andReturnNull();
+        View::shouldReceive('addNamespace')->andReturnNull();
 
-        expect(fn () => $this->controller->handle($request))
-            ->toThrow(HttpException::class);
+        $request = Request::create('/test');
+        $response = $this->controller->handle($request);
+
+        expect($response)->toBeInstanceOf(Response::class);
+        expect($response->getStatusCode())->toBe(404);
+    });
+
+    it('rejects non-php template paths for security', function (): void {
+        $nonPhpPath = __DIR__.'/../../../../../../composer.json';
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\when('is_page')->justReturn(true);
+        Brain\Monkey\Functions\when('is_404')->justReturn(false);
+        Brain\Monkey\Functions\when('get_page_template')->justReturn($nonPhpPath);
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
+
+        $this->templateFinder->shouldReceive('getViewNameFromPath')
+            ->andReturn(null);
+
+        View::shouldReceive('exists')->andReturn(false);
+        View::shouldReceive('replaceNamespace')->andReturnNull();
+        View::shouldReceive('addNamespace')->andReturnNull();
+
+        $request = Request::create('/test');
+        $response = $this->controller->handle($request);
+
+        // Should return 404 because non-.php file is rejected by isAllowedTemplatePath
+        expect($response->getStatusCode())->toBe(404);
+    });
+
+    it('renders Laravel error page when 404 with index fallback', function (): void {
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+
+        Brain\Monkey\Functions\stubs([
+            'is_embed' => false,
+            'is_404' => true,
+            'is_search' => false,
+            'is_front_page' => false,
+            'is_home' => false,
+            'is_privacy_policy' => false,
+            'is_post_type_archive' => false,
+            'is_tax' => false,
+            'is_attachment' => false,
+            'is_single' => false,
+            'is_page' => false,
+            'is_singular' => false,
+            'is_category' => false,
+            'is_tag' => false,
+            'is_author' => false,
+            'is_date' => false,
+            'is_archive' => false,
+        ]);
+
+        Brain\Monkey\Functions\when('get_404_template')->justReturn('');
+        Brain\Monkey\Functions\when('get_index_template')->justReturn('/theme/index.php');
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
+
+        $this->templateFinder->shouldReceive('getViewNameFromPath')
+            ->with('/theme/index.php')
+            ->andReturn('index');
+
+        View::shouldReceive('exists')
+            ->with('errors.404')
+            ->andReturn(false);
+        View::shouldReceive('replaceNamespace')->andReturnNull();
+        View::shouldReceive('addNamespace')->andReturnNull();
+        View::shouldReceive('exists')
+            ->with('errors::404')
+            ->andReturn(false);
+
+        $request = Request::create('/nonexistent');
+        $response = $this->controller->handle($request);
+
+        expect($response)->toBeInstanceOf(Response::class);
+        expect($response->getStatusCode())->toBe(404);
+        expect($response->getContent())->toBe('Not Found');
     });
 });

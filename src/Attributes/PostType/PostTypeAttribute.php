@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Attributes\PostType;
 
-use Attribute;
 use Pollora\Attributes\Attributable;
 use Pollora\Attributes\Contracts\HandlesAttributes;
 use Pollora\PostType\Domain\Contracts\PostTypeAttributeInterface;
@@ -19,7 +18,6 @@ use ReflectionMethod;
  *
  * @Attribute
  */
-#[Attribute(Attribute::TARGET_CLASS)]
 abstract class PostTypeAttribute implements HandlesAttributes
 {
     /**

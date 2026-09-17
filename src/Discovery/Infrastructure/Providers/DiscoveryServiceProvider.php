@@ -33,6 +33,8 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->mergeConfigFrom(__DIR__.'/../../../../config/discovery.php', 'discovery');
+
         $this->registerOptimizedServices();
         $this->registerDiscoveryEngine();
         $this->registerDiscoveryManager();
@@ -44,6 +46,10 @@ final class DiscoveryServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->publishes([
+            __DIR__.'/../../../../config/discovery.php' => config_path('discovery.php'),
+        ], 'pollora-config');
+
         $this->setupDiscoveryEngine();
     }
 
@@ -74,6 +80,9 @@ final class DiscoveryServiceProvider extends ServiceProvider
 
         // Register instance pool as singleton to maintain state across discoveries
         $this->app->singleton(InstancePool::class);
+
+        // Register ServiceProviderDiscovery so the DiscoveryRegistrar can find it
+        $this->app->singleton(ServiceProviderDiscovery::class);
     }
 
     /**
@@ -85,7 +94,9 @@ final class DiscoveryServiceProvider extends ServiceProvider
             container: $app,
             debugDetector: $app->make(DebugDetectorInterface::class),
             reflectionCache: $app->make(ReflectionCacheInterface::class),
-            instancePool: $app->make(InstancePool::class)
+            instancePool: $app->make(InstancePool::class),
+            skipClasses: (array) config('discovery.skip_classes', []),
+            skipPaths: (array) config('discovery.skip_paths', []),
         ));
     }
 
@@ -107,22 +118,8 @@ final class DiscoveryServiceProvider extends ServiceProvider
         /** @var DiscoveryEngineInterface $engine */
         $engine = $this->app->make(DiscoveryEngineInterface::class);
 
-        // Cache is now handled natively by Spatie's Discover class
-
-        // Register core discovery classes
-        $this->registerCoreDiscoveries($engine);
-
         // Add default Laravel app paths for discovery
         $this->addDefaultDiscoveryLocations($engine);
-    }
-
-    /**
-     * Register core discovery classes
-     */
-    private function registerCoreDiscoveries(DiscoveryEngineInterface $engine): void
-    {
-        // Register ServiceProviderDiscovery
-        $engine->addDiscovery('service_providers', ServiceProviderDiscovery::class);
     }
 
     /**

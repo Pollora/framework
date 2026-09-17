@@ -47,8 +47,10 @@ class ResolveBladeTemplateUseCase
             return $templatePath;
         }
 
-        // For now, return original template path
-        // In a future version, we could integrate with FrontendController
+        // Return the original template path intentionally.
+        // FrontendController resolves Blade views natively via View::make(),
+        // so no loader transformation is needed here. WooCommerce templates
+        // use their own loader path via WooCommerce::template().
         return $templatePath;
     }
 }
