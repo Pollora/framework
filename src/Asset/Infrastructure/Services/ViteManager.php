@@ -116,7 +116,7 @@ class ViteManager implements ViteManagerInterface
      */
     public function getViteClientHtml(): string
     {
-        return ViteFacade::toHtml();
+        return $this->getViteInstance()->toHtml();
     }
 
     /**
