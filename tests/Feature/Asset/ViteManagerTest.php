@@ -49,4 +49,23 @@ describe('ViteManager with several containers', function (): void {
                 'css' => [asset($this->buildRoot.'/plugin/assets/admin-456.css')],
             ]);
     });
+
+    it('renders the Vite client of its own dev server', function (): void {
+        $theme = new ViteManager(new AssetContainer('theme', [
+            'hot_file' => $this->hotFile,
+            'build_directory' => $this->buildRoot.'/theme',
+            'manifest_path' => 'manifest.json',
+            'base_path' => 'resources/assets/',
+        ]));
+
+        // Created later: must not change what the theme renders
+        new ViteManager(new AssetContainer('plugin.demo', [
+            'hot_file' => sys_get_temp_dir().'/missing-'.uniqid().'.hot',
+            'build_directory' => $this->buildRoot.'/plugin',
+            'manifest_path' => 'manifest.json',
+            'base_path' => 'resources/assets/',
+        ]));
+
+        expect($theme->getViteClientHtml())->toContain('https://example.test:5173/@vite/client');
+    });
 });
