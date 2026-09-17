@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/Pollora/framework/issues"
   },
-  "homepage": "https://github.com/Pollora/framework#readme",
+  "homepage": "https://pollora.dev",
   "dependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
