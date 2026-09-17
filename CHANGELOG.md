@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pollora:install` pointed to a non-existent `wp:env-setup` command when the database connection failed
 
 ### Changed
+- Relicensed under MIT, like the other Pollora packages: `composer.json` and the README declared `GPL-2.0-or-later`, and the only license files were the 0BSD/WTFPL texts inherited from the original WordPress integration by Jordan Doyle, now credited in the README
 - Development against WordPress 7.1 stubs (`php-stubs/wordpress-stubs` `^7.1`); `patches/wordpress-stubs.patch` regenerated for them and reduced to the `__()` → `__wp()` rename. Its `wp_mail()` hunk no longer matched the stubs (WordPress added an `$embeds` parameter) and renamed a function nothing overrides
 - `mockery/mockery` `^1.6.11` in development
 
