@@ -5,7 +5,7 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.2...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.4.3...develop)
 
 ### Added
 - Translation diagnostics in `pollora:status` and the admin dashboard — reports whether the `__()` override is the one actually installed, alongside the WordPress and Laravel locales. `laravel/framework` declares `__()` behind the same `function_exists()` guard as [`pollora/helper-overrider`](https://github.com/Pollora/helper-overrider) and Composer emits `autoload.files` in dependency order, so whichever loads first wins; when Laravel wins nothing errors, WordPress catalogues simply stop resolving and every core, theme and plugin string silently renders untranslated. Detection compares the file declaring `__()` against the one declaring `pollora_translation_resolver()` — they ship in the same `helpers.php`, so matching paths prove the package won the race whatever the install layout
@@ -45,10 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `WordPressHeaders` middleware now respects the `DONOTCACHEPAGE` constant set by WooCommerce and compatible cache plugins, preventing public cache headers on cart, checkout, and account pages
 - **`__()` no longer fatals on a translation with replacements whose key is absent from the current locale.** `__('Shipping :brand', ['brand' => 'Test'])` raised `TypeError: Cannot access offset of type array in isset or empty` whenever `Lang::has()` answered no: the guard normalised only the empty array to the `default` text domain, so a non-empty replacement array travelled into WordPress's `translate()` as the domain and reached `isset($l10n[$domain])`. It hit every `__($key, [...])` call whose key was not in the locale's catalogue — typically a site whose sources and language are both English, where no `en_US.json` exists at all, taking down every string with a placeholder. Requires [`pollora/helper-overrider`](https://github.com/Pollora/helper-overrider) 1.2, which routes on the caller's intent — a string second argument is a WordPress text domain, a non-empty array is a Laravel call — instead of on whether Laravel happens to hold the key. The same release fixes an unguarded `Lang::has()` that raised `A facade root has not been set.` wherever `__()` runs before or without an application, a `wordpress.` prefix strip that rewrote the substring anywhere it appeared (`__('Go to wordpress.org')` returned `Go to org`), Laravel group keys returning an array to callers typed against WordPress's `string`, and a missing base-language locale fallback that kept a `fr_FR` site from ever reading `lang/fr.json`
 - **The `Loop` and `Query` facade aliases no longer crash a page that uses them.** Both were still declared in `extra.laravel.aliases` after their facade classes had been deleted — `Loop` since `9a50cac` (2026-04-21), `Query` since `9c0cb42` (2024-08-05). Laravel registers an alias without checking its target and only calls `class_alias()` the first time the short name is used, so the package installed and booted cleanly and then threw `Class "Pollora\Support\Facades\Loop" not found` on whichever page happened to call it. Present in every v13.4.x release. See the migration note below for what replaces `Loop`.
-- Theme Gutenberg patterns are registered again ([#295](https://github.com/Pollora/framework/issues/295)) — `PatternService` resolved the pattern directory from `WP_Theme::get_theme_root()`, which bypasses the `theme_root` filter and pointed at `WP_CONTENT_DIR/themes` instead of the configured `theme.path`; the directory is now derived from `ThemeMetadata`
-- Patterns are discovered across the full theme ancestry (ancestors first, so the active theme can override an inherited slug) instead of a single parent level
-- `$_SERVER['HTTPS']` now forced when `APP_URL` uses HTTPS scheme
-- `WP_HOME`/`WP_SITEURL` now use `config('app.url')` instead of `url()` to avoid circular dependency
 - `PluginManagerTest` isolation — real `Container` with dynamic `WP_PLUGIN_DIR` replaces fragile `ContainerInterface` mock
 - WooCommerce hooks test updated for `ComingSoonHandler` dependency
 - PHPStan dead catches widened, redundant `@return $this` docblocks removed
@@ -56,7 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - The `Loop` and `Query` entries in `extra.laravel.aliases`, whose facade classes no longer exist
-- `Pollora\BlockPattern\Infrastructure\Registrars\PatternRegistrar` — dead duplicate of `PatternService` carrying the same theme-root resolution bug
 
 ### Migrating from `Loop`
 
@@ -107,12 +102,21 @@ v13, and the alias outlived it by two years.
 - Manual `addDiscovery()` boot logic in HookServiceProvider, PostTypeServiceProvider, TaxonomyServiceProvider, WpRestAttributeServiceProvider, SchedulerDiscoveryServiceProvider
 - `RegisterScheduleDiscoveryUseCase` (superseded by `DiscoveryRegistrar`)
 
-## [v13.4.2](https://github.com/Pollora/framework/compare/v13.4.1...v13.4.2) - 2026-06-23
+## [v13.4.3](https://github.com/Pollora/framework/compare/v13.4.2...v13.4.3) - 2026-08-31
+
+### Fixed
+- Theme Gutenberg patterns are registered again ([#295](https://github.com/Pollora/framework/issues/295)) — `PatternService` resolved the pattern directory from `WP_Theme::get_theme_root()`, which bypasses the `theme_root` filter and pointed at `WP_CONTENT_DIR/themes` instead of the configured `theme.path`; the directory is now derived from `ThemeMetadata`
+- Patterns are discovered across the full theme ancestry (ancestors first, so the active theme can override an inherited slug) instead of a single parent level
+
+### Removed
+- `Pollora\BlockPattern\Infrastructure\Registrars\PatternRegistrar` — dead duplicate of `PatternService` carrying the same theme-root resolution bug
+
+## [v13.4.2](https://github.com/Pollora/framework/compare/v13.4.1...v13.4.2) - 2026-06-29
 
 ### Fixed
 - Force `$_SERVER['HTTPS']` when `APP_URL` uses HTTPS scheme
 
-## [v13.4.1](https://github.com/Pollora/framework/compare/v13.4.0...v13.4.1) - 2026-06-23
+## [v13.4.1](https://github.com/Pollora/framework/compare/v13.4.0...v13.4.1) - 2026-06-29
 
 ### Fixed
 - Use `config('app.url')` for `WP_HOME`/`WP_SITEURL` instead of `url()` helper
