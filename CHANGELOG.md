@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.2...develop)
+
+## [v13.32.0-beta.2](https://github.com/Pollora/framework/compare/v13.32.0-beta...v13.32.0-beta.2) - 2026-09-17
 
 ### Added
 - [pollora.dev](https://pollora.dev) as the project website and documentation: `homepage` and `support.docs` in `composer.json` (shown on Packagist), `homepage` in `package.json`, the README, and a Documentation link in the Pollora admin dashboard header
@@ -16,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blocks live in `resources/views/blocks/{slug}` instead of `resources/blocks/{slug}`, next to the Blade views, for `pollora:make:block`, its `BlocksServiceProvider` stub and the Vite entries it generates. See [Migrating from `resources/blocks`](documentation/blocks.md#migrating-from-resourcesblocks)
 - `pollora:make:block` limits Vite full reloads under `resources/views` to Blade files: laravel-vite-plugin's `refreshPaths` and a `resources/views/**` glob would reload the page on every block JSX change instead of hot-replacing it
 - **BREAKING** for custom `BlockRegistrarInterface` implementations: both methods gained the optional `?string $basePath = null` parameter
+- Relicensed under MIT, like the other Pollora packages: `composer.json` and the README declared `GPL-2.0-or-later`, and the only license files were the 0BSD/WTFPL texts inherited from the original WordPress integration by Jordan Doyle, now credited in the README
+- Development against WordPress 7.1 stubs (`php-stubs/wordpress-stubs` `^7.1`); `patches/wordpress-stubs.patch` regenerated for them and reduced to the `__()` → `__wp()` rename. Its `wp_mail()` hunk no longer matched the stubs (WordPress added an `$embeds` parameter) and renamed a function nothing overrides
+- `mockery/mockery` `^1.6.11` in development
 
 ### Deprecated
 - Blocks in `resources/blocks` are still registered, with a notice in the log, until Pollora v15. A theme or plugin blocks directory scans both locations, and a block present in both is taken from `resources/views/blocks`
@@ -31,11 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pollora:install` completes without interaction (`--no-interaction`, CI, piped stdin). It called `pollora:make:theme` without a name, which failed with `Not enough arguments (missing: "name")` after WordPress was installed; it now generates the `default` theme from `pollora/theme-default` — the theme WordPress activates on install — or the one named by the new `--theme` option
 - `pollora:install` runs its migrations with `--force` and fails when they fail. In production, `migrate` asks for confirmation and cancels when it cannot prompt, yet the install reported `Migration completed successfully`: a non-interactive production install left the sessions and cache tables missing and every page answered 500
 - Commands using `PromptsForMissingOption` (`pollora:make:theme`, `pollora:make:plugin`) apply their prompt defaults when they cannot prompt, instead of leaving the options empty: a theme generated without interaction had a `style.css` with no author, URI, description or version
-
-### Changed
-- Relicensed under MIT, like the other Pollora packages: `composer.json` and the README declared `GPL-2.0-or-later`, and the only license files were the 0BSD/WTFPL texts inherited from the original WordPress integration by Jordan Doyle, now credited in the README
-- Development against WordPress 7.1 stubs (`php-stubs/wordpress-stubs` `^7.1`); `patches/wordpress-stubs.patch` regenerated for them and reduced to the `__()` → `__wp()` rename. Its `wp_mail()` hunk no longer matched the stubs (WordPress added an `$embeds` parameter) and renamed a function nothing overrides
-- `mockery/mockery` `^1.6.11` in development
 
 ### Removed
 - `patches/mockery-php84-nullable.patch` — Mockery fixed the PHP 8.4 implicit nullable deprecations upstream, so the patch no longer applied and printed `Could not apply patch!` on every `composer install`, including in projects built on the skeleton. `patches/wordpress-core.patch` stays: it is what lets `pollora/helper-overrider` declare `__()`
