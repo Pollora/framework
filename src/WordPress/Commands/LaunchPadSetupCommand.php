@@ -14,7 +14,7 @@ use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 
 #[Description('Configure environment for WordPress installation')]
-#[Signature('pollora:env:setup {--install : Suppress some informational output}')]
+#[Signature('pollora:env:setup {--install : Suppress some informational output}', aliases: ['pollora:env-setup'])]
 class LaunchPadSetupCommand extends Command
 {
     public function __construct(

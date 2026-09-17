@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Block\UI\Console;
 
+use Illuminate\Console\Attributes\Aliases;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
@@ -20,6 +21,7 @@ use Symfony\Component\Console\Input\InputOption;
  * npm dependencies, BlocksServiceProvider).
  */
 #[Description('Create a new Gutenberg block in a theme or plugin')]
+#[Aliases(['pollora:make-block'])]
 class MakeBlockCommand extends Command
 {
     use HasPluginSupport;
