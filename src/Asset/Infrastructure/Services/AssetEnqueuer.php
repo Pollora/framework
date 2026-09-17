@@ -375,7 +375,7 @@ class AssetEnqueuer
     protected function loadViteClient(string $hook): void
     {
         resolve(HookAction::class)->add($hook, function (): void {
-            if ($this->viteManager && $this->viteManager->isRunningHot()) {
+            if ($this->viteManager instanceof ViteManager && $this->viteManager->isRunningHot()) {
                 echo $this->viteManager->getViteClientHtml();
             }
         }, 1);
@@ -405,7 +405,7 @@ class AssetEnqueuer
      */
     protected function needToLoadViteClient(): bool
     {
-        return $this->useVite && $this->viteManager && $this->viteManager->isRunningHot();
+        return $this->useVite && $this->viteManager instanceof ViteManager && $this->viteManager->isRunningHot();
     }
 
     /**

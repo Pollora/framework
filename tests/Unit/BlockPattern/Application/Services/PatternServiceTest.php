@@ -93,7 +93,7 @@ function makePatternService(ThemeService $themeService, array &$registered): Pat
 
 describe('PatternService', function (): void {
     afterEach(function (): void {
-        if (isset($this->themesRoot)) {
+        if (property_exists($this, 'themesRoot') && $this->themesRoot !== null) {
             removeThemesRoot($this->themesRoot);
         }
     });

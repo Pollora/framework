@@ -83,7 +83,7 @@ class LaravelModuleDiscovery implements ModuleDiscoveryInterface
 
         try {
             $module = $this->findModule($moduleName);
-            if ($module && $module->isEnabled()) {
+            if ($module instanceof Module && $module->isEnabled()) {
                 $this->discoverModule($module);
             }
         } catch (\Throwable $throwable) {

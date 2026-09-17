@@ -55,14 +55,10 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
     public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): EntityTaxonomy
     {
         // Generate singular name if not provided
-        if ($singular === null) {
-            $singular = $this->generateSingular($slug, null);
-        }
+        $singular ??= $this->generateSingular($slug, null);
 
         // Generate plural name if not provided
-        if ($plural === null) {
-            $plural = Str::plural($singular);
-        }
+        $plural ??= Str::plural($singular);
 
         // Extract object type from args, default to ['post']
         $objectType = $args['object_type'] ?? ['post'];

@@ -98,7 +98,7 @@ class ThemeStatusCommand extends Command
     {
         $registeredTheme = $registrar->getActiveTheme();
 
-        if ($registeredTheme && $activeTheme->getName() === $registeredTheme->getName()) {
+        if ($registeredTheme instanceof ThemeModuleInterface && $activeTheme->getName() === $registeredTheme->getName()) {
             $this->info('  ✓ Theme service and registrar are in sync');
         } else {
             $this->warn('  ✗ Theme service and registrar are out of sync');

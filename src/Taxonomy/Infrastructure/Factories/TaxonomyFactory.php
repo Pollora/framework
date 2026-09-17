@@ -32,14 +32,10 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
     public function make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): mixed
     {
         // Generate singular name if not provided
-        if ($singular === null) {
-            $singular = $this->generateSingularName($slug);
-        }
+        $singular ??= $this->generateSingularName($slug);
 
         // Generate plural name if not provided
-        if ($plural === null) {
-            $plural = $this->generatePluralName($singular);
-        }
+        $plural ??= $this->generatePluralName($singular);
 
         // Create the EntityTaxonomy instance directly (without auto-registration)
         $taxonomy = new EntityTaxonomy($slug, $objectType, $singular, $plural);

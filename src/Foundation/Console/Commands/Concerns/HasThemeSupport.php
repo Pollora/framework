@@ -57,9 +57,7 @@ trait HasThemeSupport
      */
     protected function getActiveTheme(): ?string
     {
-        if ($this->registrar === null) {
-            $this->registrar = resolve(ThemeRegistrarInterface::class);
-        }
+        $this->registrar ??= resolve(ThemeRegistrarInterface::class);
 
         $activeTheme = $this->registrar->getActiveTheme();
 

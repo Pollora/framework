@@ -55,14 +55,10 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
     public function createEntityForConfiguring(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): EntityPostType
     {
         // Generate singular name if not provided
-        if ($singular === null) {
-            $singular = $this->generateSingular($slug, null);
-        }
+        $singular ??= $this->generateSingular($slug, null);
 
         // Generate plural name if not provided
-        if ($plural === null) {
-            $plural = Str::plural($singular);
-        }
+        $plural ??= Str::plural($singular);
 
         // Create the Entity PostType instance directly without auto-registration
         $postType = new EntityPostType($slug, $singular, $plural);

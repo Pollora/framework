@@ -191,7 +191,7 @@ class WordPressConditionManager implements ConditionResolverInterface, WordPress
     private function loadConfigConditions(): void
     {
         try {
-            if ($this->container && $this->container->bound('config')) {
+            if ($this->container instanceof Container && $this->container->bound('config')) {
                 $config = $this->container->make('config');
 
                 // Load base conditions from wordpress.conditions
