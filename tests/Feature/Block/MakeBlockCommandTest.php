@@ -161,6 +161,7 @@ describe('pollora:make:block', function (): void {
             ->and($vite)->not->toContain('./resources/blocks/')
             ->and($refresh[1])->not->toContain('resources/views/blocks')
             ->and($refresh[1])->toContain("'themes/'+themeName+'/resources/views/**/*.blade.php'")
+            ->and($refresh[1])->toContain("\n        'resources/views/**/*.blade.php',")
             ->and($refresh[1])->toContain("...refreshPaths.filter((refreshPath) => refreshPath !== 'resources/views/**')");
     });
 

@@ -392,7 +392,8 @@ class MakeBlockCommand extends Command
      *
      * laravel-vite-plugin's refreshPaths, a literal resources/views/** and the
      * resources/blocks/** added by earlier versions of this command all reload the
-     * page on a block JSX change, defeating HMR.
+     * page on a block JSX change, defeating HMR. Globs resolve from the Vite root, so
+     * Blade views are reloaded through resources/views/**\/*.blade.php.
      */
     private function patchRefreshPaths(string $content): string
     {
@@ -413,8 +414,16 @@ class MakeBlockCommand extends Command
             $paths
         );
 
-        if (! str_contains($paths, '.blade.php')) {
-            $paths = rtrim($paths, ", \n\t").", '".self::BLADE_REFRESH_PATH."'";
+        // refreshPaths was what reloaded Blade views: globs resolve from the Vite root (the
+        // theme or plugin), so a project-relative themes/{name}/resources/views/** never matched
+        if (! preg_match('/[\'"]'.preg_quote(self::BLADE_REFRESH_PATH, '/').'[\'"]/', $paths)) {
+            $trailingComma = str_ends_with($paths, ',') ? ',' : '';
+            $paths = rtrim($paths, ", \n\t");
+            $lastLine = (string) strrchr("\n".$paths, "\n");
+            $separator = str_contains($paths, "\n")
+                ? ",\n".substr($lastLine, 1, strspn($lastLine, " \t", 1))
+                : ', ';
+            $paths .= $separator."'".self::BLADE_REFRESH_PATH."'".$trailingComma;
         }
 
         return substr_replace($content, $paths.$trailingWhitespace, $matches[1][1], strlen($original));
