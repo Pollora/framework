@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Artisan commands renamed to the Laravel colon convention in v13.32.0-beta answer to their previous names again. The rename left no alias, so a project whose `composer.json` still ran `pollora:env-setup` in `post-autoload-dump` failed `composer install` right after upgrading. Kept as aliases: `pollora:env-setup`, `pollora:make-theme`, `pollora:delete-theme`, `pollora:make-plugin`, `pollora:make-block`, `pollora:make-model`, `pollora:make-action`, `pollora:make-filter`, `pollora:make-posttype`, `pollora:make-taxonomy`, `pollora:make-wp-cli`
 - `pollora:install` pointed to a non-existent `wp:env-setup` command when the database connection failed
 
+### Changed
+- Development against WordPress 7.1 stubs (`php-stubs/wordpress-stubs` `^7.1`); `patches/wordpress-stubs.patch` regenerated for them and reduced to the `__()` → `__wp()` rename. Its `wp_mail()` hunk no longer matched the stubs (WordPress added an `$embeds` parameter) and renamed a function nothing overrides
+- `mockery/mockery` `^1.6.11` in development
+
+### Removed
+- `patches/mockery-php84-nullable.patch` — Mockery fixed the PHP 8.4 implicit nullable deprecations upstream, so the patch no longer applied and printed `Could not apply patch!` on every `composer install`, including in projects built on the skeleton. `patches/wordpress-core.patch` stays: it is what lets `pollora/helper-overrider` declare `__()`
+
 ## [v13.32.0-beta](https://github.com/Pollora/framework/compare/v13.4.3...v13.32.0-beta) - 2026-09-17
 
 Pollora now follows Laravel's version numbers: this release requires Laravel 13.32.
