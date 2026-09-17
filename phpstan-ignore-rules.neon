@@ -1,2 +1,10 @@
 parameters:
-    ignoreErrors: []
+    ignoreErrors:
+        # Larastan checks constant view names against the package's own view finder.
+        # `errors.404` belongs to the application and `errors::404` to Laravel; both are
+        # guarded by View::exists() right before View::make().
+        -
+            identifier: argument.type
+            message: '#^Parameter \#1 \$view of static method Illuminate\\View\\Factory::make\(\) expects view-string, string given\.$#'
+            path: src/Route/UI/Http/Controllers/FrontendController.php
+            count: 2
