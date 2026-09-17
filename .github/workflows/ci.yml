@@ -98,6 +98,83 @@ jobs:
           file: ./coverage.xml
           fail_ci_if_error: false
 
+  skeleton-install:
+    name: Skeleton install
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - name: Checkout skeleton
+        uses: actions/checkout@v6
+        with:
+          repository: Pollora/pollora
+
+      - name: Checkout framework
+        uses: actions/checkout@v6
+        with:
+          path: packages/framework
+
+      - name: Setup DDEV
+        uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
+
+      # Same stack as the skeleton CI and the local Pollora test install
+      - name: Configure DDEV
+        run: |
+          ddev config \
+            --project-name=pollora \
+            --project-type=wordpress \
+            --docroot=public \
+            --php-version=8.4 \
+            --webserver-type=apache-fpm \
+            --database=mariadb:10.11 \
+            --nodejs-version=22 \
+            --disable-settings-management
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Prepare .env
+        run: |
+          cp .env.example .env
+          sed -i \
+            -e 's#^APP_URL=.*#APP_URL=https://pollora.ddev.site#' \
+            -e 's#^DB_CONNECTION=.*#DB_CONNECTION=mysql#' \
+            -e 's/^# DB_HOST=.*/DB_HOST=db/' \
+            -e 's/^# DB_PORT=.*/DB_PORT=3306/' \
+            -e 's/^# DB_DATABASE=.*/DB_DATABASE=db/' \
+            -e 's/^# DB_USERNAME=.*/DB_USERNAME=db/' \
+            -e 's/^# DB_PASSWORD=.*/DB_PASSWORD=db/' \
+            .env
+
+      - name: Install the skeleton with this framework checkout
+        run: |
+          ddev composer config repositories.framework '{"type": "path", "url": "packages/framework", "options": {"symlink": false, "versions": {"pollora/framework": "13.999.0"}}}'
+          ddev composer require pollora/framework:13.999.0 --with-all-dependencies --no-interaction --no-progress
+
+      - name: Generate application key
+        run: ddev exec php artisan key:generate --no-interaction
+
+      - name: Install WordPress
+        run: |
+          ddev exec php artisan pollora:install --install \
+            --title="Pollora" \
+            --description="Pollora CI" \
+            --admin-user=admin \
+            --admin-email=admin@example.com \
+            --admin-password=pollora-ci-password \
+            --locale=en_US \
+            --public=false \
+            --no-interaction
+
+      - name: Execute skeleton tests
+        run: ddev composer test
+
+      - name: Laravel log
+        if: failure()
+        run: tail -n 200 storage/logs/laravel.log || true
+
   validate-changelog:
     name: Validate Changelog
     runs-on: ubuntu-latest
