@@ -149,6 +149,29 @@ describe('public cache application', function (): void {
             ->and($response->headers->getCacheControlDirective('max-age'))->toBe('3600');
     });
 
+    it('skips cache when a plugin requested no-cache via DONOTCACHEPAGE', function (): void {
+        Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+
+        // DONOTCACHEPAGE cannot be undefined once declared, so the lookup is stubbed
+        $middleware = new class extends WordPressHeaders
+        {
+            protected function isNocacheRequested(): bool
+            {
+                return true;
+            }
+        };
+
+        $request = Request::create('/cart');
+        $request->setRouteResolver(fn (): null => null);
+
+        $response = $middleware->handle(
+            $request,
+            fn (): Response => new SymfonyResponse('<html></html>', 200, ['Content-Type' => 'text/html'])
+        );
+
+        expect($response->headers->getCacheControlDirective('public'))->toBeNull();
+    });
+
     it('skips cache for authenticated users', function (): void {
         Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(true);
 

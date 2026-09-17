@@ -155,6 +155,7 @@ class WordPressHeaders
      * Returns true only when all of the following conditions are met:
      * - WordPress functions are available
      * - The visitor is not authenticated (anonymous)
+     * - No plugin has requested no-cache via `DONOTCACHEPAGE` (e.g. WooCommerce cart, checkout, account)
      * - The response is a standard content response (not streamed, binary, redirect, or empty)
      * - The response has an HTML content type (non-HTML responses like JSON, PDF, XML are skipped)
      *
@@ -167,6 +168,10 @@ class WordPressHeaders
             return false;
         }
 
+        if ($this->isNocacheRequested()) {
+            return false;
+        }
+
         if ($response instanceof StreamedResponse || $response instanceof BinaryFileResponse) {
             return false;
         }
@@ -176,6 +181,16 @@ class WordPressHeaders
         }
 
         return $this->isHtmlResponse($response);
+    }
+
+    /**
+     * Check if a cache plugin (e.g. WooCommerce) has requested no-cache via DONOTCACHEPAGE.
+     *
+     * @return bool True when caching must be suppressed
+     */
+    protected function isNocacheRequested(): bool
+    {
+        return defined('DONOTCACHEPAGE') && (bool) constant('DONOTCACHEPAGE');
     }
 
     /**
