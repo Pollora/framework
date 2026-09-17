@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Block\UI\Console;
 
+use Illuminate\Console\Attributes\Aliases;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
@@ -15,11 +16,16 @@ use Symfony\Component\Console\Input\InputOption;
 /**
  * Artisan command to scaffold a Gutenberg block in a theme or plugin.
  *
- * Generates block files (block.json, index.jsx, edit.jsx, save.jsx, CSS, etc.)
- * and bootstraps the Vite infrastructure on first use (vite.config.js patching,
- * npm dependencies, BlocksServiceProvider).
+ * Generates block files in `resources/views/blocks/{slug}` (block.json, index.jsx,
+ * edit.jsx, render.blade.php, CSS, etc.) and bootstraps the Vite infrastructure on
+ * first use (vite.config.js patching, npm dependencies, BlocksServiceProvider).
+ *
+ * Blocks are dynamic and rendered with Blade by default: their markup is not stored
+ * in post_content, so changing it never invalidates existing content. `--static`
+ * generates a save.jsx instead.
  */
 #[Description('Create a new Gutenberg block in a theme or plugin')]
+#[Aliases(['pollora:make-block'])]
 class MakeBlockCommand extends Command
 {
     use HasPluginSupport;
@@ -39,6 +45,22 @@ class MakeBlockCommand extends Command
         '@wordpress/element' => '^6.0.0',
         '@wordpress/i18n' => '^5.0.0',
     ];
+
+    /**
+     * Blocks directory, relative to the theme or plugin root.
+     */
+    private const string BLOCKS_DIRECTORY = 'resources/views/blocks';
+
+    /**
+     * Blocks directory used before v13.32, relative to the theme or plugin root.
+     */
+    private const string LEGACY_BLOCKS_DIRECTORY = 'resources/blocks';
+
+    /**
+     * Refresh glob reloading the page for Blade views only: a broader resources/views/**
+     * would turn every block JSX change into a full reload instead of HMR.
+     */
+    private const string BLADE_REFRESH_PATH = 'resources/views/**/*.blade.php';
 
     public function handle(): int
     {
@@ -63,7 +85,11 @@ class MakeBlockCommand extends Command
             return self::FAILURE;
         }
 
-        $blocksDir = $target['path'].'/resources/blocks';
+        if ($this->option('dynamic')) {
+            $this->components->warn('--dynamic is deprecated: blocks are dynamic by default. Use --static for a block saved in post content.');
+        }
+
+        $blocksDir = $target['path'].'/'.self::BLOCKS_DIRECTORY;
         $blockDir = $blocksDir.'/'.$name;
 
         // Check if block already exists
@@ -71,11 +97,15 @@ class MakeBlockCommand extends Command
             return self::FAILURE;
         }
 
-        $isFirstBlock = ! is_dir($blocksDir) || $this->isEmptyDirectory($blocksDir);
+        // A target with blocks in the former location is already bootstrapped
+        $isFirstBlock = $this->isEmptyDirectory($blocksDir)
+            && $this->isEmptyDirectory($target['path'].'/'.self::LEGACY_BLOCKS_DIRECTORY);
 
         // Bootstrap infrastructure if first block
         if ($isFirstBlock) {
             $this->bootstrapInfrastructure($target);
+        } else {
+            $this->upgradeViteConfig($target);
         }
 
         // Scaffold the block
@@ -204,11 +234,11 @@ class MakeBlockCommand extends Command
             return;
         }
 
-        $content = file_get_contents($viteConfigPath);
+        $content = (string) file_get_contents($viteConfigPath);
 
         // Check if already patched
         if (str_contains($content, '@roots/vite-plugin') || str_contains($content, 'blockEntries')) {
-            $this->components->twoColumnDetail('vite.config.js', 'ALREADY CONFIGURED');
+            $this->upgradeViteConfig($target);
 
             return;
         }
@@ -221,23 +251,14 @@ class MakeBlockCommand extends Command
             return;
         }
 
-        $patched = $this->applyViteConfigPatches($content);
-
-        if ($patched === null) {
-            $this->components->warn('Could not automatically patch vite.config.js.');
-            $this->displayManualViteInstructions();
-
-            return;
-        }
-
-        file_put_contents($viteConfigPath, $patched);
+        file_put_contents($viteConfigPath, $this->applyViteConfigPatches($content));
         $this->components->twoColumnDetail('vite.config.js', 'UPDATED');
     }
 
     /**
      * Apply patches to vite.config.js content.
      */
-    private function applyViteConfigPatches(string $content): ?string
+    private function applyViteConfigPatches(string $content): string
     {
         // 1. Add imports after existing imports
         $rootsImport = "import { wordpressPlugin } from '@roots/vite-plugin';";
@@ -262,16 +283,7 @@ class MakeBlockCommand extends Command
         }
 
         // 2. Add block entries discovery after imports (before export/function)
-        $blockEntriesCode = <<<'JS'
-
-const blockEntries = globSync('./resources/blocks/*/index.{js,jsx,ts,tsx}')
-    .reduce((acc, file) => {
-        const slug = path.basename(path.dirname(file));
-        acc[`blocks/${slug}`] = file;
-        return acc;
-    }, {});
-const hasBlocks = Object.keys(blockEntries).length > 0;
-JS;
+        $blockEntriesCode = "\n".$this->blockEntriesCode(includeLegacy: false)."\nconst hasBlocks = Object.keys(blockEntries).length > 0;";
 
         // Insert before the first export or function declaration
         if (! str_contains($content, 'blockEntries') && preg_match('/^(export\s|function\s|const\s+\w+\s*=\s*\()/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
@@ -294,7 +306,8 @@ JS;
 
         // 4. Add wordpressPlugin() to plugins array
         // Find plugins: [ ... ] and add before the closing bracket
-        if (! str_contains($content, 'wordpressPlugin') && preg_match('/(plugins:\s*\[)(.*?)(\])/s', $content, $matches)) {
+        // Look for the call, not the name: step 1 already imported wordpressPlugin
+        if (! str_contains($content, 'wordpressPlugin(') && preg_match('/(plugins:\s*\[)(.*?)(\])/s', $content, $matches)) {
             $existingPlugins = rtrim($matches[2]);
             $separator = $existingPlugins !== '' ? ",\n        " : "\n        ";
             $content = str_replace(
@@ -304,16 +317,116 @@ JS;
             );
         }
 
-        // 5. Add resources/blocks/** to refresh paths if present
-        if (str_contains($content, 'refresh') && ! str_contains($content, 'resources/blocks')) {
-            return preg_replace(
-                "/(refresh:\s*\[)([^\]]*?)(\])/",
-                '$1$2, \'resources/blocks/**\'$3',
-                $content
-            );
+        // 5. Reload the page for Blade views only, so block JSX keeps HMR
+        return $this->patchRefreshPaths($content);
+    }
+
+    /**
+     * Point an already configured vite.config.js at resources/views/blocks.
+     *
+     * Configs written before v13.32 only glob resources/blocks, and the one generated
+     * by this command only built index scripts, leaving view scripts and stylesheets
+     * out of the production manifest. Their blockEntries declaration is replaced by
+     * one building both locations.
+     */
+    private function upgradeViteConfig(array $target): void
+    {
+        $viteConfigPath = $target['path'].'/vite.config.js';
+
+        if (! file_exists($viteConfigPath)) {
+            return;
         }
 
-        return $content;
+        $content = (string) file_get_contents($viteConfigPath);
+
+        if (str_contains($content, self::BLOCKS_DIRECTORY)) {
+            $this->components->twoColumnDetail('vite.config.js', 'ALREADY CONFIGURED');
+
+            return;
+        }
+
+        $upgraded = preg_replace(
+            '/const blockEntries = globSync\(.*?\n\s*\}, \{\}\);/s',
+            $this->blockEntriesCode(includeLegacy: true),
+            $content,
+            1,
+            $count
+        );
+
+        if (! is_string($upgraded) || $count === 0) {
+            $this->components->warn(sprintf('Could not update vite.config.js: make its block entries glob ./%s.', self::BLOCKS_DIRECTORY));
+
+            return;
+        }
+
+        file_put_contents($viteConfigPath, $this->patchRefreshPaths($upgraded));
+        $this->components->twoColumnDetail('vite.config.js', 'UPDATED (resources/views/blocks)');
+    }
+
+    /**
+     * JavaScript declaring the Vite entries of every block script and stylesheet.
+     */
+    private function blockEntriesCode(bool $includeLegacy): string
+    {
+        $patterns = [
+            sprintf("    './%s/*/{index,view}.{js,jsx,ts,tsx}',", self::BLOCKS_DIRECTORY),
+            sprintf("    './%s/*/{editor,style}.css',", self::BLOCKS_DIRECTORY),
+        ];
+
+        if ($includeLegacy) {
+            $patterns[] = sprintf('    // Deprecated location, built until its blocks move to %s', self::BLOCKS_DIRECTORY);
+            $patterns[] = sprintf("    './%s/*/{index,view}.{js,jsx,ts,tsx}',", self::LEGACY_BLOCKS_DIRECTORY);
+            $patterns[] = sprintf("    './%s/*/{editor,style}.css',", self::LEGACY_BLOCKS_DIRECTORY);
+        }
+
+        return "const blockEntries = globSync([\n".implode("\n", $patterns)."\n])\n"
+            ."    .reduce((acc, file) => {\n"
+            ."        // Keyed by path: blocks sharing a file name never overwrite each other\n"
+            ."        acc[file.replace(/^\\.\\//, '').replace(/\\.\\w+$/, '')] = file;\n"
+            ."        return acc;\n"
+            .'    }, {});';
+    }
+
+    /**
+     * Restrict Vite full-page reloads under resources/views to Blade templates.
+     *
+     * laravel-vite-plugin's refreshPaths, a literal resources/views/** and the
+     * resources/blocks/** added by earlier versions of this command all reload the
+     * page on a block JSX change, defeating HMR. Globs resolve from the Vite root, so
+     * Blade views are reloaded through resources/views/**\/*.blade.php.
+     */
+    private function patchRefreshPaths(string $content): string
+    {
+        if (! preg_match('/refresh:\s*\[(.*?)\]/s', $content, $matches, PREG_OFFSET_CAPTURE)) {
+            return $content;
+        }
+
+        $original = $matches[1][0];
+        $paths = rtrim($original);
+        $trailingWhitespace = substr($original, strlen($paths));
+
+        $paths = (string) preg_replace('/\s*[\'"]resources\/blocks\/\*\*[\'"],?/', '', $paths);
+        // The lookbehind leaves the refreshPaths filter below untouched when run twice
+        $paths = (string) preg_replace('/(?<!!== )([\'"])([^\'"]*resources\/views\/)\*\*\1/', '$1$2**/*.blade.php$1', $paths);
+        $paths = (string) preg_replace(
+            '/\.\.\.refreshPaths(?!\.filter)/',
+            "...refreshPaths.filter((refreshPath) => refreshPath !== 'resources/views/**')",
+            $paths
+        );
+
+        // refreshPaths was what reloaded Blade views: globs resolve from the Vite root (the
+        // theme or plugin), so a project-relative themes/{name}/resources/views/** never matched
+        if (! preg_match('/[\'"]'.preg_quote(self::BLADE_REFRESH_PATH, '/').'[\'"]/', $paths)) {
+            $trailingComma = str_ends_with($paths, ',') ? ',' : '';
+            $paths = rtrim($paths, ", \n\t");
+            $lastLine = (string) strrchr("\n".$paths, "\n");
+            $separator = str_contains($paths, "\n")
+                ? ",\n".substr($lastLine, 1, strspn($lastLine, " \t", 1))
+                : ', ';
+            $paths .= $separator."'".self::BLADE_REFRESH_PATH."'".$trailingComma;
+        }
+
+        return substr_replace($content, $paths.$trailingWhitespace, $matches[1][1], strlen($original));
     }
 
     /**
@@ -328,15 +441,14 @@ JS;
         $this->line("  import { globSync } from 'glob';");
         $this->newLine();
         $this->line('  // After imports:');
-        $this->line("  const blockEntries = globSync('./resources/blocks/*/index.{js,jsx,ts,tsx}')");
-        $this->line('    .reduce((acc, file) => {');
-        $this->line('      const slug = path.basename(path.dirname(file));');
-        $this->line('      acc[`blocks/${slug}`] = file;');
-        $this->line('      return acc;');
-        $this->line('    }, {});');
+        foreach (explode("\n", $this->blockEntriesCode(includeLegacy: false)) as $line) {
+            $this->line('  '.$line);
+        }
+
         $this->newLine();
         $this->line('  // In input: [..., ...Object.values(blockEntries)]');
         $this->line('  // In plugins: [...(Object.keys(blockEntries).length > 0 ? [wordpressPlugin()] : [])]');
+        $this->line(sprintf("  // In refresh: reload for '%s' only, not resources/views/**", self::BLADE_REFRESH_PATH));
         $this->newLine();
     }
 
@@ -390,7 +502,7 @@ JS;
 
         $namespace = $this->option('namespace') ?? $target['slug'];
         $title = $this->option('title') ?? Str::title(str_replace('-', ' ', $name));
-        $isDynamic = $this->option('dynamic');
+        $isDynamic = ! $this->option('static');
         $hasInnerBlocks = $this->option('inner-blocks');
         $hasViewScript = ! $this->option('no-view-script');
 
@@ -413,7 +525,7 @@ JS;
         $blockJsonData = json_decode($blockJson, true);
 
         if ($isDynamic) {
-            $blockJsonData['render'] = 'file:./render.php';
+            $blockJsonData['render'] = 'file:./render.blade.php';
         }
 
         if ($hasViewScript) {
@@ -449,9 +561,13 @@ JS;
             $this->writeStub($blockDir.'/save.jsx', $this->getStubContent($saveStub), $replacements);
         }
 
-        // render.php (only for dynamic blocks)
+        // render.blade.php (only for dynamic blocks)
         if ($isDynamic) {
-            $this->writeStub($blockDir.'/render.php', $this->getStubContent('render.php'), $replacements);
+            // The title lands in a single-quoted PHP string
+            $this->writeStub($blockDir.'/render.blade.php', $this->getStubContent('render.blade.php'), [
+                ...$replacements,
+                '{{ title }}' => addcslashes($title, "'\\"),
+            ]);
         }
 
         // CSS files
@@ -535,7 +651,8 @@ JS;
             ['title', null, InputOption::VALUE_REQUIRED, 'Block title in the inserter'],
             ['category', null, InputOption::VALUE_REQUIRED, 'Gutenberg category', 'widgets'],
             ['icon', null, InputOption::VALUE_REQUIRED, 'Dashicon name', 'block-default'],
-            ['dynamic', null, InputOption::VALUE_NONE, 'Create a dynamic block with render.php'],
+            ['static', null, InputOption::VALUE_NONE, 'Create a static block saved in post content (save.jsx) instead of rendered with Blade'],
+            ['dynamic', null, InputOption::VALUE_NONE, 'Deprecated: blocks are dynamic by default'],
             ['inner-blocks', null, InputOption::VALUE_NONE, 'Add InnerBlocks support'],
             ['no-view-script', null, InputOption::VALUE_NONE, 'Do not generate a frontend view script'],
             ['force', null, InputOption::VALUE_NONE, 'Overwrite existing block without confirmation'],

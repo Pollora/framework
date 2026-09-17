@@ -94,20 +94,6 @@ describe('MakeBlockCommand scaffolding', function (): void {
         expect($blockJsonData['style'])->toBe('file:./style.css');
     });
 
-    it('adds render field for dynamic blocks', function (): void {
-        $blockJsonStub = file_get_contents(blockStubsDir().'/block.json.stub');
-        $blockJson = str_replace(
-            ['{{ blockFullName }}', '{{ title }}', '{{ category }}', '{{ icon }}', '{{ blockSlug }}', '{{ targetSlug }}'],
-            ['test/hero', 'Hero', 'widgets', 'block-default', 'hero', 'test-theme'],
-            $blockJsonStub
-        );
-        $blockJsonData = json_decode($blockJson, true);
-        $blockJsonData['render'] = 'file:./render.php';
-
-        expect($blockJsonData)->toHaveKey('render');
-        expect($blockJsonData['render'])->toBe('file:./render.php');
-    });
-
     it('adds viewScript field when not using --no-view-script', function (): void {
         $blockJsonStub = file_get_contents(blockStubsDir().'/block.json.stub');
         $blockJson = str_replace(

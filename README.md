@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/Pollora/framework">
+  <a href="https://pollora.dev">
     <img src="resources/images/pollora-logo.svg" width="400" alt="Pollora">
   </a>
 </p>
@@ -28,11 +28,11 @@ Pollora is a framework that bridges **Laravel** and **WordPress**, combining Lar
 
 ## Documentation
 
-Full documentation is available at [github.com/Pollora/documentation](https://github.com/Pollora/documentation).
+Full documentation is available at **[pollora.dev](https://pollora.dev)**.
 
 ## Installation
 
-Pollora is installed via the [skeleton project](https://github.com/Pollora/pollora):
+Pollora is installed via the [skeleton project](https://github.com/Pollora/pollora) — see the [installation guide](https://pollora.dev/getting-started/installation/):
 
 ```bash
 composer create-project pollora/pollora my-project
@@ -70,4 +70,6 @@ All notable changes are documented in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-Pollora is open-sourced software licensed under the [GPL-2.0-or-later](LICENSE).
+Pollora is open-sourced software licensed under the [MIT license](LICENSE).
+
+Parts of the WordPress integration (`Pollora\Support\WordPress`, `Pollora\Hashing\WordPressHasher`) originate from work by Jordan Doyle, released under the 0BSD and WTFPL licenses.

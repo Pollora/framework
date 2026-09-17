@@ -1,7 +1,13 @@
 {
     "name": "pollora/framework",
     "description": "Laravel & WordPress blend for coding as sweet as honey. Join the hive!",
-    "license": "GPL-2.0-or-later",
+    "license": "MIT",
+    "homepage": "https://pollora.dev",
+    "support": {
+        "docs": "https://pollora.dev",
+        "issues": "https://github.com/Pollora/framework/issues",
+        "source": "https://github.com/Pollora/framework"
+    },
     "authors": [
         {
             "name": "Olivier Gorzalka",
@@ -61,10 +67,7 @@
                 "Patch __ method in l10n to stop conflicting with Laravel": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/wordpress-core.patch"
             },
             "php-stubs/wordpress-stubs": {
-                "Rename __ and wp_mail functions": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/wordpress-stubs.patch"
-            },
-            "mockery/mockery": {
-                "Fix PHP 8.4 implicit nullable deprecations": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/mockery-php84-nullable.patch"
+                "Rename __ to __wp so Laravel can declare __()": "https://raw.githubusercontent.com/Pollora/framework/refs/heads/main/patches/wordpress-stubs.patch"
             }
         },
         "laravel": {
@@ -100,10 +103,10 @@
         "pestphp/pest-plugin-type-coverage": "^3.6",
         "symfony/var-dumper": "^7.4 || ^8.0",
         "szepeviktor/phpstan-wordpress": "*",
-        "php-stubs/wordpress-stubs": "6.*",
+        "php-stubs/wordpress-stubs": "^7.1",
         "symplify/vendor-patches": "^12.0",
         "brain/monkey": "^2.6",
-        "mockery/mockery": "^1.6",
+        "mockery/mockery": "^1.6.11",
         "wp-cli/wp-cli": "^2.12",
         "larastan/larastan": "^3.0",
         "orchestra/testbench": "^11.0"

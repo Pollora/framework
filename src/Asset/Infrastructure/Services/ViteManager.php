@@ -23,6 +23,8 @@ use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
  */
 class ViteManager implements ViteManagerInterface
 {
+    public $buildDirectory;
+
     /**
      * The Vite instance.
      */
@@ -114,7 +116,7 @@ class ViteManager implements ViteManagerInterface
      */
     public function getViteClientHtml(): string
     {
-        return ViteFacade::toHtml();
+        return $this->getViteInstance()->toHtml();
     }
 
     /**
@@ -124,7 +126,10 @@ class ViteManager implements ViteManagerInterface
      */
     private function initializeVite(): Vite
     {
-        $this->vite = ViteFacade::useHotFile($this->container->getHotFile())
+        // Laravel's Vite is a singleton: configuring it in place would switch the hot file
+        // and build directory of every other container (theme, plugins, blocks) to this one
+        $this->vite = (clone ViteFacade::getFacadeRoot())
+            ->useHotFile($this->container->getHotFile())
             ->useBuildDirectory($this->container->getBuildDirectory())
             ->useManifestFilename($this->container->getManifestPath());
 
@@ -158,10 +163,11 @@ class ViteManager implements ViteManagerInterface
      */
     private function registerAssetUrlsMacro(): void
     {
-        $viteManager = $this;
-        ViteFacade::macro('getAssetUrls', function (array $entrypoints) use ($viteManager) {
+        // Bound to the Vite instance it is called on: the build directory must be that
+        // instance's, not the one of whichever manager registered the macro last
+        ViteFacade::macro('getAssetUrls', function (array $entrypoints) {
 
-            $buildDirectory = $viteManager->container()->getBuildDirectory();
+            $buildDirectory = $this->buildDirectory;
 
             $manifest = $this->manifest($buildDirectory);
 

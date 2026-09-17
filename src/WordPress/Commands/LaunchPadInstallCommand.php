@@ -25,9 +25,17 @@ use function Laravel\Prompts\info;
         {--admin-email= : Admin email}
         {--admin-password= : Admin password}
         {--locale= : Site locale (e.g. en_US, fr_FR)}
-        {--public= : Allow search engine indexing (true/false)}')]
+        {--public= : Allow search engine indexing (true/false)}
+        {--theme= : Name of the theme to generate (defaults to "default" from pollora/theme-default without interaction)}')]
 class LaunchPadInstallCommand extends Command
 {
+    /**
+     * Name of the theme generated when the install cannot prompt for one.
+     *
+     * Matches WP_DEFAULT_THEME, which WordPress activates on install.
+     */
+    private const string DEFAULT_THEME = 'default';
+
     public function __construct(
         private readonly InstallationService $installationService,
         private readonly DatabaseService $databaseService
@@ -96,17 +104,34 @@ class LaunchPadInstallCommand extends Command
 
     private function installTheme(): void
     {
-        $this->call('pollora:make:theme');
+        $arguments = [];
+        $theme = $this->option('theme');
+
+        if (is_string($theme) && $theme !== '') {
+            $arguments['name'] = $theme;
+        }
+
+        if (! $this->input->isInteractive()) {
+            // A nested call only inherits an explicit --no-interaction flag, not a
+            // non-interactive input detected by Symfony (CI, piped stdin)
+            $arguments['name'] ??= self::DEFAULT_THEME;
+            $arguments['--no-interaction'] = true;
+        }
+
+        $this->call('pollora:make:theme', $arguments);
     }
 
     public function runMigrations(): void
     {
         info('Running migration.');
-        $this->call('migrate');
+
+        // Installing is the intent to migrate: without --force, migrate asks for
+        // confirmation in production and cancels when it cannot prompt
+        if ($this->call('migrate', ['--force' => true]) !== self::SUCCESS) {
+            throw new WordPressInstallationException('Database migrations failed.');
+        }
 
         info('Migration completed successfully.');
-        info('WordPress has been successfully installed!');
-
     }
 
     private function displaySuccessMessage(): void
@@ -121,7 +146,7 @@ class LaunchPadInstallCommand extends Command
     private function handleError(\Throwable $e): void
     {
         if ($e instanceof DatabaseConnectionException) {
-            error('Database connection failed. Please check your credentials and run: php artisan wp:env-setup');
+            error('Database connection failed. Please check your credentials and run: php artisan pollora:env:setup');
         } elseif ($e instanceof WordPressInstallationException) {
             error('WordPress installation failed. Please check the error message and try again.');
         }
