@@ -1,0 +1,13 @@
+{{--
+    Server-side rendering for the {{ blockFullName }} block.
+
+    Available variables:
+    - array    $attributes  Block attributes
+    - string   $content     Block default content (inner blocks)
+    - WP_Block $block       Block instance
+
+    Markup changes apply to existing content: dynamic blocks are not saved in post_content.
+--}}
+<div {!! get_block_wrapper_attributes() !!}>
+    <p>{{ __('{{ title }}', '{{ targetSlug }}') }}</p>
+</div>
