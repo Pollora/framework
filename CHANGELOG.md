@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - The Artisan commands renamed to the Laravel colon convention in v13.32.0-beta answer to their previous names again. The rename left no alias, so a project whose `composer.json` still ran `pollora:env-setup` in `post-autoload-dump` failed `composer install` right after upgrading. Kept as aliases: `pollora:env-setup`, `pollora:make-theme`, `pollora:delete-theme`, `pollora:make-plugin`, `pollora:make-block`, `pollora:make-model`, `pollora:make-action`, `pollora:make-filter`, `pollora:make-posttype`, `pollora:make-taxonomy`, `pollora:make-wp-cli`
 - `pollora:install` pointed to a non-existent `wp:env-setup` command when the database connection failed
+- `pollora:install` completes without interaction (`--no-interaction`, CI, piped stdin). It called `pollora:make:theme` without a name, which failed with `Not enough arguments (missing: "name")` after WordPress was installed; it now generates the `default` theme from `pollora/theme-default` — the theme WordPress activates on install — or the one named by the new `--theme` option
+- Commands using `PromptsForMissingOption` (`pollora:make:theme`, `pollora:make:plugin`) apply their prompt defaults when they cannot prompt, instead of leaving the options empty: a theme generated without interaction had a `style.css` with no author, URI, description or version
 
 ### Changed
 - Relicensed under MIT, like the other Pollora packages: `composer.json` and the README declared `GPL-2.0-or-later`, and the only license files were the 0BSD/WTFPL texts inherited from the original WordPress integration by Jordan Doyle, now credited in the README
