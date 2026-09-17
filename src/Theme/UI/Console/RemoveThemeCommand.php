@@ -12,7 +12,7 @@ use Illuminate\Filesystem\Filesystem;
  * Console command used to remove an existing theme from the filesystem.
  */
 #[Description('Remove an existing theme')]
-#[Signature('pollora:theme:delete {name : Name of the theme to remove}')]
+#[Signature('pollora:theme:delete {name : Name of the theme to remove}', aliases: ['pollora:delete-theme'])]
 class RemoveThemeCommand extends BaseThemeCommand
 {
     /**

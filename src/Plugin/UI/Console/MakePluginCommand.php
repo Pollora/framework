@@ -37,7 +37,7 @@ use function Laravel\Prompts\text;
     {--repo-version= : Specific version/tag to download}
     {--asset= : Include asset files (JS/CSS) with ViteJS compilation (true/false)}
     {--activate-plugin= : Activate the plugin after creation (yes/no)}
-    {--force : Force create plugin with same name}')]
+    {--force : Force create plugin with same name}', aliases: ['pollora:make-plugin'])]
 class MakePluginCommand extends Command implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
     use PromptsForMissingOption;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\PostType\UI\Console;
 
+use Illuminate\Console\Attributes\Aliases;
 use Illuminate\Console\Attributes\Description;
 use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,6 +16,7 @@ use Symfony\Component\Console\Input\InputArgument;
  * and other PHP attributes for WordPress custom post type registration.
  */
 #[Description('Create a new WordPress custom post type class')]
+#[Aliases(['pollora:make-posttype'])]
 class PostTypeMakeCommand extends AbstractGeneratorCommand
 {
     /**

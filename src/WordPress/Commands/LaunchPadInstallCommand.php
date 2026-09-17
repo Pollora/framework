@@ -121,7 +121,7 @@ class LaunchPadInstallCommand extends Command
     private function handleError(\Throwable $e): void
     {
         if ($e instanceof DatabaseConnectionException) {
-            error('Database connection failed. Please check your credentials and run: php artisan wp:env-setup');
+            error('Database connection failed. Please check your credentials and run: php artisan pollora:env:setup');
         } elseif ($e instanceof WordPressInstallationException) {
             error('WordPress installation failed. Please check the error message and try again.');
         }
