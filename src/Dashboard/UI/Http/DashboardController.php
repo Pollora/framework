@@ -14,6 +14,11 @@ use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
  */
 final readonly class DashboardController
 {
+    /**
+     * Pollora website, home of the documentation.
+     */
+    private const string WEBSITE_URL = 'https://pollora.dev';
+
     public function __construct(
         private SystemInfoCollector $collector
     ) {}
@@ -60,6 +65,7 @@ final readonly class DashboardController
             .pollora-header-logo { flex-shrink: 0; max-width: 200px; }
             .pollora-header-logo svg { width: 100%; height: auto; display: block; }
             .pollora-header-info { flex: 1; }
+            .pollora-docs-link { margin-left: 12px; font-size: 13px; }
             .pollora-header .pollora-version {
                 font-size: 13px; font-weight: 500; padding: 3px 10px; border-radius: 12px; display: inline-block;
             }
@@ -155,6 +161,12 @@ final readonly class DashboardController
                 esc_html((string) $current)
             );
         }
+
+        printf(
+            '<a class="pollora-docs-link" href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+            esc_url(self::WEBSITE_URL),
+            esc_html__('Documentation', 'pollora')
+        );
 
         echo '</div>';
         echo '</div>';

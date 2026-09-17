@@ -2,6 +2,12 @@
     "name": "pollora/framework",
     "description": "Laravel & WordPress blend for coding as sweet as honey. Join the hive!",
     "license": "MIT",
+    "homepage": "https://pollora.dev",
+    "support": {
+        "docs": "https://pollora.dev",
+        "issues": "https://github.com/Pollora/framework/issues",
+        "source": "https://github.com/Pollora/framework"
+    },
     "authors": [
         {
             "name": "Olivier Gorzalka",

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta...develop)
 
+### Added
+- [pollora.dev](https://pollora.dev) as the project website and documentation: `homepage` and `support.docs` in `composer.json` (shown on Packagist), `homepage` in `package.json`, the README, and a Documentation link in the Pollora admin dashboard header
+
 ### Fixed
 - The Artisan commands renamed to the Laravel colon convention in v13.32.0-beta answer to their previous names again. The rename left no alias, so a project whose `composer.json` still ran `pollora:env-setup` in `post-autoload-dump` failed `composer install` right after upgrading. Kept as aliases: `pollora:env-setup`, `pollora:make-theme`, `pollora:delete-theme`, `pollora:make-plugin`, `pollora:make-block`, `pollora:make-model`, `pollora:make-action`, `pollora:make-filter`, `pollora:make-posttype`, `pollora:make-taxonomy`, `pollora:make-wp-cli`
 - `pollora:install` pointed to a non-existent `wp:env-setup` command when the database connection failed
