@@ -10,11 +10,40 @@ use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Block\Infrastructure\Services\BlockRegistrar;
 use Pollora\Hook\Domain\Contract\Filter as HookFilter;
-use Psr\Log\NullLogger;
+use Psr\Log\AbstractLogger;
 
 /**
  * Testable subclass that injects a mock ViteManager.
  */
+/**
+ * Logger keeping every record for assertions.
+ */
+class RecordingBlockLogger extends AbstractLogger
+{
+    /** @var list<array{level: string, message: string}> */
+    public array $records = [];
+
+    public function log($level, string|Stringable $message, array $context = []): void
+    {
+        $this->records[] = ['level' => (string) $level, 'message' => (string) $message];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function messages(string $level): array
+    {
+        return array_values(array_map(
+            fn (array $record): string => $record['message'],
+            array_filter($this->records, fn (array $record): bool => $record['level'] === $level),
+        ));
+    }
+}
+
+if (! class_exists('WP_Block')) {
+    eval('class WP_Block {}');
+}
+
 class TestableBlockRegistrar extends BlockRegistrar
 {
     public ?ViteManagerInterface $mockViteManager = null;
@@ -26,16 +55,19 @@ class TestableBlockRegistrar extends BlockRegistrar
 }
 
 beforeEach(function (): void {
-    $this->tempDir = sys_get_temp_dir().'/pollora-block-test-'.uniqid();
+    $this->themeDir = sys_get_temp_dir().'/pollora-block-test-'.uniqid();
+    $this->tempDir = $this->themeDir.'/resources/views/blocks';
     mkdir($this->tempDir.'/hero', 0755, true);
     mkdir($this->tempDir.'/card', 0755, true);
+    file_put_contents($this->themeDir.'/vite.config.js', 'export default {};');
 
     $app = Mockery::mock(Container::class)->makePartial();
     $app->shouldReceive('publicPath')->andReturnUsing(fn ($path = ''): string => sys_get_temp_dir().($path ? '/'.$path : ''));
     $app->instance('app', $app);
     Container::setInstance($app);
     Facade::setFacadeApplication($app);
-    $app->instance('log', new NullLogger);
+    $this->logger = new RecordingBlockLogger;
+    $app->instance('log', $this->logger);
 
     \Brain\Monkey\Functions\when('register_block_type')->alias(function ($dir, $args = []): true {
         $this->registeredBlocks[] = ['dir' => $dir, 'args' => $args];
@@ -63,14 +95,14 @@ afterEach(function (): void {
     Container::setInstance(new Container);
 
     $files = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($this->tempDir, RecursiveDirectoryIterator::SKIP_DOTS),
+        new RecursiveDirectoryIterator($this->themeDir, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::CHILD_FIRST
     );
     foreach ($files as $file) {
         $file->isDir() ? rmdir($file->getRealPath()) : unlink($file->getRealPath());
     }
 
-    rmdir($this->tempDir);
+    rmdir($this->themeDir);
 });
 
 function createMockVite(bool $isHot = false): ViteManagerInterface
@@ -203,7 +235,7 @@ describe('BlockRegistrar', function (): void {
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
         expect($this->registeredScripts['test-hero-editor-script']['src'])
-            ->toBe('http://localhost:5173/resources/blocks/hero/index.jsx');
+            ->toBe('http://localhost:5173/resources/views/blocks/hero/index.jsx');
     });
 
     it('handles dynamic blocks with render.php', function (): void {
@@ -292,5 +324,179 @@ describe('BlockRegistrar', function (): void {
         expect($addedContainers)->toHaveKey('theme.blocks');
         expect($addedContainers['theme.blocks']['base_path'])->toBe('');
         expect($addedContainers['theme.blocks']['build_directory'])->toBe('build/theme/my-theme');
+    });
+});
+
+function writeBlock(string $blockDir, array $metadata, array $files = []): void
+{
+    if (! is_dir($blockDir)) {
+        mkdir($blockDir, 0755, true);
+    }
+
+    file_put_contents($blockDir.'/block.json', json_encode($metadata));
+
+    foreach ($files as $name => $content) {
+        file_put_contents($blockDir.'/'.$name, $content);
+    }
+}
+
+function blockRegistrar(bool $isHot = true): TestableBlockRegistrar
+{
+    $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+    $registrar->mockViteManager = createMockVite(isHot: $isHot);
+
+    return $registrar;
+}
+
+describe('BlockRegistrar entry points', function (): void {
+    it('resolves assets of a resources/views/blocks block against the Vite root', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'editorScript' => 'file:./index.jsx', 'style' => 'file:./style.css']);
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredScripts['test-hero-editor-script']['src'])->toBe('http://localhost:5173/resources/views/blocks/hero/index.jsx')
+            ->and($this->registeredStyles['test-hero-style']['src'])->toBe('http://localhost:5173/resources/views/blocks/hero/style.css');
+    });
+
+    it('keeps the entry point of a block still in resources/blocks', function (): void {
+        writeBlock($this->themeDir.'/resources/blocks/hero', ['name' => 'test/hero', 'editorScript' => 'file:./index.jsx']);
+
+        blockRegistrar()->registerBlock($this->themeDir.'/resources/blocks/hero', 'theme');
+
+        expect($this->registeredScripts['test-hero-editor-script']['src'])->toBe('http://localhost:5173/resources/blocks/hero/index.jsx');
+    });
+
+    it('resolves the same entry point from an explicit basePath, a vite config or the resources folder', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'editorScript' => 'file:index.jsx']);
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+        $fromViteConfig = $this->registeredScripts['test-hero-editor-script']['src'];
+
+        unlink($this->themeDir.'/vite.config.js');
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+        $fromResourcesFolder = $this->registeredScripts['test-hero-editor-script']['src'];
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme', basePath: $this->themeDir);
+        $fromBasePath = $this->registeredScripts['test-hero-editor-script']['src'];
+
+        expect($fromViteConfig)->toBe('http://localhost:5173/resources/views/blocks/hero/index.jsx')
+            ->and($fromResourcesFolder)->toBe($fromViteConfig)
+            ->and($fromBasePath)->toBe($fromViteConfig);
+    });
+
+    it('skips an asset outside the Vite root', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'editorScript' => 'file:../../../../../outside.js']);
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredScripts)->toBeEmpty()
+            ->and($this->logger->messages('warning'))->toHaveCount(1)
+            ->and($this->registeredBlocks)->toHaveCount(1);
+    });
+
+    it('skips assets when no Vite root can be found', function (): void {
+        $blockDir = $this->themeDir.'/elsewhere/hero';
+        unlink($this->themeDir.'/vite.config.js');
+        writeBlock($blockDir, ['name' => 'test/hero', 'editorScript' => 'file:./index.jsx']);
+
+        blockRegistrar()->registerBlock($blockDir, 'theme');
+
+        expect($this->registeredScripts)->toBeEmpty()
+            ->and($this->logger->messages('warning')[0])->toContain('no Vite project root found');
+    });
+});
+
+describe('BlockRegistrar render files', function (): void {
+    it('renders a PHP render file with the block variables', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'render' => 'file:./render.php'], [
+            'render.php' => '<p><?= $attributes["title"] ?>|<?= $content ?></p>',
+        ]);
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+        $callback = $this->registeredBlocks[0]['args']['render_callback'];
+
+        expect($callback(['title' => 'Hello'], 'inner', new WP_Block))->toBe('<p>Hello|inner</p>');
+    });
+
+    it('disables rendering of a render file outside the block directory', function (): void {
+        file_put_contents($this->tempDir.'/evil.php', '<?php echo "pwned";');
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'render' => 'file:../evil.php']);
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+
+        // null, not absent: WordPress would otherwise require the file itself
+        expect($this->registeredBlocks[0]['args'])->toHaveKey('render_callback')
+            ->and($this->registeredBlocks[0]['args']['render_callback'])->toBeNull()
+            ->and($this->logger->messages('warning'))->toHaveCount(1);
+    });
+
+    it('disables rendering of a missing render file', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'render' => 'file:./render.blade.php']);
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredBlocks[0]['args']['render_callback'])->toBeNull();
+    });
+
+    it('registers a Blade render callback for a .blade.php render file', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'render' => 'file:./render.blade.php'], [
+            'render.blade.php' => '<p>{{ $attributes["title"] }}</p>',
+        ]);
+
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredBlocks[0]['args']['render_callback'])->toBeInstanceOf(Closure::class);
+    });
+});
+
+describe('BlockRegistrar discovery', function (): void {
+    it('registers blocks left in resources/blocks and reports the deprecation once', function (): void {
+        rmdir($this->tempDir.'/hero');
+        rmdir($this->tempDir.'/card');
+        rmdir($this->tempDir);
+        rmdir($this->themeDir.'/resources/views');
+        writeBlock($this->themeDir.'/resources/blocks/legacy-only', ['name' => 'test/legacy-only']);
+
+        blockRegistrar()->registerDirectory($this->themeDir.'/resources/views/blocks', 'theme');
+        blockRegistrar()->registerDirectory($this->themeDir.'/resources/views/blocks', 'theme');
+
+        expect($this->registeredBlocks)->toHaveCount(2)
+            ->and($this->registeredBlocks[0]['dir'])->toBe($this->themeDir.'/resources/blocks/legacy-only')
+            ->and($this->logger->messages('notice'))->toHaveCount(1)
+            ->and($this->logger->messages('notice')[0])->toContain('resources/views/blocks');
+    });
+
+    it('scans both locations from an old provider pointing at resources/blocks', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero']);
+        writeBlock($this->themeDir.'/resources/blocks/card', ['name' => 'test/card']);
+
+        blockRegistrar()->registerDirectory($this->themeDir.'/resources/blocks', 'theme');
+
+        expect(array_column($this->registeredBlocks, 'dir'))->toBe([
+            $this->tempDir.'/hero',
+            $this->themeDir.'/resources/blocks/card',
+        ]);
+    });
+
+    it('prefers resources/views/blocks when a block exists in both locations', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero']);
+        writeBlock($this->themeDir.'/resources/blocks/hero', ['name' => 'test/hero']);
+
+        blockRegistrar()->registerDirectory($this->tempDir, 'theme');
+
+        expect($this->registeredBlocks)->toHaveCount(1)
+            ->and($this->registeredBlocks[0]['dir'])->toBe($this->tempDir.'/hero')
+            ->and($this->logger->messages('warning'))->toHaveCount(1)
+            ->and($this->logger->messages('warning')[0])->toContain('test/hero');
+    });
+
+    it('scans a directory outside the theme conventions as is', function (): void {
+        writeBlock($this->themeDir.'/custom/hero', ['name' => 'test/hero']);
+
+        blockRegistrar()->registerDirectory($this->themeDir.'/custom', 'theme');
+
+        expect($this->registeredBlocks)->toHaveCount(1)
+            ->and($this->logger->messages('notice'))->toBeEmpty();
     });
 });
