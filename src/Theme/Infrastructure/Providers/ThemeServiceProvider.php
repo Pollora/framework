@@ -28,6 +28,7 @@ use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\ThemeJsonResolver;
+use Pollora\Theme\Infrastructure\Services\ThemeUpdateGuard;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
@@ -86,6 +87,17 @@ class ThemeServiceProvider extends ServiceProvider
         $this->registerThemeDirectories();
         $this->setupThemeBoot();
         $this->guideWhenThemeIsMissing();
+        $this->guardAgainstForeignThemeUpdates();
+    }
+
+    /**
+     * Keep wordpress.org from offering updates for the project's own themes.
+     */
+    private function guardAgainstForeignThemeUpdates(): void
+    {
+        $guard = new ThemeUpdateGuard($this->getBaseThemePath());
+
+        $this->filter->add('site_transient_update_themes', $guard->filterUpdates(...));
     }
 
     /**
