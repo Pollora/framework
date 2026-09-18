@@ -5,7 +5,14 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.2...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.3...develop)
+
+## [v13.32.0-beta.3](https://github.com/Pollora/framework/compare/v13.32.0-beta.2...v13.32.0-beta.3) - 2026-09-18
+
+### Fixed
+- Blade templates now outrank the PHP stubs at a theme's root. The root holds the files WordPress needs to consider the theme valid — `index.php` in particular, which ships as "Silence is golden" — and was registered as a view path ahead of `resources/views`, so `locate()` ranked its `index.php` above `resources/views/index.blade.php`. Every request the template hierarchy could not match to a more specific template (archives, search, custom post types, any single view without its own template) rendered that stub: HTTP 200 with an empty body and no error anywhere. Blade and PHP candidates are now collected separately so every Blade one wins, and view paths are registered in the order they are declared. A classic PHP template with no Blade equivalent is still used
+- Installing WordPress on a URL where a site already answers no longer dies with `Class "WP_Http_Cookie" not found`. `wp_install()` calls `wp_remote_get()` on the site URL and `WP_Http` builds a `WP_Http_Cookie` for every `Set-Cookie` header it gets back, but the install bootstrap loaded only part of the HTTP stack. It now loads the classes `wp-settings.php` loads, in its order. This affected reinstalls, migrations, and taking a domain back
+- A site installed through the WordPress web installer explains what to do instead of crashing. That path never runs `pollora:install`, so `themes/` stays empty while the `stylesheet` option already points at `WP_DEFAULT_THEME`, and every front-end request died on `View [home] not found`. A missing view on a front-end request now renders a page naming the two theme templates and the command that scaffolds them, and wp-admin carries the same warning. It applies only while the site has no theme at all, so a headless install keeps working and a theme missing a single template still surfaces its real error
 
 ## [v13.32.0-beta.2](https://github.com/Pollora/framework/compare/v13.32.0-beta...v13.32.0-beta.2) - 2026-09-17
 
