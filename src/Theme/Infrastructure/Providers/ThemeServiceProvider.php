@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Providers;
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
@@ -30,6 +33,10 @@ use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
+use Pollora\Theme\UI\Http\MissingThemeNotice;
+use Pollora\Theme\UI\Http\MissingThemePage;
+use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Theme Service Provider with clear separation of concerns.
@@ -78,7 +85,35 @@ class ThemeServiceProvider extends ServiceProvider
         $this->filter = $filter;
         $this->registerThemeDirectories();
         $this->setupThemeBoot();
+        $this->guideWhenThemeIsMissing();
+    }
 
+    /**
+     * Tell the user how to create a theme when the site has none.
+     *
+     * A site installed through the WordPress web installer never runs
+     * pollora:install, so it has no theme and every front-end request dies on a
+     * missing view. Replace that crash with instructions, and say the same
+     * thing in wp-admin.
+     */
+    private function guideWhenThemeIsMissing(): void
+    {
+        $action = $this->app->make(Action::class);
+        $action->add('admin_notices', [$this->app->make(MissingThemeNotice::class), 'render']);
+
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
+        $handler = $this->app->make(ExceptionHandler::class);
+
+        if (! method_exists($handler, 'renderable')) {
+            return;
+        }
+
+        $page = $this->app->make(MissingThemePage::class);
+
+        $handler->renderable(fn (Throwable $e, Request $request): ?Response => $page->handle($e, $request));
     }
 
     /**
