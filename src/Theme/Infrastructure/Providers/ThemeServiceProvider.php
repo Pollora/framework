@@ -394,7 +394,36 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function addToGlobalThemeDirectories(string $path): void
     {
-        $GLOBALS['wp_theme_directories'] = [$path];
+        $directories = $GLOBALS['wp_theme_directories'] ?? [];
+
+        if (! is_array($directories)) {
+            $directories = [];
+        }
+
+        // get_raw_theme_root() answers a hardcoded '/themes' whenever a single
+        // directory is registered, and wp_get_theme() then resolves that against
+        // WP_CONTENT_DIR — landing outside Pollora's themes directory. The admin
+        // reported the active theme as missing while the front end rendered it
+        // fine, because get_stylesheet_directory() goes through the theme_root
+        // filter and wp_get_theme() does not.
+        //
+        // Keeping WordPress's own themes directory alongside Pollora's lifts that
+        // shortcut, so the stylesheet_root option decides instead. wp-settings.php
+        // registers get_theme_root(), which the theme_root filter already points
+        // at Pollora's directory, so the standard one has to be added here.
+        $standard = defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR.'/themes' : null;
+
+        foreach ([$standard, $path] as $directory) {
+            if ($directory !== null && $directory !== $path && ! is_dir($directory)) {
+                continue;
+            }
+
+            if ($directory !== null && ! in_array($directory, $directories, true)) {
+                $directories[] = $directory;
+            }
+        }
+
+        $GLOBALS['wp_theme_directories'] = $directories;
     }
 
     /**
