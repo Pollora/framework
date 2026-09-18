@@ -54,11 +54,18 @@ class WordPressInstallLoaderService
         '/class-wp-role.php',
         '/class-wp-user.php',
         '/class-wp-post.php',
+        // The HTTP stack, in the order wp-settings.php loads it: wp_install()
+        // calls wp_remote_get() on the site URL, and WP_Http builds a
+        // WP_Http_Cookie for every Set-Cookie header it gets back.
         '/class-wp-http.php',
+        '/class-wp-http-streams.php',
+        '/class-wp-http-curl.php',
         '/class-wp-http-proxy.php',
+        '/class-wp-http-cookie.php',
+        '/class-wp-http-encoding.php',
         '/class-wp-http-response.php',
-        '/class-wp-http-requests-hooks.php',
         '/class-wp-http-requests-response.php',
+        '/class-wp-http-requests-hooks.php',
         '/class-wp-block-parser.php',
     ];
 
