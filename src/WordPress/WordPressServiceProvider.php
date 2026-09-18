@@ -70,6 +70,17 @@ class WordPressServiceProvider extends ServiceProvider
             $action = $this->app->make(Action::class);
             $action->add('wp_install', function (): void {
                 Artisan::call('migrate');
+
+                // The rewrite rules WordPress stores during its own install
+                // are incomplete — taxonomies and post types are not all
+                // registered yet — so categories, tags and date archives answer
+                // 404 on a site that otherwise works. Dropping the option lets
+                // WordPress rebuild them on a later request, once everything is
+                // registered; flushing here would just store the same
+                // incomplete set again.
+                if (function_exists('delete_option')) {
+                    delete_option('rewrite_rules');
+                }
             });
         }
     }
