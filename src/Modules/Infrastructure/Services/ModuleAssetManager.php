@@ -159,7 +159,12 @@ class ModuleAssetManager
             // Register main view paths with priority for module views
             $viewPaths = $this->getModuleViewPaths($modulePath, $moduleType);
 
-            foreach ($viewPaths as $viewPath) {
+            // Registered back to front: each path is prepended, so reversing here
+            // leaves them in the finder in the order getModuleViewPaths() lists
+            // them. Without it a theme's root — which only holds the stub PHP
+            // templates WordPress needs to consider the theme valid — would
+            // outrank resources/views and shadow every Blade view of the theme.
+            foreach (array_reverse($viewPaths) as $viewPath) {
                 if (is_dir($viewPath)) {
                     // Add module views with high priority (prepend to search paths)
                     $this->registerViewPathWithPriority($viewFinder, $viewPath);
