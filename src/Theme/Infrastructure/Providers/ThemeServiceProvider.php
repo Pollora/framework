@@ -26,6 +26,7 @@ use Pollora\Theme\Domain\Support\ThemeConfig;
 use Pollora\Theme\Infrastructure\Adapters\DomainContainerAdapter;
 use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
+use Pollora\Theme\Infrastructure\Services\EditorStyleResolver;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\ThemeJsonResolver;
 use Pollora\Theme\Infrastructure\Services\ThemeUpdateGuard;
@@ -88,6 +89,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->setupThemeBoot();
         $this->guideWhenThemeIsMissing();
         $this->guardAgainstForeignThemeUpdates();
+        $this->registerEditorStyles();
     }
 
     /**
@@ -263,6 +265,11 @@ class ThemeServiceProvider extends ServiceProvider
 
         // Theme JSON resolver - reads built theme.json from Vite output
         $this->app->singleton(ThemeJsonResolverInterface::class, fn ($app): ThemeJsonResolver => new ThemeJsonResolver(
+            $app->make('path.public')
+        ));
+
+        // Editor styles - reads the theme's built stylesheets from Vite output
+        $this->app->singleton(EditorStyleResolver::class, fn ($app): EditorStyleResolver => new EditorStyleResolver(
             $app->make('path.public')
         ));
 
@@ -506,6 +513,39 @@ class ThemeServiceProvider extends ServiceProvider
 
             return new \WP_Theme_JSON_Data($builtData, 'theme');
         });
+    }
+
+    /**
+     * Show the theme's own styles inside the block editor.
+     *
+     * `add_theme_support('editor-styles')` only tells WordPress how to treat
+     * the styles it is handed; it never loads any. The themes register their
+     * assets with `toFrontend()`, so the editor had theme.json's variables and
+     * none of the rules built from them — blocks looked nothing like the front.
+     *
+     * The stylesheets have to go through `add_editor_style()` rather than
+     * `enqueue_block_editor_assets`: the post editor runs in an iframe, and
+     * what is enqueued lands in the admin page around it instead of inside.
+     */
+    private function registerEditorStyles(): void
+    {
+        $action = $this->app->make(Action::class);
+
+        // Late enough that the theme's own after_setup_theme has declared its
+        // supports, which is what this reads to decide.
+        $action->add('after_setup_theme', function (): void {
+            if (! function_exists('current_theme_supports') || ! current_theme_supports('editor-styles')) {
+                return;
+            }
+
+            $styles = $this->app->make(EditorStyleResolver::class)->resolve(get_stylesheet());
+
+            foreach ($styles as $style) {
+                // A full URL, because the build lives outside the theme
+                // directory that add_editor_style() resolves against.
+                add_editor_style(home_url('/'.$style));
+            }
+        }, 20);
     }
 
     /**
