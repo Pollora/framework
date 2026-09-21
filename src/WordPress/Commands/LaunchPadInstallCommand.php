@@ -16,6 +16,11 @@ use function Laravel\Prompts\info;
 
 class LaunchPadInstallCommand extends Command
 {
+    /**
+     * The theme scaffolded when the caller named none and cannot be asked.
+     */
+    private const DEFAULT_THEME = 'default';
+
     protected $signature = 'pollora:install
         {--install : Suppress informational output for automated runs}
         {--title= : Site title}
@@ -24,7 +29,8 @@ class LaunchPadInstallCommand extends Command
         {--admin-email= : Admin email}
         {--admin-password= : Admin password}
         {--locale= : Site locale (e.g. en_US, fr_FR)}
-        {--public= : Allow search engine indexing (true/false)}';
+        {--public= : Allow search engine indexing (true/false)}
+        {--theme= : Name of the theme to scaffold once WordPress is installed}';
 
     protected $description = 'Install and configure WordPress';
 
@@ -94,9 +100,35 @@ class LaunchPadInstallCommand extends Command
         $this->displaySuccessMessage();
     }
 
+    /**
+     * Scaffold a theme once WordPress is installed.
+     *
+     * The name matters here. `pollora:make-theme` requires one, and a nested
+     * call inherits only an explicit --no-interaction flag, never a
+     * non-interactive input Symfony detected on its own — CI, a piped stdin, a
+     * provisioning script. So `pollora:install --install --no-interaction`
+     * installed WordPress and then died on
+     *
+     *   Not enough arguments (missing: "name").
+     *
+     * after the site was already in place: an exit code of 1 for a successful
+     * install, and a message naming a command the caller never typed.
+     */
     private function installTheme(): void
     {
-        $this->call('pollora:make-theme');
+        $arguments = [];
+        $theme = $this->option('theme');
+
+        if (is_string($theme) && $theme !== '') {
+            $arguments['name'] = $theme;
+        }
+
+        if (! $this->input->isInteractive()) {
+            $arguments['name'] ??= self::DEFAULT_THEME;
+            $arguments['--no-interaction'] = true;
+        }
+
+        $this->call('pollora:make-theme', $arguments);
     }
 
     public function runMigrations(): void
