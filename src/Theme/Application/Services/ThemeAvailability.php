@@ -33,11 +33,7 @@ final readonly class ThemeAvailability
             return false;
         }
 
-        if (function_exists('get_stylesheet_directory') && is_dir(get_stylesheet_directory())) {
-            return false;
-        }
-
-        return true;
+        return ! function_exists('get_stylesheet_directory') || ! is_dir(get_stylesheet_directory());
     }
 
     private function hasRegisteredTheme(): bool
