@@ -79,11 +79,8 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             removeDirs: ['bin'],
         );
 
-        if (! $success) {
-            $this->scaffolder->copyDirectory(
-                $this->getTemplatePath('common'),
-                $this->theme->getBasePath()
-            );
+        if (! $success && ! $this->scaffoldFromBundledTemplate()) {
+            return self::FAILURE;
         }
 
         $this->info(sprintf('Theme "%s" created successfully.', $this->theme->getName()));
@@ -94,6 +91,30 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $this->promptAndSetActiveTheme();
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Last resort when the download failed: copy the bundled template.
+     *
+     * There is no bundled template — src/Theme/stubs/ does not exist — so this
+     * only ever explains why nothing could be generated. It used to hand
+     * realpath()'s false to a string parameter, turning "GitHub did not answer"
+     * into "Return value must be of type string, false returned".
+     */
+    protected function scaffoldFromBundledTemplate(): bool
+    {
+        $template = $this->getTemplatePath('common');
+
+        if ($template === null) {
+            $this->error('The theme could not be downloaded, and this Pollora version bundles no local template to fall back on.');
+            $this->line('Check the network and the repository, then run the command again.');
+
+            return false;
+        }
+
+        $this->scaffolder->copyDirectory($template, $this->theme->getBasePath());
+
+        return true;
     }
 
     /**
