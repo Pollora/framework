@@ -160,18 +160,93 @@ class ModuleDownloader
 
     /**
      * Get the latest tag for the repository.
+     *
+     * "Latest" means the highest version, not the first tag GitHub happens to
+     * return. The API orders tags its own way, so taking the first one served
+     * whatever was pushed most recently: a patch on an older line — 1.2.1
+     * published after 1.4.0 — would have been handed to everyone scaffolding a
+     * theme or plugin, silently downgrading them.
+     *
+     * Pre-releases lose to any stable version, so tagging a beta does not push
+     * it onto people who asked for nothing in particular. They are only chosen
+     * when a repository has nothing else, which is the case for a package that
+     * has never had a stable release.
+     *
+     * A tag that is not a version at all — "latest", "nightly" — is left out of
+     * the comparison; when none of the tags parse, the first one is returned as
+     * before, so a repository using some other scheme keeps working.
      */
     protected function getLatestTag(): ?string
     {
-        $response = Http::get(sprintf('https://api.github.com/repos/%s/tags', $this->repository));
+        // 100 rather than the default 30: a repository with more tags than that
+        // could have its highest version on the second page, unreachable here.
+        $response = Http::get(sprintf('https://api.github.com/repos/%s/tags?per_page=100', $this->repository));
 
         if (! $response->successful()) {
             return null;
         }
 
-        $tags = $response->json();
+        return $this->selectLatestVersion(array_column((array) $response->json(), 'name'));
+    }
 
-        return $tags[0]['name'] ?? null;
+    /**
+     * Pick the highest version among tag names.
+     *
+     * Separated from the request so the choice can be tested without standing
+     * up HTTP — the ordering is the part that was wrong, not the fetching.
+     *
+     * @param  array<int, mixed>  $names  Tag names as GitHub returned them
+     */
+    public function selectLatestVersion(array $names): ?string
+    {
+        $names = array_values(array_filter(
+            $names,
+            fn ($name): bool => is_string($name) && $name !== ''
+        ));
+
+        if ($names === []) {
+            return null;
+        }
+
+        $versions = array_values(array_filter($names, $this->looksLikeVersion(...)));
+
+        if ($versions === []) {
+            return $names[0];
+        }
+
+        $stable = array_values(array_filter($versions, fn (string $name): bool => ! $this->isPreRelease($name)));
+        $candidates = $stable === [] ? $versions : $stable;
+
+        usort($candidates, fn (string $a, string $b): int => version_compare(
+            $this->normaliseVersion($b),
+            $this->normaliseVersion($a)
+        ));
+
+        return $candidates[0];
+    }
+
+    /**
+     * Whether a tag name can be compared as a version at all.
+     */
+    private function looksLikeVersion(string $name): bool
+    {
+        return preg_match('/^v?\d+(\.\d+)*(?:[-+.].*)?$/i', $name) === 1;
+    }
+
+    /**
+     * Whether a tag names a pre-release rather than a finished version.
+     */
+    private function isPreRelease(string $name): bool
+    {
+        return preg_match('/-(?:dev|alpha|a|beta|b|rc|pre)\b|-\d*[a-z]/i', $name) === 1;
+    }
+
+    /**
+     * Strip the leading v so version_compare() sees only the number.
+     */
+    private function normaliseVersion(string $name): string
+    {
+        return ltrim($name, 'vV');
     }
 
     /**
