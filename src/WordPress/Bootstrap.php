@@ -283,12 +283,19 @@ class Bootstrap
     /**
      * Rewrite network URL based on the given parameters.
      *
+     * WordPress calls the `network_site_url` filter with `$scheme` set to null
+     * whenever no explicit scheme is requested (see `network_site_url()` in
+     * wp-includes/link-template.php, whose signature is
+     * `network_site_url( $path = '', $scheme = null )`). The parameter must
+     * therefore be nullable, otherwise every multisite request fatals with a
+     * TypeError under PHP 8. `set_url_scheme()` already handles a null scheme.
+     *
      * @param  string  $url  The original URL.
      * @param  string  $path  The requested path.
-     * @param  string  $scheme  The scheme (http, https, or relative).
+     * @param  string|null  $scheme  The scheme (http, https, relative) or null.
      * @return string The rewritten URL.
      */
-    public function rewriteNetworkUrl(string $url, string $path, string $scheme): string
+    public function rewriteNetworkUrl(string $url, string $path = '', ?string $scheme = null): string
     {
         $url = $scheme !== 'relative' ? set_url_scheme(
             (is_secured() ? 'https://' : 'http://').(new WordPress)->site()->domain.(new WordPress)->site()->path,

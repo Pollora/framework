@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Providers;
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
@@ -23,13 +26,19 @@ use Pollora\Theme\Domain\Support\ThemeConfig;
 use Pollora\Theme\Infrastructure\Adapters\DomainContainerAdapter;
 use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
+use Pollora\Theme\Infrastructure\Services\EditorStyleResolver;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\ThemeJsonResolver;
+use Pollora\Theme\Infrastructure\Services\ThemeUpdateGuard;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
+use Pollora\Theme\UI\Http\MissingThemeNotice;
+use Pollora\Theme\UI\Http\MissingThemePage;
+use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Theme Service Provider with clear separation of concerns.
@@ -78,7 +87,56 @@ class ThemeServiceProvider extends ServiceProvider
         $this->filter = $filter;
         $this->registerThemeDirectories();
         $this->setupThemeBoot();
+        $this->guideWhenThemeIsMissing();
+        $this->guardAgainstForeignThemeUpdates();
+        $this->registerEditorStyles();
+    }
 
+    /**
+     * Keep wordpress.org from offering updates for the project's own themes.
+     */
+    private function guardAgainstForeignThemeUpdates(): void
+    {
+        $guard = new ThemeUpdateGuard($this->getBaseThemePath());
+
+        $this->filter->add('site_transient_update_themes', $guard->filterUpdates(...));
+    }
+
+    /**
+     * Tell the user how to create a theme when the site has none.
+     *
+     * A site installed through the WordPress web installer never runs
+     * pollora:install, so it has no theme and every front-end request either
+     * dies on a missing view or answers a bare 404, depending on whether the
+     * skeleton still declares WordPress routes. Both are covered here. Say the
+     * same thing in wp-admin, which is where the user goes to fix it.
+     */
+    private function guideWhenThemeIsMissing(): void
+    {
+        $action = $this->app->make(Action::class);
+        $action->add('admin_notices', [$this->app->make(MissingThemeNotice::class), 'render']);
+
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
+        $page = $this->app->make(MissingThemePage::class);
+
+        // Take the request over before a template is chosen. This is the path
+        // that matters now: since the skeleton stopped declaring WordPress
+        // routes, the template hierarchy decides, nothing calls view(), and a
+        // site with no theme answers a bare 404 with no exception raised.
+        $action->add('template_redirect', $page->interceptFrontEndRequest(...));
+
+        // Kept for anything still routing through view() — a project's own
+        // routes, or a skeleton older than v13.32.0-beta.3.
+        $handler = $this->app->make(ExceptionHandler::class);
+
+        if (! method_exists($handler, 'renderable')) {
+            return;
+        }
+
+        $handler->renderable(fn (Throwable $e, Request $request): ?Response => $page->handle($e, $request));
     }
 
     /**
@@ -207,6 +265,11 @@ class ThemeServiceProvider extends ServiceProvider
 
         // Theme JSON resolver - reads built theme.json from Vite output
         $this->app->singleton(ThemeJsonResolverInterface::class, fn ($app): ThemeJsonResolver => new ThemeJsonResolver(
+            $app->make('path.public')
+        ));
+
+        // Editor styles - reads the theme's built stylesheets from Vite output
+        $this->app->singleton(EditorStyleResolver::class, fn ($app): EditorStyleResolver => new EditorStyleResolver(
             $app->make('path.public')
         ));
 
@@ -359,7 +422,36 @@ class ThemeServiceProvider extends ServiceProvider
      */
     private function addToGlobalThemeDirectories(string $path): void
     {
-        $GLOBALS['wp_theme_directories'] = [$path];
+        $directories = $GLOBALS['wp_theme_directories'] ?? [];
+
+        if (! is_array($directories)) {
+            $directories = [];
+        }
+
+        // get_raw_theme_root() answers a hardcoded '/themes' whenever a single
+        // directory is registered, and wp_get_theme() then resolves that against
+        // WP_CONTENT_DIR — landing outside Pollora's themes directory. The admin
+        // reported the active theme as missing while the front end rendered it
+        // fine, because get_stylesheet_directory() goes through the theme_root
+        // filter and wp_get_theme() does not.
+        //
+        // Keeping WordPress's own themes directory alongside Pollora's lifts that
+        // shortcut, so the stylesheet_root option decides instead. wp-settings.php
+        // registers get_theme_root(), which the theme_root filter already points
+        // at Pollora's directory, so the standard one has to be added here.
+        $standard = defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR.'/themes' : null;
+
+        foreach ([$standard, $path] as $directory) {
+            if ($directory !== null && $directory !== $path && ! is_dir($directory)) {
+                continue;
+            }
+
+            if ($directory !== null && ! in_array($directory, $directories, true)) {
+                $directories[] = $directory;
+            }
+        }
+
+        $GLOBALS['wp_theme_directories'] = $directories;
     }
 
     /**
@@ -421,6 +513,39 @@ class ThemeServiceProvider extends ServiceProvider
 
             return new \WP_Theme_JSON_Data($builtData, 'theme');
         });
+    }
+
+    /**
+     * Show the theme's own styles inside the block editor.
+     *
+     * `add_theme_support('editor-styles')` only tells WordPress how to treat
+     * the styles it is handed; it never loads any. The themes register their
+     * assets with `toFrontend()`, so the editor had theme.json's variables and
+     * none of the rules built from them — blocks looked nothing like the front.
+     *
+     * The stylesheets have to go through `add_editor_style()` rather than
+     * `enqueue_block_editor_assets`: the post editor runs in an iframe, and
+     * what is enqueued lands in the admin page around it instead of inside.
+     */
+    private function registerEditorStyles(): void
+    {
+        $action = $this->app->make(Action::class);
+
+        // Late enough that the theme's own after_setup_theme has declared its
+        // supports, which is what this reads to decide.
+        $action->add('after_setup_theme', function (): void {
+            if (! function_exists('current_theme_supports') || ! current_theme_supports('editor-styles')) {
+                return;
+            }
+
+            $styles = $this->app->make(EditorStyleResolver::class)->resolve(get_stylesheet());
+
+            foreach ($styles as $style) {
+                // A full URL, because the build lives outside the theme
+                // directory that add_editor_style() resolves against.
+                add_editor_style(home_url('/'.$style));
+            }
+        }, 20);
     }
 
     /**

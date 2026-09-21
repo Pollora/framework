@@ -109,8 +109,17 @@ class InstallationService
             global $wp_rewrite;
             $wp_rewrite->init();
 
-            if (function_exists('flush_rewrite_rules')) {
-                flush_rewrite_rules();
+            // Drop the rules rather than flush them. The set WordPress can
+            // build at this point is incomplete — taxonomies and post types are
+            // not all registered yet — and flushing stores exactly that, which
+            // is why a freshly installed site answered 404 on every article
+            // until something flushed again later. Deleting the option lets
+            // WordPress rebuild it on the first request, once everything is
+            // registered. Same reasoning as completeWebInstall(), which fixes
+            // the web installer; that hook is only registered outside the
+            // console, so the CLI install never went through it.
+            if (function_exists('delete_option')) {
+                delete_option('rewrite_rules');
             }
 
             info('Pretty permalinks have been enabled by default.');

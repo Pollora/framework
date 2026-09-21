@@ -116,11 +116,13 @@ class ThemeInitializer implements ThemeComponent
         $activeTheme = $this->registrar->getActiveTheme();
 
         if ($activeTheme instanceof ThemeModuleInterface) {
-            // Use the registered theme's path
-            $this->themeRoot = $activeTheme->getPath();
+            // The directory holding the themes, not the theme's own directory:
+            // this feeds the stylesheet_root and template_root options, which
+            // WordPress joins with the stylesheet name to locate the theme.
+            $this->themeRoot = dirname((string) $activeTheme->getPath());
 
             // Register theme directory with WordPress
-            $this->wpTheme->registerThemeDirectory(dirname($this->themeRoot));
+            $this->wpTheme->registerThemeDirectory($this->themeRoot);
 
             // Set up theme metadata
             $this->setThemes($activeTheme->getName());

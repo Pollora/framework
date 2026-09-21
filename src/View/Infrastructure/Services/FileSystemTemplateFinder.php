@@ -84,30 +84,46 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
             ? str_replace('.php', '.blade.php', $templateNames)
             : $templateNames;
 
-        $found = [];
+        // Collected separately so that every Blade candidate outranks every PHP
+        // one. The theme root is registered as a view path ahead of
+        // resources/views, so ranking per path would let a theme's root
+        // index.php — a stub WordPress requires for the theme to be valid —
+        // shadow resources/views/index.blade.php and render nothing at all.
+        $blade = [];
+        $php = [];
 
-        // Check each view path for the template
         /** @var FileViewFinder $finder */
         $finder = $this->finder;
         foreach ($finder->getPaths() as $path) {
-            // Check for Blade version first
             $bladePath = $path.DIRECTORY_SEPARATOR.$bladeTemplate;
             if (file_exists($bladePath)) {
-                $themePath = $this->getThemePath();
-                $found[] = $themePath !== '' && $themePath !== '0' ? $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $bladePath) : $bladeTemplate;
+                $blade[] = $this->toThemeRelativePath($bladePath, $bladeTemplate);
             }
 
             // Check for original file if different from Blade
             if ($templateNames !== $bladeTemplate) {
                 $originalPath = $path.DIRECTORY_SEPARATOR.$templateNames;
                 if (file_exists($originalPath)) {
-                    $themePath = $this->getThemePath();
-                    $found[] = $themePath !== '' && $themePath !== '0' ? $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $originalPath) : $templateNames;
+                    $php[] = $this->toThemeRelativePath($originalPath, $templateNames);
                 }
             }
         }
 
-        return self::$locateCache[$templateNames] = array_unique(array_filter($found));
+        return self::$locateCache[$templateNames] = array_values(array_unique(array_filter([...$blade, ...$php])));
+    }
+
+    /**
+     * Express a located file relative to the theme, the way WordPress expects.
+     */
+    private function toThemeRelativePath(string $absolutePath, string $fallback): string
+    {
+        $themePath = $this->getThemePath();
+
+        if ($themePath === '' || $themePath === '0') {
+            return $fallback;
+        }
+
+        return $this->files->getRelativePath($themePath.DIRECTORY_SEPARATOR, $absolutePath);
     }
 
     /**
