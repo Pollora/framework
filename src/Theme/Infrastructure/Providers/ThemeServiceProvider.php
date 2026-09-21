@@ -104,9 +104,10 @@ class ThemeServiceProvider extends ServiceProvider
      * Tell the user how to create a theme when the site has none.
      *
      * A site installed through the WordPress web installer never runs
-     * pollora:install, so it has no theme and every front-end request dies on a
-     * missing view. Replace that crash with instructions, and say the same
-     * thing in wp-admin.
+     * pollora:install, so it has no theme and every front-end request either
+     * dies on a missing view or answers a bare 404, depending on whether the
+     * skeleton still declares WordPress routes. Both are covered here. Say the
+     * same thing in wp-admin, which is where the user goes to fix it.
      */
     private function guideWhenThemeIsMissing(): void
     {
@@ -117,13 +118,21 @@ class ThemeServiceProvider extends ServiceProvider
             return;
         }
 
+        $page = $this->app->make(MissingThemePage::class);
+
+        // Take the request over before a template is chosen. This is the path
+        // that matters now: since the skeleton stopped declaring WordPress
+        // routes, the template hierarchy decides, nothing calls view(), and a
+        // site with no theme answers a bare 404 with no exception raised.
+        $action->add('template_redirect', $page->interceptFrontEndRequest(...));
+
+        // Kept for anything still routing through view() — a project's own
+        // routes, or a skeleton older than v13.32.0-beta.3.
         $handler = $this->app->make(ExceptionHandler::class);
 
         if (! method_exists($handler, 'renderable')) {
             return;
         }
-
-        $page = $this->app->make(MissingThemePage::class);
 
         $handler->renderable(fn (Throwable $e, Request $request): ?Response => $page->handle($e, $request));
     }

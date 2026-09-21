@@ -42,6 +42,63 @@ final readonly class MissingThemePage
         return $this->render();
     }
 
+    /**
+     * Serve the setup page instead of letting a theme-less site answer a 404.
+     *
+     * The handle() path above only fires when something calls view() and it
+     * throws. Since v13.32.0-beta.3 the skeleton no longer declares WordPress
+     * routes, so the template hierarchy decides: nothing calls view(), nothing
+     * throws, and a site with no theme simply finds no template and answers a
+     * bare 404 — the very crash this class exists to replace, wearing a
+     * different status code.
+     *
+     * template_redirect is where WordPress lets a request be taken over before
+     * any template is chosen. It runs before Laravel routes the request, and
+     * exiting from it is what runWp() already does for robots, favicons, feeds
+     * and trackbacks.
+     */
+    public function interceptFrontEndRequest(): void
+    {
+        $response = $this->responseForFrontEndRequest();
+
+        if (! $response instanceof Response) {
+            return;
+        }
+
+        $response->send();
+
+        exit;
+    }
+
+    /**
+     * The decision behind interceptFrontEndRequest(), separated from the exit
+     * so it can be tested: null means let the request carry on untouched.
+     */
+    public function responseForFrontEndRequest(): ?Response
+    {
+        if ($this->isNonFrontRequest()) {
+            return null;
+        }
+
+        if (! $this->availability->isMissing()) {
+            return null;
+        }
+
+        return $this->render();
+    }
+
+    /**
+     * Requests that must keep their normal response even with no theme: the
+     * admin is where the user goes to fix this, and an API caller wants its
+     * status code, not a setup page.
+     */
+    private function isNonFrontRequest(): bool
+    {
+        return (function_exists('is_admin') && is_admin())
+            || (function_exists('wp_doing_ajax') && wp_doing_ajax())
+            || (defined('REST_REQUEST') && REST_REQUEST);
+    }
+
     public function render(): Response
     {
         $html = View::file(
