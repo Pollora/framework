@@ -268,6 +268,49 @@ class Bootstrap
         } else {
             $this->fixNetworkUrl();
         }
+
+        $this->guardAgainstRawTemplateOutput();
+    }
+
+    /**
+     * Keep WordPress from printing a Blade template as text.
+     *
+     * Pollora renders the template hierarchy through Laravel, so the files it
+     * puts in that hierarchy are Blade sources. WordPress's own
+     * template-loader.php `include`s whatever the hierarchy hands it, and a
+     * Blade file included by PHP is printed verbatim — directives, comments
+     * and all. Anything reaching that loader in a Pollora site has bypassed
+     * Laravel: `/cms/`, the WordPress installation root, is served by
+     * WordPress's own index.php and was answering with the source of
+     * 404.blade.php.
+     *
+     * A front-end request that ended up there was looking for the site, which
+     * lives at the home URL, so it is sent there rather than shown a blank
+     * page or a file it should never see.
+     */
+    private function guardAgainstRawTemplateOutput(): void
+    {
+        if (! function_exists('add_filter')) {
+            return;
+        }
+
+        add_filter('template_include', function ($template) {
+            if (! is_string($template) || ! str_ends_with($template, '.blade.php')) {
+                return $template;
+            }
+
+            if ($this->laravelIsServingTheRequest()) {
+                return $template;
+            }
+
+            if (function_exists('wp_safe_redirect') && function_exists('home_url')) {
+                wp_safe_redirect(home_url('/'), 302);
+                exit;
+            }
+
+            // No way to redirect: an empty template beats printing the source.
+            return '';
+        }, PHP_INT_MAX);
     }
 
     /**
