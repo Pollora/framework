@@ -97,6 +97,11 @@ abstract class BaseThemeCommand extends Command
     protected function fromTemplate(string $templateName, array $replacements = []): string
     {
         $templatePath = $this->getTemplatePath($templateName);
+
+        if ($templatePath === null) {
+            throw new \RuntimeException(sprintf('The stub template "%s" is not bundled with the framework.', $templateName));
+        }
+
         $content = $this->files->get($templatePath);
 
         return str_replace(
@@ -109,12 +114,18 @@ abstract class BaseThemeCommand extends Command
     /**
      * Resolve the path to a stub template.
      *
+     * Returns null when the stub is not there. It declared `string` and handed
+     * back realpath()'s false, which is a TypeError rather than an answer — and
+     * src/Theme/stubs/ does not exist at all, so every caller was one failed
+     * download away from it.
+     *
      * @param  string  $templateName  Template file name
-     * @return string Absolute path to the stub file
+     * @return string|null Absolute path to the stub file, or null if it is absent
      */
-    protected function getTemplatePath(string $templateName): string
+    protected function getTemplatePath(string $templateName): ?string
     {
-        // Default implementation
-        return realpath(__DIR__.'/../../stubs/'.$templateName);
+        $path = realpath(__DIR__.'/../../stubs/'.$templateName);
+
+        return $path === false ? null : $path;
     }
 }

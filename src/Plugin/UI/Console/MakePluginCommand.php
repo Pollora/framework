@@ -98,11 +98,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
             fileFilter: fn (object $item): bool => ! $this->shouldExcludeAssetFile($item),
         );
 
-        if (! $success) {
-            $this->scaffolder->copyDirectory(
-                $this->getTemplatePath('common'),
-                $this->plugin->getBasePath()
-            );
+        if (! $success && ! $this->scaffoldFromBundledTemplate()) {
+            return self::FAILURE;
         }
 
         $this->info(sprintf('Plugin %s created successfully at %s', $this->plugin->getName(), $this->plugin->getBasePath()));
@@ -409,11 +406,41 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
     }
 
     /**
-     * Get template path.
+     * Last resort when the download failed: copy the bundled template.
+     *
+     * There is no bundled template — src/Plugin/stubs/ does not exist — so this
+     * only ever explains why nothing could be generated. It used to hand
+     * realpath()'s false to a string parameter, turning "GitHub did not answer"
+     * into "Return value must be of type string, false returned".
      */
-    protected function getTemplatePath(string $templateName): string
+    protected function scaffoldFromBundledTemplate(): bool
     {
-        return realpath(__DIR__.'/../../stubs/'.$templateName);
+        $template = $this->getTemplatePath('common');
+
+        if ($template === null) {
+            $this->error('The plugin could not be downloaded, and this Pollora version bundles no local template to fall back on.');
+            $this->line('Check the network and the repository, then run the command again.');
+
+            return false;
+        }
+
+        $this->scaffolder->copyDirectory($template, $this->plugin->getBasePath());
+
+        return true;
+    }
+
+    /**
+     * Get template path, or null when the stub is not bundled.
+     *
+     * It declared `string` and handed back realpath()'s false, which is a
+     * TypeError rather than an answer — and src/Plugin/stubs/ does not exist at
+     * all, so every caller was one failed download away from it.
+     */
+    protected function getTemplatePath(string $templateName): ?string
+    {
+        $path = realpath(__DIR__.'/../../stubs/'.$templateName);
+
+        return $path === false ? null : $path;
     }
 
     /**
