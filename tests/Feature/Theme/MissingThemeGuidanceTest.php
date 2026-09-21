@@ -89,6 +89,45 @@ describe('MissingThemePage', function (): void {
             expect($page->handle(viewNotFound(), Request::create($path)))->toBeNull();
         }
     });
+
+    /*
+     * Since the skeleton stopped declaring WordPress routes, the template
+     * hierarchy decides and nothing calls view(), so handle() above never
+     * fires: a theme-less site answers a bare 404 instead. These cover the
+     * path that takes the request over before a template is chosen.
+     */
+    it('takes over a front-end request when there is no theme', function (): void {
+        Brain\Monkey\Functions\when('get_stylesheet_directory')->justReturn('/nope');
+        Brain\Monkey\Functions\when('is_admin')->justReturn(false);
+        Brain\Monkey\Functions\when('wp_doing_ajax')->justReturn(false);
+
+        $page = new MissingThemePage(themeAvailability(null));
+        $response = $page->responseForFrontEndRequest();
+
+        expect($response)->toBeInstanceOf(Response::class)
+            ->and($response->getStatusCode())->toBe(503)
+            ->and($response->getContent())->toContain('pollora:make:theme');
+    });
+
+    it('leaves a front-end request alone when a theme is installed', function (): void {
+        Brain\Monkey\Functions\when('is_admin')->justReturn(false);
+        Brain\Monkey\Functions\when('wp_doing_ajax')->justReturn(false);
+
+        $theme = Mockery::mock(ThemeModuleInterface::class);
+        $page = new MissingThemePage(themeAvailability($theme));
+
+        expect($page->responseForFrontEndRequest())->toBeNull();
+    });
+
+    it('leaves the admin alone even with no theme, since that is where it gets fixed', function (): void {
+        Brain\Monkey\Functions\when('get_stylesheet_directory')->justReturn('/nope');
+        Brain\Monkey\Functions\when('is_admin')->justReturn(true);
+        Brain\Monkey\Functions\when('wp_doing_ajax')->justReturn(false);
+
+        $page = new MissingThemePage(themeAvailability(null));
+
+        expect($page->responseForFrontEndRequest())->toBeNull();
+    });
 });
 
 describe('MissingThemeNotice', function (): void {

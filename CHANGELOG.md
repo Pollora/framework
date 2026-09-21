@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.3...develop)
 
+### Fixed
+- The missing-theme guidance page now reaches the case it was written for. It was wired only onto the exception handler, catching the `View [home] not found` that `view()` used to throw; since the skeleton stopped declaring WordPress routes the template hierarchy decides, nothing calls `view()`, nothing throws, and a site with no theme answered a bare 404 instead — the crash the page exists to replace, wearing a different status code. The request is now taken over on `template_redirect`, which WordPress fires before any template is chosen and which `runWp()` reaches before Laravel routes, alongside the existing handling for robots, favicons, feeds and trackbacks. The exception path stays for anything still routing through `view()`, and its registration no longer sits behind a guard that could skip the hook. The admin, AJAX and REST keep their normal responses: the admin is where the user goes to fix this
+
 ## [v13.32.0-beta.3](https://github.com/Pollora/framework/compare/v13.32.0-beta.2...v13.32.0-beta.3) - 2026-09-18
 
 ### Fixed
