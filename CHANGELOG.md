@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.4...develop)
 
+### Fixed
+- Attribute discovery no longer walks a plugin's `node_modules`. Themes and modules have always been scanned at `app/`, falling back to `src/` — the two directories the autoloader maps `Plugin\{Name}\` onto — while plugins were scanned at their root, which is where `node_modules/` lands as soon as a plugin has a Vite build. Symfony's Finder enumerates every file before filtering by extension, so the walk costs everything and the extension check costs nothing: measured on a demo plugin with a block build, 69,741 files walked on every request to reach the three PHP files the plugin owns — 1,691 ms against 1 ms for the same directory without `node_modules`. It also discovered five WordPress core classes shipped inside `@wordpress/style-engine` and handed them to the discovery pipeline, which is its own kind of wrong. With `APP_DEBUG` on, discovery keeps no cache, so a site paid this on every request: the home page of a site with one such plugin went from 3.0s to 0.78s, and from 691MB of peak memory to 37MB under Blackfire. A plugin shipping neither `app/` nor `src/` is still scanned at its root, so one keeping its classes at the top level is unaffected
+
+### Added
+- Discovery says so when one location takes more than 250ms to scan, naming the location, the time and how many structures it found. The cost above was absorbed in complete silence for as long as it existed — no log line, no notice, nothing that measured it. Debug mode only: with the cache on, the cost is paid once
+
 ## [v13.32.0-beta.4](https://github.com/Pollora/framework/compare/v13.32.0-beta.3...v13.32.0-beta.4) - 2026-09-22
 
 ### Added
