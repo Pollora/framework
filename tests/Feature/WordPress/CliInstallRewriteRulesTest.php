@@ -45,7 +45,6 @@ beforeEach(function (): void {
 function configureInstall(object $service, object $config): void
 {
     $method = (new ReflectionClass($service))->getMethod('configureInstallation');
-    $method->setAccessible(true);
     $method->invoke($service, $config);
 }
 

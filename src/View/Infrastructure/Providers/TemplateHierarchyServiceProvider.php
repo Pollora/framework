@@ -7,6 +7,7 @@ namespace Pollora\View\Infrastructure\Providers;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Filesystem\Filesystem;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\View\Application\Services\TemplateHierarchyService;
 use Pollora\View\Application\UseCases\RegisterTemplateHierarchyFiltersUseCase;
@@ -14,6 +15,7 @@ use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 use Pollora\View\Domain\Contracts\TemplateHierarchyFilterInterface;
 use Pollora\View\Infrastructure\Services\FileSystemTemplateFinder;
+use Pollora\View\Infrastructure\Services\TemplateMarker;
 use Pollora\View\Infrastructure\Services\WordPressTemplateHierarchyFilter;
 
 /**
@@ -40,6 +42,7 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->initializeTemplateHierarchy();
+        $this->markTheAnsweringTemplate();
     }
 
     /**
@@ -87,10 +90,33 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
      */
     private function registerApplicationServices(): void
     {
+        // Remembers the template between template_include and wp_head, so it
+        // has to be the same instance for both.
+        $this->app->singleton(TemplateMarker::class);
+
         // Main Template Hierarchy Service
         $this->app->singleton(TemplateHierarchyService::class, fn (Application $app): TemplateHierarchyService => new TemplateHierarchyService(
             $app->make(RegisterTemplateHierarchyFiltersUseCase::class)
         ));
+    }
+
+    /**
+     * Say which template answered, in the page, while debugging.
+     *
+     * Debug only: the marker is an HTML comment, so it changes no markup, but
+     * naming the file that rendered a page is information a production site
+     * has no reason to hand out.
+     */
+    private function markTheAnsweringTemplate(): void
+    {
+        if (! defined('WP_DEBUG') || ! WP_DEBUG) {
+            return;
+        }
+
+        $marker = $this->app->make(TemplateMarker::class);
+
+        $this->app->make(Filter::class)->add('template_include', $marker->capture(...), PHP_INT_MAX);
+        $this->app->make(Action::class)->add('wp_head', $marker->emit(...));
     }
 
     /**
@@ -117,6 +143,7 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
             ResolveBladeTemplateUseCase::class,
             RegisterTemplateHierarchyFiltersUseCase::class,
             TemplateHierarchyService::class,
+            TemplateMarker::class,
         ];
     }
 }

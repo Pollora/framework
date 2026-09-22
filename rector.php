@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
+use RectorLaravel\Rector\ArrayDimFetch\ServerVariableToRequestFacadeRector;
 use RectorLaravel\Rector\MethodCall\ContainerBindConcreteWithClosureOnlyRector;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
@@ -17,6 +18,17 @@ return RectorConfig::configure()
         AddOverrideAttributeToOverriddenMethodsRector::class,
         ContainerBindConcreteWithClosureOnlyRector::class => [
             __DIR__.'/src/Hook/Infrastructure/Providers/HookServiceProvider.php',
+        ],
+        // laravelIsServingTheRequest() exists to answer "is Laravel serving
+        // this at all?" — it runs when PHP is executing wp-login.php or
+        // wp-admin, where the application may not be bound. The facade needs
+        // the very container whose absence the method is detecting, so reading
+        // $_SERVER directly is the point rather than an oversight.
+        ServerVariableToRequestFacadeRector::class => [
+            __DIR__.'/src/WordPress/QueryTrait.php',
+            // Its test sets $_SERVER['SCRIPT_FILENAME'] to drive that method;
+            // going through the facade would stop it reaching the code at all.
+            __DIR__.'/tests/Unit/WordPress/LaravelServingRequestTest.php',
         ],
         __DIR__.'/tests/Unit/helpers.php',
     ])
