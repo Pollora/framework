@@ -203,7 +203,45 @@ class ThemeInitializer implements ThemeComponent
      */
     public function overrideThemeUri(): void
     {
+        $this->filter->add('theme_root_uri', $this->resolveThemeRootUri(...));
         $this->filter->add('theme_file_uri', $this->resolveThemeFileUri(...), 10, 2);
+    }
+
+    /**
+     * Keep a filesystem path out of every URL WordPress derives from the
+     * theme root.
+     *
+     * `get_theme_root_uri()` can only turn a theme root into a URL when that
+     * root sits under WP_CONTENT_DIR. A Pollora project keeps its themes at
+     * the project root instead — registered, deliberately, outside content —
+     * and for a root it cannot map WordPress falls back to returning the path
+     * verbatim. So `get_stylesheet_directory_uri()` answered
+     * `/var/www/html/themes/apiary`, and so did everything built from it.
+     *
+     * That is not only wrong, it is public. WordPress's speculative-loading
+     * rules exclude the theme directory by URL, so the server's filesystem
+     * layout was printed into the `<head>` of every page on the front end —
+     * measured, one occurrence per page.
+     *
+     * Only an answer that is not a URL is replaced, so a project that does
+     * keep its themes under content — where WordPress maps the root itself —
+     * is left exactly as it was.
+     *
+     * @param  mixed  $uri  The URI WordPress resolved, or the path it fell back to
+     * @return mixed A URL
+     */
+    public function resolveThemeRootUri(mixed $uri): mixed
+    {
+        if (! is_string($uri) || preg_match('#^(https?:)?//#i', $uri) === 1) {
+            return $uri;
+        }
+
+        // Where WordPress itself would have put them. Theme files are not
+        // served from there either — the build is the only address a theme
+        // asset has, which is what theme_file_uri now answers — but a URL
+        // that does not resolve is still better than a path that says where
+        // the site lives on disk.
+        return \content_url('themes');
     }
 
     /**
