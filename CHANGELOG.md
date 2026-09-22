@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.4...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.5...develop)
+
+## [v13.32.0-beta.5](https://github.com/Pollora/framework/compare/v13.32.0-beta.4...v13.32.0-beta.5) - 2026-09-22
 
 ### Added
 - The login screen wears the theme's design, from the theme's own theme.json. WordPress loads the theme on `wp-login.php` but emits none of its design there — measured: zero occurrences of `wp--preset--color` in the HTML of a login screen — so every site logs in through the same grey form whatever it looks like elsewhere. A theme that ships a `config/login.php` now gets its colours, radii and typography printed on `login_head`, its own logo above the form, and its home page behind that logo instead of wordpress.org. Nothing is duplicated: the design stays in theme.json, and restyling a theme restyles its login screen. Sign-in, lost password, reset, register and the confirm-admin-email prompt are all covered, being one screen as far as `login_head` is concerned. Strictly opt-in — a theme with no `config/login.php` gets WordPress's screen, byte for byte, so upgrading the framework never changes the page people sign in through. See [Theming → Login screen](documentation/theming.md#login-screen)
