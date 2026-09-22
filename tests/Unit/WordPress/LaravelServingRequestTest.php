@@ -23,7 +23,6 @@ function servingProbe(): object
         public function serving(): bool
         {
             $method = (new ReflectionClass($this))->getMethod('laravelIsServingTheRequest');
-            $method->setAccessible(true);
 
             return $method->invoke($this);
         }
@@ -61,6 +60,7 @@ afterEach(function (): void {
     } else {
         $_SERVER['SCRIPT_FILENAME'] = $this->originalScript;
     }
+
     exec('rm -rf '.escapeshellarg($this->dir));
 });
 
@@ -86,7 +86,7 @@ describe('QueryTrait::laravelIsServingTheRequest()', function (): void {
 
     it('says yes when no application is bound to ask', function (): void {
         $_SERVER['SCRIPT_FILENAME'] = $this->dir.'/public/cms/wp-login.php';
-        Container::setInstance(null);
+        Container::setInstance();
 
         // public_path() throws without one; that is not a reason to skip work.
         expect(servingProbe()->serving())->toBeTrue();

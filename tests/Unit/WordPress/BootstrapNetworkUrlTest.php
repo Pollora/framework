@@ -16,7 +16,7 @@ use Pollora\WordPress\Bootstrap;
  * The signature is asserted by reflection rather than by calling the method,
  * because a real invocation would require bootstrapping WordPress itself.
  */
-it('accepts a null scheme on rewriteNetworkUrl, as WordPress passes it', function () {
+it('accepts a null scheme on rewriteNetworkUrl, as WordPress passes it', function (): void {
     $parameter = (new ReflectionMethod(Bootstrap::class, 'rewriteNetworkUrl'))
         ->getParameters()[2];
 
@@ -25,7 +25,7 @@ it('accepts a null scheme on rewriteNetworkUrl, as WordPress passes it', functio
         ->and($parameter->isOptional())->toBeTrue();
 });
 
-it('keeps path optional on rewriteNetworkUrl, matching the filter signature', function () {
+it('keeps path optional on rewriteNetworkUrl, matching the filter signature', function (): void {
     $parameter = (new ReflectionMethod(Bootstrap::class, 'rewriteNetworkUrl'))
         ->getParameters()[1];
 

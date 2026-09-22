@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 use Mockery as m;
+use Mockery\MockInterface;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
@@ -73,7 +74,7 @@ function initializerUnderTest(?string $themePath): array
     // themselves back rather than null.
     $action = m::mock(Action::class);
     $action->shouldReceive('add')->andReturnUsing(
-        function (string $hook, callable $callback, ...$rest) use (&$actions, &$action) {
+        function (string $hook, callable $callback, ...$rest) use (&$actions, &$action): MockInterface {
             $actions[$hook] = $callback;
 
             return $action;
@@ -82,7 +83,7 @@ function initializerUnderTest(?string $themePath): array
 
     $filter = m::mock(Filter::class);
     $filter->shouldReceive('add')->andReturnUsing(
-        function (string $hook, callable $callback, ...$rest) use (&$filters, &$filter) {
+        function (string $hook, callable $callback, ...$rest) use (&$filters, &$filter): MockInterface {
             $filters[$hook] = $callback;
 
             return $filter;
