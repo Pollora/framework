@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...develop)
 
+### Changed
+- The contribution guide documents the pull request title convention. CI validates the title of every pull request against the conventional commit format, and rejected one said only that the check had failed — a rule enforced on a first contribution and published nowhere. The allowed types are listed, along with the fact that **Validate Changelog** only runs on release pull requests into `main` and never concerns a contribution to `develop`
+
 ## [v13.32.0-beta.6](https://github.com/Pollora/framework/compare/v13.32.0-beta.5...v13.32.0-beta.6) - 2026-09-22
 
 ### Fixed
