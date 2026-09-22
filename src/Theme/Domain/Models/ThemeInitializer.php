@@ -280,7 +280,16 @@ class ThemeInitializer implements ThemeComponent
     protected function builtAssetUrl(string $file): ?string
     {
         foreach ($this->manifestCandidates($file, $this->assetRoot()) as $candidate) {
-            $url = (string) (new AssetFile($candidate))->from('theme');
+            try {
+                $url = (string) (new AssetFile($candidate))->from('theme');
+            } catch (\Throwable) {
+                // AssetFile means to swallow a missing manifest entry, but it
+                // logs before returning, and the logger is itself something
+                // that can be absent. An exception escaping here would break
+                // get_theme_file_uri() for every caller — the opposite of the
+                // fallback this method exists to provide.
+                continue;
+            }
 
             if ($url !== '') {
                 return $url;
@@ -304,8 +313,8 @@ class ThemeInitializer implements ThemeComponent
      */
     public function manifestCandidates(string $file, string $assetRoot): array
     {
-        $file = ltrim(trim($file), '/');
-        $assetRoot = trim($assetRoot, '/');
+        $file = trim($file, " \t\n\r\0\x0B/");
+        $assetRoot = trim($assetRoot, " \t\n\r\0\x0B/");
 
         $candidates = [];
 
@@ -315,7 +324,12 @@ class ThemeInitializer implements ThemeComponent
 
         $candidates[] = $file;
 
-        return array_values(array_unique(array_filter($candidates, fn (string $c): bool => $c !== '')));
+        // The container root is a directory, not a file: asking the manifest
+        // for it answers nothing and only costs a lookup.
+        return array_values(array_unique(array_filter(
+            $candidates,
+            fn (string $candidate): bool => $candidate !== '' && $candidate !== $assetRoot
+        )));
     }
 
     /**
