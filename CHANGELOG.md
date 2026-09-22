@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...develop)
 
 ### Changed
+- The commit-hook tooling is declared where it belongs. `@commitlint/cli`, `@commitlint/config-conventional`, `husky`, `lint-staged` and `prettier` sat under `dependencies` rather than `devDependencies`, so every advisory in their tree was reported against this repository at **runtime** scope — ten high-severity alerts describing packages no Pollora site has ever loaded. Nothing installs differently: `npm ci` installs devDependencies by default, and the commit hook was checked after the move
+- Every open npm advisory clears: `fast-uri` moves to 3.1.8 and `js-yaml` to 4.3.2, past the 3.1.6 and 4.3.2 that patch them. `npm audit` goes from 2 high-severity vulnerabilities to **0**
 - The contribution guide documents the pull request title convention. CI validates the title of every pull request against the conventional commit format, and rejected one said only that the check had failed — a rule enforced on a first contribution and published nowhere. The allowed types are listed, along with the fact that **Validate Changelog** only runs on release pull requests into `main` and never concerns a contribution to `develop`
 
 ## [v13.32.0-beta.6](https://github.com/Pollora/framework/compare/v13.32.0-beta.5...v13.32.0-beta.6) - 2026-09-22
