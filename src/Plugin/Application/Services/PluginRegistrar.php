@@ -246,10 +246,43 @@ class PluginRegistrar
         try {
             $discoveryService = $this->app->get(ModuleDiscoveryOrchestratorInterface::class);
 
-            $discoveryService->discover($plugin->getPath());
+            $discoveryService->discover($this->getPluginDiscoveryPath($plugin));
         } catch (\Exception $exception) {
             $this->logError(sprintf('Plugin discovery error for %s: ', $plugin->getName()).$exception->getMessage());
         }
+    }
+
+    /**
+     * Where a plugin's discoverable classes live.
+     *
+     * Themes and modules have always been scanned at `app/`, falling back to
+     * `src/` — the same two directories the dynamic autoloader maps
+     * `Plugin\{Name}\` onto. Plugins were scanned at their root instead, and
+     * a plugin root is where `node_modules/` lives once the plugin has a Vite
+     * build.
+     *
+     * Measured on a demo plugin with a block build: 69,741 files under
+     * `node_modules/`, walked on every request, to reach the three PHP files
+     * the plugin actually owns. Symfony's Finder enumerates before it filters,
+     * so the extension check costs nothing and the walk costs everything:
+     * 1,691 ms against 1 ms for the same directory with `node_modules` left
+     * out. It also found ten PHP files shipped inside `@wordpress/style-engine`
+     * and handed them to discovery, which is its own kind of wrong.
+     *
+     * The root is still used when a plugin has neither directory, so a plugin
+     * that keeps its classes at the top level is discovered as before.
+     */
+    protected function getPluginDiscoveryPath(PluginModuleInterface $plugin): string
+    {
+        $basePath = rtrim($plugin->getPath(), '/');
+
+        foreach (['/app', '/src'] as $directory) {
+            if (is_dir($basePath.$directory)) {
+                return $basePath.$directory;
+            }
+        }
+
+        return $basePath;
     }
 
     /**
