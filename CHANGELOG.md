@@ -5,7 +5,13 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.5...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...develop)
+
+## [v13.32.0-beta.6](https://github.com/Pollora/framework/compare/v13.32.0-beta.5...v13.32.0-beta.6) - 2026-09-22
+
+### Fixed
+- `get_theme_file_uri()` answers the URL the build gave a theme file, instead of an empty string. It returned `''` for every path there is — measured on a live site, on the front end as much as on wp-login.php. WordPress hands the `theme_file_uri` filter both the URL it built and the file it was asked for; the file was thrown away and rebuilt by subtracting `get_stylesheet_directory_uri()` from the URL, then handed to the asset resolver, which prefixes the container's own root a second time. `resources/assets/app.js` was looked up as `resources/assets/resources/assets/app.js`, never found, and the failure was logged and swallowed — one line in `laravel.log` per call. Both spellings now resolve: the path from the theme root a caller would write, and the path relative to the container root the manifest is keyed on. A theme's own directory is not web-served on a Pollora project — measured, `/themes/…` and `/content/themes/…` both 404 while `/build/theme/…` serves — so the build is the only address a theme file has. Anything the build does not know about is handed back untouched rather than emptied
+- The server's filesystem path no longer reaches the public HTML. `get_theme_root_uri()` can only turn a theme root into a URL when it sits under `WP_CONTENT_DIR`; a Pollora project registers its themes at the project root, and for a root it cannot map WordPress returns the path verbatim — so `get_stylesheet_directory_uri()` answered `/var/www/html/themes/apiary`, and WordPress's speculative-loading rules printed it into the `<head>` of every front-end page. Measured: one occurrence per page before, zero after. Only an answer that is not a URL is replaced, so a project keeping its themes under content is untouched
 
 ## [v13.32.0-beta.5](https://github.com/Pollora/framework/compare/v13.32.0-beta.4...v13.32.0-beta.5) - 2026-09-22
 

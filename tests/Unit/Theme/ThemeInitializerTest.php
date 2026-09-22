@@ -191,3 +191,121 @@ describe('ThemeInitializer', function (): void {
         expect($harness['directories']->getArrayCopy())->toBe([]);
     });
 });
+
+/**
+ * The theme URI filters.
+ *
+ * Both answers were wrong on every Pollora site, and neither failed loudly.
+ * `get_theme_file_uri()` returned an empty string for every path there is,
+ * because the filter rebuilt the file name by subtracting a URL from a URL and
+ * then handed the asset resolver a path it prefixes again. And the URL the
+ * theme root resolved to was the server's filesystem path, which WordPress
+ * printed into the head of every public page through its speculative-loading
+ * rules.
+ */
+describe('theme URI filters', function (): void {
+    it("hands back WordPress's own answer when the build knows nothing of the file", function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+        $filter = $harness['filters']['theme_file_uri'];
+
+        // Not '': a caller that gets WordPress's answer can see what went
+        // wrong. Every call used to return the empty string.
+        expect($filter('https://example.test/themes/default/style.css', 'style.css'))
+            ->toBe('https://example.test/themes/default/style.css');
+    });
+
+    it('does not try to resolve a file it was not given', function (mixed $file): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+        $filter = $harness['filters']['theme_file_uri'];
+
+        expect($filter('https://example.test/themes/default', $file))
+            ->toBe('https://example.test/themes/default');
+    })->with([
+        'nothing' => [''],
+        'whitespace' => ['   '],
+        'not a string' => [null],
+    ]);
+
+    it('replaces a theme root that is a filesystem path', function (): void {
+        Brain\Monkey\Functions\when('content_url')->alias(
+            fn (string $path = ''): string => 'https://example.test/content'.($path === '' ? '' : '/'.$path)
+        );
+
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        // WordPress falls back to the path itself for a theme root it cannot
+        // map, and prints it into every page's speculative-loading rules.
+        expect(($harness['filters']['theme_root_uri'])('/srv/site/themes'))
+            ->toBe('https://example.test/content/themes');
+    });
+
+    it('leaves a theme root alone when WordPress already resolved a URL', function (string $uri): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        // A project keeping its themes under content is mapped by WordPress
+        // itself and must not be touched.
+        expect(($harness['filters']['theme_root_uri'])($uri))->toBe($uri);
+    })->with([
+        'https' => ['https://example.test/content/themes'],
+        'http' => ['http://example.test/content/themes'],
+        'protocol relative' => ['//example.test/content/themes'],
+    ]);
+
+    it('leaves a theme root alone when it is not a string at all', function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        expect(($harness['filters']['theme_root_uri'])(false))->toBeFalse();
+    });
+});
+
+/**
+ * Which spellings of a theme-relative file are looked for in the manifest.
+ *
+ * The asset container prefixes every lookup with its own root; the caller
+ * spells the path from the theme root. Getting this wrong is what produced
+ * `resources/assets/resources/assets/app.js` and an empty string for every
+ * call.
+ */
+describe('manifest candidates', function (): void {
+    it('takes the container root off a path that already carries it', function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        expect($harness['initializer']->manifestCandidates('resources/assets/app.js', 'resources/assets/'))
+            ->toBe(['app.js', 'resources/assets/app.js']);
+    });
+
+    it('passes through a path already relative to the container root', function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        expect($harness['initializer']->manifestCandidates('fonts/Inter.woff2', 'resources/assets/'))
+            ->toBe(['fonts/Inter.woff2']);
+    });
+
+    it('does not mistake a prefix for a directory', function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        // `resources/assets-legacy/` starts with the root's characters but is
+        // a different directory.
+        expect($harness['initializer']->manifestCandidates('resources/assets-legacy/app.js', 'resources/assets'))
+            ->toBe(['resources/assets-legacy/app.js']);
+    });
+
+    it('ignores how the paths were punctuated', function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        expect($harness['initializer']->manifestCandidates('/resources/assets/app.js', '/resources/assets/'))
+            ->toBe(['app.js', 'resources/assets/app.js']);
+    });
+
+    it('copes with a container that has no root', function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        expect($harness['initializer']->manifestCandidates('app.js', ''))->toBe(['app.js']);
+    });
+
+    it('offers nothing for a file name that is not one', function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default');
+
+        expect($harness['initializer']->manifestCandidates('resources/assets/', 'resources/assets'))->toBe([]);
+    });
+});
