@@ -125,7 +125,7 @@ class LaravelThemeModule extends ThemeModule
 
         $configFiles = glob($configPath.'/*.php');
 
-        $translationDependentConfigs = ['menus.php', 'sidebars.php', 'templates.php'];
+        $translationDependentConfigs = ['login.php', 'menus.php', 'sidebars.php', 'templates.php'];
 
         foreach ($configFiles as $configFile) {
             $configName = basename($configFile, '.php');
@@ -143,9 +143,13 @@ class LaravelThemeModule extends ThemeModule
     /**
      * Defer loading of a config file until WordPress translations are available.
      *
-     * Some config files (menus.php, sidebars.php, templates.php) use translation
-     * functions like __() which require WordPress to be fully initialized. These
-     * configs are loaded on the 'init' hook to ensure translations work correctly.
+     * Some config files (login.php, menus.php, sidebars.php, templates.php) use
+     * translation functions like __() which require WordPress to be fully
+     * initialized. These configs are loaded on the 'init' hook to ensure
+     * translations work correctly.
+     *
+     * login.php is read on the login screen, which is later still: wp-login.php
+     * fires 'init' through wp-load.php and only then 'login_init'.
      */
     protected function loadDeferredConfiguration(string $configFile, string $key): void
     {

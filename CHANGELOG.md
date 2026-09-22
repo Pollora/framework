@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.4...develop)
 
+### Added
+- The login screen wears the theme's design, from the theme's own theme.json. WordPress loads the theme on `wp-login.php` but emits none of its design there — measured: zero occurrences of `wp--preset--color` in the HTML of a login screen — so every site logs in through the same grey form whatever it looks like elsewhere. A theme that ships a `config/login.php` now gets its colours, radii and typography printed on `login_head`, its own logo above the form, and its home page behind that logo instead of wordpress.org. Nothing is duplicated: the design stays in theme.json, and restyling a theme restyles its login screen. Sign-in, lost password, reset, register and the confirm-admin-email prompt are all covered, being one screen as far as `login_head` is concerned. Strictly opt-in — a theme with no `config/login.php` gets WordPress's screen, byte for byte, so upgrading the framework never changes the page people sign in through. See [Theming → Login screen](documentation/theming.md#login-screen)
+- `pollora/login/palette`, `pollora/login/logo`, `pollora/login/styles` and `pollora/login/credit` filters, for a module or a plugin to take over any part of the login screen without touching the theme
+
+### Changed
+- A theme's `config/login.php` is loaded on `init`, like `menus.php`, `sidebars.php` and `templates.php`, so `__()` works in it. WordPress fires `init` through `wp-load.php` before `wp-login.php` fires `login_init`, so the config is in place well before anything reads it
+
 ## [v13.32.0-beta.4](https://github.com/Pollora/framework/compare/v13.32.0-beta.3...v13.32.0-beta.4) - 2026-09-22
 
 ### Added

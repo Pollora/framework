@@ -362,3 +362,7 @@ msgstr ""
 #: VersionCheck/UI/Http/SiteHealthCheck.php:139
 msgid "Learn more about updating Pollora"
 msgstr ""
+
+#: Login/Infrastructure/Services/LoginScreen.php:125
+msgid "Powered by Pollora"
+msgstr ""
