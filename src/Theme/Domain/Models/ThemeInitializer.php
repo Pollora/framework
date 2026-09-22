@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Domain\Models;
 
+use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Infrastructure\Services\AssetFile;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
@@ -193,25 +194,103 @@ class ThemeInitializer implements ThemeComponent
     }
 
     /**
-     * Override the theme URI
+     * Resolve theme file URLs through the theme's Vite build.
+     *
+     * A theme's own directory is not web-served on a Pollora project — only
+     * the build output under `/build/theme/{slug}` is — so the only address a
+     * theme file can have is the one Vite gave it. This is what makes
+     * `get_theme_file_uri()` answer something a browser can fetch.
      */
     public function overrideThemeUri(): void
     {
-        $this->filter->add('theme_file_uri', function (string $path): string {
-            $relativePath = $this->getRelativePath($path);
-
-            return (string) (new AssetFile($relativePath))->from('theme');
-        });
+        $this->filter->add('theme_file_uri', $this->resolveThemeFileUri(...), 10, 2);
     }
 
     /**
-     * Get the relative path
+     * Answer `get_theme_file_uri()` with the built asset, or leave it alone.
+     *
+     * WordPress hands the filter both the URL it built and **the file it was
+     * asked for**, relative to the theme. The file is what matters here, and
+     * it used to be thrown away: the previous implementation recovered it by
+     * subtracting `get_stylesheet_directory_uri()` from the URL by hand, then
+     * handed the result to the asset resolver, which prefixes the container's
+     * own root — so `resources/assets/app.js` was looked up as
+     * `resources/assets/resources/assets/app.js` and never found. Every call
+     * returned an empty string, on the front end as much as anywhere else,
+     * and the failure was logged and swallowed.
+     *
+     * Anything the build does not know about is handed back untouched rather
+     * than emptied. A caller that gets WordPress's own answer can at least
+     * see what went wrong; a caller that gets `''` cannot.
+     *
+     * @param  mixed  $url  The URL WordPress built
+     * @param  mixed  $file  The file asked for, relative to the theme root
+     * @return mixed The built asset URL, or WordPress's own answer
      */
-    protected function getRelativePath(string $fullPath): string
+    public function resolveThemeFileUri(mixed $url, mixed $file = ''): mixed
     {
-        // Use the interface instead of direct function call
-        $stylesheetUri = $this->wpTheme->getStylesheetDirectoryUri();
+        if (! is_string($file) || trim($file) === '') {
+            return $url;
+        }
 
-        return str_replace($stylesheetUri, '', $fullPath);
+        return $this->builtAssetUrl($file) ?? $url;
+    }
+
+    /**
+     * The URL Vite gave a file, if it built one.
+     */
+    protected function builtAssetUrl(string $file): ?string
+    {
+        foreach ($this->manifestCandidates($file, $this->assetRoot()) as $candidate) {
+            $url = (string) (new AssetFile($candidate))->from('theme');
+
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The spellings under which a theme-relative file may sit in the manifest.
+     *
+     * The asset container prefixes every lookup with its own root — normally
+     * `resources/assets/` — while `get_theme_file_uri()` is given a path from
+     * the theme's root. The two meet in one of two ways, and both are tried:
+     * the caller already spelled the container root, in which case it has to
+     * come off before the container puts it back; or the caller spelled the
+     * path the container expects, in which case it passes straight through.
+     *
+     * @return list<string>
+     */
+    public function manifestCandidates(string $file, string $assetRoot): array
+    {
+        $file = ltrim(trim($file), '/');
+        $assetRoot = trim($assetRoot, '/');
+
+        $candidates = [];
+
+        if ($assetRoot !== '' && str_starts_with($file, $assetRoot.'/')) {
+            $candidates[] = substr($file, strlen($assetRoot) + 1);
+        }
+
+        $candidates[] = $file;
+
+        return array_values(array_unique(array_filter($candidates, fn (string $c): bool => $c !== '')));
+    }
+
+    /**
+     * The container root every manifest lookup is prefixed with.
+     */
+    protected function assetRoot(): string
+    {
+        try {
+            $container = $this->app->get(AssetManager::class)->getContainer('theme');
+
+            return $container === null ? '' : $container->getBasePath();
+        } catch (\Throwable) {
+            return '';
+        }
     }
 }
