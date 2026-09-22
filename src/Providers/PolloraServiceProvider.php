@@ -23,6 +23,7 @@ use Pollora\Foundation\Providers\ArtisanServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
+use Pollora\Login\Infrastructure\Providers\LoginServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
@@ -119,6 +120,9 @@ class PolloraServiceProvider extends ServiceProvider
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);
+
+        // Login screen customisation
+        $this->app->register(LoginServiceProvider::class);
 
         // Hashing service provider
         $this->app->register(HashServiceProvider::class);

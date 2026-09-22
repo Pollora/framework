@@ -239,3 +239,5 @@ msgstr "Vous utilisez Pollora %1$s. La dernière version est %2$s. %3$sVoir le c
 
 msgid "Learn more about updating Pollora"
 msgstr "En savoir plus sur la mise à jour de Pollora"
+msgid "Powered by Pollora"
+msgstr "Propulsé par Pollora"
