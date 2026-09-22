@@ -48,8 +48,26 @@ outlines our guidelines and conventions.
 ## Pull Requests
 
 - Target the `develop` branch and describe the feature or fix clearly.
+- **Title the pull request as a conventional commit.** CI validates the title,
+  not just your commits, and a title like `Fix the thing` fails the
+  **Validate PR title** check without saying much about why — hence this list.
+  The format is `type: summary`, with an optional scope:
+
+  ```
+  fix: keep the theme root out of the public head
+  feat(routing): resolve the template hierarchy before the fallback
+  docs: document the pull request title convention
+  ```
+
+  Allowed types: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `hotfix`,
+  `perf`, `refactor`, `release`, `revert`, `style`, `test`. This is the same
+  vocabulary commitlint enforces on your commits, plus `release`, which is
+  reserved for maintainers.
 - Explain **how to test** the change. Include relevant commands or steps.
 - Ensure your branch is up to date with `develop` and that the CI checks pass.
+- The **Validate Changelog** job only runs on pull requests into `main`, which
+  are release pull requests cut by maintainers. Contributing to `develop` never
+  trips it.
 
 ## Changelog
 
