@@ -173,7 +173,7 @@ describe('pollora:make:block', function (): void {
         $provider = (string) file_get_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php');
 
         expect($provider)->toContain("add_action('init'")
-            ->and($provider)->toContain('function_exists(\'add_action\')');
+            ->and($provider)->toContain("function_exists('add_action')");
     });
 
     it('leaves an existing provider untouched', function (): void {
