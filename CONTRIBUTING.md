@@ -69,6 +69,36 @@ outlines our guidelines and conventions.
   are release pull requests cut by maintainers. Contributing to `develop` never
   trips it.
 
+## Patches
+
+The files in `patches/` are applied by
+[composer-patches](https://github.com/cweagans/composer-patches) to the
+projects that install this package — `wordpress-core.patch` renames
+WordPress's `__()` to `__wp()` so Laravel's helper can have the name. Each one
+is declared in `composer.json` under `extra.patches`, by URL, and that URL
+**pins the commit** that produced the patch:
+
+```
+https://raw.githubusercontent.com/Pollora/framework/<commit sha>/patches/wordpress-core.patch
+```
+
+It never points at a branch. A released `composer.json` cannot be changed
+again, so a branch URL moves under every version already published — deleting
+a patch from `main` once turned it into a 404 for every install of the stable
+line.
+
+To change a patch:
+
+1. Edit the patch and commit it.
+2. In a second commit, point its URL at the first one:
+   `git log -1 --format=%H -- patches/wordpress-core.patch`.
+3. **Merge the pull request, do not squash it** — squashing drops the pinned
+   commit from the history.
+
+The **Patches** CI job checks all three: the URL pins a full commit SHA of
+this repository, that commit is in the branch's history, and the file there is
+the file in the working tree.
+
 ## Changelog
 
 All notable changes are documented in the [CHANGELOG](CHANGELOG.md). When tagging a new version, update the changelog to move items from `[Unreleased]` to the new version section with the release date.
