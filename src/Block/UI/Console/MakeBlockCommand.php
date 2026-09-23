@@ -106,6 +106,7 @@ class MakeBlockCommand extends Command
             $this->bootstrapInfrastructure($target);
         } else {
             $this->upgradeViteConfig($target);
+            $this->warnIfNothingWillRegisterTheBlock($target);
         }
 
         // Scaffold the block
@@ -182,6 +183,41 @@ class MakeBlockCommand extends Command
             'namespace' => $this->getThemeSourceNamespace($theme).'Providers',
             'containerName' => 'theme',
         ];
+    }
+
+    /**
+     * Say so when the block being scaffolded will reach no registry.
+     *
+     * A blocks directory that is not empty is taken as proof that the
+     * infrastructure is already in place. It usually is — but not always.
+     * Blocks registered by something else live there too: an ACF block, a
+     * block placed by hand, a block from a theme written before the provider
+     * existed. None of those needs the BlocksServiceProvider that registers
+     * Vite-built blocks, so a target can hold blocks and have no provider.
+     *
+     * In that target the new block is written to disk, built by Vite, and
+     * registered by nobody. Nothing fails; it simply never appears in the
+     * editor, and there is nothing in the log to say why. Measured on
+     * theme-apiary, whose only shipped block is an ACF one.
+     */
+    private function warnIfNothingWillRegisterTheBlock(array $target): void
+    {
+        $providerPath = $target['path'].'/app/Providers/BlocksServiceProvider.php';
+
+        if (file_exists($providerPath)) {
+            return;
+        }
+
+        $this->newLine();
+        $this->components->warn('Nothing will register this block.');
+        $this->line('  This '.$target['type'].' has no app/Providers/BlocksServiceProvider.php.');
+        $this->line('  Its blocks directory is not empty, so the scaffolder took the');
+        $this->line('  infrastructure to be in place — but blocks registered by ACF or by');
+        $this->line('  hand do not need that provider, and this one does.');
+        $this->line('');
+        $this->line('  The block is written and Vite will build it. It will not appear in');
+        $this->line('  the editor until a BlocksServiceProvider registers');
+        $this->line('  '.self::BLOCKS_DIRECTORY.'.');
     }
 
     /**

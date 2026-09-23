@@ -138,6 +138,42 @@ describe('pollora:make:block', function (): void {
             ->and($metadata)->not->toHaveKey('render');
     });
 
+    it('says so when nothing will register the block', function (): void {
+        // A blocks directory that is not empty is taken as proof that the
+        // infrastructure is in place. It usually is — but blocks registered by
+        // something else live there too. theme-apiary ships a single ACF
+        // block, which needs no BlocksServiceProvider, so every block
+        // scaffolded into it was written, built by Vite, and registered by
+        // nobody. Nothing failed and nothing was logged; it simply never
+        // appeared in the editor.
+        mkdir($this->themeDir.'/resources/views/blocks/legacy-acf', 0755, true);
+        file_put_contents(
+            $this->themeDir.'/resources/views/blocks/legacy-acf/block.json',
+            json_encode(['name' => 'theme/legacy-acf', 'acf' => ['mode' => 'preview']])
+        );
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->expectsOutputToContain('Nothing will register this block')
+            ->assertSuccessful();
+    });
+
+    it('stays quiet when a provider is there to register it', function (): void {
+        mkdir($this->themeDir.'/app/Providers', 0755, true);
+        file_put_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php', '<?php // mine');
+        mkdir($this->themeDir.'/resources/views/blocks/already-here', 0755, true);
+        file_put_contents(
+            $this->themeDir.'/resources/views/blocks/already-here/block.json',
+            json_encode(['name' => 'theme/already-here'])
+        );
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->doesntExpectOutputToContain('Nothing will register this block')
+            ->assertSuccessful();
+
+        expect(file_get_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php'))
+            ->toBe('<?php // mine');
+    });
+
     it('still accepts the deprecated --dynamic option', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--dynamic' => true])
             ->expectsOutputToContain('--dynamic is deprecated')
