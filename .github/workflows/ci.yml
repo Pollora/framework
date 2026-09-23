@@ -74,6 +74,7 @@ jobs:
         run: |
           set -uo pipefail
           status=0
+          checked=0
           while IFS=$'\t' read -r package url; do
             if [[ ! "$url" =~ ^https://raw\.githubusercontent\.com/Pollora/framework/([0-9a-f]{40})/(patches/[^/]+\.patch)$ ]]; then
               echo "::error file=composer.json::The $package patch must be pinned to a full commit SHA of this repository, got: $url"
@@ -89,7 +90,13 @@ jobs:
               status=1; continue
             fi
             echo "ok  $package -> ${sha:0:10} $path"
+            checked=$((checked + 1))
           done < <(jq -r '(.extra.patches // {}) | to_entries[] | .key as $p | .value | to_entries[] | "\($p)\t\(.value)"' composer.json)
+          # A job that reads no entry proves nothing and would still be green.
+          if [ "$checked" -eq 0 ] && [ "$status" -eq 0 ] && ls patches/*.patch >/dev/null 2>&1; then
+            echo "::error file=composer.json::patches/ holds patches but extra.patches declares none this job could read"
+            status=1
+          fi
           exit $status
 
   code-quality:
