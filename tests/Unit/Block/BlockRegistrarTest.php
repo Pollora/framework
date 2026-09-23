@@ -254,6 +254,31 @@ describe('BlockRegistrar', function (): void {
         expect($this->registeredBlocks[0]['args']['render_callback'])->toBeCallable();
     });
 
+    it('leaves a classic React block to render the markup it saved', function (): void {
+        // save.jsx and no `render` in block.json is the standard Gutenberg
+        // shape: the markup save() produced is stored in post_content, and
+        // WordPress serves it. A render_callback would override that markup —
+        // with nothing, since there is no render file to call. So the callback
+        // must be absent, not null: null is what a *declared* render file that
+        // cannot be used resolves to, and it means something else.
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+            'editorStyle' => 'file:./editor.css',
+            'style' => 'file:./style.css',
+        ]));
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite();
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredBlocks)->toHaveCount(1)
+            ->and($this->registeredBlocks[0]['args'])->not->toHaveKey('render_callback')
+            ->and($this->registeredScripts)->toHaveKey('test-hero-editor-script')
+            ->and($this->registeredStyles)->toHaveKey('test-hero-editor-style')
+            ->and($this->registeredStyles)->toHaveKey('test-hero-style');
+    });
+
     it('builds handles matching WP generate_block_asset_handle format', function (): void {
         $registrar = new BlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
 
