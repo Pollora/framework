@@ -110,10 +110,20 @@ class ModuleAutoloader
     }
 
     /**
-     * Register all namespaces with Composer's autoloader.
+     * Register the loader with SPL, unless it is registered already.
+     *
+     * Namespaces added through addPsr4() take effect immediately on an active
+     * loader. Registering it again would only move it to the end of
+     * ClassLoader::getRegisteredLoaders(), behind any plugin loader (Query
+     * Monitor, for instance), and Application::inferBasePath() would then
+     * resolve the plugin's directory as the application base path.
      */
     public function register(): void
     {
+        if (in_array($this->loader, ClassLoader::getRegisteredLoaders(), true)) {
+            return;
+        }
+
         $this->loader->register();
     }
 
