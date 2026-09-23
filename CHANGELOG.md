@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...develop)
 
 ### Fixed
+- `pollora:make:block` says so when nothing will register the block it just wrote. A blocks directory that is not empty is taken as proof that the infrastructure is in place, and it usually is — but blocks registered by something else live there too, and none of them needs the `BlocksServiceProvider` that registers Vite-built blocks. In a target like `theme-apiary`, whose only shipped block is an ACF one, every block ever scaffolded was written to disk, built by Vite, and registered by nobody: nothing failed, nothing reached the log, and the block simply never appeared in the editor. Measured on a live site
 - `composer install` and `composer update` no longer fail on a Pollora site that has no terminal. `pollora:env:setup` runs from composer's `post-autoload-dump` hook, so it fires inside container builds, deployments and CI; when the database was not reachable it reached for Laravel Prompts, which throws where there is nothing to prompt, and composer exited 1 reporting a prompting problem rather than a database one. Nothing in that command is a gate — `pollora:install` is what refuses to continue without a database — so with no terminal it now names what is wrong, names the command to run once the database is up, and lets composer finish
 
 ### Changed
