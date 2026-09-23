@@ -44,6 +44,7 @@ function runSetupCommand(bool $configured, bool $interactive, array $parameters 
 
     $command = new LaunchPadSetupCommand($database);
     $command->setLaravel($container);
+
     $application->addCommand($command);
 
     $input = new ArrayInput(['command' => 'pollora:env:setup', ...$parameters]);

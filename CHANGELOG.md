@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...develop)
 
+### Fixed
+- `composer install` and `composer update` no longer fail on a Pollora site that has no terminal. `pollora:env:setup` runs from composer's `post-autoload-dump` hook, so it fires inside container builds, deployments and CI; when the database was not reachable it reached for Laravel Prompts, which throws where there is nothing to prompt, and composer exited 1 reporting a prompting problem rather than a database one. Nothing in that command is a gate — `pollora:install` is what refuses to continue without a database — so with no terminal it now names what is wrong, names the command to run once the database is up, and lets composer finish
+
 ### Changed
 - The commit-hook tooling is declared where it belongs. `@commitlint/cli`, `@commitlint/config-conventional`, `husky`, `lint-staged` and `prettier` sat under `dependencies` rather than `devDependencies`, so every advisory in their tree was reported against this repository at **runtime** scope — ten high-severity alerts describing packages no Pollora site has ever loaded. Nothing installs differently: `npm ci` installs devDependencies by default, and the commit hook was checked after the move
 - Every open npm advisory clears: `fast-uri` moves to 3.1.8 and `js-yaml` to 4.3.2, past the 3.1.6 and 4.3.2 that patch them. `npm audit` goes from 2 high-severity vulnerabilities to **0**
