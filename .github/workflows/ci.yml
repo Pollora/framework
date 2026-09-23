@@ -44,6 +44,54 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
+  patches:
+    name: Patches
+    runs-on: ubuntu-latest
+
+    steps:
+      # Full history: a pinned commit has to be proven an ancestor of this one.
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Every patch this package asks its consumers to apply is served from
+      # this repository at a URL recorded in composer.json — and a released
+      # composer.json can never be changed again. Pointed at a branch, that
+      # URL moves under every version already published: deleting
+      # mockery-php84-nullable.patch from main on 2026-09-17 turned it into a
+      # 404 for every v13.4.x install, which composer-patches v1 skips with a
+      # warning. With v2 a moved patch is worse: a checksum mismatch against
+      # patches.lock.json, and a failed install.
+      #
+      # So each URL pins the commit that produced the patch, and this proves
+      # three things: the pin is a full SHA of this repository, that commit is
+      # in this branch's history, and the file there is the file here.
+      # Changing a patch therefore takes two commits — the patch, then the URL
+      # pointing at it — and a pull request that does so must be merged, not
+      # squashed, or the pinned commit leaves the history.
+      - name: Patch URLs pin the patches in this commit
+        run: |
+          set -uo pipefail
+          status=0
+          while IFS=$'\t' read -r package url; do
+            if [[ ! "$url" =~ ^https://raw\.githubusercontent\.com/Pollora/framework/([0-9a-f]{40})/(patches/[^/]+\.patch)$ ]]; then
+              echo "::error file=composer.json::The $package patch must be pinned to a full commit SHA of this repository, got: $url"
+              status=1; continue
+            fi
+            sha="${BASH_REMATCH[1]}"; path="${BASH_REMATCH[2]}"
+            if ! git merge-base --is-ancestor "$sha" HEAD 2>/dev/null; then
+              echo "::error file=composer.json::The $package patch is pinned to $sha, which is not in this branch's history. Merge, do not squash, a pull request that changes a patch."
+              status=1; continue
+            fi
+            if ! diff -q <(git show "$sha:$path" 2>/dev/null) "$path" >/dev/null 2>&1; then
+              echo "::error file=$path::$path differs from the version composer.json pins ($sha). Commit the patch, then point the URL at that commit."
+              status=1; continue
+            fi
+            echo "ok  $package -> ${sha:0:10} $path"
+          done < <(jq -r '(.extra.patches // {}) | to_entries[] | .key as $p | .value | to_entries[] | "\($p)\t\(.value)"' composer.json)
+          exit $status
+
   code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
