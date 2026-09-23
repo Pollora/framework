@@ -10,6 +10,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 trait HasThemeSupport
 {
+    use ResolvesSourceDirectory;
+
     const THEME_OPTION = 'theme';
 
     private ?ThemeRegistrarInterface $registrar = null;
@@ -106,7 +108,7 @@ trait HasThemeSupport
      */
     protected function getThemeSourcePath(string $themeName): string
     {
-        return $this->getThemePath($themeName).'/app';
+        return $this->resolveSourceDirectory($this->getThemePath($themeName));
     }
 
     /**

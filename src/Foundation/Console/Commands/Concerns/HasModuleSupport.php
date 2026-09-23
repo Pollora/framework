@@ -13,6 +13,8 @@ use Symfony\Component\Console\Input\InputOption;
  */
 trait HasModuleSupport
 {
+    use ResolvesSourceDirectory;
+
     const MODULE_OPTION = 'module';
 
     /**
@@ -74,7 +76,7 @@ trait HasModuleSupport
      */
     protected function getModuleSourcePath(): string
     {
-        return $this->getModulePath().'/app';
+        return $this->resolveSourceDirectory($this->getModulePath());
     }
 
     /**

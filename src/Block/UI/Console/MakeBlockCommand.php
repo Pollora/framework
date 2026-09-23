@@ -206,7 +206,7 @@ class MakeBlockCommand extends Command
      */
     private function ensureBlocksServiceProviderExists(array $target): void
     {
-        if (file_exists($target['path'].'/app/Providers/BlocksServiceProvider.php')) {
+        if (file_exists($this->blocksServiceProviderPath($target))) {
             return;
         }
 
@@ -224,11 +224,25 @@ class MakeBlockCommand extends Command
     }
 
     /**
+     * Where the BlocksServiceProvider goes: the target's source directory,
+     * `app/` or `src/`, whichever its autoloader maps.
+     *
+     * The stub reaches the blocks with `dirname(__DIR__, 2)`, which lands on
+     * the target root from either directory.
+     *
+     * @param  array{path: string}  $target
+     */
+    private function blocksServiceProviderPath(array $target): string
+    {
+        return $this->resolveSourceDirectory($target['path']).'/Providers/BlocksServiceProvider.php';
+    }
+
+    /**
      * Create the BlocksServiceProvider in the target.
      */
     private function createBlocksServiceProvider(array $target): void
     {
-        $providerPath = $target['path'].'/app/Providers/BlocksServiceProvider.php';
+        $providerPath = $this->blocksServiceProviderPath($target);
 
         if (file_exists($providerPath)) {
             $this->components->warn('BlocksServiceProvider already exists, skipping.');

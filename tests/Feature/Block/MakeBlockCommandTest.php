@@ -176,6 +176,19 @@ describe('pollora:make:block', function (): void {
             ->and($provider)->toContain("function_exists('add_action')");
     });
 
+    it('writes the provider into src/ for a target that keeps its classes there', function (): void {
+        // Writing into app/ here would not merely misplace one file: the
+        // autoloader maps the namespace onto app/ as soon as it exists, so
+        // every class already in src/ would stop being loaded.
+        mkdir($this->themeDir.'/src/Providers', 0755, true);
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->assertSuccessful();
+
+        expect($this->themeDir.'/src/Providers/BlocksServiceProvider.php')->toBeFile()
+            ->and($this->themeDir.'/app')->not->toBeDirectory();
+    });
+
     it('leaves an existing provider untouched', function (): void {
         mkdir($this->themeDir.'/app/Providers', 0755, true);
         file_put_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php', '<?php // mine');
