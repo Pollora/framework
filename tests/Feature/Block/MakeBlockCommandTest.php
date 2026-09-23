@@ -158,6 +158,24 @@ describe('pollora:make:block', function (): void {
         expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->toBeFile();
     });
 
+    it('defers registration to init in the provider it writes', function (): void {
+        // The regression this pins, and it is not hypothetical: theme-default
+        // shipped v1.4.0 with a provider that called registerDirectory()
+        // straight from boot(). Providers boot before WordPress has defined
+        // register_block_type(), and BlockRegistrar answers that by returning
+        // immediately — no error, no notice, the blocks simply never existed.
+        // That theme fixed its own copy by hand; the stub that writes every
+        // other one kept the broken shape, so each new theme and plugin was
+        // born with the bug.
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->assertSuccessful();
+
+        $provider = (string) file_get_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php');
+
+        expect($provider)->toContain("add_action('init'")
+            ->and($provider)->toContain('function_exists(\'add_action\')');
+    });
+
     it('leaves an existing provider untouched', function (): void {
         mkdir($this->themeDir.'/app/Providers', 0755, true);
         file_put_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php', '<?php // mine');
