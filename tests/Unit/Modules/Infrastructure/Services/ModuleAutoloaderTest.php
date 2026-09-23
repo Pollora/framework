@@ -106,6 +106,43 @@ describe('ModuleAutoloader', function (): void {
     });
 });
 
+describe('ModuleAutoloader::register()', function (): void {
+    beforeEach(function (): void {
+        $this->rootLoader = new ClassLoader('/fake-project/vendor');
+        $this->pluginLoader = new ClassLoader('/fake-project/public/content/plugins/query-monitor/vendor');
+    });
+
+    afterEach(function (): void {
+        $this->rootLoader->unregister();
+        $this->pluginLoader->unregister();
+    });
+
+    it('keeps the root loader ahead of a plugin loader registered after it', function (): void {
+        // Composer registers the root loader prepended; a plugin such as
+        // Query Monitor appends its own when WordPress loads it.
+        $this->rootLoader->register(true);
+        $this->pluginLoader->register(false);
+
+        $app = new Container;
+        $app->instance(ClassLoader::class, $this->rootLoader);
+
+        (new ModuleAutoloader($app))->register();
+
+        // Application::inferBasePath() reads the first key of this list.
+        expect(array_key_first(ClassLoader::getRegisteredLoaders()))->toBe('/fake-project/vendor');
+    });
+
+    it('registers a loader that is not registered yet', function (): void {
+        $app = new Container;
+        $app->instance(ClassLoader::class, $this->rootLoader);
+
+        (new ModuleAutoloader($app))->register();
+
+        expect(spl_autoload_functions())->toContain([$this->rootLoader, 'loadClass'])
+            ->and(ClassLoader::getRegisteredLoaders())->toHaveKey('/fake-project/vendor');
+    });
+});
+
 function createMockModuleForAutoloader(string $name, string $path): ModuleInterface
 {
     $module = Mockery::mock(ModuleInterface::class);
