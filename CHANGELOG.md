@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...develop)
 
+### Fixed
+- `patches/mockery-php84-nullable.patch` is back on `main`, byte for byte as v13.4.4 shipped it. The v13.4.x line declares that patch by the URL `refs/heads/main/patches/mockery-php84-nullable.patch`, and a released `composer.json` cannot change; removing the file from `main` on 2026-09-17 made the URL answer 404, and composer-patches v1 skips a patch it cannot fetch with only a warning — so every v13.4.x install since went without it. Nothing on the 13.32 line references the file: its patch URLs are pinned to commits
+
 ## [v13.32.0-beta.6](https://github.com/Pollora/framework/compare/v13.32.0-beta.5...v13.32.0-beta.6) - 2026-09-22
 
 ### Fixed
