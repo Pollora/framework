@@ -12,6 +12,7 @@ use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
+use function Laravel\Prompts\warning;
 
 #[Description('Configure environment for WordPress installation')]
 #[Signature('pollora:env:setup {--install : Suppress some informational output}', aliases: ['pollora:env-setup'])]
@@ -32,6 +33,25 @@ class LaunchPadSetupCommand extends Command
                 if (! $install) {
                     info('Database is already configured.');
                 }
+
+                return self::SUCCESS;
+            }
+
+            // This command runs from composer's post-autoload-dump hook, and
+            // that hook fires where there is frequently no terminal to answer
+            // a question: a container build, a deployment, CI. Laravel Prompts
+            // throws there, the throw was caught below, and `composer install`
+            // exited 1 with a message about prompting rather than about the
+            // database — which is a confusing way to learn that the database
+            // was simply not up yet.
+            //
+            // Nothing here is a gate. `pollora:install` is what refuses to
+            // continue without a database, and it says so plainly. So when
+            // there is nobody to ask, say what is wrong and what to run, and
+            // let composer finish.
+            if (! $this->input->isInteractive()) {
+                warning('The database is not reachable, and there is no terminal to ask for its settings.');
+                $this->line('  Set the DB_* values in .env, then run: php artisan pollora:env:setup');
 
                 return self::SUCCESS;
             }
