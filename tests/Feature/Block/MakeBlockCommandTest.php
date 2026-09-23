@@ -138,7 +138,7 @@ describe('pollora:make:block', function (): void {
             ->and($metadata)->not->toHaveKey('render');
     });
 
-    it('says so when nothing will register the block', function (): void {
+    it('writes the provider into a target whose blocks directory was never wired', function (): void {
         // A blocks directory that is not empty is taken as proof that the
         // infrastructure is in place. It usually is — but blocks registered by
         // something else live there too. theme-apiary ships a single ACF
@@ -153,11 +153,12 @@ describe('pollora:make:block', function (): void {
         );
 
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
-            ->expectsOutputToContain('Nothing will register this block')
             ->assertSuccessful();
+
+        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->toBeFile();
     });
 
-    it('stays quiet when a provider is there to register it', function (): void {
+    it('leaves an existing provider untouched', function (): void {
         mkdir($this->themeDir.'/app/Providers', 0755, true);
         file_put_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php', '<?php // mine');
         mkdir($this->themeDir.'/resources/views/blocks/already-here', 0755, true);
@@ -167,7 +168,6 @@ describe('pollora:make:block', function (): void {
         );
 
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
-            ->doesntExpectOutputToContain('Nothing will register this block')
             ->assertSuccessful();
 
         expect(file_get_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php'))
@@ -221,7 +221,11 @@ describe('pollora:make:block', function (): void {
 
         $vite = (string) file_get_contents($this->themeDir.'/vite.config.js');
 
-        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->not->toBeFile()
+        // This expectation was the opposite until the provider turned out to be
+        // the one piece a target can genuinely be missing while its blocks
+        // directory is full. The rest of the bootstrap is still skipped: the
+        // npm dependencies and the initial vite patch belong to a first block.
+        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->toBeFile()
             ->and((string) file_get_contents($this->themeDir.'/package.json'))->toBe($packageJson)
             ->and($vite)->toContain("'./resources/views/blocks/*/{index,view}.{js,jsx,ts,tsx}'")
             ->and($vite)->toContain("'./resources/blocks/*/{editor,style}.css'")
