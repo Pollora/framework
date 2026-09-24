@@ -230,6 +230,122 @@ jobs:
         if: failure()
         run: tail -n 200 storage/logs/laravel.log || true
 
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - name: Checkout skeleton
+        uses: actions/checkout@v7
+        with:
+          repository: Pollora/pollora
+
+      - name: Checkout framework
+        uses: actions/checkout@v7
+        with:
+          path: packages/framework
+
+      - name: Setup DDEV
+        uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
+
+      - name: Configure DDEV
+        run: |
+          ddev config \
+            --project-name=pollora \
+            --project-type=wordpress \
+            --docroot=public \
+            --php-version=8.4 \
+            --webserver-type=apache-fpm \
+            --database=mariadb:10.11 \
+            --nodejs-version=22 \
+            --disable-settings-management
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Prepare .env
+        run: |
+          cp .env.example .env
+          sed -i \
+            -e 's#^APP_URL=.*#APP_URL=https://pollora.ddev.site#' \
+            -e 's#^DB_CONNECTION=.*#DB_CONNECTION=mysql#' \
+            -e 's/^# DB_HOST=.*/DB_HOST=db/' \
+            -e 's/^# DB_PORT=.*/DB_PORT=3306/' \
+            -e 's/^# DB_DATABASE=.*/DB_DATABASE=db/' \
+            -e 's/^# DB_USERNAME=.*/DB_USERNAME=db/' \
+            -e 's/^# DB_PASSWORD=.*/DB_PASSWORD=db/' \
+            .env
+
+      - name: Install the skeleton with this framework checkout
+        run: |
+          ddev composer config repositories.framework '{"type": "path", "url": "packages/framework", "options": {"symlink": false, "versions": {"pollora/framework": "13.999.0"}}}'
+          ddev composer require pollora/framework:13.999.0 --with-all-dependencies --no-interaction --no-progress
+
+      - name: Generate application key
+        run: ddev exec php artisan key:generate --no-interaction
+
+      - name: Install WordPress
+        run: |
+          ddev exec php artisan pollora:install --install \
+            --title="Pollora" \
+            --description="Pollora CI" \
+            --admin-user=admin \
+            --admin-email=admin@example.com \
+            --admin-password=pollora-ci-password \
+            --locale=en_US \
+            --public=false \
+            --no-interaction
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/framework/tests/e2e/package-lock.json
+
+      - name: Install the browser tests
+        working-directory: packages/framework/tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      # DDEV serves HTTPS with a mkcert certificate when mkcert is present.
+      # Say which case the runner is in rather than guessing.
+      - name: Trust the site's certificate
+        run: |
+          if command -v mkcert >/dev/null && [ -f "$(mkcert -CAROOT)/rootCA.pem" ]; then
+            echo "Using mkcert's authority: $(mkcert -CAROOT)/rootCA.pem"
+            echo "NODE_EXTRA_CA_CERTS=$(mkcert -CAROOT)/rootCA.pem" >> "$GITHUB_ENV"
+          else
+            echo "::warning::No mkcert authority on the runner; certificate checks are off for this disposable site"
+            echo "NODE_TLS_REJECT_UNAUTHORIZED=0" >> "$GITHUB_ENV"
+          fi
+
+      - name: Browser tests
+        working-directory: packages/framework/tests/e2e
+        env:
+          E2E_HOME_URL: https://pollora.ddev.site
+          E2E_SITE_DIR: ${{ github.workspace }}
+          E2E_RUN_ID: ${{ github.run_id }}
+        run: npx playwright test
+
+      - name: Upload the browser test report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-report
+          path: |
+            packages/framework/tests/e2e/playwright-report
+            packages/framework/tests/e2e/test-results
+          retention-days: 14
+
+      - name: Laravel log
+        if: failure()
+        run: tail -n 200 storage/logs/laravel.log || true
+
   validate-changelog:
     name: Validate Changelog
     runs-on: ubuntu-latest
