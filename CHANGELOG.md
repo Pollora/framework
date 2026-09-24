@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.7...develop)
+
+## [v13.32.0-beta.7](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...v13.32.0-beta.7) - 2026-09-24
 
 ### Fixed
 - `pollora:make:block` refuses a theme or plugin that cannot build a block, and says why. A plugin made without assets has neither `package.json` nor `vite.config.js`: the block was written anyway, could not be built, and the `npm install` the command advised walked up to the site's own `package.json` and installed there. It now stops before writing anything and names the missing files
