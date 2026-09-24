@@ -18,7 +18,8 @@ use Symfony\Component\Console\Input\InputOption;
  *
  * Generates block files in `resources/views/blocks/{slug}` (block.json, index.jsx,
  * edit.jsx, render.blade.php, CSS, etc.) and bootstraps the Vite infrastructure on
- * first use (vite.config.js patching, npm dependencies, BlocksServiceProvider).
+ * first use (vite.config.js patching, npm dependencies). No service provider is
+ * written: the framework registers every module's blocks by convention.
  *
  * Blocks are dynamic and rendered with Blade by default: their markup is not stored
  * in post_content, so changing it never invalidates existing content. `--static`
@@ -106,7 +107,6 @@ class MakeBlockCommand extends Command
             $this->bootstrapInfrastructure($target);
         } else {
             $this->upgradeViteConfig($target);
-            $this->ensureBlocksServiceProviderExists($target);
         }
 
         // Scaffold the block
@@ -129,7 +129,7 @@ class MakeBlockCommand extends Command
     /**
      * Resolve the target theme or plugin.
      *
-     * @return array{type: string, path: string, slug: string, namespace: string, containerName: string}|null
+     * @return array{type: string, path: string, slug: string}|null
      */
     private function resolveTarget(): ?array
     {
@@ -154,8 +154,6 @@ class MakeBlockCommand extends Command
                 'type' => 'plugin',
                 'path' => $path,
                 'slug' => $plugin,
-                'namespace' => $this->getPluginSourceNamespace().'Providers',
-                'containerName' => 'plugin.'.$plugin,
             ];
         }
 
@@ -180,37 +178,7 @@ class MakeBlockCommand extends Command
             'type' => 'theme',
             'path' => $path,
             'slug' => $theme,
-            'namespace' => $this->getThemeSourceNamespace($theme).'Providers',
-            'containerName' => 'theme',
         ];
-    }
-
-    /**
-     * Write the BlocksServiceProvider when the target has none.
-     *
-     * A blocks directory that is not empty used to be taken as proof that the
-     * infrastructure was already in place. It usually is — but not always.
-     * Blocks registered by something else live there too: an ACF block, a
-     * block placed by hand, a block from a theme written before the provider
-     * existed. None of those needs the BlocksServiceProvider that registers
-     * Vite-built blocks, so a target can hold blocks and have no provider.
-     *
-     * In such a target every block ever scaffolded was written to disk, built
-     * by Vite, and registered by nobody — nothing failed, nothing reached the
-     * log, and the block simply never appeared in the editor. Measured on
-     * theme-apiary, whose only shipped block is an ACF one.
-     *
-     * Only the provider is created here. The rest of the bootstrap — npm
-     * dependencies, the initial vite.config.js patch — belongs to a genuinely
-     * first block and is left alone.
-     */
-    private function ensureBlocksServiceProviderExists(array $target): void
-    {
-        if (file_exists($this->blocksServiceProviderPath($target))) {
-            return;
-        }
-
-        $this->createBlocksServiceProvider($target);
     }
 
     /**
@@ -218,49 +186,8 @@ class MakeBlockCommand extends Command
      */
     private function bootstrapInfrastructure(array $target): void
     {
-        $this->createBlocksServiceProvider($target);
         $this->patchViteConfig($target);
         $this->addNpmDependencies($target);
-    }
-
-    /**
-     * Where the BlocksServiceProvider goes: the target's source directory,
-     * `app/` or `src/`, whichever its autoloader maps.
-     *
-     * The stub reaches the blocks with `dirname(__DIR__, 2)`, which lands on
-     * the target root from either directory.
-     *
-     * @param  array{path: string}  $target
-     */
-    private function blocksServiceProviderPath(array $target): string
-    {
-        return $this->resolveSourceDirectory($target['path']).'/Providers/BlocksServiceProvider.php';
-    }
-
-    /**
-     * Create the BlocksServiceProvider in the target.
-     */
-    private function createBlocksServiceProvider(array $target): void
-    {
-        $providerPath = $this->blocksServiceProviderPath($target);
-
-        if (file_exists($providerPath)) {
-            $this->components->warn('BlocksServiceProvider already exists, skipping.');
-
-            return;
-        }
-
-        $stub = $this->getStubContent('blocks-service-provider.php');
-        $stub = str_replace(
-            ['{{ namespace }}', '{{ containerName }}'],
-            [$target['namespace'], $target['containerName']],
-            $stub
-        );
-
-        $this->ensureDirectoryExists(dirname($providerPath));
-        file_put_contents($providerPath, $stub);
-
-        $this->components->twoColumnDetail('BlocksServiceProvider', 'CREATED');
     }
 
     /**

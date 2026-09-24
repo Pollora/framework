@@ -138,14 +138,13 @@ describe('pollora:make:block', function (): void {
             ->and($metadata)->not->toHaveKey('render');
     });
 
-    it('writes the provider into a target whose blocks directory was never wired', function (): void {
-        // A blocks directory that is not empty is taken as proof that the
-        // infrastructure is in place. It usually is — but blocks registered by
-        // something else live there too. theme-apiary ships a single ACF
-        // block, which needs no BlocksServiceProvider, so every block
-        // scaffolded into it was written, built by Vite, and registered by
-        // nobody. Nothing failed and nothing was logged; it simply never
-        // appeared in the editor.
+    it('writes no BlocksServiceProvider: the framework registers the blocks by convention', function (): void {
+        // Two generations of this provider failed in turn. One called
+        // registerDirectory() from boot(), before WordPress defined
+        // register_block_type() in WP-CLI; the next hooked init from boot(),
+        // which over HTTP runs after init has fired — blocks existed in
+        // WP-CLI only. The framework now registers every module's
+        // resources/views/blocks itself, so nothing is written here.
         mkdir($this->themeDir.'/resources/views/blocks/legacy-acf', 0755, true);
         file_put_contents(
             $this->themeDir.'/resources/views/blocks/legacy-acf/block.json',
@@ -155,38 +154,19 @@ describe('pollora:make:block', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
             ->assertSuccessful();
 
-        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->toBeFile();
+        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->not->toBeFile();
     });
 
-    it('defers registration to init in the provider it writes', function (): void {
-        // The regression this pins, and it is not hypothetical: theme-default
-        // shipped v1.4.0 with a provider that called registerDirectory()
-        // straight from boot(). Providers boot before WordPress has defined
-        // register_block_type(), and BlockRegistrar answers that by returning
-        // immediately — no error, no notice, the blocks simply never existed.
-        // That theme fixed its own copy by hand; the stub that writes every
-        // other one kept the broken shape, so each new theme and plugin was
-        // born with the bug.
-        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
-            ->assertSuccessful();
-
-        $provider = (string) file_get_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php');
-
-        expect($provider)->toContain("add_action('init'")
-            ->and($provider)->toContain("function_exists('add_action')");
-    });
-
-    it('writes the provider into src/ for a target that keeps its classes there', function (): void {
-        // Writing into app/ here would not merely misplace one file: the
-        // autoloader maps the namespace onto app/ as soon as it exists, so
-        // every class already in src/ would stop being loaded.
+    it('creates no app/ directory in a target that keeps its classes in src/', function (): void {
+        // The autoloader maps the namespace onto app/ as soon as it exists, so
+        // creating it would stop every class already in src/ from loading.
         mkdir($this->themeDir.'/src/Providers', 0755, true);
 
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
             ->assertSuccessful();
 
-        expect($this->themeDir.'/src/Providers/BlocksServiceProvider.php')->toBeFile()
-            ->and($this->themeDir.'/app')->not->toBeDirectory();
+        expect($this->themeDir.'/app')->not->toBeDirectory()
+            ->and($this->themeDir.'/src/Providers/BlocksServiceProvider.php')->not->toBeFile();
     });
 
     it('leaves an existing provider untouched', function (): void {
@@ -213,7 +193,7 @@ describe('pollora:make:block', function (): void {
         expect($this->themeDir.'/resources/views/blocks/hero/render.blade.php')->toBeFile();
     });
 
-    it('bootstraps the provider and Vite entries for every block asset on the first block', function (): void {
+    it('bootstraps the Vite entries for every block asset on the first block', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])->assertSuccessful();
 
         expectValidViteConfig($this->themeDir.'/vite.config.js');
@@ -221,7 +201,7 @@ describe('pollora:make:block', function (): void {
         $vite = (string) file_get_contents($this->themeDir.'/vite.config.js');
         preg_match('/refresh:\s*\[(.*?)\]/s', $vite, $refresh);
 
-        expect((string) file_get_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php'))->toContain("'/resources/views/blocks'")
+        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->not->toBeFile()
             ->and($vite)->toContain("'./resources/views/blocks/*/{index,view}.{js,jsx,ts,tsx}'")
             ->and($vite)->toContain("'./resources/views/blocks/*/{editor,style}.css'")
             ->and($vite)->toContain('...(hasBlocks ? [wordpressPlugin()] : [])')
@@ -252,11 +232,9 @@ describe('pollora:make:block', function (): void {
 
         $vite = (string) file_get_contents($this->themeDir.'/vite.config.js');
 
-        // This expectation was the opposite until the provider turned out to be
-        // the one piece a target can genuinely be missing while its blocks
-        // directory is full. The rest of the bootstrap is still skipped: the
-        // npm dependencies and the initial vite patch belong to a first block.
-        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->toBeFile()
+        // The rest of the bootstrap is skipped: the npm dependencies and the
+        // initial vite patch belong to a first block.
+        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->not->toBeFile()
             ->and((string) file_get_contents($this->themeDir.'/package.json'))->toBe($packageJson)
             ->and($vite)->toContain("'./resources/views/blocks/*/{index,view}.{js,jsx,ts,tsx}'")
             ->and($vite)->toContain("'./resources/blocks/*/{editor,style}.css'")

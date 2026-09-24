@@ -48,6 +48,14 @@ class TestableBlockRegistrar extends BlockRegistrar
 {
     public ?ViteManagerInterface $mockViteManager = null;
 
+    /** @var list<string> Block names WordPress already holds */
+    public array $alreadyRegistered = [];
+
+    protected function isBlockRegistered(string $blockName): bool
+    {
+        return in_array($blockName, $this->alreadyRegistered, true);
+    }
+
     protected function getBlocksViteManager(string $parentContainerName): ?ViteManagerInterface
     {
         return $this->mockViteManager;
@@ -153,6 +161,24 @@ describe('BlockRegistrar', function (): void {
 
         expect($this->registeredBlocks)->toHaveCount(1);
         expect($this->registeredBlocks[0]['dir'])->toBe($this->tempDir.'/hero');
+    });
+
+    it('skips a block WordPress already holds, without registering its assets again', function (): void {
+        // The framework registers every module's blocks by convention; a
+        // BlocksServiceProvider kept from an earlier release registers them a
+        // second time, which WordPress would reject with a notice.
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+        ]));
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite();
+        $registrar->alreadyRegistered = ['test/hero'];
+        $registrar->registerDirectory($this->tempDir, 'theme');
+
+        expect($this->registeredBlocks)->toBeEmpty()
+            ->and($this->registeredScripts)->toBeEmpty();
     });
 
     it('skips non-existent directories gracefully', function (): void {
