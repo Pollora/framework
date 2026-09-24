@@ -231,9 +231,17 @@ jobs:
         run: tail -n 200 storage/logs/laravel.log || true
 
   e2e:
-    name: E2E
+    name: E2E (${{ matrix.autoloader }} autoloader)
     runs-on: ubuntu-latest
     needs: tests
+
+    # authoritative: a deployment dumped with --classmap-authoritative answers
+    # from the classmap alone. Theme and plugin classes are autoloaded at
+    # runtime, and every front-end page once answered 404 there (#320).
+    strategy:
+      fail-fast: false
+      matrix:
+        autoloader: [default, authoritative]
 
     steps:
       - name: Checkout skeleton
@@ -303,6 +311,12 @@ jobs:
       - name: Build the block fixtures
         run: ddev exec bash packages/framework/tests/e2e/bin/fixtures.sh up
 
+      - name: Dump an authoritative classmap
+        if: matrix.autoloader == 'authoritative'
+        run: |
+          ddev composer dump-autoload --classmap-authoritative --no-interaction
+          grep -q 'setClassMapAuthoritative(true)' vendor/composer/autoload_real.php
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
@@ -340,7 +354,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: e2e-report
+          name: e2e-report-${{ matrix.autoloader }}
           path: |
             packages/framework/tests/e2e/playwright-report
             packages/framework/tests/e2e/test-results
