@@ -15,6 +15,8 @@ use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOption
 use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Plugin\Domain\Models\PluginMetadata;
 use Pollora\Support\NpmRunner;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
@@ -35,12 +37,14 @@ use function Laravel\Prompts\text;
     {--plugin-version= : Plugin version}
     {--repository= : GitHub repository to download (owner/repo format)}
     {--repo-version= : Specific version/tag to download}
-    {--asset= : Include asset files (JS/CSS) with ViteJS compilation (true/false)}
+    {--asset= : Include asset files (JS/CSS) with ViteJS compilation (--asset alone means true)}
     {--activate-plugin= : Activate the plugin after creation (yes/no)}
     {--force : Force create plugin with same name}', aliases: ['pollora:make-plugin'])]
 class MakePluginCommand extends Command implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
-    use PromptsForMissingOption;
+    use PromptsForMissingOption {
+        initialize as initializeMissingOptions;
+    }
 
     /**
      * List of files and directories to exclude when --asset is false.
@@ -217,6 +221,22 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         }
 
         return false;
+    }
+
+    /**
+     * Read `--asset` given without a value as "yes".
+     *
+     * The option takes a value, so a bare flag reads as null — which the
+     * missing-option defaults then turned into "false": `--asset` alone left
+     * the assets out. Set before those defaults and before any prompt.
+     */
+    protected function initialize(InputInterface $input, OutputInterface $output): void
+    {
+        if ($input->hasParameterOption('--asset', true) && $input->getOption('asset') === null) {
+            $input->setOption('asset', 'true');
+        }
+
+        $this->initializeMissingOptions($input, $output);
     }
 
     /**

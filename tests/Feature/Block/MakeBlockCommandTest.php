@@ -177,6 +177,20 @@ describe('pollora:make:block', function (): void {
         expect(json_decode((string) file_get_contents($blockDir.'/block.json'), true)['title'])->toBe("Owner's Hero");
     });
 
+    it('refuses a target that has no Vite build, and writes nothing', function (string $missing): void {
+        // A plugin made without assets has neither file. The block written
+        // there could not be built, and the "npm install" advice that followed
+        // walked up to the site's own package.json.
+        unlink($this->themeDir.'/'.$missing);
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->expectsOutputToContain('needs a Vite build')
+            ->doesntExpectOutputToContain('npm install')
+            ->assertFailed();
+
+        expect($this->themeDir.'/resources/views/blocks')->not->toBeDirectory();
+    })->with(['package.json', 'vite.config.js']);
+
     it('creates a static block with --static', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--static' => true])
             ->assertSuccessful();
