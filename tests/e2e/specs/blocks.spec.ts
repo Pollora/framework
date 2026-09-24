@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { expect, test } from '@wordpress/e2e-test-utils-playwright';
 import { runId, wp } from '../support/site';
@@ -25,6 +26,10 @@ const pluginBlocks: BlockCase[] = [
     { name: 'e2e-blocks/static-card', text: 'Static Card' },
 ];
 
+const moduleBlocks: BlockCase[] = [{ name: 'e2e-module/module-card', text: 'Module Card' }];
+
+const generatedThemeBlocks: BlockCase[] = [{ name: 'default/theme-card', text: 'Theme Card' }];
+
 const themeDefaultBlocks: BlockCase[] = [
     { name: 'default/hero', text: 'Hero', previewGap: 'theme-default ships the placeholder edit.jsx ("Hero – Block Editor")' },
     { name: 'default/call-to-action', attributes: { heading: `Call to action ${runId}` }, text: `Call to action ${runId}` },
@@ -37,11 +42,29 @@ function watchPageErrors(page: Page): string[] {
     return errors;
 }
 
+/**
+ * Whether a fixture exists on disk. A fixture is skipped only when it was never
+ * built — never because its block is missing from WordPress, which is the bug.
+ */
+function fixtureBuilt(relativePath: string): boolean {
+    return existsSync(`${process.env.E2E_SITE_DIR ?? process.cwd()}/${relativePath}`);
+}
+
 function blockCases(): { host: string; blocks: BlockCase[]; skip: string | null }[] {
     const activePlugins = wp('plugin', 'list', '--status=active', '--field=name').split('\n');
     const activeTheme = wp('theme', 'list', '--status=active', '--field=name');
 
     return [
+        {
+            host: 'Laravel module with no service provider',
+            blocks: moduleBlocks,
+            skip: fixtureBuilt('Modules/E2eModule/resources/views/blocks/module-card/block.json') ? null : 'fixture module missing: run tests/e2e/bin/fixtures.sh up',
+        },
+        {
+            host: 'theme, made there by make:block',
+            blocks: generatedThemeBlocks,
+            skip: fixtureBuilt('themes/default/resources/views/blocks/theme-card/block.json') ? null : 'no theme block fixture: fixtures.sh only makes one in theme-default',
+        },
         {
             host: 'plugin made by make:plugin and make:block',
             blocks: pluginBlocks,
