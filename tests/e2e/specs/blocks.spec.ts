@@ -16,6 +16,8 @@ type BlockCase = {
     attributes?: Record<string, unknown>;
     /** Text the block renders on the front end */
     text: string;
+    /** Why the editor preview is known not to match the page yet */
+    previewGap?: string;
 };
 
 const pluginBlocks: BlockCase[] = [
@@ -24,7 +26,7 @@ const pluginBlocks: BlockCase[] = [
 ];
 
 const themeDefaultBlocks: BlockCase[] = [
-    { name: 'default/hero', text: 'Hero' },
+    { name: 'default/hero', text: 'Hero', previewGap: 'theme-default ships the placeholder edit.jsx ("Hero – Block Editor")' },
     { name: 'default/call-to-action', attributes: { heading: `Call to action ${runId}` }, text: `Call to action ${runId}` },
 ];
 
@@ -63,6 +65,18 @@ for (const { host, blocks, skip } of blockCases()) {
 
                 expect(type.name).toBe(block.name);
                 expect(type.editor_script_handles?.length ?? 0).toBeGreaterThan(0);
+            });
+
+            test(`${block.name} previews in the editor what the page shows`, async ({ admin, editor }) => {
+                test.fail(block.previewGap !== undefined, block.previewGap);
+
+                await admin.createNewPost({ title: `E2E preview ${block.name} ${runId}` });
+                await editor.insertBlock({ name: block.name, attributes: block.attributes });
+
+                // A dynamic block renders through ServerSideRender: the text arrives from REST
+                const preview = editor.canvas.locator(`[data-type="${block.name}"]`);
+                await expect(preview).toContainText(block.text);
+                await expect(preview).not.toContainText('Block Editor');
             });
 
             test(`${block.name} is inserted in the editor, stays valid and renders on the page`, async ({ admin, editor, page, requestUtils }) => {
