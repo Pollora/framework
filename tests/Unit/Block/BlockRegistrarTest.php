@@ -48,6 +48,14 @@ class TestableBlockRegistrar extends BlockRegistrar
 {
     public ?ViteManagerInterface $mockViteManager = null;
 
+    /** @var list<string> Block names WordPress already holds */
+    public array $alreadyRegistered = [];
+
+    protected function isBlockRegistered(string $blockName): bool
+    {
+        return in_array($blockName, $this->alreadyRegistered, true);
+    }
+
     protected function getBlocksViteManager(string $parentContainerName): ?ViteManagerInterface
     {
         return $this->mockViteManager;
@@ -105,10 +113,14 @@ afterEach(function (): void {
     rmdir($this->themeDir);
 });
 
-function createMockVite(bool $isHot = false): ViteManagerInterface
+function createMockVite(bool $isHot = false, string $buildDirectory = 'build/pollora-block-test-none'): ViteManagerInterface
 {
     $vite = Mockery::mock(ViteManagerInterface::class);
     $vite->shouldReceive('isRunningHot')->andReturn($isHot);
+    $vite->shouldReceive('container')->andReturn(new AssetContainer('theme.blocks', [
+        'build_directory' => $buildDirectory,
+        'manifest_path' => 'manifest.json',
+    ]));
     $vite->shouldReceive('asset')->andReturnUsing(fn ($path): string => 'http://localhost:5173/'.$path);
     $vite->shouldReceive('getAssetUrls')->andReturnUsing(function ($entrypoints): array {
         $js = [];
@@ -155,6 +167,24 @@ describe('BlockRegistrar', function (): void {
         expect($this->registeredBlocks[0]['dir'])->toBe($this->tempDir.'/hero');
     });
 
+    it('skips a block WordPress already holds, without registering its assets again', function (): void {
+        // The framework registers every module's blocks by convention; a
+        // BlocksServiceProvider kept from an earlier release registers them a
+        // second time, which WordPress would reject with a notice.
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+        ]));
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite();
+        $registrar->alreadyRegistered = ['test/hero'];
+        $registrar->registerDirectory($this->tempDir, 'theme');
+
+        expect($this->registeredBlocks)->toBeEmpty()
+            ->and($this->registeredScripts)->toBeEmpty();
+    });
+
     it('skips non-existent directories gracefully', function (): void {
         $registrar = new BlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->registerDirectory('/nonexistent/path', 'theme');
@@ -185,6 +215,52 @@ describe('BlockRegistrar', function (): void {
         expect($this->registeredScripts)->toHaveKey('test-hero-editor-script');
         expect($this->registeredScripts['test-hero-editor-script']['src'])
             ->toContain('index-abc123.js');
+        expect($this->registeredScripts['test-hero-editor-script']['deps'])
+            ->toBe(['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n']);
+    });
+
+    it('adds the WordPress scripts the build recorded in editor.deps.json to the editor script', function (): void {
+        // @roots/vite-plugin externalises every @wordpress/* import and lists
+        // the matching script handles in editor.deps.json. Without them, a
+        // block importing @wordpress/server-side-render depends on a script
+        // WordPress may not load.
+        $buildDirectory = 'build/pollora-block-deps-'.uniqid();
+        $public = sys_get_temp_dir().'/'.$buildDirectory;
+        mkdir($public.'/assets', 0755, true);
+        file_put_contents($public.'/manifest.json', json_encode([
+            'editor.deps.json' => ['file' => 'assets/editor.deps-abc123.json'],
+        ]));
+        file_put_contents($public.'/assets/editor.deps-abc123.json', json_encode(['wp-blocks', 'wp-server-side-render', 'wp-components']));
+
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+        ]));
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite(buildDirectory: $buildDirectory);
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
+        unlink($public.'/assets/editor.deps-abc123.json');
+        rmdir($public.'/assets');
+        unlink($public.'/manifest.json');
+        rmdir($public);
+
+        expect($this->registeredScripts['test-hero-editor-script']['deps'])
+            ->toBe(['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n', 'wp-server-side-render', 'wp-components']);
+    });
+
+    it('keeps the default editor script dependencies when the build recorded none', function (): void {
+        // In dev mode (HMR) there is no build, hence no editor.deps.json
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+        ]));
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite(isHot: true);
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
         expect($this->registeredScripts['test-hero-editor-script']['deps'])
             ->toBe(['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n']);
     });
@@ -252,6 +328,31 @@ describe('BlockRegistrar', function (): void {
         expect($this->registeredBlocks)->toHaveCount(1);
         expect($this->registeredBlocks[0]['args'])->toHaveKey('render_callback');
         expect($this->registeredBlocks[0]['args']['render_callback'])->toBeCallable();
+    });
+
+    it('leaves a classic React block to render the markup it saved', function (): void {
+        // save.jsx and no `render` in block.json is the standard Gutenberg
+        // shape: the markup save() produced is stored in post_content, and
+        // WordPress serves it. A render_callback would override that markup —
+        // with nothing, since there is no render file to call. So the callback
+        // must be absent, not null: null is what a *declared* render file that
+        // cannot be used resolves to, and it means something else.
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+            'editorStyle' => 'file:./editor.css',
+            'style' => 'file:./style.css',
+        ]));
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite();
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredBlocks)->toHaveCount(1)
+            ->and($this->registeredBlocks[0]['args'])->not->toHaveKey('render_callback')
+            ->and($this->registeredScripts)->toHaveKey('test-hero-editor-script')
+            ->and($this->registeredStyles)->toHaveKey('test-hero-editor-style')
+            ->and($this->registeredStyles)->toHaveKey('test-hero-style');
     });
 
     it('builds handles matching WP generate_block_asset_handle format', function (): void {

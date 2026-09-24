@@ -18,7 +18,8 @@ use Symfony\Component\Console\Input\InputOption;
  *
  * Generates block files in `resources/views/blocks/{slug}` (block.json, index.jsx,
  * edit.jsx, render.blade.php, CSS, etc.) and bootstraps the Vite infrastructure on
- * first use (vite.config.js patching, npm dependencies, BlocksServiceProvider).
+ * first use (vite.config.js patching, npm dependencies). No service provider is
+ * written: the framework registers every module's blocks by convention.
  *
  * Blocks are dynamic and rendered with Blade by default: their markup is not stored
  * in post_content, so changing it never invalidates existing content. `--static`
@@ -44,6 +45,7 @@ class MakeBlockCommand extends Command
         '@wordpress/components' => '^29.0.0',
         '@wordpress/element' => '^6.0.0',
         '@wordpress/i18n' => '^5.0.0',
+        '@wordpress/server-side-render' => '^5.0.0',
     ];
 
     /**
@@ -82,6 +84,20 @@ class MakeBlockCommand extends Command
         $target = $this->resolveTarget();
 
         if ($target === null) {
+            return self::FAILURE;
+        }
+
+        $missingBuildFiles = $this->missingBuildFiles($target['path']);
+
+        if ($missingBuildFiles !== []) {
+            $this->components->error(sprintf(
+                'The %s "%s" has no %s: a block needs a Vite build. Add them to %s — a plugin made with `pollora:make:plugin --asset` has both.',
+                $target['type'],
+                $target['slug'],
+                implode(' and no ', $missingBuildFiles),
+                $target['path'],
+            ));
+
             return self::FAILURE;
         }
 
@@ -128,7 +144,7 @@ class MakeBlockCommand extends Command
     /**
      * Resolve the target theme or plugin.
      *
-     * @return array{type: string, path: string, slug: string, namespace: string, containerName: string}|null
+     * @return array{type: string, path: string, slug: string}|null
      */
     private function resolveTarget(): ?array
     {
@@ -153,8 +169,6 @@ class MakeBlockCommand extends Command
                 'type' => 'plugin',
                 'path' => $path,
                 'slug' => $plugin,
-                'namespace' => $this->getPluginSourceNamespace().'Providers',
-                'containerName' => 'plugin.'.$plugin,
             ];
         }
 
@@ -179,9 +193,33 @@ class MakeBlockCommand extends Command
             'type' => 'theme',
             'path' => $path,
             'slug' => $theme,
-            'namespace' => $this->getThemeSourceNamespace($theme).'Providers',
-            'containerName' => 'theme',
         ];
+    }
+
+    /**
+     * The build files a target lacks to compile a block: its package.json,
+     * and a Vite config under any of the names Vite reads.
+     *
+     * @return list<string>
+     */
+    private function missingBuildFiles(string $path): array
+    {
+        $missing = [];
+
+        if (! is_file($path.'/package.json')) {
+            $missing[] = 'package.json';
+        }
+
+        $viteConfigs = array_map(
+            fn (string $extension): string => $path.'/vite.config.'.$extension,
+            ['js', 'ts', 'mjs', 'mts', 'cjs', 'cts'],
+        );
+
+        if (array_filter($viteConfigs, is_file(...)) === []) {
+            $missing[] = 'vite.config.js';
+        }
+
+        return $missing;
     }
 
     /**
@@ -189,35 +227,8 @@ class MakeBlockCommand extends Command
      */
     private function bootstrapInfrastructure(array $target): void
     {
-        $this->createBlocksServiceProvider($target);
         $this->patchViteConfig($target);
         $this->addNpmDependencies($target);
-    }
-
-    /**
-     * Create the BlocksServiceProvider in the target.
-     */
-    private function createBlocksServiceProvider(array $target): void
-    {
-        $providerPath = $target['path'].'/app/Providers/BlocksServiceProvider.php';
-
-        if (file_exists($providerPath)) {
-            $this->components->warn('BlocksServiceProvider already exists, skipping.');
-
-            return;
-        }
-
-        $stub = $this->getStubContent('blocks-service-provider.php');
-        $stub = str_replace(
-            ['{{ namespace }}', '{{ containerName }}'],
-            [$target['namespace'], $target['containerName']],
-            $stub
-        );
-
-        $this->ensureDirectoryExists(dirname($providerPath));
-        file_put_contents($providerPath, $stub);
-
-        $this->components->twoColumnDetail('BlocksServiceProvider', 'CREATED');
     }
 
     /**
@@ -551,14 +562,23 @@ class MakeBlockCommand extends Command
 
         $this->writeStub($blockDir.'/index.jsx', $indexStub, $replacements);
 
-        // edit.jsx
-        $editStub = $hasInnerBlocks ? 'edit-inner-blocks.jsx' : 'edit.jsx';
-        $this->writeStub($blockDir.'/edit.jsx', $this->getStubContent($editStub), $replacements);
+        // edit.jsx — the editor shows what the page shows: the server render of
+        // a dynamic block, the save() markup of a static one. Inner blocks are
+        // edited in place, which a server render cannot do.
+        $editStub = match (true) {
+            $hasInnerBlocks => 'edit-inner-blocks.jsx',
+            $isDynamic => 'edit-dynamic.jsx',
+            default => 'edit.jsx',
+        };
+        // The title lands in single-quoted JavaScript strings
+        $jsxReplacements = [...$replacements, '{{ title }}' => addcslashes($title, "'\\")];
+
+        $this->writeStub($blockDir.'/edit.jsx', $this->getStubContent($editStub), $jsxReplacements);
 
         // save.jsx (only for static blocks)
         if (! $isDynamic) {
             $saveStub = $hasInnerBlocks ? 'save-inner-blocks.jsx' : 'save.jsx';
-            $this->writeStub($blockDir.'/save.jsx', $this->getStubContent($saveStub), $replacements);
+            $this->writeStub($blockDir.'/save.jsx', $this->getStubContent($saveStub), $jsxReplacements);
         }
 
         // render.blade.php (only for dynamic blocks)

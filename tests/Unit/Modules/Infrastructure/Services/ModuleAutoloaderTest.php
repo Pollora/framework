@@ -11,7 +11,7 @@ describe('ModuleAutoloader', function (): void {
     beforeEach(function (): void {
         $this->app = new Container;
         $this->classLoader = Mockery::mock(ClassLoader::class)->shouldIgnoreMissing();
-        $this->app->instance(ClassLoader::class, $this->classLoader);
+        $this->app->instance(ModuleAutoloader::CLASS_LOADER, $this->classLoader);
         $this->autoloader = new ModuleAutoloader($this->app);
     });
 
@@ -103,6 +103,79 @@ describe('ModuleAutoloader', function (): void {
 
         rmdir($tempDir.'/app');
         rmdir($tempDir);
+    });
+});
+
+describe('ModuleAutoloader::register()', function (): void {
+    beforeEach(function (): void {
+        $this->rootLoader = new ClassLoader('/fake-project/vendor');
+        $this->pluginLoader = new ClassLoader('/fake-project/public/content/plugins/query-monitor/vendor');
+    });
+
+    afterEach(function (): void {
+        $this->rootLoader->unregister();
+        $this->pluginLoader->unregister();
+    });
+
+    it('keeps the root loader ahead of a plugin loader registered after it', function (): void {
+        // Composer registers the root loader prepended; a plugin such as
+        // Query Monitor appends its own when WordPress loads it.
+        $this->rootLoader->register(true);
+        $this->pluginLoader->register(false);
+
+        $app = new Container;
+        $app->instance(ClassLoader::class, $this->rootLoader);
+
+        (new ModuleAutoloader($app))->register();
+
+        // Application::inferBasePath() reads the first key of this list.
+        expect(array_key_first(ClassLoader::getRegisteredLoaders()))->toBe('/fake-project/vendor');
+    });
+
+    it('registers a loader that is not registered yet', function (): void {
+        $app = new Container;
+        $app->instance(ModuleAutoloader::CLASS_LOADER, $this->rootLoader);
+
+        (new ModuleAutoloader($app))->register();
+
+        expect(spl_autoload_functions())->toContain([$this->rootLoader, 'loadClass'])
+            ->and(ClassLoader::getRegisteredLoaders())->toHaveKey('/fake-project/vendor');
+    });
+});
+
+describe('ModuleAutoloader under an authoritative classmap', function (): void {
+    beforeEach(function (): void {
+        $this->themeName = 'AuthoritativeTheme'.uniqid();
+        $this->themeDir = sys_get_temp_dir().'/'.$this->themeName;
+        mkdir($this->themeDir.'/app', 0777, true);
+        file_put_contents(
+            $this->themeDir.'/app/Probe.php',
+            "<?php\n\nnamespace Theme\\{$this->themeName};\n\nclass Probe {}\n"
+        );
+
+        // A root loader dumped with --classmap-authoritative answers only from
+        // its classmap and never looks at a PSR-4 prefix added at runtime.
+        $this->rootLoader = new ClassLoader('/fake-authoritative-project/vendor');
+        $this->rootLoader->setClassMapAuthoritative(true);
+        $this->rootLoader->register(true);
+    });
+
+    afterEach(function (): void {
+        $this->rootLoader->unregister();
+        unlink($this->themeDir.'/app/Probe.php');
+        rmdir($this->themeDir.'/app');
+        rmdir($this->themeDir);
+    });
+
+    it('still loads the classes of a registered theme', function (): void {
+        $app = new Container;
+        $app->instance(ClassLoader::class, $this->rootLoader);
+
+        $autoloader = new ModuleAutoloader($app);
+        $autoloader->registerTheme(createMockModuleForAutoloader($this->themeName, $this->themeDir));
+        $autoloader->register();
+
+        expect(class_exists("Theme\\{$this->themeName}\\Probe"))->toBeTrue();
     });
 });
 

@@ -126,6 +126,71 @@ describe('pollora:make:block', function (): void {
             ->and($render)->toContain('test-theme/hero');
     });
 
+    it('previews a dynamic block in the editor with its server render', function (): void {
+        // The editor used to show a placeholder ("… – Block Editor") while the
+        // page showed render.blade.php: what an author saw was never the result.
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->assertSuccessful();
+
+        $edit = (string) file_get_contents($this->themeDir.'/resources/views/blocks/hero/edit.jsx');
+
+        expect($edit)->toContain("import ServerSideRender from '@wordpress/server-side-render';")
+            ->and($edit)->toContain('<ServerSideRender block={metadata.name} attributes={attributes} />')
+            ->and($edit)->not->toContain('Block Editor');
+    });
+
+    it('previews a static block in the editor with the markup save() writes', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--static' => true, '--title' => 'Hero'])
+            ->assertSuccessful();
+
+        $blockDir = $this->themeDir.'/resources/views/blocks/hero';
+        $edit = (string) file_get_contents($blockDir.'/edit.jsx');
+        $save = (string) file_get_contents($blockDir.'/save.jsx');
+        $paragraph = "<p>{__('Hero', 'test-theme')}</p>";
+
+        expect($edit)->toContain($paragraph)
+            ->and($save)->toContain($paragraph)
+            ->and($edit)->not->toContain('ServerSideRender');
+    });
+
+    it('keeps the InnerBlocks editor for a block with inner blocks', function (): void {
+        // A server render cannot edit child blocks in place
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--inner-blocks' => true])
+            ->assertSuccessful();
+
+        $edit = (string) file_get_contents($this->themeDir.'/resources/views/blocks/hero/edit.jsx');
+
+        expect($edit)->toContain('<InnerBlocks />')
+            ->and($edit)->not->toContain('ServerSideRender');
+    });
+
+    it('writes a title with a quote as a valid JavaScript string', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--static' => true, '--title' => "Owner's Hero"])
+            ->assertSuccessful();
+
+        $blockDir = $this->themeDir.'/resources/views/blocks/hero';
+
+        foreach (['edit.jsx', 'save.jsx'] as $file) {
+            expect((string) file_get_contents($blockDir.'/'.$file))->toContain("__('Owner\\'s Hero', 'test-theme')");
+        }
+
+        expect(json_decode((string) file_get_contents($blockDir.'/block.json'), true)['title'])->toBe("Owner's Hero");
+    });
+
+    it('refuses a target that has no Vite build, and writes nothing', function (string $missing): void {
+        // A plugin made without assets has neither file. The block written
+        // there could not be built, and the "npm install" advice that followed
+        // walked up to the site's own package.json.
+        unlink($this->themeDir.'/'.$missing);
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->expectsOutputToContain('needs a Vite build')
+            ->doesntExpectOutputToContain('npm install')
+            ->assertFailed();
+
+        expect($this->themeDir.'/resources/views/blocks')->not->toBeDirectory();
+    })->with(['package.json', 'vite.config.js']);
+
     it('creates a static block with --static', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--static' => true])
             ->assertSuccessful();
@@ -138,6 +203,53 @@ describe('pollora:make:block', function (): void {
             ->and($metadata)->not->toHaveKey('render');
     });
 
+    it('writes no BlocksServiceProvider: the framework registers the blocks by convention', function (): void {
+        // Two generations of this provider failed in turn. One called
+        // registerDirectory() from boot(), before WordPress defined
+        // register_block_type() in WP-CLI; the next hooked init from boot(),
+        // which over HTTP runs after init has fired — blocks existed in
+        // WP-CLI only. The framework now registers every module's
+        // resources/views/blocks itself, so nothing is written here.
+        mkdir($this->themeDir.'/resources/views/blocks/legacy-acf', 0755, true);
+        file_put_contents(
+            $this->themeDir.'/resources/views/blocks/legacy-acf/block.json',
+            json_encode(['name' => 'theme/legacy-acf', 'acf' => ['mode' => 'preview']])
+        );
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->assertSuccessful();
+
+        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->not->toBeFile();
+    });
+
+    it('creates no app/ directory in a target that keeps its classes in src/', function (): void {
+        // The autoloader maps the namespace onto app/ as soon as it exists, so
+        // creating it would stop every class already in src/ from loading.
+        mkdir($this->themeDir.'/src/Providers', 0755, true);
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->assertSuccessful();
+
+        expect($this->themeDir.'/app')->not->toBeDirectory()
+            ->and($this->themeDir.'/src/Providers/BlocksServiceProvider.php')->not->toBeFile();
+    });
+
+    it('leaves an existing provider untouched', function (): void {
+        mkdir($this->themeDir.'/app/Providers', 0755, true);
+        file_put_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php', '<?php // mine');
+        mkdir($this->themeDir.'/resources/views/blocks/already-here', 0755, true);
+        file_put_contents(
+            $this->themeDir.'/resources/views/blocks/already-here/block.json',
+            json_encode(['name' => 'theme/already-here'])
+        );
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->assertSuccessful();
+
+        expect(file_get_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php'))
+            ->toBe('<?php // mine');
+    });
+
     it('still accepts the deprecated --dynamic option', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--dynamic' => true])
             ->expectsOutputToContain('--dynamic is deprecated')
@@ -146,7 +258,7 @@ describe('pollora:make:block', function (): void {
         expect($this->themeDir.'/resources/views/blocks/hero/render.blade.php')->toBeFile();
     });
 
-    it('bootstraps the provider and Vite entries for every block asset on the first block', function (): void {
+    it('bootstraps the Vite entries for every block asset on the first block', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])->assertSuccessful();
 
         expectValidViteConfig($this->themeDir.'/vite.config.js');
@@ -154,7 +266,7 @@ describe('pollora:make:block', function (): void {
         $vite = (string) file_get_contents($this->themeDir.'/vite.config.js');
         preg_match('/refresh:\s*\[(.*?)\]/s', $vite, $refresh);
 
-        expect((string) file_get_contents($this->themeDir.'/app/Providers/BlocksServiceProvider.php'))->toContain("'/resources/views/blocks'")
+        expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->not->toBeFile()
             ->and($vite)->toContain("'./resources/views/blocks/*/{index,view}.{js,jsx,ts,tsx}'")
             ->and($vite)->toContain("'./resources/views/blocks/*/{editor,style}.css'")
             ->and($vite)->toContain('...(hasBlocks ? [wordpressPlugin()] : [])')
@@ -163,6 +275,14 @@ describe('pollora:make:block', function (): void {
             ->and($refresh[1])->toContain("'themes/'+themeName+'/resources/views/**/*.blade.php'")
             ->and($refresh[1])->toContain("\n        'resources/views/**/*.blade.php',")
             ->and($refresh[1])->toContain("...refreshPaths.filter((refreshPath) => refreshPath !== 'resources/views/**')");
+    });
+
+    it('adds @wordpress/server-side-render to package.json with the first block', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])->assertSuccessful();
+
+        $package = json_decode((string) file_get_contents($this->themeDir.'/package.json'), true);
+
+        expect($package['devDependencies'])->toHaveKey('@wordpress/server-side-render');
     });
 
     it('patches the refresh paths only once', function (): void {
@@ -185,6 +305,8 @@ describe('pollora:make:block', function (): void {
 
         $vite = (string) file_get_contents($this->themeDir.'/vite.config.js');
 
+        // The rest of the bootstrap is skipped: the npm dependencies and the
+        // initial vite patch belong to a first block.
         expect($this->themeDir.'/app/Providers/BlocksServiceProvider.php')->not->toBeFile()
             ->and((string) file_get_contents($this->themeDir.'/package.json'))->toBe($packageJson)
             ->and($vite)->toContain("'./resources/views/blocks/*/{index,view}.{js,jsx,ts,tsx}'")

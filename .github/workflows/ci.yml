@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -39,10 +39,65 @@ jobs:
 
       - name: Upload coverage artifact
         if: matrix.php == '8.4'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage.xml
+
+  patches:
+    name: Patches
+    runs-on: ubuntu-latest
+
+    steps:
+      # Full history: a pinned commit has to be proven an ancestor of this one.
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Every patch this package asks its consumers to apply is served from
+      # this repository at a URL recorded in composer.json — and a released
+      # composer.json can never be changed again. Pointed at a branch, that
+      # URL moves under every version already published: deleting
+      # mockery-php84-nullable.patch from main on 2026-09-17 turned it into a
+      # 404 for every v13.4.x install, which composer-patches v1 skips with a
+      # warning. With v2 a moved patch is worse: a checksum mismatch against
+      # patches.lock.json, and a failed install.
+      #
+      # So each URL pins the commit that produced the patch, and this proves
+      # three things: the pin is a full SHA of this repository, that commit is
+      # in this branch's history, and the file there is the file here.
+      # Changing a patch therefore takes two commits — the patch, then the URL
+      # pointing at it — and a pull request that does so must be merged, not
+      # squashed, or the pinned commit leaves the history.
+      - name: Patch URLs pin the patches in this commit
+        run: |
+          set -uo pipefail
+          status=0
+          checked=0
+          while IFS=$'\t' read -r package url; do
+            if [[ ! "$url" =~ ^https://raw\.githubusercontent\.com/Pollora/framework/([0-9a-f]{40})/(patches/[^/]+\.patch)$ ]]; then
+              echo "::error file=composer.json::The $package patch must be pinned to a full commit SHA of this repository, got: $url"
+              status=1; continue
+            fi
+            sha="${BASH_REMATCH[1]}"; path="${BASH_REMATCH[2]}"
+            if ! git merge-base --is-ancestor "$sha" HEAD 2>/dev/null; then
+              echo "::error file=composer.json::The $package patch is pinned to $sha, which is not in this branch's history. Merge, do not squash, a pull request that changes a patch."
+              status=1; continue
+            fi
+            if ! diff -q <(git show "$sha:$path" 2>/dev/null) "$path" >/dev/null 2>&1; then
+              echo "::error file=$path::$path differs from the version composer.json pins ($sha). Commit the patch, then point the URL at that commit."
+              status=1; continue
+            fi
+            echo "ok  $package -> ${sha:0:10} $path"
+            checked=$((checked + 1))
+          done < <(jq -r '(.extra.patches // {}) | to_entries[] | .key as $p | .value | to_entries[] | "\($p)\t\(.value)"' composer.json)
+          # A job that reads no entry proves nothing and would still be green.
+          if [ "$checked" -eq 0 ] && [ "$status" -eq 0 ] && ls patches/*.patch >/dev/null 2>&1; then
+            echo "::error file=composer.json::patches/ holds patches but extra.patches declares none this job could read"
+            status=1
+          fi
+          exit $status
 
   code-quality:
     name: Code Quality
@@ -50,7 +105,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -84,15 +139,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download coverage artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: coverage-report
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
@@ -105,12 +160,12 @@ jobs:
 
     steps:
       - name: Checkout skeleton
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: Pollora/pollora
 
       - name: Checkout framework
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: packages/framework
 
@@ -175,6 +230,140 @@ jobs:
         if: failure()
         run: tail -n 200 storage/logs/laravel.log || true
 
+  e2e:
+    name: E2E (${{ matrix.autoloader }} autoloader)
+    runs-on: ubuntu-latest
+    needs: tests
+
+    # authoritative: a deployment dumped with --classmap-authoritative answers
+    # from the classmap alone. Theme and plugin classes are autoloaded at
+    # runtime, and every front-end page once answered 404 there (#320).
+    strategy:
+      fail-fast: false
+      matrix:
+        autoloader: [default, authoritative]
+
+    steps:
+      - name: Checkout skeleton
+        uses: actions/checkout@v7
+        with:
+          repository: Pollora/pollora
+
+      - name: Checkout framework
+        uses: actions/checkout@v7
+        with:
+          path: packages/framework
+
+      - name: Setup DDEV
+        uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
+
+      - name: Configure DDEV
+        run: |
+          ddev config \
+            --project-name=pollora \
+            --project-type=wordpress \
+            --docroot=public \
+            --php-version=8.4 \
+            --webserver-type=apache-fpm \
+            --database=mariadb:10.11 \
+            --nodejs-version=22 \
+            --disable-settings-management
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Prepare .env
+        run: |
+          cp .env.example .env
+          sed -i \
+            -e 's#^APP_URL=.*#APP_URL=https://pollora.ddev.site#' \
+            -e 's#^DB_CONNECTION=.*#DB_CONNECTION=mysql#' \
+            -e 's/^# DB_HOST=.*/DB_HOST=db/' \
+            -e 's/^# DB_PORT=.*/DB_PORT=3306/' \
+            -e 's/^# DB_DATABASE=.*/DB_DATABASE=db/' \
+            -e 's/^# DB_USERNAME=.*/DB_USERNAME=db/' \
+            -e 's/^# DB_PASSWORD=.*/DB_PASSWORD=db/' \
+            .env
+
+      - name: Install the skeleton with this framework checkout
+        run: |
+          ddev composer config repositories.framework '{"type": "path", "url": "packages/framework", "options": {"symlink": false, "versions": {"pollora/framework": "13.999.0"}}}'
+          ddev composer require pollora/framework:13.999.0 --with-all-dependencies --no-interaction --no-progress
+
+      - name: Generate application key
+        run: ddev exec php artisan key:generate --no-interaction
+
+      - name: Install WordPress
+        run: |
+          ddev exec php artisan pollora:install --install \
+            --title="Pollora" \
+            --description="Pollora CI" \
+            --admin-user=admin \
+            --admin-email=admin@example.com \
+            --admin-password=pollora-ci-password \
+            --locale=en_US \
+            --public=false \
+            --no-interaction
+
+      # Built with the framework's own generators, as a developer would
+      - name: Build the block fixtures
+        run: ddev exec bash packages/framework/tests/e2e/bin/fixtures.sh up
+
+      - name: Dump an authoritative classmap
+        if: matrix.autoloader == 'authoritative'
+        run: |
+          ddev composer dump-autoload --classmap-authoritative --no-interaction
+          grep -q 'setClassMapAuthoritative(true)' vendor/composer/autoload_real.php
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/framework/tests/e2e/package-lock.json
+
+      - name: Install the browser tests
+        working-directory: packages/framework/tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      # DDEV serves HTTPS with a mkcert certificate when mkcert is present.
+      # Say which case the runner is in rather than guessing.
+      - name: Trust the site's certificate
+        run: |
+          if command -v mkcert >/dev/null && [ -f "$(mkcert -CAROOT)/rootCA.pem" ]; then
+            echo "Using mkcert's authority: $(mkcert -CAROOT)/rootCA.pem"
+            echo "NODE_EXTRA_CA_CERTS=$(mkcert -CAROOT)/rootCA.pem" >> "$GITHUB_ENV"
+          else
+            echo "::warning::No mkcert authority on the runner; certificate checks are off for this disposable site"
+            echo "NODE_TLS_REJECT_UNAUTHORIZED=0" >> "$GITHUB_ENV"
+          fi
+
+      - name: Browser tests
+        working-directory: packages/framework/tests/e2e
+        env:
+          E2E_HOME_URL: https://pollora.ddev.site
+          E2E_SITE_DIR: ${{ github.workspace }}
+          E2E_RUN_ID: ${{ github.run_id }}
+        run: npx playwright test
+
+      - name: Upload the browser test report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-report-${{ matrix.autoloader }}
+          path: |
+            packages/framework/tests/e2e/playwright-report
+            packages/framework/tests/e2e/test-results
+          retention-days: 14
+
+      - name: Laravel log
+        if: failure()
+        run: tail -n 200 storage/logs/laravel.log || true
+
   validate-changelog:
     name: Validate Changelog
     runs-on: ubuntu-latest
@@ -182,7 +371,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check Unreleased section has entries
         run: |

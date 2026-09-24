@@ -66,6 +66,13 @@ class BlockRegistrar implements BlockRegistrarInterface
     private static array $reportedLegacyDirectories = [];
 
     /**
+     * Script handles each build recorded in editor.deps.json, keyed by build directory.
+     *
+     * @var array<string, list<string>>
+     */
+    private array $builtEditorDependencies = [];
+
+    /**
      * Vite project roots already detected, keyed by block directory.
      *
      * @var array<string, string|null>
@@ -127,13 +134,20 @@ class BlockRegistrar implements BlockRegistrarInterface
             return;
         }
 
+        $blockName = $metadata['name'];
+
+        // The framework registers every module's blocks by convention; a
+        // BlocksServiceProvider kept from an earlier release registers them
+        // again, and WordPress would reject the duplicate with a notice.
+        if ($this->isBlockRegistered($blockName)) {
+            return;
+        }
+
         $viteManager = $this->getBlocksViteManager($containerName);
 
         if (! $viteManager instanceof ViteManagerInterface) {
             return;
         }
-
-        $blockName = $metadata['name'];
 
         // Pre-register all asset handles BEFORE register_block_type().
         // WP's register_block_script_handle() checks wp_script_is($handle, 'registered')
@@ -157,6 +171,15 @@ class BlockRegistrar implements BlockRegistrarInterface
         }
 
         register_block_type($blockDir, $args);
+    }
+
+    /**
+     * Whether WordPress already holds a block type with this name.
+     */
+    protected function isBlockRegistered(string $blockName): bool
+    {
+        return class_exists(\WP_Block_Type_Registry::class)
+            && \WP_Block_Type_Registry::get_instance()->is_registered($blockName);
     }
 
     /**
@@ -294,7 +317,7 @@ class BlockRegistrar implements BlockRegistrarInterface
         }
 
         $handle = $this->buildHandle($blockName, $field);
-        $deps = $field === 'editorScript' ? self::DEFAULT_EDITOR_DEPS : [];
+        $deps = $field === 'editorScript' ? $this->editorScriptDependencies($viteManager) : [];
 
         if ($viteManager->isRunningHot()) {
             wp_register_script($handle, $viteManager->asset($entryPoint), $deps, null, true);
@@ -314,6 +337,57 @@ class BlockRegistrar implements BlockRegistrarInterface
                 }
             }
         }
+    }
+
+    /**
+     * WordPress scripts an editor script depends on: the defaults, plus every
+     * handle the build recorded in editor.deps.json.
+     *
+     * The Roots Vite plugin (@roots/vite-plugin) turns each @wordpress/* import
+     * into a global and lists the matching script handles there. Without them,
+     * a block importing @wordpress/server-side-render or @wordpress/components
+     * depends on a script WordPress may never load. In dev mode there is no
+     * build: the defaults stand.
+     *
+     * @return list<string>
+     */
+    private function editorScriptDependencies(ViteManagerInterface $viteManager): array
+    {
+        return array_values(array_unique([...self::DEFAULT_EDITOR_DEPS, ...$this->builtEditorDependencies($viteManager)]));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function builtEditorDependencies(ViteManagerInterface $viteManager): array
+    {
+        $container = $viteManager->container();
+        $buildDirectory = $container->getBuildDirectory();
+
+        if (array_key_exists($buildDirectory, $this->builtEditorDependencies)) {
+            return $this->builtEditorDependencies[$buildDirectory];
+        }
+
+        $buildPath = public_path($buildDirectory);
+        $manifest = $this->readJson($buildPath.'/'.$container->getManifestPath());
+        $file = $manifest['editor.deps.json']['file'] ?? null;
+        $handles = is_string($file) ? $this->readJson($buildPath.'/'.$file) : [];
+
+        return $this->builtEditorDependencies[$buildDirectory] = array_values(array_filter($handles, is_string(...)));
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function readJson(string $path): array
+    {
+        if (! is_file($path)) {
+            return [];
+        }
+
+        $data = json_decode((string) file_get_contents($path), true);
+
+        return is_array($data) ? $data : [];
     }
 
     /**

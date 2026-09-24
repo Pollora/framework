@@ -16,7 +16,7 @@
     "url": "https://github.com/Pollora/framework/issues"
   },
   "homepage": "https://pollora.dev",
-  "dependencies": {
+  "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "husky": "^9.1.7",

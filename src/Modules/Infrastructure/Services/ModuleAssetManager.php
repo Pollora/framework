@@ -25,6 +25,13 @@ class ModuleAssetManager
 
     private ?LoggerInterface $logger = null;
 
+    /**
+     * Root directory of every module whose assets were set up, keyed by asset container name.
+     *
+     * @var array<string, string>
+     */
+    private array $moduleRoots = [];
+
     public function __construct(
         protected Container $app
     ) {
@@ -45,18 +52,7 @@ class ModuleAssetManager
     public function setupModuleAssets(string $moduleName, string $modulePath, string $moduleType, ?string $moduleSlug = null): void
     {
         try {
-            // Setup asset container
-            if ($this->app->bound(AssetManager::class)) {
-                /** @var AssetManager $assetManager */
-                $assetManager = $this->app->make(AssetManager::class);
-
-                // Determine container name based on module type
-                $containerName = $this->getContainerName($moduleType, $moduleSlug ?? $moduleName);
-
-                $assetConfig = $this->getAssetConfiguration($moduleName, $modulePath, $moduleType);
-
-                $assetManager->addContainer($containerName, $assetConfig);
-            }
+            $this->setupModuleAssetContainer($moduleName, $modulePath, $moduleType, $moduleSlug);
 
             // Register view paths for the module
             $this->registerModuleViewPaths($modulePath, $moduleType, $moduleSlug);
@@ -64,6 +60,37 @@ class ModuleAssetManager
         } catch (\Throwable $throwable) {
             $this->logger?->error(sprintf('Failed to setup assets for module %s (%s)', $moduleName, $moduleType), ['exception' => $throwable]);
         }
+    }
+
+    /**
+     * Add the asset container of a module, and nothing else — no view paths.
+     *
+     * @return string|null The container name, or null when there is no asset manager
+     */
+    public function setupModuleAssetContainer(string $moduleName, string $modulePath, string $moduleType, ?string $moduleSlug = null): ?string
+    {
+        if (! $this->app->bound(AssetManager::class)) {
+            return null;
+        }
+
+        /** @var AssetManager $assetManager */
+        $assetManager = $this->app->make(AssetManager::class);
+        $containerName = $this->getContainerName($moduleType, $moduleSlug ?? $moduleName);
+
+        $assetManager->addContainer($containerName, $this->getAssetConfiguration($moduleName, $modulePath, $moduleType));
+        $this->moduleRoots[$containerName] = $modulePath;
+
+        return $containerName;
+    }
+
+    /**
+     * Root directory of every module whose assets were set up, keyed by asset container name.
+     *
+     * @return array<string, string>
+     */
+    public function getModuleRoots(): array
+    {
+        return $this->moduleRoots;
     }
 
     /**

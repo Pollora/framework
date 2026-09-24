@@ -27,6 +27,11 @@ use Pollora\Modules\Domain\Contracts\ModuleInterface;
  */
 class ModuleAutoloader
 {
+    /**
+     * Container key of the class loader shared by every module autoloader.
+     */
+    public const CLASS_LOADER = 'pollora.modules.class_loader';
+
     protected ClassLoader $loader;
 
     protected array $registeredNamespaces = [];
@@ -34,7 +39,7 @@ class ModuleAutoloader
     public function __construct(
         protected Container $app
     ) {
-        $this->loader = $this->getComposerLoader();
+        $this->loader = $this->getModuleLoader();
     }
 
     /**
@@ -110,42 +115,41 @@ class ModuleAutoloader
     }
 
     /**
-     * Register all namespaces with Composer's autoloader.
+     * Register the loader with SPL, after Composer's own loaders.
+     *
+     * A loader that is already listed in ClassLoader::getRegisteredLoaders()
+     * is left alone: namespaces added through addPsr4() take effect
+     * immediately on an active loader, and registering it again would only
+     * move it to the end of that list, behind any plugin loader (Query
+     * Monitor, for instance), where Application::inferBasePath() would then
+     * resolve the plugin's directory as the application base path.
      */
     public function register(): void
     {
+        if (in_array($this->loader, ClassLoader::getRegisteredLoaders(), true)) {
+            return;
+        }
+
         $this->loader->register();
     }
 
     /**
-     * Get the Composer ClassLoader instance.
+     * Get the class loader that maps module namespaces.
+     *
+     * Module namespaces live in a loader of their own, not in Composer's root
+     * loader: a root loader dumped with --classmap-authoritative answers from
+     * its classmap alone and never finds a theme or plugin class. This loader
+     * has no vendor directory, so it stays out of
+     * ClassLoader::getRegisteredLoaders() and cannot shift
+     * Application::inferBasePath().
      */
-    protected function getComposerLoader(): ClassLoader
+    protected function getModuleLoader(): ClassLoader
     {
-        // Try to get from the app container first
-        if ($this->app->bound(ClassLoader::class)) {
-            return $this->app->make(ClassLoader::class);
+        if (! $this->app->bound(self::CLASS_LOADER)) {
+            $this->app->instance(self::CLASS_LOADER, new ClassLoader);
         }
 
-        // Fallback: find Composer's autoloader from global functions
-        $autoloadFunctions = spl_autoload_functions();
-
-        foreach ($autoloadFunctions as $function) {
-            if (is_array($function) &&
-                $function[0] instanceof ClassLoader
-            ) {
-                // Bind it to the container for future use
-                $this->app->instance(ClassLoader::class, $function[0]);
-
-                return $function[0];
-            }
-        }
-
-        // Last resort: create a new instance (not recommended in production)
-        $loader = new ClassLoader;
-        $this->app->instance(ClassLoader::class, $loader);
-
-        return $loader;
+        return $this->app->make(self::CLASS_LOADER);
     }
 
     /**

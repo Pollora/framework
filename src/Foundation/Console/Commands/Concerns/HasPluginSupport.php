@@ -10,6 +10,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 trait HasPluginSupport
 {
+    use ResolvesSourceDirectory;
+
     const PLUGIN_OPTION = 'plugin';
 
     /**
@@ -81,7 +83,7 @@ trait HasPluginSupport
 
     protected function getPluginSourcePath(): string
     {
-        return $this->getPluginPath().'/app';
+        return $this->resolveSourceDirectory($this->getPluginPath());
     }
 
     protected function getPluginSourceNamespace(): string

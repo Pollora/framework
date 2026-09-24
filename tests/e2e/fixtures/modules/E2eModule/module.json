@@ -1,0 +1,10 @@
+{
+    "name": "E2eModule",
+    "alias": "e2e-module",
+    "description": "Browser test fixture: a Laravel module shipping a block, with no service provider of its own.",
+    "keywords": [],
+    "active": true,
+    "order": 0,
+    "providers": [],
+    "files": []
+}
