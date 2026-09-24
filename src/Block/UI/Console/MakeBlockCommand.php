@@ -87,6 +87,20 @@ class MakeBlockCommand extends Command
             return self::FAILURE;
         }
 
+        $missingBuildFiles = $this->missingBuildFiles($target['path']);
+
+        if ($missingBuildFiles !== []) {
+            $this->components->error(sprintf(
+                'The %s "%s" has no %s: a block needs a Vite build. Add them to %s — a plugin made with `pollora:make:plugin --asset` has both.',
+                $target['type'],
+                $target['slug'],
+                implode(' and no ', $missingBuildFiles),
+                $target['path'],
+            ));
+
+            return self::FAILURE;
+        }
+
         if ($this->option('dynamic')) {
             $this->components->warn('--dynamic is deprecated: blocks are dynamic by default. Use --static for a block saved in post content.');
         }
@@ -180,6 +194,32 @@ class MakeBlockCommand extends Command
             'path' => $path,
             'slug' => $theme,
         ];
+    }
+
+    /**
+     * The build files a target lacks to compile a block: its package.json,
+     * and a Vite config under any of the names Vite reads.
+     *
+     * @return list<string>
+     */
+    private function missingBuildFiles(string $path): array
+    {
+        $missing = [];
+
+        if (! is_file($path.'/package.json')) {
+            $missing[] = 'package.json';
+        }
+
+        $viteConfigs = array_map(
+            fn (string $extension): string => $path.'/vite.config.'.$extension,
+            ['js', 'ts', 'mjs', 'mts', 'cjs', 'cts'],
+        );
+
+        if (array_filter($viteConfigs, is_file(...)) === []) {
+            $missing[] = 'vite.config.js';
+        }
+
+        return $missing;
     }
 
     /**
