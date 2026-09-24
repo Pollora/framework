@@ -11,7 +11,7 @@ describe('ThemeAutoloader', function (): void {
     beforeEach(function (): void {
         $this->app = new Container;
         $this->classLoader = Mockery::mock(ClassLoader::class)->shouldIgnoreMissing();
-        $this->app->instance(ClassLoader::class, $this->classLoader);
+        $this->app->instance(ThemeAutoloader::CLASS_LOADER, $this->classLoader);
         $this->autoloader = new ThemeAutoloader($this->app);
     });
 

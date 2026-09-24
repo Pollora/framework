@@ -11,7 +11,7 @@ describe('ModuleAutoloader', function (): void {
     beforeEach(function (): void {
         $this->app = new Container;
         $this->classLoader = Mockery::mock(ClassLoader::class)->shouldIgnoreMissing();
-        $this->app->instance(ClassLoader::class, $this->classLoader);
+        $this->app->instance(ModuleAutoloader::CLASS_LOADER, $this->classLoader);
         $this->autoloader = new ModuleAutoloader($this->app);
     });
 
@@ -134,12 +134,48 @@ describe('ModuleAutoloader::register()', function (): void {
 
     it('registers a loader that is not registered yet', function (): void {
         $app = new Container;
-        $app->instance(ClassLoader::class, $this->rootLoader);
+        $app->instance(ModuleAutoloader::CLASS_LOADER, $this->rootLoader);
 
         (new ModuleAutoloader($app))->register();
 
         expect(spl_autoload_functions())->toContain([$this->rootLoader, 'loadClass'])
             ->and(ClassLoader::getRegisteredLoaders())->toHaveKey('/fake-project/vendor');
+    });
+});
+
+describe('ModuleAutoloader under an authoritative classmap', function (): void {
+    beforeEach(function (): void {
+        $this->themeName = 'AuthoritativeTheme'.uniqid();
+        $this->themeDir = sys_get_temp_dir().'/'.$this->themeName;
+        mkdir($this->themeDir.'/app', 0777, true);
+        file_put_contents(
+            $this->themeDir.'/app/Probe.php',
+            "<?php\n\nnamespace Theme\\{$this->themeName};\n\nclass Probe {}\n"
+        );
+
+        // A root loader dumped with --classmap-authoritative answers only from
+        // its classmap and never looks at a PSR-4 prefix added at runtime.
+        $this->rootLoader = new ClassLoader('/fake-authoritative-project/vendor');
+        $this->rootLoader->setClassMapAuthoritative(true);
+        $this->rootLoader->register(true);
+    });
+
+    afterEach(function (): void {
+        $this->rootLoader->unregister();
+        unlink($this->themeDir.'/app/Probe.php');
+        rmdir($this->themeDir.'/app');
+        rmdir($this->themeDir);
+    });
+
+    it('still loads the classes of a registered theme', function (): void {
+        $app = new Container;
+        $app->instance(ClassLoader::class, $this->rootLoader);
+
+        $autoloader = new ModuleAutoloader($app);
+        $autoloader->registerTheme(createMockModuleForAutoloader($this->themeName, $this->themeDir));
+        $autoloader->register();
+
+        expect(class_exists("Theme\\{$this->themeName}\\Probe"))->toBeTrue();
     });
 });
 
