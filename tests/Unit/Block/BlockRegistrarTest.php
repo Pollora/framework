@@ -113,10 +113,14 @@ afterEach(function (): void {
     rmdir($this->themeDir);
 });
 
-function createMockVite(bool $isHot = false): ViteManagerInterface
+function createMockVite(bool $isHot = false, string $buildDirectory = 'build/pollora-block-test-none'): ViteManagerInterface
 {
     $vite = Mockery::mock(ViteManagerInterface::class);
     $vite->shouldReceive('isRunningHot')->andReturn($isHot);
+    $vite->shouldReceive('container')->andReturn(new AssetContainer('theme.blocks', [
+        'build_directory' => $buildDirectory,
+        'manifest_path' => 'manifest.json',
+    ]));
     $vite->shouldReceive('asset')->andReturnUsing(fn ($path): string => 'http://localhost:5173/'.$path);
     $vite->shouldReceive('getAssetUrls')->andReturnUsing(function ($entrypoints): array {
         $js = [];
@@ -211,6 +215,52 @@ describe('BlockRegistrar', function (): void {
         expect($this->registeredScripts)->toHaveKey('test-hero-editor-script');
         expect($this->registeredScripts['test-hero-editor-script']['src'])
             ->toContain('index-abc123.js');
+        expect($this->registeredScripts['test-hero-editor-script']['deps'])
+            ->toBe(['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n']);
+    });
+
+    it('adds the WordPress scripts the build recorded in editor.deps.json to the editor script', function (): void {
+        // @roots/vite-plugin externalises every @wordpress/* import and lists
+        // the matching script handles in editor.deps.json. Without them, a
+        // block importing @wordpress/server-side-render depends on a script
+        // WordPress may not load.
+        $buildDirectory = 'build/pollora-block-deps-'.uniqid();
+        $public = sys_get_temp_dir().'/'.$buildDirectory;
+        mkdir($public.'/assets', 0755, true);
+        file_put_contents($public.'/manifest.json', json_encode([
+            'editor.deps.json' => ['file' => 'assets/editor.deps-abc123.json'],
+        ]));
+        file_put_contents($public.'/assets/editor.deps-abc123.json', json_encode(['wp-blocks', 'wp-server-side-render', 'wp-components']));
+
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+        ]));
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite(buildDirectory: $buildDirectory);
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
+        unlink($public.'/assets/editor.deps-abc123.json');
+        rmdir($public.'/assets');
+        unlink($public.'/manifest.json');
+        rmdir($public);
+
+        expect($this->registeredScripts['test-hero-editor-script']['deps'])
+            ->toBe(['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n', 'wp-server-side-render', 'wp-components']);
+    });
+
+    it('keeps the default editor script dependencies when the build recorded none', function (): void {
+        // In dev mode (HMR) there is no build, hence no editor.deps.json
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+        ]));
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite(isHot: true);
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
         expect($this->registeredScripts['test-hero-editor-script']['deps'])
             ->toBe(['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n']);
     });
