@@ -45,6 +45,7 @@ class MakeBlockCommand extends Command
         '@wordpress/components' => '^29.0.0',
         '@wordpress/element' => '^6.0.0',
         '@wordpress/i18n' => '^5.0.0',
+        '@wordpress/server-side-render' => '^5.0.0',
     ];
 
     /**
@@ -521,14 +522,23 @@ class MakeBlockCommand extends Command
 
         $this->writeStub($blockDir.'/index.jsx', $indexStub, $replacements);
 
-        // edit.jsx
-        $editStub = $hasInnerBlocks ? 'edit-inner-blocks.jsx' : 'edit.jsx';
-        $this->writeStub($blockDir.'/edit.jsx', $this->getStubContent($editStub), $replacements);
+        // edit.jsx — the editor shows what the page shows: the server render of
+        // a dynamic block, the save() markup of a static one. Inner blocks are
+        // edited in place, which a server render cannot do.
+        $editStub = match (true) {
+            $hasInnerBlocks => 'edit-inner-blocks.jsx',
+            $isDynamic => 'edit-dynamic.jsx',
+            default => 'edit.jsx',
+        };
+        // The title lands in single-quoted JavaScript strings
+        $jsxReplacements = [...$replacements, '{{ title }}' => addcslashes($title, "'\\")];
+
+        $this->writeStub($blockDir.'/edit.jsx', $this->getStubContent($editStub), $jsxReplacements);
 
         // save.jsx (only for static blocks)
         if (! $isDynamic) {
             $saveStub = $hasInnerBlocks ? 'save-inner-blocks.jsx' : 'save.jsx';
-            $this->writeStub($blockDir.'/save.jsx', $this->getStubContent($saveStub), $replacements);
+            $this->writeStub($blockDir.'/save.jsx', $this->getStubContent($saveStub), $jsxReplacements);
         }
 
         // render.blade.php (only for dynamic blocks)

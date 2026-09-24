@@ -126,6 +126,57 @@ describe('pollora:make:block', function (): void {
             ->and($render)->toContain('test-theme/hero');
     });
 
+    it('previews a dynamic block in the editor with its server render', function (): void {
+        // The editor used to show a placeholder ("… – Block Editor") while the
+        // page showed render.blade.php: what an author saw was never the result.
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->assertSuccessful();
+
+        $edit = (string) file_get_contents($this->themeDir.'/resources/views/blocks/hero/edit.jsx');
+
+        expect($edit)->toContain("import ServerSideRender from '@wordpress/server-side-render';")
+            ->and($edit)->toContain('<ServerSideRender block={metadata.name} attributes={attributes} />')
+            ->and($edit)->not->toContain('Block Editor');
+    });
+
+    it('previews a static block in the editor with the markup save() writes', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--static' => true, '--title' => 'Hero'])
+            ->assertSuccessful();
+
+        $blockDir = $this->themeDir.'/resources/views/blocks/hero';
+        $edit = (string) file_get_contents($blockDir.'/edit.jsx');
+        $save = (string) file_get_contents($blockDir.'/save.jsx');
+        $paragraph = "<p>{__('Hero', 'test-theme')}</p>";
+
+        expect($edit)->toContain($paragraph)
+            ->and($save)->toContain($paragraph)
+            ->and($edit)->not->toContain('ServerSideRender');
+    });
+
+    it('keeps the InnerBlocks editor for a block with inner blocks', function (): void {
+        // A server render cannot edit child blocks in place
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--inner-blocks' => true])
+            ->assertSuccessful();
+
+        $edit = (string) file_get_contents($this->themeDir.'/resources/views/blocks/hero/edit.jsx');
+
+        expect($edit)->toContain('<InnerBlocks />')
+            ->and($edit)->not->toContain('ServerSideRender');
+    });
+
+    it('writes a title with a quote as a valid JavaScript string', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--static' => true, '--title' => "Owner's Hero"])
+            ->assertSuccessful();
+
+        $blockDir = $this->themeDir.'/resources/views/blocks/hero';
+
+        foreach (['edit.jsx', 'save.jsx'] as $file) {
+            expect((string) file_get_contents($blockDir.'/'.$file))->toContain("__('Owner\\'s Hero', 'test-theme')");
+        }
+
+        expect(json_decode((string) file_get_contents($blockDir.'/block.json'), true)['title'])->toBe("Owner's Hero");
+    });
+
     it('creates a static block with --static', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--static' => true])
             ->assertSuccessful();
@@ -210,6 +261,14 @@ describe('pollora:make:block', function (): void {
             ->and($refresh[1])->toContain("'themes/'+themeName+'/resources/views/**/*.blade.php'")
             ->and($refresh[1])->toContain("\n        'resources/views/**/*.blade.php',")
             ->and($refresh[1])->toContain("...refreshPaths.filter((refreshPath) => refreshPath !== 'resources/views/**')");
+    });
+
+    it('adds @wordpress/server-side-render to package.json with the first block', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])->assertSuccessful();
+
+        $package = json_decode((string) file_get_contents($this->themeDir.'/package.json'), true);
+
+        expect($package['devDependencies'])->toHaveKey('@wordpress/server-side-render');
     });
 
     it('patches the refresh paths only once', function (): void {
