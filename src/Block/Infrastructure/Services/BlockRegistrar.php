@@ -127,13 +127,20 @@ class BlockRegistrar implements BlockRegistrarInterface
             return;
         }
 
+        $blockName = $metadata['name'];
+
+        // The framework registers every module's blocks by convention; a
+        // BlocksServiceProvider kept from an earlier release registers them
+        // again, and WordPress would reject the duplicate with a notice.
+        if ($this->isBlockRegistered($blockName)) {
+            return;
+        }
+
         $viteManager = $this->getBlocksViteManager($containerName);
 
         if (! $viteManager instanceof ViteManagerInterface) {
             return;
         }
-
-        $blockName = $metadata['name'];
 
         // Pre-register all asset handles BEFORE register_block_type().
         // WP's register_block_script_handle() checks wp_script_is($handle, 'registered')
@@ -157,6 +164,15 @@ class BlockRegistrar implements BlockRegistrarInterface
         }
 
         register_block_type($blockDir, $args);
+    }
+
+    /**
+     * Whether WordPress already holds a block type with this name.
+     */
+    protected function isBlockRegistered(string $blockName): bool
+    {
+        return class_exists(\WP_Block_Type_Registry::class)
+            && \WP_Block_Type_Registry::get_instance()->is_registered($blockName);
     }
 
     /**

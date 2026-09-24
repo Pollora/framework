@@ -299,6 +299,10 @@ jobs:
             --public=false \
             --no-interaction
 
+      # Built with the framework's own generators, as a developer would
+      - name: Build the block fixtures
+        run: ddev exec bash packages/framework/tests/e2e/bin/fixtures.sh up
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:

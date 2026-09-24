@@ -108,30 +108,11 @@ describe('MakeBlockCommand scaffolding', function (): void {
         expect($blockJsonData['viewScript'])->toBe('file:./view.js');
     });
 
-    it('generates BlocksServiceProvider with correct namespace and container', function (): void {
-        $stub = file_get_contents(blockStubsDir().'/blocks-service-provider.php.stub');
-
-        $result = str_replace(
-            ['{{ namespace }}', '{{ containerName }}'],
-            ['Theme\\TestTheme\\Providers', 'theme'],
-            $stub
-        );
-
-        expect(str_contains($result, 'namespace Theme\\TestTheme\\Providers;'))->toBeTrue();
-        expect(str_contains($result, "containerName: 'theme'"))->toBeTrue();
-    });
-
-    it('generates BlocksServiceProvider with plugin container', function (): void {
-        $stub = file_get_contents(blockStubsDir().'/blocks-service-provider.php.stub');
-
-        $result = str_replace(
-            ['{{ namespace }}', '{{ containerName }}'],
-            ['Plugin\\MyPlugin\\Providers', 'plugin.my-plugin'],
-            $stub
-        );
-
-        expect(str_contains($result, 'namespace Plugin\\MyPlugin\\Providers;'))->toBeTrue();
-        expect(str_contains($result, "containerName: 'plugin.my-plugin'"))->toBeTrue();
+    it('ships no BlocksServiceProvider stub: the framework registers blocks by convention', function (): void {
+        // A provider of the module's own cannot register blocks reliably: over
+        // HTTP its boot() runs after WordPress has fired init, and a REST
+        // request is answered before it boots at all.
+        expect(blockStubsDir().'/blocks-service-provider.php.stub')->not->toBeFile();
     });
 });
 

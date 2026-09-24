@@ -7,6 +7,7 @@ namespace Pollora\Block\Infrastructure\Providers;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Block\Domain\Contracts\BlockRegistrarInterface;
 use Pollora\Block\Infrastructure\Services\BlockRegistrar;
+use Pollora\Block\Infrastructure\Services\ModuleBlocksRegistrar;
 use Pollora\Block\UI\Console\MakeBlockCommand;
 use Pollora\BlockCategory\Application\Services\BlockCategoryService;
 use Pollora\BlockCategory\Domain\Contracts\BlockCategoryRegistrarInterface;
@@ -50,8 +51,16 @@ class BlockServiceProvider extends ServiceProvider
         // Register block categories from configuration
         $this->app->make(BlockCategoryServiceInterface::class)->registerConfiguredCategories();
 
-        // Register block patterns on init
         $action = $this->app->get(Action::class);
+
+        // Register the blocks of every theme, plugin and module on init. This
+        // provider boots before WordPress loads, so the hook is in place in
+        // time — unlike one added by a theme or plugin provider.
+        $action->add('init', function (): void {
+            $this->app->make(ModuleBlocksRegistrar::class)->registerAll();
+        });
+
+        // Register block patterns on init
         $action->add('init', function (): void {
             $this->app->make(PatternServiceInterface::class)->registerAll();
         });
@@ -61,6 +70,7 @@ class BlockServiceProvider extends ServiceProvider
     {
         $this->app->singleton(BlockRegistrar::class);
         $this->app->alias(BlockRegistrar::class, BlockRegistrarInterface::class);
+        $this->app->singleton(ModuleBlocksRegistrar::class);
     }
 
     private function registerBlockCategoryServices(): void

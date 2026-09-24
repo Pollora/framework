@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Pollora\Block\Domain\Contracts\BlockRegistrarInterface;
 use Pollora\Block\Infrastructure\Providers\BlockServiceProvider;
 use Pollora\Block\Infrastructure\Services\BlockRegistrar;
+use Pollora\Block\Infrastructure\Services\ModuleBlocksRegistrar;
 use Pollora\BlockCategory\Domain\Contracts\BlockCategoryRegistrarInterface;
 use Pollora\BlockCategory\Infrastructure\Registrars\BlockCategoryRegistrar;
 use Pollora\BlockPattern\Domain\Contracts\PatternCategoryRegistrarInterface;
@@ -21,6 +22,11 @@ beforeEach(function (): void {
 describe('BlockServiceProvider', function (): void {
     it('registers BlockRegistrar as singleton', function (): void {
         expect($this->app->bound(BlockRegistrar::class))->toBeTrue();
+    });
+
+    it('registers ModuleBlocksRegistrar as singleton', function (): void {
+        expect($this->app->bound(ModuleBlocksRegistrar::class))->toBeTrue()
+            ->and($this->app->isShared(ModuleBlocksRegistrar::class))->toBeTrue();
     });
 
     it('aliases BlockRegistrar to BlockRegistrarInterface', function (): void {
