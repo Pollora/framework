@@ -1,0 +1,13 @@
+# Pollora browser test fixture: the catalogue the i18n test reads in fr_FR.
+msgid ""
+msgstr ""
+"Project-Id-Version: E2E Features\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Domain: e2e-features\n"
+
+msgid "E2E greeting"
+msgstr "Bonjour depuis le catalogue"

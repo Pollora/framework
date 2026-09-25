@@ -163,6 +163,21 @@ test.describe('Assets', () => {
     });
 });
 
+test.describe('Translations through __()', () => {
+    test("a text domain goes to WordPress's catalogues, replacements to Laravel", async () => {
+        const context = await visitor();
+        const translations = await (await context.get(homeUrl('/wp-json/e2e/v1/translations'))).json();
+        await context.dispose();
+
+        expect(translations).toEqual({
+            wordpress: 'Bonjour depuis le catalogue',
+            untranslated: 'E2E string outside the catalogue',
+            laravel: 'Shipping Example',
+            wpNative: 'Bonjour depuis le catalogue',
+        });
+    });
+});
+
 test.describe('The active theme', () => {
     test('registers the menu locations its config/menus.php declares', async ({ requestUtils }) => {
         const configFile = join(siteDir, 'themes', activeTheme(), 'config', 'menus.php');

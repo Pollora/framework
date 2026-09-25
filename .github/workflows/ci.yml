@@ -5,6 +5,11 @@ on:
     branches: [main, develop, 'feature/**', 'hotfix/**', 'release/**']
   pull_request:
     branches: [main, develop]
+  # Nightly, on the default branch: the browser tests in Firefox and WebKit as well as
+  # Chromium, which pull requests run alone to stay fast.
+  schedule:
+    - cron: '30 3 * * *'
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -238,6 +243,11 @@ jobs:
     # authoritative: a deployment dumped with --classmap-authoritative answers
     # from the classmap alone. Theme and plugin classes are autoloaded at
     # runtime, and every front-end page once answered 404 there (#320).
+    # Chromium on pushes and pull requests; all three engines on the nightly and on a
+    # manual run.
+    env:
+      E2E_BROWSERS: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'chromium,firefox,webkit' || 'chromium' }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -328,7 +338,7 @@ jobs:
         working-directory: packages/framework/tests/e2e
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps ${E2E_BROWSERS//,/ }
 
       # DDEV serves HTTPS with a mkcert certificate when mkcert is present.
       # Say which case the runner is in rather than guessing.
