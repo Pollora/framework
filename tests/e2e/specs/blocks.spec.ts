@@ -17,8 +17,6 @@ type BlockCase = {
     attributes?: Record<string, unknown>;
     /** Text the block renders on the front end */
     text: string;
-    /** Why the editor preview is known not to match the page yet */
-    previewGap?: string;
 };
 
 const pluginBlocks: BlockCase[] = [
@@ -31,7 +29,7 @@ const moduleBlocks: BlockCase[] = [{ name: 'e2e-module/module-card', text: 'Modu
 const generatedThemeBlocks: BlockCase[] = [{ name: 'default/theme-card', text: 'Theme Card' }];
 
 const themeDefaultBlocks: BlockCase[] = [
-    { name: 'default/hero', text: 'Hero', previewGap: 'theme-default ships the placeholder edit.jsx ("Hero – Block Editor")' },
+    { name: 'default/hero', text: 'Hero' },
     { name: 'default/call-to-action', attributes: { heading: `Call to action ${runId}` }, text: `Call to action ${runId}` },
 ];
 
@@ -91,8 +89,6 @@ for (const { host, blocks, skip } of blockCases()) {
             });
 
             test(`${block.name} previews in the editor what the page shows`, async ({ admin, editor }) => {
-                test.fail(block.previewGap !== undefined, block.previewGap);
-
                 await admin.createNewPost({ title: `E2E preview ${block.name} ${runId}` });
                 await editor.insertBlock({ name: block.name, attributes: block.attributes });
 
