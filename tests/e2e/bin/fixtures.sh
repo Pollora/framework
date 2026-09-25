@@ -11,6 +11,12 @@
 #         - when theme-default is the active theme, a dynamic block made in it
 #           by pollora:make:block. Any other theme is left alone: it may be
 #           someone's work in progress.
+#         - the e2e-features plugin, committed in fixtures/plugins: framework
+#           features declared by attribute (hooks, a post type, REST routes,
+#           an Ajax action) and a script enqueued through the Asset facade;
+#         - the template hierarchy themes, e2e-full and e2e-index, copied into
+#           themes/. They are not activated here: the hierarchy spec activates
+#           each in turn and gives the site its own theme back.
 #   down  remove all of it, and give modules_statuses.json back as it was
 set -euo pipefail
 
@@ -69,6 +75,17 @@ case "${1:-}" in
         build "$MODULE_DIR"
         php artisan module:enable "$MODULE" --no-interaction
 
+        # Framework features plugin
+        rm -rf "public/content/plugins/e2e-features"
+        cp -r "$FIXTURES/plugins/e2e-features" "public/content/plugins/e2e-features"
+        wp plugin activate e2e-features
+
+        # Template hierarchy themes
+        for theme in e2e-full e2e-index; do
+            rm -rf "themes/$theme"
+            cp -r "$FIXTURES/themes/$theme" "themes/$theme"
+        done
+
         # Theme, only when it is theme-default
         if [ "$(wp theme list --status=active --field=name)" = "$THEME" ]; then
             php artisan pollora:make:block "$THEME_BLOCK" --theme="$THEME" --title="Theme Card" --force --no-interaction
@@ -86,6 +103,11 @@ case "${1:-}" in
             if [ "$(cat "$STATUSES_BACKUP")" = absent ]; then rm -f "$STATUSES"; else cp "$STATUSES_BACKUP" "$STATUSES"; fi
             rm -f "$STATUSES_BACKUP"
         fi
+
+        wp plugin deactivate e2e-features 2>/dev/null || true
+        rm -rf public/content/plugins/e2e-features
+
+        rm -rf themes/e2e-full themes/e2e-index
 
         # The theme block is only ever made in theme-default, and removed from it
         rm -rf "$THEME_DIR/resources/views/blocks/$THEME_BLOCK"

@@ -9,6 +9,7 @@ import { defineConfig, devices } from '@playwright/test';
  * WP_BASE_URL    WordPress itself (`siteurl`), e.g. https://pollora-test.ddev.site/cms/ —
  *                read by @wordpress/e2e-test-utils-playwright for wp-admin, login and REST
  * E2E_WP_CLI     how to run WP-CLI against that site, e.g. "ddev wp" (default)
+ * E2E_BROWSERS   comma-separated: chromium (default), firefox, webkit — the nightly runs all three
  */
 const homeUrl = process.env.E2E_HOME_URL ?? 'https://pollora-test.ddev.site';
 // Trailing slash: relative paths such as wp-login.php must resolve inside /cms.
@@ -29,6 +30,20 @@ if (! process.env.NODE_EXTRA_CA_CERTS) {
     }
 }
 
+const browsers: Record<string, string> = {
+    chromium: 'Desktop Chrome',
+    firefox: 'Desktop Firefox',
+    webkit: 'Desktop Safari',
+};
+
+const projects = (process.env.E2E_BROWSERS ?? 'chromium').split(',').map((name) => name.trim()).map((name) => {
+    if (! (name in browsers)) {
+        throw new Error(`E2E_BROWSERS: unknown browser "${name}" (known: ${Object.keys(browsers).join(', ')})`);
+    }
+
+    return { name, use: { ...devices[browsers[name]] } };
+});
+
 export default defineConfig({
     testDir: './specs',
     globalSetup: './global-setup.ts',
@@ -46,5 +61,5 @@ export default defineConfig({
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
     },
-    projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+    projects,
 });
