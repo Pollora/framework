@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * The content the template hierarchy spec resolves, run through `wp eval` with
  * e2e-full active (its post types and taxonomy must be registered).

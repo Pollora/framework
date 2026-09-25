@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Remove everything seed.php creates, whether or not it all exists: it also
  * runs before seeding, to clear what an interrupted run left behind. Run with
