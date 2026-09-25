@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,6 @@ use Illuminate\Support\Facades\Route;
 $page = static fn (string $by): string => '<!doctype html><html><head></head><body>'
     ."<main data-e2e-view=\"route:{$by}\">{$by}</main></body></html>";
 
-Route::wp('page', 'e2e-hierarchy-routed', static fn () => response($page('wp')));
+Route::wp('page', 'e2e-hierarchy-routed', static fn (): Response => response($page('wp')));
 
-Route::get('/e2e-hierarchy-laravel', static fn () => response($page('laravel')));
+Route::get('/e2e-hierarchy-laravel', static fn (): Response => response($page('laravel')));
