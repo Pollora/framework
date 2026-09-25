@@ -10,8 +10,8 @@ use Pollora\Attributes\WpRestRoute\Method;
 /**
  * What `__()` answers, on each side of the helper that shares the name: WordPress keeps
  * its own as `__wp()`, and `__()` sends a call with a text domain to WordPress and a call
- * with replacements to Laravel. This plugin's catalogue is loaded in fr_FR whatever the
- * site's language.
+ * with replacements to Laravel. This plugin's fr_FR catalogue is what WordPress finds,
+ * whatever the site's language.
  */
 #[WpRestRoute('e2e/v1', '/translations')]
 class Translations
@@ -20,9 +20,11 @@ class Translations
     #[Method('GET')]
     public function show(): array
     {
-        add_filter('plugin_locale', static fn (string $locale, string $domain): string => $domain === 'e2e-features' ? 'fr_FR' : $locale, 10, 2);
+        // Loaded as the catalogue of the current locale, whatever the site's language:
+        // since WordPress 6.5 translations are kept per locale, so loading it as fr_FR
+        // on an en_US site would leave __() nothing to find.
         unload_textdomain('e2e-features');
-        load_plugin_textdomain('e2e-features', false, 'e2e-features/languages');
+        load_textdomain('e2e-features', WP_PLUGIN_DIR.'/e2e-features/languages/e2e-features-fr_FR.mo', determine_locale());
 
         return [
             'wordpress' => __('E2E greeting', 'e2e-features'),
