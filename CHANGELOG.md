@@ -5,7 +5,16 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.7...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...develop)
+
+## [v13.32.0-beta.8](https://github.com/Pollora/framework/compare/v13.32.0-beta.7...v13.32.0-beta.8) - 2026-09-25
+
+No change to the framework's code: this beta ships the browser test suite that now guards it, 73 tests per browser.
+
+### Added
+- Browser tests of the template hierarchy. Two fixture themes: one has a template for every case, the other `index.blade.php` alone. Each URL is read in the framework's template marker, in the template's own output and in the HTTP status: `front-page`, `home`, `page-{slug}`, `page-{id}`, a custom page template, `page`, `single`, `single-{type}`, `archive-{type}`, `archive`, `taxonomy-{tax}-{term}`, `taxonomy-{tax}`, `category-{slug}`, `tag`, `author-{nicename}`, `date`, `search`, and `404` with a 404 status; a Blade view over a PHP template of the same name; `Route::wp()` and Laravel routes over the hierarchy. With `index` alone every case falls back to it, and an unknown URL still answers 404. Replayed: without the 404 view, or with the marker disabled, the suite fails
+- Browser tests of the framework's features, through a fixture plugin that declares each by attribute and checks it by its effect: `#[Filter]` and `#[Action]`, a `#[PostType]` (REST type, archive, admin menu), `#[WpRestRoute]` (a public route; an `IsAdmin` one that refuses a visitor and answers an administrator), `#[Ajax]` for visitors and logged-in users, a script enqueued through the `Asset` facade, every script and stylesheet of the home page loading with nothing over plain `http://`, `get_theme_file_uri()` giving the active theme's built entry a URL that answers, no server path in the page a visitor gets, the theme's menu locations and login screen, and `__()` sending a text domain to WordPress's catalogues and replacements to Laravel. Replayed: with the v13.32.0-beta.6 theme URI fix undone, or with WordPress's side of `__()` disabled, the suite fails
+- The browser tests run in Firefox and WebKit as well as Chromium every night, and on a manual run of the workflow (`E2E_BROWSERS`). Pull requests keep Chromium alone. The schedule runs from `main`, so it starts with this release
 
 ## [v13.32.0-beta.7](https://github.com/Pollora/framework/compare/v13.32.0-beta.6...v13.32.0-beta.7) - 2026-09-24
 
