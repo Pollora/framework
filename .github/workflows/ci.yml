@@ -377,7 +377,14 @@ jobs:
   validate-changelog:
     name: Validate Changelog
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    # A release reaches main from develop or a release branch with [Unreleased]
+    # emptied into the version's section by construction: checking it there
+    # fails every release. A hotfix to main is still checked.
+    if: >-
+      github.event_name == 'pull_request'
+      && github.base_ref == 'main'
+      && github.head_ref != 'develop'
+      && !startsWith(github.head_ref, 'release/')
 
     steps:
       - name: Checkout code

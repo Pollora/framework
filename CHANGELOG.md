@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `develop` is aliased to `13.x-dev` (`extra.branch-alias`). Without it, `dev-develop` satisfied no version constraint: a project on `dev-develop` could not install a package requiring `pollora/framework` `^13.0` — `pollora/nectar` 1.1 does — without an inline alias of its own
 
+### Fixed
+- "Validate Changelog" no longer fails the pull request of every release. It required a non-empty `[Unreleased]` on any pull request to `main`, which a release from `develop` or `release/*` has emptied into the version's section by construction; it now checks hotfixes only
+
 ## [v13.32.0-beta.8](https://github.com/Pollora/framework/compare/v13.32.0-beta.7...v13.32.0-beta.8) - 2026-09-25
 
 No change to the framework's code: this beta ships the browser test suite that now guards it, 73 tests per browser.
