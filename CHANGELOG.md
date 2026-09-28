@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...develop)
+
+## [v13.32.0-beta.9](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...v13.32.0-beta.9) - 2026-09-28
 
 ### Added
 - `<InnerBlocks />` in a block's `render.blade.php`: the block's inner blocks are edited in place in the editor, inside the rendered template, and printed in place of the tag on the page, in a `div` carrying the tag's `class` (`pollora-inner-blocks` by default). The tag takes Gutenberg's inner blocks options — `allowedBlocks`, `template`, `templateLock`, `orientation`… — as attributes, JSON for arrays and objects. Modelled on ACF's `<InnerBlocks />`. A `render.php` template gets it too
