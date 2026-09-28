@@ -62,6 +62,9 @@
         ]
     },
     "extra": {
+        "branch-alias": {
+            "dev-develop": "13.x-dev"
+        },
         "patches": {
             "johnpbloch/wordpress-core": {
                 "Patch __ method in l10n to stop conflicting with Laravel": "https://raw.githubusercontent.com/Pollora/framework/5681565cb42923cdec3b1c0e855a2721b8bc3724/patches/wordpress-core.patch"
