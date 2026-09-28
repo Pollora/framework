@@ -20,6 +20,11 @@ namespace Pollora\View\Infrastructure\Services;
  *
  * Emitted only when WP_DEBUG is on, and as an HTML comment, so it changes no
  * markup, no styling and no production output.
+ *
+ * Only pages the template hierarchy renders carry it. A response from a
+ * `Route::wp()` route or a Laravel route never reaches `template_include`, so
+ * it has no marker — which is also how a test tells a route's response from
+ * the hierarchy's.
  */
 final class TemplateMarker
 {
@@ -30,8 +35,9 @@ final class TemplateMarker
     /**
      * Remember the template the request resolved to.
      *
-     * Hooked on `template_include`, which is the single point every path goes
-     * through — Pollora's own frontend controller applies it too.
+     * Hooked on `template_include`, which every template hierarchy response
+     * goes through — Pollora's frontend controller applies it too. Route
+     * responses (`Route::wp()`, Laravel routes) bypass it.
      *
      * @param  mixed  $template  The template path WordPress settled on
      * @return mixed The template, untouched
