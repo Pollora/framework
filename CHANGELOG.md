@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "Validate Changelog" no longer fails the pull request of every release. It required a non-empty `[Unreleased]` on any pull request to `main`, which a release from `develop` or `release/*` has emptied into the version's section by construction; it now checks hotfixes only
 
 ### Changed
+- The framework no longer declares the wpackagist repository, from which it required nothing. Composer still fetched its metadata on every install, so a wpackagist network error failed the build — measured: the nightly of 2026-09-27 failed "Code Quality" on `curl error 56` from wpackagist.org
 - The installed package no longer carries the test suite, the CI workflows and the tooling configs: `.gitattributes` leaves them out of the archive Composer installs. The browser tests stay reachable by cloning the repository, which is how theme CI fetches them
 
 ### Removed
