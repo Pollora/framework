@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TemplateMarker`'s documentation no longer says every response goes through `template_include`: responses from `Route::wp()` and Laravel routes bypass it and carry no marker, as the hierarchy browser tests assert
 - "Validate Changelog" no longer fails the pull request of every release. It required a non-empty `[Unreleased]` on any pull request to `main`, which a release from `develop` or `release/*` has emptied into the version's section by construction; it now checks hotfixes only
 
+### Changed
+- The installed package no longer carries the test suite, the CI workflows and the tooling configs: `.gitattributes` leaves them out of the archive Composer installs. The browser tests stay reachable by cloning the repository, which is how theme CI fetches them
+
+### Removed
+- `get`, a grep output committed by mistake
+
 ## [v13.32.0-beta.8](https://github.com/Pollora/framework/compare/v13.32.0-beta.7...v13.32.0-beta.8) - 2026-09-25
 
 No change to the framework's code: this beta ships the browser test suite that now guards it, 73 tests per browser.
