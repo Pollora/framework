@@ -45,7 +45,6 @@ class MakeBlockCommand extends Command
         '@wordpress/components' => '^29.0.0',
         '@wordpress/element' => '^6.0.0',
         '@wordpress/i18n' => '^5.0.0',
-        '@wordpress/server-side-render' => '^5.0.0',
     ];
 
     /**
@@ -551,11 +550,12 @@ class MakeBlockCommand extends Command
         // index.jsx
         $indexStub = $this->getStubContent('index.jsx');
         if ($isDynamic) {
-            // Remove save import and replace save reference
+            // The framework's runtime saves the inner blocks, and nothing else:
+            // the page renders the block from its template.
             $indexStub = str_replace("import save from './save';\n", '', $indexStub);
             $indexStub = str_replace(
                 '    save,',
-                '    save: () => null,',
+                '    save: window.pollora.blocks.save,',
                 $indexStub
             );
         }
@@ -563,11 +563,11 @@ class MakeBlockCommand extends Command
         $this->writeStub($blockDir.'/index.jsx', $indexStub, $replacements);
 
         // edit.jsx — the editor shows what the page shows: the server render of
-        // a dynamic block, the save() markup of a static one. Inner blocks are
-        // edited in place, which a server render cannot do.
+        // a dynamic block, with its <InnerBlocks /> edited in place, or the
+        // save() markup of a static one.
         $editStub = match (true) {
-            $hasInnerBlocks => 'edit-inner-blocks.jsx',
             $isDynamic => 'edit-dynamic.jsx',
+            $hasInnerBlocks => 'edit-inner-blocks.jsx',
             default => 'edit.jsx',
         };
         // The title lands in single-quoted JavaScript strings
@@ -584,7 +584,8 @@ class MakeBlockCommand extends Command
         // render.blade.php (only for dynamic blocks)
         if ($isDynamic) {
             // The title lands in a single-quoted PHP string
-            $this->writeStub($blockDir.'/render.blade.php', $this->getStubContent('render.blade.php'), [
+            $renderStub = $hasInnerBlocks ? 'render-inner-blocks.blade.php' : 'render.blade.php';
+            $this->writeStub($blockDir.'/render.blade.php', $this->getStubContent($renderStub), [
                 ...$replacements,
                 '{{ title }}' => addcslashes($title, "'\\"),
             ]);
