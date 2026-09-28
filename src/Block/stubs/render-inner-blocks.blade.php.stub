@@ -7,8 +7,15 @@
     - WP_Block $block       Block instance
     - bool     $isPreview   Whether the block renders for the editor's preview
 
+    <InnerBlocks /> marks where the inner blocks go. On the page they replace it,
+    inside <div class="pollora-inner-blocks"> (the tag's class, if it has one);
+    in the editor they are edited there. The tag takes the options of Gutenberg's
+    InnerBlocks: allowedBlocks, template, templateLock, orientation… Write JSON
+    values with {{ json_encode(...) }}, e.g. allowedBlocks="{{ json_encode(['core/paragraph']) }}".
+
     Markup changes apply to existing content: dynamic blocks are not saved in post_content.
 --}}
 <div {!! get_block_wrapper_attributes() !!}>
     <p>{{ __('{{ title }}', '{{ targetSlug }}') }}</p>
+    <InnerBlocks />
 </div>

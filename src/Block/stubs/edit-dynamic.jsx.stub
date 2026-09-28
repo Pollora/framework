@@ -1,17 +1,11 @@
-import { useBlockProps } from '@wordpress/block-editor';
-import ServerSideRender from '@wordpress/server-side-render';
 import metadata from './block.json';
 
 /**
  * The editor shows what the page shows: render.blade.php, rendered by the
- * server for the block's current attributes.
+ * server for the block's current attributes. Where the template writes
+ * <InnerBlocks />, the inner blocks are edited in place.
+ *
+ * window.pollora.blocks is the framework's editor runtime, loaded with every
+ * block that has a render template.
  */
-export default function Edit({ attributes }) {
-    const blockProps = useBlockProps();
-
-    return (
-        <div {...blockProps}>
-            <ServerSideRender block={metadata.name} attributes={attributes} />
-        </div>
-    );
-}
+export default window.pollora.blocks.bladeEdit(metadata);
