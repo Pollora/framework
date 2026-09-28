@@ -21,12 +21,6 @@
         }
     ],
     "type": "project",
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://wpackagist.org"
-        }
-    ],
     "require": {
         "php": "^8.3",
         "pollora/helper-overrider": "^1.2",
