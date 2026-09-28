@@ -219,6 +219,23 @@ describe('BlockRegistrar', function (): void {
             ->toBe(['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n']);
     });
 
+    it('makes the editor script of a block rendered on the server depend on the framework runtime', function (): void {
+        // Its generated edit and save are window.pollora.blocks.bladeEdit() and .save
+        file_put_contents($this->tempDir.'/hero/block.json', json_encode([
+            'name' => 'test/hero',
+            'editorScript' => 'file:./index.jsx',
+            'render' => 'file:./render.blade.php',
+        ]));
+        file_put_contents($this->tempDir.'/hero/render.blade.php', '<div></div>');
+
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar->mockViteManager = createMockVite();
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredScripts['test-hero-editor-script']['deps'])
+            ->toBe(['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n', BlockRegistrar::EDITOR_RUNTIME_HANDLE]);
+    });
+
     it('adds the WordPress scripts the build recorded in editor.deps.json to the editor script', function (): void {
         // @roots/vite-plugin externalises every @wordpress/* import and lists
         // the matching script handles in editor.deps.json. Without them, a

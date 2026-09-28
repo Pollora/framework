@@ -51,6 +51,8 @@ case "${1:-}" in
 
         php artisan pollora:make:block dynamic-card --plugin="$PLUGIN" --title="Dynamic Card" --force --no-interaction
         php artisan pollora:make:block static-card --plugin="$PLUGIN" --title="Static Card" --static --force --no-interaction
+        php artisan pollora:make:block inner-card --plugin="$PLUGIN" --title="Inner Card" --inner-blocks --force --no-interaction
+        cp "$FIXTURES/blocks/inner-card/render.blade.php" "$PLUGIN_DIR/resources/views/blocks/inner-card/render.blade.php"
         build "$PLUGIN_DIR"
         wp plugin activate "$PLUGIN"
 

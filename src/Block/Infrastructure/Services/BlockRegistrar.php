@@ -12,6 +12,7 @@ use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Block\Domain\Contracts\BlockRegistrarInterface;
+use Pollora\Block\Domain\Services\InnerBlocksTag;
 use Pollora\Hook\Domain\Contract\Filter as HookFilter;
 
 /**
@@ -42,6 +43,12 @@ class BlockRegistrar implements BlockRegistrarInterface
      * Default WordPress dependencies for editor scripts.
      */
     private const array DEFAULT_EDITOR_DEPS = ['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-i18n'];
+
+    /**
+     * Editor script of a block rendered on the server: the framework runtime
+     * behind its edit and save (window.pollora.blocks).
+     */
+    public const string EDITOR_RUNTIME_HANDLE = 'pollora-block-editor';
 
     /**
      * Blocks directory, relative to the theme or plugin root.
@@ -263,6 +270,11 @@ class BlockRegistrar implements BlockRegistrarInterface
     /**
      * Build the render callback for a block.json "render" file.
      *
+     * The template — Blade, or plain PHP — gets `$attributes`, `$content`,
+     * `$block` and `$isPreview`. On the page, its `<InnerBlocks />` tag gives
+     * way to the inner blocks; in the editor's preview it stays, for the
+     * editor runtime to make editable.
+     *
      * Returns null when the file is missing or outside the block directory, so that
      * WordPress does not include it either.
      */
@@ -278,22 +290,30 @@ class BlockRegistrar implements BlockRegistrarInterface
             return null;
         }
 
-        if (str_ends_with($realRenderFile, '.blade.php')) {
-            return static fn (array $attributes, string $content, \WP_Block $block): string => Container::getInstance()
+        $template = str_ends_with($realRenderFile, '.blade.php')
+            ? static fn (array $attributes, string $content, \WP_Block $block, bool $isPreview): string => Container::getInstance()
                 ->make(ViewFactory::class)
                 ->file($realRenderFile, [
                     'attributes' => $attributes,
                     'content' => $content,
                     'block' => $block,
+                    'isPreview' => $isPreview,
                 ])
-                ->render();
-        }
+                ->render()
+            : static function (array $attributes, string $content, \WP_Block $block, bool $isPreview) use ($realRenderFile): string {
+                ob_start();
+                include $realRenderFile;
 
-        return static function (array $attributes, string $content, \WP_Block $block) use ($realRenderFile): string {
-            ob_start();
-            include $realRenderFile;
+                return (string) ob_get_clean();
+            };
 
-            return (string) ob_get_clean();
+        return static function (array $attributes, string $content, \WP_Block $block) use ($template): string {
+            $isPreview = Container::getInstance()->make(BlockPreview::class)->isActive();
+            $html = $template($attributes, $content, $block, $isPreview);
+
+            // In the editor's preview the tag stays: the editor turns it into
+            // the editable inner blocks.
+            return $isPreview ? $html : InnerBlocksTag::replace($html, $content);
         };
     }
 
@@ -317,7 +337,7 @@ class BlockRegistrar implements BlockRegistrarInterface
         }
 
         $handle = $this->buildHandle($blockName, $field);
-        $deps = $field === 'editorScript' ? $this->editorScriptDependencies($viteManager) : [];
+        $deps = $field === 'editorScript' ? $this->editorScriptDependencies($viteManager, isset($metadata['render'])) : [];
 
         if ($viteManager->isRunningHot()) {
             wp_register_script($handle, $viteManager->asset($entryPoint), $deps, null, true);
@@ -349,11 +369,18 @@ class BlockRegistrar implements BlockRegistrarInterface
      * depends on a script WordPress may never load. In dev mode there is no
      * build: the defaults stand.
      *
+     * A block rendered on the server also depends on the framework's editor
+     * runtime, which its generated edit and save call.
+     *
      * @return list<string>
      */
-    private function editorScriptDependencies(ViteManagerInterface $viteManager): array
+    private function editorScriptDependencies(ViteManagerInterface $viteManager, bool $isRenderedOnServer = false): array
     {
-        return array_values(array_unique([...self::DEFAULT_EDITOR_DEPS, ...$this->builtEditorDependencies($viteManager)]));
+        return array_values(array_unique([
+            ...self::DEFAULT_EDITOR_DEPS,
+            ...($isRenderedOnServer ? [self::EDITOR_RUNTIME_HANDLE] : []),
+            ...$this->builtEditorDependencies($viteManager),
+        ]));
     }
 
     /**

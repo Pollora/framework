@@ -6,7 +6,9 @@ namespace Pollora\Block\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Block\Domain\Contracts\BlockRegistrarInterface;
+use Pollora\Block\Infrastructure\Services\BlockPreview;
 use Pollora\Block\Infrastructure\Services\BlockRegistrar;
+use Pollora\Block\Infrastructure\Services\EditorRuntime;
 use Pollora\Block\Infrastructure\Services\ModuleBlocksRegistrar;
 use Pollora\Block\UI\Console\MakeBlockCommand;
 use Pollora\BlockCategory\Application\Services\BlockCategoryService;
@@ -22,6 +24,7 @@ use Pollora\BlockPattern\Infrastructure\Adapters\WordPressPatternDataExtractor;
 use Pollora\BlockPattern\Infrastructure\Registrars\WordPressPatternCategoryRegistrar;
 use Pollora\BlockPattern\Infrastructure\Registrars\WordPressPatternRegistrar;
 use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 
 /**
  * Service provider for Gutenberg blocks, block categories, and block patterns.
@@ -57,8 +60,16 @@ class BlockServiceProvider extends ServiceProvider
         // provider boots before WordPress loads, so the hook is in place in
         // time — unlike one added by a theme or plugin provider.
         $action->add('init', function (): void {
+            $this->app->make(EditorRuntime::class)->register();
             $this->app->make(ModuleBlocksRegistrar::class)->registerAll();
         });
+
+        // A block rendered through the core block-renderer route is the
+        // editor's preview: its template keeps <InnerBlocks /> for the editor.
+        $filter = $this->app->get(Filter::class);
+        $preview = $this->app->make(BlockPreview::class);
+        $filter->add('rest_request_before_callbacks', $preview->start(...), 10, 3);
+        $filter->add('rest_request_after_callbacks', $preview->end(...), 10, 1);
 
         // Register block patterns on init
         $action->add('init', function (): void {
@@ -71,6 +82,8 @@ class BlockServiceProvider extends ServiceProvider
         $this->app->singleton(BlockRegistrar::class);
         $this->app->alias(BlockRegistrar::class, BlockRegistrarInterface::class);
         $this->app->singleton(ModuleBlocksRegistrar::class);
+        $this->app->singleton(BlockPreview::class);
+        $this->app->singleton(EditorRuntime::class);
     }
 
     private function registerBlockCategoryServices(): void

@@ -5,7 +5,28 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...develop)
+
+## [v13.32.0-beta.9](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...v13.32.0-beta.9) - 2026-09-28
+
+### Added
+- `<InnerBlocks />` in a block's `render.blade.php`: the block's inner blocks are edited in place in the editor, inside the rendered template, and printed in place of the tag on the page, in a `div` carrying the tag's `class` (`pollora-inner-blocks` by default). The tag takes Gutenberg's inner blocks options — `allowedBlocks`, `template`, `templateLock`, `orientation`… — as attributes, JSON for arrays and objects. Modelled on ACF's `<InnerBlocks />`. A `render.php` template gets it too
+- The block editor runtime `window.pollora.blocks` (script handle `pollora-block-editor`, a dependency of the editor script of every block with a `render` template): `bladeEdit(metadata)` previews the template through the core block-renderer route and makes its `<InnerBlocks />` editable; `save` stores the inner blocks. Shipped inline, as nothing under `vendor/` has a public URL
+- `$isPreview` in a block template: true while it renders for the editor's preview
+- `develop` is aliased to `13.x-dev` (`extra.branch-alias`). Without it, `dev-develop` satisfied no version constraint: a project on `dev-develop` could not install a package requiring `pollora/framework` `^13.0` — `pollora/nectar` 1.1 does — without an inline alias of its own
+
+### Fixed
+- `pollora:make:block --inner-blocks` made a dynamic block whose inner blocks were neither editable in its preview, saved in the post, nor printed by its template. It now writes `<InnerBlocks />` in `render.blade.php`
+- `TemplateMarker`'s documentation no longer says every response goes through `template_include`: responses from `Route::wp()` and Laravel routes bypass it and carry no marker, as the hierarchy browser tests assert
+- "Validate Changelog" no longer fails the pull request of every release. It required a non-empty `[Unreleased]` on any pull request to `main`, which a release from `develop` or `release/*` has emptied into the version's section by construction; it now checks hotfixes only
+
+### Changed
+- `pollora:make:block` generates dynamic blocks on the runtime: `edit.jsx` is `window.pollora.blocks.bladeEdit(metadata)` instead of `ServerSideRender`, `save` is `window.pollora.blocks.save` instead of `() => null`, and `@wordpress/server-side-render` is no longer added to `package.json`. Blocks made before keep working
+- The framework no longer declares the wpackagist repository, from which it required nothing. Composer still fetched its metadata on every install, so a wpackagist network error failed the build — measured: the nightly of 2026-09-27 failed "Code Quality" on `curl error 56` from wpackagist.org
+- The installed package no longer carries the test suite, the CI workflows and the tooling configs: `.gitattributes` leaves them out of the archive Composer installs. The browser tests stay reachable by cloning the repository, which is how theme CI fetches them
+
+### Removed
+- `get`, a grep output committed by mistake
 
 ## [v13.32.0-beta.8](https://github.com/Pollora/framework/compare/v13.32.0-beta.7...v13.32.0-beta.8) - 2026-09-25
 

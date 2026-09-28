@@ -112,7 +112,7 @@ describe('pollora:make:block', function (): void {
             ->and($blockDir.'/save.jsx')->not->toBeFile()
             ->and($this->themeDir.'/resources/blocks')->not->toBeDirectory()
             ->and($metadata['render'])->toBe('file:./render.blade.php')
-            ->and((string) file_get_contents($blockDir.'/index.jsx'))->toContain('save: () => null');
+            ->and((string) file_get_contents($blockDir.'/index.jsx'))->toContain('save: window.pollora.blocks.save,');
     });
 
     it('generates a render.blade.php without leftover placeholders', function (): void {
@@ -134,8 +134,9 @@ describe('pollora:make:block', function (): void {
 
         $edit = (string) file_get_contents($this->themeDir.'/resources/views/blocks/hero/edit.jsx');
 
-        expect($edit)->toContain("import ServerSideRender from '@wordpress/server-side-render';")
-            ->and($edit)->toContain('<ServerSideRender block={metadata.name} attributes={attributes} />')
+        expect($edit)->toContain('export default window.pollora.blocks.bladeEdit(metadata);')
+            ->and($edit)->toContain("import metadata from './block.json';")
+            ->and($edit)->not->toContain('ServerSideRender')
             ->and($edit)->not->toContain('Block Editor');
     });
 
@@ -153,15 +154,35 @@ describe('pollora:make:block', function (): void {
             ->and($edit)->not->toContain('ServerSideRender');
     });
 
-    it('keeps the InnerBlocks editor for a block with inner blocks', function (): void {
-        // A server render cannot edit child blocks in place
+    it('writes <InnerBlocks /> in the template of a dynamic block with inner blocks', function (): void {
+        // The block used to save nothing and its template never printed the inner blocks
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--inner-blocks' => true])
             ->assertSuccessful();
 
-        $edit = (string) file_get_contents($this->themeDir.'/resources/views/blocks/hero/edit.jsx');
+        $blockDir = $this->themeDir.'/resources/views/blocks/hero';
 
-        expect($edit)->toContain('<InnerBlocks />')
-            ->and($edit)->not->toContain('ServerSideRender');
+        expect((string) file_get_contents($blockDir.'/render.blade.php'))->toContain("    <InnerBlocks />\n</div>")
+            ->and((string) file_get_contents($blockDir.'/edit.jsx'))->toContain('window.pollora.blocks.bladeEdit(metadata)')
+            ->and((string) file_get_contents($blockDir.'/index.jsx'))->toContain('save: window.pollora.blocks.save,')
+            ->and($blockDir.'/save.jsx')->not->toBeFile();
+    });
+
+    it('keeps the InnerBlocks editor for a static block with inner blocks', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme', '--inner-blocks' => true, '--static' => true])
+            ->assertSuccessful();
+
+        $blockDir = $this->themeDir.'/resources/views/blocks/hero';
+
+        expect((string) file_get_contents($blockDir.'/edit.jsx'))->toContain('<InnerBlocks />')
+            ->and((string) file_get_contents($blockDir.'/save.jsx'))->toContain('<InnerBlocks.Content />')
+            ->and($blockDir.'/render.blade.php')->not->toBeFile();
+    });
+
+    it('leaves <InnerBlocks /> out of the template of a block without inner blocks', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])->assertSuccessful();
+
+        expect((string) file_get_contents($this->themeDir.'/resources/views/blocks/hero/render.blade.php'))
+            ->not->toContain('<InnerBlocks');
     });
 
     it('writes a title with a quote as a valid JavaScript string', function (): void {
@@ -277,12 +298,13 @@ describe('pollora:make:block', function (): void {
             ->and($refresh[1])->toContain("...refreshPaths.filter((refreshPath) => refreshPath !== 'resources/views/**')");
     });
 
-    it('adds @wordpress/server-side-render to package.json with the first block', function (): void {
+    it('no longer adds @wordpress/server-side-render, which the generated blocks do not import', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])->assertSuccessful();
 
         $package = json_decode((string) file_get_contents($this->themeDir.'/package.json'), true);
 
-        expect($package['devDependencies'])->toHaveKey('@wordpress/server-side-render');
+        expect($package['devDependencies'])->not->toHaveKey('@wordpress/server-side-render')
+            ->and($package['devDependencies'])->toHaveKey('@wordpress/block-editor');
     });
 
     it('patches the refresh paths only once', function (): void {

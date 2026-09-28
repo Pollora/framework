@@ -5,11 +5,16 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Blade;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
+use Pollora\Block\Infrastructure\Services\BlockPreview;
 use Pollora\Block\Infrastructure\Services\BlockRegistrar;
 use Pollora\Hook\Domain\Contract\Filter as HookFilter;
 
 if (! class_exists('WP_Block')) {
     eval('class WP_Block {}');
+}
+
+if (! class_exists('WP_REST_Request')) {
+    eval('class WP_REST_Request { public function __construct(private string $method = "", private string $route = "") {} public function get_route(): string { return $this->route; } }');
 }
 
 /**
@@ -92,5 +97,40 @@ describe('Blade block rendering', function (): void {
 
         expect(trim($render(['label' => 'Sale'], '', new WP_Block)))
             ->toBe('<span class="badge new">Sale</span>|Sale');
+    });
+
+    it('puts the inner blocks in place of <InnerBlocks /> on the page', function (): void {
+        file_put_contents(
+            $this->blockDir.'/render.blade.php',
+            '<section><h2>{{ $attributes[\'title\'] }}</h2><InnerBlocks class="card__body" allowedBlocks="{{ json_encode([\'core/paragraph\']) }}" /></section>'
+        );
+
+        $render = bladeBlockRenderCallback($this->blockDir);
+
+        expect($render(['title' => 'Card'], '<p>Inner</p>', new WP_Block))
+            ->toBe('<section><h2>Card</h2><div class="card__body"><p>Inner</p></div></section>');
+    });
+
+    it('keeps <InnerBlocks /> and says so to the template in the editor preview', function (): void {
+        file_put_contents(
+            $this->blockDir.'/render.blade.php',
+            "<section>@if (\$isPreview) preview @endif\n<InnerBlocks /></section>"
+        );
+
+        $render = bladeBlockRenderCallback($this->blockDir);
+        $this->app->singleton(BlockPreview::class);
+        $this->app->make(BlockPreview::class)->start(null, null, new WP_REST_Request('POST', '/wp/v2/block-renderer/test/card'));
+
+        expect($render([], '', new WP_Block))->toBe('<section> preview <InnerBlocks /></section>');
+    });
+
+    it('puts the inner blocks in place of <InnerBlocks /> in a PHP render file too', function (): void {
+        file_put_contents($this->blockDir.'/block.json', json_encode(['name' => 'test/card', 'render' => 'file:./render.php']));
+        file_put_contents($this->blockDir.'/render.php', '<section><?= $isPreview ? "preview" : "page" ?><InnerBlocks /></section>');
+
+        $render = bladeBlockRenderCallback($this->blockDir);
+
+        expect($render([], '<p>Inner</p>', new WP_Block))
+            ->toBe('<section>page<div class="pollora-inner-blocks"><p>Inner</p></div></section>');
     });
 });
