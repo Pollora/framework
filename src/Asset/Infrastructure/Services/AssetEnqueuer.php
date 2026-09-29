@@ -23,6 +23,21 @@ use Pollora\Hook\Domain\Contract\Filter as HookFilter;
 class AssetEnqueuer
 {
     /**
+     * Hooks on whose pages WordPress prints script modules, after its import map.
+     *
+     * A Vite entry is an ES module. Enqueued as a classic script it was printed in
+     * the head, before the import map — which Firefox and Safari then ignore, so any
+     * WordPress module on the page (the navigation block's, for one) failed to
+     * resolve `@wordpress/interactivity`. Enqueued as a script module, WordPress
+     * places it itself: after the import map, in the head of a block theme (or its
+     * footer with loadInFooter()), always in the footer of a classic theme.
+     *
+     * The editor, the login screen and the Customizer print no script modules, so
+     * Vite entries there stay classic scripts.
+     */
+    private const array SCRIPT_MODULE_HOOKS = ['wp_enqueue_scripts', 'admin_enqueue_scripts'];
+
+    /**
      * The asset path or array of paths.
      *
      * @var string|array<string>
@@ -336,7 +351,7 @@ class AssetEnqueuer
                     $this->loadViteClient($hook);
                 }
 
-                resolve(HookAction::class)->add($hook, $this->enqueueStyleOrScript(...), 99);
+                resolve(HookAction::class)->add($hook, fn () => $this->enqueueStyleOrScript($hook), 99);
             }
         } catch (\Throwable $throwable) {
             Log::error('Error in AssetEnqueuer::__destruct', ['error' => $throwable->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
@@ -346,12 +361,12 @@ class AssetEnqueuer
     /**
      * Enqueues all styles and scripts for the current asset.
      */
-    public function enqueueStyleOrScript(): void
+    public function enqueueStyleOrScript(?string $hook = null): void
     {
         $paths = $this->getAssetPaths();
         foreach ($paths as $type => $pathList) {
             foreach ($pathList as $path) {
-                $this->enqueueAsset((string) $type, $this->forceFullUrl($path));
+                $this->enqueueAsset((string) $type, $this->forceFullUrl($path), $hook);
             }
         }
     }
@@ -374,6 +389,19 @@ class AssetEnqueuer
      */
     protected function loadViteClient(string $hook): void
     {
+        if ($this->printsScriptModules($hook)) {
+            // The client is a module too: printed ahead of the import map, it would void it.
+            resolve(HookAction::class)->add($hook, function (): void {
+                $url = $this->viteManager instanceof ViteManager ? $this->viteManager->clientUrl() : '';
+
+                if ($url !== '') {
+                    wp_enqueue_script_module('vite-client/'.md5($url), $url);
+                }
+            }, 1);
+
+            return;
+        }
+
         resolve(HookAction::class)->add($hook, function (): void {
             if ($this->viteManager instanceof ViteManager && $this->viteManager->isRunningHot()) {
                 echo $this->viteManager->getViteClientHtml();
@@ -431,12 +459,14 @@ class AssetEnqueuer
      *
      * @throws \InvalidArgumentException When asset type is not supported
      */
-    protected function enqueueAsset(string $type, string $path): void
+    protected function enqueueAsset(string $type, string $path, ?string $hook = null): void
     {
         $handle = $this->useVite && ! $this->viteManager->isRunningHot() ? $this->handle.'/'.sanitize_title(basename($path)) : $this->handle;
         match ($type) {
             'css' => $this->enqueueStyle($path, $handle),
-            'js' => $this->enqueueScript($path, $handle),
+            'js' => $this->useVite && $this->printsScriptModules($hook)
+                ? $this->enqueueScriptModule($path, $handle)
+                : $this->enqueueScript($path, $handle),
             default => throw new \InvalidArgumentException('Unsupported asset type: '.$type)
         };
     }
@@ -464,6 +494,52 @@ class AssetEnqueuer
 
         if (! in_array($this->inlineContent, [null, '', '0'], true)) {
             wp_add_inline_script($handle, $this->inlineContent, $this->inlinePosition);
+        }
+    }
+
+    /**
+     * Whether a Vite entry enqueued on this hook is printed by WordPress as a script module.
+     */
+    protected function printsScriptModules(?string $hook): bool
+    {
+        return in_array($hook, self::SCRIPT_MODULE_HOOKS, true) && function_exists('wp_enqueue_script_module');
+    }
+
+    /**
+     * Enqueues a Vite entry as a WordPress script module.
+     *
+     * A module can only depend on modules, and takes no localized data or inline
+     * script. What the asset declares of those goes on a classic companion script,
+     * `{handle}-data`, printed in the head: it runs before the module, which the
+     * browser defers.
+     */
+    protected function enqueueScriptModule(string $path, string $handle): void
+    {
+        // null, not false: false appends WordPress's version, and a module is identified by its
+        // exact URL — a chunk importing the entry back would load a second copy of it.
+        wp_enqueue_script_module($handle, $path, [], $this->version, ['in_footer' => $this->loadInFooter]);
+
+        resolve(HookFilter::class)->add('wp_script_attributes', fn (array $attributes): array => ($attributes['id'] ?? null) === $handle.'-js-module'
+            ? [...$attributes, 'crossorigin' => true]
+            : $attributes);
+
+        $hasInlineContent = ! in_array($this->inlineContent, [null, '', '0'], true);
+
+        if ($this->dependencies === [] && $this->localizationData === [] && ! $hasInlineContent) {
+            return;
+        }
+
+        $companion = $handle.'-data';
+        // No source: a registered handle that prints only its dependencies and inline data.
+        wp_register_script($companion, false, $this->dependencies, $this->version, false);
+        wp_enqueue_script($companion);
+
+        foreach ($this->localizationData as $objectName => $data) {
+            wp_localize_script($companion, $objectName, $data);
+        }
+
+        if ($hasInlineContent) {
+            wp_add_inline_script($companion, $this->inlineContent, $this->inlinePosition);
         }
     }
 

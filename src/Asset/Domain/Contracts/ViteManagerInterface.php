@@ -47,4 +47,9 @@ interface ViteManagerInterface
      * @return string The HTML script tag for Vite client
      */
     public function getViteClientHtml(): string;
+
+    /**
+     * The URL of the Vite client on the dev server, or an empty string when Vite is not running hot.
+     */
+    public function clientUrl(): string;
 }
