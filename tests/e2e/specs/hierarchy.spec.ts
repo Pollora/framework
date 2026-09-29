@@ -2,7 +2,7 @@ import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@wordpress/e2e-test-utils-playwright';
 import { activateTheme, restoreSite, seed, type Seeded, themeDir } from '../support/hierarchy';
-import { renderedTemplate } from '../support/site';
+import { homeUrl, renderedTemplate } from '../support/site';
 
 /**
  * The WordPress template hierarchy, resolved to Blade by the framework, read in the
@@ -98,6 +98,34 @@ test.describe('Template hierarchy, with a template for every case', () => {
             await expectRendered(page, seeded.urls[expected.url], fullTheme[name]);
         });
     }
+});
+
+test.describe('Body classes, where WordPress and Laravel disagree about a URL', () => {
+    test.beforeAll(() => activateTheme('e2e-full'));
+
+    const bodyClasses = async (page: import('@playwright/test').Page, url: string): Promise<string[]> => {
+        await page.goto(url);
+
+        return ((await page.locator('body').getAttribute('class')) ?? '').split(/\s+/);
+    };
+
+    test('a 404 keeps the error404 class WordPress gave it', async ({ page }) => {
+        expect(await bodyClasses(page, seeded.urls.notFound)).toContain('error404');
+    });
+
+    test('a Route::wp() route keeps the classes of what WordPress resolved', async ({ page }) => {
+        const classes = await bodyClasses(page, seeded.urls.routed);
+
+        expect(classes).toContain('page');
+        expect(classes).not.toContain('error404');
+    });
+
+    test('a Laravel route WordPress knows nothing about is not a 404, and is named after its URI', async ({ page }) => {
+        const classes = await bodyClasses(page, homeUrl('/e2e-laravel-only/settings'));
+
+        expect(classes).toEqual(expect.arrayContaining(['e2e-laravel-only', 'tab-settings']));
+        expect(classes).not.toContain('error404');
+    });
 });
 
 test.describe('Template hierarchy, with index alone', () => {

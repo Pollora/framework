@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     @php(wp_head())
 </head>
-<body>
+<body @php(body_class())>
     <main data-e2e-view="@yield('view')">@yield('view')</main>
     @php(wp_footer())
 </body>
