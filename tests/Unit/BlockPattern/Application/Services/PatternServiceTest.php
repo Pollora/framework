@@ -150,6 +150,26 @@ describe('PatternService', function (): void {
         expect($registered)->toBeEmpty();
     });
 
+    it('registers a plain .html pattern file alongside .blade.php ones', function (): void {
+        $this->themesRoot = makeThemesRoot(['my-theme' => ['hero']]);
+        file_put_contents(
+            $this->themesRoot.'/my-theme/resources/views/patterns/quote.html',
+            '<!-- wp:quote --><blockquote>quote</blockquote><!-- /wp:quote -->'
+        );
+
+        $themeService = Mockery::mock(ThemeService::class);
+        $themeService->shouldReceive('theme')->andReturn(new ThemeMetadata('my-theme', $this->themesRoot));
+        $themeService->shouldReceive('getParentThemes')->andReturn([]);
+
+        $registered = [];
+        makePatternService($themeService, $registered)->registerAll();
+
+        $slugs = array_map(fn (Pattern $pattern): string => $pattern->getSlug(), $registered);
+        sort($slugs);
+
+        expect($slugs)->toBe(['theme/hero', 'theme/quote.html']);
+    });
+
     it('does nothing when the theme has no patterns directory', function (): void {
         $this->themesRoot = makeThemesRoot(['my-theme' => []]);
         removeThemesRoot($this->themesRoot.'/my-theme/resources/views/patterns');

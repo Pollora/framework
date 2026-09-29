@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...develop)
 
+### Added
+- A theme's `resources/views/patterns` can hold a plain `.html` file alongside `.blade.php` ones. It is registered verbatim, with no compilation step — for a pattern that needs no PHP, such as one exported straight from the block editor. Its header (`Title`, `Slug`, `Categories`…) follows the same fenced-comment convention as a Blade pattern's, `<!-- \nTitle: ... \n -->` instead of `{{-- \nTitle: ... \n --}}`
+
 ## [v13.32.0-beta.9](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...v13.32.0-beta.9) - 2026-09-28
 
 ### Added

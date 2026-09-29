@@ -32,10 +32,13 @@ interface PatternDataExtractorInterface
     public function processData(PatternFileData $fileData, object $theme): array;
 
     /**
-     * Get the rendered content for a pattern.
+     * Get the content for a pattern.
+     *
+     * A `.blade.php` file is compiled and rendered; a `.html` file is read
+     * back verbatim, with no compilation step.
      *
      * @param  string  $file  Path to the pattern file
-     * @return string|null Rendered content or null if not available
+     * @return string|null Content or null if not available
      */
     public function getContent(string $file): ?string;
 }
