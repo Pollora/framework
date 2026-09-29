@@ -73,6 +73,29 @@ describe('FrontendController', function (): void {
         expect($response->getContent())->toBe('This is a PHP template');
     });
 
+    it("answers 404 for a block theme's own 404.html, resolved through template-canvas.php", function (): void {
+        // A block theme's 404.html is resolved by WordPress core to a temporary
+        // wp-includes/template-canvas.php, never a Blade view: get_404_template()
+        // found a real template, so this never reaches the index-fallback branch.
+        $templatePath = __DIR__.'/test-template.php';
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\when('is_embed')->justReturn(false);
+        Brain\Monkey\Functions\when('is_404')->justReturn(true);
+        Brain\Monkey\Functions\when('get_404_template')->justReturn($templatePath);
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
+
+        $this->templateFinder->shouldReceive('getViewNameFromPath')
+            ->with($templatePath)
+            ->andReturn(null);
+
+        $request = Request::create('/nonexistent');
+        $response = $this->controller->handle($request);
+
+        expect($response)->toBeInstanceOf(Response::class);
+        expect($response->getStatusCode())->toBe(404);
+        expect($response->getContent())->toBe('This is a PHP template');
+    });
+
     it('returns 404 response when no template found', function (): void {
         Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
 

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - A theme's `resources/views/patterns` can hold a plain `.html` file alongside `.blade.php` ones. It is registered verbatim, with no compilation step — for a pattern that needs no PHP, such as one exported straight from the block editor. Its header (`Title`, `Slug`, `Categories`…) follows the same fenced-comment convention as a Blade pattern's, `<!-- \nTitle: ... \n -->` instead of `{{-- \nTitle: ... \n --}}`
 
+### Fixed
+- A block theme's own `404.html` answered with HTTP 200. WordPress core resolves it to `wp-includes/template-canvas.php`, which is never a Blade view, so it always rendered through `FrontendController`'s raw-PHP-template branch — the only branch that never looked at `is_404()`. Measured on a fresh block theme: right content, wrong status
+
 ## [v13.32.0-beta.9](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...v13.32.0-beta.9) - 2026-09-28
 
 ### Added
