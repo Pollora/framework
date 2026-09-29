@@ -5,7 +5,24 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta...develop)
+
+## [v13.34.0-beta](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...v13.34.0-beta) - 2026-09-29
+
+The framework's version tracks Laravel's: this beta requires Laravel 13.34.
+
+### Added
+- A third `pollora:make:theme` template, **Magazine** (`magazine` → `pollora/theme-buzz`): a Full Site Editing block theme whose templates, parts and patterns are edited in the Site Editor, next to `default` and `ecommerce`. The missing-theme page and admin notice list it too
+
+### Fixed
+- A Vite script was printed before WordPress's import map, which Firefox and Safari then ignore: any WordPress script module on the page — the navigation block's, the search block's, the image lightbox's — failed on `@wordpress/interactivity was a bare specifier`, so the block did nothing. Chromium tolerates the order, which hid it. In a classic theme the import map is always in the footer, so any theme with a Vite script in the head was affected as soon as an author inserted such a block. The Vite client of the dev server had the same problem
+- A block theme's own `404.html` answered with HTTP 200. WordPress core resolves it to `wp-includes/template-canvas.php`, which is never a Blade view, so it always rendered through `FrontendController`'s raw-PHP-template branch — the only branch that never looked at `is_404()`. Measured on a fresh block theme: right content, wrong status
+- A real 404 lost its `error404` body class, and every page served by the template hierarchy carried a meaningless one built from its path (`any-no-such-page`). The `WordPressBodyClass` middleware was meant for Laravel routes, which WordPress's own resolution calls a 404, but it only ran on WordPress routes — the `{any}` fallback included — where WordPress's verdict is the right one. So it did the opposite of its job on both sides: a Laravel route (`Route::get('/dashboard/{tab}')`) kept `error404`, `is_404()` true and a "Page not found" title over its 200 response
+
+### Changed
+- Requires Laravel 13.34: `illuminate/*` `^13.34` (was `^13.32`). Measured on `laravel/framework` v13.34.0: the full suite, Pint, PHPStan and Rector pass unchanged
+- The `WordPressBodyClass` middleware is replaced by a `RouteMatched` listener, `ApplyApplicationRouteContext`, which runs on every route: a route WordPress answers (`Route::wp()` and the template-hierarchy fallback, both flagged `isWordPressRoute()`) keeps WordPress's classes and verdict untouched; any other route has `is_404()` cleared and its URI segments added as body classes (`dashboard tab-settings`). A middleware could not do this — Laravel routes are not given the WordPress middleware stack
+- On the front end and in the admin, a Vite script is enqueued as a WordPress script module (`wp_enqueue_script_module`), so WordPress places it after its import map, as it does its own modules: in the head of a block theme (the footer with `loadInFooter()`), always in the footer of a classic theme. What a module cannot take — `dependencies()`, `localize()`, `inline()` — goes on a classic companion script, `{handle}-data`, which runs before the module. The editor, login screen and Customizer are unchanged
 
 ## [v13.32.0-beta.9](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...v13.32.0-beta.9) - 2026-09-28
 

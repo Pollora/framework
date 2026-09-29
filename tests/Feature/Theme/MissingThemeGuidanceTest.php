@@ -61,7 +61,8 @@ describe('MissingThemePage', function (): void {
         expect($response)->toBeInstanceOf(Response::class)
             ->and($response->getStatusCode())->toBe(503)
             ->and($response->getContent())->toContain('pollora/theme-default')
-            ->and($response->getContent())->toContain('pollora/theme-apiary');
+            ->and($response->getContent())->toContain('pollora/theme-apiary')
+            ->and($response->getContent())->toContain('pollora/theme-buzz');
     });
 
     it('leaves the exception alone when a theme is installed', function (): void {
@@ -140,7 +141,10 @@ describe('MissingThemeNotice', function (): void {
 
         expect($output)->toContain('notice-warning')
             ->and($output)->toContain('no theme installed')
-            ->and($output)->toContain('pollora:make:theme');
+            ->and($output)->toContain('pollora:make:theme')
+            ->and($output)->toContain('pollora/theme-default')
+            ->and($output)->toContain('pollora/theme-apiary')
+            ->and($output)->toContain('pollora/theme-buzz');
     });
 
     it('stays silent once a theme is installed', function (): void {

@@ -24,11 +24,11 @@
     "require": {
         "php": "^8.3",
         "pollora/helper-overrider": "^1.2",
-        "illuminate/auth": "^13.32",
-        "illuminate/support": "^13.32",
-        "illuminate/database": "^13.32",
-        "illuminate/routing": "^13.32",
-        "illuminate/console": "^13.32",
+        "illuminate/auth": "^13.34",
+        "illuminate/support": "^13.34",
+        "illuminate/database": "^13.34",
+        "illuminate/routing": "^13.34",
+        "illuminate/console": "^13.34",
         "pollora/abilities": "^1.0",
         "pollora/ajax": "^1.0",
         "pollora/entity": "^1.2",
@@ -44,7 +44,7 @@
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.0",
         "symfony/process": "^7.4 || ^8.0",
-        "illuminate/config": "^13.32",
+        "illuminate/config": "^13.34",
         "laravel/prompts": "^0.3.21"
     },
     "autoload": {
@@ -91,6 +91,9 @@
             "pestphp/pest-plugin": true,
             "pollora/helper-overrider": true,
             "wikimedia/composer-merge-plugin": true
+        },
+        "audit": {
+            "ignore-abandoned": ["symplify/rule-doc-generator-contracts"]
         }
     },
     "require-dev": {

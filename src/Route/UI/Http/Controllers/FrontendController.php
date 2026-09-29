@@ -66,7 +66,12 @@ class FrontendController
             include $templatePath;
             $content = ob_get_clean();
 
-            return response($content);
+            // This is how a block theme's own 404.html reaches the page: WordPress
+            // core resolves it to wp-includes/template-canvas.php, which is never a
+            // Blade view, so it always falls through to this branch. Without the
+            // status here, a block theme's 404 template rendered a real "not found"
+            // page over HTTP 200 — correct content, wrong status.
+            return response($content, is_404() ? Response::HTTP_NOT_FOUND : Response::HTTP_OK);
         }
 
         // No WordPress template found — fall back to Laravel's error view

@@ -128,6 +128,12 @@
         <pre><code>{{ $prefix }}php artisan pollora:make:theme my-shop --repository=pollora/theme-apiary</code></pre>
     </div>
 
+    <div class="card">
+        <h2>Start from the magazine theme</h2>
+        <p>A Full Site Editing block theme: its templates are edited in the Site Editor.</p>
+        <pre><code>{{ $prefix }}php artisan pollora:make:theme my-journal --repository=pollora/theme-buzz</code></pre>
+    </div>
+
     <p class="note">
         The command downloads the theme, fills in its metadata, installs its npm dependencies and builds
         its assets, then activates it in WordPress. Run it from the project root, then reload this page.

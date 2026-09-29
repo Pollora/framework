@@ -53,4 +53,12 @@ class ViteManager implements ViteManagerInterface
     {
         return '';
     }
+
+    /**
+     * Returns an empty string for the Vite client URL (stub).
+     */
+    public function clientUrl(): string
+    {
+        return '';
+    }
 }

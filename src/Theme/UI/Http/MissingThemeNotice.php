@@ -27,15 +27,18 @@ final readonly class MissingThemeNotice
         $intro = __('No theme is installed, so the front end of this site cannot be rendered. Generate one from the project root:', 'pollora');
         $default = __('Default theme', 'pollora');
         $ecommerce = __('E-commerce theme (WooCommerce)', 'pollora');
+        $magazine = __('Magazine theme (Full Site Editing)', 'pollora');
 
         printf(
-            '<div class="notice notice-warning"><p><strong>%s</strong></p><p>%s</p><p>%s<br><code>%s</code></p><p>%s<br><code>%s</code></p></div>',
+            '<div class="notice notice-warning"><p><strong>%s</strong></p><p>%s</p><p>%s<br><code>%s</code></p><p>%s<br><code>%s</code></p><p>%s<br><code>%s</code></p></div>',
             esc_html__('Pollora: no theme installed', 'pollora'),
             esc_html($intro),
             esc_html($default),
             esc_html($prefix.'php artisan pollora:make:theme my-theme --repository=pollora/theme-default'),
             esc_html($ecommerce),
-            esc_html($prefix.'php artisan pollora:make:theme my-shop --repository=pollora/theme-apiary')
+            esc_html($prefix.'php artisan pollora:make:theme my-shop --repository=pollora/theme-apiary'),
+            esc_html($magazine),
+            esc_html($prefix.'php artisan pollora:make:theme my-journal --repository=pollora/theme-buzz')
         );
     }
 }
