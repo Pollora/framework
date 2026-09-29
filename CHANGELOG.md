@@ -7,9 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...develop)
 
-### Added
-- A theme's `resources/views/patterns` can hold a plain `.html` file alongside `.blade.php` ones. It is registered verbatim, with no compilation step — for a pattern that needs no PHP, such as one exported straight from the block editor. Its header (`Title`, `Slug`, `Categories`…) follows the same fenced-comment convention as a Blade pattern's, `<!-- \nTitle: ... \n -->` instead of `{{-- \nTitle: ... \n --}}`
-
 ### Fixed
 - A Vite script was printed before WordPress's import map, which Firefox and Safari then ignore: any WordPress script module on the page — the navigation block's, the search block's, the image lightbox's — failed on `@wordpress/interactivity was a bare specifier`, so the block did nothing. Chromium tolerates the order, which hid it. In a classic theme the import map is always in the footer, so any theme with a Vite script in the head was affected as soon as an author inserted such a block. The Vite client of the dev server had the same problem
 - A block theme's own `404.html` answered with HTTP 200. WordPress core resolves it to `wp-includes/template-canvas.php`, which is never a Blade view, so it always rendered through `FrontendController`'s raw-PHP-template branch — the only branch that never looked at `is_404()`. Measured on a fresh block theme: right content, wrong status
