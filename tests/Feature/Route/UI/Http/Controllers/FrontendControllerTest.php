@@ -73,7 +73,7 @@ describe('FrontendController', function (): void {
         expect($response->getContent())->toBe('This is a PHP template');
     });
 
-    it('answers 404 for a block theme\'s own 404.html, resolved through template-canvas.php', function (): void {
+    it("answers 404 for a block theme's own 404.html, resolved through template-canvas.php", function (): void {
         // A block theme's 404.html is resolved by WordPress core to a temporary
         // wp-includes/template-canvas.php, never a Blade view: get_404_template()
         // found a real template, so this never reaches the index-fallback branch.
