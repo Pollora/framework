@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - A block theme's own `404.html` answered with HTTP 200. WordPress core resolves it to `wp-includes/template-canvas.php`, which is never a Blade view, so it always rendered through `FrontendController`'s raw-PHP-template branch — the only branch that never looked at `is_404()`. Measured on a fresh block theme: right content, wrong status
+- A real 404 lost its `error404` body class, and every page served by the template hierarchy carried a meaningless one built from its path (`any-no-such-page`). The `WordPressBodyClass` middleware was meant for Laravel routes, which WordPress's own resolution calls a 404, but it only ran on WordPress routes — the `{any}` fallback included — where WordPress's verdict is the right one. So it did the opposite of its job on both sides: a Laravel route (`Route::get('/dashboard/{tab}')`) kept `error404`, `is_404()` true and a "Page not found" title over its 200 response
+
+### Changed
+- The `WordPressBodyClass` middleware is replaced by a `RouteMatched` listener, `ApplyApplicationRouteContext`, which runs on every route: a route WordPress answers (`Route::wp()` and the template-hierarchy fallback, both flagged `isWordPressRoute()`) keeps WordPress's classes and verdict untouched; any other route has `is_404()` cleared and its URI segments added as body classes (`dashboard tab-settings`). A middleware could not do this — Laravel routes are not given the WordPress middleware stack
 
 ## [v13.32.0-beta.9](https://github.com/Pollora/framework/compare/v13.32.0-beta.8...v13.32.0-beta.9) - 2026-09-28
 

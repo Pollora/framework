@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Pollora\Route\Infrastructure\Providers;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
 use Pollora\Route\Application\UseCases\RegisterWordPressTypesUseCase;
 use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
+use Pollora\Route\Domain\Contracts\WordPressRouteInterface;
+use Pollora\Route\Infrastructure\Listeners\ApplyApplicationRouteContext;
 use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
-use Pollora\Route\Infrastructure\Middleware\WordPressBodyClass;
 use Pollora\Route\Infrastructure\Middleware\WordPressHeaders;
 use Pollora\Route\Infrastructure\Middleware\WordPressShutdown;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
@@ -43,7 +45,6 @@ class RouteServiceProvider extends ServiceProvider
     public const WORDPRESS_MIDDLEWARE = [
         WordPressBindings::class,
         WordPressHeaders::class,
-        WordPressBodyClass::class,
         WordPressShutdown::class,
     ];
 
@@ -67,6 +68,8 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->registerWpMatchMacro();
         $this->registerWpMacro();
+
+        Event::listen(RouteMatched::class, [ApplyApplicationRouteContext::class, 'handle']);
 
         // Register fallback route after modules have loaded their routes.
         // Two triggers ensure it works with or without the modules system:
@@ -210,8 +213,14 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->app->instance('route.fallback.registered', true);
 
-        Route::any('{any}', [FrontendController::class, 'handle'])
+        $route = Route::any('{any}', [FrontendController::class, 'handle'])
             ->where('any', '^(?!api/).*')
             ->middleware(self::WORDPRESS_MIDDLEWARE);
+
+        // WordPress answers here, so its own verdict on the request (a 404
+        // included) stands: see ApplyApplicationRouteContext.
+        if ($route instanceof WordPressRouteInterface) {
+            $route->setIsWordPressRoute(true);
+        }
     }
 }
