@@ -21,9 +21,6 @@ final class PatternConstants
 
     /**
      * File extension for Blade pattern files.
-     *
-     * Compiled and executed through the view engine, so the pattern can hold
-     * dynamic PHP (`{{ get_bloginfo('name') }}`) alongside its block markup.
      */
     public const string PATTERN_FILE_EXTENSION = '.blade.php';
 
@@ -31,24 +28,6 @@ final class PatternConstants
      * File extension for PHP pattern files.
      */
     public const string PHP_FILE_EXTENSION = '.php';
-
-    /**
-     * File extension for plain HTML pattern files.
-     *
-     * Used verbatim as block markup — never compiled — for a pattern that
-     * needs no PHP, such as one exported straight from the block editor.
-     */
-    public const string HTML_FILE_EXTENSION = '.html';
-
-    /**
-     * Extensions {@see \SplFileInfo::getExtension()} reports for a pattern
-     * file the discovery walk should hand to the extractor: `foo.blade.php`
-     * and `foo.html` both qualify, `foo.blade.php` reporting `php` since
-     * `getExtension()` only ever returns the last dot-segment.
-     *
-     * @var array<string>
-     */
-    public const array DISCOVERABLE_EXTENSIONS = ['php', 'html'];
 
     /**
      * Default viewport width for patterns when none is specified.

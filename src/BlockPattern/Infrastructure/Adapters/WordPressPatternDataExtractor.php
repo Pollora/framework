@@ -84,20 +84,9 @@ class WordPressPatternDataExtractor implements PatternDataExtractorInterface
 
     /**
      * {@inheritdoc}
-     *
-     * A `.blade.php` file is compiled and executed through the view engine, so
-     * it can hold dynamic PHP alongside its block markup. A `.html` file is
-     * used verbatim — never compiled — for a pattern that needs none, such as
-     * one exported straight from the block editor.
      */
     public function getContent(string $file): ?string
     {
-        if (Str::endsWith($file, PatternConstants::HTML_FILE_EXTENSION)) {
-            $content = @file_get_contents($file);
-
-            return $content === false ? null : $content;
-        }
-
         $viewName = Str::replaceLast(PatternConstants::PATTERN_FILE_EXTENSION, '', Str::after($file, 'views/'));
 
         return View::exists($viewName) ? View::make($viewName)->render() : null;

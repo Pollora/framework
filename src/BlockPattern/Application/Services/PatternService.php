@@ -193,13 +193,13 @@ class PatternService implements PatternServiceInterface
      */
     private function registerPatternsFromDirectory(string $directory, object $theme): void
     {
-        // Get every Blade (`.blade.php`) and plain (`.html`) pattern file, including subdirectories
+        // Get all PHP files in the directory (including subdirectories)
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS)
         );
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && in_array($file->getExtension(), PatternConstants::DISCOVERABLE_EXTENSIONS, true)) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
                 $this->processPatternFile($file->getPathname(), $theme);
             }
         }
