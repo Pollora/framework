@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...develop)
 
+### Added
+- A third `pollora:make:theme` template, **Magazine** (`magazine` → `pollora/theme-buzz`): a Full Site Editing block theme whose templates, parts and patterns are edited in the Site Editor, next to `default` and `ecommerce`. The missing-theme page and admin notice list it too
+
 ### Fixed
 - A Vite script was printed before WordPress's import map, which Firefox and Safari then ignore: any WordPress script module on the page — the navigation block's, the search block's, the image lightbox's — failed on `@wordpress/interactivity was a bare specifier`, so the block did nothing. Chromium tolerates the order, which hid it. In a classic theme the import map is always in the footer, so any theme with a Vite script in the head was affected as soon as an author inserted such a block. The Vite client of the dev server had the same problem
 - A block theme's own `404.html` answered with HTTP 200. WordPress core resolves it to `wp-includes/template-canvas.php`, which is never a Blade view, so it always rendered through `FrontendController`'s raw-PHP-template branch — the only branch that never looked at `is_404()`. Measured on a fresh block theme: right content, wrong status

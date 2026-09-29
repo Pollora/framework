@@ -489,6 +489,16 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     protected const TEMPLATES = [
         'default' => 'pollora/theme-default',
         'ecommerce' => 'pollora/theme-apiary',
+        'magazine' => 'pollora/theme-buzz',
+    ];
+
+    /**
+     * What the prompt says of each built-in template, keyed like TEMPLATES.
+     */
+    protected const TEMPLATE_LABELS = [
+        'default' => 'Default — Basic starter theme',
+        'ecommerce' => 'E-commerce — WooCommerce theme (Tailwind CSS, Alpine.js)',
+        'magazine' => 'Magazine — Full Site Editing block theme, edited in the Site Editor (Tailwind CSS)',
     ];
 
     /**
@@ -503,8 +513,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         $choice = select(
             label: 'Which theme template would you like to use?',
             options: [
-                'default' => 'Default — Basic starter theme',
-                'ecommerce' => 'E-commerce — WooCommerce theme (Tailwind CSS, Alpine.js)',
+                ...self::TEMPLATE_LABELS,
                 'repository' => 'Custom — Download from a GitHub repository',
             ],
             default: 'default'
