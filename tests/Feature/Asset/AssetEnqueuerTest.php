@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use Brain\Monkey\Functions;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\ConsoleDetectorInterface;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Infrastructure\Services\AssetEnqueuer;
+use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Hook\Domain\Contract\Action as HookAction;
+use Pollora\Hook\Domain\Contract\Filter as HookFilter;
 
 beforeEach(function (): void {
     // Bind console detection to always return true (prevents WP calls)
@@ -222,6 +225,132 @@ describe('AssetEnqueuer', function (): void {
 
             $reflection = new ReflectionProperty($enqueuer, 'useVite');
             expect($reflection->getValue($enqueuer))->toBeFalse();
+        });
+    });
+
+    describe('Vite entries as script modules', function (): void {
+        beforeEach(function (): void {
+            $this->filters = [];
+            $hookFilter = Mockery::mock(HookFilter::class);
+            $hookFilter->shouldReceive('add')->andReturnUsing(function (string $hook, Closure $callback) use ($hookFilter): HookFilter {
+                $this->filters[$hook] = $callback;
+
+                return $hookFilter;
+            });
+            $this->app->instance(HookFilter::class, $hookFilter);
+
+            $this->modules = [];
+            $this->scripts = [];
+            $this->registered = [];
+            Functions\when('wp_enqueue_script_module')->alias(function (string $id, string $src = '', array $deps = [], $version = false, array $args = []): void {
+                $this->modules[$id] = ['src' => $src, 'deps' => $deps, 'version' => $version, 'args' => $args];
+            });
+            Functions\when('wp_register_script')->alias(function (string $handle, $src, array $deps = []): void {
+                $this->registered[$handle] = ['src' => $src, 'deps' => $deps];
+            });
+            Functions\when('wp_enqueue_script')->alias(function (string $handle, $src = '', array $deps = []): void {
+                $this->scripts[$handle] = ['src' => $src, 'deps' => $deps];
+            });
+            Functions\when('sanitize_title')->alias(fn (string $title): string => strtolower(str_replace('.', '-', $title)));
+
+            $this->viteManager = Mockery::mock(ViteManager::class);
+            $this->viteManager->shouldReceive('isRunningHot')->andReturn(false)->byDefault();
+            $this->viteManager->shouldReceive('getAssetUrls')->andReturn([])->byDefault();
+        });
+
+        /** An enqueuer for a built Vite entry, set up the way useVite() would outside the console. */
+        function viteEnqueuer(ViteManager $viteManager, array $settings = []): AssetEnqueuer
+        {
+            $enqueuer = resolve(AssetEnqueuer::class)->handle('buzz/script');
+
+            foreach (['useVite' => true, 'viteManager' => $viteManager, 'path' => ['js' => ['https://site.test/build/app-abc.js']], ...$settings] as $property => $value) {
+                (new ReflectionProperty($enqueuer, $property))->setValue($enqueuer, $value);
+            }
+
+            return $enqueuer;
+        }
+
+        it('enqueues the entry as a module on the front end, with no version appended', function (): void {
+            viteEnqueuer($this->viteManager)->enqueueStyleOrScript('wp_enqueue_scripts');
+
+            expect($this->modules)->toHaveKey('buzz/script/app-abc-js')
+                ->and($this->modules['buzz/script/app-abc-js'])
+                ->toMatchArray(['src' => 'https://site.test/build/app-abc.js', 'version' => null, 'args' => ['in_footer' => false]])
+                ->and($this->scripts)->toBe([]);
+        });
+
+        it('passes loadInFooter() on as in_footer, as WordPress reads it for its own modules', function (): void {
+            viteEnqueuer($this->viteManager, ['loadInFooter' => true])->enqueueStyleOrScript('wp_enqueue_scripts');
+
+            expect($this->modules['buzz/script/app-abc-js']['args'])->toBe(['in_footer' => true]);
+        });
+
+        it('enqueues the entry as a module in the admin', function (): void {
+            viteEnqueuer($this->viteManager)->enqueueStyleOrScript('admin_enqueue_scripts');
+
+            expect($this->modules)->toHaveKey('buzz/script/app-abc-js');
+        });
+
+        it('keeps a classic script where WordPress prints no modules, such as the editor', function (): void {
+            viteEnqueuer($this->viteManager)->enqueueStyleOrScript('enqueue_block_editor_assets');
+
+            expect($this->modules)->toBe([])
+                ->and($this->scripts)->toHaveKey('buzz/script/app-abc-js');
+        });
+
+        it('marks the module tag crossorigin, and no other tag', function (): void {
+            viteEnqueuer($this->viteManager)->enqueueStyleOrScript('wp_enqueue_scripts');
+
+            $filter = $this->filters['wp_script_attributes'];
+
+            expect($filter(['id' => 'buzz/script/app-abc-js-js-module']))->toHaveKey('crossorigin', true)
+                ->and($filter(['id' => 'something-else-js-module']))->not->toHaveKey('crossorigin');
+        });
+
+        it('puts dependencies, localized data and inline script on a classic companion', function (): void {
+            $localized = [];
+            $inline = [];
+            Functions\when('wp_localize_script')->alias(function (string $handle, string $name) use (&$localized): void {
+                $localized[$handle][] = $name;
+            });
+            Functions\when('wp_add_inline_script')->alias(function (string $handle, string $code) use (&$inline): void {
+                $inline[$handle] = $code;
+            });
+
+            viteEnqueuer($this->viteManager, [
+                'dependencies' => ['jquery'],
+                'localizationData' => ['buzzData' => ['a' => 1]],
+                'inlineContent' => 'window.ready = true;',
+            ])->enqueueStyleOrScript('wp_enqueue_scripts');
+
+            expect($this->modules['buzz/script/app-abc-js']['deps'])->toBe([])
+                ->and($this->registered['buzz/script/app-abc-js-data'])->toBe(['src' => false, 'deps' => ['jquery']])
+                ->and($this->scripts)->toHaveKey('buzz/script/app-abc-js-data')
+                ->and($localized)->toBe(['buzz/script/app-abc-js-data' => ['buzzData']])
+                ->and($inline)->toBe(['buzz/script/app-abc-js-data' => 'window.ready = true;']);
+        });
+
+        it('enqueues the Vite client as a module while Vite runs hot', function (): void {
+            $this->viteManager->shouldReceive('isRunningHot')->andReturn(true);
+            $this->viteManager->shouldReceive('clientUrl')->andReturn('https://site.test:5173/@vite/client');
+
+            $callbacks = [];
+            $hookAction = $this->hookAction;
+            $hookAction->shouldReceive('add')->andReturnUsing(function (string $hook, callable $callback, int $priority = 10) use (&$callbacks, $hookAction): HookAction {
+                $callbacks[] = [$hook, $priority, $callback];
+
+                return $hookAction;
+            });
+
+            (function (): void {
+                $this->loadViteClient('wp_enqueue_scripts');
+            })->call(viteEnqueuer($this->viteManager));
+
+            [$hook, $priority, $callback] = $callbacks[0];
+            $callback();
+
+            expect([$hook, $priority])->toBe(['wp_enqueue_scripts', 1])
+                ->and(array_column($this->modules, 'src'))->toBe(['https://site.test:5173/@vite/client']);
         });
     });
 

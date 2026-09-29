@@ -100,6 +100,14 @@ class ViteManager implements ViteManagerInterface
     }
 
     /**
+     * The URL of the Vite client on the dev server, or an empty string when Vite is not running hot.
+     */
+    public function clientUrl(): string
+    {
+        return $this->isRunningHot() ? $this->getViteInstance()->asset('@vite/client') : '';
+    }
+
+    /**
      * Checks if Vite is running in hot module replacement mode.
      *
      * @return bool True if HMR is active, false otherwise
