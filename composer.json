@@ -91,6 +91,9 @@
             "pestphp/pest-plugin": true,
             "pollora/helper-overrider": true,
             "wikimedia/composer-merge-plugin": true
+        },
+        "audit": {
+            "ignore-abandoned": ["symplify/rule-doc-generator-contracts"]
         }
     },
     "require-dev": {
