@@ -222,7 +222,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
      */
     private function buildBaseConfiguration(string $className, PostType $postType): PostTypeConfiguration
     {
-        $slug = $this->generateSlug($className, $postType->slug);
+        $slug = $postType->resolveSlug($className);
         $singular = $this->generateSingular($className, $postType->singular);
         $plural = $this->generatePlural($postType->plural, $singular);
         $textDomain = $postType->textDomain ?? 'pollora';
@@ -363,24 +363,6 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
             // Log the error but continue - additional args are optional
             $this->logger?->error(sprintf('Failed to process additional args for %s', $className), ['exception' => $throwable]);
         }
-    }
-
-    /**
-     * Generate a post type slug from class name and attribute value.
-     *
-     * @param  string  $className  The class name
-     * @param  string|null  $attributeSlug  The slug from the attribute
-     * @return string The generated slug
-     */
-    private function generateSlug(string $className, ?string $attributeSlug): string
-    {
-        if ($attributeSlug !== null) {
-            return $attributeSlug;
-        }
-
-        $slug = Str::kebab(class_basename($className));
-
-        return substr($slug, 0, 20);
     }
 
     /**
