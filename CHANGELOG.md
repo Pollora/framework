@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta...develop)
 
+### Fixed
+- While Vite ran hot, its client was enqueued with WordPress's version appended (`@vite/client?ver=7.1.2`). The modules Vite serves import `/@vite/client` by its bare URL, so the browser loaded the client twice, as two modules with two HMR connections. It is enqueued with no version, like the entries (regression from v13.34.0-beta)
+
 ### Changed
 - `pollora:make:theme` activates the generated theme only where the site needs one. A site with no usable theme — a first install — gets it without a question; a site that already has one keeps it unless the answer is "yes", now the default "no", so `--no-interaction` never replaces a working theme. `--activate` and `--no-activate` settle it without asking, and `pollora:install` passes `--activate`. Activation goes through `switch_theme()`, which fires `switch_theme` and `after_switch_theme`; the options were written directly before, so those hooks never ran
 
