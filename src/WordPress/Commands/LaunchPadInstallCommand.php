@@ -96,7 +96,7 @@ class LaunchPadInstallCommand extends Command
 
         $config = $this->input->isInteractive()
             ? InstallationConfig::fromPrompts(...$options)
-            : InstallationConfig::withDefaults(basename(base_path()), config('app.url'), ...$options);
+            : InstallationConfig::withDefaults($this->projectName(), config('app.url'), ...$options);
 
         $this->installationService->install($config);
 
@@ -110,6 +110,24 @@ class LaunchPadInstallCommand extends Command
         $this->installTheme();
 
         $this->displaySuccessMessage();
+    }
+
+    /**
+     * The project's name, for a site title nobody was asked for.
+     *
+     * The first label of the application's host (`acme.ddev.site` → `acme`):
+     * under DDEV or Docker the project always lives in `/var/www/html`, whose
+     * directory name says nothing. The directory name only without a real host.
+     */
+    private function projectName(): string
+    {
+        $host = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        if (is_string($host) && str_contains($host, '.')) {
+            return explode('.', $host)[0];
+        }
+
+        return basename(base_path());
     }
 
     private function installTheme(): void

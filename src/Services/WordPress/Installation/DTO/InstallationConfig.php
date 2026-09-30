@@ -96,11 +96,11 @@ class InstallationConfig
      * Without a terminal — `--no-interaction`, CI, or `pollora new` driving the
      * command — prompts cannot be answered, and a required one used to abort the
      * install on "Site title is required". Every option given is kept; the rest
-     * gets a value that makes a working local site: the project directory as
+     * gets a value that makes a working local site: the project's name as
      * title, `admin` on the site's own domain, a generated password, `en_US`,
      * not indexed.
      *
-     * @param  string  $projectName  Directory name of the project, for the title
+     * @param  string  $projectName  The project's name, for the title
      * @param  string|null  $siteUrl  The application URL, for the admin email domain
      */
     public static function withDefaults(

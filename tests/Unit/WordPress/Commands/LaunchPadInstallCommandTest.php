@@ -82,7 +82,8 @@ function runInstallCommand(array $parameters, bool $interactive, int $migrateExi
 
         public function basePath(string $path = ''): string
         {
-            return '/srv/acme-site'.($path !== '' ? '/'.$path : '');
+            // DDEV and Docker keep every project in /var/www/html
+            return '/var/www/html'.($path !== '' ? '/'.$path : '');
         }
     };
     $container->instance('config', new Repository(['app' => ['url' => 'https://acme-site.ddev.site']]));

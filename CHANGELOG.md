@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0...develop)
 
 ### Fixed
-- `pollora:install` without a terminal — `--no-interaction`, CI, or `pollora new` driving it — stopped on "Site title is required" unless every option was passed: the prompts it could not show were still required. It now fills what is missing with a working local site — the project directory as title, `admin` at `admin@<APP_URL host>`, a generated password shown once (also with `--install`), `en_US`, not indexed — and keeps every option it is given
+- `pollora:install` without a terminal — `--no-interaction`, CI, or `pollora new` driving it — stopped on "Site title is required" unless every option was passed: the prompts it could not show were still required. It now fills what is missing with a working local site — the project name as title (the first label of the `APP_URL` host: under DDEV the directory is always `html`), `admin` at `admin@<APP_URL host>`, a generated password shown once (also with `--install`), `en_US`, not indexed — and keeps every option it is given
 
 ## [v13.34.0](https://github.com/Pollora/framework/compare/v13.34.0-beta.2...v13.34.0) - 2026-09-30
 
