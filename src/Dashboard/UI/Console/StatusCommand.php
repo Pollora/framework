@@ -68,14 +68,14 @@ final class StatusCommand extends Command
     }
 
     /**
-     * @param  array{current: ?string, latest: ?string, update_available: bool}  $framework
+     * @param  array{current: ?string, latest: ?string, update_available: bool, development: bool}  $framework
      */
     private function renderFrameworkStatus(array $framework): void
     {
         $current = $framework['current'] ?? 'unknown';
         $latest = $framework['latest'] ?? 'unknown';
         $updateAvailable = $framework['update_available'];
-        $isDev = is_string($current) && str_starts_with($current, 'dev-');
+        $isDev = $framework['development'];
 
         if ($isDev) {
             $this->line(sprintf('Pollora %s (latest stable: v%s)', $current, $latest));
