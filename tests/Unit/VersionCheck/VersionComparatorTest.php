@@ -56,6 +56,38 @@ describe('VersionComparator', function (): void {
         expect($comparator->isUpdateAvailable())->toBeFalse();
     });
 
+    it('reports no update for a development build', function (string $current): void {
+        $checker = Mockery::mock(VersionCheckerInterface::class);
+        $checker->shouldReceive('getCurrentVersion')->andReturn($current);
+        $checker->shouldReceive('getLatestVersion')->andReturn('13.4.4');
+
+        $comparator = new VersionComparator($checker);
+
+        expect($comparator->isDevelopmentBuild())->toBeTrue();
+        expect($comparator->isUpdateAvailable())->toBeFalse();
+    })->with(['dev-develop', '13.x-dev']);
+
+    it('reports no update when a pre-release is ahead of the latest stable', function (): void {
+        $checker = Mockery::mock(VersionCheckerInterface::class);
+        $checker->shouldReceive('getCurrentVersion')->andReturn('13.34.0-beta');
+        $checker->shouldReceive('getLatestVersion')->andReturn('13.4.4');
+
+        $comparator = new VersionComparator($checker);
+
+        expect($comparator->isDevelopmentBuild())->toBeFalse();
+        expect($comparator->isUpdateAvailable())->toBeFalse();
+    });
+
+    it('reports an update when the stable release of a pre-release is out', function (): void {
+        $checker = Mockery::mock(VersionCheckerInterface::class);
+        $checker->shouldReceive('getCurrentVersion')->andReturn('13.34.0-beta');
+        $checker->shouldReceive('getLatestVersion')->andReturn('13.34.0');
+
+        $comparator = new VersionComparator($checker);
+
+        expect($comparator->isUpdateAvailable())->toBeTrue();
+    });
+
     it('delegates getCurrentVersion to checker', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn('13.2.0');

@@ -46,7 +46,7 @@ class SiteHealthCheck
                     'value' => $current,
                 ],
                 'latest_version' => [
-                    'label' => __('Latest version', 'pollora'),
+                    'label' => __('Latest stable version', 'pollora'),
                     'value' => $latest,
                 ],
                 'up_to_date' => [
@@ -85,6 +85,7 @@ class SiteHealthCheck
      * - **good** (blue badge): Pollora is up to date
      * - **recommended** (orange badge): A newer version is available
      * - **recommended** (orange badge): Version status could not be determined
+     * - **good** (blue badge): A development build is installed, not compared with releases
      *
      * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, test: string, actions?: string} Test result
      */
@@ -102,6 +103,20 @@ class SiteHealthCheck
                     'color' => 'orange',
                 ],
                 'description' => '<p>'.__('Could not determine the current or latest Pollora version. Check your internet connection.', 'pollora').'</p>',
+                'test' => 'pollora_update',
+            ];
+        }
+
+        if ($this->comparator->isDevelopmentBuild()) {
+            return [
+                'label' => __('Pollora is running a development build', 'pollora'),
+                'status' => 'good',
+                'badge' => [
+                    'label' => 'Pollora',
+                    'color' => 'blue',
+                ],
+                /* translators: 1: installed development build, 2: latest stable version */
+                'description' => '<p>'.sprintf(__('You are running Pollora %1$s, which is not compared with releases. The latest stable version is %2$s.', 'pollora'), $current, $latest).'</p>',
                 'test' => 'pollora_update',
             ];
         }

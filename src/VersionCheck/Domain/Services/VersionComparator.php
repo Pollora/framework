@@ -24,19 +24,38 @@ class VersionComparator
     /**
      * Determine whether a newer version of Pollora is available.
      *
-     * Returns false if either version cannot be determined, ensuring
-     * no false-positive update notifications are shown.
+     * Returns false if either version cannot be determined, or if the
+     * installed version is a development build, ensuring no false-positive
+     * update notifications are shown.
      */
     public function isUpdateAvailable(): bool
     {
         $current = $this->checker->getCurrentVersion();
         $latest = $this->checker->getLatestVersion();
 
-        if ($current === null || $latest === null) {
+        if ($current === null || $latest === null || $this->isDevelopmentBuild()) {
             return false;
         }
 
         return version_compare($latest, $current, '>');
+    }
+
+    /**
+     * Determine whether the installed version is a development build.
+     *
+     * A branch install ("dev-develop", "13.x-dev") has no release number,
+     * and version_compare() ranks it below every release, so it cannot be
+     * compared with the latest stable version.
+     */
+    public function isDevelopmentBuild(): bool
+    {
+        $current = $this->checker->getCurrentVersion();
+
+        if ($current === null) {
+            return false;
+        }
+
+        return str_starts_with($current, 'dev-') || str_ends_with($current, '-dev');
     }
 
     /**
