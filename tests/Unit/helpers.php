@@ -254,6 +254,15 @@ if (! class_exists('WP_Error')) {
     }
 }
 
+if (! class_exists('WP_Term')) {
+    class WP_Term
+    {
+        public $term_id = 0;
+
+        public $taxonomy = '';
+    }
+}
+
 if (! class_exists('WP_Screen')) {
     class WP_Screen
     {

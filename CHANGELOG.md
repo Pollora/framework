@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta...develop)
 
 ### Fixed
+- Deleting a navigation menu (`wp menu delete`, or the Menus screen) raised a `TypeError` once the menu was already gone: `delete_nav_menu` is the `delete_{$taxonomy}` hook, which passes the term ID first, and the listener expected a `WP_Term`. `MenuDeleted` now receives the menu WordPress copied before deleting it
 - While Vite ran hot, its client was enqueued with WordPress's version appended (`@vite/client?ver=7.1.2`). The modules Vite serves import `/@vite/client` by its bare URL, so the browser loaded the client twice, as two modules with two HMR connections. It is enqueued with no version, like the entries (regression from v13.34.0-beta)
 
 ### Changed
