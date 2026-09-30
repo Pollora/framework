@@ -15,6 +15,7 @@ use Pollora\Services\WordPress\Installation\WordPressInstallationException;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
+use function Laravel\Prompts\warning;
 
 #[Description('Install and configure WordPress')]
 #[Signature('pollora:install
@@ -83,17 +84,26 @@ class LaunchPadInstallCommand extends Command
             info('Starting WordPress installation...');
         }
 
-        $config = InstallationConfig::fromPrompts(
-            title: $this->option('title'),
-            description: $this->option('description'),
-            adminUser: $this->option('admin-user'),
-            adminEmail: $this->option('admin-email'),
-            adminPassword: $this->option('admin-password'),
-            locale: $this->option('locale'),
-            isPublic: $this->option('public') !== null ? filter_var($this->option('public'), FILTER_VALIDATE_BOOLEAN) : null,
-        );
+        $options = [
+            'title' => $this->option('title'),
+            'description' => $this->option('description'),
+            'adminUser' => $this->option('admin-user'),
+            'adminEmail' => $this->option('admin-email'),
+            'adminPassword' => $this->option('admin-password'),
+            'locale' => $this->option('locale'),
+            'isPublic' => $this->option('public') !== null ? filter_var($this->option('public'), FILTER_VALIDATE_BOOLEAN) : null,
+        ];
+
+        $config = $this->input->isInteractive()
+            ? InstallationConfig::fromPrompts(...$options)
+            : InstallationConfig::withDefaults(basename(base_path()), config('app.url'), ...$options);
 
         $this->installationService->install($config);
+
+        if ($options['adminPassword'] === null && ! $this->input->isInteractive()) {
+            // Generated here and stored hashed: this is the only time it is shown.
+            warning(sprintf('Admin account: %s / %s — generated, shown only once.', $config->adminUser, $config->adminPassword));
+        }
 
         $this->runMigrations();
 

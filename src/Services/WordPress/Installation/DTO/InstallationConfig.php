@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Services\WordPress\Installation\DTO;
 
+use Illuminate\Support\Str;
 use Pollora\Services\WordPress\Installation\LanguageService;
 
 use function Laravel\Prompts\confirm;
@@ -86,6 +87,43 @@ class InstallationConfig
             isPublic: $isPublic ?? confirm(
                 label: 'Allow search engine indexing?'
             ),
+        );
+    }
+
+    /**
+     * Create configuration for an install that cannot prompt.
+     *
+     * Without a terminal — `--no-interaction`, CI, or `pollora new` driving the
+     * command — prompts cannot be answered, and a required one used to abort the
+     * install on "Site title is required". Every option given is kept; the rest
+     * gets a value that makes a working local site: the project directory as
+     * title, `admin` on the site's own domain, a generated password, `en_US`,
+     * not indexed.
+     *
+     * @param  string  $projectName  Directory name of the project, for the title
+     * @param  string|null  $siteUrl  The application URL, for the admin email domain
+     */
+    public static function withDefaults(
+        string $projectName,
+        ?string $siteUrl,
+        ?string $title = null,
+        ?string $description = null,
+        ?string $adminUser = null,
+        ?string $adminEmail = null,
+        ?string $adminPassword = null,
+        ?string $locale = null,
+        ?bool $isPublic = null,
+    ): self {
+        $host = is_string($siteUrl) ? parse_url($siteUrl, PHP_URL_HOST) : null;
+
+        return new self(
+            title: $title ?? Str::headline($projectName),
+            description: $description ?? '',
+            adminUser: $adminUser ?? 'admin',
+            adminEmail: $adminEmail ?? 'admin@'.(is_string($host) && str_contains($host, '.') ? $host : 'example.com'),
+            adminPassword: $adminPassword ?? Str::password(20, symbols: false),
+            locale: $locale ?? 'en_US',
+            isPublic: $isPublic ?? false,
         );
     }
 }

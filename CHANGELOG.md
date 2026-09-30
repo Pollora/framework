@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0...develop)
 
+### Fixed
+- `pollora:install` without a terminal — `--no-interaction`, CI, or `pollora new` driving it — stopped on "Site title is required" unless every option was passed: the prompts it could not show were still required. It now fills what is missing with a working local site — the project directory as title, `admin` at `admin@<APP_URL host>`, a generated password shown once (also with `--install`), `en_US`, not indexed — and keeps every option it is given
+
 ## [v13.34.0](https://github.com/Pollora/framework/compare/v13.34.0-beta.2...v13.34.0) - 2026-09-30
 
 The first stable release since v13.4.4, on Laravel 13.34. It gathers every change from v13.32.0-beta to v13.34.0-beta.2 below; coming from 13.4, read those entries, or run Nectar's `upgrade-pollora-v13-32` prompt ([full comparison](https://github.com/Pollora/framework/compare/v13.4.4...v13.34.0)).

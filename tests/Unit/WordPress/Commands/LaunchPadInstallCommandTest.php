@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use Illuminate\Config\Repository;
 use Illuminate\Console\Application;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
 use Pollora\Services\WordPress\Installation\DatabaseService;
+use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 use Pollora\Services\WordPress\Installation\InstallationService;
 use Pollora\WordPress\Commands\LaunchPadInstallCommand;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -18,13 +20,16 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * migrate are replaced by commands recording the input they receive.
  *
  * @param  array<string, mixed>  $parameters
- * @return array{exit: int, theme: array<string, mixed>|null, migrate: array<string, mixed>|null}
+ * @return array{exit: int, theme: array<string, mixed>|null, migrate: array<string, mixed>|null, config: InstallationConfig|null, output: string}
  */
 function runInstallCommand(array $parameters, bool $interactive, int $migrateExit = 0): array
 {
+    $config = null;
     $installation = Mockery::mock(InstallationService::class);
     $installation->shouldReceive('isInstalled')->andReturn(false);
-    $installation->shouldReceive('install')->once();
+    $installation->shouldReceive('install')->once()->andReturnUsing(function (InstallationConfig $given) use (&$config): void {
+        $config = $given;
+    });
 
     $database = Mockery::mock(DatabaseService::class);
     $database->shouldReceive('isConfigured')->andReturn(true);
@@ -74,7 +79,13 @@ function runInstallCommand(array $parameters, bool $interactive, int $migrateExi
         {
             return false;
         }
+
+        public function basePath(string $path = ''): string
+        {
+            return '/srv/acme-site'.($path !== '' ? '/'.$path : '');
+        }
     };
+    $container->instance('config', new Repository(['app' => ['url' => 'https://acme-site.ddev.site']]));
     // handleError() resolves app() to check the environment
     $previousContainer = Container::getInstance();
     Container::setInstance($container);
@@ -90,12 +101,13 @@ function runInstallCommand(array $parameters, bool $interactive, int $migrateExi
     $input->setInteractive($interactive);
 
     try {
-        $exit = $application->find('pollora:install')->run($input, new BufferedOutput);
+        $output = new BufferedOutput;
+        $exit = $application->find('pollora:install')->run($input, $output);
     } finally {
         Container::setInstance($previousContainer);
     }
 
-    return ['exit' => $exit, 'theme' => $recorder->received, 'migrate' => $migrate->received];
+    return ['exit' => $exit, 'theme' => $recorder->received, 'migrate' => $migrate->received, 'config' => $config, 'output' => $output->fetch()];
 }
 
 describe('pollora:install theme generation', function (): void {
@@ -161,5 +173,52 @@ describe('pollora:install migrations', function (): void {
 
         expect($result['exit'])->toBe(1)
             ->and($result['theme'])->toBeNull();
+    });
+});
+
+describe('pollora:install without prompts', function (): void {
+    beforeEach(function (): void {
+        Brain\Monkey\Functions\when('admin_url')->justReturn('https://acme-site.ddev.site/wp-admin/');
+    });
+
+    it('installs with working defaults instead of failing on the first required prompt', function (): void {
+        // `pollora new --ddev --no-interaction` ran it with no option and no
+        // terminal, and the install stopped on "Site title is required".
+        $result = runInstallCommand(['--install' => true], interactive: false);
+
+        expect($result['exit'])->toBe(0)
+            ->and($result['config'])->toBeInstanceOf(InstallationConfig::class)
+            ->and($result['config']->title)->toBe('Acme Site')
+            ->and($result['config']->adminUser)->toBe('admin')
+            ->and($result['config']->adminEmail)->toBe('admin@acme-site.ddev.site')
+            ->and(strlen($result['config']->adminPassword))->toBe(20)
+            ->and($result['config']->locale)->toBe('en_US')
+            ->and($result['config']->isPublic)->toBeFalse();
+    });
+
+    it('shows a generated password once, even in --install mode', function (): void {
+        $result = runInstallCommand(['--install' => true], interactive: false);
+
+        expect($result['output'])->toContain($result['config']->adminPassword);
+    });
+
+    it('keeps every option it is given', function (): void {
+        $result = runInstallCommand([
+            '--install' => true,
+            '--title' => 'Pollora',
+            '--admin-user' => 'olivier',
+            '--admin-email' => 'dev@example.org',
+            '--admin-password' => 'secret123',
+            '--locale' => 'fr_FR',
+            '--public' => 'true',
+        ], interactive: false);
+
+        expect($result['config']->title)->toBe('Pollora')
+            ->and($result['config']->adminUser)->toBe('olivier')
+            ->and($result['config']->adminEmail)->toBe('dev@example.org')
+            ->and($result['config']->adminPassword)->toBe('secret123')
+            ->and($result['config']->locale)->toBe('fr_FR')
+            ->and($result['config']->isPublic)->toBeTrue()
+            ->and($result['output'])->not->toContain('secret123');
     });
 });
