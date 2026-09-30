@@ -135,7 +135,7 @@ final readonly class SystemInfoCollector
     }
 
     /**
-     * @return array{current: ?string, latest: ?string, update_available: bool}
+     * @return array{current: ?string, latest: ?string, update_available: bool, development: bool}
      */
     public function collectFrameworkInfo(): array
     {
@@ -143,6 +143,7 @@ final readonly class SystemInfoCollector
             'current' => $this->versionComparator->getCurrentVersion(),
             'latest' => $this->versionComparator->getLatestVersion(),
             'update_available' => $this->versionComparator->isUpdateAvailable(),
+            'development' => $this->versionComparator->isDevelopmentBuild(),
         ];
     }
 

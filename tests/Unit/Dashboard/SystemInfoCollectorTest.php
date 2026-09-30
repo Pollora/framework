@@ -44,7 +44,21 @@ describe('SystemInfoCollector', function (): void {
                 'current' => '13.4.0',
                 'latest' => '13.4.0',
                 'update_available' => false,
+                'development' => false,
             ]);
+        });
+
+        it('flags a development build', function (): void {
+            $checker = Mockery::mock(VersionCheckerInterface::class, [
+                'getCurrentVersion' => 'dev-develop',
+                'getLatestVersion' => '13.4.4',
+            ]);
+
+            $collector = createCollector(new VersionComparator($checker));
+            $info = $collector->collectFrameworkInfo();
+
+            expect($info['development'])->toBeTrue();
+            expect($info['update_available'])->toBeFalse();
         });
 
         it('detects update available', function (): void {
