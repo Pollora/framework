@@ -17,6 +17,7 @@ use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Dashboard\Infrastructure\Providers\DashboardServiceProvider;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
+use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
@@ -133,6 +134,7 @@ class PolloraServiceProvider extends ServiceProvider
 
         // Dashboard
         $this->app->register(DashboardServiceProvider::class);
+        $this->app->register(DoctorServiceProvider::class);
     }
 
     /**

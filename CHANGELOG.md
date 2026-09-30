@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta...develop)
 
+### Added
+- `pollora:doctor`: checks a project for the failures that stay silent — the site renders, the command exits 0 — and prints, under each, the command that fixes it. Eleven checks, each from a failure met in practice: WordPress core not patched or `__()` not Pollora's, `patches.lock.json` missing or older than the framework's patches, `.env` names Pollora does not read (`DB_NAME`, `WP_HOME`…) or MySQL settings on a sqlite connection, classes missing from the discovery cache, no theme or an unbuilt one, a theme directory symlinked under another name, `%theme_*%` placeholders left in a theme copied from a template, pattern files WordPress never registers (`.html`, no Title or Slug) or missing from its cache, `Route::wp()` routes answering in place of a block theme's templates. `--json` for scripts; exits 1 on an error
+- The same checks in WordPress's **Site Health** (Tools › Site Health), with a "Pollora" badge, plus one that only a web request can make: every block of the active theme is registered. That is the boot a visitor gets — blocks were once registered under WP-CLI but not over HTTP, which a console check would have passed
+
 ### Changed
 - `pollora:make:theme` activates the generated theme only where the site needs one. A site with no usable theme — a first install — gets it without a question; a site that already has one keeps it unless the answer is "yes", now the default "no", so `--no-interaction` never replaces a working theme. `--activate` and `--no-activate` settle it without asking, and `pollora:install` passes `--activate`. Activation goes through `switch_theme()`, which fires `switch_theme` and `after_switch_theme`; the options were written directly before, so those hooks never ran
 
