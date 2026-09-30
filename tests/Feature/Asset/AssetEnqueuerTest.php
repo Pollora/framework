@@ -350,7 +350,8 @@ describe('AssetEnqueuer', function (): void {
             $callback();
 
             expect([$hook, $priority])->toBe(['wp_enqueue_scripts', 1])
-                ->and(array_column($this->modules, 'src'))->toBe(['https://site.test:5173/@vite/client']);
+                ->and(array_column($this->modules, 'src'))->toBe(['https://site.test:5173/@vite/client'])
+                ->and(array_column($this->modules, 'version'))->toBe([null]);
         });
     });
 
