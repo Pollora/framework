@@ -118,6 +118,9 @@ class LaunchPadInstallCommand extends Command
             $arguments['--no-interaction'] = true;
         }
 
+        // Installing a site is the intent to use the theme it generates.
+        $arguments['--activate'] = true;
+
         $this->call('pollora:make:theme', $arguments);
     }
 

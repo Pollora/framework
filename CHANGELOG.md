@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta...develop)
 
+### Changed
+- `pollora:make:theme` activates the generated theme only where the site needs one. A site with no usable theme — a first install — gets it without a question; a site that already has one keeps it unless the answer is "yes", now the default "no", so `--no-interaction` never replaces a working theme. `--activate` and `--no-activate` settle it without asking, and `pollora:install` passes `--activate`. Activation goes through `switch_theme()`, which fires `switch_theme` and `after_switch_theme`; the options were written directly before, so those hooks never ran
+
 ## [v13.34.0-beta](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...v13.34.0-beta) - 2026-09-29
 
 The framework's version tracks Laravel's: this beta requires Laravel 13.34.
