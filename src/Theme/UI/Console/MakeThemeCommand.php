@@ -12,6 +12,7 @@ use Pollora\Console\Concerns\PromptsForMissingOption;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
 use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Support\NpmRunner;
+use Pollora\Theme\Application\Services\ThemeAvailability;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 use Pollora\Translation\Domain\Contracts\TranslationCompilerInterface;
 use Pollora\Translation\Infrastructure\Services\GettextMoCompiler;
@@ -30,7 +31,7 @@ use function Laravel\Prompts\text;
  * setting the theme as the active WordPress theme.
  */
 #[Description('Generate theme structure by downloading from GitHub repository')]
-#[Signature('pollora:make:theme {name} {--theme-author= : Theme author name} {--theme-author-uri= : Theme author URI} {--theme-uri= : Theme URI} {--theme-description= : Theme description} {--theme-version= : Theme version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create theme with same name}', aliases: ['pollora:make-theme'])]
+#[Signature('pollora:make:theme {name} {--theme-author= : Theme author name} {--theme-author-uri= : Theme author URI} {--theme-uri= : Theme URI} {--theme-description= : Theme description} {--theme-version= : Theme version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create theme with same name} {--activate : Activate the theme without asking} {--no-activate : Leave the active theme as it is, without asking}', aliases: ['pollora:make-theme'])]
 class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
     use PromptsForMissingOption;
@@ -396,26 +397,63 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
     }
 
     /**
-     * Prompt to set the theme as active and do so if confirmed.
+     * Activate the new theme when that is what the site needs.
+     *
+     * A site with no usable theme — a first install — gets it without being
+     * asked: its front end renders nothing until a theme is active. A site
+     * that already has one keeps it unless someone says otherwise, so the
+     * question defaults to "no", and --no-interaction never replaces a working
+     * theme. --activate and --no-activate settle it without a question.
      */
     protected function promptAndSetActiveTheme(): void
     {
-        $shouldSetActive = select(
-            label: 'Do you want to set "'.$this->theme->getName().'" as the active WordPress theme?',
-            options: ['yes' => 'Yes', 'no' => 'No'],
-            default: 'yes',
-            hint: 'Selecting "Yes" will set this theme as the active one in WordPress.'
-        );
+        $name = $this->theme->getName();
 
-        if ($shouldSetActive === 'yes') {
-            if (function_exists('update_option')) {
-                update_option('stylesheet', $this->theme->getName());
-                update_option('template', $this->theme->getName());
-                $this->info('Theme "'.$this->theme->getName().'" is now set as the active WordPress theme.');
-            } else {
-                $this->warn('Unable to set the theme as active: WordPress functions are not available in this context.');
-            }
+        if (function_exists('get_stylesheet') && get_stylesheet() === $name) {
+            return;
         }
+
+        if (! $this->shouldActivateTheme($name)) {
+            return;
+        }
+
+        if (! function_exists('switch_theme')) {
+            $this->warn('Unable to set the theme as active: WordPress functions are not available in this context.');
+
+            return;
+        }
+
+        // switch_theme(), not the options alone: it fires switch_theme and
+        // after_switch_theme, which plugins and themes set themselves up on.
+        switch_theme($name);
+        $this->info(sprintf('Theme "%s" is now the active WordPress theme.', $name));
+    }
+
+    protected function shouldActivateTheme(string $name): bool
+    {
+        if ($this->option('activate')) {
+            return true;
+        }
+
+        if ($this->option('no-activate')) {
+            return false;
+        }
+
+        if ($this->laravel->make(ThemeAvailability::class)->isMissing()) {
+            return true;
+        }
+
+        // Nobody to ask: the site keeps the theme it has.
+        if (! $this->input->isInteractive()) {
+            return false;
+        }
+
+        return select(
+            label: sprintf('Another theme is active. Do you want to replace it with "%s"?', $name),
+            options: ['yes' => 'Yes', 'no' => 'No'],
+            default: 'no',
+            hint: 'Selecting "Yes" makes this theme the active one in WordPress.'
+        ) === 'yes';
     }
 
     /**
