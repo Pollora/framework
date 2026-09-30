@@ -93,6 +93,7 @@ describe('plugin discovery path', function (): void {
         foreach (['node_modules', 'vendor', 'build', 'dist', 'public', 'resources', 'assets', 'languages', '.git', '.github'] as $directory) {
             mkdir($this->root.'/'.$directory);
         }
+
         touch($this->root.'/demo-plugin.php');
 
         expect(registrar()->discoveryPathsFor(pluginAt($this->root)))->toBe([]);
