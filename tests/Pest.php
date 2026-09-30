@@ -26,7 +26,7 @@ uses(Orchestra\Testbench\TestCase::class)
     ->afterEach(function (): void {
         \Brain\Monkey\tearDown();
     })
-    ->in('Feature/Route', 'Feature/Theme', 'Feature/Discovery', 'Feature/Hook', 'Feature/VersionCheck', 'Feature/Dashboard', 'Feature/Schedule', 'Feature/Block', 'Feature/Plugin', 'Feature/Asset', 'Feature/WordPress');
+    ->in('Feature/Route', 'Feature/Theme', 'Feature/Discovery', 'Feature/Hook', 'Feature/VersionCheck', 'Feature/Dashboard', 'Feature/Doctor', 'Feature/Schedule', 'Feature/Block', 'Feature/Plugin', 'Feature/Asset', 'Feature/WordPress');
 
 /*
 |--------------------------------------------------------------------------
