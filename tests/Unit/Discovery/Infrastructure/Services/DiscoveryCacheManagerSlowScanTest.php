@@ -73,6 +73,15 @@ describe('slow scan warning', function (): void {
         // threshold is wrong and every site gets a log line per request.
         $this->logger->shouldNotReceive('warning');
 
+        // The first scan in a process loads the discoverer's classes: 150 to
+        // 225 ms measured on an idle machine, past the threshold under the
+        // load of `pest --parallel`. That is autoloading, not the scan this
+        // test is about, so it is paid on another directory first.
+        $warmUp = sys_get_temp_dir().'/pollora-scan-'.bin2hex(random_bytes(6));
+        mkdir($warmUp);
+        scanOf(managerFor(true), $warmUp);
+        rmdir($warmUp);
+
         scanOf(managerFor(true, $this->logger), $this->dir);
     });
 
