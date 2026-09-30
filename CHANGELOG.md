@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta.2...develop)
 
+### Fixed
+- A plugin with neither `app/` nor `src/` — one that only ships blocks, which need no class — was discovered from its root, `node_modules` included: 2 to 7 seconds on every request in debug mode, measured on a blocks-only plugin with a Vite build. Its other top-level directories are scanned instead, never `node_modules`, `vendor`, `bower_components`, `build`, `dist`, `public`, `resources`, `assets`, `languages`, `lang` or a hidden directory
+
 ## [v13.34.0-beta.2](https://github.com/Pollora/framework/compare/v13.34.0-beta...v13.34.0-beta.2) - 2026-09-30
 
 ### Added

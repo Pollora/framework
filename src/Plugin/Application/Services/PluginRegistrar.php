@@ -27,6 +27,26 @@ use Psr\Log\LoggerInterface;
 class PluginRegistrar
 {
     /**
+     * Directories of a plugin root that never hold discoverable classes.
+     *
+     * Dependencies, build output, views and assets, translations, and hidden
+     * directories (`.git`, `.github`). Walking them costs the request and
+     * finds nothing that belongs to the plugin.
+     */
+    private const array NON_DISCOVERABLE_DIRECTORIES = [
+        'node_modules',
+        'vendor',
+        'bower_components',
+        'build',
+        'dist',
+        'public',
+        'resources',
+        'assets',
+        'languages',
+        'lang',
+    ];
+
+    /**
      * Collection of registered plugins.
      *
      * @var array<string, PluginModuleInterface>
@@ -246,7 +266,9 @@ class PluginRegistrar
         try {
             $discoveryService = $this->app->get(ModuleDiscoveryOrchestratorInterface::class);
 
-            $discoveryService->discover($this->getPluginDiscoveryPath($plugin));
+            foreach ($this->getPluginDiscoveryPaths($plugin) as $path) {
+                $discoveryService->discover($path);
+            }
         } catch (\Exception $exception) {
             $this->logError(sprintf('Plugin discovery error for %s: ', $plugin->getName()).$exception->getMessage());
         }
@@ -269,20 +291,37 @@ class PluginRegistrar
      * out. It also found ten PHP files shipped inside `@wordpress/style-engine`
      * and handed them to discovery, which is its own kind of wrong.
      *
-     * The root is still used when a plugin has neither directory, so a plugin
-     * that keeps its classes at the top level is discovered as before.
+     * A plugin with neither directory — one that only ships blocks, which
+     * need no class at all — is scanned in its other top-level directories,
+     * never in the ones listed in {@see NON_DISCOVERABLE_DIRECTORIES}. Its
+     * root was scanned whole before: 2 to 7 seconds per request, measured on
+     * a blocks-only plugin with a Vite build.
+     *
+     * @return list<string>
      */
-    protected function getPluginDiscoveryPath(PluginModuleInterface $plugin): string
+    protected function getPluginDiscoveryPaths(PluginModuleInterface $plugin): array
     {
         $basePath = rtrim($plugin->getPath(), '/');
 
         foreach (['/app', '/src'] as $directory) {
             if (is_dir($basePath.$directory)) {
-                return $basePath.$directory;
+                return [$basePath.$directory];
             }
         }
 
-        return $basePath;
+        $paths = [];
+
+        foreach (scandir($basePath) ?: [] as $entry) {
+            if (str_starts_with($entry, '.') || in_array($entry, self::NON_DISCOVERABLE_DIRECTORIES, true)) {
+                continue;
+            }
+
+            if (is_dir($basePath.'/'.$entry)) {
+                $paths[] = $basePath.'/'.$entry;
+            }
+        }
+
+        return $paths;
     }
 
     /**
