@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0...develop)
 
+### Removed
+- The `use_default_wp_theme_directory` key of `config/wordpress.php`. Nothing ever read it: setting it to `true` changed nothing, and themes always live in `themes/` (#297)
+
 ## [v13.34.0](https://github.com/Pollora/framework/compare/v13.34.0-beta.2...v13.34.0) - 2026-09-30
 
 The first stable release since v13.4.4, on Laravel 13.34. It gathers every change from v13.32.0-beta to v13.34.0-beta.2 below; coming from 13.4, read those entries, or run Nectar's `upgrade-pollora-v13-32` prompt ([full comparison](https://github.com/Pollora/framework/compare/v13.4.4...v13.34.0)).
