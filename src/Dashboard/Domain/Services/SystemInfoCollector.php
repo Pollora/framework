@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Dashboard\Domain\Services;
 
 use Nwidart\Modules\Contracts\RepositoryInterface;
+use Pollora\Attributes\PostType;
+use Pollora\Attributes\Taxonomy;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Support\Domain\StringHelper;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
@@ -212,8 +214,9 @@ final readonly class SystemInfoCollector
                 }
 
                 $class = $item['class'];
-                $slug = StringHelper::kebab(class_basename($class));
-                $label = $this->getPostTypeLabel($slug, $class);
+                $attribute = $this->attributeOf($class, PostType::class);
+                $slug = $attribute?->resolveSlug($class) ?? StringHelper::kebab(class_basename($class));
+                $label = $this->getPostTypeLabel($slug, $class, $attribute?->plural);
 
                 $result[] = [
                     'class' => $class,
@@ -243,8 +246,9 @@ final readonly class SystemInfoCollector
                 }
 
                 $class = $item['class'];
-                $slug = StringHelper::kebab(class_basename($class));
-                $label = $this->getTaxonomyLabel($slug, $class);
+                $attribute = $this->attributeOf($class, Taxonomy::class);
+                $slug = $attribute?->resolveSlug($class) ?? StringHelper::kebab(class_basename($class));
+                $label = $this->getTaxonomyLabel($slug, $class, $attribute?->plural);
 
                 $result[] = [
                     'class' => $class,
@@ -259,7 +263,30 @@ final readonly class SystemInfoCollector
         }
     }
 
-    private function getPostTypeLabel(string $slug, string $class): string
+    /**
+     * The registration attribute a discovered class carries, when it can be read.
+     *
+     * Its slug is the one WordPress registered, which the class name alone
+     * does not give: `#[PostType('synthese-presse')] class SyntheseDePresse`
+     * is `synthese-presse`, not `synthese-de-presse`.
+     *
+     * @template T of object
+     *
+     * @param  class-string<T>  $attributeClass
+     * @return T|null
+     */
+    private function attributeOf(string $class, string $attributeClass): ?object
+    {
+        if (! class_exists($class)) {
+            return null;
+        }
+
+        $attributes = (new \ReflectionClass($class))->getAttributes($attributeClass);
+
+        return $attributes === [] ? null : $attributes[0]->newInstance();
+    }
+
+    private function getPostTypeLabel(string $slug, string $class, ?string $plural = null): string
     {
         if (function_exists('get_post_type_object')) {
             $object = get_post_type_object($slug);
@@ -269,10 +296,10 @@ final readonly class SystemInfoCollector
             }
         }
 
-        return StringHelper::headline(class_basename($class));
+        return $plural ?? StringHelper::headline(class_basename($class));
     }
 
-    private function getTaxonomyLabel(string $slug, string $class): string
+    private function getTaxonomyLabel(string $slug, string $class, ?string $plural = null): string
     {
         if (function_exists('get_taxonomy')) {
             $object = get_taxonomy($slug);
@@ -282,7 +309,7 @@ final readonly class SystemInfoCollector
             }
         }
 
-        return StringHelper::headline(class_basename($class));
+        return $plural ?? StringHelper::headline(class_basename($class));
     }
 
     /**

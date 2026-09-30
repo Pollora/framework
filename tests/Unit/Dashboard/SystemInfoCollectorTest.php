@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Pollora\Attributes\PostType;
+use Pollora\Attributes\Taxonomy;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
@@ -13,6 +15,12 @@ use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
 use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
+
+#[PostType('synthese-presse', singular: 'Synthèse de presse', plural: 'Synthèses de presse')]
+class SyntheseDePresse {}
+
+#[Taxonomy('theme-presse', singular: 'Thème de presse', plural: 'Thèmes de presse')]
+class ThemeDePresse {}
 
 function createCollector(
     ?VersionComparator $comparator = null,
@@ -138,6 +146,18 @@ describe('SystemInfoCollector', function (): void {
             expect($info['post_types']['items'][0])->toHaveKeys(['class', 'slug', 'label']);
             expect($info['post_types']['items'][0]['class'])->toBe('App\\PostTypes\\Project');
             expect($info['post_types']['items'][0]['slug'])->toBe('project');
+        });
+
+        it('reports the slug and labels of the #[PostType] attribute, not the class name', function (): void {
+            $manager = Mockery::mock(DiscoveryManager::class);
+            $manager->shouldReceive('getDiscoveredItems')->with('post_types')->andReturn([['class' => SyntheseDePresse::class]]);
+            $manager->shouldReceive('getDiscoveredItems')->with('taxonomies')->andReturn([['class' => ThemeDePresse::class]]);
+            $manager->shouldReceive('getDiscoveredItems')->withAnyArgs()->andReturn([]);
+
+            $info = createCollector(manager: $manager)->collectDiscoveryInfo();
+
+            expect($info['post_types']['items'][0])->toMatchArray(['slug' => 'synthese-presse', 'label' => 'Synthèses de presse'])
+                ->and($info['taxonomies']['items'][0])->toMatchArray(['slug' => 'theme-presse', 'label' => 'Thèmes de presse']);
         });
 
         it('collects hook counts by type', function (): void {
