@@ -395,7 +395,9 @@ class AssetEnqueuer
                 $url = $this->viteManager instanceof ViteManager ? $this->viteManager->clientUrl() : '';
 
                 if ($url !== '') {
-                    wp_enqueue_script_module('vite-client/'.md5($url), $url);
+                    // No version: the modules Vite serves import /@vite/client by its bare URL,
+                    // and a ?ver= copy would be a second client, with its own HMR connection.
+                    wp_enqueue_script_module('vite-client/'.md5($url), $url, [], null);
                 }
             }, 1);
 
