@@ -21,9 +21,13 @@ function registrar(): object
 {
     return new class(new Container, new WordPressPluginParser) extends PluginRegistrar
     {
-        public function discoveryPathFor(PluginModuleInterface $plugin): string
+        /** @return list<string> */
+        public function discoveryPathsFor(PluginModuleInterface $plugin): array
         {
-            return $this->getPluginDiscoveryPath($plugin);
+            $paths = $this->getPluginDiscoveryPaths($plugin);
+            sort($paths);
+
+            return $paths;
         }
     };
 }
@@ -58,26 +62,41 @@ describe('plugin discovery path', function (): void {
     it('scans app/ when the plugin has one', function (): void {
         mkdir($this->root.'/app');
 
-        expect(registrar()->discoveryPathFor(pluginAt($this->root)))->toBe($this->root.'/app');
+        expect(registrar()->discoveryPathsFor(pluginAt($this->root)))->toBe([$this->root.'/app']);
     });
 
     it('falls back to src/', function (): void {
         mkdir($this->root.'/src');
 
-        expect(registrar()->discoveryPathFor(pluginAt($this->root)))->toBe($this->root.'/src');
+        expect(registrar()->discoveryPathsFor(pluginAt($this->root)))->toBe([$this->root.'/src']);
     });
 
     it('prefers app/ over src/ when both are there', function (): void {
         mkdir($this->root.'/app');
         mkdir($this->root.'/src');
 
-        expect(registrar()->discoveryPathFor(pluginAt($this->root)))->toBe($this->root.'/app');
+        expect(registrar()->discoveryPathsFor(pluginAt($this->root)))->toBe([$this->root.'/app']);
     });
 
-    it('keeps scanning the root for a plugin that has neither', function (): void {
-        // A plugin holding its classes at the top level is discovered exactly
-        // as it was; nothing is narrowed away from it.
-        expect(registrar()->discoveryPathFor(pluginAt($this->root)))->toBe($this->root);
+    it('scans the other top-level directories of a plugin that has neither', function (): void {
+        // A plugin keeping its classes in, say, includes/ is still discovered.
+        mkdir($this->root.'/includes');
+        mkdir($this->root.'/config');
+
+        expect(registrar()->discoveryPathsFor(pluginAt($this->root)))
+            ->toBe([$this->root.'/config', $this->root.'/includes']);
+    });
+
+    it('never scans a directory that cannot hold discoverable classes', function (): void {
+        // A blocks-only plugin: no class, a Vite build. Its root was scanned
+        // whole, node_modules included — 2 to 7 seconds on every request.
+        foreach (['node_modules', 'vendor', 'build', 'dist', 'public', 'resources', 'assets', 'languages', '.git', '.github'] as $directory) {
+            mkdir($this->root.'/'.$directory);
+        }
+
+        touch($this->root.'/demo-plugin.php');
+
+        expect(registrar()->discoveryPathsFor(pluginAt($this->root)))->toBe([]);
     });
 
     it('never hands back a directory holding node_modules when app/ exists', function (): void {
@@ -85,15 +104,12 @@ describe('plugin discovery path', function (): void {
         mkdir($this->root.'/app');
         mkdir($this->root.'/node_modules');
 
-        $path = registrar()->discoveryPathFor(pluginAt($this->root));
-
-        expect($path)->toBe($this->root.'/app')
-            ->and(is_dir($path.'/node_modules'))->toBeFalse();
+        expect(registrar()->discoveryPathsFor(pluginAt($this->root)))->toBe([$this->root.'/app']);
     });
 
     it('does not care how the path was spelled', function (): void {
         mkdir($this->root.'/app');
 
-        expect(registrar()->discoveryPathFor(pluginAt($this->root.'/')))->toBe($this->root.'/app');
+        expect(registrar()->discoveryPathsFor(pluginAt($this->root.'/')))->toBe([$this->root.'/app']);
     });
 });

@@ -5,7 +5,14 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta.2...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0...develop)
+
+## [v13.34.0](https://github.com/Pollora/framework/compare/v13.34.0-beta.2...v13.34.0) - 2026-09-30
+
+The first stable release since v13.4.4, on Laravel 13.34. It gathers every change from v13.32.0-beta to v13.34.0-beta.2 below; coming from 13.4, read those entries, or run Nectar's `upgrade-pollora-v13-32` prompt ([full comparison](https://github.com/Pollora/framework/compare/v13.4.4...v13.34.0)).
+
+### Fixed
+- A plugin with neither `app/` nor `src/` — one that only ships blocks, which need no class — was discovered from its root, `node_modules` included: 2 to 7 seconds on every request in debug mode, measured on a blocks-only plugin with a Vite build. Its other top-level directories are scanned instead, never `node_modules`, `vendor`, `bower_components`, `build`, `dist`, `public`, `resources`, `assets`, `languages`, `lang` or a hidden directory
 
 ## [v13.34.0-beta.2](https://github.com/Pollora/framework/compare/v13.34.0-beta...v13.34.0-beta.2) - 2026-09-30
 
