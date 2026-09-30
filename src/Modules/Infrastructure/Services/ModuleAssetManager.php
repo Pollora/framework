@@ -94,6 +94,23 @@ class ModuleAssetManager
     }
 
     /**
+     * The asset container name and paths a module gets, whether or not it has been set up yet.
+     *
+     * @return array{container: string, hot_file: string, build_directory: string, manifest_path: string}
+     */
+    public function expectedAssetConfiguration(string $moduleName, string $moduleType, ?string $moduleSlug = null): array
+    {
+        $configuration = $this->getAssetConfiguration($moduleName, '', $moduleType);
+
+        return [
+            'container' => $this->getContainerName($moduleType, $moduleSlug ?? $moduleName),
+            'hot_file' => $configuration['hot_file'],
+            'build_directory' => $configuration['build_directory'],
+            'manifest_path' => $configuration['manifest_path'],
+        ];
+    }
+
+    /**
      * Get the container name based on module type and slug.
      */
     protected function getContainerName(string $moduleType, ?string $moduleSlug = null): string

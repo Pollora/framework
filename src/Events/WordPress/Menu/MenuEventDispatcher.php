@@ -61,10 +61,22 @@ class MenuEventDispatcher extends AbstractEventDispatcher
 
     /**
      * Handle menu deletion.
+     *
+     * `delete_nav_menu` is the `delete_{$taxonomy}` hook of wp_delete_term():
+     * it passes the deleted term's ID first and its object, copied before
+     * deletion, third.
+     *
+     * @param  int  $termId  ID of the deleted menu
+     * @param  int  $ttId  Term taxonomy ID of the deleted menu
+     * @param  mixed  $deletedTerm  The menu as it was before deletion
      */
-    public function handleDeleteNavMenu(WP_Term $menu): void
+    public function handleDeleteNavMenu(int $termId, int $ttId, mixed $deletedTerm): void
     {
-        $this->dispatch(MenuDeleted::class, [$menu]);
+        if (! $deletedTerm instanceof WP_Term) {
+            return;
+        }
+
+        $this->dispatch(MenuDeleted::class, [$deletedTerm]);
     }
 
     /**

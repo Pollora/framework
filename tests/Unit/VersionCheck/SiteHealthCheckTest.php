@@ -68,6 +68,18 @@ describe('SiteHealthCheck', function (): void {
         expect($result['label'])->toContain('13.3.0');
     });
 
+    it('returns good status for a development build', function (): void {
+        $checker = Mockery::mock(VersionCheckerInterface::class);
+        $checker->shouldReceive('getCurrentVersion')->andReturn('dev-develop');
+        $checker->shouldReceive('getLatestVersion')->andReturn('13.4.4');
+
+        $health = new SiteHealthCheck(new VersionComparator($checker));
+        $result = $health->testVersionStatus();
+
+        expect($result['status'])->toBe('good');
+        expect($result['label'])->not->toContain('13.4.4');
+    });
+
     it('returns recommended status when version cannot be determined', function (): void {
         $checker = Mockery::mock(VersionCheckerInterface::class);
         $checker->shouldReceive('getCurrentVersion')->andReturn(null);

@@ -5,7 +5,21 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0-beta.2...develop)
+
+## [v13.34.0-beta.2](https://github.com/Pollora/framework/compare/v13.34.0-beta...v13.34.0-beta.2) - 2026-09-30
+
+### Added
+- `pollora:doctor`: checks a project for the failures that stay silent — the site renders, the command exits 0 — and prints, under each, the command that fixes it. Each check comes from a failure met in practice: WordPress core not patched or `__()` not Pollora's; `patches.lock.json` missing or older than the framework's patches; `.env` names Pollora does not read (`DB_NAME`, `WP_HOME`…) or MySQL settings on a sqlite connection; configuration or routes cached outside production; classes missing from the discovery cache; for the theme, every Pollora plugin and every enabled module: a build missing, written to another folder than Pollora reads, or a hot file pointing at a dev server that is stopped or not exposed, a directory symlinked under another name, `%theme_*%`/`%plugin_*%` placeholders or `.stub` files left from a copied template, blocks still in the legacy `resources/blocks`; pattern files WordPress never registers or has not cached; `Route::wp()` routes answering in place of a block theme's templates. `--json` for scripts; exits 1 on an error
+- The same checks in WordPress's **Site Health** (Tools › Site Health), with a "Pollora" badge, plus one that only a web request can make: every block of the theme, the Pollora plugins and the modules is registered. That is the boot a visitor gets — blocks were once registered under WP-CLI but not over HTTP, which a console check would have passed
+
+### Fixed
+- Deleting a navigation menu (`wp menu delete`, or the Menus screen) raised a `TypeError` once the menu was already gone: `delete_nav_menu` is the `delete_{$taxonomy}` hook, which passes the term ID first, and the listener expected a `WP_Term`. `MenuDeleted` now receives the menu WordPress copied before deleting it
+- While Vite ran hot, its client was enqueued with WordPress's version appended (`@vite/client?ver=7.1.2`). The modules Vite serves import `/@vite/client` by its bare URL, so the browser loaded the client twice, as two modules with two HMR connections. It is enqueued with no version, like the entries (regression from v13.34.0-beta)
+- On a branch install (`dev-develop`, `13.x-dev`), Site Health and the admin notice announced "Pollora 13.4.4 is available": `version_compare()` ranks a branch name below every release. A development build is no longer compared with releases — Site Health says it is one, the notice stays silent — and the dashboard, the admin menu badge and `pollora:status` share that one rule, which they each duplicated and missed `13.x-dev`. Site Health's info tab now labels the compared version "Latest stable version", since pre-releases are not counted
+
+### Changed
+- `pollora:make:theme` activates the generated theme only where the site needs one. A site with no usable theme — a first install — gets it without a question; a site that already has one keeps it unless the answer is "yes", now the default "no", so `--no-interaction` never replaces a working theme. `--activate` and `--no-activate` settle it without asking, and `pollora:install` passes `--activate`. Activation goes through `switch_theme()`, which fires `switch_theme` and `after_switch_theme`; the options were written directly before, so those hooks never ran
 
 ## [v13.34.0-beta](https://github.com/Pollora/framework/compare/v13.32.0-beta.9...v13.34.0-beta) - 2026-09-29
 

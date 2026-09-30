@@ -29,7 +29,7 @@ function runInstallCommand(array $parameters, bool $interactive, int $migrateExi
     $database = Mockery::mock(DatabaseService::class);
     $database->shouldReceive('isConfigured')->andReturn(true);
 
-    $recorder = new #[Signature('pollora:make:theme {name?} {--theme-author=}')] class extends Command
+    $recorder = new #[Signature('pollora:make:theme {name?} {--theme-author=} {--activate}')] class extends Command
     {
         /** @var array<string, mixed>|null */
         public ?array $received = null;
@@ -39,6 +39,7 @@ function runInstallCommand(array $parameters, bool $interactive, int $migrateExi
             $this->received = [
                 'name' => $this->argument('name'),
                 'interactive' => $this->input->isInteractive(),
+                'activate' => $this->option('activate'),
             ];
 
             return self::SUCCESS;
@@ -117,13 +118,13 @@ describe('pollora:install theme generation', function (): void {
         $result = runInstallCommand($this->installOptions, interactive: false);
 
         expect($result['exit'])->toBe(0)
-            ->and($result['theme'])->toBe(['name' => 'default', 'interactive' => false]);
+            ->and($result['theme'])->toBe(['name' => 'default', 'interactive' => false, 'activate' => true]);
     });
 
     it('generates the theme named by --theme', function (): void {
         $result = runInstallCommand([...$this->installOptions, '--theme' => 'acme'], interactive: false);
 
-        expect($result['theme'])->toBe(['name' => 'acme', 'interactive' => false]);
+        expect($result['theme'])->toBe(['name' => 'acme', 'interactive' => false, 'activate' => true]);
     });
 
     it('leaves the theme name to the prompt when interactive', function (): void {
