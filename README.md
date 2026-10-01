@@ -11,9 +11,29 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/Pollora/framework" alt="License"></a>
 </p>
 
-## About Pollora Framework
+## About Pollora
 
-Pollora is a framework that bridges **Laravel** and **WordPress**, combining Laravel's architecture patterns with WordPress's content management capabilities. It allows developers to use Laravel's service providers, dependency injection, Blade templates, and Eloquent ORM while maintaining full WordPress functionality.
+**Pollora is the Laravel framework for WordPress.** WordPress runs inside a Laravel application: the front end uses Laravel routing, controllers, Blade and Eloquent, while the WordPress admin, database, editors' workflow and plugins keep working as usual. Hooks, post types, taxonomies and REST routes are declared with PHP 8 attributes and registered by auto-discovery.
+
+[Website](https://pollora.dev) · [Documentation](https://pollora.dev/getting-started/installation/) · [Why Pollora](https://pollora.dev/why/) · [Pollora vs Acorn, Sage, Radicle and Corcel](https://pollora.dev/compare/) · [1-minute tour](https://www.youtube.com/watch?v=Wk1VzPapqM8)
+
+```php
+use Pollora\Attributes\Filter;
+use Pollora\Attributes\PostType;
+use Pollora\Attributes\PostType\HasArchive;
+use Pollora\Attributes\PostType\Supports;
+
+#[PostType]
+#[HasArchive]
+#[Supports(['title', 'editor', 'thumbnail'])]
+class Book {}
+
+class Seo
+{
+    #[Filter('document_title_parts')]
+    public function title(array $parts): array { /* ... */ return $parts; }
+}
+```
 
 ### Key Features
 
@@ -32,19 +52,28 @@ Full documentation is available at **[pollora.dev](https://pollora.dev)**.
 
 ## Installation
 
-Pollora is installed via the [skeleton project](https://github.com/Pollora/pollora) — see the [installation guide](https://pollora.dev/getting-started/installation/):
+Create a project with the [Pollora CLI](https://github.com/Pollora/cli), or with Composer through the [skeleton](https://github.com/Pollora/pollora). See the [installation guide](https://pollora.dev/getting-started/installation/):
 
 ```bash
+composer global require pollora/cli
+pollora new my-project --ddev
+
+# or
 composer create-project pollora/pollora my-project
 ```
 
-See the [skeleton README](https://github.com/Pollora/pollora) for detailed setup instructions.
-
 ## Requirements
 
-- PHP ^8.3
-- Laravel 13.x
-- WordPress 6.9+
+- PHP 8.4+ for a new project (the skeleton's lock file ships Symfony 8; this package alone accepts PHP 8.3)
+- Laravel 13.34 (Pollora's version numbers follow the Laravel release it is built on)
+- WordPress 7.1+
+
+## Learn more
+
+- [WordPress hooks with PHP 8 attributes](https://pollora.dev/guides/wordpress-hooks-php-attributes/)
+- [Custom post types and taxonomies with PHP attributes](https://pollora.dev/guides/custom-post-types-php-attributes/)
+- [How Pollora runs WordPress inside Laravel](https://pollora.dev/guides/how-pollora-runs-wordpress-inside-laravel/)
+- [AI coding agents for WordPress projects (Nectar)](https://pollora.dev/guides/ai-coding-agents-wordpress/)
 
 ## Testing
 
