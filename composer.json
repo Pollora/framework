@@ -105,7 +105,7 @@
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "^7.1",
         "symplify/vendor-patches": "^12.1",
-        "brain/monkey": "^2.6",
+        "brain/monkey": "^2.7",
         "mockery/mockery": "^1.6.11",
         "wp-cli/wp-cli": "^2.12",
         "larastan/larastan": "^3.10",
