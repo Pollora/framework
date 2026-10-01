@@ -97,6 +97,10 @@ If you discover a security vulnerability, please report it via [GitHub Security 
 
 All notable changes are documented in [CHANGELOG.md](CHANGELOG.md).
 
+## Credits
+
+Pollora builds on the work of [Roots](https://roots.io), a constant source of inspiration: themes, blocks and plugins are built with `@roots/vite-plugin`, the project follows the Bedrock layout with `roots/bedrock-autoloader`, and Blade ships [Sage Directives](https://github.com/Log1x/sage-directives). The WordPress models are built on [Colt](https://github.com/Pollora/colt), a fork of [Corcel](https://github.com/corcel/corcel).
+
 ## License
 
 Pollora is open-sourced software licensed under the [MIT license](LICENSE).
