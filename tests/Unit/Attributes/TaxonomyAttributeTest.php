@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 use Mockery as m;
+use Pollora\Attributes\Taxonomy;
 use Pollora\Attributes\Taxonomy\AllowHierarchy;
 use Pollora\Attributes\Taxonomy\Args;
 use Pollora\Attributes\Taxonomy\CheckedOntop;
@@ -284,4 +285,9 @@ test('getArgs method merges attribute args with withArgs and labels', function (
     expect($args['labels'])->toBeArray()
         ->toHaveKey('name')
         ->toHaveKey('singular_name');
+});
+
+test('resolveSlug returns the explicit slug, or the class name in kebab-case', function (): void {
+    expect((new Taxonomy('theme-presse'))->resolveSlug('App\\Cms\\Taxonomies\\ThemeDePresse'))->toBe('theme-presse')
+        ->and((new Taxonomy)->resolveSlug('App\\Cms\\Taxonomies\\ThemeDePresse'))->toBe('theme-de-presse');
 });

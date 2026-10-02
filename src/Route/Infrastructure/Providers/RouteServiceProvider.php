@@ -17,6 +17,7 @@ use Pollora\Route\Infrastructure\Listeners\ApplyApplicationRouteContext;
 use Pollora\Route\Infrastructure\Middleware\WordPressBindings;
 use Pollora\Route\Infrastructure\Middleware\WordPressHeaders;
 use Pollora\Route\Infrastructure\Middleware\WordPressShutdown;
+use Pollora\Route\Infrastructure\Middleware\WordPressTemplateEnhancement;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressConditionManagerInterface;
 use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Services\ExtendedRouter;
@@ -46,6 +47,7 @@ class RouteServiceProvider extends ServiceProvider
         WordPressBindings::class,
         WordPressHeaders::class,
         WordPressShutdown::class,
+        WordPressTemplateEnhancement::class,
     ];
 
     /**

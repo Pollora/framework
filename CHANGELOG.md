@@ -5,7 +5,17 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.1...develop)
+
+## [v13.34.1](https://github.com/Pollora/framework/compare/v13.34.0...v13.34.1) - 2026-10-02
+
+### Removed
+- The `use_default_wp_theme_directory` key of `config/wordpress.php`. Nothing ever read it: setting it to `true` changed nothing, and themes always live in `themes/` (#297)
+
+### Fixed
+- Under WordPress 7, a classic theme's block styles and `global-styles` were printed at the bottom of every page, after the content they style — a flash of unstyled content on slow connections — and the head kept two empty placeholders. WordPress loads those styles on demand at `wp_footer`, then moves them back into the head through its template enhancement output buffer, which only starts when `template-loader.php` includes a template: a Blade page includes none. A `WordPressTemplateEnhancement` middleware now plays the buffer's part on the response — `wp_template_enhancement_output_buffer_started` before the view renders, the `wp_template_enhancement_output_buffer` filter and `wp_finalized_template_enhancement_output_buffer` on the HTML — for `Route::wp()` routes and the template hierarchy, so any plugin built on that filter sees Pollora's pages too. A plain Laravel route that prints `wp_head()`/`wp_footer()` can add the middleware itself
+- `pollora:install` without a terminal — `--no-interaction`, CI, or `pollora new` driving it — stopped on "Site title is required" unless every option was passed: the prompts it could not show were still required. It now fills what is missing with a working local site — the project name as title (the first label of the `APP_URL` host: under DDEV the directory is always `html`), `admin` at `admin@<APP_URL host>`, a generated password shown once (also with `--install`), `en_US`, not indexed — and keeps every option it is given
+- `pollora:status` and the dashboard reported a post type or taxonomy under a slug derived from its class name, ignoring the attribute: `#[PostType('synthese-presse')] class SyntheseDePresse` was listed as `synthese-de-presse`, a post type that does not exist, and its `plural` label was ignored too. Both read the attribute now, through `PostType::resolveSlug()` / `Taxonomy::resolveSlug()`, the rule discovery registers with, so they cannot disagree again (#298)
 
 ## [v13.34.0](https://github.com/Pollora/framework/compare/v13.34.0-beta.2...v13.34.0) - 2026-09-30
 

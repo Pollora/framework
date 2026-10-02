@@ -1,6 +1,6 @@
 {
     "name": "pollora/framework",
-    "description": "Laravel & WordPress blend for coding as sweet as honey. Join the hive!",
+    "description": "The Laravel framework for WordPress: Laravel routing, Blade and Eloquent, with PHP 8 attributes for hooks, post types, taxonomies and REST routes.",
     "license": "MIT",
     "homepage": "https://pollora.dev",
     "support": {
