@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.1...develop)
+
+## [v13.34.1](https://github.com/Pollora/framework/compare/v13.34.0...v13.34.1) - 2026-10-02
 
 ### Removed
 - The `use_default_wp_theme_directory` key of `config/wordpress.php`. Nothing ever read it: setting it to `true` changed nothing, and themes always live in `themes/` (#297)
