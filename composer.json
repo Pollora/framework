@@ -106,7 +106,7 @@
         "php-stubs/wordpress-stubs": "^7.1",
         "symplify/vendor-patches": "^12.1",
         "brain/monkey": "^2.6",
-        "mockery/mockery": "^1.6.11",
+        "mockery/mockery": "^1.6.15",
         "wp-cli/wp-cli": "^2.12",
         "larastan/larastan": "^3.10",
         "orchestra/testbench": "^11.1.0"
