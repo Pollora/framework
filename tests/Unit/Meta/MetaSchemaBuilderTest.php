@@ -8,7 +8,9 @@ use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Enums\MetaValueType;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaDefinitionException;
 use Pollora\Meta\Domain\Models\MetaSchema;
+use Tests\Unit\Meta\Fixtures\ArticleExtras;
 use Tests\Unit\Meta\Fixtures\BookGenre;
+use Tests\Unit\Meta\Fixtures\CategoryExtras;
 use Tests\Unit\Meta\Fixtures\Event;
 use Tests\Unit\Meta\Fixtures\EventStatus;
 use Tests\Unit\Meta\Fixtures\InvalidArray;
@@ -19,8 +21,11 @@ use Tests\Unit\Meta\Fixtures\InvalidPureEnum;
 use Tests\Unit\Meta\Fixtures\InvalidTermRevisions;
 use Tests\Unit\Meta\Fixtures\InvalidUnion;
 use Tests\Unit\Meta\Fixtures\InvalidUntyped;
+use Tests\Unit\Meta\Fixtures\MemberProfile;
 use Tests\Unit\Meta\Fixtures\NotADeclaration;
 use Tests\Unit\Meta\Fixtures\Priority;
+use Tests\Unit\Meta\Fixtures\ReviewMeta;
+use Tests\Unit\Meta\Fixtures\UserRevisions;
 
 require_once __DIR__.'/Fixtures/Invalid.php';
 
@@ -31,7 +36,7 @@ describe('a post type', function (): void {
 
     it('attaches the meta to the post type slug', function (): void {
         expect($this->schema->objectType)->toBe(MetaObjectType::Post)
-            ->and($this->schema->subtype)->toBe('event')
+            ->and($this->schema->subtypes)->toBe(['event'])
             ->and($this->schema->declaringClass)->toBe(Event::class);
     });
 
@@ -86,13 +91,13 @@ it('attaches the meta of a taxonomy to its slug', function (): void {
     $schema = (new MetaSchemaBuilder)->build(BookGenre::class);
 
     expect($schema->objectType)->toBe(MetaObjectType::Term)
-        ->and($schema->subtype)->toBe('book-genre')
+        ->and($schema->subtypes)->toBe(['book-genre'])
         ->and($schema->definitions['color']->key)->toBe('color');
 });
 
-it('refuses a class that is neither a post type nor a taxonomy', function (): void {
+it('refuses a class that declares no meta owner', function (): void {
     (new MetaSchemaBuilder)->build(NotADeclaration::class);
-})->throws(InvalidMetaDefinitionException::class, 'carries neither #[PostType] nor #[Taxonomy]');
+})->throws(InvalidMetaDefinitionException::class, 'carries none of #[PostType], #[Taxonomy], #[PostMeta], #[TermMeta], #[UserMeta], #[CommentMeta]');
 
 it('refuses a declaration WordPress cannot register', function (string $class, string $message): void {
     expect(fn (): MetaSchema => (new MetaSchemaBuilder)->build($class))
@@ -105,5 +110,19 @@ it('refuses a declaration WordPress cannot register', function (string $class, s
     'no default, not nullable' => [InvalidNoDefault::class, 'give the property a default value or make it nullable'],
     'protected key in REST' => [InvalidProtectedInRest::class, 'the protected key "_secret" can only be exposed in REST with an explicit capability'],
     'revisions on a term' => [InvalidTermRevisions::class, 'revisions only exist for post types'],
+    'revisions on a user' => [UserRevisions::class, 'revisions only exist for post types'],
     'same key twice' => [InvalidDuplicateKey::class, 'the key "shared" is already used by $first'],
+]);
+
+it('attaches the meta of #[PostMeta], #[TermMeta], #[UserMeta] and #[CommentMeta] to their objects', function (string $class, MetaObjectType $objectType, array $subtypes): void {
+    $schema = (new MetaSchemaBuilder)->build($class);
+
+    expect($schema->objectType)->toBe($objectType)
+        ->and($schema->subtypes)->toBe($subtypes)
+        ->and($schema->isEmpty())->toBeFalse();
+})->with([
+    'post types' => [ArticleExtras::class, MetaObjectType::Post, ['post', 'page']],
+    'a taxonomy' => [CategoryExtras::class, MetaObjectType::Term, ['category']],
+    'users' => [MemberProfile::class, MetaObjectType::User, []],
+    'comments' => [ReviewMeta::class, MetaObjectType::Comment, []],
 ]);

@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Pollora\Meta\Infrastructure\Services;
 
+use Pollora\Attributes\CommentMeta;
+use Pollora\Attributes\PostMeta;
 use Pollora\Attributes\PostType;
 use Pollora\Attributes\Taxonomy;
+use Pollora\Attributes\TermMeta;
+use Pollora\Attributes\UserMeta;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
@@ -18,7 +22,8 @@ use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 
 /**
- * Discovers the `#[Meta]` properties of `#[PostType]` and `#[Taxonomy]` classes.
+ * Discovers the `#[Meta]` properties of `#[PostType]`, `#[Taxonomy]`, `#[PostMeta]`,
+ * `#[TermMeta]`, `#[UserMeta]` and `#[CommentMeta]` classes.
  *
  *  1. **discover()** — keeps the classes carrying one of those attributes.
  *  2. **apply()** — builds each class's schema, stores it for `Meta::of()` and
@@ -31,7 +36,7 @@ final class MetaDiscovery implements DiscoveryInterface
 {
     use IsDiscovery;
 
-    private const array OWNER_ATTRIBUTES = [PostType::class, Taxonomy::class];
+    private const array OWNER_ATTRIBUTES = [PostType::class, Taxonomy::class, PostMeta::class, TermMeta::class, UserMeta::class, CommentMeta::class];
 
     public function __construct(
         private readonly MetaSchemaBuilder $builder,

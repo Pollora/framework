@@ -12,17 +12,39 @@ use Pollora\Meta\Domain\Enums\MetaObjectType;
 final readonly class MetaSchema
 {
     /**
-     * @param  class-string  $declaringClass  The `#[PostType]` or `#[Taxonomy]` class
+     * @param  class-string  $declaringClass  The class declaring the meta
      * @param  MetaObjectType  $objectType  The WordPress object the meta belong to
-     * @param  string  $subtype  The post type or taxonomy slug
+     * @param  list<string>  $subtypes  The post type or taxonomy slugs; empty for every object of the type
      * @param  array<string, MetaDefinition>  $definitions  Definitions keyed by property name
      */
     public function __construct(
         public string $declaringClass,
         public MetaObjectType $objectType,
-        public string $subtype,
+        public array $subtypes,
         public array $definitions,
     ) {}
+
+    /**
+     * Whether some object can carry the meta of both schemas.
+     */
+    public function overlaps(self $other): bool
+    {
+        if ($this->objectType !== $other->objectType) {
+            return false;
+        }
+
+        return $this->subtypes === [] || $other->subtypes === [] || array_intersect($this->subtypes, $other->subtypes) !== [];
+    }
+
+    /**
+     * The objects the meta belong to, for messages: `post "event"`, `user`.
+     */
+    public function ownerName(): string
+    {
+        return $this->subtypes === []
+            ? $this->objectType->value
+            : sprintf('%s "%s"', $this->objectType->value, implode('", "', $this->subtypes));
+    }
 
     public function isEmpty(): bool
     {

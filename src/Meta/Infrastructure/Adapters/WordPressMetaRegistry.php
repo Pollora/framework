@@ -38,18 +38,21 @@ final readonly class WordPressMetaRegistry implements MetaRegistryInterface
 
     private function registerNow(MetaSchema $schema): void
     {
-        foreach ($schema->definitions as $definition) {
-            \register_meta($schema->objectType->value, $definition->key, $this->argumentsFor($schema, $definition));
+        // An empty subtype registers the meta for every object of the type.
+        foreach ($schema->subtypes === [] ? [''] : $schema->subtypes as $subtype) {
+            foreach ($schema->definitions as $definition) {
+                \register_meta($schema->objectType->value, $definition->key, $this->argumentsFor($schema, $definition, $subtype));
+            }
         }
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function argumentsFor(MetaSchema $schema, MetaDefinition $definition): array
+    private function argumentsFor(MetaSchema $schema, MetaDefinition $definition, string $subtype): array
     {
         $arguments = [
-            'object_subtype' => $schema->subtype,
+            'object_subtype' => $subtype,
             'type' => $definition->wordPressType(),
             'single' => true,
             'sanitize_callback' => $definition->sanitize ?? $this->sanitizerFor($definition),

@@ -41,5 +41,5 @@ it('finds a definition by property name or by key', function (): void {
         ->and($schema->find('starts_at')?->property)->toBe('startsAt')
         ->and($schema->find('unknown'))->toBeNull()
         ->and($schema->isEmpty())->toBeFalse()
-        ->and((new MetaSchema(Event::class, $schema->objectType, 'event', []))->isEmpty())->toBeTrue();
+        ->and((new MetaSchema(Event::class, $schema->objectType, ['event'], []))->isEmpty())->toBeTrue();
 });

@@ -30,8 +30,8 @@ final readonly class MetaAccessor
     ) {}
 
     /**
-     * @param  class-string  $class  The `#[PostType]` or `#[Taxonomy]` class declaring the meta
-     * @param  int  $objectId  The post or term ID
+     * @param  class-string  $class  The class declaring the meta
+     * @param  int  $objectId  The post, term, user or comment ID
      */
     public function of(string $class, int $objectId): MetaRecord
     {
