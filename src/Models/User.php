@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Pollora\Models\Concerns\HasRoles;
+use Pollora\Models\Concerns\HasTypedMeta;
 use Watson\Rememberable\Rememberable;
 
 /**
@@ -34,6 +35,7 @@ class User extends \Pollora\Colt\Model\User implements AuthenticatableContract, 
     use Authenticatable;
     use Authorizable;
     use HasRoles;
+    use HasTypedMeta;
     use Rememberable;
 
     /**

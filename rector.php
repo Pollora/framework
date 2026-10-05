@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
+use Rector\TypeDeclaration\Rector\ClassMethod\ScalarParamTypeByMethodCallTypeRector;
 use RectorLaravel\Rector\ArrayDimFetch\ServerVariableToRequestFacadeRector;
 use RectorLaravel\Rector\MethodCall\ContainerBindConcreteWithClosureOnlyRector;
 use RectorLaravel\Set\LaravelLevelSetList;
@@ -16,6 +17,11 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        // getAttribute($key) and setAttribute($key) override Eloquent's untyped
+        // signatures: typing $key would be a fatal incompatible declaration.
+        ScalarParamTypeByMethodCallTypeRector::class => [
+            __DIR__.'/src/Models/Concerns/HasTypedMeta.php',
+        ],
         ContainerBindConcreteWithClosureOnlyRector::class => [
             __DIR__.'/src/Hook/Infrastructure/Providers/HookServiceProvider.php',
         ],

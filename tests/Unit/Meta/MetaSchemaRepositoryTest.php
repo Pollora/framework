@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
+use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaDefinitionException;
 use Tests\Unit\Meta\Fixtures\ArticleExtras;
 use Tests\Unit\Meta\Fixtures\BillingProfile;
@@ -57,4 +58,20 @@ it('accepts the same key on objects the schemas do not share', function (): void
     $repository->add((new MetaSchemaBuilder)->build(BookGenre::class));
 
     expect($repository->all())->toHaveCount(4);
+});
+
+it('finds the schemas an object can carry, and whether a name is declared', function (): void {
+    $repository = new MetaSchemaRepository;
+    $repository->add($event = (new MetaSchemaBuilder)->build(Event::class));
+    $repository->add($article = (new MetaSchemaBuilder)->build(ArticleExtras::class));
+    $repository->add($member = (new MetaSchemaBuilder)->build(MemberProfile::class));
+
+    expect($repository->forObject(MetaObjectType::Post, 'event'))->toBe([$event])
+        ->and($repository->forObject(MetaObjectType::Post, 'page'))->toBe([$article])
+        ->and($repository->forObject(MetaObjectType::Post, null))->toBe([])
+        ->and($repository->forObject(MetaObjectType::User, null))->toBe([$member])
+        ->and($repository->declares(MetaObjectType::Post, 'soldOut'))->toBeTrue()
+        ->and($repository->declares(MetaObjectType::Post, 'sold_out'))->toBeTrue()
+        ->and($repository->declares(MetaObjectType::User, 'sold_out'))->toBeFalse()
+        ->and($repository->declares(MetaObjectType::Post, 'post_title'))->toBeFalse();
 });

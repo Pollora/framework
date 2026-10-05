@@ -8,6 +8,7 @@ use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaValueException;
 use Pollora\Meta\Domain\Models\MetaDefinition;
 use Pollora\Meta\Domain\Models\MetaRecord;
+use Pollora\Meta\Domain\Models\MetaSchema;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
 use Psr\Log\LoggerInterface;
 
@@ -35,8 +36,14 @@ final readonly class MetaAccessor
      */
     public function of(string $class, int $objectId): MetaRecord
     {
-        $schema = $this->schemas->forClass($class) ?? $this->builder->build($class);
+        return $this->record($this->schemas->forClass($class) ?? $this->builder->build($class), $objectId);
+    }
 
+    /**
+     * The typed meta of a schema on one object.
+     */
+    public function record(MetaSchema $schema, int $objectId): MetaRecord
+    {
         return new MetaRecord($schema, $objectId, $this->store, $this->caster, $this->handleUnreadable(...));
     }
 
