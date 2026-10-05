@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.2...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.3...develop)
+
+## [v13.34.3](https://github.com/Pollora/framework/compare/v13.34.2...v13.34.3) - 2026-10-05
 
 ### Fixed
 - Each discovered item is applied once per request. The engine applied every discovery again for each scanned location and module engine (5 times per request on a typical project), with all the items found so far: each `#[Schedule]` task had 5 callbacks on its cron hook and **ran 5 times per cron run**, each `#[WpRestRoute]` route exposed 5 identical endpoints, `cron_schedules` and `init` collected duplicate closures. Measured on a project with WooCommerce: `apply()` time per request 6.6 ms → 2.6 ms, 80 fewer hook callbacks; registered post types, taxonomies, REST routes, cron events, WP-CLI commands and rendered pages unchanged (#386)
