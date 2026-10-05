@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.4...develop)
 
 ### Added
+- Roles in Laravel (**experimental**), a role being named by its slug or by the class of a `#[Role]`: `hasRole()`, `assignRole()`, `removeRole()` and `roles()` on `Pollora\Models\User` (trait `HasRoles`; writes go through `WP_User`, an unknown role is refused); the `role:` route middleware (`role:event_manager,editor`, or `EnsureUserHasRole::using(EventManager::class)`), which refuses with a 403 a user who has none of the roles, an alias the application already uses being kept; `@role` accepts role classes (`@role(EventManager::class)`) and keeps the behaviour of Sage Directives' `@role` for slugs
+- REST permission `Can` for `#[WpRestRoute]` and `#[Method]`: `permissionCallback: new Can('edit_posts')`, a `#[CapabilitySet]` enum case, or `new Can('edit_post', parameter: 'id')` to check a meta capability on the object in the request. `permissionCallback` now accepts a `Permission` instance as well as a class name; a refusal answers 401 to a guest and 403 to a logged-in user
 - Translated role labels: `#[Role(…, textDomain: 'my-theme')]` translates the label with that domain wherever WordPress shows role names (`translate_user_role()`: users list, role dropdowns). Translation happens when the admin displays the role, through `gettext_with_context_default`, so no translation is loaded early; a label WordPress already translates is left alone
 
 ## [v13.34.4](https://github.com/Pollora/framework/compare/v13.34.3...v13.34.4) - 2026-10-05
