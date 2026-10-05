@@ -30,7 +30,7 @@
         "illuminate/routing": "^13.34",
         "illuminate/console": "^13.34",
         "pollora/abilities": "^1.0",
-        "pollora/ajax": "^1.0",
+        "pollora/ajax": "^1.1",
         "pollora/entity": "^1.2",
         "pollora/hook": "^1.0",
         "pollora/option": "^1.0",
