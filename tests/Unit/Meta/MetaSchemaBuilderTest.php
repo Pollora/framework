@@ -1,0 +1,109 @@
+<?php
+
+declare(strict_types=1);
+
+use Carbon\CarbonImmutable;
+use Pollora\Meta\Application\Services\MetaSchemaBuilder;
+use Pollora\Meta\Domain\Enums\MetaObjectType;
+use Pollora\Meta\Domain\Enums\MetaValueType;
+use Pollora\Meta\Domain\Exceptions\InvalidMetaDefinitionException;
+use Pollora\Meta\Domain\Models\MetaSchema;
+use Tests\Unit\Meta\Fixtures\BookGenre;
+use Tests\Unit\Meta\Fixtures\Event;
+use Tests\Unit\Meta\Fixtures\EventStatus;
+use Tests\Unit\Meta\Fixtures\InvalidArray;
+use Tests\Unit\Meta\Fixtures\InvalidDuplicateKey;
+use Tests\Unit\Meta\Fixtures\InvalidNoDefault;
+use Tests\Unit\Meta\Fixtures\InvalidProtectedInRest;
+use Tests\Unit\Meta\Fixtures\InvalidPureEnum;
+use Tests\Unit\Meta\Fixtures\InvalidTermRevisions;
+use Tests\Unit\Meta\Fixtures\InvalidUnion;
+use Tests\Unit\Meta\Fixtures\InvalidUntyped;
+use Tests\Unit\Meta\Fixtures\NotADeclaration;
+use Tests\Unit\Meta\Fixtures\Priority;
+
+require_once __DIR__.'/Fixtures/Invalid.php';
+
+describe('a post type', function (): void {
+    beforeEach(function (): void {
+        $this->schema = (new MetaSchemaBuilder)->build(Event::class);
+    });
+
+    it('attaches the meta to the post type slug', function (): void {
+        expect($this->schema->objectType)->toBe(MetaObjectType::Post)
+            ->and($this->schema->subtype)->toBe('event')
+            ->and($this->schema->declaringClass)->toBe(Event::class);
+    });
+
+    it('keeps only public instance properties carrying #[Meta]', function (): void {
+        expect(array_keys($this->schema->definitions))->toBe([
+            'startsAt', 'capacity', 'price', 'soldOut', 'status', 'priority', 'subtitle', 'internalRef', 'summary', 'endsAt',
+        ]);
+    });
+
+    it('derives the key from the property name, in snake_case', function (): void {
+        expect($this->schema->definitions['startsAt']->key)->toBe('starts_at')
+            ->and($this->schema->definitions['internalRef']->key)->toBe('_event_internal_ref');
+    });
+
+    it('derives the value type from the property type', function (string $property, MetaValueType $type, ?string $class): void {
+        $definition = $this->schema->definitions[$property];
+
+        expect($definition->valueType)->toBe($type)
+            ->and($definition->valueClass)->toBe($class);
+    })->with([
+        'string' => ['summary', MetaValueType::String, null],
+        'int' => ['capacity', MetaValueType::Integer, null],
+        'float' => ['price', MetaValueType::Number, null],
+        'bool' => ['soldOut', MetaValueType::Boolean, null],
+        'date' => ['startsAt', MetaValueType::DateTime, CarbonImmutable::class],
+        'string enum' => ['status', MetaValueType::Enum, EventStatus::class],
+        'int enum' => ['priority', MetaValueType::Enum, Priority::class],
+    ]);
+
+    it('takes the default from the initial value, null for a nullable property', function (): void {
+        expect($this->schema->definitions['capacity']->default)->toBe(0)
+            ->and($this->schema->definitions['status']->default)->toBe(EventStatus::Draft)
+            ->and($this->schema->definitions['startsAt']->default)->toBeNull()
+            ->and($this->schema->definitions['startsAt']->nullable)->toBeTrue()
+            ->and($this->schema->definitions['capacity']->nullable)->toBeFalse();
+    });
+
+    it('carries the attribute options', function (): void {
+        $startsAt = $this->schema->definitions['startsAt'];
+        $internalRef = $this->schema->definitions['internalRef'];
+
+        expect($startsAt->showInRest)->toBeTrue()
+            ->and($startsAt->label)->toBe('Start')
+            ->and($startsAt->description)->toBe('When the event starts')
+            ->and($internalRef->capability)->toBe('manage_options')
+            ->and($this->schema->definitions['subtitle']->revisions)->toBeTrue()
+            ->and($this->schema->definitions['summary']->sanitize)->toBe('wp_kses_post');
+    });
+});
+
+it('attaches the meta of a taxonomy to its slug', function (): void {
+    $schema = (new MetaSchemaBuilder)->build(BookGenre::class);
+
+    expect($schema->objectType)->toBe(MetaObjectType::Term)
+        ->and($schema->subtype)->toBe('book-genre')
+        ->and($schema->definitions['color']->key)->toBe('color');
+});
+
+it('refuses a class that is neither a post type nor a taxonomy', function (): void {
+    (new MetaSchemaBuilder)->build(NotADeclaration::class);
+})->throws(InvalidMetaDefinitionException::class, 'carries neither #[PostType] nor #[Taxonomy]');
+
+it('refuses a declaration WordPress cannot register', function (string $class, string $message): void {
+    expect(fn (): MetaSchema => (new MetaSchemaBuilder)->build($class))
+        ->toThrow(InvalidMetaDefinitionException::class, $message);
+})->with([
+    'union type' => [InvalidUnion::class, 'needs a single type'],
+    'untyped property' => [InvalidUntyped::class, 'needs a single type'],
+    'array' => [InvalidArray::class, 'the type array is not supported yet'],
+    'pure enum' => [InvalidPureEnum::class, 'needs backing values'],
+    'no default, not nullable' => [InvalidNoDefault::class, 'give the property a default value or make it nullable'],
+    'protected key in REST' => [InvalidProtectedInRest::class, 'the protected key "_secret" can only be exposed in REST with an explicit capability'],
+    'revisions on a term' => [InvalidTermRevisions::class, 'revisions only exist for post types'],
+    'same key twice' => [InvalidDuplicateKey::class, 'the key "shared" is already used by $first'],
+]);

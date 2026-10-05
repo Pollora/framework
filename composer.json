@@ -30,10 +30,10 @@
         "illuminate/routing": "^13.34",
         "illuminate/console": "^13.34",
         "pollora/abilities": "^1.0",
-        "pollora/ajax": "^1.0",
+        "pollora/ajax": "^1.1",
         "pollora/entity": "^1.2",
-        "pollora/hook": "^1.0",
-        "pollora/option": "^1.0",
+        "pollora/hook": "^1.1",
+        "pollora/option": "^1.1",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^2.0",
         "pollora/colt": "^10.0.1",
@@ -45,7 +45,7 @@
         "nwidart/laravel-modules": "^13.0",
         "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.34",
-        "laravel/prompts": "^0.3.21"
+        "laravel/prompts": "^0.3.24"
     },
     "autoload": {
         "psr-4": {
@@ -97,18 +97,18 @@
         }
     },
     "require-dev": {
-        "driftingly/rector-laravel": "^2.5",
-        "laravel/pint": "^v1.29.3",
+        "driftingly/rector-laravel": "^2.6",
+        "laravel/pint": "^v1.32.1",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
         "symfony/var-dumper": "^7.4 || ^8.0",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "^7.1",
         "symplify/vendor-patches": "^12.1",
-        "brain/monkey": "^2.6",
-        "mockery/mockery": "^1.6.11",
+        "brain/monkey": "^2.7",
+        "mockery/mockery": "^1.6.15",
         "wp-cli/wp-cli": "^2.12",
-        "larastan/larastan": "^3.10",
+        "larastan/larastan": "^3.12",
         "orchestra/testbench": "^11.1.0"
     },
     "autoload-dev": {

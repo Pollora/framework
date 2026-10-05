@@ -26,11 +26,13 @@ use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Login\Infrastructure\Providers\LoginServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
+use Pollora\Meta\Infrastructure\Providers\MetaServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
 use Pollora\Permalink\Infrastructure\Providers\PermalinkServiceProvider;
 use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
+use Pollora\Role\Infrastructure\Providers\RoleServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\Jobs\JobDispatcher;
 use Pollora\Schedule\SchedulerServiceProvider;
@@ -84,6 +86,8 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(TaxonomyServiceProvider::class);
 
         $this->app->register(PostTypeServiceProvider::class);
+        $this->app->register(MetaServiceProvider::class);
+        $this->app->register(RoleServiceProvider::class);
 
         // WordPress REST API
         $this->app->register(WpRestAttributeServiceProvider::class);

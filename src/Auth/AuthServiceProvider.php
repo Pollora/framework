@@ -75,12 +75,11 @@ class AuthServiceProvider extends ServiceProvider
      *
      * Integrates WordPress's user_can() function with Laravel's authorization system,
      * allowing WordPress capabilities to be checked using Laravel's Gate facade.
-     * This method is only activated if the WordPress user_can function exists.
+     * Registered unconditionally: this runs before WordPress is loaded, so the
+     * callback checks for user_can() itself when the Gate asks.
      */
     protected function registerWordPressGate(): void
     {
-        if (function_exists('user_can')) {
-            Gate::after(static fn ($user, $ability, $result, $arguments) => user_can($user, $ability, ...$arguments));
-        }
+        Gate::after((new WordPressCapabilityGate)->__invoke(...));
     }
 }

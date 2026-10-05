@@ -5,7 +5,23 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.3...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.4...develop)
+
+## [v13.34.4](https://github.com/Pollora/framework/compare/v13.34.3...v13.34.4) - 2026-10-05
+
+### Added
+- Typed meta (**experimental**): a public typed property of a `#[PostType]` or `#[Taxonomy]` class marked `#[Meta]` is registered with `register_meta()` — type, default, sanitization, REST schema (dates as `date-time`, enums as `enum`), `capability` as `auth_callback`, `revisions`. `Meta::of(Event::class, $postId)` reads each meta with its PHP type (`int`, `float`, `bool`, `string`, dates, backed enums) and writes through WordPress's meta API (`->fill([...])->save()`). A declaration WordPress cannot register (union or array type, no default, protected key in REST without a capability, a key declared twice) is reported at discovery with the class and property named. The API may change before it is declared stable
+- Roles declared in code (**experimental**): `#[Role('event_manager', inherits: 'author')]` with `#[Grants]`, `#[Without]`, `#[GrantsPostType(Event::class, Access::Editor)]` and `#[GrantsTaxonomy]`; `#[ModifyRole('editor')]` for roles the project does not own; `#[CapabilitySet]` enums for the project's own capabilities; `pollora:make:role`. Roles are injected into WordPress on `wp_roles_init`, never written to the database: the code is the only source of truth, a role or a capability removed from the code is gone even after a plugin wrote the roles back. The roles in `roles.super_roles` (`administrator`) receive every declared capability, so a post type with `#[CapabilityType]` no longer disappears from the admin. Sensitive capabilities need `allowSensitive: true`; a core role cannot be redeclared, a super role cannot be inherited from
+
+### Fixed
+- WordPress capabilities answer Laravel's authorization again: `$user->can('edit_posts')`, `Gate::allows('edit_post', $post)`, `@can` and the `can:` middleware. The `Gate::after()` bridge to `user_can()` was only added when WordPress was already loaded, which it never is when providers register, so every WordPress capability was denied. The bridge now converts the Gate's user (`Pollora\Models\User`, `WP_User` or ID) and Eloquent model arguments for `user_can()`, and `Pollora\Models\User` uses Laravel's `Authorizable` (`can()`, `cannot()`). Abilities defined with `Gate::define()` and policies keep priority (#390)
+
+### Changed
+- Dependency minimums: `pollora/ajax`, `pollora/hook`, `pollora/option` `^1.1`, `laravel/prompts` `^0.3.24` (#394)
+- Discoveries also receive the enums that carry attributes (needed by `#[CapabilitySet]`); enums without attributes are still skipped
+
+### Removed
+- `src/Theme/Infrastructure/Services/Directives.php`: `@usercan`, `@template` and `@gravityform` were never registered (the file was loaded nowhere, and `@usercan` called a `User::current()` that does not exist). Use `@can` for capabilities
 
 ## [v13.34.3](https://github.com/Pollora/framework/compare/v13.34.2...v13.34.3) - 2026-10-05
 
