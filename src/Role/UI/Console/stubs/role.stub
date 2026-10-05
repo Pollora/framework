@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DummyNamespace;
+
+use Pollora\Attributes\Role;
+use Pollora\Attributes\Role\Grants;
+
+/**
+ * DummyLabel role.
+ *
+ * Injected into WordPress on each request: changing this class and deploying
+ * changes the role, with nothing to migrate.
+ */
+#[Role('DummySlug', label: 'DummyLabel', inherits: 'subscriber')]
+#[Grants('read')]
+final class DummyClass
+{
+}
