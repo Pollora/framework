@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.4...develop)
 
+### Added
+- Translated role labels: `#[Role(…, textDomain: 'my-theme')]` translates the label with that domain wherever WordPress shows role names (`translate_user_role()`: users list, role dropdowns). Translation happens when the admin displays the role, through `gettext_with_context_default`, so no translation is loaded early; a label WordPress already translates is left alone
+
 ## [v13.34.4](https://github.com/Pollora/framework/compare/v13.34.3...v13.34.4) - 2026-10-05
 
 ### Added

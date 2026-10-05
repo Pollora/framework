@@ -6,6 +6,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
 use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Role\Application\Services\RoleDefinitionBuilder;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
 use Pollora\Role\Infrastructure\Providers\RoleServiceProvider;
@@ -20,6 +21,8 @@ beforeEach(function (): void {
 
     $this->action = Mockery::mock(Action::class);
     $this->app->instance(Action::class, $this->action);
+    $this->filter = Mockery::mock(Filter::class);
+    $this->app->instance(Filter::class, $this->filter);
     $this->provider = new RoleServiceProvider($this->app);
     $this->provider->register();
 });
@@ -30,9 +33,10 @@ it('binds the discovery and the injector, with the configured super roles', func
         ->and((new ReflectionProperty(RoleDefinitionBuilder::class, 'superRoles'))->getValue($this->app->make(RoleDefinitionBuilder::class)))->toBe(['administrator', 'network_admin']);
 });
 
-it('subscribes the injector to wp_roles_init, early, and reports warnings once on init', function (): void {
+it('subscribes the injector to wp_roles_init, early, reports warnings once on init, and translates labels', function (): void {
     $this->action->shouldReceive('add')->once()->with('wp_roles_init', Mockery::type(Closure::class), 1)->andReturnSelf();
     $this->action->shouldReceive('add')->once()->with('init', Mockery::type(Closure::class), PHP_INT_MAX)->andReturnSelf();
+    $this->filter->shouldReceive('add')->once()->with('gettext_with_context_default', Mockery::type(Closure::class), 10, 3)->andReturnSelf();
 
     $this->provider->boot();
 });

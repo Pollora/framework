@@ -7,12 +7,14 @@ namespace Pollora\Role\Infrastructure\Providers;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Role\Application\Services\CapabilityOwnerReader;
 use Pollora\Role\Application\Services\RoleDefinitionBuilder;
 use Pollora\Role\Application\Services\RoleRegistry;
 use Pollora\Role\Domain\Services\PostTypeCapabilityMap;
 use Pollora\Role\Domain\Services\RoleCompiler;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
+use Pollora\Role\Infrastructure\Adapters\WordPressRoleLabelTranslator;
 use Pollora\Role\Infrastructure\Services\RoleDiscovery;
 use Pollora\Role\UI\Console\RoleMakeCommand;
 use Psr\Log\LoggerInterface;
@@ -34,6 +36,7 @@ class RoleServiceProvider extends ServiceProvider
         $this->app->singleton(PostTypeCapabilityMap::class);
         $this->app->singleton(RoleCompiler::class);
         $this->app->singleton(RoleRegistry::class);
+        $this->app->singleton(WordPressRoleLabelTranslator::class);
 
         $this->app->singleton(RoleDefinitionBuilder::class, fn (Application $app): RoleDefinitionBuilder => new RoleDefinitionBuilder(
             $app->make(CapabilityOwnerReader::class),
@@ -67,6 +70,8 @@ class RoleServiceProvider extends ServiceProvider
         // Early priority: listeners after it see the roles as the code declares them.
         $action->add('wp_roles_init', $injector->inject(...), 1);
         $action->add('init', $injector->reportWarnings(...), PHP_INT_MAX);
+
+        $this->app->make(Filter::class)->add('gettext_with_context_default', $this->app->make(WordPressRoleLabelTranslator::class)->translate(...), 10, 3);
     }
 
     /**

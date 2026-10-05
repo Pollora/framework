@@ -87,6 +87,7 @@ final readonly class RoleDefinitionBuilder
             inherits: $inherits,
             changes: $changes,
             declaringClass: $class,
+            textDomain: $role->textDomain,
         );
     }
 

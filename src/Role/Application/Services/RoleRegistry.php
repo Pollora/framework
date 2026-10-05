@@ -177,6 +177,24 @@ final class RoleRegistry
     }
 
     /**
+     * The text domain of each role label that has one, by label.
+     *
+     * @return array<string, string>
+     */
+    public function labelDomains(): array
+    {
+        $domains = [];
+
+        foreach ($this->definitions as $definition) {
+            if ($definition->textDomain !== null) {
+                $domains[$definition->label] = $definition->textDomain;
+            }
+        }
+
+        return $domains;
+    }
+
+    /**
      * Every capability the project declares, for the super roles.
      *
      * @return list<string>

@@ -25,6 +25,7 @@ use Tests\Unit\Role\Fixtures\NoRoleAttribute;
 use Tests\Unit\Role\Fixtures\RedeclaresCoreRole;
 use Tests\Unit\Role\Fixtures\RoleAndModify;
 use Tests\Unit\Role\Fixtures\Steward;
+use Tests\Unit\Role\Fixtures\Usher;
 
 require_once __DIR__.'/Fixtures/Invalid.php';
 
@@ -38,6 +39,7 @@ it('builds a role from #[Role] and its grants', function (): void {
     expect($role)->toBeInstanceOf(RoleDefinition::class)
         ->and($role->slug)->toBe('event_manager')
         ->and($role->label)->toBe('Event manager')
+        ->and($role->textDomain)->toBeNull()
         ->and($role->inherits)->toBe('author')
         ->and($role->declaringClass)->toBe(EventManager::class)
         ->and($role->changes->grants)->toBe(['export_attendees', 'scan_tickets', 'upload_files'])
@@ -55,6 +57,13 @@ it('resolves an inherited role given by class, and defaults the label to the cla
     expect($role->inherits)->toBe('event_manager')
         ->and($role->label)->toBe('Steward')
         ->and($role->changes->grants)->toBe(['manage_options']);
+});
+
+it('keeps the text domain of the label, through resolution', function (): void {
+    $role = $this->builder->build(Usher::class);
+
+    expect($role->textDomain)->toBe('events')
+        ->and($role->withChanges($role->changes)->textDomain)->toBe('events');
 });
 
 it('builds a modification from #[ModifyRole]', function (): void {

@@ -20,6 +20,7 @@ use Tests\Unit\Role\Fixtures\Genre;
 use Tests\Unit\Role\Fixtures\LoopA;
 use Tests\Unit\Role\Fixtures\LoopB;
 use Tests\Unit\Role\Fixtures\Topic;
+use Tests\Unit\Role\Fixtures\Usher;
 use Tests\Unit\Role\Fixtures\Venue;
 
 require_once __DIR__.'/Fixtures/Invalid.php';
@@ -113,4 +114,11 @@ it('keeps one modification per class', function (): void {
     $this->registry->addModification(($this->build)(EditorAdjustments::class));
 
     expect($this->registry->modifications())->toHaveCount(1);
+});
+
+it('lists the text domain of each label that declares one', function (): void {
+    $this->registry->addRole(($this->build)(Usher::class));
+    $this->registry->addRole(($this->build)(LoopB::class));
+
+    expect($this->registry->labelDomains())->toBe(['Usher' => 'events']);
 });
