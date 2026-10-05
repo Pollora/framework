@@ -3,12 +3,14 @@
 declare(strict_types=1);
 
 use Pollora\Attributes\Meta;
+use Pollora\Colt\Model\Post as ColtPost;
 use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Pollora\Meta\Domain\Contracts\MetaRegistryInterface;
 use Pollora\Meta\Domain\Models\MetaSchema;
 use Pollora\Meta\Infrastructure\Services\MetaDiscovery;
+use Pollora\Models\Page;
 use Psr\Log\LoggerInterface;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredEnum;
@@ -17,6 +19,7 @@ use Tests\Unit\Meta\Fixtures\BookGenre;
 use Tests\Unit\Meta\Fixtures\CategoryExtras;
 use Tests\Unit\Meta\Fixtures\Event;
 use Tests\Unit\Meta\Fixtures\EventExtras;
+use Tests\Unit\Meta\Fixtures\EventPostModel;
 use Tests\Unit\Meta\Fixtures\EventStatus;
 use Tests\Unit\Meta\Fixtures\InvalidArray;
 use Tests\Unit\Meta\Fixtures\MemberProfile;
@@ -74,6 +77,16 @@ it('logs a declaration it cannot register and carries on', function (): void {
     ($this->discover)(Event::class, InvalidArray::class, EventExtras::class, BookGenre::class);
 
     $this->discovery->apply();
+});
+
+it('binds the post models of the project to their post type', function (): void {
+    ($this->discover)(EventPostModel::class, Page::class);
+
+    $this->discovery->apply();
+
+    expect((new ReflectionProperty(ColtPost::class, 'postTypes'))->getValue())->toHaveKey('fixture_event', EventPostModel::class);
+
+    ColtPost::clearRegisteredPostTypes();
 });
 
 it('identifies itself as meta', function (): void {

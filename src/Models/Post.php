@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+use Pollora\Models\Concerns\HasTypedMeta;
 
 /**
  * Class Post
@@ -45,6 +46,8 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class Post extends \Pollora\Colt\Model\Post
 {
+    use HasTypedMeta;
+
     /**
      * Convert the Post instance to a WP_Post object.
      */
