@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.1...develop)
 
+### Security
+- The `api_plugins` bootstrap reads `active_plugins` with `unserialize()` restricted to no classes: a tampered option can no longer instantiate PHP objects
+
 ## [v13.34.1](https://github.com/Pollora/framework/compare/v13.34.0...v13.34.1) - 2026-10-02
 
 ### Removed
