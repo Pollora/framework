@@ -9,12 +9,14 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\Compilers\BladeCompiler;
 use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Role\Application\Services\CapabilityOwnerReader;
 use Pollora\Role\Application\Services\RoleDefinitionBuilder;
 use Pollora\Role\Application\Services\RoleRegistry;
 use Pollora\Role\Domain\Services\PostTypeCapabilityMap;
 use Pollora\Role\Domain\Services\RoleCompiler;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
+use Pollora\Role\Infrastructure\Adapters\WordPressRoleLabelTranslator;
 use Pollora\Role\Infrastructure\Middleware\EnsureUserHasRole;
 use Pollora\Role\Infrastructure\Services\RoleDiscovery;
 use Pollora\Role\UI\Console\RoleMakeCommand;
@@ -39,6 +41,7 @@ class RoleServiceProvider extends ServiceProvider
         $this->app->singleton(PostTypeCapabilityMap::class);
         $this->app->singleton(RoleCompiler::class);
         $this->app->singleton(RoleRegistry::class);
+        $this->app->singleton(WordPressRoleLabelTranslator::class);
 
         $this->app->singleton(RoleDefinitionBuilder::class, fn (Application $app): RoleDefinitionBuilder => new RoleDefinitionBuilder(
             $app->make(CapabilityOwnerReader::class),
@@ -87,6 +90,8 @@ class RoleServiceProvider extends ServiceProvider
                 $blade->directive('endrole', static fn (): string => '<?php endif; ?>');
             });
         });
+
+        $this->app->make(Filter::class)->add('gettext_with_context_default', $this->app->make(WordPressRoleLabelTranslator::class)->translate(...), 10, 3);
     }
 
     /**

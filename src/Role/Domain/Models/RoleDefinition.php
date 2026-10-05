@@ -18,10 +18,11 @@ final readonly class RoleDefinition
         public ?string $inherits,
         public RoleChanges $changes,
         public string $declaringClass,
+        public ?string $textDomain = null,
     ) {}
 
     public function withChanges(RoleChanges $changes): self
     {
-        return new self($this->slug, $this->label, $this->inherits, $changes, $this->declaringClass);
+        return new self($this->slug, $this->label, $this->inherits, $changes, $this->declaringClass, $this->textDomain);
     }
 }
