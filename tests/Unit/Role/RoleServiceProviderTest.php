@@ -3,14 +3,19 @@
 declare(strict_types=1);
 
 use Illuminate\Config\Repository;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
+use Illuminate\Routing\Router;
+use Illuminate\View\Compilers\BladeCompiler;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Role\Application\Services\RoleDefinitionBuilder;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
+use Pollora\Role\Infrastructure\Middleware\EnsureUserHasRole;
 use Pollora\Role\Infrastructure\Providers\RoleServiceProvider;
 use Pollora\Role\Infrastructure\Services\RoleDiscovery;
 use Pollora\Role\UI\Console\RoleMakeCommand;
+use Pollora\Role\UI\View\RoleDirective;
 use Psr\Log\LoggerInterface;
 
 beforeEach(function (): void {
@@ -46,4 +51,36 @@ it('generates a role class with its slug and label', function (): void {
     expect($class)->toContain("#[Role('event_manager', label: 'Event Manager', inherits: 'subscriber')]")
         ->toContain('final class EventManager')
         ->and($command->getName())->toBe('pollora:make:role');
+});
+
+it('aliases the role middleware, unless the application already uses the alias', function (): void {
+    $this->action->shouldReceive('add')->andReturnSelf();
+    $router = new Router(new Dispatcher, $this->app);
+    $this->app->instance('router', $router);
+
+    $this->provider->boot();
+
+    expect($router->getMiddleware()['role'])->toBe(EnsureUserHasRole::class);
+
+    $router->aliasMiddleware('role', 'App\\Http\\Middleware\\Role');
+    $this->provider->boot();
+
+    expect($router->getMiddleware()['role'])->toBe('App\\Http\\Middleware\\Role');
+});
+
+it('replaces the @role directive once every provider has booted', function (): void {
+    $this->action->shouldReceive('add')->andReturnSelf();
+    $blade = new BladeCompiler(new Filesystem, sys_get_temp_dir());
+    $blade->directive('role', fn (): string => 'sage');
+
+    $this->app->instance('blade.compiler', $blade);
+
+    $this->provider->boot();
+
+    expect($blade->getCustomDirectives()['role']('x'))->toBe('sage');
+
+    $this->app->boot();
+
+    expect($blade->getCustomDirectives()['role'])->toBeInstanceOf(RoleDirective::class)
+        ->and($blade->compileString("@role('editor') yes @endrole"))->toContain('matchesAny')->toContain('<?php endif; ?>');
 });

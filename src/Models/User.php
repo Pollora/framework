@@ -8,6 +8,7 @@ use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Foundation\Auth\Access\Authorizable;
+use Pollora\Models\Concerns\HasRoles;
 use Watson\Rememberable\Rememberable;
 
 /**
@@ -25,12 +26,14 @@ use Watson\Rememberable\Rememberable;
  * @property string $display_name
  *
  * `can()` and `cannot()` answer with WordPress capabilities through the Gate:
- * `$user->can('edit_posts')`, `$user->can('edit_post', $post)`.
+ * `$user->can('edit_posts')`, `$user->can('edit_post', $post)`. Roles:
+ * `hasRole()`, `assignRole()`, `removeRole()`, `roles()`.
  */
 class User extends \Pollora\Colt\Model\User implements AuthenticatableContract, AuthorizableContract
 {
     use Authenticatable;
     use Authorizable;
+    use HasRoles;
     use Rememberable;
 
     /**
