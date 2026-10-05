@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WordPress capabilities answer Laravel's authorization again: `$user->can('edit_posts')`, `Gate::allows('edit_post', $post)`, `@can` and the `can:` middleware. The `Gate::after()` bridge to `user_can()` was only added when WordPress was already loaded, which it never is when providers register, so every WordPress capability was denied. The bridge now converts the Gate's user (`Pollora\Models\User`, `WP_User` or ID) and Eloquent model arguments for `user_can()`, and `Pollora\Models\User` uses Laravel's `Authorizable` (`can()`, `cannot()`). Abilities defined with `Gate::define()` and policies keep priority (#390)
 
 ### Changed
+- Dependency minimums: `pollora/ajax`, `pollora/hook`, `pollora/option` `^1.1`, `laravel/prompts` `^0.3.24` (#394)
 - Discoveries also receive the enums that carry attributes (needed by `#[CapabilitySet]`); enums without attributes are still skipped
 
 ### Removed
