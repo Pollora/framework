@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.3...develop)
 
+### Added
+- Roles declared in code (**experimental**): `#[Role('event_manager', inherits: 'author')]` with `#[Grants]`, `#[Without]`, `#[GrantsPostType(Event::class, Access::Editor)]` and `#[GrantsTaxonomy]`; `#[ModifyRole('editor')]` for roles the project does not own; `#[CapabilitySet]` enums for the project's own capabilities; `pollora:make:role`. Roles are injected into WordPress on `wp_roles_init`, never written to the database: the code is the only source of truth, a role or a capability removed from the code is gone even after a plugin wrote the roles back. The roles in `roles.super_roles` (`administrator`) receive every declared capability, so a post type with `#[CapabilityType]` no longer disappears from the admin. Sensitive capabilities need `allowSensitive: true`; a core role cannot be redeclared, a super role cannot be inherited from
+
+### Changed
+- Discoveries also receive the enums that carry attributes (needed by `#[CapabilitySet]`); enums without attributes are still skipped
+
 ## [v13.34.3](https://github.com/Pollora/framework/compare/v13.34.2...v13.34.3) - 2026-10-05
 
 ### Fixed
