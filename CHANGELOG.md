@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.3...develop)
 
+### Added
+- Typed meta (**experimental**): a public typed property of a `#[PostType]` or `#[Taxonomy]` class marked `#[Meta]` is registered with `register_meta()` — type, default, sanitization, REST schema (dates as `date-time`, enums as `enum`), `capability` as `auth_callback`, `revisions`. `Meta::of(Event::class, $postId)` reads each meta with its PHP type (`int`, `float`, `bool`, `string`, dates, backed enums) and writes through WordPress's meta API (`->fill([...])->save()`). A declaration WordPress cannot register (union or array type, no default, protected key in REST without a capability, a key declared twice) is reported at discovery with the class and property named. The API may change before it is declared stable
+
+### Fixed
+- WordPress capabilities answer Laravel's authorization again: `$user->can('edit_posts')`, `Gate::allows('edit_post', $post)`, `@can` and the `can:` middleware. The `Gate::after()` bridge to `user_can()` was only added when WordPress was already loaded, which it never is when providers register, so every WordPress capability was denied. The bridge now converts the Gate's user (`Pollora\Models\User`, `WP_User` or ID) and Eloquent model arguments for `user_can()`, and `Pollora\Models\User` uses Laravel's `Authorizable` (`can()`, `cannot()`). Abilities defined with `Gate::define()` and policies keep priority (#390)
+
 ## [v13.34.3](https://github.com/Pollora/framework/compare/v13.34.2...v13.34.3) - 2026-10-05
 
 ### Fixed
 - Each discovered item is applied once per request. The engine applied every discovery again for each scanned location and module engine (5 times per request on a typical project), with all the items found so far: each `#[Schedule]` task had 5 callbacks on its cron hook and **ran 5 times per cron run**, each `#[WpRestRoute]` route exposed 5 identical endpoints, `cron_schedules` and `init` collected duplicate closures. Measured on a project with WooCommerce: `apply()` time per request 6.6 ms → 2.6 ms, 80 fewer hook callbacks; registered post types, taxonomies, REST routes, cron events, WP-CLI commands and rendered pages unchanged (#386)
-
-### Added
-- Typed meta (**experimental**): a public typed property of a `#[PostType]` or `#[Taxonomy]` class marked `#[Meta]` is registered with `register_meta()` — type, default, sanitization, REST schema (dates as `date-time`, enums as `enum`), `capability` as `auth_callback`, `revisions`. `Meta::of(Event::class, $postId)` reads each meta with its PHP type (`int`, `float`, `bool`, `string`, dates, backed enums) and writes through WordPress's meta API (`->fill([...])->save()`). A declaration WordPress cannot register (union or array type, no default, protected key in REST without a capability, a key declared twice) is reported at discovery with the class and property named. The API may change before it is declared stable
 
 ## [v13.34.2](https://github.com/Pollora/framework/compare/v13.34.1...v13.34.2) - 2026-10-05
 
