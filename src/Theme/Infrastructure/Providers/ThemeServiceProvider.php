@@ -477,21 +477,12 @@ class ThemeServiceProvider extends ServiceProvider
     /**
      * Setup theme boot process and integrations.
      *
-     * Registers Blade directives and other framework integrations.
+     * Registers framework integrations. A theme's own Blade directives live in its
+     * resources/directives.php, loaded by ModuleAssetManager::registerModuleBladeDirectives().
      */
     private function setupThemeBoot(): void
     {
-        $this->registerBladeDirectives();
         $this->registerThemeJsonFilter();
-    }
-
-    /**
-     * Register custom Blade directives for theme functionality.
-     */
-    private function registerBladeDirectives(): void
-    {
-        // No framework-level Blade directives currently needed.
-        // Module-specific directives are loaded via ModuleAssetManager::registerModuleBladeDirectives().
     }
 
     /**
