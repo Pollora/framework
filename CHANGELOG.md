@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Discoveries also receive the enums that carry attributes (needed by `#[CapabilitySet]`); enums without attributes are still skipped
 
+### Removed
+- `src/Theme/Infrastructure/Services/Directives.php`: `@usercan`, `@template` and `@gravityform` were never registered (the file was loaded nowhere, and `@usercan` called a `User::current()` that does not exist). Use `@can` for capabilities
+
 ## [v13.34.3](https://github.com/Pollora/framework/compare/v13.34.2...v13.34.3) - 2026-10-05
 
 ### Fixed
