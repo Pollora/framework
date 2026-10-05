@@ -63,14 +63,6 @@ it('stores and registers the schema of each declaring class', function (): void 
         ->and($this->schemas->forClass(NoMeta::class))->toBeNull();
 });
 
-it('registers each schema once when applied again', function (): void {
-    $this->registry->shouldReceive('register')->once();
-    ($this->discover)(Event::class);
-
-    $this->discovery->apply();
-    $this->discovery->apply();
-});
-
 it('logs a declaration it cannot register and carries on', function (): void {
     $this->registry->shouldReceive('register')->twice();
     $this->logger->shouldReceive('error')->once()->with(Mockery::pattern('/InvalidArray: .*the type array is not supported yet/'), Mockery::type('array'));

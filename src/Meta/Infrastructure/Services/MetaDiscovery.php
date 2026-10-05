@@ -13,7 +13,6 @@ use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Pollora\Meta\Domain\Contracts\MetaRegistryInterface;
-use Pollora\Meta\Domain\Models\MetaSchema;
 use Psr\Log\LoggerInterface;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
@@ -26,8 +25,7 @@ use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
  *     queues it for `register_meta()`.
  *
  * A declaration that cannot be registered is logged with the class and property
- * named, and the other classes still register. Applying again registers nothing
- * twice.
+ * named, and the other classes still register.
  */
 final class MetaDiscovery implements DiscoveryInterface
 {
@@ -62,12 +60,6 @@ final class MetaDiscovery implements DiscoveryInterface
         foreach ($this->getItems() as $item) {
             /** @var class-string $class */
             $class = $item['class'];
-
-            // The engine applies again for each theme, plugin and module it scans,
-            // with the items found so far: a schema registers once.
-            if ($this->schemas->forClass($class) instanceof MetaSchema) {
-                continue;
-            }
 
             try {
                 $schema = $this->builder->build($class);
