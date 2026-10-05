@@ -5,10 +5,17 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.1...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.2...develop)
+
+## [v13.34.2](https://github.com/Pollora/framework/compare/v13.34.1...v13.34.2) - 2026-10-05
 
 ### Security
-- The `api_plugins` bootstrap reads `active_plugins` with `unserialize()` restricted to no classes: a tampered option can no longer instantiate PHP objects
+- `pollora/colt` `^10.0.1`: meta and option values are unserialized without allowing classes, so a tampered value can no longer instantiate PHP objects (Pollora/colt#1)
+- The `api_plugins` bootstrap reads `active_plugins` with `unserialize()` restricted to no classes: a tampered option can no longer instantiate PHP objects (#382)
+
+### Fixed
+- `saveMeta()` and `createMeta()` on `Pollora\Models` go through `update_metadata()` / `add_metadata()` when WordPress is loaded: sanitize callbacks, meta hooks and object cache invalidation now apply, and `get_post_meta()` no longer returns the previous value under a persistent object cache (Pollora/colt#1)
+- `$post->acf`, `$term->acf` and `$user->acf` no longer end in a fatal error: Colt's ACF trait referenced a class that was never shipped (Pollora/colt#1)
 
 ## [v13.34.1](https://github.com/Pollora/framework/compare/v13.34.0...v13.34.1) - 2026-10-02
 
