@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Models;
 
 use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Watson\Rememberable\Rememberable;
 
 /**
@@ -21,10 +23,14 @@ use Watson\Rememberable\Rememberable;
  * @property string $user_activation_key
  * @property int $user_status
  * @property string $display_name
+ *
+ * `can()` and `cannot()` answer with WordPress capabilities through the Gate:
+ * `$user->can('edit_posts')`, `$user->can('edit_post', $post)`.
  */
-class User extends \Pollora\Colt\Model\User implements AuthenticatableContract
+class User extends \Pollora\Colt\Model\User implements AuthenticatableContract, AuthorizableContract
 {
     use Authenticatable;
+    use Authorizable;
     use Rememberable;
 
     /**
