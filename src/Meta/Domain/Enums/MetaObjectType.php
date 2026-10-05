@@ -11,4 +11,6 @@ enum MetaObjectType: string
 {
     case Post = 'post';
     case Term = 'term';
+    case User = 'user';
+    case Comment = 'comment';
 }

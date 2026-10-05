@@ -24,15 +24,13 @@ final class MetaSchemaRepository
     public function add(MetaSchema $schema): void
     {
         foreach ($this->schemas as $existing) {
-            if ($existing->declaringClass === $schema->declaringClass
-                || $existing->objectType !== $schema->objectType
-                || $existing->subtype !== $schema->subtype) {
+            if ($existing->declaringClass === $schema->declaringClass || ! $existing->overlaps($schema)) {
                 continue;
             }
 
             foreach ($schema->definitions as $definition) {
                 if ($existing->find($definition->key) instanceof MetaDefinition) {
-                    throw InvalidMetaDefinitionException::duplicateKey($definition->key, $schema->subtype, $existing->declaringClass, $schema->declaringClass);
+                    throw InvalidMetaDefinitionException::duplicateKey($definition->key, $schema->ownerName(), $existing->declaringClass, $schema->declaringClass);
                 }
             }
         }

@@ -6,9 +6,13 @@ namespace Pollora\Meta\Application\Services;
 
 use BackedEnum;
 use DateTimeInterface;
+use Pollora\Attributes\CommentMeta;
 use Pollora\Attributes\Meta;
+use Pollora\Attributes\PostMeta;
 use Pollora\Attributes\PostType;
 use Pollora\Attributes\Taxonomy;
+use Pollora\Attributes\TermMeta;
+use Pollora\Attributes\UserMeta;
 use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Enums\MetaValueType;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaDefinitionException;
@@ -20,7 +24,8 @@ use ReflectionProperty;
 use UnitEnum;
 
 /**
- * Builds the meta schema of a `#[PostType]` or `#[Taxonomy]` class from its
+ * Builds the meta schema of a class declaring meta (`#[PostType]`, `#[Taxonomy]`,
+ * `#[PostMeta]`, `#[TermMeta]`, `#[UserMeta]`, `#[CommentMeta]`) from its
  * `#[Meta]` properties.
  *
  * Every rule WordPress would otherwise break silently is checked here, so a
@@ -36,7 +41,7 @@ final class MetaSchemaBuilder
     public function build(string $class): MetaSchema
     {
         $reflection = new ReflectionClass($class);
-        [$objectType, $subtype] = $this->resolveOwner($reflection);
+        [$objectType, $subtypes] = $this->resolveOwner($reflection);
 
         $definitions = [];
         $properties = [];
@@ -62,28 +67,27 @@ final class MetaSchemaBuilder
             $definitions[$definition->property] = $definition;
         }
 
-        return new MetaSchema($class, $objectType, $subtype, $definitions);
+        return new MetaSchema($class, $objectType, $subtypes, $definitions);
     }
 
     /**
      * @param  ReflectionClass<object>  $reflection
-     * @return array{0: MetaObjectType, 1: string}
+     * @return array{0: MetaObjectType, 1: list<string>}
      */
     private function resolveOwner(ReflectionClass $reflection): array
     {
-        $postType = $reflection->getAttributes(PostType::class)[0] ?? null;
+        $class = $reflection->getName();
+        $owner = static fn (string $attribute): ?object => ($reflection->getAttributes($attribute)[0] ?? null)?->newInstance();
 
-        if ($postType !== null) {
-            return [MetaObjectType::Post, $postType->newInstance()->resolveSlug($reflection->getName())];
-        }
-
-        $taxonomy = $reflection->getAttributes(Taxonomy::class)[0] ?? null;
-
-        if ($taxonomy !== null) {
-            return [MetaObjectType::Term, $taxonomy->newInstance()->resolveSlug($reflection->getName())];
-        }
-
-        throw InvalidMetaDefinitionException::notADeclaration($reflection->getName());
+        return match (true) {
+            ($postType = $owner(PostType::class)) instanceof PostType => [MetaObjectType::Post, [$postType->resolveSlug($class)]],
+            ($taxonomy = $owner(Taxonomy::class)) instanceof Taxonomy => [MetaObjectType::Term, [$taxonomy->resolveSlug($class)]],
+            ($postMeta = $owner(PostMeta::class)) instanceof PostMeta => [MetaObjectType::Post, $postMeta->postTypes],
+            ($termMeta = $owner(TermMeta::class)) instanceof TermMeta => [MetaObjectType::Term, $termMeta->taxonomies],
+            $owner(UserMeta::class) instanceof UserMeta => [MetaObjectType::User, []],
+            $owner(CommentMeta::class) instanceof CommentMeta => [MetaObjectType::Comment, []],
+            default => throw InvalidMetaDefinitionException::notADeclaration($class),
+        };
     }
 
     private function buildDefinition(string $class, ReflectionProperty $property, Meta $meta, MetaObjectType $objectType): MetaDefinition
