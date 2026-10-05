@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.2...develop)
 
+### Added
+- Typed meta (**experimental**): a public typed property of a `#[PostType]` or `#[Taxonomy]` class marked `#[Meta]` is registered with `register_meta()` — type, default, sanitization, REST schema (dates as `date-time`, enums as `enum`), `capability` as `auth_callback`, `revisions`. `Meta::of(Event::class, $postId)` reads each meta with its PHP type (`int`, `float`, `bool`, `string`, dates, backed enums) and writes through WordPress's meta API (`->fill([...])->save()`). A declaration WordPress cannot register (union or array type, no default, protected key in REST without a capability, a key declared twice) is reported at discovery with the class and property named. The API may change before it is declared stable
+
 ## [v13.34.2](https://github.com/Pollora/framework/compare/v13.34.1...v13.34.2) - 2026-10-05
 
 ### Security
