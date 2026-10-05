@@ -8,6 +8,7 @@ use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\MySqlConnection;
+use Illuminate\Events\Dispatcher;
 use Pollora\Meta\Application\Services\MetaAccessor;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
@@ -72,7 +73,17 @@ function existingModel(string $class, array $attributes): Model
 }
 
 beforeEach(function (): void {
-    $container = Container::getInstance();
+    // Colt asks the container for its version to tell Laravel from Lumen.
+    $this->previousContainer = Container::getInstance();
+    $container = new class extends Container
+    {
+        public function version(): string
+        {
+            return '13.0.0';
+        }
+    };
+    Container::setInstance($container);
+
     $this->repository = new MetaSchemaRepository;
     $this->repository->add((new MetaSchemaBuilder)->build(Event::class));
     $this->repository->add((new MetaSchemaBuilder)->build(MemberProfile::class));
@@ -84,11 +95,7 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
-    $container = Container::getInstance();
-
-    foreach ([MetaSchemaRepository::class, MetaValueCaster::class, MetaAccessor::class] as $abstract) {
-        $container->forgetInstance($abstract);
-    }
+    Container::setInstance($this->previousContainer);
 });
 
 it('reads a declared meta with its PHP type, by property name or key', function (): void {
@@ -152,36 +159,34 @@ it('stops eager loading the meta relation for a class known to carry typed meta 
         ->and($with->getValue(new User))->not->toContain('meta');
 });
 
-it('primes the meta cache once for a collection of typed models', function (): void {
+it('primes the meta cache once for the models loaded together, on the first typed read', function (): void {
+    Model::clearBootedModels();
+    Model::setEventDispatcher(new Dispatcher);
+    $this->store->values['post:1:capacity'] = '10';
+    $this->store->values['post:2:capacity'] = '20';
     Functions\expect('update_meta_cache')->once()->with('post', [1, 2]);
 
-    (new EventModel)->newCollection([existingModel(EventModel::class, ['ID' => 1]), existingModel(EventModel::class, ['ID' => 2])]);
+    [$first, $second] = [(new EventModel)->newFromBuilder(['ID' => 1, 'post_type' => 'event']), (new EventModel)->newFromBuilder(['ID' => 2, 'post_type' => 'event'])];
+
+    expect($first->capacity + $second->capacity)->toBe(30);
+
+    Model::unsetEventDispatcher();
+    Model::clearBootedModels();
 });
 
 it('does not prime the cache for models without typed meta', function (): void {
+    Model::clearBootedModels();
+    Model::setEventDispatcher(new Dispatcher);
     Functions\expect('update_meta_cache')->never();
 
-    (new Post)->newCollection([existingModel(Post::class, ['ID' => 1])]);
+    (new Post)->newFromBuilder(['ID' => 1, 'post_type' => 'page', 'post_title' => 'About'])->post_title;
+
+    Model::unsetEventDispatcher();
+    Model::clearBootedModels();
 });
 
 describe('whereMeta()', function (): void {
     beforeEach(function (): void {
-        // Colt asks the container for its version to tell Laravel from Lumen.
-        $this->previousContainer = Container::getInstance();
-        $container = new class extends Container
-        {
-            public function version(): string
-            {
-                return '13.0.0';
-            }
-        };
-
-        foreach ([MetaSchemaRepository::class, MetaValueCaster::class, MetaAccessor::class] as $abstract) {
-            $container->instance($abstract, $this->previousContainer->make($abstract));
-        }
-
-        Container::setInstance($container);
-
         $connection = new MySqlConnection(fn (): never => throw new LogicException('No query should run.'), 'wordpress', 'wp_');
         $resolver = new ConnectionResolver(['wordpress' => $connection]);
         $resolver->setDefaultConnection('wordpress');
@@ -190,7 +195,6 @@ describe('whereMeta()', function (): void {
 
     afterEach(function (): void {
         Model::unsetConnectionResolver();
-        Container::setInstance($this->previousContainer);
     });
 
     it('compares numbers as numbers', function (): void {

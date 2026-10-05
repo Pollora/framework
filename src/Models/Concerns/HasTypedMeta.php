@@ -40,8 +40,9 @@ use Pollora\Meta\Domain\Services\MetaValueCaster;
  *
  * A model whose class is known to carry typed meta (a post model with the
  * `$postType` of a declared schema, users and comments with a `#[UserMeta]` or
- * `#[CommentMeta]`) reads through the object cache, primed once per collection,
- * and no longer eager loads the `meta` relation. Other models, and keys no
+ * `#[CommentMeta]`) reads through the object cache, primed in one query for
+ * all the models loaded together, and no longer eager loads the `meta`
+ * relation. Other models, and keys no
  * `#[Meta]` declares, keep Colt's behaviour (`$post->some_key` reads the raw
  * value): a project without typed meta sees no change.
  *
@@ -66,12 +67,24 @@ trait HasTypedMeta
     private bool $carriesTypedMeta = false;
 
     /**
+     * @var array<int, true> IDs of the models loaded since the meta cache was last primed
+     */
+    private static array $typedMetaBatch = [];
+
+    /**
      * Writes the pending typed meta once the model is saved, when its ID is known.
      */
     public static function bootHasTypedMeta(): void
     {
         static::saved(static function (self $model): void {
             $model->saveTypedMeta();
+        });
+
+        // Models loaded together are primed together, on the first typed read.
+        static::retrieved(static function (self $model): void {
+            if ($model->carriesTypedMeta) {
+                self::$typedMetaBatch[(int) $model->getKey()] = true;
+            }
         });
     }
 
@@ -110,6 +123,8 @@ trait HasTypedMeta
         if (! $this->exists) {
             return $schema->definitions[$property]->default;
         }
+
+        $this->primeTypedMetaCache();
 
         return ($this->typedMetaRecords[$schema->declaringClass] ??= resolve(MetaAccessor::class)->record($schema, (int) $this->getKey()))->get($property);
     }
@@ -158,22 +173,6 @@ trait HasTypedMeta
     }
 
     /**
-     * Primes WordPress's meta cache for the whole collection: one query, whatever
-     * the number of models.
-     *
-     * @param  array<int, static>  $models
-     * @return Collection<int, static>
-     */
-    public function newCollection(array $models = [])
-    {
-        if ($models !== [] && $this->carriesTypedMeta && function_exists('update_meta_cache')) {
-            update_meta_cache($this->typedMetaObjectType()->value, array_map(static fn (self $model): int => (int) $model->getKey(), $models));
-        }
-
-        return parent::newCollection($models);
-    }
-
-    /**
      * Filters on a typed meta, compared as stored: numbers as numbers, dates in
      * UTC. A model without the meta is not matched, even if its default would be.
      *
@@ -212,6 +211,21 @@ trait HasTypedMeta
                 default => $meta->where('meta_value', $operator, $stored),
             };
         });
+    }
+
+    /**
+     * Loads the meta of every model loaded since the last typed read in one query,
+     * so reading a meta across a collection costs one query, not one per model.
+     */
+    private function primeTypedMetaCache(): void
+    {
+        if (self::$typedMetaBatch === [] || ! function_exists('update_meta_cache')) {
+            return;
+        }
+
+        $ids = array_keys(self::$typedMetaBatch);
+        self::$typedMetaBatch = [];
+        update_meta_cache($this->typedMetaObjectType()->value, $ids);
     }
 
     /**
