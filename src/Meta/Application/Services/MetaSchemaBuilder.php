@@ -14,6 +14,7 @@ use Pollora\Attributes\PostType;
 use Pollora\Attributes\Taxonomy;
 use Pollora\Attributes\TermMeta;
 use Pollora\Attributes\UserMeta;
+use Pollora\Meta\Domain\Enums\Control;
 use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Enums\MetaValueType;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaDefinitionException;
@@ -144,6 +145,9 @@ final class MetaSchemaBuilder
             single: $meta->single,
             items: $items,
             properties: $properties,
+            control: $meta->control ?? $this->defaultControl($valueType, $meta),
+            group: $meta->group,
+            hints: $meta->hints,
         );
     }
 
@@ -185,6 +189,22 @@ final class MetaSchemaBuilder
             : sprintf('the type %s is not supported; use string, int, float, bool, a date, a backed enum, an array or a class with public typed properties.', $typeName);
 
         throw InvalidMetaDefinitionException::forProperty($class, $property, $reason);
+    }
+
+    /**
+     * The input a type calls for; none for an array or an object, which a UI
+     * driver builds its own way.
+     */
+    private function defaultControl(MetaValueType $valueType, Meta $meta): ?Control
+    {
+        return match ($valueType) {
+            MetaValueType::String => $meta->sanitize === 'wp_kses_post' ? Control::RichText : Control::Text,
+            MetaValueType::Integer, MetaValueType::Number => Control::Number,
+            MetaValueType::Boolean => Control::Toggle,
+            MetaValueType::DateTime => Control::DateTime,
+            MetaValueType::Enum => Control::Select,
+            MetaValueType::ArrayOf, MetaValueType::DataObject => null,
+        };
     }
 
     /**

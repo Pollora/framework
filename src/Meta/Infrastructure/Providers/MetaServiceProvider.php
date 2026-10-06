@@ -11,9 +11,11 @@ use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Meta\Application\Services\MetaAccessor;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
+use Pollora\Meta\Application\Services\MetaUiDrivers;
 use Pollora\Meta\Domain\Contracts\MetaRegistryInterface;
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
 use Pollora\Meta\Domain\Contracts\MetaValidatorInterface;
+use Pollora\Meta\Domain\Events\MetaSchemasRegistered;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
 use Pollora\Meta\Infrastructure\Adapters\WordPressMetaRegistry;
 use Pollora\Meta\Infrastructure\Adapters\WordPressMetaStore;
@@ -23,8 +25,9 @@ use Pollora\Meta\Infrastructure\Services\MetaDiscovery;
 use Psr\Log\LoggerInterface;
 
 /**
- * Typed meta: `#[Meta]` discovery, `register_meta()`, `Meta::of()`, and the
- * `rules` of typed meta applied to REST writes.
+ * Typed meta: `#[Meta]` discovery, `register_meta()`, `Meta::of()`, the
+ * `rules` of typed meta applied to REST writes, and the hand-off of the schemas
+ * to a UI driver (`meta.ui`).
  *
  * Bindings:
  *  - `wp.meta` → {@see MetaAccessor} (singleton, used by the Meta facade)
@@ -34,6 +37,8 @@ class MetaServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->mergeConfigFrom(__DIR__.'/../../config/meta.php', 'meta');
+        $this->app->singleton(MetaUiDrivers::class, fn (Application $app): MetaUiDrivers => new MetaUiDrivers($app));
         $this->app->singleton(MetaValueCaster::class);
         $this->app->singleton(MetaSchemaBuilder::class);
         $this->app->singleton(MetaSchemaRepository::class);
@@ -53,6 +58,7 @@ class MetaServiceProvider extends ServiceProvider
             (bool) $app->make('config')->get('app.debug', false),
             $app->make(LoggerInterface::class),
             $app->make(MetaValidatorInterface::class),
+            $app->make(MetaUiDrivers::class),
         ));
         $this->app->alias('wp.meta', MetaAccessor::class);
 
@@ -66,11 +72,30 @@ class MetaServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Once every schema is registered with WordPress (priority 20).
+        $this->app->make(Action::class)->add('init', $this->announceSchemas(...), WordPressMetaRegistry::INIT_PRIORITY + 1);
+
         $this->app->make(Filter::class)->add(
             'rest_request_before_callbacks',
             fn (mixed $response, array $handler, \WP_REST_Request $request): mixed => $this->app->make(WordPressRestMetaValidation::class)->validate($response, $handler, $request),
             10,
             3
         );
+    }
+
+    /**
+     * Dispatches MetaSchemasRegistered and hands the schemas to the UI driver
+     * the project picks in `meta.ui`.
+     */
+    private function announceSchemas(): void
+    {
+        $schemas = $this->app->make(MetaSchemaRepository::class)->all();
+        $this->app->make('events')->dispatch(new MetaSchemasRegistered($schemas));
+        $driver = $this->app->make('config')->get('meta.ui');
+
+        if (is_string($driver) && $driver !== '') {
+            $drivers = $this->app->make(MetaUiDrivers::class);
+            $drivers->build($drivers->driver($driver), $schemas);
+        }
     }
 }

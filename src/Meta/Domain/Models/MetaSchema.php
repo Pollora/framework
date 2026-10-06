@@ -49,6 +49,16 @@ final readonly class MetaSchema
     }
 
     /**
+     * The same schema, with only the given definitions.
+     *
+     * @param  array<string, MetaDefinition>  $definitions
+     */
+    public function withDefinitions(array $definitions): self
+    {
+        return new self($this->declaringClass, $this->objectType, $this->subtypes, $definitions, $this->declaresSubtypes);
+    }
+
+    /**
      * Whether a meta of the schema is exposed in REST.
      */
     public function exposesInRest(): bool

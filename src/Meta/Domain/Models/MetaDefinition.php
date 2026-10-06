@@ -6,6 +6,7 @@ namespace Pollora\Meta\Domain\Models;
 
 use BackedEnum;
 use LogicException;
+use Pollora\Meta\Domain\Enums\Control;
 use Pollora\Meta\Domain\Enums\MetaValueType;
 use ReflectionEnum;
 
@@ -34,6 +35,9 @@ final readonly class MetaDefinition
      * @param  bool  $single  False for an array stored one row per item
      * @param  MetaDefinition|null  $items  The item of an array
      * @param  array<string, MetaDefinition>  $properties  The properties of a data object, by property name
+     * @param  Control|null  $control  The input a UI driver should build; null when no neutral control fits (arrays, objects)
+     * @param  string|null  $group  The group of fields a UI driver puts the meta in
+     * @param  array<string, mixed>  $hints  Options for UI drivers, by driver
      */
     public function __construct(
         public string $property,
@@ -52,6 +56,9 @@ final readonly class MetaDefinition
         public bool $single = true,
         public ?MetaDefinition $items = null,
         public array $properties = [],
+        public ?Control $control = null,
+        public ?string $group = null,
+        public array $hints = [],
     ) {}
 
     /**
