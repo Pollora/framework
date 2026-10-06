@@ -41,7 +41,7 @@ final class MetaSchemaBuilder
     public function build(string $class): MetaSchema
     {
         $reflection = new ReflectionClass($class);
-        [$objectType, $subtypes] = $this->resolveOwner($reflection);
+        [$objectType, $subtypes, $declaresSubtypes] = $this->resolveOwner($reflection);
 
         $definitions = [];
         $properties = [];
@@ -67,12 +67,12 @@ final class MetaSchemaBuilder
             $definitions[$definition->property] = $definition;
         }
 
-        return new MetaSchema($class, $objectType, $subtypes, $definitions);
+        return new MetaSchema($class, $objectType, $subtypes, $definitions, $declaresSubtypes);
     }
 
     /**
      * @param  ReflectionClass<object>  $reflection
-     * @return array{0: MetaObjectType, 1: list<string>}
+     * @return array{0: MetaObjectType, 1: list<string>, 2: bool}
      */
     private function resolveOwner(ReflectionClass $reflection): array
     {
@@ -80,12 +80,12 @@ final class MetaSchemaBuilder
         $owner = static fn (string $attribute): ?object => ($reflection->getAttributes($attribute)[0] ?? null)?->newInstance();
 
         return match (true) {
-            ($postType = $owner(PostType::class)) instanceof PostType => [MetaObjectType::Post, [$postType->resolveSlug($class)]],
-            ($taxonomy = $owner(Taxonomy::class)) instanceof Taxonomy => [MetaObjectType::Term, [$taxonomy->resolveSlug($class)]],
-            ($postMeta = $owner(PostMeta::class)) instanceof PostMeta => [MetaObjectType::Post, $postMeta->postTypes],
-            ($termMeta = $owner(TermMeta::class)) instanceof TermMeta => [MetaObjectType::Term, $termMeta->taxonomies],
-            $owner(UserMeta::class) instanceof UserMeta => [MetaObjectType::User, []],
-            $owner(CommentMeta::class) instanceof CommentMeta => [MetaObjectType::Comment, []],
+            ($postType = $owner(PostType::class)) instanceof PostType => [MetaObjectType::Post, [$postType->resolveSlug($class)], true],
+            ($taxonomy = $owner(Taxonomy::class)) instanceof Taxonomy => [MetaObjectType::Term, [$taxonomy->resolveSlug($class)], true],
+            ($postMeta = $owner(PostMeta::class)) instanceof PostMeta => [MetaObjectType::Post, $postMeta->postTypes, false],
+            ($termMeta = $owner(TermMeta::class)) instanceof TermMeta => [MetaObjectType::Term, $termMeta->taxonomies, false],
+            $owner(UserMeta::class) instanceof UserMeta => [MetaObjectType::User, [], false],
+            $owner(CommentMeta::class) instanceof CommentMeta => [MetaObjectType::Comment, [], false],
             default => throw InvalidMetaDefinitionException::notADeclaration($class),
         };
     }
