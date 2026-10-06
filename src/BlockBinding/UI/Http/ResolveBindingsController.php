@@ -18,7 +18,8 @@ use Pollora\BlockBinding\Infrastructure\Services\BindingEditorData;
  *      "bindings": [{"key": "a", "source": "acme/event", "args": {"field": "seats"}, "block": "core/paragraph", "attribute": "content"}]}
  *     → {"values": {"a": "120 seats"}}
  *
- * Only for a user who can edit the post (or edit posts, without one), with
+ * Values are formatted in the site's language, as on the page, whatever the
+ * language of the user. Only for a user who can edit the post (or edit posts, without one), with
  * the REST nonce; only Pollora's sources are answered.
  */
 final readonly class ResolveBindingsController
@@ -62,6 +63,9 @@ final readonly class ResolveBindingsController
         $context = $this->context($request);
         $values = [];
 
+        // The page formats dates and numbers in the site's language; REST runs in the user's
+        $switched = \switch_to_locale(\get_locale());
+
         foreach ((array) $request->get_param('bindings') as $binding) {
             if (! is_array($binding) || ! is_scalar($binding['key'] ?? null)) {
                 continue;
@@ -74,6 +78,10 @@ final readonly class ResolveBindingsController
             $values[(string) $binding['key']] = $source instanceof BindingSource
                 ? $this->resolver->preview($source, $args, $context, $attribute, $this->attributeSource($binding['block'] ?? null, $attribute))
                 : null;
+        }
+
+        if ($switched) {
+            \restore_previous_locale();
         }
 
         return ['values' => $values];

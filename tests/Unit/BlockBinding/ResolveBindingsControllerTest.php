@@ -24,6 +24,16 @@ function previewRequest(array $params): WP_REST_Request
 }
 
 beforeEach(function (): void {
+    Functions\when('get_locale')->justReturn('fr_FR');
+    $this->locales = [];
+    Functions\when('switch_to_locale')->alias(function (string $locale): bool {
+        $this->locales[] = 'switch:'.$locale;
+
+        return true;
+    });
+    Functions\when('restore_previous_locale')->alias(function (): void {
+        $this->locales[] = 'restore';
+    });
     Functions\when('sanitize_key')->alias(fn (string $key): string => strtolower((string) preg_replace('/[^a-z0-9_\-]/i', '', $key)));
     $sources = new BindingSourceRegistry;
     $sources->add((new BindingSourceBuilder)->build(EventBinding::class));
@@ -69,4 +79,10 @@ it('lets preview only who can edit the post, or edit posts without one', functio
     expect($this->controller->canPreview(previewRequest(['context' => ['postId' => 7]])))->toBeTrue()
         ->and($this->controller->canPreview(previewRequest(['context' => ['postId' => 8]])))->toBeFalse()
         ->and($this->controller->canPreview(previewRequest(['context' => []])))->toBeFalse();
+});
+
+it('formats the values in the site language, then gives the user theirs back', function (): void {
+    $this->controller->handle(previewRequest(['bindings' => []]));
+
+    expect($this->locales)->toBe(['switch:fr_FR', 'restore']);
 });
