@@ -8,6 +8,7 @@ use Pollora\Doctor\Domain\Contracts\CheckInterface;
 use Pollora\Doctor\Domain\Enums\RunContext;
 use Pollora\Doctor\Domain\Models\CheckResult;
 use Pollora\Role\Domain\Contracts\RoleUsageInterface;
+use Pollora\Role\Domain\Services\StoredEntryClassifier;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
 
 /**
@@ -27,6 +28,7 @@ final readonly class RolesCheck implements CheckInterface
     public function __construct(
         private RoleUsageInterface $usage,
         private WordPressRoleInjector $injector,
+        private StoredEntryClassifier $classifier = new StoredEntryClassifier,
     ) {}
 
     public function id(): string
@@ -51,11 +53,6 @@ final readonly class RolesCheck implements CheckInterface
         }
 
         $roles = \wp_roles()->roles;
-        $grantable = [];
-
-        foreach ($roles as $role) {
-            $grantable += array_fill_keys(array_keys($role['capabilities'] ?? []), true);
-        }
 
         $errors = [];
         $warnings = [];
@@ -68,11 +65,13 @@ final readonly class RolesCheck implements CheckInterface
         $individual = [];
 
         foreach ($this->usage->entries() as $entry => $users) {
-            if (isset($roles[$entry])) {
+            $kind = $this->classifier->classify($entry, $roles);
+
+            if ($kind === StoredEntryClassifier::ROLE) {
                 continue;
             }
 
-            if (isset($grantable[$entry])) {
+            if ($kind === StoredEntryClassifier::CAPABILITY) {
                 $individual[] = sprintf('%s (%d user(s))', $entry, $users);
 
                 continue;
@@ -106,7 +105,7 @@ final readonly class RolesCheck implements CheckInterface
             return CheckResult::warning(
                 sprintf('%d problem(s) with roles.', count($warnings)),
                 $warnings,
-                'Give the users another role (php artisan pollora:roles:prune --reassign=subscriber shows them first), and declare capabilities on roles with #[Role] or #[ModifyRole]',
+                'Roles removed from the code: php artisan pollora:roles:prune --reassign=subscriber (shows the changes first). Capabilities given one by one: declare them on a role with #[Role] or #[ModifyRole], then remove them from the users',
             );
         }
 

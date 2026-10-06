@@ -14,17 +14,22 @@ use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Role\Application\Services\CapabilityOwnerReader;
 use Pollora\Role\Application\Services\RoleDefinitionBuilder;
 use Pollora\Role\Application\Services\RoleRegistry;
+use Pollora\Role\Domain\Contracts\RoleStoreInterface;
 use Pollora\Role\Domain\Contracts\RoleUsageInterface;
 use Pollora\Role\Domain\Services\PostTypeCapabilityMap;
 use Pollora\Role\Domain\Services\RoleCompiler;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleLabelTranslator;
+use Pollora\Role\Infrastructure\Adapters\WordPressRoleStore;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleUsage;
 use Pollora\Role\Infrastructure\Checks\RolesCheck;
 use Pollora\Role\Infrastructure\Middleware\EnsureUserHasRole;
 use Pollora\Role\Infrastructure\Services\RoleDiscovery;
+use Pollora\Role\UI\Console\RoleDumpCommand;
+use Pollora\Role\UI\Console\RoleImportCommand;
 use Pollora\Role\UI\Console\RoleListCommand;
 use Pollora\Role\UI\Console\RoleMakeCommand;
+use Pollora\Role\UI\Console\RolePruneCommand;
 use Pollora\Role\UI\Console\RoleShowCommand;
 use Pollora\Role\UI\View\RoleDirective;
 use Psr\Log\LoggerInterface;
@@ -49,6 +54,7 @@ class RoleServiceProvider extends ServiceProvider
         $this->app->singleton(RoleRegistry::class);
         $this->app->singleton(WordPressRoleLabelTranslator::class);
         $this->app->singleton(RoleUsageInterface::class, WordPressRoleUsage::class);
+        $this->app->singleton(RoleStoreInterface::class, WordPressRoleStore::class);
 
         $this->app->singleton(RoleDefinitionBuilder::class, fn (Application $app): RoleDefinitionBuilder => new RoleDefinitionBuilder(
             $app->make(CapabilityOwnerReader::class),
@@ -70,7 +76,7 @@ class RoleServiceProvider extends ServiceProvider
         ));
 
         if ($this->app->runningInConsole()) {
-            $this->commands([RoleMakeCommand::class, RoleListCommand::class, RoleShowCommand::class]);
+            $this->commands([RoleMakeCommand::class, RoleListCommand::class, RoleShowCommand::class, RolePruneCommand::class, RoleImportCommand::class, RoleDumpCommand::class]);
         }
     }
 
