@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace Pollora\Meta\Application\Services;
 
+use Closure;
+use Illuminate\Contracts\Container\Container;
+use LogicException;
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
+use Pollora\Meta\Domain\Contracts\MetaUiDriver;
 use Pollora\Meta\Domain\Contracts\MetaValidatorInterface;
+use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaValueException;
 use Pollora\Meta\Domain\Models\MetaDefinition;
 use Pollora\Meta\Domain\Models\MetaRecord;
@@ -30,6 +35,7 @@ final readonly class MetaAccessor
         private bool $debug = false,
         private ?LoggerInterface $logger = null,
         private ?MetaValidatorInterface $validator = null,
+        private ?MetaUiDrivers $drivers = null,
     ) {}
 
     /**
@@ -39,6 +45,38 @@ final readonly class MetaAccessor
     public function of(string $class, int $objectId): MetaRecord
     {
         return $this->record($this->schemas->forClass($class) ?? $this->builder->build($class), $objectId);
+    }
+
+    /**
+     * Every typed meta schema of the project.
+     *
+     * @return list<MetaSchema>
+     */
+    public function schemas(): array
+    {
+        return $this->schemas->all();
+    }
+
+    /**
+     * The schemas whose meta an object carries: `Meta::schemaFor('post', 'event')`,
+     * `Meta::schemaFor('user')`.
+     *
+     * @return list<MetaSchema>
+     */
+    public function schemaFor(MetaObjectType|string $objectType, ?string $subtype = null): array
+    {
+        return $this->schemas->forObject($objectType instanceof MetaObjectType ? $objectType : MetaObjectType::from($objectType), $subtype);
+    }
+
+    /**
+     * Registers a UI driver, from a package's service provider:
+     * `Meta::extend('acf', AcfDriver::class)`.
+     *
+     * @param  class-string<MetaUiDriver>|Closure(Container): MetaUiDriver  $driver
+     */
+    public function extend(string $name, string|Closure $driver): void
+    {
+        ($this->drivers ?? throw new LogicException('Meta UI drivers are not available.'))->extend($name, $driver);
     }
 
     /**

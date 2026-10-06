@@ -27,7 +27,9 @@ use Tests\Unit\Meta\Fixtures\Event;
 beforeEach(function (): void {
     $this->app = new Application(sys_get_temp_dir());
     $this->app->instance('config', new Repository(['app' => ['debug' => true]]));
-    $this->app->instance(Action::class, Mockery::mock(Action::class));
+
+    $this->action = Mockery::mock(Action::class);
+    $this->app->instance(Action::class, $this->action);
     $this->app->instance(LoggerInterface::class, Mockery::mock(LoggerInterface::class));
     $this->app->instance('validator', new Factory(new Translator(new ArrayLoader, 'en')));
 
@@ -57,6 +59,7 @@ it('serves Meta::of() through the facade', function (): void {
 });
 
 it('binds the Laravel validator and applies the rules to REST writes', function (): void {
+    $this->action->shouldReceive('add')->andReturnSelf();
     $this->filter->shouldReceive('add')->once()->with('rest_request_before_callbacks', Mockery::type(Closure::class), 10, 3)->andReturnSelf();
 
     $this->provider->boot();
