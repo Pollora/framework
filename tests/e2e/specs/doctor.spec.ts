@@ -7,7 +7,7 @@ import { expect, test } from '@wordpress/e2e-test-utils-playwright';
  * visitor gets. Blocks registered under WP-CLI but missing over HTTP were exactly
  * that kind of failure, and the console check could never have seen it.
  */
-test('Site Health lists the Pollora checks, the web-only block check included', async ({ admin, page }) => {
+test('Site Health lists the Pollora checks, the web-only block check and a check a module adds', async ({ admin, page }) => {
     await admin.visitAdminPage('site-health.php');
 
     // Site Health lists its results once every test, asynchronous ones included, has answered.
@@ -16,7 +16,7 @@ test('Site Health lists the Pollora checks, the web-only block check included', 
     // Passed tests sit in a collapsed list: read the triggers, visible or not.
     const results = page.locator('.health-check-accordion-trigger');
 
-    for (const label of ['WordPress core patch', 'Composer patches lock', 'Theme, plugin and module builds', 'Blocks registered']) {
+    for (const label of ['WordPress core patch', 'Composer patches lock', 'Theme, plugin and module builds', 'Blocks registered', 'Block bindings']) {
         await expect(results.filter({ hasText: label }).filter({ hasText: 'Pollora' }), label).toHaveCount(1);
     }
 
