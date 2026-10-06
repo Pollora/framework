@@ -38,6 +38,7 @@ function registeredEventMeta(string $class = Event::class): array
 it('waits for init, after post types and taxonomies', function (): void {
     Functions\when('did_action')->justReturn(0);
     Functions\when('add_post_type_support')->justReturn();
+
     Functions\expect('register_meta')->never();
     $action = Mockery::mock(Action::class);
     $action->shouldReceive('add')->once()->with('init', Mockery::type(Closure::class), 20)->andReturnUsing(function (string $hook, Closure $callback) use ($action): Action {
