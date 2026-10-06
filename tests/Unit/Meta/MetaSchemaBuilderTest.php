@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
+use Pollora\Attributes\Meta;
+use Pollora\Attributes\UserMeta;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
+use Pollora\Meta\Domain\Enums\Control;
 use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Enums\MetaValueType;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaDefinitionException;
@@ -15,6 +18,7 @@ use Tests\Unit\Meta\Fixtures\Event;
 use Tests\Unit\Meta\Fixtures\EventStatus;
 use Tests\Unit\Meta\Fixtures\InvalidArray;
 use Tests\Unit\Meta\Fixtures\InvalidDuplicateKey;
+use Tests\Unit\Meta\Fixtures\InvalidMedia;
 use Tests\Unit\Meta\Fixtures\InvalidNoDefault;
 use Tests\Unit\Meta\Fixtures\InvalidProtectedInRest;
 use Tests\Unit\Meta\Fixtures\InvalidPureEnum;
@@ -112,6 +116,7 @@ it('refuses a declaration WordPress cannot register', function (string $class, s
     'revisions on a term' => [InvalidTermRevisions::class, 'revisions only exist for post types'],
     'revisions on a user' => [UserRevisions::class, 'revisions only exist for post types'],
     'same key twice' => [InvalidDuplicateKey::class, 'the key "shared" is already used by $first'],
+    'media on a string' => [InvalidMedia::class, 'media: true holds an attachment ID, so it needs an int property'],
 ]);
 
 it('attaches the meta of #[PostMeta], #[TermMeta], #[UserMeta] and #[CommentMeta] to their objects', function (string $class, MetaObjectType $objectType, array $subtypes): void {
@@ -133,4 +138,22 @@ it('knows when the class declares its post type or taxonomy', function (): void 
         ->and((new MetaSchemaBuilder)->build(BookGenre::class)->declaresSubtypes)->toBeTrue()
         ->and((new MetaSchemaBuilder)->build(Event::class)->exposesInRest())->toBeTrue()
         ->and((new MetaSchemaBuilder)->build(ReviewMeta::class)->exposesInRest())->toBeFalse();
+});
+
+it('marks an attachment ID and a meta anyone may see', function (): void {
+    $class = new #[UserMeta] class
+    {
+        #[Meta(media: true, public: true)]
+        public ?int $avatarId = null;
+
+        #[Meta]
+        public ?string $phone = null;
+    };
+    $definitions = (new MetaSchemaBuilder)->build($class::class)->definitions;
+
+    expect($definitions['avatarId']->media)->toBeTrue()
+        ->and($definitions['avatarId']->public)->toBeTrue()
+        ->and($definitions['avatarId']->control)->toBe(Control::Media)
+        ->and($definitions['phone']->media)->toBeFalse()
+        ->and($definitions['phone']->public)->toBeFalse();
 });

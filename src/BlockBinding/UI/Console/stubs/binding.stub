@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DummyNamespace;
+
+use Pollora\Attributes\BlockBinding;
+use Pollora\Attributes\BlockBinding\BindingField;
+use Pollora\BlockBinding\Domain\Models\BindingContext;
+
+/**
+ * DummyLabel block binding source.
+ *
+ * Bind a block attribute to a field in the block's markup:
+ * "metadata": {"bindings": {"content": {"source": "DummySourceName", "args": {"field": "title"}}}}
+ */
+#[BlockBinding('DummySourceName', label: 'DummyLabel')]
+final class DummyClass
+{
+    #[BindingField(label: 'Title')]
+    public function title(BindingContext $context): ?string
+    {
+        return $context->post()?->post_title;
+    }
+}

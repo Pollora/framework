@@ -107,3 +107,10 @@ class InvalidObjectProperty
     #[Meta]
     public ?ScheduleWithList $schedule = null;
 }
+
+#[PostType('invalid-media')]
+class InvalidMedia
+{
+    #[Meta(media: true)]
+    public ?string $cover = null;
+}

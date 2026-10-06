@@ -124,6 +124,10 @@ final class MetaSchemaBuilder
             ));
         }
 
+        if ($meta->media && $valueType !== MetaValueType::Integer) {
+            throw InvalidMetaDefinitionException::forProperty($class, $name, 'media: true holds an attachment ID, so it needs an int property.');
+        }
+
         if ($meta->revisions && $objectType !== MetaObjectType::Post) {
             throw InvalidMetaDefinitionException::forProperty($class, $name, 'revisions only exist for post types.');
         }
@@ -145,9 +149,11 @@ final class MetaSchemaBuilder
             single: $meta->single,
             items: $items,
             properties: $properties,
-            control: $meta->control ?? $this->defaultControl($valueType, $meta),
+            control: $meta->control ?? ($meta->media ? Control::Media : $this->defaultControl($valueType, $meta)),
             group: $meta->group,
             hints: $meta->hints,
+            media: $meta->media,
+            public: $meta->public,
         );
     }
 
