@@ -10,6 +10,7 @@ use Tests\Unit\BlockBinding\Fixtures\EventBinding;
 use Tests\Unit\BlockBinding\Fixtures\FakePresenter;
 use Tests\Unit\BlockBinding\Fixtures\FakeVisibility;
 use Tests\Unit\BlockBinding\Fixtures\InvokableBinding;
+use Tests\Unit\BlockBinding\Fixtures\SlowBinding;
 
 require_once __DIR__.'/Fixtures/blocks.php';
 
@@ -94,6 +95,24 @@ it('logs a field that throws and keeps the block content', function (): void {
 it('throws a failing field in debug mode', function (): void {
     expect(fn () => ($this->resolver)(true)->resolve($this->event, ['field' => 'broken'], boundParagraph(), 'content'))
         ->toThrow(RuntimeException::class, 'No database.');
+});
+
+it('logs a field slower than 50 ms in debug mode, with its source and post', function (): void {
+    $source = (new BindingSourceBuilder)->build(SlowBinding::class);
+    $this->logger->shouldReceive('warning')->once()->with(
+        Mockery::pattern('/^The block binding "acme\/slow" \(field "late"\) took \d+ ms on post 7$/'),
+        Mockery::on(fn (array $context): bool => $context['source'] === 'acme/slow' && $context['field'] === 'late' && $context['post'] === 7 && $context['milliseconds'] > 50),
+    );
+
+    expect(($this->resolver)(true)->resolve($source, ['field' => 'late'], boundParagraph(), 'content'))->toBe('late');
+});
+
+it('does not time a field outside debug mode, nor log a fast one', function (): void {
+    $source = (new BindingSourceBuilder)->build(SlowBinding::class);
+    $this->logger->shouldNotReceive('warning');
+
+    expect(($this->resolver)()->resolve($source, ['field' => 'late'], boundParagraph(), 'content'))->toBe('late')
+        ->and(($this->resolver)(true)->resolve($source, ['field' => 'quick'], boundParagraph(), 'content'))->toBe('quick');
 });
 
 it('hands an invokable source every call', function (): void {

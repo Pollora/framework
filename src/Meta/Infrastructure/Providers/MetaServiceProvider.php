@@ -6,22 +6,29 @@ namespace Pollora\Meta\Infrastructure\Providers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Meta\Application\Services\MetaAccessor;
+use Pollora\Meta\Application\Services\MetaAuditor;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Pollora\Meta\Application\Services\MetaUiDrivers;
+use Pollora\Meta\Domain\Contracts\MetaInventoryInterface;
 use Pollora\Meta\Domain\Contracts\MetaRegistryInterface;
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
 use Pollora\Meta\Domain\Contracts\MetaValidatorInterface;
 use Pollora\Meta\Domain\Events\MetaSchemasRegistered;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
+use Pollora\Meta\Infrastructure\Adapters\WordPressMetaInventory;
 use Pollora\Meta\Infrastructure\Adapters\WordPressMetaRegistry;
 use Pollora\Meta\Infrastructure\Adapters\WordPressMetaStore;
 use Pollora\Meta\Infrastructure\Adapters\WordPressRestMetaValidation;
+use Pollora\Meta\Infrastructure\Checks\TypedMetaCheck;
 use Pollora\Meta\Infrastructure\Services\LaravelMetaValidator;
 use Pollora\Meta\Infrastructure\Services\MetaDiscovery;
+use Pollora\Meta\UI\Console\MetaAuditCommand;
+use Pollora\Meta\UI\Console\MetaListCommand;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -43,6 +50,8 @@ class MetaServiceProvider extends ServiceProvider
         $this->app->singleton(MetaSchemaBuilder::class);
         $this->app->singleton(MetaSchemaRepository::class);
         $this->app->singleton(MetaStoreInterface::class, WordPressMetaStore::class);
+        $this->app->singleton(MetaInventoryInterface::class, WordPressMetaInventory::class);
+        $this->app->singleton(MetaAuditor::class);
         $this->app->singleton(MetaValidatorInterface::class, fn (Application $app): LaravelMetaValidator => new LaravelMetaValidator($app->make('validator')));
 
         $this->app->singleton(MetaRegistryInterface::class, fn (Application $app): WordPressMetaRegistry => new WordPressMetaRegistry(
@@ -68,10 +77,17 @@ class MetaServiceProvider extends ServiceProvider
             $app->make(MetaRegistryInterface::class),
             $app->make(LoggerInterface::class),
         ));
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([MetaListCommand::class, MetaAuditCommand::class]);
+        }
     }
 
     public function boot(): void
     {
+        // A check of pollora:doctor and Site Health; tagged on boot, so it comes after the framework's own
+        $this->app->tag([TypedMetaCheck::class], DoctorServiceProvider::CHECKS_TAG);
+
         // Once every schema is registered with WordPress (priority 20).
         $this->app->make(Action::class)->add('init', $this->announceSchemas(...), WordPressMetaRegistry::INIT_PRIORITY + 1);
 

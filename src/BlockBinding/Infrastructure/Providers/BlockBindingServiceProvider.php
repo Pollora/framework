@@ -6,6 +6,7 @@ namespace Pollora\BlockBinding\Infrastructure\Providers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use Pollora\BlockBinding\Application\Services\BindingReferenceInspector;
 use Pollora\BlockBinding\Application\Services\BindingResolver;
 use Pollora\BlockBinding\Application\Services\BindingSourceBuilder;
 use Pollora\BlockBinding\Application\Services\BindingSourceRegistry;
@@ -15,6 +16,7 @@ use Pollora\BlockBinding\Infrastructure\Adapters\WordPressBindingEditorScript;
 use Pollora\BlockBinding\Infrastructure\Adapters\WordPressBindingRegistry;
 use Pollora\BlockBinding\Infrastructure\Adapters\WordPressContentVisibility;
 use Pollora\BlockBinding\Infrastructure\Adapters\WordPressValuePresenter;
+use Pollora\BlockBinding\Infrastructure\Checks\BlockBindingsCheck;
 use Pollora\BlockBinding\Infrastructure\Services\BindingEditorData;
 use Pollora\BlockBinding\Infrastructure\Services\BindingFormatter;
 use Pollora\BlockBinding\Infrastructure\Services\BlockBindingDiscovery;
@@ -23,10 +25,13 @@ use Pollora\BlockBinding\Infrastructure\Sources\OptionSource;
 use Pollora\BlockBinding\Infrastructure\Sources\PostMetaSource;
 use Pollora\BlockBinding\Infrastructure\Sources\TermMetaSource;
 use Pollora\BlockBinding\Infrastructure\Sources\TypedMetaReader;
+use Pollora\BlockBinding\UI\Console\BindingListCommand;
 use Pollora\BlockBinding\UI\Console\MakeBindingCommand;
 use Pollora\BlockBinding\UI\Http\ResolveBindingsController;
+use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Meta\Application\Services\MetaAccessor;
+use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -62,6 +67,12 @@ class BlockBindingServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressBindingEditorScript::class);
         $this->app->singleton(ResolveBindingsController::class);
 
+        $this->app->singleton(BindingReferenceInspector::class, fn (Application $app): BindingReferenceInspector => new BindingReferenceInspector(
+            $app->make(BindingSourceRegistry::class),
+            $app->make(MetaSchemaRepository::class),
+            array_values(array_filter((array) $app->make('config')->get('block-bindings.options', []), is_string(...))),
+        ));
+
         $this->app->singleton(BindingResolver::class, fn (Application $app): BindingResolver => new BindingResolver(
             $app,
             $app->make(ContentVisibilityInterface::class),
@@ -84,12 +95,15 @@ class BlockBindingServiceProvider extends ServiceProvider
         ));
 
         if ($this->app->runningInConsole()) {
-            $this->commands([MakeBindingCommand::class]);
+            $this->commands([MakeBindingCommand::class, BindingListCommand::class]);
         }
     }
 
     public function boot(): void
     {
+        // A check of pollora:doctor and Site Health; tagged on boot, so it comes after the framework's own
+        $this->app->tag([BlockBindingsCheck::class], DoctorServiceProvider::CHECKS_TAG);
+
         $builder = $this->app->make(BindingSourceBuilder::class);
         $sources = $this->app->make(BindingSourceRegistry::class);
         $registry = $this->app->make(WordPressBindingRegistry::class);

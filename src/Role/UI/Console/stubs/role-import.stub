@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DummyNamespace;
+
+DummyImports
+
+/**
+ * DummyLabel role, imported from the database by pollora:roles:import.
+ *
+ * Injected into WordPress on each request: changing this class and deploying
+ * changes the role, with nothing to migrate.DummyNotes
+ */
+DummyAttributes
+final class DummyClass
+{
+}

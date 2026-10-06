@@ -65,7 +65,7 @@ composer create-project pollora/pollora my-project
 ## Requirements
 
 - PHP 8.4+ for a new project (the skeleton's lock file ships Symfony 8; this package alone accepts PHP 8.3)
-- Laravel 13.34 (Pollora's version numbers follow the Laravel release it is built on)
+- Laravel 13.35 (Pollora's version numbers follow the Laravel release it is built on)
 - WordPress 7.1+
 
 ## Learn more

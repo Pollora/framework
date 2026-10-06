@@ -5,7 +5,26 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.6...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.0...develop)
+
+## [v13.35.0](https://github.com/Pollora/framework/compare/v13.34.6...v13.35.0) - 2026-10-06
+
+### Added
+- `pollora:doctor` and Site Health check every Block Binding written in the templates, template parts and patterns of the theme, the Pollora plugins and the modules: a source that is not registered, a field the source does not have, a meta no `#[Meta]` declares, a meta or an option the source may not show (not in REST, protected, not `public`, not listed in `block-bindings.options`), an attribute WordPress does not bind for that block, and a `block.json` whose `pollora.bindings` lacks `render` or lists an undeclared attribute. Each of these left the block with its saved content, silently. Content stored in the database is not read
+- `pollora:doctor` and Site Health check typed meta: a `#[Meta]` declaration discovery refused (until now only logged, its meta never registered), a post type or taxonomy named by `#[PostMeta]`/`#[TermMeta]` that does not exist, meta marked `showInRest` on a post type or taxonomy that is not in REST, and stored values that cannot be read as their type (sampled: they read as the default)
+- `pollora:doctor` and Site Health check roles: users still carrying a role removed from the code (named, with the users), a `default_role` naming a role that no longer exists (new users get no capability), capabilities given to users one by one outside the declared roles, and what the role declarations could not apply (until now only logged)
+- `pollora:roles:list` (`--json`): every WordPress role with its origin (declared by a class, modified by one, or stored), its number of capabilities and of users
+- `pollora:roles:show {role}` (`--json`, a slug or a `#[Role]` class): the effective capabilities of a role, each with where it comes from (inherited, granted by the class, by `#[ModifyRole]`, by the super roles), and the capabilities the code removes
+- `pollora:roles:prune` (`--reassign=`, `--force`): takes roles removed from the code off the users who still carry them (WordPress's `remove_role()` ignores a role it no longer knows, so through `remove_cap()`), gives the users left with no role the `--reassign` one, and deletes the copies of removed roles a plugin wrote back to the database. Shows the changes unless `--force`; refuses to leave a user with no role
+- `pollora:roles:import {role}` (`--inherits=`, `--class=`, `--theme`, `--plugin`, `--module`): generates a `#[Role]` class from a role stored in the database (`add_role()`, a role editor plugin); with `--inherits`, only the differences (`#[Grants]`, `#[Without]`). Sensitive capabilities get `allowSensitive: true` and a note; capabilities stored as denied are listed and left out. Refuses core roles (use `#[ModifyRole]`) and roles the code already declares
+- `pollora:roles:dump` (`--force`): writes the roles as the code makes them into the `{prefix}user_roles` option, for tools that read the database without loading the site; what it writes is marked, so a role later removed from the code is still removed. Shows the changes unless `--force`
+- `pollora:meta:list` (`--json`): every typed meta by class, with the object it belongs to, its key, type and options; exits with 1 when discovery refused a declaration
+- `pollora:meta:audit` (`--limit`, `--json`): reads the stored values of every typed meta and names those that cannot be read as their type (a property whose type changed, a value written outside the meta API), with the objects concerned — exits with 1 then, for CI against a copy of production; and lists the keys stored on the project's own post types and taxonomies that no `#[Meta]` declares, such as the old key of a renamed property
+- `pollora:binding:list` (`--json`): the Pollora binding sources, what each one offers (fields, the meta it may show by post type or taxonomy, the listed options), and the blocks whose attributes WordPress lets bind
+- In debug mode, a Block Bindings field slower than 50 ms is logged as a warning, with its source, its field and its post: every bound block of the page waits for it
+
+### Changed
+- Requires Laravel 13.35 (`illuminate/*` `^13.35`)
 
 ## [v13.34.6](https://github.com/Pollora/framework/compare/v13.34.5...v13.34.6) - 2026-10-06
 

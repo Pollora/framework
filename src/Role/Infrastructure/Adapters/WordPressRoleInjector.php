@@ -96,6 +96,17 @@ final class WordPressRoleInjector
     }
 
     /**
+     * What the last compilation could not apply (an unknown inherited role, a
+     * modification of a role that does not exist…).
+     *
+     * @return list<string>
+     */
+    public function warnings(): array
+    {
+        return array_values(array_unique($this->warnings));
+    }
+
+    /**
      * Logs what the last compilation could not apply. Hooked late, once every
      * location has been discovered.
      */
