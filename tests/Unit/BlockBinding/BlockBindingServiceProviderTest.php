@@ -37,8 +37,14 @@ it('binds the discovery and one resolver for the request', function (): void {
         ->and($this->app->make('config')->get('block-bindings.options'))->toBe([]);
 });
 
-it('registers the sources Pollora ships', function (): void {
+it('registers the sources Pollora ships, and their editor side', function (): void {
     $registered = [];
+    $hooks = [];
+    $this->app->make(Action::class)->shouldReceive('add')->andReturnUsing(function (string $hook) use (&$hooks): Action {
+        $hooks[] = $hook;
+
+        return $this->app->make(Action::class);
+    });
     Functions\when('did_action')->justReturn(1);
     Functions\when('get_block_bindings_source')->justReturn();
     Functions\when('register_block_bindings_source')->alias(function (string $name, array $properties) use (&$registered): bool {
@@ -54,7 +60,8 @@ it('registers the sources Pollora ships', function (): void {
         'pollora/term-meta' => ['termId', 'taxonomy'],
         'pollora/author-meta' => ['postId'],
         'pollora/option' => [],
-    ])->and($this->app->make(BindingSourceRegistry::class)->all())->toHaveCount(4);
+    ])->and($this->app->make(BindingSourceRegistry::class)->all())->toHaveCount(4)
+        ->and($hooks)->toBe(['enqueue_block_editor_assets', 'rest_api_init']);
 });
 
 it('generates a source named after the application, never after the framework', function (): void {

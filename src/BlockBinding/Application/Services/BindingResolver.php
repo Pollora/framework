@@ -62,7 +62,33 @@ final class BindingResolver
      */
     public function resolve(BindingSource $source, array $args, ?\WP_Block $block, string $attribute): mixed
     {
-        $context = $this->context($args, $block, $attribute);
+        $attributeSource = $block?->block_type?->attributes[$attribute]['source'] ?? null;
+
+        return $this->resolveIn($source, $args, $block instanceof \WP_Block ? $block->context : [], $block, $attribute, is_string($attributeSource) ? $attributeSource : null);
+    }
+
+    /**
+     * The value the editor previews for a bound attribute: the same checks, the
+     * same field and the same escaping, from the block context the editor sends.
+     *
+     * @param  array<string, mixed>  $args  Arguments of the binding
+     * @param  array<string, mixed>  $blockContext  `postId`, `postType`, `termId`, `taxonomy`
+     * @param  string|null  $attributeSource  The `source` of the attribute in the block type (`rich-text`, `attribute`…)
+     */
+    public function preview(BindingSource $source, array $args, array $blockContext, string $attribute, ?string $attributeSource = null): mixed
+    {
+        $value = $this->resolveIn($source, $args, $blockContext, null, $attribute, $attributeSource);
+
+        return is_bool($value) ? $this->presenter->boolean($value) : $value;
+    }
+
+    /**
+     * @param  array<string, mixed>  $args
+     * @param  array<string, mixed>  $blockContext
+     */
+    private function resolveIn(BindingSource $source, array $args, array $blockContext, ?\WP_Block $block, string $attribute, ?string $attributeSource = null): mixed
+    {
+        $context = $this->context($args, $blockContext, $block, $attribute);
 
         if (! $this->isVisible($context) || ! $source->answersFor($context->postType)) {
             return null;
@@ -76,7 +102,7 @@ final class BindingResolver
             return null;
         }
 
-        $key = $this->cacheKey($source, $context);
+        $key = $this->cacheKey($source, $context, $attributeSource);
 
         if (array_key_exists($key, $this->resolved)) {
             return $this->resolved[$key];
@@ -84,16 +110,15 @@ final class BindingResolver
 
         $value = $this->call($source, $field->method, $context);
 
-        return $this->resolved[$key] = $this->present($value, $field->type, $block, $attribute);
+        return $this->resolved[$key] = $this->present($value, $field->type, $attributeSource);
     }
 
     /**
      * @param  array<string, mixed>  $args
+     * @param  array<string, mixed>  $blockContext
      */
-    private function context(array $args, ?\WP_Block $block, string $attribute): BindingContext
+    private function context(array $args, array $blockContext, ?\WP_Block $block, string $attribute): BindingContext
     {
-        $blockContext = $block instanceof \WP_Block ? $block->context : [];
-
         return new BindingContext(
             args: $args,
             attribute: $attribute,
@@ -137,13 +162,12 @@ final class BindingResolver
         }
     }
 
-    private function present(mixed $value, BindingFieldType $type, ?\WP_Block $block, string $attribute): mixed
+    private function present(mixed $value, BindingFieldType $type, ?string $attributeSource): mixed
     {
         if ($value === null) {
             return null;
         }
 
-        $attributeSource = $block?->block_type?->attributes[$attribute]['source'] ?? null;
         $inHtml = in_array($attributeSource, self::HTML_SOURCES, true);
 
         if ($value instanceof Htmlable) {
@@ -167,11 +191,12 @@ final class BindingResolver
         };
     }
 
-    private function cacheKey(BindingSource $source, BindingContext $context): string
+    private function cacheKey(BindingSource $source, BindingContext $context, ?string $attributeSource): string
     {
         return implode('|', [
             $source->name,
             $context->attribute,
+            (string) $attributeSource,
             (string) $context->postId,
             (string) $context->termId,
             (string) $context->block?->name,

@@ -101,3 +101,12 @@ it('hands an invokable source every call', function (): void {
 
     expect(($this->resolver)()->resolve($source, ['say' => '<b>'], boundParagraph(), 'content'))->toBe('&lt;b&gt;');
 });
+
+it('previews a value from the context the editor sends, escaped like the attribute on the page', function (): void {
+    $resolver = ($this->resolver)();
+    $context = ['postId' => 7, 'postType' => 'event'];
+
+    expect($resolver->preview($this->event, ['field' => 'remaining_seats'], $context, 'content', 'rich-text'))->toBe('14 seats &amp; more')
+        ->and($resolver->preview($this->event, ['field' => 'remaining_seats'], $context, 'title'))->toBe('14 seats & more')
+        ->and($resolver->preview($this->event, ['field' => 'sold_out'], $context, 'title'))->toBe('Yes');
+});
