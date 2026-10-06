@@ -93,4 +93,36 @@ test.describe('Block Bindings', () => {
             .toBe(true);
         expect(errors, 'no uncaught page error').toEqual([]);
     });
+
+    test('the editor previews the bound values, escaped like the page', async ({ admin, editor }) => {
+        await admin.editPost(event.id);
+
+        await expect(editor.canvas.locator('p.e2e-seats')).toHaveText('1200 seats <for> you');
+        await expect(editor.canvas.locator('h2.e2e-date')).toHaveText('2026-11-14');
+        await expect(editor.canvas.locator('.e2e-bound-card__title')).toHaveText('1200 seats <for> you');
+    });
+
+    test('a field is chosen in the Attributes panel and its value shows at once', async ({ admin, editor, page }) => {
+        await admin.editPost(event.id);
+        await editor.insertBlock({ name: 'core/paragraph', attributes: { content: 'Pick a field', className: 'e2e-picked' } });
+        await editor.openDocumentSettingsSidebar();
+
+        const panel = page.locator('.block-editor-bindings__panel');
+        await panel.getByRole('button', { name: /Attributes options/i }).click();
+        await page.getByRole('menuitemcheckbox', { name: /content/i }).click();
+        await page.keyboard.press('Escape');
+        await panel.getByRole('button', { name: /content/i }).click();
+
+        // The menus open on hover and move under the pointer: a forced click is the stable one
+        const openMenus = page.locator('[role=menu][data-open="true"]');
+        await openMenus.getByRole('menuitem', { name: 'E2E Event' }).click();
+        const fields = openMenus.last();
+        await expect(fields.locator('[role^=menuitem]')).toHaveText([/Seats/, /Booking link/]);
+        await fields.locator('[role^=menuitem]').filter({ hasText: 'Seats' }).first().click({ force: true });
+
+        await expect
+            .poll(() => page.evaluate(() => window.wp.data.select('core/block-editor').getSelectedBlock()?.attributes.metadata?.bindings))
+            .toEqual({ content: { source: 'e2e/event', args: { field: 'seats' } } });
+        await expect(editor.canvas.locator('p.e2e-picked')).toHaveText('1200 seats <for> you');
+    });
 });
