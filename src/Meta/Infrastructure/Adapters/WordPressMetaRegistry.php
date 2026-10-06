@@ -14,7 +14,8 @@ use Pollora\Meta\Domain\Services\MetaValueCaster;
 
 /**
  * Registers typed meta with `register_meta()`, on `init` after post types and
- * taxonomies (priority 20), or right away when `init` has already run.
+ * taxonomies (priority 20), or right away when `init` has already run, and adds
+ * `custom-fields` to a declared post type that exposes a meta in REST.
  */
 final readonly class WordPressMetaRegistry implements MetaRegistryInterface
 {
@@ -38,6 +39,15 @@ final readonly class WordPressMetaRegistry implements MetaRegistryInterface
 
     private function registerNow(MetaSchema $schema): void
     {
+        // WordPress leaves `meta` out of a post's REST response unless its post
+        // type supports custom-fields. Only a post type the class declares is
+        // changed: one targeted by #[PostMeta] belongs to someone else.
+        if ($schema->objectType === MetaObjectType::Post && $schema->declaresSubtypes && $schema->exposesInRest()) {
+            foreach ($schema->subtypes as $postType) {
+                \add_post_type_support($postType, 'custom-fields');
+            }
+        }
+
         // An empty subtype registers the meta for every object of the type.
         foreach ($schema->subtypes === [] ? [''] : $schema->subtypes as $subtype) {
             foreach ($schema->definitions as $definition) {

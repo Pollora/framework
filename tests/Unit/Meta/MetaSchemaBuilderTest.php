@@ -119,6 +119,7 @@ it('attaches the meta of #[PostMeta], #[TermMeta], #[UserMeta] and #[CommentMeta
 
     expect($schema->objectType)->toBe($objectType)
         ->and($schema->subtypes)->toBe($subtypes)
+        ->and($schema->declaresSubtypes)->toBeFalse()
         ->and($schema->isEmpty())->toBeFalse();
 })->with([
     'post types' => [ArticleExtras::class, MetaObjectType::Post, ['post', 'page']],
@@ -126,3 +127,10 @@ it('attaches the meta of #[PostMeta], #[TermMeta], #[UserMeta] and #[CommentMeta
     'users' => [MemberProfile::class, MetaObjectType::User, []],
     'comments' => [ReviewMeta::class, MetaObjectType::Comment, []],
 ]);
+
+it('knows when the class declares its post type or taxonomy', function (): void {
+    expect((new MetaSchemaBuilder)->build(Event::class)->declaresSubtypes)->toBeTrue()
+        ->and((new MetaSchemaBuilder)->build(BookGenre::class)->declaresSubtypes)->toBeTrue()
+        ->and((new MetaSchemaBuilder)->build(Event::class)->exposesInRest())->toBeTrue()
+        ->and((new MetaSchemaBuilder)->build(ReviewMeta::class)->exposesInRest())->toBeFalse();
+});

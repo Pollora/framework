@@ -16,12 +16,14 @@ final readonly class MetaSchema
      * @param  MetaObjectType  $objectType  The WordPress object the meta belong to
      * @param  list<string>  $subtypes  The post type or taxonomy slugs; empty for every object of the type
      * @param  array<string, MetaDefinition>  $definitions  Definitions keyed by property name
+     * @param  bool  $declaresSubtypes  Whether the class also declares its post type or taxonomy (`#[PostType]`, `#[Taxonomy]`)
      */
     public function __construct(
         public string $declaringClass,
         public MetaObjectType $objectType,
         public array $subtypes,
         public array $definitions,
+        public bool $declaresSubtypes = false,
     ) {}
 
     /**
@@ -44,6 +46,20 @@ final readonly class MetaSchema
         return $this->subtypes === []
             ? $this->objectType->value
             : sprintf('%s "%s"', $this->objectType->value, implode('", "', $this->subtypes));
+    }
+
+    /**
+     * Whether a meta of the schema is exposed in REST.
+     */
+    public function exposesInRest(): bool
+    {
+        foreach ($this->definitions as $definition) {
+            if ($definition->showInRest) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function isEmpty(): bool
