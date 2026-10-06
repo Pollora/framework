@@ -60,7 +60,8 @@ it('lists the items of an array', function (): void {
 
 it('gives the raw value with format: raw', function (): void {
     expect(formatConcert('capacity', 1200, ['format' => 'raw']))->toBe(1200)
-        ->and(formatConcert('status', ConcertStatus::Cancelled, ['format' => 'raw']))->toBe('cancelled');
+        ->and(formatConcert('status', ConcertStatus::Cancelled, ['format' => 'raw']))->toBe('cancelled')
+        ->and(formatConcert('startsAt', CarbonImmutable::parse('2026-11-14 09:00:00', 'UTC'), ['format' => 'raw']))->toBe('2026-11-14T09:00:00+00:00');
 });
 
 it('shows the fallback for an empty meta, or keeps the block content', function (): void {

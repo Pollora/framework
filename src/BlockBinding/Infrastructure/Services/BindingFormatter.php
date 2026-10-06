@@ -36,7 +36,12 @@ final readonly class BindingFormatter
         }
 
         if (($args['format'] ?? null) === 'raw') {
-            return is_scalar($value) ? $value : ($value instanceof BackedEnum ? $value->value : null);
+            return match (true) {
+                is_scalar($value) => $value,
+                $value instanceof BackedEnum => $value->value,
+                $value instanceof DateTimeInterface => $value->format(DateTimeInterface::ATOM),
+                default => null,
+            };
         }
 
         if ($definition->media && is_int($value)) {
