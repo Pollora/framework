@@ -14,6 +14,7 @@ use Pollora\Colt\Model\Term;
 use Pollora\Colt\Model\User;
 use Pollora\Meta\Application\Services\MetaAccessor;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
+use Pollora\Meta\Domain\Contracts\MetaValidatorInterface;
 use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Enums\MetaValueType;
 use Pollora\Meta\Domain\Models\MetaDefinition;
@@ -34,7 +35,7 @@ use Pollora\Meta\Domain\Services\MetaValueCaster;
  *
  *     $event = Event::find($id);
  *     $event->capacity;                    // int, or by its key: $event->starts_at
- *     $event->capacity = 250;              // checked now, written on save()
+ *     $event->capacity = 250;              // type and rules checked now, written on save()
  *     $event->save();
  *     Event::whereMeta('capacity', '>=', 100)->get();
  *
@@ -141,7 +142,11 @@ trait HasTypedMeta
         }
 
         $definition = $schema->find($key);
-        resolve(MetaValueCaster::class)->toStorage($definition, $value);
+
+        if (resolve(MetaValueCaster::class)->toStorage($definition, $value) !== null) {
+            resolve(MetaValidatorInterface::class)->validate($definition, $value);
+        }
+
         $this->pendingTypedMeta[$schema->declaringClass][$definition->property] = $value;
 
         return $this;

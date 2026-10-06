@@ -13,13 +13,18 @@ use Pollora\Meta\Application\Services\MetaAccessor;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
+use Pollora\Meta\Domain\Contracts\MetaValidatorInterface;
 use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaValueException;
+use Pollora\Meta\Domain\Exceptions\MetaValidationException;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
 use Pollora\Models\Post;
 use Pollora\Models\User;
 use Tests\Unit\Meta\Fixtures\Event;
 use Tests\Unit\Meta\Fixtures\MemberProfile;
+use Tests\Unit\Meta\Fixtures\RatedEvent;
+
+require_once __DIR__.'/Fixtures/validator.php';
 
 /**
  * A post model bound to the `event` post type, as a project would write it.
@@ -92,6 +97,7 @@ beforeEach(function (): void {
     $container->instance(MetaSchemaRepository::class, $this->repository);
     $container->instance(MetaValueCaster::class, new MetaValueCaster);
     $container->instance(MetaAccessor::class, new MetaAccessor($this->repository, new MetaSchemaBuilder, $this->store, new MetaValueCaster));
+    $container->instance(MetaValidatorInterface::class, metaValidator());
 });
 
 afterEach(function (): void {
@@ -139,6 +145,14 @@ it('checks a write at once, and writes it through the meta API once the model is
     expect($this->store->values)->toBe(['post:42:capacity' => '300'])
         ->and($event->hasPendingTypedMeta())->toBeFalse()
         ->and($event->capacity)->toBe(300);
+});
+
+it('checks the rules of a meta when it is set', function (): void {
+    $this->repository->add((new MetaSchemaBuilder)->build(RatedEvent::class));
+    $event = existingModel(Post::class, ['ID' => 5, 'post_type' => 'rated_event']);
+
+    expect(fn (): int => $event->capacity = 6000)->toThrow(MetaValidationException::class)
+        ->and($event->hasPendingTypedMeta())->toBeFalse();
 });
 
 it('reads the default of a model not saved yet', function (): void {
