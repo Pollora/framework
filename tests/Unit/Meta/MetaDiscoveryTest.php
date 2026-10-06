@@ -77,6 +77,9 @@ it('logs a declaration it cannot register and carries on', function (): void {
     ($this->discover)(Event::class, InvalidArray::class, EventExtras::class, BookGenre::class);
 
     $this->discovery->apply();
+
+    expect(array_keys($this->schemas->failures()))->toBe([InvalidArray::class, EventExtras::class])
+        ->and($this->schemas->failures()[InvalidArray::class])->toContain('say what the array holds');
 });
 
 it('binds the post models of the project to their post type', function (): void {

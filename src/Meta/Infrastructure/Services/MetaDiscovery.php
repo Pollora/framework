@@ -91,6 +91,7 @@ final class MetaDiscovery implements DiscoveryInterface
                 $this->schemas->add($schema);
                 $this->registry->register($schema);
             } catch (\Throwable $throwable) {
+                $this->schemas->fail($class, $throwable->getMessage());
                 $this->logger?->error(sprintf('Failed to register the meta of %s: %s', $class, $throwable->getMessage()), ['exception' => $throwable]);
             }
         }
