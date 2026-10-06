@@ -7,7 +7,9 @@ namespace Pollora\Meta\Domain\Models;
 use Closure;
 use InvalidArgumentException;
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
+use Pollora\Meta\Domain\Contracts\MetaValidatorInterface;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaValueException;
+use Pollora\Meta\Domain\Exceptions\MetaValidationException;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
 
 /**
@@ -43,6 +45,7 @@ final class MetaRecord
         private readonly MetaStoreInterface $store,
         private readonly MetaValueCaster $caster,
         private readonly Closure $onUnreadable,
+        private readonly ?MetaValidatorInterface $validator = null,
     ) {}
 
     public function __get(string $name): mixed
@@ -83,12 +86,18 @@ final class MetaRecord
      * Sets a meta, written on `save()`. Null deletes a nullable meta.
      *
      * @throws InvalidMetaValueException When the value does not match the property type
+     * @throws MetaValidationException When the value breaks a rule of the meta
      */
     public function set(string $name, mixed $value): static
     {
         $definition = $this->definition($name);
+        $stored = $this->caster->toStorage($definition, $value);
 
-        $this->pending[$definition->property] = $this->caster->toStorage($definition, $value);
+        if ($stored !== null) {
+            $this->validator?->validate($definition, $value);
+        }
+
+        $this->pending[$definition->property] = $stored;
         $this->values[$definition->property] = $value;
 
         return $this;

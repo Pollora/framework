@@ -131,6 +131,7 @@ final class MetaSchemaBuilder
             sanitize: $meta->sanitize,
             capability: $meta->capability,
             revisions: $meta->revisions,
+            rules: array_values($meta->rules),
         );
     }
 

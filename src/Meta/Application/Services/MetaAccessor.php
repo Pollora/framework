@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Meta\Application\Services;
 
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
+use Pollora\Meta\Domain\Contracts\MetaValidatorInterface;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaValueException;
 use Pollora\Meta\Domain\Models\MetaDefinition;
 use Pollora\Meta\Domain\Models\MetaRecord;
@@ -28,6 +29,7 @@ final readonly class MetaAccessor
         private MetaValueCaster $caster,
         private bool $debug = false,
         private ?LoggerInterface $logger = null,
+        private ?MetaValidatorInterface $validator = null,
     ) {}
 
     /**
@@ -44,7 +46,7 @@ final readonly class MetaAccessor
      */
     public function record(MetaSchema $schema, int $objectId): MetaRecord
     {
-        return new MetaRecord($schema, $objectId, $this->store, $this->caster, $this->handleUnreadable(...));
+        return new MetaRecord($schema, $objectId, $this->store, $this->caster, $this->handleUnreadable(...), $this->validator);
     }
 
     private function handleUnreadable(InvalidMetaValueException $exception, MetaDefinition $definition): mixed

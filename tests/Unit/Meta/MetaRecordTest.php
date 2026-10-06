@@ -6,11 +6,15 @@ use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
 use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Exceptions\InvalidMetaValueException;
+use Pollora\Meta\Domain\Exceptions\MetaValidationException;
 use Pollora\Meta\Domain\Models\MetaDefinition;
 use Pollora\Meta\Domain\Models\MetaRecord;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
 use Tests\Unit\Meta\Fixtures\Event;
 use Tests\Unit\Meta\Fixtures\EventStatus;
+use Tests\Unit\Meta\Fixtures\RatedEvent;
+
+require_once __DIR__.'/Fixtures/validator.php';
 
 /**
  * An in-memory meta store that records its writes.
@@ -153,4 +157,15 @@ it('tells which meta are set', function (): void {
     expect(isset($record->capacity))->toBeTrue()
         ->and(isset($record->startsAt))->toBeFalse()
         ->and(isset($record->unknown))->toBeFalse();
+});
+
+it('checks the rules of a meta on write, and keeps nothing pending when one fails', function (): void {
+    $store = memoryMetaStore();
+    $record = new MetaRecord((new MetaSchemaBuilder)->build(RatedEvent::class), 42, $store, new MetaValueCaster, fn (): mixed => null, metaValidator());
+
+    expect(fn (): MetaRecord => $record->set('capacity', 6000))->toThrow(MetaValidationException::class);
+
+    $record->set('capacity', 300)->set('contact', null)->save();
+
+    expect($store->stored)->toBe(['capacity' => '300']);
 });
