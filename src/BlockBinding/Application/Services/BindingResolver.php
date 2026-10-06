@@ -28,6 +28,8 @@ use Throwable;
  *
  * A field that throws reads as null (the block keeps its own content) and is
  * logged; in debug mode the exception is thrown, so it shows during development.
+ * In debug mode too, a field slower than {@see self::SLOW_FIELD_MS} is logged,
+ * with its source and its post, since every bound block of a page waits for it.
  */
 final class BindingResolver
 {
@@ -35,6 +37,11 @@ final class BindingResolver
      * Attribute sources whose value WordPress writes as HTML.
      */
     private const array HTML_SOURCES = ['html', 'rich-text'];
+
+    /**
+     * Milliseconds past which a field is logged as slow, in debug mode.
+     */
+    public const int SLOW_FIELD_MS = 50;
 
     /**
      * @var array<string, mixed> Values already resolved in this request
@@ -108,7 +115,7 @@ final class BindingResolver
             return $this->resolved[$key];
         }
 
-        $value = $this->call($source, $field->method, $context);
+        $value = $this->call($source, $field, $context);
 
         return $this->resolved[$key] = $this->present($value, $field->type, $attributeSource);
     }
@@ -140,12 +147,20 @@ final class BindingResolver
         return $context->termId === null || $context->taxonomy === null || $this->visibility->canShowTerm($context->termId, $context->taxonomy);
     }
 
-    private function call(BindingSource $source, string $method, BindingContext $context): mixed
+    private function call(BindingSource $source, BindingFieldDefinition $field, BindingContext $context): mixed
     {
         try {
             $instance = $this->instances[$source->class] ??= $this->container->make($source->class);
 
-            return $this->container->call([$instance, $method], [BindingContext::class => $context, 'context' => $context]);
+            if (! $this->debug) {
+                return $this->container->call([$instance, $field->method], [BindingContext::class => $context, 'context' => $context]);
+            }
+
+            $start = hrtime(true);
+            $value = $this->container->call([$instance, $field->method], [BindingContext::class => $context, 'context' => $context]);
+            $this->reportSlow($source, $field, $context, (hrtime(true) - $start) / 1_000_000);
+
+            return $value;
         } catch (Throwable $throwable) {
             if ($this->debug) {
                 throw $throwable;
@@ -160,6 +175,26 @@ final class BindingResolver
 
             return null;
         }
+    }
+
+    private function reportSlow(BindingSource $source, BindingFieldDefinition $field, BindingContext $context, float $milliseconds): void
+    {
+        if ($milliseconds <= self::SLOW_FIELD_MS) {
+            return;
+        }
+
+        $this->logger?->warning(sprintf(
+            'The block binding "%s"%s took %d ms on %s',
+            $source->name,
+            $field->name === '' ? '' : sprintf(' (field "%s")', $field->name),
+            (int) round($milliseconds),
+            $context->postId === null ? 'no post' : 'post '.$context->postId,
+        ), [
+            'source' => $source->name,
+            'field' => $field->name,
+            'post' => $context->postId,
+            'milliseconds' => round($milliseconds, 1),
+        ]);
     }
 
     private function present(mixed $value, BindingFieldType $type, ?string $attributeSource): mixed

@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pollora:meta:list` (`--json`): every typed meta by class, with the object it belongs to, its key, type and options; exits with 1 when discovery refused a declaration
 - `pollora:meta:audit` (`--limit`, `--json`): reads the stored values of every typed meta and names those that cannot be read as their type (a property whose type changed, a value written outside the meta API), with the objects concerned — exits with 1 then, for CI against a copy of production; and lists the keys stored on the project's own post types and taxonomies that no `#[Meta]` declares, such as the old key of a renamed property
 - `pollora:binding:list` (`--json`): the Pollora binding sources, what each one offers (fields, the meta it may show by post type or taxonomy, the listed options), and the blocks whose attributes WordPress lets bind
+- In debug mode, a Block Bindings field slower than 50 ms is logged as a warning, with its source, its field and its post: every bound block of the page waits for it
 
 ## [v13.34.6](https://github.com/Pollora/framework/compare/v13.34.5...v13.34.6) - 2026-10-06
 
