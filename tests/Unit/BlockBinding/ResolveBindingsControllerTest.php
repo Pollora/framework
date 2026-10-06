@@ -35,6 +35,7 @@ beforeEach(function (): void {
         $this->locales[] = 'restore';
     });
     Functions\when('sanitize_key')->alias(fn (string $key): string => strtolower((string) preg_replace('/[^a-z0-9_\-]/i', '', $key)));
+
     $sources = new BindingSourceRegistry;
     $sources->add((new BindingSourceBuilder)->build(EventBinding::class));
 
