@@ -15,4 +15,10 @@ enum MetaValueType
     case Boolean;
     case DateTime;
     case Enum;
+
+    /** A PHP array of typed items: one row per item, or one serialized array */
+    case ArrayOf;
+
+    /** A class with public typed properties, stored as an array */
+    case DataObject;
 }

@@ -14,7 +14,8 @@ use Pollora\Meta\Domain\Services\MetaValueCaster;
 
 /**
  * Registers typed meta with `register_meta()`, on `init` after post types and
- * taxonomies (priority 20), or right away when `init` has already run.
+ * taxonomies (priority 20), or right away when `init` has already run, and adds
+ * `custom-fields` to a declared post type that exposes a meta in REST.
  */
 final readonly class WordPressMetaRegistry implements MetaRegistryInterface
 {
@@ -38,20 +39,32 @@ final readonly class WordPressMetaRegistry implements MetaRegistryInterface
 
     private function registerNow(MetaSchema $schema): void
     {
-        foreach ($schema->definitions as $definition) {
-            \register_meta($schema->objectType->value, $definition->key, $this->argumentsFor($schema, $definition));
+        // WordPress leaves `meta` out of a post's REST response unless its post
+        // type supports custom-fields. Only a post type the class declares is
+        // changed: one targeted by #[PostMeta] belongs to someone else.
+        if ($schema->objectType === MetaObjectType::Post && $schema->declaresSubtypes && $schema->exposesInRest()) {
+            foreach ($schema->subtypes as $postType) {
+                \add_post_type_support($postType, 'custom-fields');
+            }
+        }
+
+        // An empty subtype registers the meta for every object of the type.
+        foreach ($schema->subtypes === [] ? [''] : $schema->subtypes as $subtype) {
+            foreach ($schema->definitions as $definition) {
+                \register_meta($schema->objectType->value, $definition->key, $this->argumentsFor($schema, $definition, $subtype));
+            }
         }
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function argumentsFor(MetaSchema $schema, MetaDefinition $definition): array
+    private function argumentsFor(MetaSchema $schema, MetaDefinition $definition, string $subtype): array
     {
         $arguments = [
-            'object_subtype' => $schema->subtype,
+            'object_subtype' => $subtype,
             'type' => $definition->wordPressType(),
-            'single' => true,
+            'single' => $definition->single,
             'sanitize_callback' => $definition->sanitize ?? $this->sanitizerFor($definition),
             'show_in_rest' => $definition->showInRest ? ['schema' => $definition->restSchema()] : false,
         ];
@@ -84,10 +97,37 @@ final readonly class WordPressMetaRegistry implements MetaRegistryInterface
 
     private function sanitizerFor(MetaDefinition $definition): callable
     {
+        // WordPress sanitizes each row of a non-single meta on its own.
+        if ($definition->valueType === MetaValueType::ArrayOf && ! $definition->single) {
+            return $this->sanitizerFor($definition->item());
+        }
+
         if ($definition->valueType === MetaValueType::String) {
             return 'sanitize_text_field';
         }
 
-        return fn (mixed $value): string => $this->caster->sanitize($definition, $value);
+        return fn (mixed $value): mixed => $this->sanitizeText($definition, $this->caster->sanitize($definition, $value));
+    }
+
+    /**
+     * Strips HTML from the strings inside an array or an object, as from a string meta.
+     */
+    private function sanitizeText(MetaDefinition $definition, mixed $value): mixed
+    {
+        if (! is_array($value)) {
+            return $definition->valueType === MetaValueType::String && is_string($value) ? \sanitize_text_field($value) : $value;
+        }
+
+        if ($definition->valueType === MetaValueType::ArrayOf) {
+            return array_map(fn (mixed $item): mixed => $this->sanitizeText($definition->item(), $item), $value);
+        }
+
+        foreach ($definition->properties as $property) {
+            if (array_key_exists($property->key, $value)) {
+                $value[$property->key] = $this->sanitizeText($property, $value[$property->key]);
+            }
+        }
+
+        return $value;
     }
 }

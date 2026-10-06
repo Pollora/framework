@@ -21,15 +21,15 @@ final class InvalidMetaDefinitionException extends LogicException
 
     public static function notADeclaration(string $class): self
     {
-        return new self(sprintf('%s declares no meta: it carries neither #[PostType] nor #[Taxonomy].', $class));
+        return new self(sprintf('%s declares no meta: it carries none of #[PostType], #[Taxonomy], #[PostMeta], #[TermMeta], #[UserMeta], #[CommentMeta].', $class));
     }
 
-    public static function duplicateKey(string $key, string $subtype, string $firstClass, string $secondClass): self
+    public static function duplicateKey(string $key, string $owner, string $firstClass, string $secondClass): self
     {
         return new self(sprintf(
-            'The meta key "%s" of "%s" is declared twice, by %s and by %s.',
+            'The meta key "%s" of %s is declared twice, by %s and by %s.',
             $key,
-            $subtype,
+            $owner,
             $firstClass,
             $secondClass
         ));

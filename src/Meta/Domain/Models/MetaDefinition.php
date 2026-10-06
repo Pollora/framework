@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Meta\Domain\Models;
 
 use BackedEnum;
+use LogicException;
+use Pollora\Meta\Domain\Enums\Control;
 use Pollora\Meta\Domain\Enums\MetaValueType;
 use ReflectionEnum;
 
@@ -29,6 +31,13 @@ final readonly class MetaDefinition
      * @param  string|array{0: class-string|object, 1: string}|null  $sanitize  Callable replacing the derived sanitization
      * @param  string|null  $capability  Capability required to write through REST and the editor
      * @param  bool  $revisions  Versions the meta with post revisions
+     * @param  array<int, mixed>  $rules  Laravel validation rules
+     * @param  bool  $single  False for an array stored one row per item
+     * @param  MetaDefinition|null  $items  The item of an array
+     * @param  array<string, MetaDefinition>  $properties  The properties of a data object, by property name
+     * @param  Control|null  $control  The input a UI driver should build; null when no neutral control fits (arrays, objects)
+     * @param  string|null  $group  The group of fields a UI driver puts the meta in
+     * @param  array<string, mixed>  $hints  Options for UI drivers, by driver
      */
     public function __construct(
         public string $property,
@@ -43,6 +52,13 @@ final readonly class MetaDefinition
         public string|array|null $sanitize = null,
         public ?string $capability = null,
         public bool $revisions = false,
+        public array $rules = [],
+        public bool $single = true,
+        public ?MetaDefinition $items = null,
+        public array $properties = [],
+        public ?Control $control = null,
+        public ?string $group = null,
+        public array $hints = [],
     ) {}
 
     /**
@@ -64,6 +80,9 @@ final readonly class MetaDefinition
             MetaValueType::Number => 'number',
             MetaValueType::Boolean => 'boolean',
             MetaValueType::Enum => $this->isIntegerBackedEnum() ? 'integer' : 'string',
+            // A non-single meta registers the type of one row: WordPress wraps it in an array.
+            MetaValueType::ArrayOf => $this->single ? 'array' : $this->item()->wordPressType(),
+            MetaValueType::DataObject => 'object',
         };
     }
 
@@ -74,6 +93,20 @@ final readonly class MetaDefinition
      */
     public function restSchema(): array
     {
+        if ($this->valueType === MetaValueType::ArrayOf) {
+            return $this->single ? ['type' => 'array', 'items' => $this->item()->restSchema()] : $this->item()->restSchema();
+        }
+
+        if ($this->valueType === MetaValueType::DataObject) {
+            $properties = [];
+
+            foreach ($this->properties as $property) {
+                $properties[$property->key] = $property->nullableRestSchema();
+            }
+
+            return ['type' => 'object', 'properties' => $properties, 'additionalProperties' => false];
+        }
+
         $schema = ['type' => $this->wordPressType()];
 
         if ($this->valueType === MetaValueType::DateTime) {
@@ -84,6 +117,38 @@ final readonly class MetaDefinition
             /** @var class-string<BackedEnum> $enum */
             $enum = $this->valueClass;
             $schema['enum'] = array_map(static fn (BackedEnum $case): int|string => $case->value, $enum::cases());
+        }
+
+        return $schema;
+    }
+
+    /**
+     * The item of an array.
+     */
+    public function item(): MetaDefinition
+    {
+        return $this->items ?? throw new LogicException(sprintf('The meta "%s" is not an array.', $this->key));
+    }
+
+    /**
+     * Whether the value is an array or an object, stored serialized or in several rows.
+     */
+    public function isStructured(): bool
+    {
+        return $this->valueType === MetaValueType::ArrayOf || $this->valueType === MetaValueType::DataObject;
+    }
+
+    /**
+     * The REST schema of a property inside an object, accepting null when it does.
+     *
+     * @return array<string, mixed>
+     */
+    private function nullableRestSchema(): array
+    {
+        $schema = $this->restSchema();
+
+        if ($this->nullable && is_string($schema['type'])) {
+            $schema['type'] = [$schema['type'], 'null'];
         }
 
         return $schema;

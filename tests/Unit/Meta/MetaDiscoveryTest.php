@@ -3,22 +3,29 @@
 declare(strict_types=1);
 
 use Pollora\Attributes\Meta;
+use Pollora\Colt\Model\Post as ColtPost;
 use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Pollora\Meta\Domain\Contracts\MetaRegistryInterface;
 use Pollora\Meta\Domain\Models\MetaSchema;
 use Pollora\Meta\Infrastructure\Services\MetaDiscovery;
+use Pollora\Models\Page;
 use Psr\Log\LoggerInterface;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredEnum;
+use Tests\Unit\Meta\Fixtures\ArticleExtras;
 use Tests\Unit\Meta\Fixtures\BookGenre;
+use Tests\Unit\Meta\Fixtures\CategoryExtras;
 use Tests\Unit\Meta\Fixtures\Event;
 use Tests\Unit\Meta\Fixtures\EventExtras;
+use Tests\Unit\Meta\Fixtures\EventPostModel;
 use Tests\Unit\Meta\Fixtures\EventStatus;
 use Tests\Unit\Meta\Fixtures\InvalidArray;
+use Tests\Unit\Meta\Fixtures\MemberProfile;
 use Tests\Unit\Meta\Fixtures\NoMeta;
 use Tests\Unit\Meta\Fixtures\NotADeclaration;
+use Tests\Unit\Meta\Fixtures\ReviewMeta;
 
 require_once __DIR__.'/Fixtures/Invalid.php';
 
@@ -42,11 +49,11 @@ beforeEach(function (): void {
     };
 });
 
-it('keeps post type and taxonomy classes only', function (): void {
-    ($this->discover)(Event::class, BookGenre::class, NotADeclaration::class, AbstractMetaDeclaration::class);
+it('keeps the classes declaring meta only', function (): void {
+    ($this->discover)(Event::class, BookGenre::class, ArticleExtras::class, CategoryExtras::class, MemberProfile::class, ReviewMeta::class, NotADeclaration::class, AbstractMetaDeclaration::class);
     $this->discovery->discover($this->location, DiscoveredEnum::fromReflection(new ReflectionEnum(EventStatus::class)));
 
-    expect(array_column(iterator_to_array($this->discovery->getItems()), 'class'))->toBe([Event::class, BookGenre::class]);
+    expect(array_column(iterator_to_array($this->discovery->getItems()), 'class'))->toBe([Event::class, BookGenre::class, ArticleExtras::class, CategoryExtras::class, MemberProfile::class, ReviewMeta::class]);
 });
 
 it('stores and registers the schema of each declaring class', function (): void {
@@ -65,11 +72,21 @@ it('stores and registers the schema of each declaring class', function (): void 
 
 it('logs a declaration it cannot register and carries on', function (): void {
     $this->registry->shouldReceive('register')->twice();
-    $this->logger->shouldReceive('error')->once()->with(Mockery::pattern('/InvalidArray: .*the type array is not supported yet/'), Mockery::type('array'));
-    $this->logger->shouldReceive('error')->once()->with(Mockery::pattern('/EventExtras: The meta key "capacity" of "event" is declared twice/'), Mockery::type('array'));
+    $this->logger->shouldReceive('error')->once()->with(Mockery::pattern('/InvalidArray: .*say what the array holds/'), Mockery::type('array'));
+    $this->logger->shouldReceive('error')->once()->with(Mockery::pattern('/EventExtras: The meta key "capacity" of post "event" is declared twice/'), Mockery::type('array'));
     ($this->discover)(Event::class, InvalidArray::class, EventExtras::class, BookGenre::class);
 
     $this->discovery->apply();
+});
+
+it('binds the post models of the project to their post type', function (): void {
+    ($this->discover)(EventPostModel::class, Page::class);
+
+    $this->discovery->apply();
+
+    expect((new ReflectionProperty(ColtPost::class, 'postTypes'))->getValue())->toHaveKey('fixture_event', EventPostModel::class);
+
+    ColtPost::clearRegisteredPostTypes();
 });
 
 it('identifies itself as meta', function (): void {

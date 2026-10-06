@@ -6,11 +6,13 @@ namespace Pollora\Attributes;
 
 use Attribute;
 use Illuminate\Support\Str;
+use Pollora\Meta\Domain\Enums\Control;
 
 /**
  * Meta Attribute
  *
- * Marks a public typed property of a `#[PostType]` or `#[Taxonomy]` class as a
+ * Marks a public typed property of a `#[PostType]`, `#[Taxonomy]`, `#[PostMeta]`,
+ * `#[TermMeta]`, `#[UserMeta]` or `#[CommentMeta]` class as a
  * WordPress meta. The property type gives the meta type, its initial value the
  * default and its name the key:
  *
@@ -37,6 +39,12 @@ final readonly class Meta
      * @param  string|array{0: class-string|object, 1: string}|null  $sanitize  Callable replacing the sanitization derived from the type
      * @param  string|null  $capability  Capability required to write the meta through REST and the editor
      * @param  bool  $revisions  Versions the meta with post revisions (post types only)
+     * @param  array<int, mixed>  $rules  Laravel validation rules, checked on writes from PHP and REST
+     * @param  bool  $single  On an `array` property, false stores one row per item instead of one serialized array
+     * @param  string|null  $items  On an `array` property, the item type: `'string'`, `'int'`, `'float'`, `'bool'` or a class. Defaults to the `@var list<…>` docblock
+     * @param  Control|null  $control  The input a UI driver should build. Defaults to one derived from the type
+     * @param  string|null  $group  The group of fields a UI driver puts the meta in
+     * @param  array<string, mixed>  $hints  Options passed as they are to UI drivers, by driver: `['acf' => ['wrapper' => ['width' => 50]]]`
      */
     public function __construct(
         public ?string $key = null,
@@ -46,6 +54,12 @@ final readonly class Meta
         public string|array|null $sanitize = null,
         public ?string $capability = null,
         public bool $revisions = false,
+        public array $rules = [],
+        public bool $single = true,
+        public ?string $items = null,
+        public ?Control $control = null,
+        public ?string $group = null,
+        public array $hints = [],
     ) {}
 
     /**

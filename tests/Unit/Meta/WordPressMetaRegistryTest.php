@@ -7,8 +7,11 @@ use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
 use Pollora\Meta\Infrastructure\Adapters\WordPressMetaRegistry;
+use Tests\Unit\Meta\Fixtures\ArticleExtras;
 use Tests\Unit\Meta\Fixtures\BookGenre;
 use Tests\Unit\Meta\Fixtures\Event;
+use Tests\Unit\Meta\Fixtures\MemberProfile;
+use Tests\Unit\Meta\Fixtures\ReviewMeta;
 
 /**
  * Registers the Event schema right away and returns the register_meta() calls, by key.
@@ -19,6 +22,7 @@ function registeredEventMeta(string $class = Event::class): array
 {
     $calls = [];
     Functions\when('did_action')->justReturn(1);
+    Functions\when('add_post_type_support')->justReturn();
     Functions\when('register_meta')->alias(function (string $objectType, string $key, array $args) use (&$calls): bool {
         $calls[$key] = [$objectType, $args];
 
@@ -33,6 +37,8 @@ function registeredEventMeta(string $class = Event::class): array
 
 it('waits for init, after post types and taxonomies', function (): void {
     Functions\when('did_action')->justReturn(0);
+    Functions\when('add_post_type_support')->justReturn();
+
     Functions\expect('register_meta')->never();
     $action = Mockery::mock(Action::class);
     $action->shouldReceive('add')->once()->with('init', Mockery::type(Closure::class), 20)->andReturnUsing(function (string $hook, Closure $callback) use ($action): Action {
@@ -106,4 +112,39 @@ it('enables revisions when asked', function (): void {
 
     expect($meta['subtitle'][1]['revisions_enabled'])->toBeTrue()
         ->and($meta['capacity'][1])->not->toHaveKey('revisions_enabled');
+});
+
+it('registers the meta on each post type of the list, and for every user without a subtype', function (): void {
+    $calls = [];
+    Functions\when('did_action')->justReturn(1);
+    Functions\when('add_post_type_support')->justReturn();
+    Functions\when('register_meta')->alias(function (string $objectType, string $key, array $args) use (&$calls): bool {
+        $calls[] = [$objectType, $key, $args['object_subtype']];
+
+        return true;
+    });
+    $registry = new WordPressMetaRegistry(Mockery::mock(Action::class), new MetaValueCaster);
+
+    $registry->register((new MetaSchemaBuilder)->build(ArticleExtras::class));
+    $registry->register((new MetaSchemaBuilder)->build(MemberProfile::class));
+    $registry->register((new MetaSchemaBuilder)->build(ReviewMeta::class));
+
+    expect($calls)->toBe([
+        ['post', 'subtitle', 'post'],
+        ['post', 'subtitle', 'page'],
+        ['user', 'newsletter_opt_in', ''],
+        ['user', 'job_title', ''],
+        ['comment', 'rating', ''],
+    ]);
+});
+
+it('adds custom-fields to a declared post type exposing a meta in REST, and to no other', function (): void {
+    Functions\when('did_action')->justReturn(1);
+    Functions\when('register_meta')->justReturn(true);
+    Functions\expect('add_post_type_support')->once()->with('event', 'custom-fields');
+    $registry = new WordPressMetaRegistry(Mockery::mock(Action::class), new MetaValueCaster);
+
+    $registry->register((new MetaSchemaBuilder)->build(Event::class));
+    $registry->register((new MetaSchemaBuilder)->build(ArticleExtras::class));
+    $registry->register((new MetaSchemaBuilder)->build(BookGenre::class));
 });
