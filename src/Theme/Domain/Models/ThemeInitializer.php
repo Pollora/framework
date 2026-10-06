@@ -340,7 +340,7 @@ class ThemeInitializer implements ThemeComponent
         try {
             $container = $this->app->get(AssetManager::class)->getContainer('theme');
 
-            return $container === null ? '' : $container->getBasePath();
+            return $container?->getBasePath() ?? '';
         } catch (\Throwable) {
             return '';
         }
