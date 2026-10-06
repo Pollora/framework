@@ -25,6 +25,11 @@ final class MetaSchemaRepository
     private array $names = [];
 
     /**
+     * @var array<class-string, string> Declarations discovery refused, with the reason
+     */
+    private array $failures = [];
+
+    /**
      * @throws InvalidMetaDefinitionException When another class already declares one of its keys on the same object
      */
     public function add(MetaSchema $schema): void
@@ -78,6 +83,27 @@ final class MetaSchemaRepository
     public function declares(MetaObjectType $objectType, string $propertyOrKey): bool
     {
         return isset($this->names[$objectType->value][$propertyOrKey]);
+    }
+
+    /**
+     * Records a declaration discovery could not register, so that it can be
+     * reported (pollora:doctor) instead of only logged.
+     *
+     * @param  class-string  $class
+     */
+    public function fail(string $class, string $reason): void
+    {
+        $this->failures[$class] = $reason;
+    }
+
+    /**
+     * The declarations discovery refused, with the reason, by class.
+     *
+     * @return array<class-string, string>
+     */
+    public function failures(): array
+    {
+        return $this->failures;
     }
 
     /**
