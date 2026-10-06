@@ -38,6 +38,8 @@ final readonly class MetaDefinition
      * @param  Control|null  $control  The input a UI driver should build; null when no neutral control fits (arrays, objects)
      * @param  string|null  $group  The group of fields a UI driver puts the meta in
      * @param  array<string, mixed>  $hints  Options for UI drivers, by driver
+     * @param  bool  $media  The value is an attachment ID
+     * @param  bool  $public  The value may be shown to anyone
      */
     public function __construct(
         public string $property,
@@ -59,6 +61,8 @@ final readonly class MetaDefinition
         public ?Control $control = null,
         public ?string $group = null,
         public array $hints = [],
+        public bool $media = false,
+        public bool $public = false,
     ) {}
 
     /**

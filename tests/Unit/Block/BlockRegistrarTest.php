@@ -618,3 +618,63 @@ describe('BlockRegistrar discovery', function (): void {
             ->and($this->logger->messages('notice'))->toBeEmpty();
     });
 });
+
+describe('BlockRegistrar bindings', function (): void {
+    /**
+     * Register the block and return the filters added, by hook.
+     *
+     * @param  array<string, mixed>  $metadata
+     * @return array<string, Closure>
+     */
+    function bindableFilters(string $blockDir, array $metadata): array
+    {
+        $filters = [];
+        $filter = Mockery::mock(HookFilter::class);
+        $filter->shouldReceive('add')->andReturnUsing(function (string $hook, Closure $callback) use (&$filters, $filter): HookFilter {
+            $filters[$hook] = $callback;
+
+            return $filter;
+        });
+        writeBlock($blockDir, $metadata, ['render.blade.php' => '<div></div>']);
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), $filter);
+        $registrar->mockViteManager = createMockVite();
+        $registrar->registerBlock($blockDir, 'theme');
+
+        return $filters;
+    }
+
+    it('makes the attributes listed under pollora.bindings bindable', function (): void {
+        $filters = bindableFilters($this->tempDir.'/card', [
+            'name' => 'acme/event-card',
+            'attributes' => ['title' => ['type' => 'string'], 'ctaUrl' => ['type' => 'string']],
+            'pollora' => ['bindings' => ['title', 'ctaUrl']],
+            'render' => 'file:./render.blade.php',
+        ]);
+
+        expect($filters)->toHaveKey('block_bindings_supported_attributes_acme/event-card')
+            ->and($filters['block_bindings_supported_attributes_acme/event-card'](['title']))->toBe(['title', 'ctaUrl']);
+    });
+
+    it('refuses bindings on a block that is not rendered on the server', function (): void {
+        $filters = bindableFilters($this->tempDir.'/card', [
+            'name' => 'acme/static-card',
+            'attributes' => ['title' => ['type' => 'string']],
+            'pollora' => ['bindings' => ['title']],
+        ]);
+
+        expect($filters)->toBe([])
+            ->and($this->logger->messages('warning'))->toContain('BlockRegistrar: block "acme/static-card" lists pollora.bindings but has no "render": only a block rendered on the server can be bound.');
+    });
+
+    it('reports a listed attribute the block does not declare', function (): void {
+        $filters = bindableFilters($this->tempDir.'/card', [
+            'name' => 'acme/event-card',
+            'attributes' => ['title' => ['type' => 'string']],
+            'pollora' => ['bindings' => ['title', 'subtitle']],
+            'render' => 'file:./render.blade.php',
+        ]);
+
+        expect($filters['block_bindings_supported_attributes_acme/event-card']([]))->toBe(['title'])
+            ->and($this->logger->messages('warning'))->toContain('BlockRegistrar: block "acme/event-card" lists "subtitle" in pollora.bindings, which is not one of its attributes.');
+    });
+});

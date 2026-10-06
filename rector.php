@@ -37,6 +37,9 @@ return RectorConfig::configure()
             __DIR__.'/tests/Unit/WordPress/LaravelServingRequestTest.php',
         ],
         __DIR__.'/tests/Unit/helpers.php',
+        // Binding sources each broken on purpose (an untyped field, a private
+        // one): fixing them would remove what the tests check is refused.
+        __DIR__.'/tests/Unit/BlockBinding/Fixtures/Invalid.php',
     ])
     ->withPreparedSets(
         deadCode: true,

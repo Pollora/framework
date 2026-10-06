@@ -13,6 +13,7 @@ use Pollora\Application\Infrastructure\Providers\ApplicationServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\Block\Infrastructure\Providers\BlockServiceProvider;
+use Pollora\BlockBinding\Infrastructure\Providers\BlockBindingServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Dashboard\Infrastructure\Providers\DashboardServiceProvider;
@@ -88,6 +89,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(MetaServiceProvider::class);
         $this->app->register(RoleServiceProvider::class);
+        $this->app->register(BlockBindingServiceProvider::class);
 
         // WordPress REST API
         $this->app->register(WpRestAttributeServiceProvider::class);

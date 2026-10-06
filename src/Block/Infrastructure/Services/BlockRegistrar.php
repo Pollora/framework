@@ -23,6 +23,7 @@ use Pollora\Hook\Domain\Contract\Filter as HookFilter;
  * 2. Creates a dedicated `{parent}.blocks` container (no basePath) for Vite resolution
  * 3. Pre-registers script/style handles via wp_register_script/style with Vite-resolved URLs
  * 4. Calls register_block_type() — WP finds the pre-registered handles and skips its own resolution
+ * 5. Makes the attributes listed under `pollora.bindings` bindable (Block Bindings)
  *
  * Blocks live in `resources/views/blocks/{slug}`. The former `resources/blocks` directory
  * is still scanned, with a deprecation notice, until v15.
@@ -178,6 +179,54 @@ class BlockRegistrar implements BlockRegistrarInterface
         }
 
         register_block_type($blockDir, $args);
+
+        $this->registerBindableAttributes($blockName, $metadata);
+    }
+
+    /**
+     * Make the attributes a block.json lists under `pollora.bindings` bindable:
+     * WordPress replaces them with the bound value before the block renders.
+     *
+     * Only a block rendered on the server can be bound: WordPress cannot rewrite
+     * the saved HTML of a block that is not its own.
+     *
+     * @param  array<string, mixed>  $metadata
+     */
+    private function registerBindableAttributes(string $blockName, array $metadata): void
+    {
+        $bindings = $metadata['pollora']['bindings'] ?? null;
+
+        if ($bindings === null) {
+            return;
+        }
+
+        if (! isset($metadata['render'])) {
+            Log::warning(sprintf('BlockRegistrar: block "%s" lists pollora.bindings but has no "render": only a block rendered on the server can be bound.', $blockName));
+
+            return;
+        }
+
+        $declared = is_array($metadata['attributes'] ?? null) ? $metadata['attributes'] : [];
+        $attributes = [];
+
+        foreach (is_array($bindings) ? $bindings : [] as $attribute) {
+            if (is_string($attribute) && array_key_exists($attribute, $declared)) {
+                $attributes[] = $attribute;
+
+                continue;
+            }
+
+            Log::warning(sprintf('BlockRegistrar: block "%s" lists "%s" in pollora.bindings, which is not one of its attributes.', $blockName, is_scalar($attribute) ? (string) $attribute : get_debug_type($attribute)));
+        }
+
+        if ($attributes === []) {
+            return;
+        }
+
+        $this->filter->add(
+            'block_bindings_supported_attributes_'.$blockName,
+            static fn (array $supported): array => array_values(array_unique([...$supported, ...$attributes]))
+        );
     }
 
     /**
