@@ -44,7 +44,17 @@ final readonly class MetaAccessor
      */
     public function of(string $class, int $objectId): MetaRecord
     {
-        return $this->record($this->schemas->forClass($class) ?? $this->builder->build($class), $objectId);
+        return $this->record($this->schema($class), $objectId);
+    }
+
+    /**
+     * The schema a class declares, discovered or built on the spot.
+     *
+     * @param  class-string  $class
+     */
+    public function schema(string $class): MetaSchema
+    {
+        return $this->schemas->forClass($class) ?? $this->builder->build($class);
     }
 
     /**

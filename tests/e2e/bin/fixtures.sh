@@ -5,15 +5,17 @@
 # its container (e.g. `ddev exec bash <path>/tests/e2e/bin/fixtures.sh up`).
 #
 #   up    - a plugin made by pollora:make:plugin, holding a dynamic and a
-#           static block made by pollora:make:block, built by Vite;
+#           static block made by pollora:make:block, built by Vite, and a
+#           dynamic block whose title Block Bindings can replace;
 #         - a Laravel module with no service provider, holding a copy of that
 #           dynamic block (pollora:make:block cannot target a module);
 #         - when theme-default is the active theme, a dynamic block made in it
 #           by pollora:make:block. Any other theme is left alone: it may be
 #           someone's work in progress.
 #         - the e2e-features plugin, committed in fixtures/plugins: framework
-#           features declared by attribute (hooks, a post type, REST routes,
-#           an Ajax action) and a script enqueued through the Asset facade;
+#           features declared by attribute (hooks, a post type with typed
+#           meta, REST routes, an Ajax action, a block binding source) and a
+#           script enqueued through the Asset facade;
 #         - the template hierarchy themes, e2e-full and e2e-index, copied into
 #           themes/. They are not activated here: the hierarchy spec activates
 #           each in turn and gives the site its own theme back.
@@ -53,6 +55,14 @@ case "${1:-}" in
         php artisan pollora:make:block static-card --plugin="$PLUGIN" --title="Static Card" --static --force --no-interaction
         php artisan pollora:make:block inner-card --plugin="$PLUGIN" --title="Inner Card" --inner-blocks --force --no-interaction
         cp "$FIXTURES/blocks/inner-card/render.blade.php" "$PLUGIN_DIR/resources/views/blocks/inner-card/render.blade.php"
+        php artisan pollora:make:block bound-card --plugin="$PLUGIN" --title="Bound Card" --force --no-interaction
+        cp "$FIXTURES/blocks/bound-card/render.blade.php" "$PLUGIN_DIR/resources/views/blocks/bound-card/render.blade.php"
+        # A "title" attribute the block lets Block Bindings replace
+        php -r '$file = $argv[1]; $block = json_decode(file_get_contents($file), true);
+            $block["attributes"]["title"] = ["type" => "string", "default" => "Saved title"];
+            $block["pollora"] = ["bindings" => ["title"]];
+            file_put_contents($file, json_encode($block, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");' \
+            "$PLUGIN_DIR/resources/views/blocks/bound-card/block.json"
         build "$PLUGIN_DIR"
         wp plugin activate "$PLUGIN"
 
