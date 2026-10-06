@@ -20,9 +20,23 @@ final class WordPressMetaStore implements MetaStoreInterface
         return \get_metadata_raw($objectType->value, $objectId, $key, true);
     }
 
-    public function update(MetaObjectType $objectType, int $objectId, string $key, string $value): void
+    public function getAll(MetaObjectType $objectType, int $objectId, string $key): array
+    {
+        return array_values((array) \get_metadata_raw($objectType->value, $objectId, $key, false));
+    }
+
+    public function update(MetaObjectType $objectType, int $objectId, string $key, string|array $value): void
     {
         \update_metadata($objectType->value, $objectId, \wp_slash($key), \wp_slash($value));
+    }
+
+    public function replaceAll(MetaObjectType $objectType, int $objectId, string $key, array $values): void
+    {
+        \delete_metadata($objectType->value, $objectId, \wp_slash($key));
+
+        foreach ($values as $value) {
+            \add_metadata($objectType->value, $objectId, \wp_slash($key), \wp_slash($value));
+        }
     }
 
     public function delete(MetaObjectType $objectType, int $objectId, string $key): void

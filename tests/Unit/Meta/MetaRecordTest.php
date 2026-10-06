@@ -36,7 +36,7 @@ function memoryMetaStore(array $stored = []): MetaStoreInterface
             return $this->stored[$key] ?? null;
         }
 
-        public function update(MetaObjectType $objectType, int $objectId, string $key, string $value): void
+        public function update(MetaObjectType $objectType, int $objectId, string $key, string|array $value): void
         {
             $this->writes[] = ['update', $objectType, $objectId, $key, $value];
             $this->stored[$key] = $value;
@@ -46,6 +46,19 @@ function memoryMetaStore(array $stored = []): MetaStoreInterface
         {
             $this->writes[] = ['delete', $objectType, $objectId, $key];
             unset($this->stored[$key]);
+        }
+
+        public function getAll(MetaObjectType $objectType, int $objectId, string $key): array
+        {
+            $this->reads++;
+
+            return (array) ($this->stored[$key] ?? []);
+        }
+
+        public function replaceAll(MetaObjectType $objectType, int $objectId, string $key, array $values): void
+        {
+            $this->writes[] = ['replaceAll', $objectType, $objectId, $key, $values];
+            $this->stored[$key] = $values;
         }
     };
 }

@@ -180,6 +180,8 @@ trait HasTypedMeta
     /**
      * Filters on a typed meta, compared as stored: numbers as numbers, dates in
      * UTC. A model without the meta is not matched, even if its default would be.
+     * For an array stored one row per item, the value is an item, and a model
+     * matches when one of its items does.
      *
      * @param  Builder<static>  $query
      *
@@ -205,10 +207,21 @@ trait HasTypedMeta
             };
         }
 
+        $key = $definition->key;
+
+        // A meta stored one row per item matches when one of its rows does.
+        if ($definition->valueType === MetaValueType::ArrayOf && ! $definition->single) {
+            $definition = $definition->item();
+        }
+
+        if ($definition->isStructured()) {
+            throw new InvalidArgumentException(sprintf('whereMeta() cannot compare "%s": it is stored serialized. Store it with single: false to filter on its items.', $name));
+        }
+
         $stored = resolve(MetaValueCaster::class)->toStorage($definition, $value);
 
-        return $query->whereHas('meta', static function (Builder $meta) use ($definition, $operator, $stored): void {
-            $meta->where('meta_key', $definition->key);
+        return $query->whereHas('meta', static function (Builder $meta) use ($definition, $key, $operator, $stored): void {
+            $meta->where('meta_key', $key);
 
             match ($definition->valueType) {
                 MetaValueType::Integer => $meta->whereRaw('CAST(meta_value AS SIGNED) '.$operator.' ?', [(int) $stored]),

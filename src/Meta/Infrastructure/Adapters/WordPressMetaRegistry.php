@@ -54,7 +54,7 @@ final readonly class WordPressMetaRegistry implements MetaRegistryInterface
         $arguments = [
             'object_subtype' => $subtype,
             'type' => $definition->wordPressType(),
-            'single' => true,
+            'single' => $definition->single,
             'sanitize_callback' => $definition->sanitize ?? $this->sanitizerFor($definition),
             'show_in_rest' => $definition->showInRest ? ['schema' => $definition->restSchema()] : false,
         ];
@@ -87,10 +87,37 @@ final readonly class WordPressMetaRegistry implements MetaRegistryInterface
 
     private function sanitizerFor(MetaDefinition $definition): callable
     {
+        // WordPress sanitizes each row of a non-single meta on its own.
+        if ($definition->valueType === MetaValueType::ArrayOf && ! $definition->single) {
+            return $this->sanitizerFor($definition->item());
+        }
+
         if ($definition->valueType === MetaValueType::String) {
             return 'sanitize_text_field';
         }
 
-        return fn (mixed $value): string => $this->caster->sanitize($definition, $value);
+        return fn (mixed $value): mixed => $this->sanitizeText($definition, $this->caster->sanitize($definition, $value));
+    }
+
+    /**
+     * Strips HTML from the strings inside an array or an object, as from a string meta.
+     */
+    private function sanitizeText(MetaDefinition $definition, mixed $value): mixed
+    {
+        if (! is_array($value)) {
+            return $definition->valueType === MetaValueType::String && is_string($value) ? \sanitize_text_field($value) : $value;
+        }
+
+        if ($definition->valueType === MetaValueType::ArrayOf) {
+            return array_map(fn (mixed $item): mixed => $this->sanitizeText($definition->item(), $item), $value);
+        }
+
+        foreach ($definition->properties as $property) {
+            if (array_key_exists($property->key, $value)) {
+                $value[$property->key] = $this->sanitizeText($property, $value[$property->key]);
+            }
+        }
+
+        return $value;
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Meta\Infrastructure\Services;
 
 use BackedEnum;
+use DateTimeInterface;
 use Illuminate\Contracts\Validation\Factory;
 use Pollora\Meta\Domain\Contracts\MetaValidatorInterface;
 use Pollora\Meta\Domain\Enums\MetaValueType;
@@ -30,7 +31,7 @@ final readonly class LaravelMetaValidator implements MetaValidatorInterface
 
         $rules = [...$this->impliedRules($definition), ...$definition->rules];
         $validator = $this->validator->make(
-            [$definition->key => $value instanceof BackedEnum ? $value->value : $value],
+            [$definition->key => $this->comparable($value)],
             [$definition->key => $rules],
             [],
             [$definition->key => $definition->label ?? str_replace('_', ' ', $definition->key)],
@@ -39,6 +40,20 @@ final readonly class LaravelMetaValidator implements MetaValidatorInterface
         if ($validator->fails()) {
             throw new MetaValidationException($definition, array_values($validator->errors()->all()));
         }
+    }
+
+    /**
+     * The value as rules compare it: enums by their backing value, data objects
+     * as arrays of their public properties.
+     */
+    private function comparable(mixed $value): mixed
+    {
+        return match (true) {
+            $value instanceof BackedEnum => $value->value,
+            is_array($value) => array_map($this->comparable(...), $value),
+            is_object($value) && ! $value instanceof DateTimeInterface => array_map($this->comparable(...), get_object_vars($value)),
+            default => $value,
+        };
     }
 
     /**
@@ -53,6 +68,7 @@ final readonly class LaravelMetaValidator implements MetaValidatorInterface
             MetaValueType::Boolean => 'boolean',
             MetaValueType::DateTime => 'date',
             MetaValueType::Enum => null,
+            MetaValueType::ArrayOf, MetaValueType::DataObject => 'array',
         };
 
         return array_values(array_filter([$definition->nullable ? 'nullable' : null, $type]));

@@ -72,7 +72,7 @@ it('stores and registers the schema of each declaring class', function (): void 
 
 it('logs a declaration it cannot register and carries on', function (): void {
     $this->registry->shouldReceive('register')->twice();
-    $this->logger->shouldReceive('error')->once()->with(Mockery::pattern('/InvalidArray: .*the type array is not supported yet/'), Mockery::type('array'));
+    $this->logger->shouldReceive('error')->once()->with(Mockery::pattern('/InvalidArray: .*say what the array holds/'), Mockery::type('array'));
     $this->logger->shouldReceive('error')->once()->with(Mockery::pattern('/EventExtras: The meta key "capacity" of post "event" is declared twice/'), Mockery::type('array'));
     ($this->discover)(Event::class, InvalidArray::class, EventExtras::class, BookGenre::class);
 

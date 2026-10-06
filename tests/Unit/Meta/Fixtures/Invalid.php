@@ -66,3 +66,44 @@ class InvalidUntyped
     #[Meta]
     public $value = '';
 }
+
+#[PostType('invalid-single')]
+class InvalidSingleFalse
+{
+    #[Meta(single: false)]
+    public int $count = 0;
+}
+
+#[PostType('invalid-nested')]
+class InvalidNestedArray
+{
+    #[Meta(items: 'array')]
+    public array $matrix = [];
+}
+
+#[PostType('invalid-unknown-item')]
+class InvalidUnknownItem
+{
+    /** @var list<Speaker> */
+    #[Meta]
+    public array $speakers = [];
+}
+
+#[PostType('invalid-rows-of-objects')]
+class InvalidRowsOfObjects
+{
+    #[Meta(single: false, items: Schedule::class)]
+    public array $sessions = [];
+}
+
+final class ScheduleWithList
+{
+    public array $tags = [];
+}
+
+#[PostType('invalid-object-property')]
+class InvalidObjectProperty
+{
+    #[Meta]
+    public ?ScheduleWithList $schedule = null;
+}
