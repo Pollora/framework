@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.5...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.6...develop)
+
+## [v13.34.6](https://github.com/Pollora/framework/compare/v13.34.5...v13.34.6) - 2026-10-06
 
 ### Added
 - Block Bindings sources declared in PHP (**experimental**): a class marked `#[BlockBinding('acme/event')]` is registered with `register_block_bindings_source()`, each public method marked `#[BindingField]` being a field a block chooses with `"args": {"field": "remaining_seats"}` (an `__invoke()` source receives every call). A field receives a `BindingContext` — the post or term of the block context, right in a query loop, the arguments, the bound attribute, `post()` and `meta(Event::class)` for typed meta — and any dependency the container resolves. Every source answers through one resolver, so none can forget its checks: nothing of a post the visitor cannot see (unpublished, password, `read_post`) or of a non-public term, text escaped where WordPress writes it as HTML, `url` fields sanitized, an `HtmlString` filtered like post content, a field that throws logged and the block keeping its content (thrown in debug mode), each value computed once per request. A declaration WordPress would reject or leave silently empty (name, missing or unsupported return type, field declared twice) is reported at discovery. `pollora:make:binding` generates a source
