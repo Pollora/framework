@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.6...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.0...develop)
+
+## [v13.35.0](https://github.com/Pollora/framework/compare/v13.34.6...v13.35.0) - 2026-10-06
 
 ### Added
 - `pollora:doctor` and Site Health check every Block Binding written in the templates, template parts and patterns of the theme, the Pollora plugins and the modules: a source that is not registered, a field the source does not have, a meta no `#[Meta]` declares, a meta or an option the source may not show (not in REST, protected, not `public`, not listed in `block-bindings.options`), an attribute WordPress does not bind for that block, and a `block.json` whose `pollora.bindings` lacks `render` or lists an undeclared attribute. Each of these left the block with its saved content, silently. Content stored in the database is not read
