@@ -105,7 +105,7 @@ it('refuses a declaration WordPress cannot register', function (string $class, s
 })->with([
     'union type' => [InvalidUnion::class, 'needs a single type'],
     'untyped property' => [InvalidUntyped::class, 'needs a single type'],
-    'array' => [InvalidArray::class, 'the type array is not supported yet'],
+    'array' => [InvalidArray::class, 'say what the array holds'],
     'pure enum' => [InvalidPureEnum::class, 'needs backing values'],
     'no default, not nullable' => [InvalidNoDefault::class, 'give the property a default value or make it nullable'],
     'protected key in REST' => [InvalidProtectedInRest::class, 'the protected key "_secret" can only be exposed in REST with an explicit capability'],

@@ -6,6 +6,7 @@ namespace Pollora\Meta\Application\Services;
 
 use BackedEnum;
 use DateTimeInterface;
+use Illuminate\Support\Str;
 use Pollora\Attributes\CommentMeta;
 use Pollora\Attributes\Meta;
 use Pollora\Attributes\PostMeta;
@@ -99,11 +100,19 @@ final class MetaSchemaBuilder
             throw InvalidMetaDefinitionException::forProperty($class, $name, 'the property needs a single type (no union, no untyped property).');
         }
 
-        [$valueType, $valueClass] = $this->resolveValueType($class, $name, $type);
+        [$valueType, $valueClass] = $this->resolveValueType($class, $name, $type->getName());
 
-        if (! $property->hasDefaultValue() && ! $type->allowsNull()) {
+        // A data object without a default reads as an instance with its own defaults.
+        if (! $property->hasDefaultValue() && ! $type->allowsNull() && $valueType !== MetaValueType::DataObject) {
             throw InvalidMetaDefinitionException::forProperty($class, $name, 'give the property a default value or make it nullable: it is what an absent meta reads as.');
         }
+
+        if (! $meta->single && $valueType !== MetaValueType::ArrayOf) {
+            throw InvalidMetaDefinitionException::forProperty($class, $name, 'single: false stores one row per item, so it needs an array property.');
+        }
+
+        $items = $valueType === MetaValueType::ArrayOf ? $this->buildItems($class, $property, $meta) : null;
+        $properties = $valueType === MetaValueType::DataObject ? $this->buildProperties($class, $name, (string) $valueClass) : [];
 
         $key = $meta->resolveKey($name);
 
@@ -132,16 +141,17 @@ final class MetaSchemaBuilder
             capability: $meta->capability,
             revisions: $meta->revisions,
             rules: array_values($meta->rules),
+            single: $meta->single,
+            items: $items,
+            properties: $properties,
         );
     }
 
     /**
      * @return array{0: MetaValueType, 1: class-string|null}
      */
-    private function resolveValueType(string $class, string $property, ReflectionNamedType $type): array
+    private function resolveValueType(string $class, string $property, string $typeName): array
     {
-        $typeName = $type->getName();
-
         $scalar = match ($typeName) {
             'string' => MetaValueType::String,
             'int' => MetaValueType::Integer,
@@ -162,10 +172,126 @@ final class MetaSchemaBuilder
             return [MetaValueType::Enum, $typeName];
         }
 
+        if ($typeName === 'array') {
+            return [MetaValueType::ArrayOf, null];
+        }
+
+        if (class_exists($typeName) && ! is_a($typeName, UnitEnum::class, true) && (new ReflectionClass($typeName))->isInstantiable()) {
+            return [MetaValueType::DataObject, $typeName];
+        }
+
         $reason = is_a($typeName, UnitEnum::class, true)
             ? sprintf('the enum %s needs backing values (enum %s: string).', $typeName, class_basename($typeName))
-            : sprintf('the type %s is not supported yet; use string, int, float, bool, a date or a backed enum.', $typeName);
+            : sprintf('the type %s is not supported; use string, int, float, bool, a date, a backed enum, an array or a class with public typed properties.', $typeName);
 
         throw InvalidMetaDefinitionException::forProperty($class, $property, $reason);
+    }
+
+    /**
+     * The item of an array property, from `items:` or the `@var list<…>` docblock.
+     */
+    private function buildItems(string $class, ReflectionProperty $property, Meta $meta): MetaDefinition
+    {
+        $name = $property->getName();
+        $itemType = $meta->items ?? $this->itemTypeFromDocblock((string) $property->getDocComment());
+
+        if ($itemType === null) {
+            throw InvalidMetaDefinitionException::forProperty($class, $name, "say what the array holds, with items: 'string' (or int, float, bool, a class) or a @var list<string> docblock.");
+        }
+
+        $itemType = ltrim($itemType, '\\');
+
+        if ($itemType === 'array') {
+            throw InvalidMetaDefinitionException::forProperty($class, $name, 'an item cannot be an array: use a class with public typed properties.');
+        }
+
+        $scalar = ['string' => 'string', 'int' => 'int', 'integer' => 'int', 'float' => 'float', 'bool' => 'bool', 'boolean' => 'bool'][$itemType] ?? null;
+
+        if ($scalar === null && ! class_exists($itemType) && ! enum_exists($itemType)) {
+            throw InvalidMetaDefinitionException::forProperty($class, $name, sprintf('the item type %s is unknown: use string, int, float, bool or a fully qualified class.', $itemType));
+        }
+
+        [$valueType, $valueClass] = $this->resolveValueType($class, $name, $scalar ?? $itemType);
+
+        if ($valueType === MetaValueType::ArrayOf || ($valueType === MetaValueType::DataObject && ! $meta->single)) {
+            throw InvalidMetaDefinitionException::forProperty($class, $name, 'an item cannot be an array, and objects need single: true.');
+        }
+
+        return new MetaDefinition(
+            property: $name,
+            key: $meta->resolveKey($name),
+            valueType: $valueType,
+            valueClass: $valueClass,
+            nullable: false,
+            default: null,
+            properties: $valueType === MetaValueType::DataObject ? $this->buildProperties($class, $name, (string) $valueClass) : [],
+        );
+    }
+
+    private function itemTypeFromDocblock(string $docblock): ?string
+    {
+        if (preg_match('/@var\s+(?:list<\s*([\w\\\\]+)\s*>|array<\s*(?:int\s*,\s*)?([\w\\\\]+)\s*>|([\w\\\\]+)\[\])/', $docblock, $matches) !== 1) {
+            return null;
+        }
+
+        return $matches[1] ?: ($matches[2] ?? '') ?: ($matches[3] ?? null);
+    }
+
+    /**
+     * The properties of a data object: public typed properties of a scalar, date
+     * or enum type, each with a default or nullable.
+     *
+     * @param  class-string|string  $objectClass
+     * @return array<string, MetaDefinition>
+     */
+    private function buildProperties(string $class, string $name, string $objectClass): array
+    {
+        $reflection = new ReflectionClass($objectClass);
+        $defaults = [];
+
+        foreach ($reflection->getConstructor()?->getParameters() ?? [] as $parameter) {
+            if ($parameter->isPromoted() && $parameter->isDefaultValueAvailable()) {
+                $defaults[$parameter->getName()] = $parameter->getDefaultValue();
+            }
+        }
+
+        $properties = [];
+
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+            if ($property->isStatic()) {
+                continue;
+            }
+
+            $propertyName = $property->getName();
+            $type = $property->getType();
+            $where = sprintf('%s::$%s', $objectClass, $propertyName);
+
+            if (! $type instanceof ReflectionNamedType) {
+                throw InvalidMetaDefinitionException::forProperty($class, $name, sprintf('%s needs a single type.', $where));
+            }
+
+            [$valueType, $valueClass] = $this->resolveValueType($class, $name, $type->getName());
+
+            if ($valueType === MetaValueType::ArrayOf || $valueType === MetaValueType::DataObject) {
+                throw InvalidMetaDefinitionException::forProperty($class, $name, sprintf('%s: an object property can be a string, int, float, bool, date or backed enum, not an array or an object.', $where));
+            }
+
+            $hasDefault = $property->hasDefaultValue() || array_key_exists($propertyName, $defaults);
+
+            if (! $hasDefault && ! $type->allowsNull()) {
+                throw InvalidMetaDefinitionException::forProperty($class, $name, sprintf('%s needs a default value or a nullable type.', $where));
+            }
+
+            $properties[$propertyName] = new MetaDefinition(
+                property: $propertyName,
+                key: Str::snake($propertyName),
+                valueType: $valueType,
+                valueClass: $valueClass,
+                nullable: $type->allowsNull(),
+                default: $property->hasDefaultValue() ? $property->getDefaultValue() : ($defaults[$propertyName] ?? null),
+            );
+        }
+
+        return $properties;
     }
 }

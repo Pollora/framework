@@ -20,6 +20,7 @@ use Pollora\Meta\Domain\Exceptions\MetaValidationException;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
 use Pollora\Models\Post;
 use Pollora\Models\User;
+use Tests\Unit\Meta\Fixtures\Conference;
 use Tests\Unit\Meta\Fixtures\Event;
 use Tests\Unit\Meta\Fixtures\MemberProfile;
 use Tests\Unit\Meta\Fixtures\RatedEvent;
@@ -35,12 +36,18 @@ final class EventModel extends Post
     protected $postType = 'event';
 }
 
+#[Connection('wordpress')]
+final class ConferenceModel extends Post
+{
+    protected $postType = 'conference';
+}
+
 /**
  * An in-memory meta store recording writes.
  */
 final class InMemoryMetaStore implements MetaStoreInterface
 {
-    /** @var array<string, string> */
+    /** @var array<string, string|array<array-key, mixed>> */
     public array $values = [];
 
     public function get(MetaObjectType $objectType, int $objectId, string $key): mixed
@@ -48,7 +55,7 @@ final class InMemoryMetaStore implements MetaStoreInterface
         return $this->values["{$objectType->value}:{$objectId}:{$key}"] ?? null;
     }
 
-    public function update(MetaObjectType $objectType, int $objectId, string $key, string $value): void
+    public function update(MetaObjectType $objectType, int $objectId, string $key, string|array $value): void
     {
         $this->values["{$objectType->value}:{$objectId}:{$key}"] = $value;
     }
@@ -56,6 +63,16 @@ final class InMemoryMetaStore implements MetaStoreInterface
     public function delete(MetaObjectType $objectType, int $objectId, string $key): void
     {
         unset($this->values["{$objectType->value}:{$objectId}:{$key}"]);
+    }
+
+    public function getAll(MetaObjectType $objectType, int $objectId, string $key): array
+    {
+        return (array) ($this->values["{$objectType->value}:{$objectId}:{$key}"] ?? []);
+    }
+
+    public function replaceAll(MetaObjectType $objectType, int $objectId, string $key, array $values): void
+    {
+        $this->values["{$objectType->value}:{$objectId}:{$key}"] = $values;
     }
 }
 
@@ -223,6 +240,15 @@ describe('whereMeta()', function (): void {
 
         expect($query->toSql())->toContain('`meta_value` = ?')
             ->and($query->getBindings())->toContain('sold_out', '1');
+    });
+
+    it('matches a model by one of the items of an array stored one row per item', function (): void {
+        $this->repository->add((new MetaSchemaBuilder)->build(Conference::class));
+        $query = ConferenceModel::query()->whereMeta('speakers', 'Ada');
+
+        expect($query->toSql())->toContain('`meta_value` = ?')
+            ->and($query->getBindings())->toContain('speakers', 'Ada')
+            ->and(fn () => ConferenceModel::query()->whereMeta('roomIds', [3]))->toThrow(InvalidArgumentException::class, 'it is stored serialized');
     });
 
     it('matches an absent meta with null', function (): void {

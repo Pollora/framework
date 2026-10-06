@@ -32,7 +32,7 @@ final class MetaRecord
     private array $values = [];
 
     /**
-     * @var array<string, string|null> Stored forms waiting for save(), by property name
+     * @var array<string, string|array<array-key, mixed>|null> Stored forms waiting for save(), by property name
      */
     private array $pending = [];
 
@@ -121,13 +121,13 @@ final class MetaRecord
     public function save(): static
     {
         foreach ($this->pending as $property => $stored) {
-            $key = $this->schema->definitions[$property]->key;
+            $definition = $this->schema->definitions[$property];
 
-            if ($stored === null) {
-                $this->store->delete($this->schema->objectType, $this->objectId, $key);
-            } else {
-                $this->store->update($this->schema->objectType, $this->objectId, $key, $stored);
-            }
+            match (true) {
+                $stored === null => $this->store->delete($this->schema->objectType, $this->objectId, $definition->key),
+                ! $definition->single && is_array($stored) => $this->store->replaceAll($this->schema->objectType, $this->objectId, $definition->key, array_values(array_map(strval(...), $stored))),
+                default => $this->store->update($this->schema->objectType, $this->objectId, $definition->key, $stored),
+            };
         }
 
         $this->pending = [];
@@ -162,7 +162,9 @@ final class MetaRecord
 
     private function read(MetaDefinition $definition): mixed
     {
-        $raw = $this->store->get($this->schema->objectType, $this->objectId, $definition->key);
+        $raw = $definition->single
+            ? $this->store->get($this->schema->objectType, $this->objectId, $definition->key)
+            : $this->store->getAll($this->schema->objectType, $this->objectId, $definition->key);
 
         try {
             return $this->caster->toPhp($definition, $raw);
