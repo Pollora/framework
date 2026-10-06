@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.4...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.34.5...develop)
+
+## [v13.34.5](https://github.com/Pollora/framework/compare/v13.34.4...v13.34.5) - 2026-10-06
 
 ### Added
 - Input fields for typed meta, through a contract (**experimental**): `#[Meta(control: Control::Color, group: 'Profile', hints: ['acf' => [...]])]` describes the field in neutral terms, a control being derived from the type otherwise (`Text`, `RichText` with `sanitize: 'wp_kses_post'`, `Number`, `Toggle`, `DateTime`, `Select`). A package implements `MetaUiDriver` and registers it with `Meta::extend('acf', AcfDriver::class)`; the project picks it in `meta.ui` (none by default), and the driver receives each schema on `init`, with only the meta it supports. `Meta::schemas()`, `Meta::schemaFor('post', 'event')`, the `MetaSchemasRegistered` event, and `MetaUiDriverConformance::check($driver)` for driver authors. The framework names no field plugin
