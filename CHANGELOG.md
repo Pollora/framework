@@ -5,7 +5,25 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.1...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.2...develop)
+
+## [v13.35.2](https://github.com/Pollora/framework/compare/v13.35.1...v13.35.2) - 2026-10-07
+
+### Added
+- Asynchronous actions in the framework (pollora/hook 1.4): `Action::add(...)->async()` can queue handlers as Laravel jobs. The `queue` driver dispatches a `RunAsyncAction` job on `hooks.async.queue.connection` (the default connection when null) and on the action's `onQueue()` or `hooks.async.queue.queue`. `auto`, the default, tries the Laravel queue first once `HOOKS_ASYNC_CONNECTION` names the connection a worker runs (without a worker, jobs would never run, so the queue is opt-in), then Action Scheduler, then WP-Cron; a `sync` or `null` connection is always skipped. `via('queue')` and `HOOKS_ASYNC_DRIVER=queue` use the default connection. The job is tried once: retries are new jobs queued after the backoff, and the last failure lands in the failed jobs table. It also clears WordPress's in-memory cache before each handler, since a worker lives across jobs
+- `config/hooks.php`, published with `php artisan vendor:publish --tag=pollora-hooks`: default driver (`HOOKS_ASYNC_DRIVER`, `sync` in a developer's `.env` runs every handler at once), attempts, backoff, `as_user`, queue connection and name
+- `#[Async]`, next to `#[Action]`, makes a method asynchronous with the options of `->async()` as named parameters: `delay`, `via`, `onQueue`, `unique` (`true` or the lock duration), `tries`, `backoff`, `asUser`, `capture` and `when` (public methods of the class), `keepMissing`, `except`. On a class it applies to every `#[Action]` method, and a method's own `#[Async]` replaces it. A declaration that cannot be honoured (a hook in `except` the method does not declare, a missing or non-public `capture`/`when` method, invalid attempts, backoff or lock) is logged and the action runs synchronously; `#[Async]` on a `#[Filter]` or without `#[Action]` is logged
+- `pollora:doctor` and Site Health check asynchronous actions (`async-actions`): an ignored `#[Async]` (now kept, not only logged), an unavailable default driver (every handler then runs in the request) or `via()` driver, a `HOOKS_ASYNC_CONNECTION` that is undefined or `sync`/`null`, WP-Cron events overdue for an hour while WP-Cron or Action Scheduler is in use (Pollora sets `DISABLE_WP_CRON`: a system cron must request `wp-cron.php`), jobs of a database queue waiting 15 minutes for a worker, and payloads or unique locks the daily recovery task left behind
+- `pollora:make:action --async` generates the method with `#[Async]` and its import, in a new class or added to an existing one
+- `pollora:async:list` lists the asynchronous actions (hook, priority, handler, driver, delay, attempts and backoff, unique lock, queue, as user), which drivers are available in this request, and the default driver with where it comes from (`HOOKS_ASYNC_DRIVER`, the `POLLORA_ASYNC_DRIVER` constant, the `pollora/hook/async_driver` filter, or `auto` and the drivers it tries); `--json` for scripts
+- Async handlers in the framework: debug mode follows `app.debug`, incidents go to the Laravel log, closures are signed with the application key, Eloquent models travel by class and key and are reloaded at execution, and parameters typed with a service are resolved from the container
+
+### Fixed
+- `pollora:make:action` and `pollora:make:filter` were registered as `pollora:make:action {name}` and `pollora:make:filter {name}`: the console reached them by prefix, but `Artisan::call('pollora:make:action')` did not find them
+- The method generated for a hook with separators read `handleSavepost` for `save_post`: it is now `handleSavePost`
+- Errors met while registering hooks discovered by attribute went to no logger: `HookDiscovery` now receives the application's logger
+- Login screen: the language switcher's label ("Language" and its icon, shown when a second language is installed) sat at the left edge of the window, far from its dropdown. The card style given to the login form also reached the switcher's form and made it a full-width block; it is an inline block again, as in WordPress's own sheet
+- Login screen: the rules for the buttons were written `.pollora-login .wp-core-ui …`, but both classes are on `<body>`, so they never matched. The language switcher's button kept wp-admin's blue instead of the theme's primary colour, and the submit button kept WordPress's `button-large` padding
 
 ## [v13.35.1](https://github.com/Pollora/framework/compare/v13.35.0...v13.35.1) - 2026-10-07
 

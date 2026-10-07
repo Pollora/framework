@@ -41,6 +41,8 @@ return RectorConfig::configure()
         // Binding sources each broken on purpose (an untyped field, a private
         // one): fixing them would remove what the tests check is refused.
         __DIR__.'/tests/Unit/BlockBinding/Fixtures/Invalid.php',
+        // Hook classes with empty, unused or private methods on purpose: they carry the attributes under test.
+        __DIR__.'/tests/Feature/Hook/Async/Fixtures/AsyncAttributeFixtures.php',
     ])
     ->withPreparedSets(
         deadCode: true,

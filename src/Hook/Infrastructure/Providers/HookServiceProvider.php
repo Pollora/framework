@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Hook\Adapter\Out\WordPress\Action;
 use Pollora\Hook\Adapter\Out\WordPress\Filter;
+use Pollora\Hook\Application\Services\AsyncDeclarationFailures;
 use Pollora\Hook\Domain\Contract\Action as ActionContract;
 use Pollora\Hook\Domain\Contract\CallbackResolverInterface;
 use Pollora\Hook\Domain\Contract\Filter as FilterContract;
@@ -16,6 +17,7 @@ use Pollora\Hook\Infrastructure\Services\ContainerCallbackResolver;
 use Pollora\Hook\Infrastructure\Services\HookDiscovery;
 use Pollora\Hook\UI\Console\ActionMakeCommand;
 use Pollora\Hook\UI\Console\FilterMakeCommand;
+use Psr\Log\LoggerInterface;
 
 /**
  * Service provider for Hook feature (Infrastructure layer).
@@ -73,10 +75,15 @@ class HookServiceProvider extends ServiceProvider
         $this->app->alias(Action::class, ActionContract::class);
         $this->app->alias(Filter::class, FilterContract::class);
 
+        // #[Async] declarations discovery refuses, listed by pollora:doctor
+        $this->app->singleton(AsyncDeclarationFailures::class);
+
         // Register Hook Discovery
         $this->app->singleton(HookDiscovery::class, fn (Application $app): HookDiscovery => new HookDiscovery(
             $app->make(ActionContract::class),
-            $app->make(FilterContract::class)
+            $app->make(FilterContract::class),
+            $app->bound(LoggerInterface::class) ? $app->make(LoggerInterface::class) : null,
+            $app->make(AsyncDeclarationFailures::class),
         ));
 
         if ($this->consoleDetectionService->isConsole()) {

@@ -11,6 +11,7 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Pollora\Attributes\Action;
+use Pollora\Attributes\Async;
 use Pollora\Attributes\Filter;
 use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
@@ -144,7 +145,7 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
         $stub = File::get($stubPath);
 
         $hook = $this->getDefaultOption('hook');
-        $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', (string) $hook));
+        $hookMethodName = $this->methodName((string) $hook);
 
         $existingContent = File::get($path);
 
@@ -173,6 +174,7 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
         $requiredImports = [
             Action::class,
             Filter::class,
+            ...($this->isAsync() ? [Async::class] : []),
         ];
 
         foreach ($requiredImports as $import) {
@@ -198,19 +200,38 @@ class AttributeMakeCommand extends AbstractGeneratorCommand
     {
         $hook = $this->getDefaultOption('hook');
         $priority = $this->getDefaultOption('priority');
-        $hookMethodName = 'handle'.Str::studly(preg_replace('/[^a-zA-Z0-9]/', '', (string) $hook));
+        $hookMethodName = $this->methodName((string) $hook);
         $hookType = $this->type;
 
         $returnType = $hookType === 'Action' ? ': void' : '';
         $arg = $hookType === 'Filter' ? '$arg' : '';
         $return = $hookType === 'Filter' ? "\n".'        return $arg;' : '';
 
+        $async = $this->isAsync();
+
         return str_replace(
             ['{{ hookType }}', '{{ hook }}', '{{ priority }}', '{{ hookMethodName }}',
-                '{{ arg }}', '{{ returnType }}', '{{ return }}'],
-            [$hookType, $hook, ', priority:'.$priority, $hookMethodName, $arg, $returnType, $return],
+                '{{ arg }}', '{{ returnType }}', '{{ return }}', '{{ async }}', '{{ asyncImport }}'],
+            [$hookType, $hook, ', priority:'.$priority, $hookMethodName, $arg, $returnType, $return,
+                $async ? "\n    #[Async]" : '', $async ? "\nuse ".Async::class.';' : ''],
             $stub
         );
+    }
+
+    /**
+     * The generated method's name: save_post gives handleSavePost.
+     */
+    protected function methodName(string $hook): string
+    {
+        return 'handle'.Str::studly((string) preg_replace('/[^a-zA-Z0-9]+/', ' ', $hook));
+    }
+
+    /**
+     * Whether the generated method carries #[Async]: only an action can be asynchronous.
+     */
+    protected function isAsync(): bool
+    {
+        return $this->type === 'Action' && $this->hasOption('async') && $this->option('async');
     }
 
     /**
