@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Hook\Infrastructure\Services;
 
 use Pollora\Attributes\Action;
+use Pollora\Attributes\Async;
 use Pollora\Attributes\Filter;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
@@ -88,6 +89,18 @@ final class HookDiscovery implements DiscoveryInterface
                         'reflection_method' => $method,
                     ]);
                 }
+
+                // An #[Async] with neither #[Action] nor #[Filter] has nothing to apply to
+                $asyncAttributes = $method->getAttributes(Async::class);
+                if ($asyncAttributes !== [] && $actionAttributes === [] && $filterAttributes === []) {
+                    $this->getItems()->add($location, [
+                        'type' => 'async',
+                        'class' => $className,
+                        'method' => $method->getName(),
+                        'attribute' => $asyncAttributes[0],
+                        'reflection_method' => $method,
+                    ]);
+                }
             }
         } catch (\Throwable) {
             // Skip classes that can't be reflected
@@ -118,16 +131,23 @@ final class HookDiscovery implements DiscoveryInterface
                     /** @var Action $action */
                     $action = $hookAttribute->newInstance();
 
-                    // Create instance and call method directly
+                    // Create instance and call method directly; asynchronously when #[Async] says so
                     $instance = $this->getInstanceFromPool($className);
-                    $this->actionService->add(
-                        hooks: $action->hook,
-                        callback: [$instance, $methodName],
+                    (new AsyncAttributeRegistrar($this->actionService, $this->logger))->register(
+                        hook: $action->hook,
+                        instance: $instance,
+                        method: $reflectionMethod,
                         priority: $action->priority
                     );
+                } elseif ($hookType === 'async') {
+                    $this->logger?->error(sprintf('#[Async] on %s::%s() is ignored: the method has no #[Action] to make asynchronous.', ltrim($className, '\\'), $methodName));
                 } elseif ($hookType === 'filter') {
                     /** @var Filter $filter */
                     $filter = $hookAttribute->newInstance();
+
+                    if (AsyncAttributeRegistrar::isDeclaredOn($reflectionMethod)) {
+                        $this->logger?->error(sprintf('#[Async] on %s::%s() is ignored: a filter returns a value to its caller and cannot be deferred.', ltrim($className, '\\'), $methodName));
+                    }
 
                     // Create instance and call method directly
                     $instance = $this->getInstanceFromPool($className);

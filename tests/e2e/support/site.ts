@@ -26,6 +26,24 @@ export function wp(...args: string[]): string {
 }
 
 /**
+ * Run an Artisan command against the site under test: E2E_ARTISAN ("ddev exec php artisan" by default),
+ * from E2E_SITE_DIR.
+ */
+export function artisan(...args: string[]): string {
+    const [command, ...prefix] = (process.env.E2E_ARTISAN ?? 'ddev exec php artisan').split(' ');
+
+    try {
+        return execFileSync(command, [...prefix, ...args], {
+            cwd: process.env.E2E_SITE_DIR ?? process.cwd(),
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'pipe'],
+        }).trim();
+    } catch (error) {
+        throw new Error(`Artisan failed: ${command} ${prefix.join(' ')} ${args.join(' ')}\n${(error as { stderr?: string }).stderr ?? ''}`);
+    }
+}
+
+/**
  * The template that rendered a page, from the marker the framework writes under WP_DEBUG.
  */
 export function renderedTemplate(html: string): { template: string; path: string } | null {

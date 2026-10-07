@@ -16,6 +16,7 @@ use Pollora\Hook\Infrastructure\Services\ContainerCallbackResolver;
 use Pollora\Hook\Infrastructure\Services\HookDiscovery;
 use Pollora\Hook\UI\Console\ActionMakeCommand;
 use Pollora\Hook\UI\Console\FilterMakeCommand;
+use Psr\Log\LoggerInterface;
 
 /**
  * Service provider for Hook feature (Infrastructure layer).
@@ -76,7 +77,8 @@ class HookServiceProvider extends ServiceProvider
         // Register Hook Discovery
         $this->app->singleton(HookDiscovery::class, fn (Application $app): HookDiscovery => new HookDiscovery(
             $app->make(ActionContract::class),
-            $app->make(FilterContract::class)
+            $app->make(FilterContract::class),
+            $app->bound(LoggerInterface::class) ? $app->make(LoggerInterface::class) : null
         ));
 
         if ($this->consoleDetectionService->isConsole()) {
