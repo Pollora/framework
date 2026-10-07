@@ -223,6 +223,12 @@ parameters:
 			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
 
 		-
+			message: '#^Call to an undefined method Illuminate\\Contracts\\View\\View\:\:makeLoader\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/View/Application/UseCases/MakeTemplateIncludableUseCase.php
+
+		-
 			message: '#^Constant WP_CLI_VERSION not found\.$#'
 			identifier: constant.notFound
 			count: 1

@@ -100,6 +100,7 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
             version: $this->option('repo-version'),
             output: $this->getOutput(),
             fileFilter: fn (object $item): bool => ! $this->shouldExcludeAssetFile($item),
+            removeDirs: ['bin'],
         );
 
         if (! $success && ! $this->scaffoldFromBundledTemplate()) {

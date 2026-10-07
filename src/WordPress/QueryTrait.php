@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\WordPress;
 
 use Exception;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -75,10 +76,14 @@ trait QueryTrait
      * Run the WordPress bootstrap process.
      *
      * This method initializes WordPress and handles special request types
-     * like robots.txt, favicon, feeds, trackbacks, and AJAX requests. AJAX requests
-     * are handled early and bypass the normal WordPress query processing to prevent
-     * them from reaching the Laravel routing system. Normal template resolution
+     * like robots.txt, favicon, feeds and trackbacks. Normal template resolution
      * is delegated to the Laravel routing system.
+     *
+     * `template_redirect` runs once every provider has booted, still before
+     * routing: WordPress is loaded from this provider's boot, and the theme's
+     * providers, registered by functions.php, boot after it. A plugin that
+     * renders a page from `template_redirect` (WooCommerce's Review Order 404)
+     * then gets the theme's view composers and shared data.
      *
      * @throws \RuntimeException If WordPress core functions are not available
      */
@@ -88,40 +93,65 @@ trait QueryTrait
             throw new \RuntimeException('The WordPress core functions are not available. Ensure WordPress is loaded.');
         }
 
-        if ($this->laravelIsServingTheRequest()) {
-            // Initialize WordPress for the current request
-            wp();
+        if (! $this->laravelIsServingTheRequest()) {
+            $this->action->do('pollora_loaded');
 
-            if (wp_using_themes()) {
-                $this->action->do('template_redirect');
-            }
-
-            // Handle special request types that should bypass Laravel routing
-            if (is_robots()) {
-                $this->action->do('do_robots');
-                exit;
-            }
-
-            if (is_favicon()) {
-                $this->action->do('do_favicon');
-                exit;
-            }
-
-            if (is_feed()) {
-                do_feed();
-                exit;
-            }
-
-            if (is_trackback()) {
-                require_once ABSPATH.'wp-trackback.php';
-                exit;
-            }
+            return;
         }
 
-        // For normal requests, let Laravel routing handle template resolution
-        // Do not load WordPress template-loader.php as we use FrontendController instead
-        $this->action->do('pollora_loaded');
+        // Initialize WordPress for the current request
+        wp();
+
+        App::booted(function (): void {
+            $this->withWordPressErrorHandling(function (): void {
+                $this->handleTemplateRedirect();
+
+                // For normal requests, let Laravel routing handle template resolution
+                // Do not load WordPress template-loader.php as we use FrontendController instead
+                $this->action->do('pollora_loaded');
+            });
+        });
     }
+
+    /**
+     * Fire `template_redirect`, then answer the requests WordPress serves itself.
+     */
+    private function handleTemplateRedirect(): void
+    {
+        if (wp_using_themes()) {
+            $this->action->do('template_redirect');
+        }
+
+        // Handle special request types that should bypass Laravel routing
+        if (is_robots()) {
+            $this->action->do('do_robots');
+            exit;
+        }
+
+        if (is_favicon()) {
+            $this->action->do('do_favicon');
+            exit;
+        }
+
+        if (is_feed()) {
+            do_feed();
+            exit;
+        }
+
+        if (is_trackback()) {
+            // wp-trackback.php is written for the global scope: without $wp it
+            // loads WordPress a second time, and it reads $posts and $wpdb.
+            global $wp, $wpdb, $posts;
+
+            require_once ABSPATH.'wp-trackback.php';
+            exit;
+        }
+    }
+
+    /**
+     * Run a callback with WordPress-safe error handling.
+     */
+    abstract private function withWordPressErrorHandling(callable $callback): void;
 
     /**
      * Whether this request is Laravel's to serve.
