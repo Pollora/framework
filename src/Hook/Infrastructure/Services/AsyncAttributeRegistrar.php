@@ -6,6 +6,7 @@ namespace Pollora\Hook\Infrastructure\Services;
 
 use Pollora\Attributes\Action;
 use Pollora\Attributes\Async;
+use Pollora\Hook\Application\Services\AsyncDeclarationFailures;
 use Pollora\Hook\Async\PendingAsync;
 use Pollora\Hook\Domain\Contract\Action as ActionContract;
 use Psr\Log\LoggerInterface;
@@ -16,14 +17,15 @@ use ReflectionMethod;
  *
  * A declaration that cannot be honoured (an unknown hook in except, a capture
  * or when method that is not a public method of the class, invalid attempts,
- * backoff or lock duration) is logged and the action is registered
- * synchronously: the work still happens.
+ * backoff or lock duration) is logged, kept for pollora:doctor, and the
+ * action is registered synchronously: the work still happens.
  */
 final readonly class AsyncAttributeRegistrar
 {
     public function __construct(
         private ActionContract $actions,
         private ?LoggerInterface $logger = null,
+        private ?AsyncDeclarationFailures $failures = null,
     ) {}
 
     /**
@@ -63,6 +65,7 @@ final readonly class AsyncAttributeRegistrar
 
         if ($problem !== null) {
             $this->logger?->error(sprintf('#[Async] on %s::%s() is ignored, the action runs synchronously: %s', $method->getDeclaringClass()->getName(), $method->getName(), $problem));
+            $this->failures?->fail($method->getDeclaringClass()->getName(), $method->getName(), $problem);
 
             return;
         }

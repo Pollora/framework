@@ -16,7 +16,7 @@ test('Site Health lists the Pollora checks, the web-only block check and the che
     // Passed tests sit in a collapsed list: read the triggers, visible or not.
     const results = page.locator('.health-check-accordion-trigger');
 
-    for (const label of ['WordPress core patch', 'Composer patches lock', 'Theme, plugin and module builds', 'Blocks registered', 'Typed meta', 'Roles', 'Block bindings']) {
+    for (const label of ['WordPress core patch', 'Composer patches lock', 'Theme, plugin and module builds', 'Blocks registered', 'Typed meta', 'Roles', 'Block bindings', 'Asynchronous actions']) {
         await expect(results.filter({ hasText: label }).filter({ hasText: 'Pollora' }), label).toHaveCount(1);
     }
 
