@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.0...develop)
 
+### Changed
+- README: the organization's banner and badges (CI instead of Codecov), installation first, the newer features listed (typed meta, roles, blocks and Block Bindings, `pollora:doctor`), and the type coverage check under Testing
+
 ## [v13.35.0](https://github.com/Pollora/framework/compare/v13.34.6...v13.35.0) - 2026-10-06
 
 ### Added
