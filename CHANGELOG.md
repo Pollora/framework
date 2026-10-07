@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - WordPress 7.1.3 is a security release (seven fixes, among them a stored XSS on the Comments screen and a second-order SQL injection in the WXR export). The skeleton installs it from v13.35.1; an existing project runs `composer update johnpbloch/wordpress johnpbloch/wordpress-core`. Pollora's core patch still applies
 
+### Removed
+- Editor and tool files no longer tracked: `.cursor/` and `.windsurf/` rules from 2025 (superseded by `CLAUDE.md` and Nectar), a `.claude/` plan, a 2023 `.php-cs-fixer.cache`, and the unused StyleCI and Code Climate configurations (style is checked by Pint in CI, coverage by Codecov)
+
 ### Fixed
 - A plugin that answers from `template_redirect` and includes the theme's query template itself (`include get_query_template('404')`, WooCommerce's Review Order page) printed the Blade source of the view: the `{type}_template` filters now hand back a loader that renders it while `template_redirect` runs (#419)
 - `template_redirect` ran before the application's providers had booted — WordPress is loaded from a provider's boot, the theme's providers boot after it — so a view rendered from it lacked the theme's view composers and shared data. It now runs once every provider has booted, still before routing, and `pollora_loaded` after it (#419)

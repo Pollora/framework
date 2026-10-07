@@ -16,3 +16,7 @@ claude
 framework.code-workspace
 examples/
 .claude/
+
+# Editor and AI-assistant settings stay local; project guidelines live in CLAUDE.md and Nectar
+/.cursor/
+/.windsurf/
