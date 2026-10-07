@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `template_redirect` ran before the application's providers had booted — WordPress is loaded from a provider's boot, the theme's providers boot after it — so a view rendered from it lacked the theme's view composers and shared data. It now runs once every provider has booted, still before routing, and `pollora_loaded` after it (#419)
 - Trackbacks answered 500: `wp-trackback.php` was required from a method, where it found no `$wp` and loaded WordPress a second time (#419)
 
+### Changed
+- README: the organization's banner and badges (CI instead of Codecov), installation first, the newer features listed (typed meta, roles, blocks and Block Bindings, `pollora:doctor`), and the type coverage check under Testing
+
 ## [v13.35.0](https://github.com/Pollora/framework/compare/v13.34.6...v13.35.0) - 2026-10-06
 
 ### Added
