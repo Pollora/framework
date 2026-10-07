@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.1...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.2...develop)
+
+## [v13.35.2](https://github.com/Pollora/framework/compare/v13.35.1...v13.35.2) - 2026-10-07
 
 ### Added
 - Asynchronous actions in the framework (pollora/hook 1.4): `Action::add(...)->async()` can queue handlers as Laravel jobs. The `queue` driver dispatches a `RunAsyncAction` job on `hooks.async.queue.connection` (the default connection when null) and on the action's `onQueue()` or `hooks.async.queue.queue`. `auto`, the default, tries the Laravel queue first once `HOOKS_ASYNC_CONNECTION` names the connection a worker runs (without a worker, jobs would never run, so the queue is opt-in), then Action Scheduler, then WP-Cron; a `sync` or `null` connection is always skipped. `via('queue')` and `HOOKS_ASYNC_DRIVER=queue` use the default connection. The job is tried once: retries are new jobs queued after the backoff, and the last failure lands in the failed jobs table. It also clears WordPress's in-memory cache before each handler, since a worker lives across jobs
