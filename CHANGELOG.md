@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.1...develop)
 
+### Fixed
+- Login screen: the language switcher's label ("Language" and its icon, shown when a second language is installed) sat at the left edge of the window, far from its dropdown. The card style given to the login form also reached the switcher's form and made it a full-width block; it is an inline block again, as in WordPress's own sheet
+- Login screen: the rules for the buttons were written `.pollora-login .wp-core-ui …`, but both classes are on `<body>`, so they never matched. The language switcher's button kept wp-admin's blue instead of the theme's primary colour, and the submit button kept WordPress's `button-large` padding
+
 ## [v13.35.1](https://github.com/Pollora/framework/compare/v13.35.0...v13.35.1) - 2026-10-07
 
 ### Security

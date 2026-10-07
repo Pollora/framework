@@ -204,6 +204,15 @@ test.describe('The active theme', () => {
         if (dressed) {
             await expect(page.locator('body')).toHaveClass(/pollora-login/);
             expect(await page.locator('style#pollora-login').textContent()).toMatch(/--pollora-login-primary:\s*[^;]+;/);
+
+            // WordPress shows the language switcher only when a second language is installed.
+            // Its label sits above the dropdown, not at the window's edge.
+            const switcher = page.locator('#language-switcher');
+            if (await switcher.count()) {
+                const label = await switcher.locator('label').boundingBox();
+                const select = await switcher.locator('select').boundingBox();
+                expect(Math.abs(label!.x - select!.x)).toBeLessThan(2);
+            }
         }
 
         await context.close();
