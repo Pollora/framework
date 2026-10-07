@@ -1,11 +1,11 @@
 <?php
 namespace {{ namespace }};
 
-use Pollora\Attributes\{{ hookType }};
+use Pollora\Attributes\{{ hookType }};{{ asyncImport }}
 
 class {{ class }}
 {
-    #[{{ hookType }}('{{ hook }}'{{ priority }})]
+    #[{{ hookType }}('{{ hook }}'{{ priority }})]{{ async }}
     public function {{ hookMethodName }}({{ arg }}){{ returnType }}
     {
         // Code is executed on the "{{ hook }}" WordPress {{ hookType }} only.{{ return }}

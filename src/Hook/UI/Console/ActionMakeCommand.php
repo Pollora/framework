@@ -6,6 +6,7 @@ namespace Pollora\Hook\UI\Console;
 
 use Illuminate\Console\Attributes\Aliases;
 use Illuminate\Console\Attributes\Description;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Class ActionMakeCommand
@@ -22,7 +23,7 @@ class ActionMakeCommand extends AttributeMakeCommand
      *
      * @var string
      */
-    protected $name = 'pollora:make:action {name}';
+    protected $name = 'pollora:make:action';
 
     /**
      * The type of the attribute.
@@ -30,4 +31,15 @@ class ActionMakeCommand extends AttributeMakeCommand
      * @var string
      */
     protected $type = 'Action';
+
+    /**
+     * Get the console command options.
+     */
+    protected function getOptions(): array
+    {
+        return [
+            ...parent::getOptions(),
+            ['async', null, InputOption::VALUE_NONE, 'Run the method after the request, with #[Async]'],
+        ];
+    }
 }
