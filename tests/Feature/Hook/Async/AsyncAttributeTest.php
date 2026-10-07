@@ -7,6 +7,7 @@ use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Pollora\Hook\Adapter\Out\WordPress\Action;
 use Pollora\Hook\Adapter\Out\WordPress\Filter;
+use Pollora\Hook\Application\Services\AsyncDeclarationFailures;
 use Pollora\Hook\Async\Async;
 use Pollora\Hook\Async\AsyncPayload;
 use Pollora\Hook\Async\QueuedHandler;
@@ -32,7 +33,8 @@ beforeEach(function (): void {
             $this->errors[] = (string) $message;
         }
     };
-    $this->registrar = new AsyncAttributeRegistrar($this->actions, $this->logger);
+    $this->failures = new AsyncDeclarationFailures;
+    $this->registrar = new AsyncAttributeRegistrar($this->actions, $this->logger, $this->failures);
     $this->register = function (string $class, string $method, ?string $hook = null): void {
         $reflection = new ReflectionMethod($class, $method);
         foreach ($reflection->getAttributes(ActionAttribute::class) as $action) {
@@ -111,10 +113,12 @@ it('applies a class #[Async] to every #[Action] method, a method #[Async] replac
     Async::assertDispatched(AsyncAttributeClassHooks::class.'@audit', fn (AsyncPayload $payload): bool => $payload->tries === 5);
 });
 
-it('registers synchronously, and logs why, a declaration it cannot honour', function (string $method, string $reason): void {
+it('registers synchronously, and logs and records why, a declaration it cannot honour', function (string $method, string $reason): void {
     ($this->register)(AsyncAttributeInvalidHooks::class, $method);
 
     expect(registeredCallback($this->actions, 'save_post'))->toBeArray()
+        ->and($this->failures->all())->toHaveKey(AsyncAttributeInvalidHooks::class.'::'.$method.'()')
+        ->and($this->failures->all()[AsyncAttributeInvalidHooks::class.'::'.$method.'()'])->toContain($reason)
         ->and($this->logger->errors)->toHaveCount(1)
         ->and($this->logger->errors[0])->toContain(sprintf('#[Async] on %s::%s() is ignored, the action runs synchronously', AsyncAttributeInvalidHooks::class, $method))
         ->and($this->logger->errors[0])->toContain($reason);
@@ -129,7 +133,7 @@ it('registers synchronously, and logs why, a declaration it cannot honour', func
 
 describe('Discovery', function (): void {
     beforeEach(function (): void {
-        $this->discovery = new HookDiscovery($this->actions, new Filter, $this->logger);
+        $this->discovery = new HookDiscovery($this->actions, new Filter, $this->logger, $this->failures);
         $this->discovery->discover(new DiscoveryLocation('', __DIR__), DiscoveredClass::fromReflection(new ReflectionClass(AsyncAttributeHooks::class)), new ReflectionCache);
         $this->discovery->apply();
     });
@@ -139,8 +143,9 @@ describe('Discovery', function (): void {
             ->and(registeredCallback($this->actions, 'wp_loaded'))->toBeArray();
     });
 
-    it('logs an #[Async] on a filter, which still registers, and an #[Async] without #[Action]', function (): void {
-        expect($this->logger->errors)->toContain(sprintf('#[Async] on %s::filterContent() is ignored: a filter returns a value to its caller and cannot be deferred.', AsyncAttributeHooks::class))
+    it('logs and records an #[Async] on a filter, which still registers, and an #[Async] without #[Action]', function (): void {
+        expect(array_keys($this->failures->all()))->toContain(AsyncAttributeHooks::class.'::filterContent()', AsyncAttributeHooks::class.'::orphan()')
+            ->and($this->logger->errors)->toContain(sprintf('#[Async] on %s::filterContent() is ignored: a filter returns a value to its caller and cannot be deferred.', AsyncAttributeHooks::class))
             ->and($this->logger->errors)->toContain(sprintf('#[Async] on %s::orphan() is ignored: the method has no #[Action] to make asynchronous.', AsyncAttributeHooks::class));
     });
 });

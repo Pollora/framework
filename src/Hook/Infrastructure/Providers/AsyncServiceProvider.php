@@ -8,10 +8,12 @@ use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Hook\Async\Async;
 use Pollora\Hook\Async\Contracts\AsyncDriver;
 use Pollora\Hook\Infrastructure\Async\EloquentModelReference;
 use Pollora\Hook\Infrastructure\Async\QueueDriver;
+use Pollora\Hook\Infrastructure\Checks\AsyncActionsCheck;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,6 +25,7 @@ use Psr\Log\LoggerInterface;
  * - closures signed with the application key
  * - Eloquent models carried by reference
  * - handler parameters that are not hook arguments resolved from the container
+ * - the async-actions check of pollora:doctor and Site Health
  */
 class AsyncServiceProvider extends ServiceProvider
 {
@@ -36,6 +39,9 @@ class AsyncServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../../../config/hooks.php' => config_path('hooks.php'),
         ], 'pollora-hooks');
+
+        // A check of pollora:doctor and Site Health; tagged on boot, so it comes after the framework's own
+        $this->app->tag([AsyncActionsCheck::class], DoctorServiceProvider::CHECKS_TAG);
 
         $this->configureAsync($this->app->make(Repository::class));
     }
