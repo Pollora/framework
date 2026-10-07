@@ -23,6 +23,7 @@ use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
+use Pollora\Hook\Infrastructure\Providers\AsyncServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Login\Infrastructure\Providers\LoginServiceProvider;
@@ -106,6 +107,7 @@ class PolloraServiceProvider extends ServiceProvider
 
         $this->app->register(WordPressMailServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
+        $this->app->register(AsyncServiceProvider::class);
 
         $this->app->register(PermalinkServiceProvider::class);
         $this->app->register(ThemeServiceProvider::class);
