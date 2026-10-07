@@ -170,7 +170,8 @@ it('warns when HOOKS_ASYNC_CONNECTION names a connection the queue driver cannot
     'null' => [['jobs' => ['driver' => 'null']], 'discards jobs'],
 ]);
 
-it('warns when WP-Cron events are overdue, with the fix for DISABLE_WP_CRON', function (bool $onPageLoad, string $fix): void {
+it('warns when WP-Cron events are overdue, with the fix for what runs WP-Cron', function (bool $onPageLoad, bool $laravelScheduler, string $fix): void {
+    config(['wordpress.use_laravel_scheduler' => $laravelScheduler]);
     ($this->register)('save_post');
     $this->inspector->cronOnPageLoad = $onPageLoad;
     $this->inspector->overdue = ['count' => 3, 'oldest' => 1_800_000_000];
@@ -181,8 +182,9 @@ it('warns when WP-Cron events are overdue, with the fix for DISABLE_WP_CRON', fu
         ->and($result->details[0])->toBe('3 WP-Cron event(s) overdue, the oldest since 2027-01-15 08:00 UTC: WP-Cron and Action Scheduler run nothing until wp-cron.php is requested')
         ->and($result->fix)->toContain($fix);
 })->with([
-    'disabled' => [false, 'DISABLE_WP_CRON is set'],
-    'on page load' => [true, 'too few visits'],
+    'disabled' => [false, false, 'DISABLE_WP_CRON is set'],
+    'on page load' => [true, false, 'too few visits'],
+    'Laravel scheduler' => [false, true, 'run a queue worker'],
 ]);
 
 it('leaves overdue WP-Cron events alone when no driver in use relies on WP-Cron', function (): void {

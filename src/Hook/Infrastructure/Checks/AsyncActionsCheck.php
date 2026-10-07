@@ -175,6 +175,20 @@ final readonly class AsyncActionsCheck implements CheckInterface
     }
 
     /**
+     * What runs WP-Cron on this site, and so what to add when nothing does.
+     */
+    private function cronFix(): string
+    {
+        if ($this->config->get('wordpress.use_laravel_scheduler')) {
+            return 'WP-Cron events are Laravel jobs here (wordpress.use_laravel_scheduler): run a queue worker, php artisan queue:work';
+        }
+
+        return $this->inspector->cronRunsOnPageLoad()
+            ? 'The site gets too few visits to run WP-Cron: add a system cron that requests wp-cron.php every minute'
+            : 'DISABLE_WP_CRON is set (Pollora sets it): add a system cron, e.g. * * * * * curl -s https://example.com/cms/wp-cron.php, or wp cron event run --due-now';
+    }
+
+    /**
      * What the drivers in use queued and nothing ran.
      *
      * @param  list<string>  $drivers
@@ -190,9 +204,7 @@ final readonly class AsyncActionsCheck implements CheckInterface
             if ($overdue['count'] > 0) {
                 $problems[] = [
                     sprintf('%d WP-Cron event(s) overdue, the oldest since %s: WP-Cron and Action Scheduler run nothing until wp-cron.php is requested', $overdue['count'], gmdate('Y-m-d H:i', (int) $overdue['oldest']).' UTC'),
-                    $this->inspector->cronRunsOnPageLoad()
-                        ? 'The site gets too few visits to run WP-Cron: add a system cron that requests wp-cron.php every minute'
-                        : 'DISABLE_WP_CRON is set (Pollora sets it): add a system cron, e.g. * * * * * curl -s https://example.com/cms/wp-cron.php, or wp cron event run --due-now',
+                    $this->cronFix(),
                 ];
             }
         }
