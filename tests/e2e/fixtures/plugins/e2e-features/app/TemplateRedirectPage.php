@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plugin\E2eFeatures;
 
+use Illuminate\Support\Facades\Request;
 use Pollora\Attributes\Action;
 
 /**
@@ -16,7 +17,7 @@ class TemplateRedirectPage
     #[Action('template_redirect')]
     public function renderNotFound(): void
     {
-        if (! isset($_GET['e2e-template-redirect'])) {
+        if (Request::query('e2e-template-redirect') === null) {
             return;
         }
 
