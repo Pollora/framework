@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
  * Connects the asynchronous actions of pollora/hook to the application.
  *
  * - config/hooks.php (publishable with the "pollora-hooks" tag): default driver, attempts, backoff, as_user, queue
- * - the "queue" driver, first of the drivers "auto" tries
+ * - the "queue" driver, first of the drivers "auto" tries once hooks.async.queue.connection is set
  * - debug mode from app.debug, incidents to the Laravel log
  * - closures signed with the application key
  * - Eloquent models carried by reference
@@ -45,7 +45,10 @@ class AsyncServiceProvider extends ServiceProvider
         $container = $this->app;
 
         Async::extend('queue', static fn (): AsyncDriver => new QueueDriver($container->make(Dispatcher::class), $config));
-        Async::setAutoDrivers(['queue', 'action-scheduler', 'wp-cron']);
+        // The Laravel queue needs a worker: auto only picks it once a connection is set for async actions
+        Async::setAutoDrivers($config->get('hooks.async.queue.connection') !== null
+            ? ['queue', 'action-scheduler', 'wp-cron']
+            : ['action-scheduler', 'wp-cron']);
 
         $default = $config->get('hooks.async.default', 'auto');
         Async::setDefaultDriver(is_string($default) && $default !== '' && $default !== 'auto' ? $default : null);
