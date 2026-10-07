@@ -1,16 +1,10 @@
 # Left out of the archive Composer installs: what only developing the
 # framework needs. The browser tests stay reachable by cloning the repository,
 # which is how theme CI fetches them.
-/.claude export-ignore
-/.codeclimate.yml export-ignore
-/.cursor export-ignore
 /.github export-ignore
 /.gitattributes export-ignore
 /.gitmodules export-ignore
 /.husky export-ignore
-/.php-cs-fixer.cache export-ignore
-/.styleci.yml export-ignore
-/.windsurf export-ignore
 /CLAUDE.md export-ignore
 /commitlint.config.js export-ignore
 /documentation export-ignore
