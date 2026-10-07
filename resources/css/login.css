@@ -74,6 +74,15 @@ body.login.pollora-login::before {
 	display: flow-root;
 }
 
+/* The language switcher is a form too, but not a card: WordPress's
+   #language-switcher rule already strips the surface above, and this gives
+   back the inline-block its own sheet sets. As a block the form spanned the
+   page, and its left-aligned label ("Language" and its icon) sat at the
+   window's edge, far from the dropdown. */
+.pollora-login .language-switcher form {
+	display: inline-block;
+}
+
 .pollora-login form label {
 	color: var(--pollora-login-foreground);
 	font-size: .875rem;
@@ -132,7 +141,7 @@ body.login.pollora-login::before {
    of the primary's family the sweep goes muddy — measured on apiary, slate
    #1f2937 into amber #fbbf24. Two shades of one role read as one button on
    every palette, and on theme-default they are Pollora's coral and pink. */
-.pollora-login .wp-core-ui .button-primary,
+.pollora-login.wp-core-ui .button-primary,
 .pollora-login .button-primary {
 	background: linear-gradient(135deg, var(--pollora-login-primary), var(--pollora-login-primary-hover));
 	border: 0;
@@ -146,32 +155,32 @@ body.login.pollora-login::before {
 	transition: filter .15s ease, box-shadow .15s ease, transform .15s ease;
 }
 
-.pollora-login .wp-core-ui .button-primary:hover,
+.pollora-login.wp-core-ui .button-primary:hover,
 .pollora-login .button-primary:hover {
 	filter: saturate(1.1) brightness(1.03);
 	box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--pollora-login-primary) 45%, transparent);
 	transform: translateY(-1px);
 }
 
-.pollora-login .wp-core-ui .button-primary:focus,
+.pollora-login.wp-core-ui .button-primary:focus,
 .pollora-login .button-primary:focus {
 	box-shadow: 0 0 0 3px color-mix(in srgb, var(--pollora-login-primary) 35%, transparent);
 	transform: none;
 }
 
-.pollora-login .wp-core-ui .button-primary:active,
+.pollora-login.wp-core-ui .button-primary:active,
 .pollora-login .button-primary:active {
 	transform: none;
 	filter: brightness(.97);
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.pollora-login .wp-core-ui .button-primary,
+	.pollora-login.wp-core-ui .button-primary,
 	.pollora-login .button-primary {
 		transition: none;
 	}
 
-	.pollora-login .wp-core-ui .button-primary:hover,
+	.pollora-login.wp-core-ui .button-primary:hover,
 	.pollora-login .button-primary:hover {
 		transform: none;
 	}
@@ -183,7 +192,7 @@ body.login.pollora-login::before {
    `.button`, and left alone it kept wp-admin's blue next to a palette that
    has none. The password-reveal toggle is a `.button` too, and is styled
    above as the icon it is, so it stays out of this. */
-.pollora-login .wp-core-ui .button:not(.button-primary):not(.wp-hide-pw) {
+.pollora-login.wp-core-ui .button:not(.button-primary):not(.wp-hide-pw) {
 	color: var(--pollora-login-primary);
 	border-color: var(--pollora-login-outline);
 	background: var(--pollora-login-surface);
@@ -191,7 +200,7 @@ body.login.pollora-login::before {
 	min-height: 2.25rem;
 }
 
-.pollora-login .wp-core-ui .button:not(.button-primary):not(.wp-hide-pw):hover {
+.pollora-login.wp-core-ui .button:not(.button-primary):not(.wp-hide-pw):hover {
 	color: var(--pollora-login-primary-hover);
 	border-color: var(--pollora-login-primary);
 	background: var(--pollora-login-surface);
