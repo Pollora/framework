@@ -6,6 +6,7 @@ namespace Pollora\Hook\Infrastructure\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\InteractsWithQueue;
 use Pollora\Hook\Async\Async;
 
@@ -16,12 +17,11 @@ use Pollora\Hook\Async\Async;
  * the job itself is tried once; the last failure is thrown, which lands it in
  * the failed jobs table.
  */
+#[Tries(1)]
 final class RunAsyncAction implements ShouldQueue
 {
     use InteractsWithQueue;
     use Queueable;
-
-    public int $tries = 1;
 
     /**
      * @param  string  $payload  The payload, as JSON

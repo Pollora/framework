@@ -21,7 +21,7 @@ beforeEach(function (): void {
 
 function queueDriver(): QueueDriver
 {
-    return new QueueDriver(app(Dispatcher::class), app('config'));
+    return new QueueDriver(resolve(Dispatcher::class), resolve('config'));
 }
 
 function queuePayload(?string $queue = null): AsyncPayload

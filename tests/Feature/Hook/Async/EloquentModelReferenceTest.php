@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Pollora\Hook\Infrastructure\Async\EloquentModelReference;
 
-final class AsyncReferenceOrder extends Model
-{
-    public $timestamps = false;
-
-    protected $table = 'async_reference_orders';
-
-    protected $guarded = [];
-}
+#[Unguarded]
+#[Table(name: 'async_reference_orders')]
+#[WithoutTimestamps]
+final class AsyncReferenceOrder extends Model {}
 
 beforeEach(function (): void {
     config(['database.default' => 'testing', 'database.connections.testing' => ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => '']]);

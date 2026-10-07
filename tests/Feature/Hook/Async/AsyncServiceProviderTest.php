@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Async\Async;
 use Pollora\Hook\Async\AsyncFake;
-use Pollora\Hook\Async\AsyncPayload;
 use Pollora\Hook\Async\Exceptions\UnresolvableHandler;
 use Pollora\Hook\Async\PendingAsync;
 use Pollora\Hook\Async\QueuedHandler;
@@ -85,7 +84,7 @@ it('signs closures with the application key', function (): void {
 it('does not sign closures with an empty application key', function (): void {
     bootAsyncProvider(['app.key' => '']);
 
-    expect(fn () => Async::closureKey())->toThrow(UnresolvableHandler::class, 'without a signing key');
+    expect(fn (): string => Async::closureKey())->toThrow(UnresolvableHandler::class, 'without a signing key');
 });
 
 it('sends incidents to the Laravel log, as errors when they carry an exception', function (): void {

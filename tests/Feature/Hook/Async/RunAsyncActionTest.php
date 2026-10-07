@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
+use Illuminate\Queue\Attributes\Tries;
 use Pollora\Hook\Async\Async;
 use Pollora\Hook\Async\AsyncPayload;
 use Pollora\Hook\Infrastructure\Jobs\RunAsyncAction;
@@ -73,7 +74,9 @@ it('throws the last failure, so the job lands in the failed jobs table, without 
 });
 
 it('is tried once: retries are new jobs, queued by the package after the backoff', function (): void {
-    expect((new RunAsyncAction(runAsyncActionPayload()))->tries)->toBe(1);
+    $tries = (new ReflectionClass(RunAsyncAction::class))->getAttributes(Tries::class)[0]->newInstance();
+
+    expect($tries->tries)->toBe(1);
 });
 
 it('names itself after the hook and the handler', function (string $handler, string $name): void {
