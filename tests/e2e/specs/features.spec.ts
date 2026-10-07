@@ -209,3 +209,34 @@ test.describe('The active theme', () => {
         await context.close();
     });
 });
+
+test.describe('Requests answered from template_redirect', () => {
+    // A plugin that includes the theme's 404 template itself, as WooCommerce's Review
+    // Order page does (#419): the Blade view renders, with the theme's layout.
+    test("a plugin including the theme's 404 template gets the rendered view", async ({ page }) => {
+        const response = await page.goto(homeUrl('/?e2e-template-redirect=1'));
+
+        expect(response?.status()).toBe(404);
+        expect(await page.content()).not.toMatch(/@extends|@section|\{\{--/);
+        // wp_footer ran, so the layout did.
+        await expect(page.locator('script#e2e-features')).toHaveCount(1);
+    });
+
+    test('a trackback is answered and stored', async () => {
+        const post = wp('post', 'create', '--post_status=publish', '--ping_status=open', '--porcelain', `--post_title=Trackback ${runId}`);
+        const context = await visitor();
+
+        try {
+            const response = await context.post(homeUrl(`/?p=${post}&tb=1`), {
+                form: { url: `https://example.test/${runId}`, title: 'Trackback', excerpt: 'Excerpt', blog_name: 'E2E' },
+            });
+
+            expect(response.status()).toBe(200);
+            expect(await response.text()).toContain('<error>0</error>');
+            expect(wp('comment', 'list', `--post_id=${post}`, '--type=trackback', '--format=count')).toBe('1');
+        } finally {
+            await context.dispose();
+            wp('post', 'delete', post, '--force');
+        }
+    });
+});

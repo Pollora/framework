@@ -26,6 +26,11 @@ function servingProbe(): object
 
             return $method->invoke($this);
         }
+
+        private function withWordPressErrorHandling(callable $callback): void
+        {
+            $callback();
+        }
     };
 }
 

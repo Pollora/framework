@@ -7,6 +7,7 @@ namespace Pollora\View\Infrastructure\Services;
 use Illuminate\Support\Str;
 use Illuminate\View\FileViewFinder;
 use Illuminate\View\ViewFinderInterface;
+use Pollora\View\Application\UseCases\MakeTemplateIncludableUseCase;
 use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 use Pollora\View\Domain\Contracts\TemplateHierarchyFilterInterface;
@@ -23,7 +24,8 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
     public function __construct(
         private readonly TemplateFinderInterface $templateFinder,
         private readonly ResolveBladeTemplateUseCase $resolveBladeTemplateUseCase,
-        private readonly ViewFinderInterface $viewFinder
+        private readonly ViewFinderInterface $viewFinder,
+        private readonly MakeTemplateIncludableUseCase $makeTemplateIncludable
     ) {}
 
     /**
@@ -54,6 +56,23 @@ class WordPressTemplateHierarchyFilter implements TemplateHierarchyFilterInterfa
     public function resolveTemplateInclude(string $template): string
     {
         return $this->resolveBladeTemplateUseCase->execute($template);
+    }
+
+    /**
+     * A plugin that answers from `template_redirect` may include the query
+     * template itself (`include get_query_template('404')`, WooCommerce's
+     * Review Order page): it gets a loader that renders the view. Outside
+     * `template_redirect` the path is left alone — the FrontendController
+     * resolves the hierarchy later and needs the Blade path, and WordPress's
+     * own template loader must still meet the raw-output guard.
+     */
+    public function includableTemplate(string $template): string
+    {
+        if (! function_exists('doing_action') || ! doing_action('template_redirect')) {
+            return $template;
+        }
+
+        return $this->makeTemplateIncludable->execute($template);
     }
 
     /**
