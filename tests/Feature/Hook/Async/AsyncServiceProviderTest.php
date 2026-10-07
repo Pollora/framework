@@ -47,14 +47,20 @@ it('merges config/hooks.php and publishes it under the pollora-hooks tag', funct
         ->and(array_values(ServiceProvider::pathsToPublish(AsyncServiceProvider::class, 'pollora-hooks')))->toBe([config_path('hooks.php')]);
 });
 
-it('makes the Laravel queue the first driver auto tries, skipped on a sync connection', function (): void {
-    bootAsyncProvider();
+it('leaves the Laravel queue out of auto until a connection is set for async actions', function (): void {
+    bootAsyncProvider(['queue.default' => 'database']);
 
     expect(Async::defaultDriver())->toBe('wp-cron');
+});
 
-    config(['queue.default' => 'database']);
+it('makes the Laravel queue the first driver auto tries once a connection is set, skipped when it is sync', function (): void {
+    bootAsyncProvider(['hooks.async.queue.connection' => 'database']);
 
     expect(Async::defaultDriver())->toBe('queue');
+
+    config(['hooks.async.queue.connection' => 'sync']);
+
+    expect(Async::defaultDriver())->toBe('wp-cron');
 });
 
 it('sets the default driver from the configuration', function (): void {
