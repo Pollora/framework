@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.1...develop)
 
+### Added
+- Asynchronous actions in the framework (pollora/hook 1.4): `Action::add(...)->async()` can queue handlers as Laravel jobs. The `queue` driver dispatches a `RunAsyncAction` job on `hooks.async.queue.connection` (the default connection when null) and on the action's `onQueue()` or `hooks.async.queue.queue`. `auto`, the default, now tries the Laravel queue first, then Action Scheduler, then WP-Cron; a `sync` or `null` connection is always skipped. The job is tried once: retries are new jobs queued after the backoff, and the last failure lands in the failed jobs table. It also clears WordPress's in-memory cache before each handler, since a worker lives across jobs
+- `config/hooks.php`, published with `php artisan vendor:publish --tag=pollora-hooks`: default driver (`HOOKS_ASYNC_DRIVER`, `sync` in a developer's `.env` runs every handler at once), attempts, backoff, `as_user`, queue connection and name
+- Async handlers in the framework: debug mode follows `app.debug`, incidents go to the Laravel log, closures are signed with the application key, Eloquent models travel by class and key and are reloaded at execution, and parameters typed with a service are resolved from the container
+
 ### Fixed
 - Login screen: the language switcher's label ("Language" and its icon, shown when a second language is installed) sat at the left edge of the window, far from its dropdown. The card style given to the login form also reached the switcher's form and made it a full-width block; it is an inline block again, as in WordPress's own sheet
 - Login screen: the rules for the buttons were written `.pollora-login .wp-core-ui …`, but both classes are on `<body>`, so they never matched. The language switcher's button kept wp-admin's blue instead of the theme's primary colour, and the submit button kept WordPress's `button-large` padding
