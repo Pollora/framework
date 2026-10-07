@@ -32,9 +32,10 @@ return RectorConfig::configure()
         // $_SERVER directly is the point rather than an oversight.
         ServerVariableToRequestFacadeRector::class => [
             __DIR__.'/src/WordPress/QueryTrait.php',
-            // Its test sets $_SERVER['SCRIPT_FILENAME'] to drive that method;
+            // Its tests set $_SERVER['SCRIPT_FILENAME'] to drive that method;
             // going through the facade would stop it reaching the code at all.
             __DIR__.'/tests/Unit/WordPress/LaravelServingRequestTest.php',
+            __DIR__.'/tests/Unit/WordPress/DeferredTemplateRedirectTest.php',
         ],
         __DIR__.'/tests/Unit/helpers.php',
         // Binding sources each broken on purpose (an untyped field, a private

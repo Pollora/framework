@@ -64,6 +64,13 @@ class RegisterTemplateHierarchyFiltersUseCase
                 $this->hierarchyFilter->extendTemplateHierarchy(...),
                 10
             );
+
+            // `404_template`… : for plugins that include get_query_template() themselves
+            $this->filter->add(
+                str_replace('_hierarchy', '', $filterName),
+                $this->hierarchyFilter->includableTemplate(...),
+                PHP_INT_MAX
+            );
         }
 
         // Theme templates filter

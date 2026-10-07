@@ -29,6 +29,16 @@ interface TemplateHierarchyFilterInterface
     public function resolveTemplateInclude(string $template): string;
 
     /**
+     * The template a `{type}_template` filter hands back: a file PHP can
+     * include while `template_redirect` runs, when a plugin includes the
+     * query template itself instead of going through `template_include`.
+     *
+     * @param  string  $template  Template path WordPress resolved
+     * @return string Template path to use (original or a loader)
+     */
+    public function includableTemplate(string $template): string;
+
+    /**
      * Add Blade compatibility for theme templates.
      *
      * @param  array<string, string>  $templates  Existing theme templates

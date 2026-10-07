@@ -10,6 +10,7 @@ use Pollora\Filesystem\Filesystem;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\View\Application\Services\TemplateHierarchyService;
+use Pollora\View\Application\UseCases\MakeTemplateIncludableUseCase;
 use Pollora\View\Application\UseCases\RegisterTemplateHierarchyFiltersUseCase;
 use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
@@ -63,7 +64,8 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
         $this->app->bind(TemplateHierarchyFilterInterface::class, fn (Application $app): WordPressTemplateHierarchyFilter => new WordPressTemplateHierarchyFilter(
             $app->make(TemplateFinderInterface::class),
             $app->make(ResolveBladeTemplateUseCase::class),
-            $app->get('view')->getFinder()
+            $app->get('view')->getFinder(),
+            $app->make(MakeTemplateIncludableUseCase::class)
         ));
     }
 
@@ -74,6 +76,12 @@ class TemplateHierarchyServiceProvider extends ServiceProvider
     {
         // Resolve Blade Template Use Case
         $this->app->bind(ResolveBladeTemplateUseCase::class, fn (Application $app): ResolveBladeTemplateUseCase => new ResolveBladeTemplateUseCase(
+            $app->make(TemplateFinderInterface::class),
+            $app->get('view')
+        ));
+
+        // Make Template Includable Use Case
+        $this->app->bind(MakeTemplateIncludableUseCase::class, fn (Application $app): MakeTemplateIncludableUseCase => new MakeTemplateIncludableUseCase(
             $app->make(TemplateFinderInterface::class),
             $app->get('view')
         ));
