@@ -1,0 +1,11 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
+
+/*
+ * Web routes of the %module_name% module. A Laravel route answers before
+ * WordPress; Route::wp() binds a WordPress condition instead.
+ */
+Route::get('%module_slug%', fn () => response('%module_name%'))->name('%module_slug%.index');

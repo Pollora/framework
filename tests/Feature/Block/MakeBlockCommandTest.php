@@ -388,3 +388,17 @@ describe('pollora:make:block --module', function (): void {
             ->assertFailed();
     });
 });
+
+describe('pollora:make:block with @pollora/vite-config', function (): void {
+    it('leaves a vite.config.js built on @pollora/vite-config as it is: it already builds blocks', function (): void {
+        $viteConfig = "import { defineConfig } from 'vite';\nimport pollora from '@pollora/vite-config';\n\nexport default defineConfig({\n    plugins: [pollora({ type: 'theme' })],\n});\n";
+        file_put_contents($this->themeDir.'/vite.config.js', $viteConfig);
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->expectsOutputToContain('BUILDS BLOCKS')
+            ->assertSuccessful();
+        $this->artisan('pollora:make:block', ['name' => 'card', '--theme' => 'test-theme'])->assertSuccessful();
+
+        expect((string) file_get_contents($this->themeDir.'/vite.config.js'))->toBe($viteConfig);
+    });
+});

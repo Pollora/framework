@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace %module_namespace%\Providers;
+
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Route;
+
+/**
+ * Routes of the %module_name% module: routes/web.php with the web middleware,
+ * and routes/api.php under /api when the module has one.
+ */
+class RouteServiceProvider extends ServiceProvider
+{
+    protected string $name = '%module_name%';
+
+    public function map(): void
+    {
+        $apiRoutes = module_path($this->name, 'routes/api.php');
+
+        if (is_file($apiRoutes)) {
+            Route::middleware('api')->prefix('api')->name('api.')->group($apiRoutes);
+        }
+
+        Route::middleware('web')->group(module_path($this->name, 'routes/web.php'));
+    }
+}
