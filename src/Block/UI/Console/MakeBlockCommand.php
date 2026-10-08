@@ -8,13 +8,14 @@ use Illuminate\Console\Attributes\Aliases;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use Pollora\Foundation\Console\Commands\Concerns\HasModuleSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasPluginSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasThemeSupport;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
- * Artisan command to scaffold a Gutenberg block in a theme or plugin.
+ * Artisan command to scaffold a Gutenberg block in a theme, plugin or module.
  *
  * Generates block files in `resources/views/blocks/{slug}` (block.json, index.jsx,
  * edit.jsx, render.blade.php, CSS, etc.) and bootstraps the Vite infrastructure on
@@ -25,10 +26,11 @@ use Symfony\Component\Console\Input\InputOption;
  * in post_content, so changing it never invalidates existing content. `--static`
  * generates a save.jsx instead.
  */
-#[Description('Create a new Gutenberg block in a theme or plugin')]
+#[Description('Create a new Gutenberg block in a theme, plugin or module')]
 #[Aliases(['pollora:make-block'])]
 class MakeBlockCommand extends Command
 {
+    use HasModuleSupport;
     use HasPluginSupport;
     use HasThemeSupport;
 
@@ -74,8 +76,10 @@ class MakeBlockCommand extends Command
         }
 
         // Validate mutually exclusive options
-        if ($this->hasPluginOption() && $this->hasThemeOption()) {
-            $this->components->error('Options --theme and --plugin are mutually exclusive.');
+        $targetOptions = array_filter([$this->hasThemeOption(), $this->hasPluginOption(), $this->hasModuleOption()]);
+
+        if (count($targetOptions) > 1) {
+            $this->components->error('Options --theme, --plugin and --module are mutually exclusive.');
 
             return self::FAILURE;
         }
@@ -141,12 +145,16 @@ class MakeBlockCommand extends Command
     }
 
     /**
-     * Resolve the target theme or plugin.
+     * Resolve the target theme, plugin or module.
      *
      * @return array{type: string, path: string, slug: string}|null
      */
     private function resolveTarget(): ?array
     {
+        if ($this->hasModuleOption()) {
+            return $this->resolveModuleTarget();
+        }
+
         if ($this->hasPluginOption()) {
             $plugin = $this->resolvePlugin();
 
@@ -192,6 +200,37 @@ class MakeBlockCommand extends Command
             'type' => 'theme',
             'path' => $path,
             'slug' => $theme,
+        ];
+    }
+
+    /**
+     * Resolve the target module: its blocks register under its kebab-case name,
+     * like its asset container (module.<kebab>).
+     *
+     * @return array{type: string, path: string, slug: string}|null
+     */
+    private function resolveModuleTarget(): ?array
+    {
+        $module = (string) $this->getModuleName();
+
+        if ($module === '') {
+            $this->components->error('Module name is required with --module option.');
+
+            return null;
+        }
+
+        $path = $this->getModulePath();
+
+        if (! is_dir($path)) {
+            $this->components->error('Module directory not found: '.$path);
+
+            return null;
+        }
+
+        return [
+            'type' => 'module',
+            'path' => $path,
+            'slug' => Str::kebab(basename($path)),
         ];
     }
 
@@ -668,6 +707,7 @@ class MakeBlockCommand extends Command
         return [
             ...($this->getThemeOptions()),
             ...($this->getPluginOptions()),
+            ...($this->getModuleOptions()),
             ['namespace', null, InputOption::VALUE_REQUIRED, 'Block namespace (before the /)'],
             ['title', null, InputOption::VALUE_REQUIRED, 'Block title in the inserter'],
             ['category', null, InputOption::VALUE_REQUIRED, 'Gutenberg category', 'widgets'],

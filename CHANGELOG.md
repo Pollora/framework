@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.2...develop)
 
+### Added
+- `pollora:make:block --module=<name>` creates a block in a module's `resources/views/blocks`, named after the module in kebab case (`blocks-demo/hero`), like the seven generators that already took `--module`
+
+### Fixed
+- Generators with `--module` wrote into `Modules/<Studly>` under the `Modules\<Studly>` namespace whatever the module declared: they now take the path where nwidart/laravel-modules found the module and the namespace its `composer.json` maps onto `app/` (or `src/`), so a module under `Module\BlocksDemo\` gets classes it can autoload
+
+### Removed
+- The framework's `Modules/config/modules.php`, merged into `modules` after nwidart/laravel-modules' own config and so never applied (its module path pointed at the themes directory)
+
 ## [v13.35.2](https://github.com/Pollora/framework/compare/v13.35.1...v13.35.2) - 2026-10-07
 
 ### Added

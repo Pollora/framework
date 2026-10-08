@@ -31,9 +31,6 @@ class ModuleServiceProvider extends ServiceProvider
         $this->registerDomainContracts();
         $this->registerUseCases();
         $this->registerApplicationServices();
-
-        // Merge configuration
-        $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');
     }
 
     public function boot(): void

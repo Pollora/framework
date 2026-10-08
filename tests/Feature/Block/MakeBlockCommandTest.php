@@ -337,3 +337,54 @@ describe('pollora:make:block', function (): void {
             ->and($vite)->toContain("'resources/views/**/*.blade.php'");
     });
 });
+
+describe('pollora:make:block --module', function (): void {
+    beforeEach(function (): void {
+        $this->moduleDir = $this->themesDir.'/Modules/BlocksDemo';
+        mkdir($this->moduleDir.'/resources/assets', 0755, true);
+        file_put_contents($this->moduleDir.'/vite.config.js', MAKE_BLOCK_VITE_CONFIG);
+        file_put_contents($this->moduleDir.'/package.json', json_encode(['name' => 'blocks-demo']));
+
+        $moduleDir = $this->moduleDir;
+        $this->app->instance('modules', new readonly class($moduleDir)
+        {
+            public function __construct(private string $path) {}
+
+            public function find(string $name): ?object
+            {
+                $path = $this->path;
+
+                return strtolower($name) === 'blocksdemo'
+                    ? new readonly class($path)
+                    {
+                        public function __construct(private string $path) {}
+
+                        public function getPath(): string
+                        {
+                            return $this->path;
+                        }
+                    }
+                : null;
+            }
+        });
+    });
+
+    it('creates the block in the module nwidart/laravel-modules found, under its kebab-case name', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--module' => 'blocks-demo'])->assertSuccessful();
+
+        $metadata = json_decode((string) file_get_contents($this->moduleDir.'/resources/views/blocks/hero/block.json'), true);
+
+        expect($metadata['name'])->toBe('blocks-demo/hero')
+            ->and($this->themeDir.'/resources/views/blocks/hero')->not->toBeDirectory();
+    });
+
+    it('refuses a module that does not exist', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--module' => 'missing'])->assertFailed();
+    });
+
+    it('refuses --module with --theme', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--module' => 'blocks-demo', '--theme' => 'test-theme'])
+            ->expectsOutputToContain('mutually exclusive')
+            ->assertFailed();
+    });
+});
