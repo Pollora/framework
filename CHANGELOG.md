@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.2...develop)
 
 ### Added
+- Module activation connectors: whether a Laravel module is enabled comes from a connector, through nwidart/laravel-modules' activator (`'activator' => 'pollora'`), so `module:enable`, `module:disable` and everything reading `app('modules')` keep working. `json` (default) reads and writes `modules_statuses.json` as nwidart does; `database` keeps a JSON map in the non-autoloaded `pollora_modules` WordPress option, read with Laravel's connection before WordPress loads (never unserialized) and written with `update_option()` once it has, falling back on `json` while the options table does not exist; `config` reads `connectors.config.states` or `MODULES_ENABLED` / `MODULES_DISABLED`, read-only. A project connector implements `ModuleStateConnector` and is declared in `connectors.<name>.class`, or given to `ModuleConnectors::extend()` in `bootstrap/app.php`
+- `modules.locked.enabled` / `modules.locked.disabled` (`MODULES_LOCKED_ENABLED` / `MODULES_LOCKED_DISABLED`) force a module's state over any connector; switching a locked module throws `ModuleLockedException`
+- A switch clears nwidart's provider manifest and the discovery cache, and fires `ModuleEnabled` / `ModuleDisabled` (module, source `admin` or `console`, WordPress user)
+- `config/modules.php`, published with `php artisan vendor:publish --tag=pollora-modules`: nwidart reads its activator while it registers, before any provider of the application, so the connector is chosen in this file, not from a provider
+- `pollora:module:connector [connector] [--import]` shows where module states live and copies them into another connector before the configuration points to it
+
+### Added
 - `pollora:make:block --module=<name>` creates a block in a module's `resources/views/blocks`, named after the module in kebab case (`blocks-demo/hero`), like the seven generators that already took `--module`
 
 ### Fixed

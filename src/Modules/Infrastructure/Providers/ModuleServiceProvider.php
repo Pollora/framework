@@ -18,6 +18,7 @@ use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
 use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
+use Pollora\Modules\UI\Console\ModuleConnectorCommand;
 
 /**
  * Main service provider for the generic module system.
@@ -46,6 +47,15 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->booted(function (): void {
             Event::dispatch('modules.routes.registered');
         });
+
+        // Activation connector settings, read by nwidart while it registers: published, never merged
+        $this->publishes([
+            __DIR__.'/../../../../config/modules.php' => $this->app->configPath('modules.php'),
+        ], 'pollora-modules');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([ModuleConnectorCommand::class]);
+        }
     }
 
     /**
