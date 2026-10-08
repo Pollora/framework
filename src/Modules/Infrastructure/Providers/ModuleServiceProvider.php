@@ -9,11 +9,13 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
+use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Modules\Application\UseCases\ApplyModulesUseCase;
 use Pollora\Modules\Application\UseCases\DiscoverModulesUseCase;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Infrastructure\Checks\ModuleActivationCheck;
 use Pollora\Modules\Infrastructure\Services\LaravelModuleAssets;
 use Pollora\Modules\Infrastructure\Services\LeanModuleMake;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
@@ -25,6 +27,7 @@ use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 use Pollora\Modules\Infrastructure\Services\ModuleTemplate;
 use Pollora\Modules\UI\Console\MakeModuleCommand;
 use Pollora\Modules\UI\Console\ModuleConnectorCommand;
+use Pollora\Modules\UI\Console\ModuleFrontendCommand;
 use Pollora\Modules\UI\Http\ModulesAdminPage;
 
 /**
@@ -65,13 +68,16 @@ class ModuleServiceProvider extends ServiceProvider
             Event::dispatch('modules.routes.registered');
         });
 
+        // A check of pollora:doctor and Site Health; tagged on boot, so it comes after the framework's own
+        $this->app->tag([ModuleActivationCheck::class], DoctorServiceProvider::CHECKS_TAG);
+
         // Activation connector settings, read by nwidart while it registers: published, never merged
         $this->publishes([
             __DIR__.'/../../../../config/modules.php' => $this->app->configPath('modules.php'),
         ], 'pollora-modules');
 
         if ($this->app->runningInConsole()) {
-            $this->commands([MakeModuleCommand::class, ModuleConnectorCommand::class]);
+            $this->commands([MakeModuleCommand::class, ModuleConnectorCommand::class, ModuleFrontendCommand::class]);
         }
 
         $this->registerModulesAdminPage();
