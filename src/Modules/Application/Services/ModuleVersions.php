@@ -12,8 +12,8 @@ use Pollora\VersionCheck\Domain\Services\StableVersions;
 /**
  * Versions of the modules installed by Composer.
  *
- * A module installed as a package (type laravel-module, placed in Modules/ by
- * an installer or scanned in vendor/) is matched to it by install path, and
+ * A module installed as a package (placed in Modules/ by an installer-paths
+ * rule, or scanned in vendor/) is matched to it by install path, and
  * carries that package's version. A local module — its composer.json merged
  * into the project's — has no version: nothing is shown, checked or requested.
  */
