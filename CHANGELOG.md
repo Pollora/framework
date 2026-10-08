@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A switch clears nwidart's provider manifest and the discovery cache, and fires `ModuleEnabled` / `ModuleDisabled` (module, source `admin` or `console`, WordPress user)
 - `config/modules.php`, published with `php artisan vendor:publish --tag=pollora-modules`: nwidart reads its activator while it registers, before any provider of the application, so the connector is chosen in this file, not from a provider
 - `pollora:module:connector [connector] [--import]` shows where module states live and copies them into another connector before the configuration points to it
+- `pollora:doctor` and Site Health check module activation (`module-activation`): the database connector reading its fallback, a module the states list but the disk no longer has, a state file that cannot be written while Plugins › Modules is the way to switch, a configuration or route cache written before the last switch, and `MODULES_*` settings ignored because `config/modules.php` is not published
+- `pollora:module:frontend Crm` gives an existing module the template's frontend build (`package.json` and `vite.config.js` on `@pollora/vite-config`, `resources/assets/app.{js,css}`), keeping a `.bak` of each file it replaces; the builds check recognises the Vite config of nwidart's stock `module:make` (`public/build-<lower>`, where Pollora never looks) and points to it
 - `pollora:make:block --module=<name>` creates a block in a module's `resources/views/blocks`, named after the module in kebab case (`blocks-demo/hero`), like the seven generators that already took `--module`
 
 ### Fixed
