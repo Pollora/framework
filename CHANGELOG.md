@@ -17,9 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A switch clears nwidart's provider manifest and the discovery cache, and fires `ModuleEnabled` / `ModuleDisabled` (module, source `admin` or `console`, WordPress user)
 - `config/modules.php`, published with `php artisan vendor:publish --tag=pollora-modules`: nwidart reads its activator while it registers, before any provider of the application, so the connector is chosen in this file, not from a provider
 - `pollora:module:connector [connector] [--import]` shows where module states live and copies them into another connector before the configuration points to it
+- Plugins › Modules (`plugins.php?page=pollora-modules`, linked as "Modules (n)" among the plugin views): every module with its description, path, state (enabled, disabled, locked) and where the state lives, with Enable / Disable per row and as bulk actions. Switches need `activate_plugins` (`modules.admin.capability`), are nonce-protected, go through nwidart's `Module::enable()` / `disable()` and say the change applies from the next request. A locked module has no switch; `MODULES_ADMIN_TOGGLE=false` turns every switch off. With the JSON file, the view warns that the next deployment resets it and each switch asks for confirmation; when the file cannot be written, switches are off and the view explains how to change states
+- Tools › Pollora's Modules card and `pollora:status` say where module states are stored, and the card links to the Modules view
 - `pollora:make:block --module=<name>` creates a block in a module's `resources/views/blocks`, named after the module in kebab case (`blocks-demo/hero`), like the seven generators that already took `--module`
 
 ### Fixed
+- Tools › Pollora and `pollora:status` reported 0 modules when one `module.json` had no `priority`: nwidart's `getPriority()` is typed `string` and threw
+- Tools › Pollora and `pollora:status` showed every module as disabled: nwidart keys `allEnabled()` by lower-case name, which the module's own name never matched
 - Generators with `--module` wrote into `Modules/<Studly>` under the `Modules\<Studly>` namespace whatever the module declared: they now take the path where nwidart/laravel-modules found the module and the namespace its `composer.json` maps onto `app/` (or `src/`), so a module under `Module\BlocksDemo\` gets classes it can autoload
 
 ### Removed

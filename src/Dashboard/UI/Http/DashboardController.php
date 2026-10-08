@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Dashboard\UI\Http;
 
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
+use Pollora\Modules\UI\Http\ModulesAdminPage;
 
 /**
  * Renders the Pollora admin dashboard page.
@@ -323,7 +324,7 @@ final readonly class DashboardController
     }
 
     /**
-     * @param  array{count: int, enabled: int, disabled: int, items: list<array{name: string, status: string, description: string, priority: string}>}  $modules
+     * @param  array{count: int, enabled: int, disabled: int, connector: string|null, items: list<array{name: string, status: string, description: string, priority: string}>}  $modules
      */
     private function renderModulesCard(array $modules): void
     {
@@ -348,6 +349,15 @@ final readonly class DashboardController
                 __('Disabled', 'pollora'),
                 $modules['disabled']
             );
+
+            if ($modules['connector'] !== null) {
+                printf(
+                    '<tr><td>%s</td><td>%s</td></tr>',
+                    __('Stored in', 'pollora'),
+                    esc_html($modules['connector'])
+                );
+            }
+
             echo '</table>';
 
             echo '<ul class="pollora-entity-list" style="margin-top: 10px;">';
@@ -369,6 +379,12 @@ final readonly class DashboardController
             }
 
             echo '</ul>';
+
+            printf(
+                '<p><a href="%s">%s</a></p>',
+                esc_url(admin_url('plugins.php?page='.ModulesAdminPage::SLUG)),
+                esc_html__('Manage modules', 'pollora')
+            );
         }
 
         echo '</div>';
