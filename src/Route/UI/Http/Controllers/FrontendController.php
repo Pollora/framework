@@ -8,6 +8,9 @@ use Illuminate\Foundation\Exceptions\RegisterErrorViewPaths;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
+use Pollora\Route\Application\Services\AnsweringTemplate;
+use Pollora\Route\Domain\Enums\TemplateOutcome;
+use Pollora\Route\Domain\Models\TemplateResolution;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 /**
@@ -30,8 +33,15 @@ class FrontendController
      */
     private bool $usedIndexFallback = false;
 
+    /**
+     * The conditional tag whose template getter found the template, null when
+     * the index fallback answered.
+     */
+    private ?string $matchedCondition = null;
+
     public function __construct(
-        private readonly TemplateFinderInterface $templateFinder
+        private readonly TemplateFinderInterface $templateFinder,
+        private readonly AnsweringTemplate $answeringTemplate = new AnsweringTemplate,
     ) {}
 
     /**
@@ -41,6 +51,8 @@ class FrontendController
     {
         // Early return if themes are not being used
         if (function_exists('wp_using_themes') && ! wp_using_themes()) {
+            $this->remember('', null, TemplateOutcome::NotFound);
+
             return $this->renderNotFound();
         }
 
@@ -54,14 +66,20 @@ class FrontendController
         // A real index.blade.php IS a valid fallback for other request types,
         // but for 404s it means the theme has no 404 handling at all.
         if (is_404() && $this->usedIndexFallback) {
+            $this->remember($templatePath, $viewName, TemplateOutcome::NotFound);
+
             return $this->renderNotFound();
         }
 
         if ($viewName && View::exists($viewName)) {
+            $this->remember($templatePath, $viewName, TemplateOutcome::View);
+
             return response(View::make($viewName), is_404() ? Response::HTTP_NOT_FOUND : Response::HTTP_OK);
         }
 
         if (file_exists($templatePath) && $this->isAllowedTemplatePath($templatePath)) {
+            $this->remember($templatePath, null, TemplateOutcome::File);
+
             ob_start();
             include $templatePath;
             $content = ob_get_clean();
@@ -75,7 +93,23 @@ class FrontendController
         }
 
         // No WordPress template found — fall back to Laravel's error view
+        $this->remember($templatePath, $viewName, TemplateOutcome::NotFound);
+
         return $this->renderNotFound();
+    }
+
+    /**
+     * Keep what the hierarchy settled on, for debugging tools.
+     */
+    private function remember(string $templatePath, ?string $viewName, TemplateOutcome $outcome): void
+    {
+        $this->answeringTemplate->record(new TemplateResolution(
+            template: $templatePath,
+            condition: $this->matchedCondition,
+            view: $viewName ?: null,
+            usedIndexFallback: $this->usedIndexFallback,
+            outcome: $outcome,
+        ));
     }
 
     /**
@@ -129,6 +163,7 @@ class FrontendController
     protected function getTemplateFile(): string
     {
         $this->usedIndexFallback = false;
+        $this->matchedCondition = null;
 
         if (wp_using_themes()) {
 
@@ -160,6 +195,8 @@ class FrontendController
                 }
 
                 if ($template) {
+                    $this->matchedCondition = $tag;
+
                     if ($tag === 'is_attachment') {
                         remove_filter('the_content', 'prepend_attachment');
                     }
