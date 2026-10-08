@@ -12,8 +12,10 @@ use Illuminate\Contracts\Config\Repository;
  * The generator is told to write no folder, no file and no class of its stock
  * module; once it has created module.json and enabled the module, the
  * `modules.<name>.created` event writes the bundled copy of Pollora/module-default
- * over it. A project that published config/modules.php keeps nwidart's stock
- * module: its own configuration decides what the generator writes.
+ * over it. A project whose config/modules.php sets `paths` or `stubs` (nwidart's
+ * full published file) keeps the stock module: its own configuration decides what
+ * the generator writes. A file holding only Pollora's keys (activator, connector)
+ * does not.
  *
  * These keys are read when a generator runs, after every provider registered,
  * so setting them from the framework's register() is early enough — unlike
@@ -28,12 +30,23 @@ class LeanModuleMake
     ) {}
 
     /**
-     * Whether module:make writes the lean module: the project has not
-     * published config/modules.php, and nwidart's configuration is loaded.
+     * Whether module:make writes the lean module: nwidart's configuration is
+     * loaded, and the project's config/modules.php does not set the generator.
      */
     public function isActive(): bool
     {
-        return ! is_file($this->publishedConfigPath) && is_array($this->config->get('modules.paths.generator'));
+        return is_array($this->config->get('modules.paths.generator')) && ! $this->projectSetsGenerator();
+    }
+
+    private function projectSetsGenerator(): bool
+    {
+        if (! is_file($this->publishedConfigPath)) {
+            return false;
+        }
+
+        $published = require $this->publishedConfigPath;
+
+        return is_array($published) && (array_key_exists('paths', $published) || array_key_exists('stubs', $published));
     }
 
     /**
