@@ -11,6 +11,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
+use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Modules\Application\UseCases\ApplyModulesUseCase;
 use Pollora\Modules\Application\UseCases\DiscoverModulesUseCase;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
@@ -25,7 +26,11 @@ use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 use Pollora\Modules\Infrastructure\Services\ModuleTemplate;
 use Pollora\Modules\UI\Console\MakeModuleCommand;
 use Pollora\Modules\UI\Console\ModuleConnectorCommand;
+use Pollora\Modules\UI\Console\ModuleOutdatedCommand;
 use Pollora\Modules\UI\Http\ModulesAdminPage;
+use Pollora\Modules\UI\Http\ModuleVersionsHealthCheck;
+use Pollora\VersionCheck\Infrastructure\Sources\HttpGet;
+use Pollora\VersionCheck\Infrastructure\Sources\VersionSources;
 
 /**
  * Main service provider for the generic module system.
@@ -34,6 +39,11 @@ use Pollora\Modules\UI\Http\ModulesAdminPage;
  */
 class ModuleServiceProvider extends ServiceProvider
 {
+    /**
+     * WP-Cron event refreshing the latest versions of the modules installed by Composer.
+     */
+    public const string REFRESH_VERSIONS_EVENT = 'pollora_refresh_module_versions';
+
     public function register(): void
     {
         $this->registerDomainContracts();
@@ -49,6 +59,12 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->isBooted() ? $setUpModuleAssets() : $this->app->booting($setUpModuleAssets);
 
         $this->mergeConfigFrom(__DIR__.'/../../../../config/modules-defaults.php', 'modules');
+
+        $this->app->singleton(VersionSources::class, fn (Container $app): VersionSources => new VersionSources(
+            $app->make(HttpGet::class),
+            base_path('composer.json'),
+            $app->make('config')->get('modules.versions.github_token'),
+        ));
     }
 
     public function boot(): void
@@ -71,7 +87,7 @@ class ModuleServiceProvider extends ServiceProvider
         ], 'pollora-modules');
 
         if ($this->app->runningInConsole()) {
-            $this->commands([MakeModuleCommand::class, ModuleConnectorCommand::class]);
+            $this->commands([MakeModuleCommand::class, ModuleConnectorCommand::class, ModuleOutdatedCommand::class]);
         }
 
         $this->registerModulesAdminPage();
@@ -93,6 +109,16 @@ class ModuleServiceProvider extends ServiceProvider
         $action->add('load-plugins_page_'.ModulesAdminPage::SLUG, fn () => $this->app->make(ModulesAdminPage::class)->handleRequest());
 
         $filter->add('views_plugins', fn (array $views): array => $this->app->make(ModulesAdminPage::class)->addView($views));
+
+        // Versions of the modules installed by Composer: fetched once a day, never on a front-end request
+        $filter->add('site_status_tests', fn (array $tests): array => $this->app->make(ModuleVersionsHealthCheck::class)->addTests($tests));
+
+        $action->add(self::REFRESH_VERSIONS_EVENT, fn () => $this->app->make(ModuleVersions::class)->refresh());
+        $action->add('admin_init', function (): void {
+            if (function_exists('wp_next_scheduled') && ! wp_next_scheduled(self::REFRESH_VERSIONS_EVENT)) {
+                wp_schedule_event(time() + 60, 'daily', self::REFRESH_VERSIONS_EVENT);
+            }
+        });
     }
 
     /**

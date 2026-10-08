@@ -9,6 +9,7 @@ use Pollora\Attributes\PostType;
 use Pollora\Attributes\Taxonomy;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Modules\Application\Services\ModuleStates;
+use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Support\Domain\StringHelper;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
@@ -437,7 +438,7 @@ final readonly class SystemInfoCollector
     }
 
     /**
-     * @return array{count: int, enabled: int, disabled: int, connector: string|null, items: list<array{name: string, status: string, description: string, priority: string}>}
+     * @return array{count: int, enabled: int, disabled: int, connector: string|null, items: list<array{name: string, status: string, description: string, priority: string, version: string|null, latest: string|null}>}
      */
     public function collectModulesInfo(): array
     {
@@ -448,6 +449,7 @@ final readonly class SystemInfoCollector
             $enabled = $modules->allEnabled();
             $disabled = $modules->allDisabled();
 
+            $versions = $this->moduleVersions();
             $items = [];
             foreach ($all as $module) {
                 $items[] = [
@@ -456,6 +458,9 @@ final readonly class SystemInfoCollector
                     'description' => $module->getDescription(),
                     // getPriority() is typed string and throws on a module.json without priority
                     'priority' => (string) $module->get('priority', ''),
+                    // Only modules installed by Composer have one
+                    'version' => $versions[$module->getName()]['version'] ?? null,
+                    'latest' => $versions[$module->getName()]['latest'] ?? null,
                 ];
             }
 
@@ -468,6 +473,18 @@ final readonly class SystemInfoCollector
             ];
         } catch (\Throwable) {
             return ['count' => 0, 'enabled' => 0, 'disabled' => 0, 'connector' => null, 'items' => []];
+        }
+    }
+
+    /**
+     * @return array<string, array{version: string, latest: string|null}>
+     */
+    private function moduleVersions(): array
+    {
+        try {
+            return $this->container->get(ModuleVersions::class)->all();
+        } catch (\Throwable) {
+            return [];
         }
     }
 

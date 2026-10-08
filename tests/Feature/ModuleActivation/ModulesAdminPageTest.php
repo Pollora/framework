@@ -6,9 +6,12 @@ use Brain\Monkey\Functions;
 use Illuminate\Support\Facades\File;
 use Nwidart\Modules\Contracts\ActivatorInterface;
 use Pollora\Modules\Application\Services\ModuleStates;
+use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Modules\Infrastructure\Activation\ConnectorActivator;
 use Pollora\Modules\Infrastructure\Activation\JsonStateConnector;
 use Pollora\Modules\UI\Http\ModulesAdminPage;
+use Pollora\VersionCheck\Infrastructure\Sources\HttpGet;
+use Pollora\VersionCheck\Infrastructure\Sources\VersionSources;
 
 /**
  * A module as nwidart/laravel-modules hands it out, switched through the activator.
@@ -96,6 +99,8 @@ beforeEach(function (): void {
             return $this->modules[$name] ?? null;
         }
     });
+
+    $this->app->instance(VersionSources::class, new VersionSources(new HttpGet, $this->directory.'/composer.json'));
 
     $this->page = $this->app->make(ModulesAdminPage::class);
 });
@@ -188,6 +193,24 @@ describe('ModulesAdminPage', function (): void {
             ->toContain('Locked enabled')
             ->toContain('name="modules[]" value="Shop" disabled')
             ->not->toContain('value="disable:Shop"');
+    });
+
+    it('shows the version of a module installed by Composer and its update, nothing for a local one', function (): void {
+        $versions = Mockery::mock(ModuleVersions::class);
+        $versions->shouldReceive('all')->andReturn(['Crm' => [
+            'package' => 'acme/crm', 'version' => '1.3.0', 'latest' => '1.4.0', 'development' => false, 'update' => true,
+            'release_url' => 'https://packagist.org/packages/acme/crm#1.4.0',
+        ]]);
+        $this->app->instance(ModuleVersions::class, $versions);
+
+        ob_start();
+        $this->app->make(ModulesAdminPage::class)->render();
+        $html = (string) ob_get_clean();
+
+        expect($html)->toContain('1.3.0 · <strong><a href="https://packagist.org/packages/acme/crm#1.4.0"')
+            ->toContain('1.4.0 available')
+            ->toContain('<code>composer update acme/crm</code>')
+            ->and(substr_count($html, 'composer update'))->toBe(1);
     });
 
     it('explains how to switch modules when the state cannot be written', function (): void {
