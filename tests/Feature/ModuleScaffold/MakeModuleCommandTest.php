@@ -162,7 +162,7 @@ describe('module:make', function (): void {
             ->and($this->modulesPath.'/Crm/vite.config.js')->toBeFile();
     });
 
-    it('keeps the stock module of a project that published nwidart\'s config/modules.php', function (): void {
+    it("keeps the stock module of a project that published nwidart's config/modules.php", function (): void {
         File::ensureDirectoryExists($this->modulesPath);
         file_put_contents($this->modulesPath.'/modules.php', '<?php return ["paths" => ["modules" => "Modules"]];');
         config(['modules.paths.generator' => ['controller' => ['path' => 'app/Http/Controllers', 'generate' => true]]]);
@@ -172,7 +172,7 @@ describe('module:make', function (): void {
         expect(config('modules.paths.generator.controller.generate'))->toBeTrue();
     });
 
-    it('writes the lean module when config/modules.php only sets Pollora\'s keys', function (): void {
+    it("writes the lean module when config/modules.php only sets Pollora's keys", function (): void {
         File::ensureDirectoryExists($this->modulesPath);
         file_put_contents($this->modulesPath.'/modules.php', '<?php return ["activator" => "pollora", "connector" => "json"];');
         config(['modules.paths.generator' => ['controller' => ['path' => 'app/Http/Controllers', 'generate' => true]]]);
