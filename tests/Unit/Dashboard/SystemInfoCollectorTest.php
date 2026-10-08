@@ -303,16 +303,18 @@ describe('SystemInfoCollector', function (): void {
             expect($info['disabled'])->toBe(0);
         });
 
-        it('lists a module whose module.json has no priority', function (): void {
+        it('lists a module whose module.json has no priority, with its state', function (): void {
             // nwidart's getPriority() is typed string and threw: the card said "0 modules"
             $module = Mockery::mock(Module::class);
             $module->shouldReceive('getName')->andReturn('BlocksDemo');
             $module->shouldReceive('getDescription')->andReturn('Demo');
             $module->shouldReceive('get')->with('priority', '')->andReturn(null);
+            $module->shouldReceive('isEnabled')->andReturn(true);
 
             $modules = Mockery::mock();
             $modules->shouldReceive('all')->andReturn(['BlocksDemo' => $module]);
-            $modules->shouldReceive('allEnabled')->andReturn(['BlocksDemo' => $module]);
+            // nwidart keys enabled modules by lower-case name
+            $modules->shouldReceive('allEnabled')->andReturn(['blocksdemo' => $module]);
             $modules->shouldReceive('allDisabled')->andReturn([]);
 
             $container = Mockery::mock(ContainerInterface::class);

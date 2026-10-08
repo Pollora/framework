@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Tools › Pollora and `pollora:status` reported 0 modules when one `module.json` had no `priority`: nwidart's `getPriority()` is typed `string` and threw
+- Tools › Pollora and `pollora:status` showed every module as disabled: nwidart keys `allEnabled()` by lower-case name, which the module's own name never matched
 - Generators with `--module` wrote into `Modules/<Studly>` under the `Modules\<Studly>` namespace whatever the module declared: they now take the path where nwidart/laravel-modules found the module and the namespace its `composer.json` maps onto `app/` (or `src/`), so a module under `Module\BlocksDemo\` gets classes it can autoload
 
 ### Removed
