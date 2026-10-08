@@ -8,13 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.2...develop)
 
 ### Added
+- `pollora:make:module Crm` creates a lean module from the new [Pollora/module-default](https://github.com/Pollora/module-default) template: classes discovered in `app/` (an example hooks class, no service provider), `resources/views/blocks`, and a Vite build through [`@pollora/vite-config`](https://github.com/Pollora/vite-config) into `public/build/module/<kebab>`. Each Laravel layer is one flag away: `--provider`, `--routes` (implies `--provider`), `--api` (implies `--routes`), `--config`, `--database`, `--tests`, or `--full`; `--no-assets` for a PHP-only module. The module is enabled, `composer dump-autoload` merges its `composer.json`, and npm builds it (`--no-enable`, `--no-npm`). `--repository` and `--repo-version` pick another template; `--offline`, or a failed download, uses the copy bundled with the framework
+- `module:make` writes the same lean module, offline, unless the project published `config/modules.php`: the framework turns off nwidart/laravel-modules' stock folders, files and classes and writes its bundled template once the module is created
+- Every enabled module with a `vite.config.*` gets its `module.<kebab>` asset container, so `Asset::add(...)->container('module.crm')` works without a provider of its own; it was set up only for modules with blocks
+- `pollora:make:block` recognises a `vite.config.js` built on `@pollora/vite-config`, which builds blocks already, instead of warning that it does not match the Pollora pattern
 - Module activation connectors: whether a Laravel module is enabled comes from a connector, through nwidart/laravel-modules' activator (`'activator' => 'pollora'`), so `module:enable`, `module:disable` and everything reading `app('modules')` keep working. `json` (default) reads and writes `modules_statuses.json` as nwidart does; `database` keeps a JSON map in the non-autoloaded `pollora_modules` WordPress option, read with Laravel's connection before WordPress loads (never unserialized) and written with `update_option()` once it has, falling back on `json` while the options table does not exist; `config` reads `connectors.config.states` or `MODULES_ENABLED` / `MODULES_DISABLED`, read-only. A project connector implements `ModuleStateConnector` and is declared in `connectors.<name>.class`, or given to `ModuleConnectors::extend()` in `bootstrap/app.php`
 - `modules.locked.enabled` / `modules.locked.disabled` (`MODULES_LOCKED_ENABLED` / `MODULES_LOCKED_DISABLED`) force a module's state over any connector; switching a locked module throws `ModuleLockedException`
 - A switch clears nwidart's provider manifest and the discovery cache, and fires `ModuleEnabled` / `ModuleDisabled` (module, source `admin` or `console`, WordPress user)
 - `config/modules.php`, published with `php artisan vendor:publish --tag=pollora-modules`: nwidart reads its activator while it registers, before any provider of the application, so the connector is chosen in this file, not from a provider
 - `pollora:module:connector [connector] [--import]` shows where module states live and copies them into another connector before the configuration points to it
-
-### Added
 - `pollora:make:block --module=<name>` creates a block in a module's `resources/views/blocks`, named after the module in kebab case (`blocks-demo/hero`), like the seven generators that already took `--module`
 
 ### Fixed

@@ -1,0 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
+
+/*
+ * API routes of the %module_name% module, under /api with the api middleware.
+ */
+Route::get('%module_slug%', fn () => ['module' => '%module_name%'])->name('%module_slug%.index');

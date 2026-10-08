@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace %module_namespace%\Providers;
+
+use Nwidart\Modules\Support\ModuleServiceProvider;
+
+/**
+ * Service provider of the %module_name% module.
+ *
+ * nwidart/laravel-modules' base provider merges config/config.php as
+ * %module_lower%.*, and loads the module's translations and migrations.
+ * Classes in app/ declared with Pollora attributes need no registering here.
+ */
+class %module_name%ServiceProvider extends ModuleServiceProvider
+{
+    protected string $name = '%module_name%';
+
+    protected string $nameLower = '%module_lower%';
+
+    /**
+     * Providers registered with this one.
+     *
+     * @var array<int, class-string>
+     */
+    protected array $providers = [%module_providers%];
+}
