@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Modules\Application\UseCases\ApplyModulesUseCase;
 use Pollora\Modules\Application\UseCases\DiscoverModulesUseCase;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
@@ -26,6 +28,7 @@ use Pollora\Modules\Infrastructure\Services\ModuleTemplate;
 use Pollora\Modules\UI\Console\MakeModuleCommand;
 use Pollora\Modules\UI\Console\ModuleConnectorCommand;
 use Pollora\Modules\UI\Console\ModuleFrontendCommand;
+use Pollora\Modules\UI\Http\ModulesAdminPage;
 
 /**
  * Main service provider for the generic module system.
@@ -47,6 +50,8 @@ class ModuleServiceProvider extends ServiceProvider
         };
 
         $this->app->isBooted() ? $setUpModuleAssets() : $this->app->booting($setUpModuleAssets);
+
+        $this->mergeConfigFrom(__DIR__.'/../../../../config/modules-defaults.php', 'modules');
     }
 
     public function boot(): void
@@ -74,6 +79,26 @@ class ModuleServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([MakeModuleCommand::class, ModuleConnectorCommand::class, ModuleFrontendCommand::class]);
         }
+
+        $this->registerModulesAdminPage();
+    }
+
+    /**
+     * The Modules view of the Plugins screen.
+     */
+    private function registerModulesAdminPage(): void
+    {
+        if (! $this->app->bound(Action::class) || ! $this->app->bound(Filter::class)) {
+            return;
+        }
+
+        $action = $this->app->make(Action::class);
+        $filter = $this->app->make(Filter::class);
+
+        $action->add('admin_menu', fn () => $this->app->make(ModulesAdminPage::class)->addMenuPage());
+        $action->add('load-plugins_page_'.ModulesAdminPage::SLUG, fn () => $this->app->make(ModulesAdminPage::class)->handleRequest());
+
+        $filter->add('views_plugins', fn (array $views): array => $this->app->make(ModulesAdminPage::class)->addView($views));
     }
 
     /**

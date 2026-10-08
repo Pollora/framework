@@ -176,7 +176,7 @@ final class StatusCommand extends Command
     }
 
     /**
-     * @param  array{count: int, enabled: int, disabled: int, items: list<array{name: string, status: string, description: string, priority: string}>}  $modules
+     * @param  array{count: int, enabled: int, disabled: int, connector: string|null, items: list<array{name: string, status: string, description: string, priority: string}>}  $modules
      */
     private function renderModules(array $modules): void
     {
@@ -186,6 +186,10 @@ final class StatusCommand extends Command
             $modules['enabled'],
             $modules['disabled']
         ));
+
+        if ($modules['connector'] !== null && $modules['count'] > 0) {
+            $this->line(sprintf('    Stored in: %s', $modules['connector']));
+        }
 
         foreach ($modules['items'] as $module) {
             $status = $module['status'] === 'enabled' ? '✓' : '✗';
