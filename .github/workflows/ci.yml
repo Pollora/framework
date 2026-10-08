@@ -4,7 +4,8 @@ on:
   push:
     branches: [main, develop, 'feature/**', 'hotfix/**', 'release/**']
   pull_request:
-    branches: [main, develop]
+    # release/** too: features of an upcoming release are merged into its branch
+    branches: [main, develop, 'release/**']
   # Nightly, on the default branch: the browser tests in Firefox and WebKit as well as
   # Chromium, which pull requests run alone to stay fast.
   schedule:
