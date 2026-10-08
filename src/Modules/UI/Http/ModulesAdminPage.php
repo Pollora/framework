@@ -6,6 +6,7 @@ namespace Pollora\Modules\UI\Http;
 
 use Illuminate\Support\Facades\Request;
 use Pollora\Modules\Application\Services\ModuleStates;
+use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Modules\Infrastructure\Activation\JsonStateConnector;
 use RuntimeException;
 
@@ -23,7 +24,10 @@ class ModulesAdminPage
 
     private const string NONCE = 'pollora-modules';
 
-    public function __construct(private readonly ModuleStates $states) {}
+    public function __construct(
+        private readonly ModuleStates $states,
+        private readonly ModuleVersions $versions,
+    ) {}
 
     public function url(): string
     {
@@ -170,15 +174,18 @@ class ModulesAdminPage
         printf('<th scope="col" class="manage-column column-name column-primary">%s</th>', esc_html__('Module', 'pollora'));
         printf('<th scope="col" class="manage-column column-description">%s</th>', esc_html__('Description', 'pollora'));
         printf('<th scope="col" class="manage-column">%s</th>', esc_html__('State', 'pollora'));
+        printf('<th scope="col" class="manage-column">%s</th>', esc_html__('Version', 'pollora'));
         printf('<th scope="col" class="manage-column">%s</th>', esc_html__('Connector', 'pollora'));
         echo '</tr></thead><tbody id="the-list">';
 
         if ($modules === []) {
-            printf('<tr class="no-items"><td class="colspanchange" colspan="5">%s</td></tr>', esc_html__('No modules found.', 'pollora'));
+            printf('<tr class="no-items"><td class="colspanchange" colspan="6">%s</td></tr>', esc_html__('No modules found.', 'pollora'));
         }
 
+        $versions = $this->versions->all();
+
         foreach ($modules as $module) {
-            $this->renderRow($module, $connector->label(), $confirm);
+            $this->renderRow($module, $connector->label(), $confirm, $versions[$module['name']] ?? null);
         }
 
         echo '</tbody></table></form></div>';
@@ -186,8 +193,9 @@ class ModulesAdminPage
 
     /**
      * @param  array{name: string, description: string, path: string, enabled: bool, locked: bool|null, toggleable: bool, reason: string|null}  $module
+     * @param  array{package: string, version: string, latest: string|null, development: bool, update: bool, release_url: string|null}|null  $version  Null for a local module
      */
-    private function renderRow(array $module, string $connectorLabel, string $confirm): void
+    private function renderRow(array $module, string $connectorLabel, string $confirm, ?array $version): void
     {
         $name = $module['name'];
 
@@ -230,7 +238,44 @@ class ModulesAdminPage
             default => __('Disabled', 'pollora'),
         };
 
-        printf('<td>%s</td><td>%s</td></tr>', esc_html($state), esc_html($connectorLabel));
+        printf('<td>%s</td><td>%s</td><td>%s</td></tr>', esc_html($state), $this->versionCell($version), esc_html($connectorLabel));
+    }
+
+    /**
+     * "1.3.0 · 1.4.0 available", with the command that updates it. A local
+     * module has no version, and the cell stays empty.
+     *
+     * @param  array{package: string, version: string, latest: string|null, development: bool, update: bool, release_url: string|null}|null  $version
+     */
+    private function versionCell(?array $version): string
+    {
+        if ($version === null) {
+            return '';
+        }
+
+        $cell = esc_html($version['version']);
+
+        if ($version['development']) {
+            return $cell.' <span class="description">'.esc_html__('(development build)', 'pollora').'</span>';
+        }
+
+        if (! $version['update'] || $version['latest'] === null) {
+            return $cell;
+        }
+
+        /* translators: %s: latest version */
+        $available = esc_html(sprintf(__('%s available', 'pollora'), $version['latest']));
+
+        if ($version['release_url'] !== null) {
+            $available = sprintf('<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>', esc_url($version['release_url']), $available);
+        }
+
+        return sprintf(
+            '%s · <strong>%s</strong><br><code>composer update %s</code>',
+            $cell,
+            $available,
+            esc_html($version['package']),
+        );
     }
 
     private function renderBulkActions(string $confirm): void

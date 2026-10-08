@@ -324,7 +324,7 @@ final readonly class DashboardController
     }
 
     /**
-     * @param  array{count: int, enabled: int, disabled: int, connector: string|null, items: list<array{name: string, status: string, description: string, priority: string}>}  $modules
+     * @param  array{count: int, enabled: int, disabled: int, connector: string|null, items: list<array{name: string, status: string, description: string, priority: string, version: string|null, latest: string|null}>}  $modules
      */
     private function renderModulesCard(array $modules): void
     {
