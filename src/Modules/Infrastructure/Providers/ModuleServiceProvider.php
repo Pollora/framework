@@ -14,12 +14,16 @@ use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Modules\Application\UseCases\ApplyModulesUseCase;
 use Pollora\Modules\Application\UseCases\DiscoverModulesUseCase;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Infrastructure\Services\LaravelModuleAssets;
+use Pollora\Modules\Infrastructure\Services\LeanModuleMake;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
 use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
+use Pollora\Modules\Infrastructure\Services\ModuleTemplate;
+use Pollora\Modules\UI\Console\MakeModuleCommand;
 use Pollora\Modules\UI\Console\ModuleConnectorCommand;
 use Pollora\Modules\UI\Http\ModulesAdminPage;
 
@@ -35,6 +39,14 @@ class ModuleServiceProvider extends ServiceProvider
         $this->registerDomainContracts();
         $this->registerUseCases();
         $this->registerApplicationServices();
+        $this->registerLeanModuleMake();
+
+        // Before any provider boots: WordPress loads, and fires init, while the providers boot
+        $setUpModuleAssets = function (): void {
+            $this->app->make(LaravelModuleAssets::class)->setUp();
+        };
+
+        $this->app->isBooted() ? $setUpModuleAssets() : $this->app->booting($setUpModuleAssets);
 
         $this->mergeConfigFrom(__DIR__.'/../../../../config/modules-defaults.php', 'modules');
     }
@@ -59,7 +71,7 @@ class ModuleServiceProvider extends ServiceProvider
         ], 'pollora-modules');
 
         if ($this->app->runningInConsole()) {
-            $this->commands([ModuleConnectorCommand::class]);
+            $this->commands([MakeModuleCommand::class, ModuleConnectorCommand::class]);
         }
 
         $this->registerModulesAdminPage();
@@ -81,6 +93,28 @@ class ModuleServiceProvider extends ServiceProvider
         $action->add('load-plugins_page_'.ModulesAdminPage::SLUG, fn () => $this->app->make(ModulesAdminPage::class)->handleRequest());
 
         $filter->add('views_plugins', fn (array $views): array => $this->app->make(ModulesAdminPage::class)->addView($views));
+    }
+
+    /**
+     * Have nwidart/laravel-modules' module:make write the lean Pollora module,
+     * unless the project published config/modules.php.
+     */
+    private function registerLeanModuleMake(): void
+    {
+        $this->app->singleton(ModuleTemplate::class);
+        $this->app->singleton(LeanModuleMake::class, fn (Application $app): LeanModuleMake => new LeanModuleMake(
+            $app->make('config'),
+            $app->make(ModuleTemplate::class),
+            $app->configPath('modules.php'),
+        ));
+
+        $this->app->make(LeanModuleMake::class)->applyDefaults();
+
+        Event::listen('modules.*.created', function (string $event, array $payload): void {
+            if (isset($payload[0]) && is_object($payload[0])) {
+                $this->app->make(LeanModuleMake::class)->writeOver($payload[0]);
+            }
+        });
     }
 
     /**

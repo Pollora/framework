@@ -1,0 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * Configuration of the %module_name% module, read as config('%module_lower%.*').
+ */
+return [
+    'name' => '%module_name%',
+];

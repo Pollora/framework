@@ -285,6 +285,10 @@ class MakeBlockCommand extends Command
 
         $content = (string) file_get_contents($viteConfigPath);
 
+        if ($this->reportPolloraViteConfig($content)) {
+            return;
+        }
+
         // Check if already patched
         if (str_contains($content, '@roots/vite-plugin') || str_contains($content, 'blockEntries')) {
             $this->upgradeViteConfig($target);
@@ -388,6 +392,10 @@ class MakeBlockCommand extends Command
 
         $content = (string) file_get_contents($viteConfigPath);
 
+        if ($this->reportPolloraViteConfig($content)) {
+            return;
+        }
+
         if (str_contains($content, self::BLOCKS_DIRECTORY)) {
             $this->components->twoColumnDetail('vite.config.js', 'ALREADY CONFIGURED');
 
@@ -410,6 +418,25 @@ class MakeBlockCommand extends Command
 
         file_put_contents($viteConfigPath, $this->patchRefreshPaths($upgraded));
         $this->components->twoColumnDetail('vite.config.js', 'UPDATED (resources/views/blocks)');
+    }
+
+    /**
+     * A vite.config.js built on @pollora/vite-config needs no patch: it builds
+     * resources/views/blocks unless told `blocks: false`.
+     */
+    private function reportPolloraViteConfig(string $content): bool
+    {
+        if (! str_contains($content, '@pollora/vite-config')) {
+            return false;
+        }
+
+        if (preg_match('/blocks\s*:\s*false/', $content) === 1) {
+            $this->components->warn('vite.config.js passes `blocks: false` to @pollora/vite-config: remove it so the block is built.');
+        } else {
+            $this->components->twoColumnDetail('vite.config.js', 'BUILDS BLOCKS (@pollora/vite-config)');
+        }
+
+        return true;
     }
 
     /**
