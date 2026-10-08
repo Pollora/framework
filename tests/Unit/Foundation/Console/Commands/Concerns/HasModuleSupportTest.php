@@ -110,6 +110,62 @@ describe('HasModuleSupport', function (): void {
         expect($location['source_namespace'])->toBe('Modules\\Blog\\');
     });
 
+    it('takes the module path nwidart/laravel-modules found', function (): void {
+        Container::getInstance()->instance('modules', new class
+        {
+            public function find(string $name): ?object
+            {
+                return $name === 'BlocksDemo' ? new class
+                {
+                    public function getPath(): string
+                    {
+                        return '/srv/custom-modules/BlocksDemo/';
+                    }
+                } : null;
+            }
+        });
+        $this->command->setModuleOption('blocks-demo');
+
+        expect($this->command->getModulePath())->toBe('/srv/custom-modules/BlocksDemo');
+    });
+
+    it('reads the namespace the module maps onto its source directory', function (): void {
+        // A module is free to pick its namespace: pollora-test's BlocksDemo uses Module\BlocksDemo\
+        $modulePath = sys_get_temp_dir().'/pollora-module-'.uniqid();
+        mkdir($modulePath.'/app', 0755, true);
+        file_put_contents($modulePath.'/composer.json', json_encode(['autoload' => ['psr-4' => [
+            'Module\\BlocksDemo\\Database\\Seeders\\' => 'database/seeders/',
+            'Module\\BlocksDemo\\' => 'app/',
+        ]]]));
+        Container::getInstance()->instance('modules', new readonly class($modulePath)
+        {
+            public function __construct(private string $path) {}
+
+            public function find(string $name): object
+            {
+                $path = $this->path;
+
+                return new readonly class($path)
+                {
+                    public function __construct(private string $path) {}
+
+                    public function getPath(): string
+                    {
+                        return $this->path;
+                    }
+                };
+            }
+        });
+        $this->command->setModuleOption('blocks-demo');
+
+        expect($this->command->getModuleNamespace())->toBe('Module\\BlocksDemo')
+            ->and($this->command->getModuleSourceNamespace())->toBe('Module\\BlocksDemo\\');
+
+        unlink($modulePath.'/composer.json');
+        rmdir($modulePath.'/app');
+        rmdir($modulePath);
+    });
+
     it('returns empty array when no module option', function (): void {
         expect($this->command->resolveModuleLocation())->toBe([]);
     });
