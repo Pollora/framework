@@ -452,7 +452,8 @@ final readonly class SystemInfoCollector
             foreach ($all as $module) {
                 $items[] = [
                     'name' => $module->getName(),
-                    'status' => isset($enabled[$module->getName()]) ? 'enabled' : 'disabled',
+                    // allEnabled() is keyed by lower-case name: ask the module
+                    'status' => $module->isEnabled() ? 'enabled' : 'disabled',
                     'description' => $module->getDescription(),
                     // getPriority() is typed string and throws on a module.json without priority
                     'priority' => (string) $module->get('priority', ''),
