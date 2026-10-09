@@ -6,6 +6,7 @@ namespace Pollora\Asset\Infrastructure\Services;
 
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Vite as ViteFacade;
+use Pollora\Asset\Application\Services\MissingBuilds;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Asset\Domain\Exceptions\AssetException;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
@@ -53,13 +54,7 @@ class ViteManager implements ViteManagerInterface
     /**
      * Gets the URLs for the specified entry points.
      *
-     * @param  array  $entrypoints  List of entry points to process
-     * @return array Array of asset URLs grouped by type (js/css)
-     *
-     * @throws AssetException When entrypoints array is empty
-     */
-    /**
-     * Gets the URLs for the specified entry points.
+     * Without a build, there are none: see isMissingBuild().
      *
      * @param  array  $entrypoints  List of entry points to process
      * @return array Array of asset URLs grouped by type (js/css)
@@ -70,6 +65,10 @@ class ViteManager implements ViteManagerInterface
     {
         if ($entrypoints === []) {
             throw new AssetException('Entry points array cannot be empty.');
+        }
+
+        if ($this->isMissingBuild()) {
+            return ['js' => [], 'css' => []];
         }
 
         $basePath = $this->container()->getBasePath();
@@ -91,12 +90,44 @@ class ViteManager implements ViteManagerInterface
     /**
      * Gets the URL for a specific asset path.
      *
+     * Without a build, an empty string: see isMissingBuild().
+     *
      * @param  string  $path  The asset path
      * @return string The complete asset URL
      */
     public function asset(string $path): string
     {
+        if ($this->isMissingBuild()) {
+            return '';
+        }
+
         return $this->getViteInstance()->asset($this->container()->getBasePath().$path);
+    }
+
+    /**
+     * Whether the container has neither a running dev server nor a manifest.
+     *
+     * Laravel's Vite throws on a missing manifest, and assets are resolved
+     * while WordPress boots (blocks register on `init`): one unbuilt theme
+     * used to answer 500 everywhere, wp-admin and wp-login.php included
+     * (Pollora/pollora#79). The missing build is recorded instead, logged
+     * once and named in wp-admin.
+     */
+    public function isMissingBuild(): bool
+    {
+        if ($this->isRunningHot()) {
+            return false;
+        }
+
+        $manifest = public_path($this->container->getBuildDirectory().'/'.$this->container->getManifestPath());
+
+        if (is_file($manifest)) {
+            return false;
+        }
+
+        resolve(MissingBuilds::class)->record($this->container->getName(), $manifest);
+
+        return true;
     }
 
     /**
