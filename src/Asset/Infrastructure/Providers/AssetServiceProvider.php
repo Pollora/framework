@@ -8,10 +8,13 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Application\Services\AssetRetrievalService;
+use Pollora\Asset\Application\Services\MissingBuilds;
 use Pollora\Asset\Domain\Contracts\AssetRepositoryInterface;
 use Pollora\Asset\Infrastructure\Repositories\InMemoryAssetRepository;
 use Pollora\Asset\Infrastructure\Services\AssetEnqueuer;
 use Pollora\Asset\Infrastructure\Services\RootAssetManager;
+use Pollora\Asset\UI\Http\MissingBuildNotice;
+use Pollora\Hook\Domain\Contract\Action;
 
 /**
  * Laravel service provider for asset management services and bindings.
@@ -33,6 +36,7 @@ class AssetServiceProvider extends ServiceProvider
             $app->make(AssetRetrievalService::class)
         ));
         $this->app->bind(AssetEnqueuer::class, fn (Application $app): AssetEnqueuer => new AssetEnqueuer($app));
+        $this->app->singleton(MissingBuilds::class);
         $this->app->singleton(RootAssetManager::class, fn (Application $app): RootAssetManager => new RootAssetManager(
             $app->make(AssetManager::class)
         ));
@@ -44,5 +48,7 @@ class AssetServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->make(RootAssetManager::class)->registerRootAssets();
+
+        $this->app->make(Action::class)->add('admin_notices', [$this->app->make(MissingBuildNotice::class), 'render']);
     }
 }
