@@ -396,6 +396,15 @@ class Bootstrap
 
         Constant::queue('JETPACK_DEV_DEBUG', $debugMode);
 
+        if (! function_exists('getenv') || getenv('WP_ENVIRONMENT_TYPE') === false) {
+            Constant::queue('WP_ENVIRONMENT_TYPE', match (config('app.env')) {
+                'local' => 'local',
+                'dev', 'development', 'testing' => 'development',
+                'staging' => 'staging',
+                default => 'production',
+            });
+        }
+
         foreach ((array) config('wordpress.constants', []) as $key => $value) {
             $key = strtoupper((string) $key);
             Constant::queue($key, $value);
