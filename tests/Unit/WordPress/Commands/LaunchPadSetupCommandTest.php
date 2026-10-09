@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Console\Application;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
 use Pollora\Services\WordPress\Installation\DatabaseService;
@@ -17,7 +18,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * @param  array<string, mixed>  $parameters
  * @return array{exit: int, output: string}
  */
-function runSetupCommand(bool $configured, bool $interactive, array $parameters = []): array
+function runSetupCommand(bool $configured, bool $interactive, array $parameters = [], bool $terminal = true): array
 {
     $database = Mockery::mock(DatabaseService::class);
     $database->shouldReceive('isConfigured')->andReturn($configured);
@@ -42,7 +43,19 @@ function runSetupCommand(bool $configured, bool $interactive, array $parameters 
     $application = new Application($container, new Dispatcher($container), 'testing');
     $application->setAutoExit(false);
 
-    $command = new LaunchPadSetupCommand($database);
+    // Laravel reads the signature from the class's own attributes
+    $command = new #[Signature('pollora:env:setup {--install : Suppress some informational output}')] class($database, $terminal) extends LaunchPadSetupCommand
+    {
+        public function __construct(DatabaseService $database, private readonly bool $terminal)
+        {
+            parent::__construct($database);
+        }
+
+        protected function hasTerminal(): bool
+        {
+            return $this->terminal;
+        }
+    };
     $command->setLaravel($container);
 
     $application->addCommand($command);
@@ -94,5 +107,21 @@ describe('pollora:env:setup without a terminal', function (): void {
 
         expect($result['exit'])->toBe(0)
             ->and($result['output'])->not->toContain('already configured');
+    });
+});
+
+describe('pollora:env:setup from composer create-project', function (): void {
+    it('does not prompt when the input is interactive but there is no terminal', function (): void {
+        // Composer runs post-autoload-dump without a terminal even when
+        // create-project was typed in one: Laravel Prompts answered every
+        // question with its default and stopped on "Database name is
+        // required" (Pollora/pollora#78)
+        $result = runSetupCommand(configured: false, interactive: true, terminal: false);
+
+        expect($result['exit'])->toBe(0)
+            ->and($result['output'])
+            ->toContain('DB_CONNECTION=mysql')
+            ->toContain('php artisan pollora:install')
+            ->not->toContain('Database name is required');
     });
 });

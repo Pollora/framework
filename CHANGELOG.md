@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - A page template declared in the theme's `config/templates.php` is rendered by its Blade view: WordPress puts the template slug first in the page hierarchy without extension (`landing`), which Pollora looked up as a file named `landing` instead of `landing.blade.php`, so `page.blade.php` answered (pollora#159)
+- Before the database is configured, the WordPress fallback route answers 503 instead of 500 (`Call to undefined function wp_using_themes()`): with `APP_DEBUG`, a "Pollora is not set up yet" page names the missing settings (`DB_CONNECTION=mysql`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) and the commands to run (`pollora:env:setup`, `pollora:install`, `pollora:doctor`); without it, the application's or Laravel's 503 page. Laravel routes keep working (pollora#78)
+- `composer create-project pollora/pollora` without a database no longer ends with a failing script ("Database name is required"): Composer runs `pollora:env:setup` without a terminal, which the command now treats as non-interactive, printing the settings to fill and the commands to run (pollora#78)
 
 ## [v13.35.4](https://github.com/Pollora/framework/compare/v13.35.3...v13.35.4) - 2026-10-09
 
