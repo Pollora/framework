@@ -49,6 +49,9 @@ class AssetServiceProvider extends ServiceProvider
     {
         $this->app->make(RootAssetManager::class)->registerRootAssets();
 
-        $this->app->make(Action::class)->add('admin_notices', [$this->app->make(MissingBuildNotice::class), 'render']);
+        // Hooks come from pollora/hook's provider, absent from some test applications
+        if ($this->app->bound(Action::class)) {
+            $this->app->make(Action::class)->add('admin_notices', [$this->app->make(MissingBuildNotice::class), 'render']);
+        }
     }
 }
