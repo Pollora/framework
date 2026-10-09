@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.3...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.4...develop)
+
+## [v13.35.4](https://github.com/Pollora/framework/compare/v13.35.3...v13.35.4) - 2026-10-09
 
 ### Fixed
 - Update checks for modules installed by Composer ask the project's repositories in Composer's order and move on when one does not serve the package (401, 403, 404), Packagist last: a private `composer` repository listed first (SatisPress, paid plugins) answered for every package and a module from Packagist read "source did not answer" (#448). A repository's `exclude` is honoured next to `only`, `"packagist.org": false` keeps Packagist out, and `wpackagist.org` is no longer taken for Packagist
