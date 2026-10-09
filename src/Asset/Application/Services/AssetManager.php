@@ -94,6 +94,17 @@ class AssetManager
     }
 
     /**
+     * Every asset container, keyed by name: the theme's, each plugin's and
+     * module's, for tools that list where a page's assets come from.
+     *
+     * @return array<string, AssetContainer>
+     */
+    public function containers(): array
+    {
+        return $this->containers;
+    }
+
+    /**
      * Sets the default asset container.
      *
      * @param  string  $name  Name of the container to set as default

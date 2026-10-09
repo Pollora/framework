@@ -5,11 +5,13 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.2...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.3...develop)
+
+## [v13.35.3](https://github.com/Pollora/framework/compare/v13.35.2...v13.35.3) - 2026-10-09
 
 ### Added
 - `pollora:make:module Crm` creates a lean module from the new [Pollora/module-default](https://github.com/Pollora/module-default) template: classes discovered in `app/` (an example hooks class, no service provider), `resources/views/blocks`, and a Vite build through [`@pollora/vite-config`](https://github.com/Pollora/vite-config) into `public/build/module/<kebab>`. Each Laravel layer is one flag away: `--provider`, `--routes` (implies `--provider`), `--api` (implies `--routes`), `--config`, `--database`, `--tests`, or `--full`; `--no-assets` for a PHP-only module. The module is enabled, `composer dump-autoload` merges its `composer.json`, and npm builds it (`--no-enable`, `--no-npm`). `--repository` and `--repo-version` pick another template; `--offline`, or a failed download, uses the copy bundled with the framework
-- `module:make` writes the same lean module, offline, unless the project published `config/modules.php`: the framework turns off nwidart/laravel-modules' stock folders, files and classes and writes its bundled template once the module is created
+- `module:make` writes the same lean module, offline, unless the project's `config/modules.php` sets `paths` or `stubs` (nwidart/laravel-modules' own published file; Pollora's, from `--tag=pollora-modules`, does not): the framework turns off nwidart/laravel-modules' stock folders, files and classes and writes its bundled template once the module is created
 - Every enabled module with a `vite.config.*` gets its `module.<kebab>` asset container, so `Asset::add(...)->container('module.crm')` works without a provider of its own; it was set up only for modules with blocks
 - `pollora:make:block` recognises a `vite.config.js` built on `@pollora/vite-config`, which builds blocks already, instead of warning that it does not match the Pollora pattern
 - Module activation connectors: whether a Laravel module is enabled comes from a connector, through nwidart/laravel-modules' activator (`'activator' => 'pollora'`), so `module:enable`, `module:disable` and everything reading `app('modules')` keep working. `json` (default) reads and writes `modules_statuses.json` as nwidart does; `database` keeps a JSON map in the non-autoloaded `pollora_modules` WordPress option, read with Laravel's connection before WordPress loads (never unserialized) and written with `update_option()` once it has, falling back on `json` while the options table does not exist; `config` reads `connectors.config.states` or `MODULES_ENABLED` / `MODULES_DISABLED`, read-only. A project connector implements `ModuleStateConnector` and is declared in `connectors.<name>.class`, or given to `ModuleConnectors::extend()` in `bootstrap/app.php`
@@ -23,6 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tools › Pollora's Modules card and `pollora:status` say where module states are stored, and the card links to the Modules view
 - Update checks for modules installed by Composer: a module whose path is a Composer package's install path (placed in `Modules/` by the skeleton's `installer-paths` rule, or scanned in `vendor/`) carries that package's version, whatever its type; a local module has none and is never checked. The latest release comes from the repository the project's `composer.json` declares for it — a `composer` repository (Private Packagist, Satis: `{url}/p2/{package}.json`), a GitHub `vcs` repository (latest release, else highest tag; `MODULES_GITHUB_TOKEN` for a private one), or Packagist — is cached per package for 12 hours (1 hour when the source does not answer), and is fetched by a daily WP-Cron task or `pollora:module:outdated`, never during a front-end request. Plugins › Modules shows "1.3.0 · 1.4.0 available" with the `composer update` command, Site Health tests "Pollora modules are up to date", and `pollora:status` (`--json` too) gives each module's version and latest; a `dev-*` build is never reported outdated
 - `pollora:make:block --module=<name>` creates a block in a module's `resources/views/blocks`, named after the module in kebab case (`blocks-demo/hero`), like the seven generators that already took `--module`
+- `AnsweringTemplate` says which template the hierarchy answered a request with: template file, conditional tag, Blade view, whether it fell back to `index`. It stays empty when `Route::wp()` or a Laravel route answered, and works without `WP_DEBUG`, unlike the template marker
+- `Pollora\WordPress\Events\WordPressBooting` is dispatched right before `wp-settings.php` loads: the last moment to set something up before WordPress builds its globals. Listen to it from a provider's `register()`
+- `DiscoveryCacheManager::scans()` says, for each location, whether its structures came from this process, the persistent cache or a scan, with time and count. A cold and a warm persistent cache used to both count as a miss
+- `Pollora\BlockBinding\Domain\Events\BindingResolved` is dispatched for each block binding resolved, with its source, field, post, time and whether the cache answered; only when something listens
+- `AssetManager::containers()` lists every asset container by name: the theme's, plugins', modules'
+
+### Changed
+- Requires `pollora/hook` `^1.5`, for `AbstractHook::all()` (every registration made through `Action` and `Filter`) and the `pollora/async/dispatched` action, which debugging tools read
 
 ### Fixed
 - Tools › Pollora and `pollora:status` reported 0 modules when one `module.json` had no `priority`: nwidart's `getPriority()` is typed `string` and threw

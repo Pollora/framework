@@ -9,6 +9,7 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Route\Application\Services\AnsweringTemplate;
 use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
 use Pollora\Route\Application\UseCases\RegisterWordPressTypesUseCase;
 use Pollora\Route\Domain\Contracts\ConditionResolverInterface;
@@ -87,6 +88,10 @@ class RouteServiceProvider extends ServiceProvider
      */
     private function registerDomainContracts(): void
     {
+        // Which template answered: written by the frontend controller, read
+        // by debugging tools later in the same request
+        $this->app->singleton(AnsweringTemplate::class);
+
         // Register the WordPress type resolver
         $this->app->singleton(WordPressTypeResolverInterface::class, WordPressTypeResolver::class);
 

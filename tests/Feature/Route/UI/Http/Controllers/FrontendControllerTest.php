@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
+use Pollora\Route\Application\Services\AnsweringTemplate;
+use Pollora\Route\Domain\Enums\TemplateOutcome;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
@@ -205,5 +207,85 @@ describe('FrontendController', function (): void {
         expect($response)->toBeInstanceOf(Response::class);
         expect($response->getStatusCode())->toBe(404);
         expect($response->getContent())->toBe('Not Found');
+    });
+
+    it('remembers the condition and the Blade view that answered', function (): void {
+        $answering = new AnsweringTemplate;
+        $controller = new FrontendController($this->templateFinder, $answering);
+
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\stubs([
+            'is_embed' => false,
+            'is_404' => false,
+            'is_search' => false,
+            'is_front_page' => false,
+            'is_home' => false,
+            'is_privacy_policy' => false,
+            'is_post_type_archive' => false,
+            'is_tax' => false,
+            'is_attachment' => false,
+            'is_single' => true,
+        ]);
+        Brain\Monkey\Functions\when('get_single_template')->justReturn('/theme/single.blade.php');
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
+
+        $this->templateFinder->shouldReceive('getViewNameFromPath')->andReturn('single');
+        View::shouldReceive('exists')->with('single')->andReturn(true);
+        View::shouldReceive('make')->with('single')->andReturn('<html>single</html>');
+
+        $controller->handle(Request::create('/hello-world'));
+
+        $resolution = $answering->resolution();
+
+        expect($resolution)->not->toBeNull()
+            ->and($resolution->template)->toBe('/theme/single.blade.php')
+            ->and($resolution->condition)->toBe('is_single')
+            ->and($resolution->view)->toBe('single')
+            ->and($resolution->usedIndexFallback)->toBeFalse()
+            ->and($resolution->outcome)->toBe(TemplateOutcome::View);
+    });
+
+    it('remembers a 404 that only the index could answer as not found', function (): void {
+        $answering = new AnsweringTemplate;
+        $controller = new FrontendController($this->templateFinder, $answering);
+
+        Brain\Monkey\Functions\when('wp_using_themes')->justReturn(true);
+        Brain\Monkey\Functions\stubs([
+            'is_embed' => false,
+            'is_404' => true,
+            'is_search' => false,
+            'is_front_page' => false,
+            'is_home' => false,
+            'is_privacy_policy' => false,
+            'is_post_type_archive' => false,
+            'is_tax' => false,
+            'is_attachment' => false,
+            'is_single' => false,
+            'is_page' => false,
+            'is_singular' => false,
+            'is_category' => false,
+            'is_tag' => false,
+            'is_author' => false,
+            'is_date' => false,
+            'is_archive' => false,
+        ]);
+        Brain\Monkey\Functions\when('get_404_template')->justReturn('');
+        Brain\Monkey\Functions\when('get_index_template')->justReturn('/theme/index.php');
+        Brain\Monkey\Functions\when('apply_filters')->alias(fn ($filter, $value) => $value);
+
+        $this->templateFinder->shouldReceive('getViewNameFromPath')->andReturn('index');
+        View::shouldReceive('exists')->andReturn(false);
+        View::shouldReceive('replaceNamespace')->andReturnNull();
+        View::shouldReceive('addNamespace')->andReturnNull();
+
+        $controller->handle(Request::create('/nothing-here'));
+
+        expect($answering->resolution()?->condition)->toBeNull()
+            ->and($answering->resolution()?->usedIndexFallback)->toBeTrue()
+            ->and($answering->resolution()?->outcome)->toBe(TemplateOutcome::NotFound);
+    });
+
+    it('leaves nothing behind for requests the hierarchy never saw', function (): void {
+        expect((new AnsweringTemplate)->resolution())->toBeNull();
     });
 });
