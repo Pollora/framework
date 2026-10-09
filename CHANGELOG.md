@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Pollora\BlockBinding\Domain\Events\BindingResolved` is dispatched for each block binding resolved, with its source, field, post, time and whether the cache answered; only when something listens
 - `AssetManager::containers()` lists every asset container by name: the theme's, plugins', modules'
 
+### Changed
+- Requires `pollora/hook` `^1.5`, for `AbstractHook::all()` (every registration made through `Action` and `Filter`) and the `pollora/async/dispatched` action, which debugging tools read
+
 ### Fixed
 - Tools › Pollora and `pollora:status` reported 0 modules when one `module.json` had no `priority`: nwidart's `getPriority()` is typed `string` and threw
 - Tools › Pollora and `pollora:status` showed every module as disabled: nwidart keys `allEnabled()` by lower-case name, which the module's own name never matched
