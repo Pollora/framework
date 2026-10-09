@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.5...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.6...develop)
+
+## [v13.35.6](https://github.com/Pollora/framework/compare/v13.35.5...v13.35.6) - 2026-10-09
 
 ### Fixed
 - `composer create-project pollora/pollora` without a database finishes: `pollora:install`, run by the skeleton's `post-create-project-cmd`, stopped with "Application environment is not configured. Aborting." and exit code 1. Run by a Composer script, it now says which settings to fill and what to run, and exits 0; run by hand or in a deployment, it still fails, with the same hints (pollora#78)
