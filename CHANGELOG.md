@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.2...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.3...develop)
+
+## [v13.35.3](https://github.com/Pollora/framework/compare/v13.35.2...v13.35.3) - 2026-10-09
 
 ### Added
 - `pollora:make:module Crm` creates a lean module from the new [Pollora/module-default](https://github.com/Pollora/module-default) template: classes discovered in `app/` (an example hooks class, no service provider), `resources/views/blocks`, and a Vite build through [`@pollora/vite-config`](https://github.com/Pollora/vite-config) into `public/build/module/<kebab>`. Each Laravel layer is one flag away: `--provider`, `--routes` (implies `--provider`), `--api` (implies `--routes`), `--config`, `--database`, `--tests`, or `--full`; `--no-assets` for a PHP-only module. The module is enabled, `composer dump-autoload` merges its `composer.json`, and npm builds it (`--no-enable`, `--no-npm`). `--repository` and `--repo-version` pick another template; `--offline`, or a failed download, uses the copy bundled with the framework
