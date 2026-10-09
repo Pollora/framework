@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\View;
 use Pollora\Route\Application\Services\AnsweringTemplate;
 use Pollora\Route\Domain\Enums\TemplateOutcome;
 use Pollora\Route\Domain\Models\TemplateResolution;
+use Pollora\Route\UI\Http\Responses\SetupRequiredResponse;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 /**
@@ -49,8 +50,14 @@ class FrontendController
      */
     public function handle(Request $request): Response
     {
+        // WordPress loads once the database is configured: until then there is
+        // no hierarchy to ask (Pollora/pollora#78)
+        if (! $this->wordPressIsLoaded()) {
+            return SetupRequiredResponse::make();
+        }
+
         // Early return if themes are not being used
-        if (function_exists('wp_using_themes') && ! wp_using_themes()) {
+        if (! wp_using_themes()) {
             $this->remember('', null, TemplateOutcome::NotFound);
 
             return $this->renderNotFound();
@@ -96,6 +103,14 @@ class FrontendController
         $this->remember($templatePath, $viewName, TemplateOutcome::NotFound);
 
         return $this->renderNotFound();
+    }
+
+    /**
+     * Whether WordPress has been loaded for this request.
+     */
+    protected function wordPressIsLoaded(): bool
+    {
+        return function_exists('wp_using_themes');
     }
 
     /**
