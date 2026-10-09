@@ -24,7 +24,7 @@ class SetupRequiredResponse
      *
      * @var array<string, string>
      */
-    private const SETTINGS = [
+    private const array SETTINGS = [
         'host' => 'DB_HOST',
         'database' => 'DB_DATABASE',
         'username' => 'DB_USERNAME',
@@ -36,7 +36,7 @@ class SetupRequiredResponse
      *
      * @var array<string, string>
      */
-    private const COMMANDS = [
+    private const array COMMANDS = [
         'php artisan pollora:env:setup' => 'asks for the database settings and writes them to .env',
         'php artisan pollora:install' => 'installs WordPress and the theme',
         'php artisan pollora:doctor' => 'checks the project and prints the fix for each problem',

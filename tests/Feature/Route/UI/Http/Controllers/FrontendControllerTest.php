@@ -320,7 +320,7 @@ describe('FrontendController before WordPress is set up', function (): void {
 
     it('names the missing settings and the commands to run with debug', function (): void {
         config()->set('app.debug', true);
-        config()->set('database.connections.mysql.host', null);
+        config()->set('database.connections.mysql.host');
 
         $response = $this->controller->handle(Request::create('/'));
 
