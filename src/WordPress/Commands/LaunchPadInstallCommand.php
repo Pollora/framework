@@ -58,11 +58,7 @@ class LaunchPadInstallCommand extends Command
             }
 
             if (! $this->databaseService->isConfigured()) {
-                if (! $installMode) {
-                    info('Application environment is not configured. Aborting.');
-                }
-
-                return self::FAILURE;
+                return $this->reportMissingDatabase();
             }
 
             $this->installWordPress($installMode);
@@ -76,6 +72,41 @@ class LaunchPadInstallCommand extends Command
 
             return self::FAILURE;
         }
+    }
+
+    /**
+     * Without a database there is nothing to install.
+     *
+     * Run by hand or in a deployment, that is a failure. Run by Composer
+     * (`post-create-project-cmd` of the skeleton), it is the normal state of a
+     * project nobody has configured yet: say what to do and let
+     * `composer create-project` finish (Pollora/pollora#78).
+     */
+    private function reportMissingDatabase(): int
+    {
+        $runByComposer = $this->runByComposer();
+
+        $message = 'The database is not configured, so WordPress cannot be installed yet.';
+
+        if ($runByComposer) {
+            warning($message);
+        } else {
+            error($message);
+        }
+
+        $this->line('  Set DB_CONNECTION=mysql and the DB_* values in .env, or run: php artisan pollora:env:setup');
+        $this->line('  Then: php artisan pollora:install (php artisan pollora:doctor checks the project)');
+
+        return $runByComposer ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * Whether a Composer script runs this command: Composer sets
+     * COMPOSER_DEV_MODE for every script it runs.
+     */
+    protected function runByComposer(): bool
+    {
+        return getenv('COMPOSER_DEV_MODE') !== false;
     }
 
     private function installWordPress(bool $silent = false): void

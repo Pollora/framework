@@ -223,3 +223,88 @@ describe('pollora:install without prompts', function (): void {
             ->and($result['output'])->not->toContain('secret123');
     });
 });
+
+/**
+ * Run pollora:install, without prompts, against a project with no database.
+ *
+ * @return array{exit: int, output: string}
+ */
+function runInstallWithoutDatabase(): array
+{
+    $installation = Mockery::mock(InstallationService::class);
+    $installation->shouldReceive('isInstalled')->andReturn(false);
+    $installation->shouldNotReceive('install');
+
+    $database = Mockery::mock(DatabaseService::class);
+    $database->shouldReceive('isConfigured')->andReturn(false);
+
+    $container = new class extends Container
+    {
+        public function runningUnitTests(): bool
+        {
+            return false;
+        }
+    };
+
+    $previousContainer = Container::getInstance();
+    Container::setInstance($container);
+
+    $application = new Application($container, new Dispatcher($container), 'testing');
+    $application->setAutoExit(false);
+
+    $command = new LaunchPadInstallCommand($installation, $database);
+    $command->setLaravel($container);
+
+    $application->addCommand($command);
+
+    $input = new ArrayInput(['command' => 'pollora:install']);
+    $input->setInteractive(false);
+
+    $output = new BufferedOutput;
+
+    try {
+        $exit = $application->find('pollora:install')->run($input, $output);
+    } finally {
+        Container::setInstance($previousContainer);
+    }
+
+    return ['exit' => $exit, 'output' => $output->fetch()];
+}
+
+/**
+ * `composer create-project pollora/pollora` runs pollora:install from the
+ * skeleton's post-create-project-cmd. Without a database it stopped with
+ * "Application environment is not configured. Aborting." and exit code 1,
+ * so create-project ended on a failing script (Pollora/pollora#78).
+ */
+describe('pollora:install without a database', function (): void {
+    beforeEach(function (): void {
+        // Composer sets it for every script, `composer test` included
+        $this->composerDevMode = getenv('COMPOSER_DEV_MODE');
+    });
+
+    afterEach(function (): void {
+        putenv($this->composerDevMode === false ? 'COMPOSER_DEV_MODE' : 'COMPOSER_DEV_MODE='.$this->composerDevMode);
+    });
+
+    it('lets composer create-project finish, saying what to set and run', function (): void {
+        putenv('COMPOSER_DEV_MODE=1');
+
+        $result = runInstallWithoutDatabase();
+
+        expect($result['exit'])->toBe(0)
+            ->and($result['output'])
+            ->toContain('DB_CONNECTION=mysql')
+            ->toContain('php artisan pollora:env:setup')
+            ->toContain('php artisan pollora:install');
+    });
+
+    it('still fails when run by hand or in a deployment', function (): void {
+        putenv('COMPOSER_DEV_MODE');
+
+        $result = runInstallWithoutDatabase();
+
+        expect($result['exit'])->toBe(1)
+            ->and($result['output'])->toContain('DB_CONNECTION=mysql');
+    });
+});
