@@ -79,10 +79,7 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
             return self::$locateCache[$templateNames];
         }
 
-        // Convert PHP template to Blade template
-        $bladeTemplate = str_ends_with($templateNames, '.php') && ! str_ends_with($templateNames, '.blade.php')
-            ? str_replace('.php', '.blade.php', $templateNames)
-            : $templateNames;
+        $bladeTemplate = $this->toBladeTemplate($templateNames);
 
         // Collected separately so that every Blade candidate outranks every PHP
         // one. The theme root is registered as a view path ahead of
@@ -103,13 +100,38 @@ class FileSystemTemplateFinder implements TemplateFinderInterface
             // Check for original file if different from Blade
             if ($templateNames !== $bladeTemplate) {
                 $originalPath = $path.DIRECTORY_SEPARATOR.$templateNames;
-                if (file_exists($originalPath)) {
+                if (is_file($originalPath)) {
                     $php[] = $this->toThemeRelativePath($originalPath, $templateNames);
                 }
             }
         }
 
         return self::$locateCache[$templateNames] = array_values(array_unique(array_filter([...$blade, ...$php])));
+    }
+
+    /**
+     * The Blade file a hierarchy candidate stands for.
+     *
+     * `single.php` becomes `single.blade.php`. A candidate without extension
+     * is a page template slug, which WordPress puts first in the hierarchy
+     * (the `landing` declared in the theme's `config/templates.php`): it
+     * stands for `landing.blade.php`.
+     */
+    private function toBladeTemplate(string $templateName): string
+    {
+        if (str_ends_with($templateName, '.blade.php')) {
+            return $templateName;
+        }
+
+        if (str_ends_with($templateName, '.php')) {
+            return substr($templateName, 0, -4).'.blade.php';
+        }
+
+        if (! str_contains(basename($templateName), '.')) {
+            return $templateName.'.blade.php';
+        }
+
+        return $templateName;
     }
 
     /**

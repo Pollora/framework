@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\View;
 use Pollora\Route\Application\Services\AnsweringTemplate;
 use Pollora\Route\Domain\Enums\TemplateOutcome;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
+use Pollora\Route\UI\Http\Responses\SetupRequiredResponse;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
 beforeEach(function (): void {
@@ -287,5 +288,62 @@ describe('FrontendController', function (): void {
 
     it('leaves nothing behind for requests the hierarchy never saw', function (): void {
         expect((new AnsweringTemplate)->resolution())->toBeNull();
+    });
+});
+
+/**
+ * Pollora loads WordPress only once the database is configured, but the
+ * fallback route is always there: it used to call WordPress anyway and
+ * answer 500 (Pollora/pollora#78).
+ */
+describe('FrontendController before WordPress is set up', function (): void {
+    beforeEach(function (): void {
+        $this->controller = new class($this->templateFinder) extends FrontendController
+        {
+            protected function wordPressIsLoaded(): bool
+            {
+                return false;
+            }
+        };
+
+        config()->set('database.default', 'sqlite');
+    });
+
+    it('answers a plain 503 without debug', function (): void {
+        config()->set('app.debug', false);
+
+        $response = $this->controller->handle(Request::create('/'));
+
+        expect($response->getStatusCode())->toBe(503)
+            ->and($response->getContent())->not->toContain('DB_CONNECTION');
+    });
+
+    it('names the missing settings and the commands to run with debug', function (): void {
+        config()->set('app.debug', true);
+        config()->set('database.connections.mysql.host');
+
+        $response = $this->controller->handle(Request::create('/'));
+
+        expect($response->getStatusCode())->toBe(503)
+            ->and($response->getContent())
+            ->toContain('Pollora is not set up yet')
+            ->toContain('DB_CONNECTION=mysql')
+            ->toContain('DB_HOST')
+            ->toContain('php artisan pollora:env:setup')
+            ->toContain('php artisan pollora:install')
+            ->toContain('php artisan pollora:doctor');
+    });
+
+    it('asks only for what a MySQL connection still lacks', function (): void {
+        config()->set('database.default', 'mysql');
+        config()->set('database.connections.mysql', [
+            'driver' => 'mysql',
+            'host' => '127.0.0.1',
+            'database' => '',
+            'username' => 'pollora',
+            'password' => '',
+        ]);
+
+        expect(SetupRequiredResponse::missingSettings())->toBe(['DB_DATABASE']);
     });
 });

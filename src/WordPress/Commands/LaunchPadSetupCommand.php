@@ -49,9 +49,16 @@ class LaunchPadSetupCommand extends Command
             // continue without a database, and it says so plainly. So when
             // there is nobody to ask, say what is wrong and what to run, and
             // let composer finish.
-            if (! $this->input->isInteractive()) {
+            //
+            // Composer runs the hook without a terminal even when the user
+            // typed `composer create-project` in one: the input still says it
+            // is interactive, but Laravel Prompts reads STDIN, answers each
+            // question with its default and fails on the first required one
+            // ("Database name is required", Pollora/pollora#78).
+            if (! $this->input->isInteractive() || ! $this->hasTerminal()) {
                 warning('The database is not reachable, and there is no terminal to ask for its settings.');
-                $this->line('  Set the DB_* values in .env, then run: php artisan pollora:env:setup');
+                $this->line('  Set DB_CONNECTION=mysql and the DB_* values in .env, or run: php artisan pollora:env:setup');
+                $this->line('  Then: php artisan pollora:install (php artisan pollora:doctor checks the project)');
 
                 return self::SUCCESS;
             }
@@ -75,5 +82,13 @@ class LaunchPadSetupCommand extends Command
 
             return self::FAILURE;
         }
+    }
+
+    /**
+     * Whether someone can answer a question on STDIN.
+     */
+    protected function hasTerminal(): bool
+    {
+        return defined('STDIN') && stream_isatty(STDIN);
     }
 }
