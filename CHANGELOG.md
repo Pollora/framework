@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.3...develop)
 
+### Fixed
+- Update checks for modules installed by Composer ask the project's repositories in Composer's order and move on when one does not serve the package (401, 403, 404), Packagist last: a private `composer` repository listed first (SatisPress, paid plugins) answered for every package and a module from Packagist read "source did not answer" (#448). A repository's `exclude` is honoured next to `only`, `"packagist.org": false` keeps Packagist out, and `wpackagist.org` is no longer taken for Packagist
+
 ## [v13.35.3](https://github.com/Pollora/framework/compare/v13.35.2...v13.35.3) - 2026-10-09
 
 ### Added

@@ -12,6 +12,7 @@ use Pollora\Modules\UI\Http\ModuleVersionsHealthCheck;
 use Pollora\VersionCheck\Application\Services\PackageVersionChecker;
 use Pollora\VersionCheck\Domain\Services\StableVersions;
 use Pollora\VersionCheck\Infrastructure\Sources\ComposerRepositorySource;
+use Pollora\VersionCheck\Infrastructure\Sources\FirstAnsweringSource;
 use Pollora\VersionCheck\Infrastructure\Sources\GitHubSource;
 use Pollora\VersionCheck\Infrastructure\Sources\HttpGet;
 use Pollora\VersionCheck\Infrastructure\Sources\VersionSources;
@@ -92,16 +93,69 @@ describe('version sources', function (): void {
             ->and($requests[0]['headers']['Authorization'])->toBe('Bearer secret');
     });
 
-    it("picks the source from the project's repositories", function (): void {
+    it("asks the project's repositories in Composer's order, then Packagist", function (): void {
         file_put_contents($this->directory.'/composer.json', json_encode(['repositories' => [
             ['type' => 'composer', 'url' => 'https://satis.example.com', 'only' => ['acme/*']],
             ['type' => 'vcs', 'url' => 'https://github.com/other/billing.git'],
         ]]));
         $sources = new VersionSources(new HttpGet, $this->directory.'/composer.json');
 
-        expect($sources->for('acme/crm'))->toBeInstanceOf(ComposerRepositorySource::class)
-            ->and($sources->for('other/billing'))->toBeInstanceOf(GitHubSource::class)
+        expect($sources->for('acme/crm'))->toBeInstanceOf(FirstAnsweringSource::class)
+            ->and(array_map(get_class(...), $sources->for('acme/crm')->sources()))->toBe([ComposerRepositorySource::class, ComposerRepositorySource::class])
+            ->and(array_map(get_class(...), $sources->for('other/billing')->sources()))->toBe([GitHubSource::class, ComposerRepositorySource::class])
+            ->and($sources->for('vendor/package'))->toBeInstanceOf(ComposerRepositorySource::class)
             ->and($sources->for('vendor/package')->releaseUrl('vendor/package', '1.0.0'))->toBe('https://packagist.org/packages/vendor/package#1.0.0');
+    });
+
+    it('moves on to Packagist when a private repository does not serve the package (issue #448)', function (): void {
+        $requests = [];
+        fakeHttp(['https://repo.packagist.org/p2/pollora/meilifacets.json' => ['packages' => ['pollora/meilifacets' => [['version' => '0.2.1'], ['version' => '0.3.0']]]]], $requests);
+        file_put_contents($this->directory.'/composer.json', json_encode(['repositories' => [
+            ['type' => 'composer', 'url' => 'https://example.com/satispress/'],
+            ['type' => 'composer', 'url' => 'https://repo.wp-packages.org'],
+        ]]));
+
+        $latest = (new VersionSources(new HttpGet, $this->directory.'/composer.json'))->for('pollora/meilifacets')->latest('pollora/meilifacets');
+
+        expect($latest)->toBe('0.3.0')
+            ->and(array_column($requests, 'url'))->toBe([
+                'https://example.com/satispress/p2/pollora/meilifacets.json',
+                'https://repo.wp-packages.org/p2/pollora/meilifacets.json',
+                'https://repo.packagist.org/p2/pollora/meilifacets.json',
+            ]);
+    });
+
+    it('tells Packagist from wpackagist.org by its host', function (): void {
+        expect(ComposerRepositorySource::isPackagist('https://repo.packagist.org'))->toBeTrue()
+            ->and(ComposerRepositorySource::isPackagist('https://packagist.org/'))->toBeTrue()
+            ->and(ComposerRepositorySource::isPackagist('https://repo.wp-packages.org'))->toBeFalse()
+            ->and(ComposerRepositorySource::isPackagist('https://wpackagist.org'))->toBeFalse()
+            ->and(ComposerRepositorySource::isPackagist('https://repo.packagist.com/acme/'))->toBeFalse()
+            ->and((new ComposerRepositorySource(new HttpGet, 'https://wpackagist.org'))->releaseUrl('wpackagist-plugin/akismet', '5.0'))->toBeNull();
+    });
+
+    it('stops at the first repository that serves the package', function (): void {
+        $requests = [];
+        fakeHttp(['https://satis.example.com/p2/acme/crm.json' => ['packages' => ['acme/crm' => [['version' => '1.4.0']]]]], $requests);
+        file_put_contents($this->directory.'/composer.json', json_encode(['repositories' => [
+            ['type' => 'composer', 'url' => 'https://satis.example.com'],
+        ]]));
+
+        expect((new VersionSources(new HttpGet, $this->directory.'/composer.json'))->for('acme/crm')->latest('acme/crm'))->toBe('1.4.0')
+            ->and(array_column($requests, 'url'))->toBe(['https://satis.example.com/p2/acme/crm.json']);
+    });
+
+    it('skips a repository whose exclude lists the package, and Packagist when the project turned it off', function (): void {
+        $requests = [];
+        fakeHttp([], $requests);
+        file_put_contents($this->directory.'/composer.json', json_encode(['repositories' => [
+            ['type' => 'composer', 'url' => 'https://example.com/satispress/', 'exclude' => ['pollora/*']],
+            ['type' => 'composer', 'url' => 'https://satis.example.com'],
+            ['packagist.org' => false],
+        ]]));
+
+        expect((new VersionSources(new HttpGet, $this->directory.'/composer.json'))->for('pollora/meilifacets')->latest('pollora/meilifacets'))->toBeNull()
+            ->and(array_column($requests, 'url'))->toBe(['https://satis.example.com/p2/pollora/meilifacets.json']);
     });
 });
 
