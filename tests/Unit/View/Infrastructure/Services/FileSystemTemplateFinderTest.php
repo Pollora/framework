@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+use Brain\Monkey\Functions;
 use Illuminate\View\ViewFinderInterface;
 use Pollora\Filesystem\Filesystem;
+use Pollora\View\Application\UseCases\MakeTemplateIncludableUseCase;
+use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
 use Pollora\View\Infrastructure\Services\FileSystemTemplateFinder;
+use Pollora\View\Infrastructure\Services\WordPressTemplateHierarchyFilter;
 
 beforeEach(function (): void {
     FileSystemTemplateFinder::clearLocateCache();
@@ -160,5 +164,73 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
         unlink($tempDir.'/single.blade.php');
         unlink($tempDir.'/page.blade.php');
         rmdir($tempDir);
+    });
+});
+
+/**
+ * WordPress puts the page template slug first in the page hierarchy, without
+ * extension: `landing` for a template declared in the theme's
+ * config/templates.php. It stands for landing.blade.php (Pollora/pollora#159).
+ */
+describe('page template slugs', function (): void {
+    beforeEach(function (): void {
+        $this->themeRoot = sys_get_temp_dir().'/pollora-theme-'.uniqid();
+        $this->viewsPath = $this->themeRoot.'/resources/views';
+        mkdir($this->viewsPath.'/landing', 0755, true);
+        file_put_contents($this->themeRoot.'/index.php', '<?php // Silence is golden...');
+        file_put_contents($this->viewsPath.'/page.blade.php', 'page');
+        file_put_contents($this->viewsPath.'/landing.blade.php', 'landing');
+
+        $this->viewFinder->shouldReceive('getPaths')->andReturn([$this->themeRoot, $this->viewsPath]);
+        $this->filesystem->shouldReceive('getRelativePath')->andReturnUsing(
+            fn (string $base, string $path): string => str_replace($base, '', $path)
+        );
+
+        $this->finder = new FileSystemTemplateFinder($this->viewFinder, $this->filesystem, $this->themeRoot);
+    });
+
+    afterEach(function (): void {
+        exec('rm -rf '.escapeshellarg($this->themeRoot));
+    });
+
+    it('reads a candidate without extension as a Blade view', function (): void {
+        expect($this->finder->locate('landing'))->toBe(['resources/views/landing.blade.php'])
+            ->and($this->finder->locate('missing'))->toBe([]);
+    });
+
+    it('lets the template declared in config/templates.php outrank page.blade.php', function (): void {
+        Functions\when('wp_is_block_theme')->justReturn(false);
+
+        $filter = new WordPressTemplateHierarchyFilter(
+            $this->finder,
+            Mockery::mock(ResolveBladeTemplateUseCase::class),
+            $this->viewFinder,
+            Mockery::mock(MakeTemplateIncludableUseCase::class),
+        );
+
+        $hierarchy = ['landing', 'page-issue-159.php', 'page-9.php', 'page.php'];
+
+        expect($filter->extendTemplateHierarchy($hierarchy)[0])->toBe('resources/views/landing.blade.php');
+    });
+
+    it('keeps the template first for a block theme', function (): void {
+        Functions\when('wp_is_block_theme')->justReturn(true);
+        Functions\when('current_theme_supports')->justReturn(true);
+        Functions\when('get_page_template_slug')->justReturn('landing');
+
+        $filter = new WordPressTemplateHierarchyFilter(
+            $this->finder,
+            Mockery::mock(ResolveBladeTemplateUseCase::class),
+            $this->viewFinder,
+            Mockery::mock(MakeTemplateIncludableUseCase::class),
+        );
+
+        expect($filter->extendTemplateHierarchy(['landing', 'page.php'])[0])->toBe('resources/views/landing.blade.php');
+    });
+
+    it('leaves a file with another extension alone', function (): void {
+        file_put_contents($this->viewsPath.'/landing.html', '<!-- block template -->');
+
+        expect($this->finder->locate('landing.html'))->toBe(['resources/views/landing.html']);
     });
 });

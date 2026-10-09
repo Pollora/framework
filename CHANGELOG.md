@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.4...develop)
 
+### Fixed
+- A page template declared in the theme's `config/templates.php` is rendered by its Blade view: WordPress puts the template slug first in the page hierarchy without extension (`landing`), which Pollora looked up as a file named `landing` instead of `landing.blade.php`, so `page.blade.php` answered (pollora#159)
+
 ## [v13.35.4](https://github.com/Pollora/framework/compare/v13.35.3...v13.35.4) - 2026-10-09
 
 ### Fixed
