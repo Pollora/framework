@@ -36,6 +36,17 @@ class ComposerRepositorySource implements VersionSource
 
     public function releaseUrl(string $package, string $version): ?string
     {
-        return str_contains($this->url, 'packagist.org') ? sprintf('https://packagist.org/packages/%s#%s', $package, $version) : null;
+        return self::isPackagist($this->url) ? sprintf('https://packagist.org/packages/%s#%s', $package, $version) : null;
+    }
+
+    /**
+     * Whether a repository URL is Packagist itself, by its host: wpackagist.org
+     * contains "packagist.org" but is another repository.
+     */
+    public static function isPackagist(string $url): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+
+        return $host === 'packagist.org' || str_ends_with($host, '.packagist.org');
     }
 }
