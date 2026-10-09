@@ -8,6 +8,8 @@ use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Attributes\PostType;
 use Pollora\Attributes\Taxonomy;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
+use Pollora\Modules\Application\Services\ModuleStates;
+use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Support\Domain\StringHelper;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
@@ -436,7 +438,7 @@ final readonly class SystemInfoCollector
     }
 
     /**
-     * @return array{count: int, enabled: int, disabled: int, items: list<array{name: string, status: string, description: string, priority: string}>}
+     * @return array{count: int, enabled: int, disabled: int, connector: string|null, items: list<array{name: string, status: string, description: string, priority: string, version: string|null, latest: string|null}>}
      */
     public function collectModulesInfo(): array
     {
@@ -447,13 +449,19 @@ final readonly class SystemInfoCollector
             $enabled = $modules->allEnabled();
             $disabled = $modules->allDisabled();
 
+            $versions = $this->moduleVersions();
             $items = [];
             foreach ($all as $module) {
                 $items[] = [
                     'name' => $module->getName(),
-                    'status' => isset($enabled[$module->getName()]) ? 'enabled' : 'disabled',
+                    // allEnabled() is keyed by lower-case name: ask the module
+                    'status' => $module->isEnabled() ? 'enabled' : 'disabled',
                     'description' => $module->getDescription(),
-                    'priority' => $module->getPriority(),
+                    // getPriority() is typed string and throws on a module.json without priority
+                    'priority' => (string) $module->get('priority', ''),
+                    // Only modules installed by Composer have one
+                    'version' => $versions[$module->getName()]['version'] ?? null,
+                    'latest' => $versions[$module->getName()]['latest'] ?? null,
                 ];
             }
 
@@ -461,10 +469,35 @@ final readonly class SystemInfoCollector
                 'count' => count($all),
                 'enabled' => count($enabled),
                 'disabled' => count($disabled),
+                'connector' => $this->moduleConnectorLabel(),
                 'items' => $items,
             ];
         } catch (\Throwable) {
-            return ['count' => 0, 'enabled' => 0, 'disabled' => 0, 'items' => []];
+            return ['count' => 0, 'enabled' => 0, 'disabled' => 0, 'connector' => null, 'items' => []];
+        }
+    }
+
+    /**
+     * @return array<string, array{version: string, latest: string|null}>
+     */
+    private function moduleVersions(): array
+    {
+        try {
+            return $this->container->get(ModuleVersions::class)->all();
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Where module states live: "JSON file", "Database"…
+     */
+    private function moduleConnectorLabel(): ?string
+    {
+        try {
+            return $this->container->get(ModuleStates::class)->connector()->label();
+        } catch (\Throwable) {
+            return null;
         }
     }
 

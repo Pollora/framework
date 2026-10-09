@@ -13,6 +13,7 @@ use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Support\Facades\Constant;
 use Pollora\Support\WordPress;
+use Pollora\WordPress\Events\WordPressBooting;
 
 class Bootstrap
 {
@@ -153,9 +154,13 @@ class Bootstrap
         }
 
         // Apply lightweight mode filters before WordPress loads
-        if ($this->isLightweightRequest()) {
+        $lightweight = $this->isLightweightRequest();
+
+        if ($lightweight) {
             $this->applyLightweightFilters();
         }
+
+        event(new WordPressBooting($lightweight));
 
         if (! $this->consoleDetectionService->isWpCli()) {
             require_once ABSPATH.'wp-settings.php';

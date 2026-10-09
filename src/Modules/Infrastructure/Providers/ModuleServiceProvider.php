@@ -9,15 +9,31 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
+use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\Filter;
+use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Modules\Application\UseCases\ApplyModulesUseCase;
 use Pollora\Modules\Application\UseCases\DiscoverModulesUseCase;
 use Pollora\Modules\Domain\Contracts\ModuleDiscoveryOrchestratorInterface;
+use Pollora\Modules\Infrastructure\Checks\ModuleActivationCheck;
+use Pollora\Modules\Infrastructure\Services\LaravelModuleAssets;
+use Pollora\Modules\Infrastructure\Services\LeanModuleMake;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Modules\Infrastructure\Services\ModuleComponentManager;
 use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
 use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
+use Pollora\Modules\Infrastructure\Services\ModuleTemplate;
+use Pollora\Modules\UI\Console\MakeModuleCommand;
+use Pollora\Modules\UI\Console\ModuleConnectorCommand;
+use Pollora\Modules\UI\Console\ModuleFrontendCommand;
+use Pollora\Modules\UI\Console\ModuleOutdatedCommand;
+use Pollora\Modules\UI\Http\ModulesAdminPage;
+use Pollora\Modules\UI\Http\ModuleVersionsHealthCheck;
+use Pollora\VersionCheck\Infrastructure\Sources\HttpGet;
+use Pollora\VersionCheck\Infrastructure\Sources\VersionSources;
 
 /**
  * Main service provider for the generic module system.
@@ -26,14 +42,32 @@ use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
  */
 class ModuleServiceProvider extends ServiceProvider
 {
+    /**
+     * WP-Cron event refreshing the latest versions of the modules installed by Composer.
+     */
+    public const string REFRESH_VERSIONS_EVENT = 'pollora_refresh_module_versions';
+
     public function register(): void
     {
         $this->registerDomainContracts();
         $this->registerUseCases();
         $this->registerApplicationServices();
+        $this->registerLeanModuleMake();
 
-        // Merge configuration
-        $this->mergeConfigFrom(__DIR__.'/../../config/modules.php', 'modules');
+        // Before any provider boots: WordPress loads, and fires init, while the providers boot
+        $setUpModuleAssets = function (): void {
+            $this->app->make(LaravelModuleAssets::class)->setUp();
+        };
+
+        $this->app->isBooted() ? $setUpModuleAssets() : $this->app->booting($setUpModuleAssets);
+
+        $this->mergeConfigFrom(__DIR__.'/../../../../config/modules-defaults.php', 'modules');
+
+        $this->app->singleton(VersionSources::class, fn (Container $app): VersionSources => new VersionSources(
+            $app->make(HttpGet::class),
+            base_path('composer.json'),
+            $app->make('config')->get('modules.versions.github_token'),
+        ));
     }
 
     public function boot(): void
@@ -48,6 +82,70 @@ class ModuleServiceProvider extends ServiceProvider
         // Fire event when modules are ready
         $this->app->booted(function (): void {
             Event::dispatch('modules.routes.registered');
+        });
+
+        // A check of pollora:doctor and Site Health; tagged on boot, so it comes after the framework's own
+        $this->app->tag([ModuleActivationCheck::class], DoctorServiceProvider::CHECKS_TAG);
+
+        // Activation connector settings, read by nwidart while it registers: published, never merged
+        $this->publishes([
+            __DIR__.'/../../../../config/modules.php' => $this->app->configPath('modules.php'),
+        ], 'pollora-modules');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([MakeModuleCommand::class, ModuleConnectorCommand::class, ModuleFrontendCommand::class, ModuleOutdatedCommand::class]);
+        }
+
+        $this->registerModulesAdminPage();
+    }
+
+    /**
+     * The Modules view of the Plugins screen.
+     */
+    private function registerModulesAdminPage(): void
+    {
+        if (! $this->app->bound(Action::class) || ! $this->app->bound(Filter::class)) {
+            return;
+        }
+
+        $action = $this->app->make(Action::class);
+        $filter = $this->app->make(Filter::class);
+
+        $action->add('admin_menu', fn () => $this->app->make(ModulesAdminPage::class)->addMenuPage());
+        $action->add('load-plugins_page_'.ModulesAdminPage::SLUG, fn () => $this->app->make(ModulesAdminPage::class)->handleRequest());
+
+        $filter->add('views_plugins', fn (array $views): array => $this->app->make(ModulesAdminPage::class)->addView($views));
+
+        // Versions of the modules installed by Composer: fetched once a day, never on a front-end request
+        $filter->add('site_status_tests', fn (array $tests): array => $this->app->make(ModuleVersionsHealthCheck::class)->addTests($tests));
+
+        $action->add(self::REFRESH_VERSIONS_EVENT, fn () => $this->app->make(ModuleVersions::class)->refresh());
+        $action->add('admin_init', function (): void {
+            if (function_exists('wp_next_scheduled') && ! wp_next_scheduled(self::REFRESH_VERSIONS_EVENT)) {
+                wp_schedule_event(time() + 60, 'daily', self::REFRESH_VERSIONS_EVENT);
+            }
+        });
+    }
+
+    /**
+     * Have nwidart/laravel-modules' module:make write the lean Pollora module,
+     * unless the project published config/modules.php.
+     */
+    private function registerLeanModuleMake(): void
+    {
+        $this->app->singleton(ModuleTemplate::class);
+        $this->app->singleton(LeanModuleMake::class, fn (Application $app): LeanModuleMake => new LeanModuleMake(
+            $app->make('config'),
+            $app->make(ModuleTemplate::class),
+            $app->configPath('modules.php'),
+        ));
+
+        $this->app->make(LeanModuleMake::class)->applyDefaults();
+
+        Event::listen('modules.*.created', function (string $event, array $payload): void {
+            if (isset($payload[0]) && is_object($payload[0])) {
+                $this->app->make(LeanModuleMake::class)->writeOver($payload[0]);
+            }
         });
     }
 

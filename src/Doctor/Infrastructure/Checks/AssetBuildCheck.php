@@ -118,6 +118,13 @@ final readonly class AssetBuildCheck implements CheckInterface
             return null;
         }
 
+        if ($module->type === 'module' && $this->isStockModuleConfig($module)) {
+            return [
+                sprintf("%s: its vite.config.js is the one nwidart/laravel-modules' module:make writes, which builds into public/build-%s, where Pollora never looks", $module->label(), strtolower(basename($module->root))),
+                sprintf("php artisan pollora:module:frontend %s (replaces package.json and vite.config.js with the module template's, keeping a backup), then cd %s && npm install && npm run build", basename($module->root), $module->relativeRoot()),
+            ];
+        }
+
         $elsewhere = $this->buildElsewhere($module);
 
         if ($elsewhere !== null) {
@@ -131,6 +138,16 @@ final readonly class AssetBuildCheck implements CheckInterface
             sprintf('%s: not built — no manifest at %s', $module->label(), $this->relative($module->manifest())),
             sprintf('cd %s && npm install && npm run build', $module->relativeRoot()),
         ];
+    }
+
+    /**
+     * The Vite config nwidart's stub writes: `buildDirectory: 'build-<lower>'`.
+     */
+    private function isStockModuleConfig(ProjectModule $module): bool
+    {
+        $config = (string) @file_get_contents($module->root.'/vite.config.js');
+
+        return preg_match('/buildDirectory\s*:\s*[\'"]build-/', $config) === 1;
     }
 
     /** A manifest for this module under another public/build folder, relative to the project. */

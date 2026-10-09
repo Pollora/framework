@@ -9,6 +9,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Pollora\BlockBinding\Domain\Contracts\ContentVisibilityInterface;
 use Pollora\BlockBinding\Domain\Contracts\ValuePresenterInterface;
 use Pollora\BlockBinding\Domain\Enums\BindingFieldType;
+use Pollora\BlockBinding\Domain\Events\BindingResolved;
 use Pollora\BlockBinding\Domain\Models\BindingContext;
 use Pollora\BlockBinding\Domain\Models\BindingFieldDefinition;
 use Pollora\BlockBinding\Domain\Models\BindingSource;
@@ -112,12 +113,45 @@ final class BindingResolver
         $key = $this->cacheKey($source, $context, $attributeSource);
 
         if (array_key_exists($key, $this->resolved)) {
+            $this->announce($source, $field, $context, 0.0, true, $this->resolved[$key] !== null);
+
             return $this->resolved[$key];
         }
 
+        $start = hrtime(true);
         $value = $this->call($source, $field, $context);
+        $milliseconds = (hrtime(true) - $start) / 1_000_000;
 
-        return $this->resolved[$key] = $this->present($value, $field->type, $attributeSource);
+        $this->resolved[$key] = $this->present($value, $field->type, $attributeSource);
+        $this->announce($source, $field, $context, $milliseconds, false, $this->resolved[$key] !== null);
+
+        return $this->resolved[$key];
+    }
+
+    /**
+     * Tell debugging tools what was resolved, when one is listening.
+     */
+    private function announce(BindingSource $source, BindingFieldDefinition $field, BindingContext $context, float $milliseconds, bool $cached, bool $hasValue): void
+    {
+        if (! $this->container->bound('events')) {
+            return;
+        }
+
+        $events = $this->container->make('events');
+
+        if (! $events->hasListeners(BindingResolved::class)) {
+            return;
+        }
+
+        $events->dispatch(new BindingResolved(
+            source: $source->name,
+            field: $field->name,
+            attribute: $context->attribute,
+            postId: $context->postId,
+            milliseconds: round($milliseconds, 3),
+            cached: $cached,
+            hasValue: $hasValue,
+        ));
     }
 
     /**

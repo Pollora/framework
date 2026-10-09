@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Nwidart\Modules\Module;
 use Pollora\Attributes\PostType;
 use Pollora\Attributes\Taxonomy;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
@@ -300,6 +301,31 @@ describe('SystemInfoCollector', function (): void {
             expect($info['count'])->toBe(0);
             expect($info['enabled'])->toBe(0);
             expect($info['disabled'])->toBe(0);
+        });
+
+        it('lists a module whose module.json has no priority, with its state', function (): void {
+            // nwidart's getPriority() is typed string and threw: the card said "0 modules"
+            $module = Mockery::mock(Module::class);
+            $module->shouldReceive('getName')->andReturn('BlocksDemo');
+            $module->shouldReceive('getDescription')->andReturn('Demo');
+            $module->shouldReceive('get')->with('priority', '')->andReturn(null);
+            $module->shouldReceive('isEnabled')->andReturn(true);
+
+            $modules = Mockery::mock();
+            $modules->shouldReceive('all')->andReturn(['BlocksDemo' => $module]);
+            // nwidart keys enabled modules by lower-case name
+            $modules->shouldReceive('allEnabled')->andReturn(['blocksdemo' => $module]);
+            $modules->shouldReceive('allDisabled')->andReturn([]);
+
+            $container = Mockery::mock(ContainerInterface::class);
+            $container->shouldReceive('get')->with('modules')->andReturn($modules);
+            $container->shouldReceive('get')->andThrow(new RuntimeException('Not bound'));
+
+            $info = createCollector(container: $container)->collectModulesInfo();
+
+            expect($info['count'])->toBe(1)
+                ->and($info['items'][0])->toMatchArray(['name' => 'BlocksDemo', 'status' => 'enabled', 'priority' => ''])
+                ->and($info['connector'])->toBeNull();
         });
     });
 

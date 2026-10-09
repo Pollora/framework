@@ -102,6 +102,15 @@ describe('Theme, plugin and module builds', function (): void {
             ->and($result->fix)->toContain('cd public/content/plugins/acme-forms && npm install && npm run build');
     });
 
+    it("recognises the Vite config of nwidart's stock module:make and points to pollora:module:frontend", function (): void {
+        putModuleFile($this->module->root.'/vite.config.js', "laravel({\n    publicDirectory: '../../public',\n    buildDirectory: 'build-blocksdemo',\n})");
+
+        $result = (new AssetBuildCheck(availability(false), $this->modules))->run(RunContext::Console);
+
+        expect($result->details)->toContain("module blocks-demo: its vite.config.js is the one nwidart/laravel-modules' module:make writes, which builds into public/build-blocksdemo, where Pollora never looks")
+            ->and($result->fix)->toContain('php artisan pollora:module:frontend BlocksDemo');
+    });
+
     it('tells a stopped dev server from one the browser cannot reach', function (): void {
         putModuleFile($this->theme->root.'/vite.config.js', '');
         putModuleFile($this->theme->hotFile, 'https://site.test:5173');

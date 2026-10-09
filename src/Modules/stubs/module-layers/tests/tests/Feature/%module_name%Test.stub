@@ -1,0 +1,9 @@
+<?php
+
+declare(strict_types=1);
+
+use Nwidart\Modules\Facades\Module;
+
+it('is enabled', function (): void {
+    expect(Module::isEnabled('%module_name%'))->toBeTrue();
+});

@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use Illuminate\Container\Container;
+use Illuminate\Events\Dispatcher;
 use Pollora\BlockBinding\Application\Services\BindingResolver;
 use Pollora\BlockBinding\Application\Services\BindingSourceBuilder;
+use Pollora\BlockBinding\Domain\Events\BindingResolved;
 use Psr\Log\LoggerInterface;
 use Tests\Unit\BlockBinding\Fixtures\EventBinding;
 use Tests\Unit\BlockBinding\Fixtures\FakePresenter;
@@ -128,4 +130,38 @@ it('previews a value from the context the editor sends, escaped like the attribu
     expect($resolver->preview($this->event, ['field' => 'remaining_seats'], $context, 'content', 'rich-text'))->toBe('14 seats &amp; more')
         ->and($resolver->preview($this->event, ['field' => 'remaining_seats'], $context, 'title'))->toBe('14 seats & more')
         ->and($resolver->preview($this->event, ['field' => 'sold_out'], $context, 'title'))->toBe('Yes');
+});
+
+describe('announcing resolutions', function (): void {
+    beforeEach(function (): void {
+        $this->events = new Dispatcher($this->container);
+        $this->container->instance('events', $this->events);
+        $this->announced = [];
+        $this->events->listen(BindingResolved::class, function ($event): void {
+            $this->announced[] = $event;
+        });
+    });
+
+    it('announces each resolution, and says when the request cache answered', function (): void {
+        $resolver = ($this->resolver)();
+
+        $resolver->resolve($this->event, ['field' => 'remaining_seats'], boundParagraph(), 'content');
+        $resolver->resolve($this->event, ['field' => 'remaining_seats'], boundParagraph(), 'content');
+
+        expect($this->announced)->toHaveCount(2)
+            ->and($this->announced[0]->source)->toBe('acme/event')
+            ->and($this->announced[0]->field)->toBe('remaining_seats')
+            ->and($this->announced[0]->attribute)->toBe('content')
+            ->and($this->announced[0]->postId)->toBe(7)
+            ->and($this->announced[0]->cached)->toBeFalse()
+            ->and($this->announced[0]->hasValue)->toBeTrue()
+            ->and($this->announced[1]->cached)->toBeTrue()
+            ->and($this->announced[1]->milliseconds)->toBe(0.0);
+    });
+
+    it('says when a source left the block its own content', function (): void {
+        ($this->resolver)()->resolve($this->event, ['field' => 'nothing'], boundParagraph(), 'content');
+
+        expect($this->announced[0]->hasValue)->toBeFalse();
+    });
 });

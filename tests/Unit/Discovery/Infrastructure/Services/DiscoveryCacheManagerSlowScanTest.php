@@ -10,6 +10,7 @@ use Pollora\Discovery\Domain\Models\DiscoveryContext;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryCacheManager;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Psr\Log\LoggerInterface;
+use Spatie\StructureDiscoverer\Cache\StaticDiscoverCacheDriver;
 
 /**
  * A location that costs seconds has to say so.
@@ -129,4 +130,44 @@ describe('slow scan warning', function (): void {
         (new ReflectionMethod($manager, 'warnIfSlow'))
             ->invoke($manager, locationAt('/srv/site/plugins/demo'), 5000.0, 1);
     })->throwsNoExceptions();
+});
+
+describe('scan sources', function (): void {
+    it("tells a real scan from this process's own copy", function (): void {
+        $manager = managerFor(debug: true, logger: Mockery::spy(LoggerInterface::class));
+
+        scanOf($manager, $this->dir);
+        scanOf($manager, $this->dir);
+
+        $scans = $manager->scans();
+
+        expect($scans)->toHaveCount(2)
+            ->and($scans[0]['path'])->toBe($this->dir)
+            ->and($scans[0]['source'])->toBe('disk')
+            ->and($scans[1]['source'])->toBe('memory')
+            ->and($scans[1]['milliseconds'])->toBe(0.0);
+    });
+
+    it('tells a warm persistent cache from a scan that filled it', function (): void {
+        $container = new Container;
+        $container->instance('config', new Repository(['structure-discoverer' => ['cache' => ['driver' => StaticDiscoverCacheDriver::class]]]));
+        $container->instance(StaticDiscoverCacheDriver::class, new StaticDiscoverCacheDriver);
+        Container::setInstance($container);
+
+        $detector = Mockery::mock(DebugDetectorInterface::class);
+        $detector->shouldReceive('isDebugMode')->andReturn(false);
+
+        $first = new DiscoveryCacheManager($container, $detector);
+        scanOf($first, $this->dir);
+
+        // A new process starts with an empty copy of its own, and only the
+        // persistent cache is left to answer.
+        (new ReflectionProperty(DiscoveryCacheManager::class, 'structuresCache'))->setValue(null, []);
+
+        $second = new DiscoveryCacheManager($container, $detector);
+        scanOf($second, $this->dir);
+
+        expect($first->scans()[0]['source'])->toBe('disk')
+            ->and($second->scans()[0]['source'])->toBe('cache');
+    });
 });

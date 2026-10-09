@@ -32,7 +32,7 @@
         "pollora/abilities": "^1.0",
         "pollora/ajax": "^1.1",
         "pollora/entity": "^1.2",
-        "pollora/hook": "^1.4",
+        "pollora/hook": "^1.5",
         "pollora/option": "^1.1",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^2.0",
