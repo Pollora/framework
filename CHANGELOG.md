@@ -10,14 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Discovery lives in its own package, [`pollora/discovery`](https://github.com/Pollora/discovery), which the framework requires: the engine, its contracts, `DiscoveryManager`, the cache and the `#[SkipDiscovery]` attribute, with their tests and benchmarks. Class names do not change. The framework keeps what needs Laravel: the service provider, `discovery:run` / `discovery:clear`, `DiscoveryRegistrar`, `ServiceProviderDiscovery`, the Laravel adapters, and `HasConfiguringSupport`, which builds post types and taxonomies
 - Discovery can run without Laravel's application, the first step towards `pollora/discovery`: `new DiscoveryEngine()` works with no argument. Two contracts let an environment plug in — `InstanceResolverInterface` builds the classes discovery needs (Laravel's container in a Pollora application, `ReflectionInstanceResolver` otherwise) and `DiscoveryRegistrarInterface` adds the environment's discoveries before each run (`DiscoveryRegistrar` keeps scanning the container's `*Discovery` bindings). `Psr16DiscoverCacheDriver` caches scans in any PSR-16 cache
+- Post type and taxonomy attributes say what they register: each implements `ConfiguresArguments`, a pure function that returns the registration arguments with its own contribution (`#[HasArchive('library')]` sets `has_archive`, `#[Labels]` merges into the generated labels), and the method attributes (`#[AdminCol]`, `#[RegisterMetaBoxCb]`, `#[MetaBoxCb]`, `#[MetaBoxSanitizeCb]`, `#[UpdateCountCallback]`) implement `ConfiguresArgumentsWithMethod`, the discovery handing them the method as a callback. The `Pollora\Attributes` namespace no longer reaches Laravel or a framework service, which an architecture test keeps: the first step towards `pollora/attributes`, a package to declare attributes without the framework
 
 ### Changed
 - `DiscoveryEngine`, `DiscoveryCacheManager`, `InstancePool` and `ReflectionCache` take their dependencies instead of reaching for `app()` and `config()`; reading `structure-discoverer.cache` moved to `LaravelDiscoveryCacheManagerFactory`. `DiscoveryRegistrar::registerFromContainer()` is now `registerInto()`. These are infrastructure classes, outside the public contracts (`Pollora\Discovery\Domain\*`), which do not change
 - One `DiscoveryCacheManager` is shared by the engine and the `pollora:doctor` discovery cache check, which built its own
 - The discovery benchmarks measure memory as PHP allocates it, from a reset peak: they read 2 MB whatever the load
+- `#[WpRestRoute\Method]` no longer registers its route: `WpRestRouteRegistrar`, in the WpRest module, does, with the same arguments, permissions and request injection. Default slugs, meta keys and command names come from `Pollora\Attributes\Support\Naming`, which gives the same results as `Str::kebab()` and `Str::snake()`; `Pollora\Support\Slug` uses it
 
 ### Deprecated
 - `DiscoveryCacheInterface` and `LaravelDiscoveryCache`, removed in 15.0: nothing reads this cache, scans are cached by the Spatie driver given to `DiscoveryCacheManager`
+- `Pollora\Attributes\PostType\PostTypeAttribute` and `Pollora\Attributes\Taxonomy\TaxonomyAttribute`, removed in 15.0: no built-in attribute extends them any more; implement `ConfiguresArguments`
+
+### Removed
+- `handle()` on `#[Action]`, `#[Filter]`, `#[WpRestRoute]` and `#[WpRestRoute\Method]`, and `Hook` no longer implements `HandlesAttributes`: `HookDiscovery` and `WpRestDiscovery` register hooks and routes themselves. Only the bug below reached `Action::handle()`, and `WpRestRoute::handle()` wrote to a read-only wrapper
+
+### Fixed
+- A public `#[Action]` or `#[Filter]` method in a `#[PostType]` or `#[Taxonomy]` class is registered once: the post type and taxonomy discoveries also handed it to `Action::handle()`, which registered it a second time on the discovery's configuration object, so the page firing that hook failed with `call_user_func(): Argument #1 ($callback) must be a valid callback, class Pollora\PostType\Infrastructure\Services\PostTypeConfiguration does not have a method …`
 
 ## [v13.35.6](https://github.com/Pollora/framework/compare/v13.35.5...v13.35.6) - 2026-10-12
 

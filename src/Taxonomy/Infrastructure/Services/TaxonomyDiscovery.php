@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Pollora\Taxonomy\Infrastructure\Services;
 
 use Illuminate\Support\Str;
+use Pollora\Attributes\Contracts\ConfiguresArguments;
+use Pollora\Attributes\Contracts\ConfiguresArgumentsWithMethod;
+use Pollora\Attributes\Contracts\HandlesAttributes;
 use Pollora\Attributes\Taxonomy;
 use Pollora\Discovery\Domain\Contracts\ConfigurableDiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
@@ -307,8 +310,13 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
     {
         $attributeInstance = $attribute->newInstance();
 
-        // Check if the attribute has a handle method and call it
-        if (method_exists($attributeInstance, 'handle')) {
+        if ($attributeInstance instanceof ConfiguresArguments) {
+            $config->replaceArgs($attributeInstance->configureArguments($config->withArgs()));
+
+            return;
+        }
+
+        if ($attributeInstance instanceof HandlesAttributes) {
             $attributeInstance->handle(app(), $config, $reflectionClass, $attributeInstance);
         }
     }
@@ -330,8 +338,13 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
     ): void {
         $attributeInstance = $attribute->newInstance();
 
-        // Check if the attribute has a handle method and call it
-        if (method_exists($attributeInstance, 'handle')) {
+        if ($attributeInstance instanceof ConfiguresArgumentsWithMethod) {
+            $config->replaceArgs($attributeInstance->configureArguments($config->withArgs(), [new $method->class, $method->getName()]));
+
+            return;
+        }
+
+        if ($attributeInstance instanceof HandlesAttributes) {
             $attributeInstance->handle(app(), $config, $method, $attributeInstance);
         }
     }

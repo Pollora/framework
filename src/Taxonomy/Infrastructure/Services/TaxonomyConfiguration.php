@@ -97,6 +97,16 @@ class TaxonomyConfiguration implements TaxonomyAttributeInterface
     }
 
     /**
+     * Replace every attribute argument.
+     *
+     * @param  array<string, mixed>  $args  The arguments to keep
+     */
+    public function replaceArgs(array $args): void
+    {
+        $this->attributeArgs = $args;
+    }
+
+    /**
      * Merge additional arguments into the configuration.
      *
      * @param  array<string, mixed>  $args  Arguments to merge
