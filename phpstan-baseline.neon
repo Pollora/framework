@@ -19,24 +19,6 @@ parameters:
 			path: src/Asset/Infrastructure/Services/ViteManager.php
 
 		-
-			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$classPermission\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Attributes/WpRestRoute/Method.php
-
-		-
-			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$namespace\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Attributes/WpRestRoute/Method.php
-
-		-
-			message: '#^Access to an undefined property Pollora\\Attributes\\Attributable\:\:\$route\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Attributes/WpRestRoute/Method.php
-
-		-
 			message: '#^Constant AUTH_COOKIE not found\.$#'
 			identifier: constant.notFound
 			count: 1

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Attributes\PostType;
 
 use Pollora\Attributes\Attributable;
+use Pollora\Attributes\Contracts\ConfiguresArguments;
 use Pollora\Attributes\Contracts\HandlesAttributes;
 use Pollora\PostType\Domain\Contracts\PostTypeAttributeInterface;
 use ReflectionClass;
@@ -16,7 +17,9 @@ use ReflectionMethod;
  * This attribute serves as the base for all post type configuration attributes.
  * It provides common functionality for handling post type registration arguments.
  *
- * @Attribute
+ * @deprecated since 13.36, removed in 15.0. Implement
+ *             {@see ConfiguresArguments}, as the
+ *             built-in attributes now do.
  */
 abstract class PostTypeAttribute implements HandlesAttributes
 {
