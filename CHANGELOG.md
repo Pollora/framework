@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - One `DiscoveryCacheManager` is shared by the engine and the `pollora:doctor` discovery cache check, which built its own
 - The discovery benchmarks measure memory as PHP allocates it, from a reset peak: they read 2 MB whatever the load
 - `#[WpRestRoute\Method]` no longer registers its route: `WpRestRouteRegistrar`, in the WpRest module, does, with the same arguments, permissions and request injection. Default slugs, meta keys and command names come from `Pollora\Attributes\Support\Naming`, which gives the same results as `Str::kebab()` and `Str::snake()`; `Pollora\Support\Slug` uses it
+- The WpRest module no longer reaches for Laravel's application, the first step towards `pollora/wp-rest`: custom `HandlesAttributes` attributes receive the PSR-11 container given to `WpRestDiscovery`, and `WpRestAttributableWrapper` takes the controller instance instead of building it. An architecture test keeps the module to the attributes, discovery, PSR contracts and WordPress
 
 ### Deprecated
 - `DiscoveryCacheInterface` and `LaravelDiscoveryCache`, removed in 15.0: nothing reads this cache, scans are cached by the Spatie driver given to `DiscoveryCacheManager`
@@ -28,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - A public `#[Action]` or `#[Filter]` method in a `#[PostType]` or `#[Taxonomy]` class is registered once: the post type and taxonomy discoveries also handed it to `Action::handle()`, which registered it a second time on the discovery's configuration object, so the page firing that hook failed with `call_user_func(): Argument #1 ($callback) must be a valid callback, class Pollora\PostType\Infrastructure\Services\PostTypeConfiguration does not have a method …`
+- A REST controller declared with `#[WpRestRoute]` gets its constructor dependencies: it is resolved through the discovery's instance pool (Laravel's container in a Pollora application) instead of `new` with no argument, so a controller with a required dependency answered every request with `Trying to invoke non static method … without an object`
 
 ## [v13.35.6](https://github.com/Pollora/framework/compare/v13.35.5...v13.35.6) - 2026-10-12
 
