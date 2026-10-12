@@ -5,12 +5,20 @@ declare(strict_types=1);
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
+use Pollora\Discovery\Domain\Contracts\InstanceResolverInterface;
 use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
+use Pollora\Discovery\Infrastructure\Adapters\LaravelInstanceResolver;
 use Pollora\Discovery\Infrastructure\Providers\DiscoveryServiceProvider;
+use Pollora\Discovery\Infrastructure\Services\DiscoveryCacheManager;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryEngine;
 use Pollora\Discovery\Infrastructure\Services\InstancePool;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Pollora\Discovery\Infrastructure\Services\ServiceProviderDiscovery;
+
+final class InstancePoolTestService
+{
+    public function __construct(public string $source = 'by reflection') {}
+}
 
 beforeEach(function (): void {
     // DiscoveryServiceProvider depends on DebugDetectorInterface
@@ -54,6 +62,32 @@ describe('DiscoveryServiceProvider', function (): void {
 
         expect($manager)->toBeInstanceOf(DiscoveryManager::class);
         expect($this->app->make(DiscoveryManager::class))->toBe($manager);
+    });
+
+    it('builds discovery classes through the application container', function (): void {
+        $this->app->bind(InstancePoolTestService::class, fn (): InstancePoolTestService => new InstancePoolTestService('from the container'));
+
+        expect($this->app->make(InstanceResolverInterface::class))->toBeInstanceOf(LaravelInstanceResolver::class)
+            ->and($this->app->make(InstancePool::class)->getInstance(InstancePoolTestService::class)->source)->toBe('from the container');
+    });
+
+    it('shares one cache manager between the engine and its other readers', function (): void {
+        $engine = $this->app->make(DiscoveryEngineInterface::class);
+
+        expect($engine->getCacheManager())->toBe($this->app->make(DiscoveryCacheManager::class));
+    });
+
+    it('turns the persistent cache off in debug mode', function (): void {
+        $this->app->forgetInstance(DiscoveryCacheManager::class);
+        $this->app->singleton(DebugDetectorInterface::class, fn () => Mockery::mock(DebugDetectorInterface::class, [
+            'isDebugMode' => true,
+        ]));
+
+        expect($this->app->make(DiscoveryCacheManager::class)->isCacheEnabled())->toBeFalse();
+    });
+
+    it('keeps the persistent cache on outside debug mode', function (): void {
+        expect($this->app->make(DiscoveryCacheManager::class)->isCacheEnabled())->toBeTrue();
     });
 
     it('registers ServiceProviderDiscovery as singleton for auto-registration', function (): void {

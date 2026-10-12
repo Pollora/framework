@@ -15,6 +15,8 @@ use Pollora\Discovery\Domain\Models\DiscoveryItems;
  *
  * Implementation of discovery cache using Laravel's cache system.
  * Provides persistent caching of discovery results to improve performance.
+ *
+ * @deprecated Removed in 15.0, with DiscoveryCacheInterface.
  */
 final readonly class LaravelDiscoveryCache implements DiscoveryCacheInterface
 {

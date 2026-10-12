@@ -71,7 +71,7 @@ describe('DiscoveryRegistrar', function (): void {
             ->once()
             ->with('test_discovery', $discovery);
 
-        $registered = $this->registrar->registerFromContainer($engine);
+        $registered = $this->registrar->registerInto($engine);
 
         expect($registered)->toContain('test_discovery');
     });
@@ -82,7 +82,7 @@ describe('DiscoveryRegistrar', function (): void {
         $engine = createMockRegistrarEngine();
         $engine->shouldNotReceive('addDiscovery');
 
-        $registered = $this->registrar->registerFromContainer($engine);
+        $registered = $this->registrar->registerInto($engine);
 
         expect($registered)->toBe([]);
     });
@@ -96,7 +96,7 @@ describe('DiscoveryRegistrar', function (): void {
             ->andReturn(new Collection(['already_registered' => $discovery]));
         $engine->shouldNotReceive('addDiscovery');
 
-        $registered = $this->registrar->registerFromContainer($engine);
+        $registered = $this->registrar->registerInto($engine);
 
         expect($registered)->toBe([]);
     });
@@ -107,7 +107,7 @@ describe('DiscoveryRegistrar', function (): void {
         $engine = createMockRegistrarEngine();
         $engine->shouldNotReceive('addDiscovery');
 
-        $registered = $this->registrar->registerFromContainer($engine);
+        $registered = $this->registrar->registerInto($engine);
 
         expect($registered)->toBe([]);
     });
@@ -118,7 +118,7 @@ describe('DiscoveryRegistrar', function (): void {
         $engine = createMockRegistrarEngine();
         $engine->shouldNotReceive('addDiscovery');
 
-        $registered = $this->registrar->registerFromContainer($engine);
+        $registered = $this->registrar->registerInto($engine);
 
         expect($registered)->toBe([]);
     });

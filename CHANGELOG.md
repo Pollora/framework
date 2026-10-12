@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.6...develop)
 
+### Added
+- Discovery can run without Laravel's application, the first step towards `pollora/discovery`: `new DiscoveryEngine()` works with no argument. Two contracts let an environment plug in — `InstanceResolverInterface` builds the classes discovery needs (Laravel's container in a Pollora application, `ReflectionInstanceResolver` otherwise) and `DiscoveryRegistrarInterface` adds the environment's discoveries before each run (`DiscoveryRegistrar` keeps scanning the container's `*Discovery` bindings). `Psr16DiscoverCacheDriver` caches scans in any PSR-16 cache
+
+### Changed
+- `DiscoveryEngine`, `DiscoveryCacheManager`, `InstancePool` and `ReflectionCache` take their dependencies instead of reaching for `app()` and `config()`; reading `structure-discoverer.cache` moved to `LaravelDiscoveryCacheManagerFactory`. `DiscoveryRegistrar::registerFromContainer()` is now `registerInto()`. These are infrastructure classes, outside the public contracts (`Pollora\Discovery\Domain\*`), which do not change
+- One `DiscoveryCacheManager` is shared by the engine and the `pollora:doctor` discovery cache check, which built its own
+- The discovery benchmarks measure memory as PHP allocates it, from a reset peak: they read 2 MB whatever the load
+
+### Deprecated
+- `DiscoveryCacheInterface` and `LaravelDiscoveryCache`, removed in 15.0: nothing reads this cache, scans are cached by the Spatie driver given to `DiscoveryCacheManager`
+
 ## [v13.35.6](https://github.com/Pollora/framework/compare/v13.35.5...v13.35.6) - 2026-10-12
 
 ### Fixed
