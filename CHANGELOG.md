@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.6...develop)
 
 ### Added
+- Discovery lives in its own package, [`pollora/discovery`](https://github.com/Pollora/discovery), which the framework requires: the engine, its contracts, `DiscoveryManager`, the cache and the `#[SkipDiscovery]` attribute, with their tests and benchmarks. Class names do not change. The framework keeps what needs Laravel: the service provider, `discovery:run` / `discovery:clear`, `DiscoveryRegistrar`, `ServiceProviderDiscovery`, the Laravel adapters, and `HasConfiguringSupport`, which builds post types and taxonomies
 - Discovery can run without Laravel's application, the first step towards `pollora/discovery`: `new DiscoveryEngine()` works with no argument. Two contracts let an environment plug in — `InstanceResolverInterface` builds the classes discovery needs (Laravel's container in a Pollora application, `ReflectionInstanceResolver` otherwise) and `DiscoveryRegistrarInterface` adds the environment's discoveries before each run (`DiscoveryRegistrar` keeps scanning the container's `*Discovery` bindings). `Psr16DiscoverCacheDriver` caches scans in any PSR-16 cache
 
 ### Changed
