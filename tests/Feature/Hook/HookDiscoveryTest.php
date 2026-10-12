@@ -26,7 +26,7 @@ final class DiscoveredHooks
     #[ActionAttribute('edit_post', priority: 20)]
     public function syncPost(int $postId, object $post): void
     {
-        $this->calls[] = 'syncPost';
+        $this->calls[] = sprintf('syncPost(%d, %s)', $postId, $post::class);
     }
 
     #[FilterAttribute('the_title')]
