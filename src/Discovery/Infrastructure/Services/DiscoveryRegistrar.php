@@ -7,6 +7,7 @@ namespace Pollora\Discovery\Infrastructure\Services;
 use Illuminate\Container\Container;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
+use Pollora\Discovery\Domain\Contracts\DiscoveryRegistrarInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,7 +20,7 @@ use Psr\Log\LoggerInterface;
  * Each ServiceProvider still registers its Discovery as a singleton in
  * register(). The registrar picks them up and adds them to the engine.
  */
-final readonly class DiscoveryRegistrar
+final readonly class DiscoveryRegistrar implements DiscoveryRegistrarInterface
 {
     public function __construct(
         private Container $container,
@@ -30,9 +31,9 @@ final readonly class DiscoveryRegistrar
      * Scan container bindings and register any DiscoveryInterface implementations.
      *
      * @param  DiscoveryEngineInterface  $engine  The engine to register discoveries with
-     * @return array<string> Identifiers of auto-registered discoveries
+     * @return array<int, string> Identifiers of auto-registered discoveries
      */
-    public function registerFromContainer(DiscoveryEngineInterface $engine): array
+    public function registerInto(DiscoveryEngineInterface $engine): array
     {
         $registered = [];
 

@@ -8,6 +8,7 @@ use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Models\DiscoveryLocation;
+use Pollora\Discovery\Infrastructure\Adapters\LaravelDiscoveryCacheManagerFactory;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryCacheManager;
 use Pollora\Doctor\Domain\Enums\RunContext;
 use Pollora\Doctor\Infrastructure\Checks\DiscoveryCacheCheck;
@@ -213,7 +214,7 @@ describe('DiscoveryCacheManager::classesMissingFromCache()', function (): void {
         $detector = Mockery::mock(DebugDetectorInterface::class);
         $detector->shouldReceive('isDebugMode')->andReturn($debug);
 
-        return new DiscoveryCacheManager(app(), $detector);
+        return (new LaravelDiscoveryCacheManagerFactory(app(), $detector))->make();
     }
 
     beforeEach(function (): void {
