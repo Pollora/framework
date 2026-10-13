@@ -93,7 +93,7 @@ it('finds the asynchronous registrations among the WordPress hooks', function ()
         ->and($queued)->toBeInstanceOf(QueuedHandler::class);
 });
 
-it('does not count as WP-Cron\'s the events another driver keeps, which the cron option indexes too', function (): void {
+it("does not count as WP-Cron's the events another driver keeps, which the cron option indexes too", function (): void {
     $now = time();
     Functions\when('_get_cron_array')->justReturn([
         $now - 7200 => ['wp_version_check' => ['k1' => ['schedule' => 'daily', 'args' => []]], 'reports' => ['k2' => ['schedule' => 'daily', 'args' => [], 'driver' => 'action-scheduler']]],
