@@ -149,6 +149,16 @@ describe('driver choice', function (): void {
             ->and($status->configured())->toBe('nope');
     });
 
+    it('does not call a driver unknown because something else switched the engine after the provider', function (): void {
+        Schedule::driver('wp-cron');
+
+        $status = app(ScheduleStatus::class);
+
+        expect($status->configured())->toBe('memory')
+            ->and($status->active())->toBe('wp-cron')
+            ->and($status->unknown())->toBeFalse();
+    });
+
     it('protects the hooks the configuration names', function (): void {
         config(['schedule.protected_hooks' => ['my_heartbeat']]);
         app()->register(SchedulerServiceProvider::class, force: true);

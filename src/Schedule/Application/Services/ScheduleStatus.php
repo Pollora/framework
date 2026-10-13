@@ -42,7 +42,7 @@ final readonly class ScheduleStatus
      */
     public function unknown(): bool
     {
-        return $this->configured() !== $this->active();
+        return ! Schedule::knows($this->configured());
     }
 
     /**
