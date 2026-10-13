@@ -10,6 +10,7 @@ use Pollora\Schedule\Application\Services\ScheduleStatus;
 use Pollora\Schedule\Contracts\ScheduleDriver;
 use Pollora\Schedule\Event;
 use Pollora\Schedule\Infrastructure\Checks\ScheduleDriverCheck;
+use Pollora\Schedule\Infrastructure\Services\MigrationNotice;
 use Pollora\Schedule\Schedule;
 use Pollora\Schedule\SchedulerServiceProvider;
 
@@ -106,6 +107,7 @@ beforeEach(function (): void {
     Functions\when('wp_schedule_event')->justReturn(true);
     Functions\when('wp_schedule_single_event')->justReturn(true);
     Functions\when('did_action')->justReturn(1);
+    Functions\when('wp_date')->alias(fn (string $format, int $timestamp): string => gmdate($format, $timestamp));
 
     Schedule::extend('memory', fn (): ScheduleDriver => $this->memory);
     config(['schedule.driver' => 'memory', 'schedule.protected_hooks' => []]);
@@ -137,9 +139,10 @@ describe('driver choice', function (): void {
         config(['schedule.driver' => 'nope']);
         $schedule = new ReflectionClass(Schedule::class);
         $schedule->setStaticPropertyValue('engine', null);
+
         app()->register(SchedulerServiceProvider::class, force: true);
 
-        $status = app(ScheduleStatus::class);
+        $status = resolve(ScheduleStatus::class);
 
         expect(Schedule::engine()->driverName())->toBe('wp-cron')
             ->and($status->unknown())->toBeTrue()
@@ -235,13 +238,13 @@ describe('the doctor check', function (): void {
     it('is ok when events are kept by the driver of the site', function (): void {
         $this->cron = [$this->time => ['digest' => [md5(serialize([])) => ['schedule' => false, 'args' => [], 'driver' => 'memory']]]];
 
-        $result = app(ScheduleDriverCheck::class)->run(RunContext::Console);
+        $result = resolve(ScheduleDriverCheck::class)->run(RunContext::Console);
 
         expect($result->status)->toBe(CheckStatus::Ok);
     });
 
     it('warns of events a former driver keeps, with the command that moves them', function (): void {
-        $result = app(ScheduleDriverCheck::class)->run(RunContext::Console);
+        $result = resolve(ScheduleDriverCheck::class)->run(RunContext::Console);
 
         expect($result->status)->toBe(CheckStatus::Warning)
             ->and(implode(' ', $result->details))->toContain('"wp-cron"', 'not by the driver of the site ("memory")')
@@ -252,7 +255,7 @@ describe('the doctor check', function (): void {
         MemoryScheduleDriver::$available = false;
         $this->cron = [$this->time => ['reports' => [md5(serialize([])) => ['schedule' => 'daily', 'args' => [], 'interval' => 86400]]]];
 
-        $result = app(ScheduleDriverCheck::class)->run(RunContext::Console);
+        $result = resolve(ScheduleDriverCheck::class)->run(RunContext::Console);
 
         expect($result->status)->toBe(CheckStatus::Warning)
             ->and(implode(' ', $result->details))->toContain('is not available')
@@ -264,7 +267,7 @@ describe('the doctor check', function (): void {
         (new ReflectionClass(Schedule::class))->setStaticPropertyValue('engine', null);
         app()->register(SchedulerServiceProvider::class, force: true);
 
-        $result = app(ScheduleDriverCheck::class)->run(RunContext::Console);
+        $result = resolve(ScheduleDriverCheck::class)->run(RunContext::Console);
 
         expect($result->status)->toBe(CheckStatus::Warning)
             ->and(implode(' ', $result->details))->toContain('"nope", which does not exist');
@@ -273,6 +276,51 @@ describe('the doctor check', function (): void {
     it('is skipped before WordPress has initialised', function (): void {
         Functions\when('did_action')->justReturn(0);
 
-        expect(app(ScheduleDriverCheck::class)->run(RunContext::Console)->status)->toBe(CheckStatus::Skipped);
+        expect(resolve(ScheduleDriverCheck::class)->run(RunContext::Console)->status)->toBe(CheckStatus::Skipped);
+    });
+});
+
+describe('the administration notice', function (): void {
+    beforeEach(function (): void {
+        Functions\when('esc_html__')->returnArg();
+        Functions\when('esc_html')->returnArg();
+    });
+
+    it('tells those who can run the command which events wait, and how to move them', function (): void {
+        Functions\when('current_user_can')->justReturn(true);
+
+        ob_start();
+        resolve(MigrationNotice::class)->render();
+        $html = (string) ob_get_clean();
+
+        expect($html)->toContain('notice-warning', 'pollora:schedule:migrate --from=wp-cron --to=memory');
+    });
+
+    it('says nothing to those who cannot, or when nothing waits', function (): void {
+        Functions\when('current_user_can')->justReturn(false);
+
+        ob_start();
+        resolve(MigrationNotice::class)->render();
+        expect((string) ob_get_clean())->toBe('');
+
+        Functions\when('current_user_can')->justReturn(true);
+        $this->cron = [];
+
+        ob_start();
+        resolve(MigrationNotice::class)->render();
+        expect((string) ob_get_clean())->toBe('');
+    });
+
+    it('is shown on the administration screens, and the network ones', function (): void {
+        $added = [];
+        Functions\when('add_action')->alias(function (string $hook) use (&$added): bool {
+            $added[] = $hook;
+
+            return true;
+        });
+
+        resolve(MigrationNotice::class)->register();
+
+        expect($added)->toBe(['admin_notices', 'network_admin_notices']);
     });
 });

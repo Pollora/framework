@@ -81,7 +81,7 @@ final readonly class ScheduleStatus
     {
         $placement = $this->placement($event);
 
-        return (string) $event->driver.($placement === 'active' ? '' : sprintf(' (%s)', $placement));
+        return $event->driver.($placement === 'active' ? '' : sprintf(' (%s)', $placement));
     }
 
     /**

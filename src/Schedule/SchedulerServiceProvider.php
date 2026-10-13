@@ -17,6 +17,7 @@ use Pollora\Schedule\Application\UseCases\RegisterSchedulerFiltersUseCase;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Events\RecurringEvent;
 use Pollora\Schedule\Infrastructure\Checks\ScheduleDriverCheck;
+use Pollora\Schedule\Infrastructure\Services\MigrationNotice;
 use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
 use Pollora\Schedule\Schedule as ScheduleApi;
 use Pollora\Schedule\UI\Console\ScheduleListCommand;
@@ -60,6 +61,7 @@ class SchedulerServiceProvider extends ServiceProvider
 
         // A check of pollora:doctor and Site Health; tagged on boot, so it comes after the framework's own
         $this->app->tag([ScheduleDriverCheck::class], DoctorServiceProvider::CHECKS_TAG);
+        $this->app->make(MigrationNotice::class)->register();
 
         if (config('wordpress.use_laravel_scheduler', false)) {
             $this->app->make(RegisterSchedulerFiltersUseCase::class)->execute();
