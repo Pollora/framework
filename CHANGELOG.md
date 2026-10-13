@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The WpCli module no longer reaches for Laravel's application, the first step towards `pollora/wp-cli`: `WpCliDiscovery` builds commands through the discovery's instance pool instead of `resolve()`. Its service provider and `pollora:make:wp-cli` stay in the framework; an architecture test keeps the rest to the attributes, discovery, PSR logging and WP-CLI
 - `#[Schedule]`, which runs on WP-Cron alone, no longer reaches for Laravel, the first step towards `pollora/schedule`: `ScheduleDiscovery` derives default hook names itself, with the same results as `Str::snake()` (a parity test keeps them), so hooks already scheduled keep their name. The bridge to Laravel's scheduler (`use_laravel_scheduler`) stays in the framework
 
+- Asynchronous actions queue through the WP-Cron and Action Scheduler drivers of `pollora/schedule`, with `pollora/hook` 2.0: `->async()`, `#[Async]`, `Async::fake()`, `via()` and their options do not change, and work already queued runs once the upgrade is in. `Async\Drivers\WpCronDriver` and `ActionSchedulerDriver` are gone with no alias; the framework never used them, and the `queue` driver is unchanged
+
 ### Deprecated
 - `DiscoveryCacheInterface` and `LaravelDiscoveryCache`, removed in 15.0: nothing reads this cache, scans are cached by the Spatie driver given to `DiscoveryCacheManager`
 - `Pollora\Attributes\PostType\PostTypeAttribute` and `Pollora\Attributes\Taxonomy\TaxonomyAttribute`, removed in 15.0: no built-in attribute extends them any more; implement `ConfiguresArguments`
@@ -36,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `handle()` on `#[Action]`, `#[Filter]`, `#[WpRestRoute]` and `#[WpRestRoute\Method]`, and `Hook` no longer implements `HandlesAttributes`: `HookDiscovery` and `WpRestDiscovery` register hooks and routes themselves. Only the bug below reached `Action::handle()`, and `WpRestRoute::handle()` wrote to a read-only wrapper
 
 ### Fixed
+- `pollora:doctor` no longer counts as overdue WP-Cron events the ones Action Scheduler keeps: the `cron` option indexes them too, with a `driver` key
 - A public `#[Action]` or `#[Filter]` method in a `#[PostType]` or `#[Taxonomy]` class is registered once: the post type and taxonomy discoveries also handed it to `Action::handle()`, which registered it a second time on the discovery's configuration object, so the page firing that hook failed with `call_user_func(): Argument #1 ($callback) must be a valid callback, class Pollora\PostType\Infrastructure\Services\PostTypeConfiguration does not have a method …`
 - A REST controller declared with `#[WpRestRoute]` gets its constructor dependencies: it is resolved through the discovery's instance pool (Laravel's container in a Pollora application) instead of `new` with no argument, so a controller with a required dependency answered every request with `Trying to invoke non static method … without an object`
 
