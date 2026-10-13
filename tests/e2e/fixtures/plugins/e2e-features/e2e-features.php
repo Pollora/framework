@@ -15,4 +15,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+// The site follows APP_ENV (local), and WordPress 7.1 refuses pings outside production: the trackback test needs them.
+add_filter('wp_should_disable_pings_for_environment', '__return_false');
+
 pollora_register(ModuleType::Plugin, 'e2e-features', __DIR__);
