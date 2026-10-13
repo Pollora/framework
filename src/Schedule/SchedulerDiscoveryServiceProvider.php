@@ -22,5 +22,7 @@ class SchedulerDiscoveryServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ScheduleDiscovery::class, fn (): ScheduleDiscovery => new ScheduleDiscovery);
+
+        Schedule::useContainer($this->app);
     }
 }

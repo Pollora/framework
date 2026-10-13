@@ -14,6 +14,7 @@ use Pollora\Schedule\Application\UseCases\RegisterSchedulerFiltersUseCase;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Events\RecurringEvent;
 use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
+use Pollora\Schedule\Schedule as ScheduleApi;
 
 /**
  * Service provider for WordPress cron scheduler functionality.
@@ -30,6 +31,8 @@ class SchedulerServiceProvider extends ServiceProvider
     {
         $this->registerDomainContracts();
         $this->registerUseCases();
+
+        ScheduleApi::useContainer($this->app);
     }
 
     /**

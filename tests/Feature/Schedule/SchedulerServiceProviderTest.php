@@ -7,6 +7,7 @@ use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Schedule\Application\UseCases\RegisterSchedulerFiltersUseCase;
 use Pollora\Schedule\Contracts\SchedulerInterface;
 use Pollora\Schedule\Infrastructure\Services\ScheduleDiscovery;
+use Pollora\Schedule\Schedule;
 use Pollora\Schedule\Scheduler;
 use Pollora\Schedule\SchedulerServiceProvider;
 
@@ -40,5 +41,11 @@ describe('SchedulerServiceProvider', function (): void {
         $useCase = $this->app->make(RegisterSchedulerFiltersUseCase::class);
 
         expect($useCase)->toBeInstanceOf(RegisterSchedulerFiltersUseCase::class);
+    });
+
+    it('gives the schedule engine the application, so the classes passed to call() get their dependencies', function (): void {
+        $container = (new ReflectionProperty(Schedule::engine(), 'container'))->getValue(Schedule::engine());
+
+        expect($container)->toBe($this->app);
     });
 });
