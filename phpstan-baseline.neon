@@ -210,8 +210,3 @@ parameters:
 			count: 1
 			path: src/View/Application/UseCases/MakeTemplateIncludableUseCase.php
 
-		-
-			message: '#^Constant WP_CLI_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/WpCli/Infrastructure/Adapters/WpCliAdapter.php
