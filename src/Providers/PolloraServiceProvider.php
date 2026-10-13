@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Providers;
 
-use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 use Log1x\SageDirectives\SageDirectivesServiceProvider;
 use Pollora\Ability\Infrastructure\Providers\AbilityServiceProvider;
@@ -36,7 +35,6 @@ use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
 use Pollora\Role\Infrastructure\Providers\RoleServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
-use Pollora\Schedule\Jobs\JobDispatcher;
 use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
@@ -125,7 +123,6 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(RouteServiceProvider::class);
 
         $this->app->register(SchedulerServiceProvider::class);
-        $this->app->singleton(JobDispatcher::class, fn ($app): JobDispatcher => new JobDispatcher($app->make(Dispatcher::class)));
 
         // Authentication service provider
         $this->app->register(AuthServiceProvider::class);

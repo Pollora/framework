@@ -107,6 +107,8 @@ beforeEach(function (): void {
     Functions\when('wp_schedule_event')->justReturn(true);
     Functions\when('wp_schedule_single_event')->justReturn(true);
     Functions\when('did_action')->justReturn(1);
+    Functions\when('get_current_blog_id')->justReturn(1);
+    Functions\when('is_multisite')->justReturn(false);
     Functions\when('wp_date')->alias(fn (string $format, int $timestamp): string => gmdate($format, $timestamp));
 
     Schedule::extend('memory', fn (): ScheduleDriver => $this->memory);

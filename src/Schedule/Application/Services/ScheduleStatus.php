@@ -6,6 +6,7 @@ namespace Pollora\Schedule\Application\Services;
 
 use Illuminate\Contracts\Config\Repository;
 use Pollora\Schedule\Event;
+use Pollora\Schedule\Infrastructure\Drivers\LaravelQueueDriver;
 use Pollora\Schedule\Schedule;
 use Pollora\Schedule\Support\CronIndex;
 
@@ -72,6 +73,24 @@ final readonly class ScheduleStatus
         }
 
         return $counts;
+    }
+
+    /**
+     * Seconds after which an event of the "laravel" driver counts as late.
+     */
+    public function lateAfter(): int
+    {
+        return max(60, (int) $this->config->get('schedule.laravel.late_after', 600));
+    }
+
+    /**
+     * Events of the "laravel" driver that are late: a job lost, or no worker.
+     */
+    public function late(): int
+    {
+        $limit = time() - $this->lateAfter();
+
+        return count(array_filter(Schedule::engine()->index(), static fn (Event $event): bool => $event->driver === LaravelQueueDriver::NAME && $event->timestamp < $limit));
     }
 
     /**
