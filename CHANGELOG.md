@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The discovery benchmarks measure memory as PHP allocates it, from a reset peak: they read 2 MB whatever the load
 - `#[WpRestRoute\Method]` no longer registers its route: `WpRestRouteRegistrar`, in the WpRest module, does, with the same arguments, permissions and request injection. Default slugs, meta keys and command names come from `Pollora\Attributes\Support\Naming`, which gives the same results as `Str::kebab()` and `Str::snake()`; `Pollora\Support\Slug` uses it
 - The WpRest module no longer reaches for Laravel's application, the first step towards `pollora/wp-rest`: custom `HandlesAttributes` attributes receive the PSR-11 container given to `WpRestDiscovery`, and `WpRestAttributableWrapper` takes the controller instance instead of building it. An architecture test keeps the module to the attributes, discovery, PSR contracts and WordPress
+- The WpCli module no longer reaches for Laravel's application, the first step towards `pollora/wp-cli`: `WpCliDiscovery` builds commands through the discovery's instance pool instead of `resolve()`. Its service provider and `pollora:make:wp-cli` stay in the framework; an architecture test keeps the rest to the attributes, discovery, PSR logging and WP-CLI
 
 ### Deprecated
 - `DiscoveryCacheInterface` and `LaravelDiscoveryCache`, removed in 15.0: nothing reads this cache, scans are cached by the Spatie driver given to `DiscoveryCacheManager`
