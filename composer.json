@@ -34,7 +34,7 @@
         "pollora/attributes": "^0.1 || ^1.0",
         "pollora/discovery": "^0.1 || ^1.0",
         "pollora/entity": "^1.2",
-        "pollora/hook": "^1.5",
+        "pollora/hook": "^2.0",
         "pollora/option": "^1.1",
         "pollora/schedule": "^0.1.1 || ^1.0",
         "pollora/wp-cli": "^0.1 || ^1.0",
