@@ -6,6 +6,7 @@ namespace Pollora\Schedule\Infrastructure\Drivers;
 
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\Container;
 use Pollora\Schedule\Contracts\Identifies;
 use Pollora\Schedule\Contracts\ScheduleDriver;
 use Pollora\Schedule\Event;
@@ -31,8 +32,11 @@ final readonly class LaravelQueueDriver implements Identifies, ScheduleDriver
      */
     private const array MAX_DELAYS = ['sqs' => 900];
 
+    /**
+     * The bus is resolved when a job is queued: the driver is built while the application is still registering its providers.
+     */
     public function __construct(
-        private Dispatcher $dispatcher,
+        private Container $container,
         private Repository $config,
     ) {}
 
@@ -109,7 +113,7 @@ final readonly class LaravelQueueDriver implements Identifies, ScheduleDriver
             $job->delay($delay);
         }
 
-        $this->dispatcher->dispatch($job);
+        $this->container->make(Dispatcher::class)->dispatch($job);
     }
 
     /**

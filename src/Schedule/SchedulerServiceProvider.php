@@ -35,8 +35,9 @@ class SchedulerServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../../config/schedule.php', 'schedule');
         $this->app->singleton(ScheduleStatus::class, fn (Application $app): ScheduleStatus => new ScheduleStatus($app->make(Repository::class)));
 
-        ScheduleApi::useContainer($this->app);
+        // Before anything creates the engine: POLLORA_SCHEDULE_DRIVER may name it
         ScheduleApi::extend(LaravelQueueDriver::NAME, fn (): LaravelQueueDriver => $this->app->make(LaravelQueueDriver::class));
+        ScheduleApi::useContainer($this->app);
         $this->chooseDriver($this->app->make(Repository::class));
 
         if ($this->app->runningInConsole()) {

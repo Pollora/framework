@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
+use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Bus;
 use Pollora\Doctor\Domain\Enums\CheckStatus;
@@ -88,6 +89,12 @@ describe('the driver', function (): void {
 
         config(['schedule.laravel.connection' => 'missing']);
         expect($this->driver->available())->toBeFalse();
+    });
+
+    it('is built before the application has a bus: the driver is chosen while the providers register', function (): void {
+        $driver = new LaravelQueueDriver(new Container, resolve('config'));
+
+        expect($driver->available())->toBeTrue();
     });
 
     it('queues a delayed job and writes the entry, with its identifier, in the index', function (): void {
