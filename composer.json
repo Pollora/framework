@@ -108,7 +108,7 @@
         "brain/monkey": "^2.7",
         "mockery/mockery": "^1.6.15",
         "wp-cli/wp-cli": "^2.12",
-        "larastan/larastan": "^3.12",
+        "larastan/larastan": "^3.13",
         "orchestra/testbench": "^11.1.0"
     },
     "autoload-dev": {
