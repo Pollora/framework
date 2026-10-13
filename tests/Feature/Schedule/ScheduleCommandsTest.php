@@ -152,7 +152,7 @@ describe('driver choice', function (): void {
     it('does not call a driver unknown because something else switched the engine after the provider', function (): void {
         Schedule::driver('wp-cron');
 
-        $status = app(ScheduleStatus::class);
+        $status = resolve(ScheduleStatus::class);
 
         expect($status->configured())->toBe('memory')
             ->and($status->active())->toBe('wp-cron')
