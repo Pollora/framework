@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Support;
 
+use Pollora\Attributes\Support\Naming;
+
 /**
  * Utility class for slug generation.
  *
@@ -25,15 +27,7 @@ class Slug
      */
     public static function fromClassName(string $className): string
     {
-        // Extract the base class name (remove namespace)
-        $baseName = basename(str_replace('\\', '/', $className));
-
-        // Remove "Command" suffix if present
-        if (self::endsWith($baseName, 'Command')) {
-            $baseName = substr($baseName, 0, -7);
-        }
-
-        return self::toKebabCase($baseName);
+        return Naming::commandFromClassName($className);
     }
 
     /**
@@ -50,7 +44,7 @@ class Slug
      */
     public static function fromMethodName(string $methodName): string
     {
-        return self::toKebabCase($methodName);
+        return Naming::slug($methodName);
     }
 
     /**
@@ -61,35 +55,6 @@ class Slug
      */
     public static function toKebabCase(string $string): string
     {
-        // Insert a hyphen before any uppercase letter that follows a lowercase letter or number
-        $string = preg_replace('/([a-z0-9])([A-Z])/', '$1-$2', $string);
-
-        // Convert to lowercase
-        $string = strtolower((string) $string);
-
-        // Replace multiple consecutive hyphens with a single hyphen
-        $string = preg_replace('/-+/', '-', $string);
-
-        // Trim hyphens from the beginning and end
-        $string = trim((string) $string, '-');
-
-        return $string;
-    }
-
-    /**
-     * Check if a string ends with a specific suffix.
-     *
-     * @param  string  $haystack  The string to check
-     * @param  string  $needle  The suffix to look for
-     * @return bool True if the string ends with the suffix
-     */
-    private static function endsWith(string $haystack, string $needle): bool
-    {
-        $length = strlen($needle);
-        if ($length === 0) {
-            return true;
-        }
-
-        return substr($haystack, -$length) === $needle;
+        return Naming::slug($string);
     }
 }

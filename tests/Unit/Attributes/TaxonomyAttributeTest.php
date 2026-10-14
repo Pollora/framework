@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 use Mockery as m;
+use Pollora\Attributes\Contracts\ConfiguresArguments;
 use Pollora\Attributes\Taxonomy;
 use Pollora\Attributes\Taxonomy\AllowHierarchy;
 use Pollora\Attributes\Taxonomy\Args;
@@ -161,8 +162,8 @@ function testBooleanAttribute(string $attributeName, string $argName): void
         $reflectionClass = new ReflectionClass($taxonomy);
         foreach ($reflectionClass->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
-            if (method_exists($attributeInstance, 'handle')) {
-                $attributeInstance->handle(app(), $taxonomy, $reflectionClass, $attributeInstance);
+            if ($attributeInstance instanceof ConfiguresArguments) {
+                $taxonomy->attributeArgs = $attributeInstance->configureArguments($taxonomy->attributeArgs);
             }
         }
 
@@ -180,8 +181,8 @@ function testValueAttribute(string $attributeName, string $argName, mixed $expec
         $reflectionClass = new ReflectionClass($taxonomy);
         foreach ($reflectionClass->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
-            if (method_exists($attributeInstance, 'handle')) {
-                $attributeInstance->handle(app(), $taxonomy, $reflectionClass, $attributeInstance);
+            if ($attributeInstance instanceof ConfiguresArguments) {
+                $taxonomy->attributeArgs = $attributeInstance->configureArguments($taxonomy->attributeArgs);
             }
         }
 
@@ -206,7 +207,7 @@ function testMethodAttribute(string $attributeName, string $argName, string $met
             $attributes = $method->getAttributes($attributeClass);
             foreach ($attributes as $attribute) {
                 $attributeInstance = $attribute->newInstance();
-                $attributeInstance->handle(null, $taxonomy, $method, $attributeInstance);
+                $taxonomy->attributeArgs = $attributeInstance->configureArguments($taxonomy->attributeArgs, [$taxonomy, $method->getName()]);
             }
         }
 
@@ -259,8 +260,8 @@ test('getArgs method merges attribute args with withArgs and labels', function (
     $reflectionClass = new ReflectionClass($taxonomy);
     foreach ($reflectionClass->getAttributes() as $attribute) {
         $attributeInstance = $attribute->newInstance();
-        if (method_exists($attributeInstance, 'handle')) {
-            $attributeInstance->handle(app(), $taxonomy, $reflectionClass, $attributeInstance);
+        if ($attributeInstance instanceof ConfiguresArguments) {
+            $taxonomy->attributeArgs = $attributeInstance->configureArguments($taxonomy->attributeArgs);
         }
     }
 
