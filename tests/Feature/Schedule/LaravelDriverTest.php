@@ -138,6 +138,21 @@ describe('the driver', function (): void {
             ->and($this->engine->next('digest', ['u' => 1]))->toBeNull();
     });
 
+    it('gives a recurring event the interval of its recurrence when the caller gave none: the fluent API and #[Schedule] only know the name', function (): void {
+        $this->engine->place(new Event('reports', time() - 5, 'daily', []));
+
+        expect(dispatchedJobs()[0]->interval)->toBe(86400);
+
+        $job = dispatchedJobs()[0];
+        $job->handle($this->driver);
+
+        $next = CronIndex::events('laravel');
+
+        expect($next)->toHaveCount(1)
+            ->and($next[0]->hook)->toBe('reports')
+            ->and($next[0]->timestamp)->toBe($job->timestamp + 86400);
+    });
+
     it('stores a single event of the WordPress functions the same way', function (): void {
         $this->driver->once('digest', time() + 600, []);
         $this->driver->recurring('reports', time() + 600, 'daily', []);
