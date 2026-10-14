@@ -7,6 +7,7 @@ use Illuminate\Container\Container;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Models\DiscoveryContext;
+use Pollora\Discovery\Infrastructure\Adapters\LaravelDiscoveryCacheManagerFactory;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryCacheManager;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Psr\Log\LoggerInterface;
@@ -38,15 +39,14 @@ function managerFor(bool $debug, ?LoggerInterface $logger = null): DiscoveryCach
         $container->instance(LoggerInterface::class, $logger);
     }
 
-    // config() reaches for the application container; without it the
-    // non-debug path cannot resolve a cache driver.
+    // Without a config repository the non-debug path cannot resolve a cache driver.
     $container->instance('config', new Repository(['structure-discoverer' => ['cache' => []]]));
     Container::setInstance($container);
 
     $detector = Mockery::mock(DebugDetectorInterface::class);
     $detector->shouldReceive('isDebugMode')->andReturn($debug);
 
-    return new DiscoveryCacheManager($container, $detector);
+    return (new LaravelDiscoveryCacheManagerFactory($container, $detector))->make();
 }
 
 function scanOf(DiscoveryCacheManager $manager, string $path): void
@@ -157,14 +157,14 @@ describe('scan sources', function (): void {
         $detector = Mockery::mock(DebugDetectorInterface::class);
         $detector->shouldReceive('isDebugMode')->andReturn(false);
 
-        $first = new DiscoveryCacheManager($container, $detector);
+        $first = (new LaravelDiscoveryCacheManagerFactory($container, $detector))->make();
         scanOf($first, $this->dir);
 
         // A new process starts with an empty copy of its own, and only the
         // persistent cache is left to answer.
         (new ReflectionProperty(DiscoveryCacheManager::class, 'structuresCache'))->setValue(null, []);
 
-        $second = new DiscoveryCacheManager($container, $detector);
+        $second = (new LaravelDiscoveryCacheManagerFactory($container, $detector))->make();
         scanOf($second, $this->dir);
 
         expect($first->scans()[0]['source'])->toBe('disk')

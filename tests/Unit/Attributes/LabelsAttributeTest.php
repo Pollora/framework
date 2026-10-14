@@ -56,9 +56,7 @@ describe('PostType Labels attribute', function (): void {
 
         $reflection = new ReflectionClass(ProjectWithLabels::class);
         $attr = $reflection->getAttributes(PostTypeLabels::class)[0]->newInstance();
-        $attr->handle(null, $config, $reflection, $attr);
-
-        $labels = $config->attributeArgs['labels'];
+        $labels = $attr->configureArguments($config->attributeArgs)['labels'];
 
         // Overridden by #[Labels]
         expect($labels['all_items'])->toBe('All Projects');
@@ -88,10 +86,7 @@ describe('PostType Labels attribute', function (): void {
         );
 
         $config = new PostTypeConfiguration('item', 'Item', 'Items');
-        $reflection = new ReflectionClass(ArticleWithoutLabels::class);
-        $labels->handle(null, $config, $reflection, $labels);
-
-        $result = $config->attributeArgs['labels'];
+        $result = $labels->configureArguments($config->attributeArgs)['labels'];
 
         expect($result)->toBe([
             'name' => 'My Items',
@@ -126,9 +121,7 @@ describe('Taxonomy Labels attribute', function (): void {
 
         $reflection = new ReflectionClass(GenreWithLabels::class);
         $attr = $reflection->getAttributes(TaxonomyLabels::class)[0]->newInstance();
-        $attr->handle(null, $config, $reflection, $attr);
-
-        $labels = $config->attributeArgs['labels'];
+        $labels = $attr->configureArguments($config->attributeArgs)['labels'];
 
         // Overridden
         expect($labels['all_items'])->toBe('All Genres');

@@ -81,8 +81,9 @@ class AsyncInspector
                 continue;
             }
 
+            // The events another driver keeps (Action Scheduler) are in the index too: this counts what only WP-Cron runs
             foreach ((array) $hooks as $events) {
-                $count += count((array) $events);
+                $count += count(array_filter((array) $events, static fn (mixed $event): bool => ! is_array($event) || ($event['driver'] ?? 'wp-cron') === 'wp-cron'));
             }
 
             $oldest = $oldest === null ? $timestamp : min($oldest, $timestamp);

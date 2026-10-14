@@ -179,10 +179,6 @@ final readonly class AsyncActionsCheck implements CheckInterface
      */
     private function cronFix(): string
     {
-        if ($this->config->get('wordpress.use_laravel_scheduler')) {
-            return 'WP-Cron events are Laravel jobs here (wordpress.use_laravel_scheduler): run a queue worker, php artisan queue:work';
-        }
-
         return $this->inspector->cronRunsOnPageLoad()
             ? 'The site gets too few visits to run WP-Cron: add a system cron that requests wp-cron.php every minute'
             : 'DISABLE_WP_CRON is set (Pollora sets it): add a system cron, e.g. * * * * * curl -s https://example.com/cms/wp-cron.php, or wp cron event run --due-now';
