@@ -50,7 +50,7 @@
         "nwidart/laravel-modules": "^13.0",
         "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.36",
-        "laravel/prompts": "^0.3.24"
+        "laravel/prompts": "^0.3.25"
     },
     "autoload": {
         "psr-4": {
@@ -113,8 +113,8 @@
         "brain/monkey": "^2.7",
         "mockery/mockery": "^1.6.15",
         "wp-cli/wp-cli": "^2.12",
-        "larastan/larastan": "^3.12",
-        "orchestra/testbench": "^11.1.0"
+        "larastan/larastan": "^3.13",
+        "orchestra/testbench": "^11.3.0"
     },
     "autoload-dev": {
         "psr-4": {
