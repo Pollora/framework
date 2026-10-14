@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.35.6...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.36.0...develop)
+
+## [v13.36.0](https://github.com/Pollora/framework/compare/v13.35.6...v13.36.0) - 2026-10-14
 
 ### Added
 - Discovery lives in its own package, [`pollora/discovery`](https://github.com/Pollora/discovery), which the framework requires: the engine, its contracts, `DiscoveryManager`, the cache and the `#[SkipDiscovery]` attribute, with their tests and benchmarks. Class names do not change. The framework keeps what needs Laravel: the service provider, `discovery:run` / `discovery:clear`, `DiscoveryRegistrar`, `ServiceProviderDiscovery`, the Laravel adapters, and `HasConfiguringSupport`, which builds post types and taxonomies
