@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lost jobs (a flushed Redis, a purged queue) are found again: at most every five minutes, as a request ends and under a lock, and with `php artisan pollora:schedule:recover` (`--network`, `--dry-run`), an event more than `late_after` seconds (600) past its time is queued again with the same identifier, so it never runs twice. `pollora:doctor` and Site Health report late events (no worker), a queue connection that is `sync` or `null`, and a scheduled event that failed for good in the last week
 
 ### Changed
+- Requires Laravel 13.36: `illuminate/*` `^13.35` → `^13.36`. The framework version tracks Laravel's, so this release is v13.36.0
 - `DiscoveryEngine`, `DiscoveryCacheManager`, `InstancePool` and `ReflectionCache` take their dependencies instead of reaching for `app()` and `config()`; reading `structure-discoverer.cache` moved to `LaravelDiscoveryCacheManagerFactory`. `DiscoveryRegistrar::registerFromContainer()` is now `registerInto()`. These are infrastructure classes, outside the public contracts (`Pollora\Discovery\Domain\*`), which do not change
 - One `DiscoveryCacheManager` is shared by the engine and the `pollora:doctor` discovery cache check, which built its own
 - The discovery benchmarks measure memory as PHP allocates it, from a reset peak: they read 2 MB whatever the load
