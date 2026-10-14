@@ -49,9 +49,25 @@ final readonly class LaravelQueueDriver implements Identifies, ScheduleDriver
 
     public function placeIdentified(Event $event): bool
     {
-        $this->send(RunScheduledEvent::for($event));
+        $this->send(RunScheduledEvent::for($this->withInterval($event)));
 
         return true;
+    }
+
+    /**
+     * A recurring event runs again only when its job knows the interval: the fluent API and #[Schedule] give the name of the recurrence, WordPress's own functions give both.
+     */
+    private function withInterval(Event $event): Event
+    {
+        if ($event->recurrence === null || $event->interval !== null) {
+            return $event;
+        }
+
+        $interval = (int) ((function_exists('wp_get_schedules') ? wp_get_schedules() : [])[$event->recurrence]['interval'] ?? 0);
+
+        return $interval > 0
+            ? new Event($event->hook, $event->timestamp, $event->recurrence, $event->args, $interval, $event->driver, $event->id)
+            : $event;
     }
 
     public function once(string $hook, int $timestamp, array $args = []): bool
@@ -61,9 +77,7 @@ final readonly class LaravelQueueDriver implements Identifies, ScheduleDriver
 
     public function recurring(string $hook, int $timestamp, string $recurrence, array $args = []): bool
     {
-        $interval = (int) ((function_exists('wp_get_schedules') ? wp_get_schedules() : [])[$recurrence]['interval'] ?? 0);
-
-        return $this->place(new Event($hook, $timestamp, $recurrence, $args, $interval > 0 ? $interval : null));
+        return $this->place($this->withInterval(new Event($hook, $timestamp, $recurrence, $args)));
     }
 
     /**
