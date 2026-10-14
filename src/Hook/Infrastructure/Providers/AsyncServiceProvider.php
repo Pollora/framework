@@ -49,6 +49,9 @@ class AsyncServiceProvider extends ServiceProvider
         $this->app->tag([AsyncActionsCheck::class], DoctorServiceProvider::CHECKS_TAG);
 
         $this->configureAsync($this->app->make(Repository::class));
+
+        // The run of a queued action must not wait for an Action to be built in the request: the request that runs it may register no hook at all
+        Async::listen();
     }
 
     private function configureAsync(Repository $config): void
