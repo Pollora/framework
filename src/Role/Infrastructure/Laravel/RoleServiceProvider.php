@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Role\Infrastructure\Providers;
+namespace Pollora\Role\Infrastructure\Laravel;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Router;
@@ -22,16 +22,13 @@ use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleLabelTranslator;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleStore;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleUsage;
-use Pollora\Role\Infrastructure\Checks\RolesCheck;
-use Pollora\Role\Infrastructure\Middleware\EnsureUserHasRole;
+use Pollora\Role\Infrastructure\Laravel\Console\RoleDumpCommand;
+use Pollora\Role\Infrastructure\Laravel\Console\RoleImportCommand;
+use Pollora\Role\Infrastructure\Laravel\Console\RoleListCommand;
+use Pollora\Role\Infrastructure\Laravel\Console\RoleMakeCommand;
+use Pollora\Role\Infrastructure\Laravel\Console\RolePruneCommand;
+use Pollora\Role\Infrastructure\Laravel\Console\RoleShowCommand;
 use Pollora\Role\Infrastructure\Services\RoleDiscovery;
-use Pollora\Role\UI\Console\RoleDumpCommand;
-use Pollora\Role\UI\Console\RoleImportCommand;
-use Pollora\Role\UI\Console\RoleListCommand;
-use Pollora\Role\UI\Console\RoleMakeCommand;
-use Pollora\Role\UI\Console\RolePruneCommand;
-use Pollora\Role\UI\Console\RoleShowCommand;
-use Pollora\Role\UI\View\RoleDirective;
 use Psr\Log\LoggerInterface;
 
 /**

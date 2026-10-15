@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Role\UI\View;
+namespace Pollora\Role\Infrastructure\Laravel;
 
 use Pollora\Role\Application\Services\RoleReference;
 

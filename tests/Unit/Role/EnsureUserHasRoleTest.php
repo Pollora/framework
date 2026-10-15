@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
-use Pollora\Role\Infrastructure\Middleware\EnsureUserHasRole;
+use Pollora\Role\Infrastructure\Laravel\EnsureUserHasRole;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Unit\Role\Fixtures\EventManager;
 

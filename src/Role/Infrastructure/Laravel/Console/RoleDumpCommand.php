@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Role\UI\Console;
+namespace Pollora\Role\Infrastructure\Laravel\Console;
 
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;

@@ -11,7 +11,7 @@ use Pollora\Role\Application\Services\RoleRegistry;
 use Pollora\Role\Domain\Services\PostTypeCapabilityMap;
 use Pollora\Role\Domain\Services\RoleCompiler;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
-use Pollora\Role\Infrastructure\Checks\RolesCheck;
+use Pollora\Role\Infrastructure\Laravel\RolesCheck;
 use Tests\Unit\Role\Fixtures\EventManager;
 use Tests\Unit\Role\Fixtures\FakeRoleUsage;
 
