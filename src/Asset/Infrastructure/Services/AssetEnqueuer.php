@@ -378,7 +378,24 @@ class AssetEnqueuer
                 $this->hookAction()->add($hook, fn () => $this->enqueueStyleOrScript($hook), 99);
             }
         } catch (\Throwable $throwable) {
-            ($this->logger ?? new NullLogger)->error('Error in AssetEnqueuer::__destruct', ['error' => $throwable->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
+            $this->report('Error in AssetEnqueuer::__destruct', ['error' => $throwable->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
+        }
+    }
+
+    /**
+     * Report a failure of the deferred enqueue.
+     *
+     * Called from the destructor, which may run when the application is already gone
+     * (end of the request, a test that built the enqueuer): a logger that cannot log then must not throw.
+     *
+     * @param  array<string, mixed>  $context
+     */
+    private function report(string $message, array $context): void
+    {
+        try {
+            ($this->logger ?? new NullLogger)->error($message, $context);
+        } catch (\Throwable) {
+            // Nothing left to report to
         }
     }
 
