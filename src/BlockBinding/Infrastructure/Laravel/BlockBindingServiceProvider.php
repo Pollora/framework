@@ -86,6 +86,7 @@ class BlockBindingServiceProvider extends ServiceProvider
             $app->make(LoggerInterface::class),
             $app->make(LaravelMethodInvoker::class),
             $app->make(LaravelBindingEvents::class),
+            $app->make(LaravelPostFinder::class),
         ));
 
         $this->app->singleton(WordPressBindingRegistry::class, fn (Application $app): WordPressBindingRegistry => new WordPressBindingRegistry(

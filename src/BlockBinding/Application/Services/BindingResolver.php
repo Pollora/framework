@@ -7,6 +7,7 @@ namespace Pollora\BlockBinding\Application\Services;
 use Pollora\BlockBinding\Domain\Contracts\BindingEventsInterface;
 use Pollora\BlockBinding\Domain\Contracts\ContentVisibilityInterface;
 use Pollora\BlockBinding\Domain\Contracts\MethodInvokerInterface;
+use Pollora\BlockBinding\Domain\Contracts\PostFinderInterface;
 use Pollora\BlockBinding\Domain\Contracts\ValuePresenterInterface;
 use Pollora\BlockBinding\Domain\Enums\BindingFieldType;
 use Pollora\BlockBinding\Domain\Events\BindingResolved;
@@ -67,6 +68,7 @@ final class BindingResolver
         private readonly ?LoggerInterface $logger = null,
         ?MethodInvokerInterface $invoker = null,
         private readonly ?BindingEventsInterface $events = null,
+        private readonly ?PostFinderInterface $posts = null,
     ) {
         $this->invoker = $invoker ?? new ReflectionMethodInvoker($container);
     }
@@ -171,6 +173,7 @@ final class BindingResolver
             taxonomy: is_string($blockContext['taxonomy'] ?? null) ? $blockContext['taxonomy'] : null,
             block: $block,
             metaAccessor: $this->metaAccessor,
+            postFinder: $this->posts,
         );
     }
 

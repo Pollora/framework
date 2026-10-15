@@ -18,7 +18,7 @@
             "SLOW_FIELD_MS": "const"
         },
         "methods": {
-            "__construct": "public (Psr\\Container\\ContainerInterface $container, Pollora\\BlockBinding\\Domain\\Contracts\\ContentVisibilityInterface $visibility, Pollora\\BlockBinding\\Domain\\Contracts\\ValuePresenterInterface $presenter, ?Pollora\\Meta\\Application\\Services\\MetaAccessor $metaAccessor = ?, bool $debug = ?, ?Psr\\Log\\LoggerInterface $logger = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\MethodInvokerInterface $invoker = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\BindingEventsInterface $events = ?): mixed",
+            "__construct": "public (Psr\\Container\\ContainerInterface $container, Pollora\\BlockBinding\\Domain\\Contracts\\ContentVisibilityInterface $visibility, Pollora\\BlockBinding\\Domain\\Contracts\\ValuePresenterInterface $presenter, ?Pollora\\Meta\\Application\\Services\\MetaAccessor $metaAccessor = ?, bool $debug = ?, ?Psr\\Log\\LoggerInterface $logger = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\MethodInvokerInterface $invoker = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\BindingEventsInterface $events = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\PostFinderInterface $posts = ?): mixed",
             "preview": "public (Pollora\\BlockBinding\\Domain\\Models\\BindingSource $source, array $args, array $blockContext, string $attribute, ?string $attributeSource = ?): mixed",
             "resolve": "public (Pollora\\BlockBinding\\Domain\\Models\\BindingSource $source, array $args, ?WP_Block $block, string $attribute): mixed"
         }
@@ -72,6 +72,15 @@
             "call": "public abstract (object $instance, string $method, array $parameters): mixed"
         }
     },
+    "Pollora\\BlockBinding\\Domain\\Contracts\\PostFinderInterface": {
+        "kind": "interface",
+        "extends": null,
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "find": "public abstract (int $postId): ?Pollora\\Colt\\Model\\Post"
+        }
+    },
     "Pollora\\BlockBinding\\Domain\\Contracts\\ValuePresenterInterface": {
         "kind": "interface",
         "extends": null,
@@ -110,10 +119,10 @@
         "implements": [],
         "constants": [],
         "methods": {
-            "__construct": "public (array $args = ?, string $attribute = ?, ?int $postId = ?, ?string $postType = ?, ?int $termId = ?, ?string $taxonomy = ?, ?WP_Block $block = ?, ?Pollora\\Meta\\Application\\Services\\MetaAccessor $metaAccessor = ?): mixed",
+            "__construct": "public (array $args = ?, string $attribute = ?, ?int $postId = ?, ?string $postType = ?, ?int $termId = ?, ?string $taxonomy = ?, ?WP_Block $block = ?, ?Pollora\\Meta\\Application\\Services\\MetaAccessor $metaAccessor = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\PostFinderInterface $postFinder = ?): mixed",
             "arg": "public (string $name, mixed $default = ?): mixed",
             "meta": "public (string $class): ?Pollora\\Meta\\Domain\\Models\\MetaRecord",
-            "post": "public (): ?Pollora\\Models\\Post"
+            "post": "public (): ?Pollora\\Colt\\Model\\Post"
         }
     },
     "Pollora\\BlockBinding\\Domain\\Models\\BindingFieldDefinition": {
@@ -268,6 +277,17 @@
         "methods": {
             "__construct": "public (Illuminate\\Contracts\\Container\\Container $container): mixed",
             "call": "public (object $instance, string $method, array $parameters): mixed"
+        }
+    },
+    "Pollora\\BlockBinding\\Infrastructure\\Laravel\\LaravelPostFinder": {
+        "kind": "final class",
+        "extends": null,
+        "implements": [
+            "Pollora\\BlockBinding\\Domain\\Contracts\\PostFinderInterface"
+        ],
+        "constants": [],
+        "methods": {
+            "find": "public (int $postId): ?Pollora\\Models\\Post"
         }
     },
     "Pollora\\BlockBinding\\Infrastructure\\Services\\BindingEditorData": {
