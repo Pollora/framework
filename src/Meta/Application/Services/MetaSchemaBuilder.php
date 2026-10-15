@@ -6,11 +6,11 @@ namespace Pollora\Meta\Application\Services;
 
 use BackedEnum;
 use DateTimeInterface;
-use Illuminate\Support\Str;
 use Pollora\Attributes\CommentMeta;
 use Pollora\Attributes\Meta;
 use Pollora\Attributes\PostMeta;
 use Pollora\Attributes\PostType;
+use Pollora\Attributes\Support\Naming;
 use Pollora\Attributes\Taxonomy;
 use Pollora\Attributes\TermMeta;
 use Pollora\Attributes\UserMeta;
@@ -310,7 +310,7 @@ final class MetaSchemaBuilder
 
             $properties[$propertyName] = new MetaDefinition(
                 property: $propertyName,
-                key: Str::snake($propertyName),
+                key: Naming::snake($propertyName),
                 valueType: $valueType,
                 valueClass: $valueClass,
                 nullable: $type->allowsNull(),

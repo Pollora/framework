@@ -23,7 +23,7 @@ use Pollora\Meta\Domain\Events\MetaSchemasRegistered;
 use Pollora\Meta\Domain\Models\MetaDefinition;
 use Pollora\Meta\Domain\Models\MetaSchema;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
-use Pollora\Meta\Infrastructure\Providers\MetaServiceProvider;
+use Pollora\Meta\Infrastructure\Laravel\MetaServiceProvider;
 use Pollora\Meta\Testing\MetaUiDriverConformance;
 use Psr\Log\LoggerInterface;
 use Tests\Unit\Meta\Fixtures\Event;

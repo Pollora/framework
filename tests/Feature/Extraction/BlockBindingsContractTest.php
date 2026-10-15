@@ -21,7 +21,7 @@ use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
-use Pollora\Meta\Infrastructure\Providers\MetaServiceProvider;
+use Pollora\Meta\Infrastructure\Laravel\MetaServiceProvider;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Tests\Unit\BlockBinding\Fixtures\ArrayMetaStore;

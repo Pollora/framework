@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Meta\Infrastructure\Providers;
+namespace Pollora\Meta\Infrastructure\Laravel;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -24,11 +24,9 @@ use Pollora\Meta\Infrastructure\Adapters\WordPressMetaInventory;
 use Pollora\Meta\Infrastructure\Adapters\WordPressMetaRegistry;
 use Pollora\Meta\Infrastructure\Adapters\WordPressMetaStore;
 use Pollora\Meta\Infrastructure\Adapters\WordPressRestMetaValidation;
-use Pollora\Meta\Infrastructure\Checks\TypedMetaCheck;
-use Pollora\Meta\Infrastructure\Services\LaravelMetaValidator;
+use Pollora\Meta\Infrastructure\Laravel\Console\MetaAuditCommand;
+use Pollora\Meta\Infrastructure\Laravel\Console\MetaListCommand;
 use Pollora\Meta\Infrastructure\Services\MetaDiscovery;
-use Pollora\Meta\UI\Console\MetaAuditCommand;
-use Pollora\Meta\UI\Console\MetaListCommand;
 use Psr\Log\LoggerInterface;
 
 /**

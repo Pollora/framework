@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Meta\Infrastructure\Services;
+namespace Pollora\Meta\Infrastructure\Laravel;
 
 use BackedEnum;
 use DateTimeInterface;

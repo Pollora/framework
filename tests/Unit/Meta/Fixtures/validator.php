@@ -7,7 +7,7 @@ declare(strict_types=1);
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
 use Illuminate\Validation\Factory;
-use Pollora\Meta\Infrastructure\Services\LaravelMetaValidator;
+use Pollora\Meta\Infrastructure\Laravel\LaravelMetaValidator;
 
 function metaValidator(): LaravelMetaValidator
 {
