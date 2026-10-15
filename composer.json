@@ -38,6 +38,7 @@
         "pollora/meta": "^0.1",
         "pollora/hook": "^2.0.1",
         "pollora/option": "^1.1",
+        "pollora/roles": "^0.1",
         "pollora/schedule": "^1.0",
         "pollora/wp-cli": "^0.1 || ^1.0",
         "pollora/wp-rest": "^0.1 || ^1.0",
