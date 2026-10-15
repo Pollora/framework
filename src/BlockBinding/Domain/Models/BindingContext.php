@@ -55,7 +55,7 @@ final class BindingContext
      */
     public function post(): ?Post
     {
-        $this->post ??= $this->postId === null ? false : (($this->postFinder instanceof \Pollora\BlockBinding\Domain\Contracts\PostFinderInterface ? $this->postFinder->find($this->postId) : Post::query()->find($this->postId)) ?? false);
+        $this->post ??= $this->postId === null ? false : (($this->postFinder instanceof PostFinderInterface ? $this->postFinder->find($this->postId) : Post::query()->find($this->postId)) ?? false);
 
         return $this->post ?: null;
     }
