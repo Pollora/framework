@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\BlockBinding\Infrastructure\Sources;
 
-use Illuminate\Contracts\Config\Repository;
 use Pollora\Attributes\BlockBinding;
 use Pollora\BlockBinding\Domain\Models\BindingContext;
 
@@ -17,8 +16,11 @@ use Pollora\BlockBinding\Domain\Models\BindingContext;
 #[BlockBinding('pollora/option', label: 'Site option (Pollora)', usesContext: [])]
 final readonly class OptionSource
 {
+    /**
+     * @param  list<string>  $options  The options a project lists as bindable (`block-bindings.options`)
+     */
     public function __construct(
-        private Repository $config,
+        private array $options,
     ) {}
 
     public function __invoke(BindingContext $context): ?string
@@ -27,7 +29,7 @@ final readonly class OptionSource
         $fallback = $context->arg('fallback');
         $fallback = is_scalar($fallback) ? (string) $fallback : null;
 
-        if (! is_string($name) || ! in_array($name, (array) $this->config->get('block-bindings.options', []), true)) {
+        if (! is_string($name) || ! in_array($name, $this->options, true)) {
             return null;
         }
 

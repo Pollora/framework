@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Pollora\BlockBinding\Application\Services\BindingReferenceInspector;
 use Pollora\BlockBinding\Application\Services\BindingSourceBuilder;
 use Pollora\BlockBinding\Application\Services\BindingSourceRegistry;
-use Pollora\BlockBinding\Infrastructure\Providers\BlockBindingServiceProvider;
+use Pollora\BlockBinding\Infrastructure\Laravel\BlockBindingServiceProvider;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Tests\Unit\BlockBinding\Fixtures\ArtistProfile;

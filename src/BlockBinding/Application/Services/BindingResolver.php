@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Pollora\BlockBinding\Application\Services;
 
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\Support\Htmlable;
+use Pollora\BlockBinding\Domain\Contracts\BindingEventsInterface;
 use Pollora\BlockBinding\Domain\Contracts\ContentVisibilityInterface;
+use Pollora\BlockBinding\Domain\Contracts\MethodInvokerInterface;
 use Pollora\BlockBinding\Domain\Contracts\ValuePresenterInterface;
 use Pollora\BlockBinding\Domain\Enums\BindingFieldType;
 use Pollora\BlockBinding\Domain\Events\BindingResolved;
 use Pollora\BlockBinding\Domain\Models\BindingContext;
 use Pollora\BlockBinding\Domain\Models\BindingFieldDefinition;
 use Pollora\BlockBinding\Domain\Models\BindingSource;
+use Pollora\BlockBinding\Infrastructure\Adapters\ReflectionMethodInvoker;
 use Pollora\Meta\Application\Services\MetaAccessor;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Stringable;
 use Throwable;
@@ -54,14 +56,20 @@ final class BindingResolver
      */
     private array $instances = [];
 
+    private readonly MethodInvokerInterface $invoker;
+
     public function __construct(
-        private readonly Container $container,
+        private readonly ContainerInterface $container,
         private readonly ContentVisibilityInterface $visibility,
         private readonly ValuePresenterInterface $presenter,
         private readonly ?MetaAccessor $metaAccessor = null,
         private readonly bool $debug = false,
         private readonly ?LoggerInterface $logger = null,
-    ) {}
+        ?MethodInvokerInterface $invoker = null,
+        private readonly ?BindingEventsInterface $events = null,
+    ) {
+        $this->invoker = $invoker ?? new ReflectionMethodInvoker($container);
+    }
 
     /**
      * The value of a bound attribute, or null to keep what the block holds.
@@ -133,17 +141,11 @@ final class BindingResolver
      */
     private function announce(BindingSource $source, BindingFieldDefinition $field, BindingContext $context, float $milliseconds, bool $cached, bool $hasValue): void
     {
-        if (! $this->container->bound('events')) {
+        if (! $this->events instanceof BindingEventsInterface || ! $this->events->isListening()) {
             return;
         }
 
-        $events = $this->container->make('events');
-
-        if (! $events->hasListeners(BindingResolved::class)) {
-            return;
-        }
-
-        $events->dispatch(new BindingResolved(
+        $this->events->dispatch(new BindingResolved(
             source: $source->name,
             field: $field->name,
             attribute: $context->attribute,
@@ -184,14 +186,14 @@ final class BindingResolver
     private function call(BindingSource $source, BindingFieldDefinition $field, BindingContext $context): mixed
     {
         try {
-            $instance = $this->instances[$source->class] ??= $this->container->make($source->class);
+            $instance = $this->instances[$source->class] ??= $this->container->get($source->class);
 
             if (! $this->debug) {
-                return $this->container->call([$instance, $field->method], [BindingContext::class => $context, 'context' => $context]);
+                return $this->invoker->call($instance, $field->method, [BindingContext::class => $context, 'context' => $context]);
             }
 
             $start = hrtime(true);
-            $value = $this->container->call([$instance, $field->method], [BindingContext::class => $context, 'context' => $context]);
+            $value = $this->invoker->call($instance, $field->method, [BindingContext::class => $context, 'context' => $context]);
             $this->reportSlow($source, $field, $context, (hrtime(true) - $start) / 1_000_000);
 
             return $value;
@@ -239,8 +241,8 @@ final class BindingResolver
 
         $inHtml = in_array($attributeSource, self::HTML_SOURCES, true);
 
-        if ($value instanceof Htmlable) {
-            return $this->presenter->richText($value->toHtml());
+        if (is_object($value) && method_exists($value, 'toHtml')) {
+            return $this->presenter->richText((string) $value->toHtml());
         }
 
         if (is_bool($value)) {

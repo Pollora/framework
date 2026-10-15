@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-use Illuminate\Config\Repository;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Container\Container;
 use Illuminate\Foundation\Application;
 use Pollora\BlockBinding\Application\Services\BindingSourceBuilder;
 use Pollora\BlockBinding\Application\Services\BindingSourceRegistry;
-use Pollora\BlockBinding\Infrastructure\Providers\BlockBindingServiceProvider;
+use Pollora\BlockBinding\Infrastructure\Laravel\BlockBindingServiceProvider;
+use Pollora\BlockBinding\Infrastructure\Laravel\Console\BindingListCommand;
 use Pollora\BlockBinding\Infrastructure\Services\BindingEditorData;
-use Pollora\BlockBinding\UI\Console\BindingListCommand;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -34,7 +33,7 @@ function runBindingList(array $input = [], ?array $blocks = null): string
     $schemas->add((new MetaSchemaBuilder)->build(Concert::class));
 
     $app->instance(BindingSourceRegistry::class, $sources);
-    $app->instance(BindingEditorData::class, new BindingEditorData($sources, $schemas, new Repository(['block-bindings' => ['options' => ['blogname']]])));
+    $app->instance(BindingEditorData::class, new BindingEditorData($sources, $schemas, ['blogname']));
 
     $command = new #[Signature('pollora:binding:list {--json}')] class($blocks) extends BindingListCommand
     {

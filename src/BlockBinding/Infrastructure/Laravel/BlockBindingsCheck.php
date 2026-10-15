@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\BlockBinding\Infrastructure\Checks;
+namespace Pollora\BlockBinding\Infrastructure\Laravel;
 
 use Pollora\BlockBinding\Application\Services\BindingReferenceInspector;
 use Pollora\Doctor\Domain\Contracts\CheckInterface;

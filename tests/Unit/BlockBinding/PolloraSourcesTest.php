@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
-use Illuminate\Config\Repository;
 use Pollora\BlockBinding\Domain\Models\BindingContext;
 use Pollora\BlockBinding\Infrastructure\Services\BindingFormatter;
 use Pollora\BlockBinding\Infrastructure\Sources\AuthorMetaSource;
@@ -86,7 +85,7 @@ it('pollora/author-meta reads only the public meta of the author', function (): 
 
 it('pollora/option reads only the options the project lists', function (): void {
     Functions\when('get_option')->alias(fn (string $name): string => $name === 'blogdescription' ? 'Live music' : 'secret');
-    $source = new OptionSource(new Repository(['block-bindings' => ['options' => ['blogdescription']]]));
+    $source = new OptionSource(['blogdescription']);
 
     expect($source(new BindingContext(args: ['name' => 'blogdescription'])))->toBe('Live music')
         ->and($source(new BindingContext(args: ['name' => 'admin_email'])))->toBeNull();

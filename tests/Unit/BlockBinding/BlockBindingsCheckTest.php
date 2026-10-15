@@ -7,7 +7,7 @@ use Illuminate\Filesystem\Filesystem;
 use Pollora\BlockBinding\Application\Services\BindingReferenceInspector;
 use Pollora\BlockBinding\Application\Services\BindingSourceBuilder;
 use Pollora\BlockBinding\Application\Services\BindingSourceRegistry;
-use Pollora\BlockBinding\Infrastructure\Checks\BlockBindingsCheck;
+use Pollora\BlockBinding\Infrastructure\Laravel\BlockBindingsCheck;
 use Pollora\Doctor\Domain\Enums\CheckStatus;
 use Pollora\Doctor\Domain\Enums\RunContext;
 use Pollora\Doctor\Infrastructure\Support\ProjectModule;

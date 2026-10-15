@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
-use Illuminate\Config\Repository;
 use Pollora\BlockBinding\Application\Services\BindingSourceRegistry;
 use Pollora\BlockBinding\Infrastructure\Adapters\WordPressBindingEditorScript;
 use Pollora\BlockBinding\Infrastructure\Services\BindingEditorData;
@@ -26,7 +25,7 @@ it('prints the editor data before the script, on a handle depending on wp-blocks
         $calls[] = ['enqueue', $handle];
     });
 
-    (new WordPressBindingEditorScript(new BindingEditorData(new BindingSourceRegistry, new MetaSchemaRepository, new Repository)))->enqueue();
+    (new WordPressBindingEditorScript(new BindingEditorData(new BindingSourceRegistry, new MetaSchemaRepository, [])))->enqueue();
 
     expect($calls[0])->toBe(['register', 'pollora-block-bindings', false, ['wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-data']])
         ->and($calls[1][1])->toBe('before')
