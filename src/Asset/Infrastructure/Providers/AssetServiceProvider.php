@@ -65,7 +65,7 @@ class AssetServiceProvider extends ServiceProvider
             $app->make(LoggerInterface::class),
         ));
         AssetFile::resolveUsing(Closure::fromCallable(new LaravelAssetFileResolver($this->app)));
-        $this->app->bind(MissingBuildNotice::class, fn (Application $app): MissingBuildNotice => new MissingBuildNotice($app->make(MissingBuilds::class), base_path()));
+        $this->app->bind(MissingBuildNotice::class, fn (Application $app): MissingBuildNotice => new MissingBuildNotice($app->make(MissingBuilds::class), base_path(), 'php artisan pollora:doctor'));
         $this->app->singleton(MissingBuilds::class);
         $this->app->singleton(RootAssetManager::class, fn (Application $app): RootAssetManager => new RootAssetManager(
             $app->make(AssetManager::class)
