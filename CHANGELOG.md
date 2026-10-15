@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.36.0...develop)
 
+### Added
+- The asset classes live in their own package, [`pollora/assets`](https://github.com/Pollora/assets), which the framework requires: `AssetManager`, `AssetContainer`, `AssetEnqueuer` (`Asset::add()->container()->useVite()`), `AssetFile`, the record and the wp-admin notice of a missing build. Class names do not change. The package also resolves Vite builds without Laravel, for a classic theme, a plugin or a Bedrock site. The framework keeps what needs Laravel: the service provider, the `Asset` facade, `ViteManager` (Laravel's Vite, where `ASSET_URL`, a CDN and the application URL keep applying), `RootAssetManager` and the Laravel implementations of the package's three contracts (`ViteManagerFactory`, `RuntimeContext`, `PublicPath`)
+
+### Changed
+- The asset classes that left for the package no longer reach for Laravel: `AssetEnqueuer` receives the hook services, the Vite factory, the runtime and a PSR-3 logger instead of resolving them from the container, `AssetFile` is resolved through a resolver the provider sets (`AssetFile::resolveUsing()`), and `AssetManager`, `MissingBuilds` and `MissingBuildNotice` take their public directory, logger and project root as arguments. The rendered HTML of a Pollora site is unchanged, in build and while Vite runs hot
+- An `AssetEnqueuer` destroyed after its application, as in a test, no longer throws while it reports a failure of its deferred enqueue
+
 ## [v13.36.0](https://github.com/Pollora/framework/compare/v13.35.6...v13.36.0) - 2026-10-14
 
 ### Added
