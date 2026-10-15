@@ -14,7 +14,10 @@ use Pollora\Asset\Application\Services\MissingBuilds;
  */
 final readonly class MissingBuildNotice
 {
-    public function __construct(private MissingBuilds $missingBuilds) {}
+    /**
+     * @param  string  $root  The project root, taken off the manifest paths the notice shows; empty to show them whole
+     */
+    public function __construct(private MissingBuilds $missingBuilds, private string $root = '') {}
 
     public function render(): void
     {
@@ -58,7 +61,11 @@ final readonly class MissingBuildNotice
 
     private function relative(string $path): string
     {
-        $base = rtrim(base_path(), '/').'/';
+        if ($this->root === '') {
+            return $path;
+        }
+
+        $base = rtrim($this->root, '/').'/';
 
         return str_starts_with($path, $base) ? substr($path, strlen($base)) : $path;
     }

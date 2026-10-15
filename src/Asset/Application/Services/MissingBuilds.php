@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Asset\Application\Services;
 
-use Illuminate\Support\Facades\Log;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * The asset containers asked for assets this request whose Vite build is missing.
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Log;
  */
 class MissingBuilds
 {
+    public function __construct(private readonly ?LoggerInterface $logger = null) {}
+
     /**
      * Manifest path of each container whose build is missing, by container name.
      *
@@ -32,7 +35,7 @@ class MissingBuilds
 
         $this->missing[$container] = $manifest;
 
-        Log::warning(sprintf('Pollora: the "%s" assets are not built, no Vite manifest at %s. Its scripts and styles are left out until you run npm run build.', $container, $manifest), [
+        ($this->logger ?? new NullLogger)->warning(sprintf('Pollora: the "%s" assets are not built, no Vite manifest at %s. Its scripts and styles are left out until you run npm run build.', $container, $manifest), [
             'container' => $container,
             'manifest' => $manifest,
         ]);

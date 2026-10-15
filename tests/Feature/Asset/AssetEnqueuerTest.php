@@ -6,6 +6,12 @@ use Brain\Monkey\Functions;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\ConsoleDetectorInterface;
 use Pollora\Asset\Application\Services\AssetManager;
+use Pollora\Asset\Domain\Contracts\RuntimeContext;
+use Pollora\Asset\Domain\Contracts\ViteManagerFactory;
+use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
+use Pollora\Asset\Domain\Exceptions\AssetException;
+use Pollora\Asset\Infrastructure\Laravel\LaravelRuntimeContext;
+use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\AssetEnqueuer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Hook\Domain\Contract\Action as HookAction;
@@ -19,6 +25,7 @@ beforeEach(function (): void {
 
     $this->app->instance(ConsoleDetectorInterface::class, $detector);
     $this->app->singleton(ConsoleDetectionService::class, fn (): ConsoleDetectionService => new ConsoleDetectionService($detector));
+    $this->app->singleton(RuntimeContext::class, fn (): RuntimeContext => new LaravelRuntimeContext(new ConsoleDetectionService($detector)));
 
     // Bind AssetManager
     $this->assetManager = Mockery::mock(AssetManager::class);
@@ -225,6 +232,40 @@ describe('AssetEnqueuer', function (): void {
 
             $reflection = new ReflectionProperty($enqueuer, 'useVite');
             expect($reflection->getValue($enqueuer))->toBeFalse();
+        });
+    });
+
+    describe('the Vite resolver of useVite()', function (): void {
+        beforeEach(function (): void {
+            // Not the command line: useVite() acts
+            $this->app->singleton(RuntimeContext::class, fn (): RuntimeContext => new class implements RuntimeContext
+            {
+                public function isCommandLine(): bool
+                {
+                    return false;
+                }
+            });
+
+            $this->container = new AssetContainer('theme', ['hot_file' => '/tmp/none.hot', 'build_directory' => 'build/theme/x']);
+            $this->assetManager->shouldReceive('getContainer')->with('theme')->andReturn($this->container);
+        });
+
+        it('asks the factory for the resolver of the container it was given', function (): void {
+            $resolver = Mockery::mock(ViteManagerInterface::class)->shouldIgnoreMissing();
+            $factory = Mockery::mock(ViteManagerFactory::class);
+            $factory->shouldReceive('make')->once()->with($this->container)->andReturn($resolver);
+            $this->app->instance(ViteManagerFactory::class, $factory);
+
+            $enqueuer = resolve(AssetEnqueuer::class)->handle('theme/script')->path('app.js')->container('theme')->useVite();
+
+            expect((new ReflectionProperty($enqueuer, 'viteManager'))->getValue($enqueuer))->toBe($resolver);
+        });
+
+        it('says so when no resolver is set', function (): void {
+            $this->app->forgetInstance(ViteManagerFactory::class);
+
+            expect(fn () => resolve(AssetEnqueuer::class)->handle('theme/script')->path('app.js')->container('theme')->useVite())
+                ->toThrow(AssetException::class, 'No Vite resolver is set');
         });
     });
 
