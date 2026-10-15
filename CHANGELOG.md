@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.36.0...develop)
 
 ### Added
+- Typed meta lives in its own package, [`pollora/meta`](https://github.com/Pollora/meta), which the framework requires: `MetaAccessor` (`of()`, `schemas()`, `schemaFor()`, `extend()`), the fluent `MetaRecord`, the schema builder and repository, `MetaAuditor`, `MetaUiDrivers`, the value caster, the WordPress adapters, `MetaDiscovery` and `MetaUiDriverConformance`, with their tests. Class names do not change. The framework keeps what needs Laravel: `MetaServiceProvider`, the `Meta` facade and `HasTypedMeta`, the Laravel validator (`LaravelMetaValidator`), the `pollora:meta:*` commands and the `pollora:doctor` check
 - The asset classes live in their own package, [`pollora/assets`](https://github.com/Pollora/assets), which the framework requires: `AssetManager`, `AssetContainer`, `AssetEnqueuer` (`Asset::add()->container()->useVite()`), `AssetFile`, the record and the wp-admin notice of a missing build. Class names do not change. The package also resolves Vite builds without Laravel, for a classic theme, a plugin or a Bedrock site. The framework keeps what needs Laravel: the service provider, the `Asset` facade, `ViteManager` (Laravel's Vite, where `ASSET_URL`, a CDN and the application URL keep applying), `RootAssetManager` and the Laravel implementations of the package's three contracts (`ViteManagerFactory`, `RuntimeContext`, `PublicPath`)
 
 ### Changed
