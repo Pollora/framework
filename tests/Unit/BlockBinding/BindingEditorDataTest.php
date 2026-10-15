@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-use Illuminate\Config\Repository;
 use Pollora\BlockBinding\Application\Services\BindingSourceBuilder;
 use Pollora\BlockBinding\Application\Services\BindingSourceRegistry;
-use Pollora\BlockBinding\Infrastructure\Providers\BlockBindingServiceProvider;
+use Pollora\BlockBinding\Infrastructure\Laravel\BlockBindingServiceProvider;
 use Pollora\BlockBinding\Infrastructure\Services\BindingEditorData;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
@@ -27,7 +26,7 @@ beforeEach(function (): void {
         $schemas->add((new MetaSchemaBuilder)->build($class));
     }
 
-    $this->data = (new BindingEditorData($sources, $schemas, new Repository(['block-bindings' => ['options' => ['blogdescription']]])))->toArray();
+    $this->data = (new BindingEditorData($sources, $schemas, ['blogdescription']))->toArray();
 });
 
 it('gives the editor the route and the fields of a #[BlockBinding] source', function (): void {

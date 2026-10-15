@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\BlockBinding\Infrastructure\Providers;
+namespace Pollora\BlockBinding\Infrastructure\Laravel;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -16,7 +16,8 @@ use Pollora\BlockBinding\Infrastructure\Adapters\WordPressBindingEditorScript;
 use Pollora\BlockBinding\Infrastructure\Adapters\WordPressBindingRegistry;
 use Pollora\BlockBinding\Infrastructure\Adapters\WordPressContentVisibility;
 use Pollora\BlockBinding\Infrastructure\Adapters\WordPressValuePresenter;
-use Pollora\BlockBinding\Infrastructure\Checks\BlockBindingsCheck;
+use Pollora\BlockBinding\Infrastructure\Laravel\Console\BindingListCommand;
+use Pollora\BlockBinding\Infrastructure\Laravel\Console\MakeBindingCommand;
 use Pollora\BlockBinding\Infrastructure\Services\BindingEditorData;
 use Pollora\BlockBinding\Infrastructure\Services\BindingFormatter;
 use Pollora\BlockBinding\Infrastructure\Services\BlockBindingDiscovery;
@@ -25,8 +26,6 @@ use Pollora\BlockBinding\Infrastructure\Sources\OptionSource;
 use Pollora\BlockBinding\Infrastructure\Sources\PostMetaSource;
 use Pollora\BlockBinding\Infrastructure\Sources\TermMetaSource;
 use Pollora\BlockBinding\Infrastructure\Sources\TypedMetaReader;
-use Pollora\BlockBinding\UI\Console\BindingListCommand;
-use Pollora\BlockBinding\UI\Console\MakeBindingCommand;
 use Pollora\BlockBinding\UI\Http\ResolveBindingsController;
 use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
@@ -63,14 +62,19 @@ class BlockBindingServiceProvider extends ServiceProvider
         $this->app->singleton(ValuePresenterInterface::class, WordPressValuePresenter::class);
         $this->app->singleton(BindingFormatter::class);
         $this->app->singleton(TypedMetaReader::class);
-        $this->app->singleton(BindingEditorData::class);
+        $this->app->singleton(BindingEditorData::class, fn (Application $app): BindingEditorData => new BindingEditorData(
+            $app->make(BindingSourceRegistry::class),
+            $app->make(MetaSchemaRepository::class),
+            $this->options(),
+        ));
+        $this->app->singleton(OptionSource::class, fn (): OptionSource => new OptionSource($this->options()));
         $this->app->singleton(WordPressBindingEditorScript::class);
         $this->app->singleton(ResolveBindingsController::class);
 
         $this->app->singleton(BindingReferenceInspector::class, fn (Application $app): BindingReferenceInspector => new BindingReferenceInspector(
             $app->make(BindingSourceRegistry::class),
             $app->make(MetaSchemaRepository::class),
-            array_values(array_filter((array) $app->make('config')->get('block-bindings.options', []), is_string(...))),
+            $this->options(),
         ));
 
         $this->app->singleton(BindingResolver::class, fn (Application $app): BindingResolver => new BindingResolver(
@@ -80,6 +84,9 @@ class BlockBindingServiceProvider extends ServiceProvider
             $app->make(MetaAccessor::class),
             (bool) $app->make('config')->get('app.debug', false),
             $app->make(LoggerInterface::class),
+            $app->make(LaravelMethodInvoker::class),
+            $app->make(LaravelBindingEvents::class),
+            $app->make(LaravelPostFinder::class),
         ));
 
         $this->app->singleton(WordPressBindingRegistry::class, fn (Application $app): WordPressBindingRegistry => new WordPressBindingRegistry(
@@ -117,5 +124,15 @@ class BlockBindingServiceProvider extends ServiceProvider
         $action = $this->app->make(Action::class);
         $action->add('enqueue_block_editor_assets', fn () => $this->app->make(WordPressBindingEditorScript::class)->enqueue());
         $action->add('rest_api_init', fn () => $this->app->make(ResolveBindingsController::class)->register());
+    }
+
+    /**
+     * The options a project lists as bindable.
+     *
+     * @return list<string>
+     */
+    private function options(): array
+    {
+        return array_values(array_filter((array) $this->app->make('config')->get('block-bindings.options', []), is_string(...)));
     }
 }

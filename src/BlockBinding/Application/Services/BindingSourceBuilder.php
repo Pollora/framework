@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\BlockBinding\Application\Services;
 
-use Illuminate\Support\Str;
 use Pollora\Attributes\BlockBinding;
 use Pollora\Attributes\BlockBinding\BindingField;
+use Pollora\Attributes\Support\Naming;
 use Pollora\BlockBinding\Domain\Enums\BindingFieldType;
 use Pollora\BlockBinding\Domain\Exceptions\InvalidBindingSourceException;
 use Pollora\BlockBinding\Domain\Models\BindingFieldDefinition;
@@ -75,7 +75,7 @@ final class BindingSourceBuilder
 
         return new BindingSource(
             name: $attribute->name,
-            label: $attribute->label ?? Str::headline($reflection->getShortName()),
+            label: $attribute->label ?? Naming::headline($reflection->getShortName()),
             class: $class,
             usesContext: $attribute->usesContext,
             postTypes: $attribute->postTypes,
@@ -105,7 +105,7 @@ final class BindingSourceBuilder
 
             $this->assertReturnType($class, $method);
 
-            $name = $attribute->name ?? Str::snake($method->getName());
+            $name = $attribute->name ?? Naming::snake($method->getName());
 
             if (isset($fields[$name])) {
                 throw InvalidBindingSourceException::forField($class, $method->getName(), sprintf(
@@ -126,7 +126,7 @@ final class BindingSourceBuilder
 
             $fields[$name] = new BindingFieldDefinition(
                 name: $name,
-                label: $attribute->label ?? Str::headline($method->getName()),
+                label: $attribute->label ?? Naming::headline($method->getName()),
                 type: $type,
                 method: $method->getName(),
             );

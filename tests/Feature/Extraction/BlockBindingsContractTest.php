@@ -13,7 +13,7 @@ use Pollora\BlockBinding\Application\Services\BindingSourceRegistry;
 use Pollora\BlockBinding\Domain\Contracts\ContentVisibilityInterface;
 use Pollora\BlockBinding\Domain\Contracts\ValuePresenterInterface;
 use Pollora\BlockBinding\Domain\Models\BindingContext;
-use Pollora\BlockBinding\Infrastructure\Providers\BlockBindingServiceProvider;
+use Pollora\BlockBinding\Infrastructure\Laravel\BlockBindingServiceProvider;
 use Pollora\BlockBinding\Infrastructure\Services\BindingEditorData;
 use Pollora\BlockBinding\Infrastructure\Sources\OptionSource;
 use Pollora\Hook\Domain\Contract\Action;

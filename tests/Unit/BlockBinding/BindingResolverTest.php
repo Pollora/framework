@@ -7,6 +7,8 @@ use Illuminate\Events\Dispatcher;
 use Pollora\BlockBinding\Application\Services\BindingResolver;
 use Pollora\BlockBinding\Application\Services\BindingSourceBuilder;
 use Pollora\BlockBinding\Domain\Events\BindingResolved;
+use Pollora\BlockBinding\Infrastructure\Laravel\LaravelBindingEvents;
+use Pollora\BlockBinding\Infrastructure\Laravel\LaravelMethodInvoker;
 use Psr\Log\LoggerInterface;
 use Tests\Unit\BlockBinding\Fixtures\EventBinding;
 use Tests\Unit\BlockBinding\Fixtures\FakePresenter;
@@ -20,7 +22,7 @@ beforeEach(function (): void {
     $this->container = new Container;
     $this->visibility = new FakeVisibility;
     $this->logger = Mockery::mock(LoggerInterface::class);
-    $this->resolver = fn (bool $debug = false): BindingResolver => new BindingResolver($this->container, $this->visibility, new FakePresenter, null, $debug, $this->logger);
+    $this->resolver = fn (bool $debug = false): BindingResolver => new BindingResolver($this->container, $this->visibility, new FakePresenter, null, $debug, $this->logger, new LaravelMethodInvoker($this->container), new LaravelBindingEvents($this->container));
     $this->event = (new BindingSourceBuilder)->build(EventBinding::class);
 });
 

@@ -18,7 +18,7 @@
             "SLOW_FIELD_MS": "const"
         },
         "methods": {
-            "__construct": "public (Illuminate\\Contracts\\Container\\Container $container, Pollora\\BlockBinding\\Domain\\Contracts\\ContentVisibilityInterface $visibility, Pollora\\BlockBinding\\Domain\\Contracts\\ValuePresenterInterface $presenter, ?Pollora\\Meta\\Application\\Services\\MetaAccessor $metaAccessor = ?, bool $debug = ?, ?Psr\\Log\\LoggerInterface $logger = ?): mixed",
+            "__construct": "public (Psr\\Container\\ContainerInterface $container, Pollora\\BlockBinding\\Domain\\Contracts\\ContentVisibilityInterface $visibility, Pollora\\BlockBinding\\Domain\\Contracts\\ValuePresenterInterface $presenter, ?Pollora\\Meta\\Application\\Services\\MetaAccessor $metaAccessor = ?, bool $debug = ?, ?Psr\\Log\\LoggerInterface $logger = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\MethodInvokerInterface $invoker = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\BindingEventsInterface $events = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\PostFinderInterface $posts = ?): mixed",
             "preview": "public (Pollora\\BlockBinding\\Domain\\Models\\BindingSource $source, array $args, array $blockContext, string $attribute, ?string $attributeSource = ?): mixed",
             "resolve": "public (Pollora\\BlockBinding\\Domain\\Models\\BindingSource $source, array $args, ?WP_Block $block, string $attribute): mixed"
         }
@@ -43,6 +43,16 @@
             "find": "public (string $name): ?Pollora\\BlockBinding\\Domain\\Models\\BindingSource"
         }
     },
+    "Pollora\\BlockBinding\\Domain\\Contracts\\BindingEventsInterface": {
+        "kind": "interface",
+        "extends": null,
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "dispatch": "public abstract (Pollora\\BlockBinding\\Domain\\Events\\BindingResolved $event): void",
+            "isListening": "public abstract (): bool"
+        }
+    },
     "Pollora\\BlockBinding\\Domain\\Contracts\\ContentVisibilityInterface": {
         "kind": "interface",
         "extends": null,
@@ -51,6 +61,24 @@
         "methods": {
             "canShowPost": "public abstract (int $postId): bool",
             "canShowTerm": "public abstract (int $termId, string $taxonomy): bool"
+        }
+    },
+    "Pollora\\BlockBinding\\Domain\\Contracts\\MethodInvokerInterface": {
+        "kind": "interface",
+        "extends": null,
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "call": "public abstract (object $instance, string $method, array $parameters): mixed"
+        }
+    },
+    "Pollora\\BlockBinding\\Domain\\Contracts\\PostFinderInterface": {
+        "kind": "interface",
+        "extends": null,
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "find": "public abstract (int $postId): ?Pollora\\Colt\\Model\\Post"
         }
     },
     "Pollora\\BlockBinding\\Domain\\Contracts\\ValuePresenterInterface": {
@@ -91,10 +119,10 @@
         "implements": [],
         "constants": [],
         "methods": {
-            "__construct": "public (array $args = ?, string $attribute = ?, ?int $postId = ?, ?string $postType = ?, ?int $termId = ?, ?string $taxonomy = ?, ?WP_Block $block = ?, ?Pollora\\Meta\\Application\\Services\\MetaAccessor $metaAccessor = ?): mixed",
+            "__construct": "public (array $args = ?, string $attribute = ?, ?int $postId = ?, ?string $postType = ?, ?int $termId = ?, ?string $taxonomy = ?, ?WP_Block $block = ?, ?Pollora\\Meta\\Application\\Services\\MetaAccessor $metaAccessor = ?, ?Pollora\\BlockBinding\\Domain\\Contracts\\PostFinderInterface $postFinder = ?): mixed",
             "arg": "public (string $name, mixed $default = ?): mixed",
             "meta": "public (string $class): ?Pollora\\Meta\\Domain\\Models\\MetaRecord",
-            "post": "public (): ?Pollora\\Models\\Post"
+            "post": "public (): ?Pollora\\Colt\\Model\\Post"
         }
     },
     "Pollora\\BlockBinding\\Domain\\Models\\BindingFieldDefinition": {
@@ -116,6 +144,18 @@
             "answersFor": "public (?string $postType): bool",
             "field": "public (string $name): ?Pollora\\BlockBinding\\Domain\\Models\\BindingFieldDefinition",
             "isInvokable": "public (): bool"
+        }
+    },
+    "Pollora\\BlockBinding\\Infrastructure\\Adapters\\ReflectionMethodInvoker": {
+        "kind": "final readonly class",
+        "extends": null,
+        "implements": [
+            "Pollora\\BlockBinding\\Domain\\Contracts\\MethodInvokerInterface"
+        ],
+        "constants": [],
+        "methods": {
+            "__construct": "public (?Psr\\Container\\ContainerInterface $container = ?): mixed",
+            "call": "public (object $instance, string $method, array $parameters): mixed"
         }
     },
     "Pollora\\BlockBinding\\Infrastructure\\Adapters\\WordPressBindingEditorScript": {
@@ -166,7 +206,19 @@
             "url": "public (string $value): string"
         }
     },
-    "Pollora\\BlockBinding\\Infrastructure\\Checks\\BlockBindingsCheck": {
+    "Pollora\\BlockBinding\\Infrastructure\\Laravel\\BlockBindingServiceProvider": {
+        "kind": "class",
+        "extends": "Illuminate\\Support\\ServiceProvider",
+        "implements": [],
+        "constants": {
+            "SOURCES": "const"
+        },
+        "methods": {
+            "boot": "public (): void",
+            "register": "public (): void"
+        }
+    },
+    "Pollora\\BlockBinding\\Infrastructure\\Laravel\\BlockBindingsCheck": {
         "kind": "final readonly class",
         "extends": null,
         "implements": [
@@ -181,16 +233,61 @@
             "runsIn": "public (): array"
         }
     },
-    "Pollora\\BlockBinding\\Infrastructure\\Providers\\BlockBindingServiceProvider": {
+    "Pollora\\BlockBinding\\Infrastructure\\Laravel\\Console\\BindingListCommand": {
         "kind": "class",
-        "extends": "Illuminate\\Support\\ServiceProvider",
+        "extends": "Illuminate\\Console\\Command",
         "implements": [],
-        "constants": {
-            "SOURCES": "const"
-        },
+        "constants": [],
         "methods": {
-            "boot": "public (): void",
-            "register": "public (): void"
+            "bindableBlocks": "protected (): ?array",
+            "handle": "public (Pollora\\BlockBinding\\Application\\Services\\BindingSourceRegistry $sources, Pollora\\BlockBinding\\Infrastructure\\Services\\BindingEditorData $editorData): int"
+        }
+    },
+    "Pollora\\BlockBinding\\Infrastructure\\Laravel\\Console\\MakeBindingCommand": {
+        "kind": "class",
+        "extends": "Pollora\\Console\\AbstractGeneratorCommand",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "getArguments": "protected (): array",
+            "getStub": "protected (): string",
+            "replaceClass": "protected (mixed $stub, mixed $name): string"
+        }
+    },
+    "Pollora\\BlockBinding\\Infrastructure\\Laravel\\LaravelBindingEvents": {
+        "kind": "final readonly class",
+        "extends": null,
+        "implements": [
+            "Pollora\\BlockBinding\\Domain\\Contracts\\BindingEventsInterface"
+        ],
+        "constants": [],
+        "methods": {
+            "__construct": "public (Illuminate\\Contracts\\Container\\Container $container): mixed",
+            "dispatch": "public (Pollora\\BlockBinding\\Domain\\Events\\BindingResolved $event): void",
+            "isListening": "public (): bool"
+        }
+    },
+    "Pollora\\BlockBinding\\Infrastructure\\Laravel\\LaravelMethodInvoker": {
+        "kind": "final readonly class",
+        "extends": null,
+        "implements": [
+            "Pollora\\BlockBinding\\Domain\\Contracts\\MethodInvokerInterface"
+        ],
+        "constants": [],
+        "methods": {
+            "__construct": "public (Illuminate\\Contracts\\Container\\Container $container): mixed",
+            "call": "public (object $instance, string $method, array $parameters): mixed"
+        }
+    },
+    "Pollora\\BlockBinding\\Infrastructure\\Laravel\\LaravelPostFinder": {
+        "kind": "final class",
+        "extends": null,
+        "implements": [
+            "Pollora\\BlockBinding\\Domain\\Contracts\\PostFinderInterface"
+        ],
+        "constants": [],
+        "methods": {
+            "find": "public (int $postId): ?Pollora\\Models\\Post"
         }
     },
     "Pollora\\BlockBinding\\Infrastructure\\Services\\BindingEditorData": {
@@ -202,7 +299,7 @@
             "REST_ROUTE": "const"
         },
         "methods": {
-            "__construct": "public (Pollora\\BlockBinding\\Application\\Services\\BindingSourceRegistry $sources, Pollora\\Meta\\Application\\Services\\MetaSchemaRepository $schemas, Illuminate\\Contracts\\Config\\Repository $config): mixed",
+            "__construct": "public (Pollora\\BlockBinding\\Application\\Services\\BindingSourceRegistry $sources, Pollora\\Meta\\Application\\Services\\MetaSchemaRepository $schemas, array $options): mixed",
             "toArray": "public (): array"
         }
     },
@@ -248,7 +345,7 @@
         "implements": [],
         "constants": [],
         "methods": {
-            "__construct": "public (Illuminate\\Contracts\\Config\\Repository $config): mixed",
+            "__construct": "public (array $options): mixed",
             "__invoke": "public (Pollora\\BlockBinding\\Domain\\Models\\BindingContext $context): ?string"
         }
     },
@@ -283,27 +380,6 @@
             "read": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, ?string $subtype, int $objectId, string $key, Closure $readable): ?array"
         }
     },
-    "Pollora\\BlockBinding\\UI\\Console\\BindingListCommand": {
-        "kind": "class",
-        "extends": "Illuminate\\Console\\Command",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "bindableBlocks": "protected (): ?array",
-            "handle": "public (Pollora\\BlockBinding\\Application\\Services\\BindingSourceRegistry $sources, Pollora\\BlockBinding\\Infrastructure\\Services\\BindingEditorData $editorData): int"
-        }
-    },
-    "Pollora\\BlockBinding\\UI\\Console\\MakeBindingCommand": {
-        "kind": "class",
-        "extends": "Pollora\\Console\\AbstractGeneratorCommand",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "getArguments": "protected (): array",
-            "getStub": "protected (): string",
-            "replaceClass": "protected (mixed $stub, mixed $name): string"
-        }
-    },
     "Pollora\\BlockBinding\\UI\\Http\\ResolveBindingsController": {
         "kind": "final readonly class",
         "extends": null,
@@ -316,310 +392,6 @@
             "canPreview": "public (WP_REST_Request $request): bool",
             "handle": "public (WP_REST_Request $request): array",
             "register": "public (): void"
-        }
-    },
-    "Pollora\\Meta\\Application\\Services\\MetaAccessor": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Meta\\Application\\Services\\MetaSchemaRepository $schemas, Pollora\\Meta\\Application\\Services\\MetaSchemaBuilder $builder, Pollora\\Meta\\Domain\\Contracts\\MetaStoreInterface $store, Pollora\\Meta\\Domain\\Services\\MetaValueCaster $caster, bool $debug = ?, ?Psr\\Log\\LoggerInterface $logger = ?, ?Pollora\\Meta\\Domain\\Contracts\\MetaValidatorInterface $validator = ?, ?Pollora\\Meta\\Application\\Services\\MetaUiDrivers $drivers = ?): mixed",
-            "extend": "public (string $name, Closure|string $driver): void",
-            "of": "public (string $class, int $objectId): Pollora\\Meta\\Domain\\Models\\MetaRecord",
-            "record": "public (Pollora\\Meta\\Domain\\Models\\MetaSchema $schema, int $objectId): Pollora\\Meta\\Domain\\Models\\MetaRecord",
-            "schema": "public (string $class): Pollora\\Meta\\Domain\\Models\\MetaSchema",
-            "schemaFor": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType|string $objectType, ?string $subtype = ?): array",
-            "schemas": "public (): array"
-        }
-    },
-    "Pollora\\Meta\\Application\\Services\\MetaAuditor": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Meta\\Application\\Services\\MetaSchemaRepository $schemas, Pollora\\Meta\\Domain\\Contracts\\MetaInventoryInterface $inventory, Pollora\\Meta\\Domain\\Services\\MetaValueCaster $caster): mixed",
-            "undeclared": "public (int $limit): array",
-            "unreadable": "public (int $limit): array"
-        }
-    },
-    "Pollora\\Meta\\Application\\Services\\MetaSchemaBuilder": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "build": "public (string $class): Pollora\\Meta\\Domain\\Models\\MetaSchema"
-        }
-    },
-    "Pollora\\Meta\\Application\\Services\\MetaSchemaRepository": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "add": "public (Pollora\\Meta\\Domain\\Models\\MetaSchema $schema): void",
-            "all": "public (): array",
-            "declares": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, string $propertyOrKey): bool",
-            "fail": "public (string $class, string $reason): void",
-            "failures": "public (): array",
-            "forClass": "public (string $class): ?Pollora\\Meta\\Domain\\Models\\MetaSchema",
-            "forObject": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, ?string $subtype): array"
-        }
-    },
-    "Pollora\\Meta\\Application\\Services\\MetaUiDrivers": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Psr\\Container\\ContainerInterface $container): mixed",
-            "build": "public (Pollora\\Meta\\Domain\\Contracts\\MetaUiDriver $driver, array $schemas): void",
-            "driver": "public (string $name): Pollora\\Meta\\Domain\\Contracts\\MetaUiDriver",
-            "extend": "public (string $name, Closure|string $driver): void",
-            "has": "public (string $name): bool"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Contracts\\MetaInventoryInterface": {
-        "kind": "interface",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "keys": "public abstract (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, array $subtypes, int $limit): array",
-            "values": "public abstract (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, array $subtypes, string $key, int $limit): array"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Contracts\\MetaRegistryInterface": {
-        "kind": "interface",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "register": "public abstract (Pollora\\Meta\\Domain\\Models\\MetaSchema $schema): void"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Contracts\\MetaStoreInterface": {
-        "kind": "interface",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "delete": "public abstract (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key): void",
-            "get": "public abstract (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key): mixed",
-            "getAll": "public abstract (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key): array",
-            "replaceAll": "public abstract (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key, array $values): void",
-            "update": "public abstract (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key, array|string $value): void"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Contracts\\MetaUiDriver": {
-        "kind": "interface",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "register": "public abstract (Pollora\\Meta\\Domain\\Models\\MetaSchema $schema): void",
-            "supports": "public abstract (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition): bool"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Contracts\\MetaValidatorInterface": {
-        "kind": "interface",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "validate": "public abstract (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $value): void"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Enums\\MetaObjectType": {
-        "kind": "enum",
-        "extends": null,
-        "implements": [
-            "BackedEnum",
-            "UnitEnum"
-        ],
-        "constants": {
-            "Comment": "case",
-            "Post": "case",
-            "Term": "case",
-            "User": "case"
-        },
-        "methods": {
-            "cases": "public static (): array",
-            "from": "public static (string|int $value): static",
-            "tryFrom": "public static (string|int $value): ?static"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Enums\\MetaValueType": {
-        "kind": "enum",
-        "extends": null,
-        "implements": [
-            "UnitEnum"
-        ],
-        "constants": {
-            "ArrayOf": "case",
-            "Boolean": "case",
-            "DataObject": "case",
-            "DateTime": "case",
-            "Enum": "case",
-            "Integer": "case",
-            "Number": "case",
-            "String": "case"
-        },
-        "methods": {
-            "cases": "public static (): array"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Events\\MetaSchemasRegistered": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (array $schemas): mixed"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Exceptions\\InvalidMetaDefinitionException": {
-        "kind": "final class",
-        "extends": "LogicException",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "duplicateKey": "public static (string $key, string $owner, string $firstClass, string $secondClass): self",
-            "forProperty": "public static (string $class, string $property, string $reason): self",
-            "notADeclaration": "public static (string $class): self"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Exceptions\\InvalidMetaValueException": {
-        "kind": "final class",
-        "extends": "InvalidArgumentException",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "forRead": "public static (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $raw): self",
-            "forWrite": "public static (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $value): self"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Exceptions\\MetaValidationException": {
-        "kind": "final class",
-        "extends": "InvalidArgumentException",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, array $messages): mixed"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Models\\MetaDefinition": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (string $property, string $key, Pollora\\Meta\\Domain\\Enums\\MetaValueType $valueType, ?string $valueClass, bool $nullable, mixed $default, bool $showInRest = ?, ?string $label = ?, ?string $description = ?, array|string|null $sanitize = ?, ?string $capability = ?, bool $revisions = ?, array $rules = ?, bool $single = ?, ?Pollora\\Meta\\Domain\\Models\\MetaDefinition $items = ?, array $properties = ?, ?Pollora\\Meta\\Domain\\Enums\\Control $control = ?, ?string $group = ?, array $hints = ?, bool $media = ?, bool $public = ?): mixed",
-            "isProtected": "public (): bool",
-            "isStructured": "public (): bool",
-            "item": "public (): Pollora\\Meta\\Domain\\Models\\MetaDefinition",
-            "restSchema": "public (): array",
-            "wordPressType": "public (): string"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Models\\MetaRecord": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Meta\\Domain\\Models\\MetaSchema $schema, int $objectId, Pollora\\Meta\\Domain\\Contracts\\MetaStoreInterface $store, Pollora\\Meta\\Domain\\Services\\MetaValueCaster $caster, Closure $onUnreadable, ?Pollora\\Meta\\Domain\\Contracts\\MetaValidatorInterface $validator = ?): mixed",
-            "__get": "public (string $name): mixed",
-            "__isset": "public (string $name): bool",
-            "__set": "public (string $name, mixed $value): void",
-            "fill": "public (array $values): static",
-            "get": "public (string $name): mixed",
-            "objectId": "public (): int",
-            "save": "public (): static",
-            "set": "public (string $name, mixed $value): static",
-            "toArray": "public (): array"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Models\\MetaSchema": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (string $declaringClass, Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, array $subtypes, array $definitions, bool $declaresSubtypes = ?): mixed",
-            "exposesInRest": "public (): bool",
-            "find": "public (string $propertyOrKey): ?Pollora\\Meta\\Domain\\Models\\MetaDefinition",
-            "isEmpty": "public (): bool",
-            "overlaps": "public (self $other): bool",
-            "ownerName": "public (): string",
-            "withDefinitions": "public (array $definitions): self"
-        }
-    },
-    "Pollora\\Meta\\Domain\\Services\\MetaValueCaster": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "absentValue": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition): mixed",
-            "sanitize": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $value): mixed",
-            "toJson": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $value): mixed",
-            "toPhp": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $raw): mixed",
-            "toRestDefault": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition): mixed",
-            "toStorage": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $value): array|string|null"
-        }
-    },
-    "Pollora\\Meta\\Infrastructure\\Adapters\\WordPressMetaInventory": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [
-            "Pollora\\Meta\\Domain\\Contracts\\MetaInventoryInterface"
-        ],
-        "constants": [],
-        "methods": {
-            "keys": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, array $subtypes, int $limit): array",
-            "values": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, array $subtypes, string $key, int $limit): array"
-        }
-    },
-    "Pollora\\Meta\\Infrastructure\\Adapters\\WordPressMetaRegistry": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [
-            "Pollora\\Meta\\Domain\\Contracts\\MetaRegistryInterface"
-        ],
-        "constants": {
-            "INIT_PRIORITY": "const"
-        },
-        "methods": {
-            "__construct": "public (Pollora\\Hook\\Domain\\Contract\\Action $action, Pollora\\Meta\\Domain\\Services\\MetaValueCaster $caster): mixed",
-            "register": "public (Pollora\\Meta\\Domain\\Models\\MetaSchema $schema): void"
-        }
-    },
-    "Pollora\\Meta\\Infrastructure\\Adapters\\WordPressMetaStore": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [
-            "Pollora\\Meta\\Domain\\Contracts\\MetaStoreInterface"
-        ],
-        "constants": [],
-        "methods": {
-            "delete": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key): void",
-            "get": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key): mixed",
-            "getAll": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key): array",
-            "replaceAll": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key, array $values): void",
-            "update": "public (Pollora\\Meta\\Domain\\Enums\\MetaObjectType $objectType, int $objectId, string $key, array|string $value): void"
-        }
-    },
-    "Pollora\\Meta\\Infrastructure\\Adapters\\WordPressRestMetaValidation": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Meta\\Application\\Services\\MetaSchemaRepository $schemas, Pollora\\Meta\\Domain\\Services\\MetaValueCaster $caster, Pollora\\Meta\\Domain\\Contracts\\MetaValidatorInterface $validator): mixed",
-            "validate": "public (mixed $response, array $handler, WP_REST_Request $request): mixed"
         }
     },
     "Pollora\\Meta\\Infrastructure\\Laravel\\Console\\MetaAuditCommand": {
@@ -675,250 +447,6 @@
             "label": "public (): string",
             "run": "public (Pollora\\Doctor\\Domain\\Enums\\RunContext $context): Pollora\\Doctor\\Domain\\Models\\CheckResult",
             "runsIn": "public (): array"
-        }
-    },
-    "Pollora\\Meta\\Infrastructure\\Services\\MetaDiscovery": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [
-            "Pollora\\Discovery\\Domain\\Contracts\\DiscoveryInterface"
-        ],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Meta\\Application\\Services\\MetaSchemaBuilder $builder, Pollora\\Meta\\Application\\Services\\MetaSchemaRepository $schemas, Pollora\\Meta\\Domain\\Contracts\\MetaRegistryInterface $registry, ?Psr\\Log\\LoggerInterface $logger = ?): mixed",
-            "apply": "public (): void",
-            "discover": "public (Pollora\\Discovery\\Domain\\Contracts\\DiscoveryLocationInterface $location, Spatie\\StructureDiscoverer\\Data\\DiscoveredStructure $structure, ?Pollora\\Discovery\\Domain\\Contracts\\ReflectionCacheInterface $reflectionCache = ?): void",
-            "getIdentifier": "public (): string",
-            "getItems": "public (): Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface",
-            "setItems": "public (Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface $items): void"
-        }
-    },
-    "Pollora\\Meta\\Testing\\Fixtures\\EveryMetaKind": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": []
-    },
-    "Pollora\\Meta\\Testing\\InstantiatingContainer": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [
-            "Psr\\Container\\ContainerInterface"
-        ],
-        "constants": [],
-        "methods": {
-            "get": "public (string $id): mixed",
-            "has": "public (string $id): bool"
-        }
-    },
-    "Pollora\\Meta\\Testing\\MetaUiDriverConformance": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "check": "public static (Pollora\\Meta\\Domain\\Contracts\\MetaUiDriver $driver): array",
-            "schema": "public static (): Pollora\\Meta\\Domain\\Models\\MetaSchema"
-        }
-    },
-    "Pollora\\Role\\Application\\Services\\CapabilityOwnerReader": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": {
-            "TERM_CAPABILITIES": "const"
-        },
-        "methods": {
-            "postType": "public (string $class): ?array",
-            "taxonomy": "public (string $class): ?array"
-        }
-    },
-    "Pollora\\Role\\Application\\Services\\RoleDefinitionBuilder": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": {
-            "CORE_ROLES": "const",
-            "SENSITIVE_CAPABILITIES": "const"
-        },
-        "methods": {
-            "__construct": "public (Pollora\\Role\\Application\\Services\\CapabilityOwnerReader $owners, array $superRoles = ?): mixed",
-            "build": "public (string $class): Pollora\\Role\\Domain\\Models\\RoleDefinition|Pollora\\Role\\Domain\\Models\\RoleModification"
-        }
-    },
-    "Pollora\\Role\\Application\\Services\\RoleReference": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "matchesAny": "public static (array $userRoles, array $roles): bool",
-            "slug": "public static (string $role): string"
-        }
-    },
-    "Pollora\\Role\\Application\\Services\\RoleRegistry": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Role\\Application\\Services\\CapabilityOwnerReader $owners, Pollora\\Role\\Domain\\Services\\PostTypeCapabilityMap $postTypeCapabilities): mixed",
-            "addCapabilitySet": "public (array $capabilities): void",
-            "addModification": "public (Pollora\\Role\\Domain\\Models\\RoleModification $modification): void",
-            "addPostType": "public (string $class): void",
-            "addRole": "public (Pollora\\Role\\Domain\\Models\\RoleDefinition $definition): void",
-            "addTaxonomy": "public (string $class): void",
-            "declaredCapabilities": "public (): array",
-            "definitions": "public (?Closure $warn = ?): array",
-            "isEmpty": "public (): bool",
-            "labelDomains": "public (): array",
-            "modifications": "public (?Closure $warn = ?): array"
-        }
-    },
-    "Pollora\\Role\\Domain\\Contracts\\RoleStoreInterface": {
-        "kind": "interface",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "addRoleToUser": "public abstract (int $userId, string $role): void",
-            "removeFromUser": "public abstract (int $userId, string $entry): void",
-            "rolesOf": "public abstract (int $userId): array",
-            "saveStoredRoles": "public abstract (array $roles): void",
-            "storedRoles": "public abstract (): array"
-        }
-    },
-    "Pollora\\Role\\Domain\\Contracts\\RoleUsageInterface": {
-        "kind": "interface",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "entries": "public abstract (): array",
-            "usersWith": "public abstract (string $entry): array"
-        }
-    },
-    "Pollora\\Role\\Domain\\Exceptions\\InvalidRoleDefinitionException": {
-        "kind": "final class",
-        "extends": "LogicException",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "forClass": "public static (string $class, string $reason): self"
-        }
-    },
-    "Pollora\\Role\\Domain\\Models\\RoleChanges": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (array $grants = ?, array $removals = ?, array $postTypeGrants = ?, array $taxonomyGrants = ?): mixed",
-            "withResolvedGrants": "public (array $grants): self"
-        }
-    },
-    "Pollora\\Role\\Domain\\Models\\RoleDefinition": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (string $slug, string $label, ?string $inherits, Pollora\\Role\\Domain\\Models\\RoleChanges $changes, string $declaringClass, ?string $textDomain = ?): mixed",
-            "withChanges": "public (Pollora\\Role\\Domain\\Models\\RoleChanges $changes): self"
-        }
-    },
-    "Pollora\\Role\\Domain\\Models\\RoleModification": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (string $slug, Pollora\\Role\\Domain\\Models\\RoleChanges $changes, string $declaringClass): mixed",
-            "withChanges": "public (Pollora\\Role\\Domain\\Models\\RoleChanges $changes): self"
-        }
-    },
-    "Pollora\\Role\\Domain\\Services\\PostTypeCapabilityMap": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "capabilities": "public (string $capabilityType, Pollora\\Role\\Domain\\Enums\\Access $access, array $overrides = ?): array"
-        }
-    },
-    "Pollora\\Role\\Domain\\Services\\RoleCompiler": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": {
-            "MARKER": "const"
-        },
-        "methods": {
-            "compile": "public (array $storedRoles, array $definitions, array $modifications, array $superRoles, array $declaredCapabilities, ?Closure $warn = ?): array"
-        }
-    },
-    "Pollora\\Role\\Domain\\Services\\StoredEntryClassifier": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": {
-            "CAPABILITY": "const",
-            "DEAD": "const",
-            "ROLE": "const"
-        },
-        "methods": {
-            "classify": "public (string $entry, array $roles): string"
-        }
-    },
-    "Pollora\\Role\\Infrastructure\\Adapters\\WordPressRoleInjector": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Role\\Application\\Services\\RoleRegistry $registry, Pollora\\Role\\Domain\\Services\\RoleCompiler $compiler, array $superRoles = ?, ?Psr\\Log\\LoggerInterface $logger = ?): mixed",
-            "inject": "public (WP_Roles $wpRoles): void",
-            "refresh": "public (): void",
-            "reportWarnings": "public (): void",
-            "warnings": "public (): array"
-        }
-    },
-    "Pollora\\Role\\Infrastructure\\Adapters\\WordPressRoleLabelTranslator": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Role\\Application\\Services\\RoleRegistry $registry): mixed",
-            "translate": "public (string $translation, string $text, string $context): string"
-        }
-    },
-    "Pollora\\Role\\Infrastructure\\Adapters\\WordPressRoleStore": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [
-            "Pollora\\Role\\Domain\\Contracts\\RoleStoreInterface"
-        ],
-        "constants": [],
-        "methods": {
-            "addRoleToUser": "public (int $userId, string $role): void",
-            "removeFromUser": "public (int $userId, string $entry): void",
-            "rolesOf": "public (int $userId): array",
-            "saveStoredRoles": "public (array $roles): void",
-            "storedRoles": "public (): array"
-        }
-    },
-    "Pollora\\Role\\Infrastructure\\Adapters\\WordPressRoleUsage": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [
-            "Pollora\\Role\\Domain\\Contracts\\RoleUsageInterface"
-        ],
-        "constants": [],
-        "methods": {
-            "entries": "public (): array",
-            "usersWith": "public (string $entry): array"
         }
     },
     "Pollora\\Role\\Infrastructure\\Laravel\\Console\\RoleDumpCommand": {
@@ -1025,22 +553,6 @@
             "label": "public (): string",
             "run": "public (Pollora\\Doctor\\Domain\\Enums\\RunContext $context): Pollora\\Doctor\\Domain\\Models\\CheckResult",
             "runsIn": "public (): array"
-        }
-    },
-    "Pollora\\Role\\Infrastructure\\Services\\RoleDiscovery": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [
-            "Pollora\\Discovery\\Domain\\Contracts\\DiscoveryInterface"
-        ],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Pollora\\Role\\Application\\Services\\RoleDefinitionBuilder $builder, Pollora\\Role\\Application\\Services\\RoleRegistry $registry, Pollora\\Role\\Infrastructure\\Adapters\\WordPressRoleInjector $injector, ?Psr\\Log\\LoggerInterface $logger = ?): mixed",
-            "apply": "public (): void",
-            "discover": "public (Pollora\\Discovery\\Domain\\Contracts\\DiscoveryLocationInterface $location, Spatie\\StructureDiscoverer\\Data\\DiscoveredStructure $structure, ?Pollora\\Discovery\\Domain\\Contracts\\ReflectionCacheInterface $reflectionCache = ?): void",
-            "getIdentifier": "public (): string",
-            "getItems": "public (): Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface",
-            "setItems": "public (Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface $items): void"
         }
     }
 }

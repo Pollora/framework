@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\BlockBinding\Infrastructure\Services;
 
-use Illuminate\Contracts\Config\Repository;
-use Illuminate\Support\Str;
+use Pollora\Attributes\Support\Naming;
 use Pollora\BlockBinding\Application\Services\BindingSourceRegistry;
 use Pollora\BlockBinding\Domain\Models\BindingSource;
 use Pollora\BlockBinding\Infrastructure\Sources\TypedMetaReader;
@@ -28,10 +27,13 @@ final readonly class BindingEditorData
 
     public const string REST_ROUTE = '/block-bindings/resolve';
 
+    /**
+     * @param  list<string>  $options  The options a project lists as bindable (`block-bindings.options`)
+     */
     public function __construct(
         private BindingSourceRegistry $sources,
         private MetaSchemaRepository $schemas,
-        private Repository $config,
+        private array $options,
     ) {}
 
     /**
@@ -88,7 +90,7 @@ final readonly class BindingEditorData
                     continue;
                 }
 
-                $label = $definition->label ?? Str::headline($definition->property);
+                $label = $definition->label ?? Naming::headline($definition->property);
 
                 foreach ($schema->subtypes === [] ? [''] : $schema->subtypes as $subtype) {
                     $fields[$subtype][] = ['label' => $label, 'args' => ['key' => $definition->key], 'type' => 'string'];
@@ -110,9 +112,9 @@ final readonly class BindingEditorData
     {
         $fields = [];
 
-        foreach ((array) $this->config->get('block-bindings.options', []) as $name) {
+        foreach ($this->options as $name) {
             if (is_string($name)) {
-                $fields[] = ['label' => Str::headline($name), 'args' => ['name' => $name], 'type' => 'string'];
+                $fields[] = ['label' => Naming::headline($name), 'args' => ['name' => $name], 'type' => 'string'];
             }
         }
 

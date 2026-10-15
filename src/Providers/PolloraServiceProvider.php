@@ -12,7 +12,7 @@ use Pollora\Application\Infrastructure\Providers\ApplicationServiceProvider;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\Block\Infrastructure\Providers\BlockServiceProvider;
-use Pollora\BlockBinding\Infrastructure\Providers\BlockBindingServiceProvider;
+use Pollora\BlockBinding\Infrastructure\Laravel\BlockBindingServiceProvider;
 use Pollora\Collection\Infrastructure\Providers\CollectionServiceProvider;
 use Pollora\Config\Infrastructure\Providers\ConfigServiceProvider;
 use Pollora\Dashboard\Infrastructure\Providers\DashboardServiceProvider;

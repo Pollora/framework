@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use Pollora\BlockBinding\Domain\Contracts\PostFinderInterface;
 use Pollora\BlockBinding\Domain\Models\BindingContext;
+use Pollora\Colt\Model\Post;
 use Pollora\Meta\Application\Services\MetaAccessor;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
@@ -32,4 +34,28 @@ it('reads typed meta on the object of the block context that carries them', func
 
 it('has no meta to give without the object', function (): void {
     expect((new BindingContext(metaAccessor: $this->accessor))->meta(Concert::class))->toBeNull();
+});
+
+it('loads the post of the block context through the finder it is given, once', function (): void {
+    $post = new Post;
+    $finder = new class($post) implements PostFinderInterface
+    {
+        public int $calls = 0;
+
+        public function __construct(private readonly Post $post) {}
+
+        public function find(int $postId): ?Post
+        {
+            $this->calls++;
+
+            return $postId === 7 ? $this->post : null;
+        }
+    };
+    $context = new BindingContext(postId: 7, postFinder: $finder);
+
+    expect($context->post())->toBe($post)
+        ->and($context->post())->toBe($post)
+        ->and($finder->calls)->toBe(1)
+        ->and((new BindingContext(postId: 8, postFinder: $finder))->post())->toBeNull()
+        ->and((new BindingContext)->post())->toBeNull();
 });

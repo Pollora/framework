@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Pollora\BlockBinding\Domain\Models;
 
 use LogicException;
+use Pollora\BlockBinding\Domain\Contracts\PostFinderInterface;
+use Pollora\Colt\Model\Post;
 use Pollora\Meta\Application\Services\MetaAccessor;
 use Pollora\Meta\Domain\Enums\MetaObjectType;
 use Pollora\Meta\Domain\Models\MetaRecord;
-use Pollora\Models\Post;
 
 /**
  * What a binding field knows about the block it fills: the post or term of the
@@ -37,6 +38,7 @@ final class BindingContext
         public readonly ?string $taxonomy = null,
         public readonly ?\WP_Block $block = null,
         private readonly ?MetaAccessor $metaAccessor = null,
+        private readonly ?PostFinderInterface $postFinder = null,
     ) {}
 
     /**
@@ -48,12 +50,12 @@ final class BindingContext
     }
 
     /**
-     * The post of the block context, as a Pollora model (the class bound to its
-     * post type, when there is one).
+     * The post of the block context, as a model (the class bound to its post type, when
+     * there is one; in a Pollora application, the framework's Post model).
      */
     public function post(): ?Post
     {
-        $this->post ??= $this->postId === null ? false : (Post::query()->find($this->postId) ?? false);
+        $this->post ??= $this->postId === null ? false : (($this->postFinder instanceof PostFinderInterface ? $this->postFinder->find($this->postId) : Post::query()->find($this->postId)) ?? false);
 
         return $this->post ?: null;
     }
@@ -84,7 +86,7 @@ final class BindingContext
 
     private function authorId(): ?int
     {
-        $author = (int) $this->post()?->post_author;
+        $author = (int) $this->post()?->getAttribute('post_author');
 
         return $author > 0 ? $author : null;
     }
