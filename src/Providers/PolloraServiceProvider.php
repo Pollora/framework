@@ -27,7 +27,7 @@ use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Login\Infrastructure\Providers\LoginServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
-use Pollora\Meta\Infrastructure\Providers\MetaServiceProvider;
+use Pollora\Meta\Infrastructure\Laravel\MetaServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
 use Pollora\Permalink\Infrastructure\Providers\PermalinkServiceProvider;

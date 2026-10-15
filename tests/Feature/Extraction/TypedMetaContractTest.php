@@ -20,7 +20,7 @@ use Pollora\Meta\Domain\Exceptions\MetaValidationException;
 use Pollora\Meta\Domain\Models\MetaDefinition;
 use Pollora\Meta\Domain\Models\MetaRecord;
 use Pollora\Meta\Domain\Models\MetaSchema;
-use Pollora\Meta\Infrastructure\Providers\MetaServiceProvider;
+use Pollora\Meta\Infrastructure\Laravel\MetaServiceProvider;
 use Pollora\Support\Facades\Meta;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;

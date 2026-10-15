@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollora\Meta\Testing;
 
-use Illuminate\Container\Container;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaUiDrivers;
 use Pollora\Meta\Domain\Contracts\MetaUiDriver;
@@ -57,7 +56,7 @@ final class MetaUiDriverConformance
         }
 
         try {
-            (new MetaUiDrivers(new Container))->build($driver, [$schema]);
+            (new MetaUiDrivers(new InstantiatingContainer))->build($driver, [$schema]);
         } catch (Throwable $throwable) {
             $violations[] = sprintf('register() throws for the meta it supports: %s', $throwable->getMessage());
         }

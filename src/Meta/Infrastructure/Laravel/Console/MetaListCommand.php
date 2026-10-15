@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Meta\UI\Console;
+namespace Pollora\Meta\Infrastructure\Laravel\Console;
 
 use BackedEnum;
 use Illuminate\Console\Attributes\Description;

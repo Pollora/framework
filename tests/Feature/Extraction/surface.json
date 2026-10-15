@@ -374,7 +374,7 @@
         "implements": [],
         "constants": [],
         "methods": {
-            "__construct": "public (Illuminate\\Contracts\\Container\\Container $container): mixed",
+            "__construct": "public (Psr\\Container\\ContainerInterface $container): mixed",
             "build": "public (Pollora\\Meta\\Domain\\Contracts\\MetaUiDriver $driver, array $schemas): void",
             "driver": "public (string $name): Pollora\\Meta\\Domain\\Contracts\\MetaUiDriver",
             "extend": "public (string $name, Closure|string $driver): void",
@@ -622,7 +622,47 @@
             "validate": "public (mixed $response, array $handler, WP_REST_Request $request): mixed"
         }
     },
-    "Pollora\\Meta\\Infrastructure\\Checks\\TypedMetaCheck": {
+    "Pollora\\Meta\\Infrastructure\\Laravel\\Console\\MetaAuditCommand": {
+        "kind": "class",
+        "extends": "Illuminate\\Console\\Command",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "handle": "public (Pollora\\Meta\\Application\\Services\\MetaAuditor $auditor): int"
+        }
+    },
+    "Pollora\\Meta\\Infrastructure\\Laravel\\Console\\MetaListCommand": {
+        "kind": "class",
+        "extends": "Illuminate\\Console\\Command",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "handle": "public (Pollora\\Meta\\Application\\Services\\MetaSchemaRepository $schemas): int"
+        }
+    },
+    "Pollora\\Meta\\Infrastructure\\Laravel\\LaravelMetaValidator": {
+        "kind": "final readonly class",
+        "extends": null,
+        "implements": [
+            "Pollora\\Meta\\Domain\\Contracts\\MetaValidatorInterface"
+        ],
+        "constants": [],
+        "methods": {
+            "__construct": "public (Illuminate\\Contracts\\Validation\\Factory $validator): mixed",
+            "validate": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $value): void"
+        }
+    },
+    "Pollora\\Meta\\Infrastructure\\Laravel\\MetaServiceProvider": {
+        "kind": "class",
+        "extends": "Illuminate\\Support\\ServiceProvider",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "boot": "public (): void",
+            "register": "public (): void"
+        }
+    },
+    "Pollora\\Meta\\Infrastructure\\Laravel\\TypedMetaCheck": {
         "kind": "final readonly class",
         "extends": null,
         "implements": [
@@ -635,28 +675,6 @@
             "label": "public (): string",
             "run": "public (Pollora\\Doctor\\Domain\\Enums\\RunContext $context): Pollora\\Doctor\\Domain\\Models\\CheckResult",
             "runsIn": "public (): array"
-        }
-    },
-    "Pollora\\Meta\\Infrastructure\\Providers\\MetaServiceProvider": {
-        "kind": "class",
-        "extends": "Illuminate\\Support\\ServiceProvider",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "boot": "public (): void",
-            "register": "public (): void"
-        }
-    },
-    "Pollora\\Meta\\Infrastructure\\Services\\LaravelMetaValidator": {
-        "kind": "final readonly class",
-        "extends": null,
-        "implements": [
-            "Pollora\\Meta\\Domain\\Contracts\\MetaValidatorInterface"
-        ],
-        "constants": [],
-        "methods": {
-            "__construct": "public (Illuminate\\Contracts\\Validation\\Factory $validator): mixed",
-            "validate": "public (Pollora\\Meta\\Domain\\Models\\MetaDefinition $definition, mixed $value): void"
         }
     },
     "Pollora\\Meta\\Infrastructure\\Services\\MetaDiscovery": {
@@ -682,6 +700,18 @@
         "constants": [],
         "methods": []
     },
+    "Pollora\\Meta\\Testing\\InstantiatingContainer": {
+        "kind": "final class",
+        "extends": null,
+        "implements": [
+            "Psr\\Container\\ContainerInterface"
+        ],
+        "constants": [],
+        "methods": {
+            "get": "public (string $id): mixed",
+            "has": "public (string $id): bool"
+        }
+    },
     "Pollora\\Meta\\Testing\\MetaUiDriverConformance": {
         "kind": "final class",
         "extends": null,
@@ -690,24 +720,6 @@
         "methods": {
             "check": "public static (Pollora\\Meta\\Domain\\Contracts\\MetaUiDriver $driver): array",
             "schema": "public static (): Pollora\\Meta\\Domain\\Models\\MetaSchema"
-        }
-    },
-    "Pollora\\Meta\\UI\\Console\\MetaAuditCommand": {
-        "kind": "class",
-        "extends": "Illuminate\\Console\\Command",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "handle": "public (Pollora\\Meta\\Application\\Services\\MetaAuditor $auditor): int"
-        }
-    },
-    "Pollora\\Meta\\UI\\Console\\MetaListCommand": {
-        "kind": "class",
-        "extends": "Illuminate\\Console\\Command",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "handle": "public (Pollora\\Meta\\Application\\Services\\MetaSchemaRepository $schemas): int"
         }
     },
     "Pollora\\Role\\Application\\Services\\CapabilityOwnerReader": {

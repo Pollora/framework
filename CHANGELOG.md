@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - The asset classes that left for the package no longer reach for Laravel: `AssetEnqueuer` receives the hook services, the Vite factory, the runtime and a PSR-3 logger instead of resolving them from the container, `AssetFile` is resolved through a resolver the provider sets (`AssetFile::resolveUsing()`), and `AssetManager`, `MissingBuilds` and `MissingBuildNotice` take their public directory, logger and project root as arguments. The rendered HTML of a Pollora site is unchanged, in build and while Vite runs hot
 - An `AssetEnqueuer` destroyed after its application, as in a test, no longer throws while it reports a failure of its deferred enqueue
+- The typed meta classes that will leave for `pollora/meta` no longer reach for Laravel: `MetaUiDrivers` and `MetaAccessor::extend()` take a PSR-11 `ContainerInterface` (the Laravel container is one, a driver closure receives the same object), and the key of a data object's property is derived by `Pollora\Attributes\Support\Naming` instead of `Str::snake()`. What needs Laravel moved to `Pollora\Meta\Infrastructure\Laravel`: `MetaServiceProvider`, `LaravelMetaValidator`, `TypedMetaCheck`, `MetaListCommand` and `MetaAuditCommand`. The rendered pages, the REST responses and the output of the `pollora:meta:*`, `pollora:binding:list`, `pollora:roles:*` and `pollora:doctor` commands of a Pollora site are unchanged
 
 ## [v13.36.0](https://github.com/Pollora/framework/compare/v13.35.6...v13.36.0) - 2026-10-14
 

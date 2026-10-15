@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Pollora\Meta\Application\Services;
 
 use Closure;
-use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
 use Pollora\Meta\Domain\Contracts\MetaUiDriver;
 use Pollora\Meta\Domain\Models\MetaSchema;
+use Psr\Container\ContainerInterface;
 
 /**
  * The UI drivers packages register, and the hand-off of the schemas to the one
@@ -16,13 +16,13 @@ use Pollora\Meta\Domain\Models\MetaSchema;
  */
 final class MetaUiDrivers
 {
-    /** @var array<string, class-string<MetaUiDriver>|Closure(Container): MetaUiDriver> */
+    /** @var array<string, class-string<MetaUiDriver>|Closure(ContainerInterface): MetaUiDriver> */
     private array $drivers = [];
 
-    public function __construct(private readonly Container $container) {}
+    public function __construct(private readonly ContainerInterface $container) {}
 
     /**
-     * @param  class-string<MetaUiDriver>|Closure(Container): MetaUiDriver  $driver
+     * @param  class-string<MetaUiDriver>|Closure(ContainerInterface): MetaUiDriver  $driver
      */
     public function extend(string $name, string|Closure $driver): void
     {
@@ -40,7 +40,7 @@ final class MetaUiDrivers
     public function driver(string $name): MetaUiDriver
     {
         $driver = $this->drivers[$name] ?? throw new InvalidArgumentException(sprintf('No meta UI driver is named "%s"; its package registers it with Meta::extend().', $name));
-        $instance = $driver instanceof Closure ? $driver($this->container) : $this->container->make($driver);
+        $instance = $driver instanceof Closure ? $driver($this->container) : $this->container->get($driver);
 
         return $instance instanceof MetaUiDriver
             ? $instance

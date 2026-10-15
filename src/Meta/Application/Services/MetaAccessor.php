@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollora\Meta\Application\Services;
 
 use Closure;
-use Illuminate\Contracts\Container\Container;
 use LogicException;
 use Pollora\Meta\Domain\Contracts\MetaStoreInterface;
 use Pollora\Meta\Domain\Contracts\MetaUiDriver;
@@ -16,6 +15,7 @@ use Pollora\Meta\Domain\Models\MetaDefinition;
 use Pollora\Meta\Domain\Models\MetaRecord;
 use Pollora\Meta\Domain\Models\MetaSchema;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -82,7 +82,7 @@ final readonly class MetaAccessor
      * Registers a UI driver, from a package's service provider:
      * `Meta::extend('acf', AcfDriver::class)`.
      *
-     * @param  class-string<MetaUiDriver>|Closure(Container): MetaUiDriver  $driver
+     * @param  class-string<MetaUiDriver>|Closure(ContainerInterface): MetaUiDriver  $driver
      */
     public function extend(string $name, string|Closure $driver): void
     {
