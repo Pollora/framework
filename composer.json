@@ -32,7 +32,7 @@
         "pollora/abilities": "^1.0",
         "pollora/ajax": "^1.1",
         "pollora/assets": "^0.1",
-        "pollora/attributes": "^0.1 || ^1.0",
+        "pollora/attributes": "^0.1.1 || ^1.0",
         "pollora/discovery": "^0.1 || ^1.0",
         "pollora/entity": "^1.2",
         "pollora/hook": "^2.0.1",

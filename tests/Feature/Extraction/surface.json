@@ -921,7 +921,98 @@
             "usersWith": "public (string $entry): array"
         }
     },
-    "Pollora\\Role\\Infrastructure\\Checks\\RolesCheck": {
+    "Pollora\\Role\\Infrastructure\\Laravel\\Console\\RoleDumpCommand": {
+        "kind": "class",
+        "extends": "Illuminate\\Console\\Command",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "handle": "public (Pollora\\Role\\Domain\\Contracts\\RoleStoreInterface $store): int"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\Console\\RoleImportCommand": {
+        "kind": "class",
+        "extends": "Pollora\\Console\\AbstractGeneratorCommand",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "execute": "protected (Symfony\\Component\\Console\\Input\\InputInterface $input, Symfony\\Component\\Console\\Output\\OutputInterface $output): int",
+            "getArguments": "protected (): array",
+            "getNameInput": "protected (): string",
+            "getOptions": "protected (): array",
+            "getStub": "protected (): string",
+            "handle": "public (): ?bool",
+            "replaceClass": "protected (mixed $stub, mixed $name): string"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\Console\\RoleListCommand": {
+        "kind": "class",
+        "extends": "Illuminate\\Console\\Command",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "handle": "public (Pollora\\Role\\Application\\Services\\RoleRegistry $registry, Pollora\\Role\\Domain\\Contracts\\RoleUsageInterface $usage): int"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\Console\\RoleMakeCommand": {
+        "kind": "class",
+        "extends": "Pollora\\Console\\AbstractGeneratorCommand",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "getArguments": "protected (): array",
+            "getStub": "protected (): string",
+            "replaceClass": "protected (mixed $stub, mixed $name): string"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\Console\\RolePruneCommand": {
+        "kind": "class",
+        "extends": "Illuminate\\Console\\Command",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "handle": "public (Pollora\\Role\\Domain\\Contracts\\RoleUsageInterface $usage, Pollora\\Role\\Domain\\Contracts\\RoleStoreInterface $store, Pollora\\Role\\Application\\Services\\RoleRegistry $registry, Pollora\\Role\\Domain\\Services\\StoredEntryClassifier $classifier): int"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\Console\\RoleShowCommand": {
+        "kind": "class",
+        "extends": "Illuminate\\Console\\Command",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "handle": "public (Pollora\\Role\\Application\\Services\\RoleRegistry $registry): int"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\EnsureUserHasRole": {
+        "kind": "class",
+        "extends": null,
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "handle": "public (Illuminate\\Http\\Request $request, Closure $next, ...string $roles): Symfony\\Component\\HttpFoundation\\Response",
+            "using": "public static (...string $roles): string"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\RoleDirective": {
+        "kind": "final class",
+        "extends": null,
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "__invoke": "public (string $expression): string"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\RoleServiceProvider": {
+        "kind": "class",
+        "extends": "Illuminate\\Support\\ServiceProvider",
+        "implements": [],
+        "constants": [],
+        "methods": {
+            "boot": "public (): void",
+            "register": "public (): void"
+        }
+    },
+    "Pollora\\Role\\Infrastructure\\Laravel\\RolesCheck": {
         "kind": "final readonly class",
         "extends": null,
         "implements": [
@@ -934,26 +1025,6 @@
             "label": "public (): string",
             "run": "public (Pollora\\Doctor\\Domain\\Enums\\RunContext $context): Pollora\\Doctor\\Domain\\Models\\CheckResult",
             "runsIn": "public (): array"
-        }
-    },
-    "Pollora\\Role\\Infrastructure\\Middleware\\EnsureUserHasRole": {
-        "kind": "class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "handle": "public (Illuminate\\Http\\Request $request, Closure $next, ...string $roles): Symfony\\Component\\HttpFoundation\\Response",
-            "using": "public static (...string $roles): string"
-        }
-    },
-    "Pollora\\Role\\Infrastructure\\Providers\\RoleServiceProvider": {
-        "kind": "class",
-        "extends": "Illuminate\\Support\\ServiceProvider",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "boot": "public (): void",
-            "register": "public (): void"
         }
     },
     "Pollora\\Role\\Infrastructure\\Services\\RoleDiscovery": {
@@ -970,77 +1041,6 @@
             "getIdentifier": "public (): string",
             "getItems": "public (): Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface",
             "setItems": "public (Pollora\\Discovery\\Domain\\Contracts\\DiscoveryItemsInterface $items): void"
-        }
-    },
-    "Pollora\\Role\\UI\\Console\\RoleDumpCommand": {
-        "kind": "class",
-        "extends": "Illuminate\\Console\\Command",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "handle": "public (Pollora\\Role\\Domain\\Contracts\\RoleStoreInterface $store): int"
-        }
-    },
-    "Pollora\\Role\\UI\\Console\\RoleImportCommand": {
-        "kind": "class",
-        "extends": "Pollora\\Console\\AbstractGeneratorCommand",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "execute": "protected (Symfony\\Component\\Console\\Input\\InputInterface $input, Symfony\\Component\\Console\\Output\\OutputInterface $output): int",
-            "getArguments": "protected (): array",
-            "getNameInput": "protected (): string",
-            "getOptions": "protected (): array",
-            "getStub": "protected (): string",
-            "handle": "public (): ?bool",
-            "replaceClass": "protected (mixed $stub, mixed $name): string"
-        }
-    },
-    "Pollora\\Role\\UI\\Console\\RoleListCommand": {
-        "kind": "class",
-        "extends": "Illuminate\\Console\\Command",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "handle": "public (Pollora\\Role\\Application\\Services\\RoleRegistry $registry, Pollora\\Role\\Domain\\Contracts\\RoleUsageInterface $usage): int"
-        }
-    },
-    "Pollora\\Role\\UI\\Console\\RoleMakeCommand": {
-        "kind": "class",
-        "extends": "Pollora\\Console\\AbstractGeneratorCommand",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "getArguments": "protected (): array",
-            "getStub": "protected (): string",
-            "replaceClass": "protected (mixed $stub, mixed $name): string"
-        }
-    },
-    "Pollora\\Role\\UI\\Console\\RolePruneCommand": {
-        "kind": "class",
-        "extends": "Illuminate\\Console\\Command",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "handle": "public (Pollora\\Role\\Domain\\Contracts\\RoleUsageInterface $usage, Pollora\\Role\\Domain\\Contracts\\RoleStoreInterface $store, Pollora\\Role\\Application\\Services\\RoleRegistry $registry, Pollora\\Role\\Domain\\Services\\StoredEntryClassifier $classifier): int"
-        }
-    },
-    "Pollora\\Role\\UI\\Console\\RoleShowCommand": {
-        "kind": "class",
-        "extends": "Illuminate\\Console\\Command",
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "handle": "public (Pollora\\Role\\Application\\Services\\RoleRegistry $registry): int"
-        }
-    },
-    "Pollora\\Role\\UI\\View\\RoleDirective": {
-        "kind": "final class",
-        "extends": null,
-        "implements": [],
-        "constants": [],
-        "methods": {
-            "__invoke": "public (string $expression): string"
         }
     }
 }

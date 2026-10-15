@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Role\Infrastructure\Middleware;
+namespace Pollora\Role\Infrastructure\Laravel;
 
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;

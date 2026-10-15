@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollora\Role\Infrastructure\Checks;
+namespace Pollora\Role\Infrastructure\Laravel;
 
 use Pollora\Doctor\Domain\Contracts\CheckInterface;
 use Pollora\Doctor\Domain\Enums\RunContext;

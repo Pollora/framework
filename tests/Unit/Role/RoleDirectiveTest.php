@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
-use Pollora\Role\UI\View\RoleDirective;
+use Pollora\Role\Infrastructure\Laravel\RoleDirective;
 use Tests\Unit\Role\Fixtures\EventManager;
 
 /**

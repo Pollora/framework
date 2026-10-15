@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Pollora\Role\Application\Services;
 
 use BackedEnum;
-use Illuminate\Support\Str;
 use Pollora\Attributes\ModifyRole;
 use Pollora\Attributes\Role;
 use Pollora\Attributes\Role\Grants;
 use Pollora\Attributes\Role\GrantsPostType;
 use Pollora\Attributes\Role\GrantsTaxonomy;
 use Pollora\Attributes\Role\Without;
+use Pollora\Attributes\Support\Naming;
 use Pollora\Role\Domain\Exceptions\InvalidRoleDefinitionException;
 use Pollora\Role\Domain\Models\RoleChanges;
 use Pollora\Role\Domain\Models\RoleDefinition;
@@ -83,7 +83,7 @@ final readonly class RoleDefinitionBuilder
 
         return new RoleDefinition(
             slug: $role->slug,
-            label: $role->label ?? Str::headline(class_basename($class)),
+            label: $role->label ?? Naming::headline(Naming::classBasename($class)),
             inherits: $inherits,
             changes: $changes,
             declaringClass: $class,

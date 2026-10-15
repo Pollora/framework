@@ -33,7 +33,7 @@ use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
 use Pollora\Permalink\Infrastructure\Providers\PermalinkServiceProvider;
 use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
-use Pollora\Role\Infrastructure\Providers\RoleServiceProvider;
+use Pollora\Role\Infrastructure\Laravel\RoleServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
