@@ -47,7 +47,7 @@
         "pollora/colt": "^10.0.1",
         "log1x/sage-directives": "^2.0",
         "roots/bedrock-autoloader": "^1.1",
-        "pollora/query": "^1.0",
+        "pollora/query": "^2.0",
         "spatie/php-structure-discoverer": "^2.4",
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.0",
