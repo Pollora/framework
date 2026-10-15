@@ -132,6 +132,8 @@ describe('ViteManager without a build', function (): void {
 
 describe('MissingBuildNotice', function (): void {
     beforeEach(function (): void {
+        // AssetServiceProvider's binding: manifest paths shown from the project root
+        app()->bind(MissingBuildNotice::class, fn (): MissingBuildNotice => new MissingBuildNotice(resolve(MissingBuilds::class), base_path()));
         Functions\when('current_user_can')->justReturn(true);
         Functions\when('esc_html')->returnArg();
         Functions\when('esc_html__')->returnArg();

@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Pollora\Asset\Infrastructure\Services;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Log;
-use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Asset\Application\Services\AssetManager;
+use Pollora\Asset\Domain\Contracts\RuntimeContext;
+use Pollora\Asset\Domain\Contracts\ViteManagerFactory;
+use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Asset\Domain\Exceptions\AssetException;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Hook\Domain\Contract\Action as HookAction;
 use Pollora\Hook\Domain\Contract\Filter as HookFilter;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Handles the registration and enqueuing of CSS and JavaScript assets in WordPress.
@@ -64,7 +66,7 @@ class AssetEnqueuer
     /**
      * The Vite manager instance.
      */
-    protected ?ViteManager $viteManager = null;
+    protected ?ViteManagerInterface $viteManager = null;
 
     /**
      * Whether to use Vite.js for asset handling.
@@ -121,22 +123,40 @@ class AssetEnqueuer
     protected array $localizationData = [];
 
     /**
-     * AssetManager instance for container resolution.
+     * @param  AssetManager  $assetManager  Resolves the containers by name
+     * @param  HookAction|null  $action  Registers the enqueue callbacks on WordPress hooks
+     * @param  HookFilter|null  $filter  Registers the tag and script attribute filters
+     * @param  ViteManagerFactory|null  $viteManagers  Builds the Vite resolver of a container for useVite()
+     * @param  RuntimeContext|null  $runtime  Tells the command line, where nothing is enqueued
+     * @param  LoggerInterface|null  $logger  Where a failure of the deferred enqueue is reported
      */
-    protected AssetManager $assetManager;
+    public function __construct(
+        protected AssetManager $assetManager,
+        protected ?HookAction $action = null,
+        protected ?HookFilter $filter = null,
+        protected ?ViteManagerFactory $viteManagers = null,
+        protected ?RuntimeContext $runtime = null,
+        protected ?LoggerInterface $logger = null,
+    ) {}
 
     /**
-     * Console detection service instance.
+     * The hook service the enqueuer registers on.
+     *
+     * @throws AssetException When the enqueuer was built without one
      */
-    protected ConsoleDetectionService $consoleDetectionService;
-
-    /**
-     * Constructor with dependency injection.
-     */
-    public function __construct(Application $app)
+    protected function hookAction(): HookAction
     {
-        $this->assetManager = $app->make(AssetManager::class);
-        $this->consoleDetectionService = $app->make(ConsoleDetectionService::class);
+        return $this->action ?? throw new AssetException('No hook service is set: the enqueuer was built without an Action.');
+    }
+
+    /**
+     * The filter service the enqueuer registers on.
+     *
+     * @throws AssetException When the enqueuer was built without one
+     */
+    protected function hookFilter(): HookFilter
+    {
+        return $this->filter ?? throw new AssetException('No filter service is set: the enqueuer was built without a Filter.');
     }
 
     /**
@@ -171,7 +191,7 @@ class AssetEnqueuer
      */
     public function container(string $containerName): self
     {
-        if ($this->consoleDetectionService->isConsole() || $this->consoleDetectionService->isWpCli()) {
+        if ($this->runtime?->isCommandLine()) {
             return $this;
         }
 
@@ -204,7 +224,7 @@ class AssetEnqueuer
      */
     public function useVite(): self
     {
-        if ($this->consoleDetectionService->isConsole() || $this->consoleDetectionService->isWpCli()) {
+        if ($this->runtime?->isCommandLine()) {
             return $this;
         }
 
@@ -213,7 +233,11 @@ class AssetEnqueuer
         }
 
         $this->useVite = true;
-        $this->viteManager = new ViteManager($this->container);
+        if (! $this->viteManagers instanceof ViteManagerFactory) {
+            throw new AssetException('No Vite resolver is set: the enqueuer was built without a ViteManagerFactory.');
+        }
+
+        $this->viteManager = $this->viteManagers->make($this->container);
 
         return $this;
     }
@@ -351,10 +375,27 @@ class AssetEnqueuer
                     $this->loadViteClient($hook);
                 }
 
-                resolve(HookAction::class)->add($hook, fn () => $this->enqueueStyleOrScript($hook), 99);
+                $this->hookAction()->add($hook, fn () => $this->enqueueStyleOrScript($hook), 99);
             }
         } catch (\Throwable $throwable) {
-            Log::error('Error in AssetEnqueuer::__destruct', ['error' => $throwable->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
+            $this->report('Error in AssetEnqueuer::__destruct', ['error' => $throwable->getMessage(), 'hooks' => $this->hooks, 'path' => $this->path ?? null]);
+        }
+    }
+
+    /**
+     * Report a failure of the deferred enqueue.
+     *
+     * Called from the destructor, which may run when the application is already gone
+     * (end of the request, a test that built the enqueuer): a logger that cannot log then must not throw.
+     *
+     * @param  array<string, mixed>  $context
+     */
+    private function report(string $message, array $context): void
+    {
+        try {
+            ($this->logger ?? new NullLogger)->error($message, $context);
+        } catch (\Throwable) {
+            // Nothing left to report to
         }
     }
 
@@ -391,8 +432,8 @@ class AssetEnqueuer
     {
         if ($this->printsScriptModules($hook)) {
             // The client is a module too: printed ahead of the import map, it would void it.
-            resolve(HookAction::class)->add($hook, function (): void {
-                $url = $this->viteManager instanceof ViteManager ? $this->viteManager->clientUrl() : '';
+            $this->hookAction()->add($hook, function (): void {
+                $url = $this->viteManager instanceof ViteManagerInterface ? $this->viteManager->clientUrl() : '';
 
                 if ($url !== '') {
                     // No version: the modules Vite serves import /@vite/client by its bare URL,
@@ -404,8 +445,8 @@ class AssetEnqueuer
             return;
         }
 
-        resolve(HookAction::class)->add($hook, function (): void {
-            if ($this->viteManager instanceof ViteManager && $this->viteManager->isRunningHot()) {
+        $this->hookAction()->add($hook, function (): void {
+            if ($this->viteManager instanceof ViteManagerInterface && $this->viteManager->isRunningHot()) {
                 echo $this->viteManager->getViteClientHtml();
             }
         }, 1);
@@ -418,7 +459,7 @@ class AssetEnqueuer
      */
     public function configureViteAssets(): void
     {
-        if (! $this->viteManager instanceof ViteManager) {
+        if (! $this->viteManager instanceof ViteManagerInterface) {
             throw new AssetException('Vite manager not initialized. Call useVite() first.');
         }
 
@@ -435,7 +476,7 @@ class AssetEnqueuer
      */
     protected function needToLoadViteClient(): bool
     {
-        return $this->useVite && $this->viteManager instanceof ViteManager && $this->viteManager->isRunningHot();
+        return $this->useVite && $this->viteManager instanceof ViteManagerInterface && $this->viteManager->isRunningHot();
     }
 
     /**
@@ -521,7 +562,7 @@ class AssetEnqueuer
         // exact URL — a chunk importing the entry back would load a second copy of it.
         wp_enqueue_script_module($handle, $path, [], $this->version, ['in_footer' => $this->loadInFooter]);
 
-        resolve(HookFilter::class)->add('wp_script_attributes', fn (array $attributes): array => ($attributes['id'] ?? null) === $handle.'-js-module'
+        $this->hookFilter()->add('wp_script_attributes', fn (array $attributes): array => ($attributes['id'] ?? null) === $handle.'-js-module'
             ? [...$attributes, 'crossorigin' => true]
             : $attributes);
 
@@ -564,7 +605,7 @@ class AssetEnqueuer
      */
     protected function addViteScriptAttributes(string $handle): void
     {
-        resolve(HookFilter::class)->add('script_loader_tag', fn ($tag, $scriptHandle, $src) => $scriptHandle === $handle
+        $this->hookFilter()->add('script_loader_tag', fn ($tag, $scriptHandle, $src) => $scriptHandle === $handle
             ? '<script type="module" crossorigin src="'.esc_url($src).'"></script>'
             : $tag, 10, 3);
     }

@@ -6,6 +6,9 @@ use Illuminate\Filesystem\Filesystem;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Application\Services\AssetRetrievalService;
 use Pollora\Asset\Application\Services\MissingBuilds;
+use Pollora\Asset\Domain\Contracts\ViteManagerFactory;
+use Pollora\Asset\Infrastructure\Laravel\LaravelAssetFileResolver;
+use Pollora\Asset\Infrastructure\Laravel\LaravelViteManagerFactory;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\AssetFile;
 use Pollora\Asset\Infrastructure\Services\RootAssetManager;
@@ -37,6 +40,8 @@ beforeEach(function (): void {
     $this->assetManager = new AssetManager(Mockery::mock(AssetRetrievalService::class));
     $this->app->instance(AssetManager::class, $this->assetManager);
     $this->app->singleton(MissingBuilds::class);
+    $this->app->singleton(ViteManagerFactory::class, LaravelViteManagerFactory::class);
+    AssetFile::resolveUsing(Closure::fromCallable(new LaravelAssetFileResolver($this->app)));
 
     $this->modules = new ModuleAssetManager($this->app);
     $this->modules->setupModuleAssetContainer($this->names['theme'], '/themes/apiary', 'theme');
@@ -62,6 +67,8 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
+    AssetFile::resolveUsing(null);
+
     foreach (array_unique($this->builds) as $directory) {
         foreach ($this->names as $name) {
             (new Filesystem)->deleteDirectory($directory.'/'.$name);

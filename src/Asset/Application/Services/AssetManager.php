@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Asset\Application\Services;
 
+use Closure;
+use Pollora\Asset\Domain\Contracts\PublicPath;
+use Pollora\Asset\Domain\Exceptions\AssetException;
 use Pollora\Asset\Domain\Models\Asset;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\AssetEnqueuer;
@@ -33,8 +36,14 @@ class AssetManager
      * Initializes the asset manager with the retrieval service.
      *
      * @param  AssetRetrievalService  $retrievalService  Service for retrieving assets
+     * @param  PublicPath|null  $publicPath  Where the hot file of a container without one lives
+     * @param  (Closure(): AssetEnqueuer)|null  $enqueuers  Builds the enqueuer of an asset
      */
-    public function __construct(private readonly AssetRetrievalService $retrievalService) {}
+    public function __construct(
+        private readonly AssetRetrievalService $retrievalService,
+        private readonly ?PublicPath $publicPath = null,
+        private readonly ?Closure $enqueuers = null,
+    ) {}
 
     /**
      * Factory method: returns an AssetEnqueuer (builder) for fluent asset management and enqueueing.
@@ -45,7 +54,11 @@ class AssetManager
      */
     public function add(string $handle, string $file): AssetEnqueuer
     {
-        return resolve(AssetEnqueuer::class)
+        if (! $this->enqueuers instanceof Closure) {
+            throw new AssetException('No asset enqueuer is set: the asset manager was built without one.');
+        }
+
+        return ($this->enqueuers)()
             ->handle($handle)
             ->path($file);
     }
@@ -79,6 +92,10 @@ class AssetManager
      */
     public function addContainer(string $name, array $config): void
     {
+        if (! isset($config['hot_file']) && $this->publicPath instanceof PublicPath) {
+            $config['hot_file'] = $this->publicPath->path($name.'.hot');
+        }
+
         $this->containers[$name] = new AssetContainer($name, $config);
     }
 
