@@ -177,6 +177,7 @@ it('checks fluent declarations in the registry the injector compiles', function 
 
     $wpRoles = new WP_Roles;
     $wpRoles->roles = $this->stored;
+
     $injector = $this->app->make(WordPressRoleInjector::class);
     $injector->inject($wpRoles);
 
