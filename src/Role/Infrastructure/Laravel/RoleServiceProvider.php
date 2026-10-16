@@ -12,12 +12,14 @@ use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Role\Application\Services\CapabilityOwnerReader;
+use Pollora\Role\Application\Services\RoleDeclarer;
 use Pollora\Role\Application\Services\RoleDefinitionBuilder;
 use Pollora\Role\Application\Services\RoleRegistry;
 use Pollora\Role\Domain\Contracts\RoleStoreInterface;
 use Pollora\Role\Domain\Contracts\RoleUsageInterface;
 use Pollora\Role\Domain\Services\PostTypeCapabilityMap;
 use Pollora\Role\Domain\Services\RoleCompiler;
+use Pollora\Role\Infrastructure\Adapters\WordPressLateRefresh;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleLabelTranslator;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleStore;
@@ -48,7 +50,6 @@ class RoleServiceProvider extends ServiceProvider
         $this->app->singleton(CapabilityOwnerReader::class);
         $this->app->singleton(PostTypeCapabilityMap::class);
         $this->app->singleton(RoleCompiler::class);
-        $this->app->singleton(RoleRegistry::class);
         $this->app->singleton(WordPressRoleLabelTranslator::class);
         $this->app->singleton(RoleUsageInterface::class, WordPressRoleUsage::class);
         $this->app->singleton(RoleStoreInterface::class, WordPressRoleStore::class);
@@ -56,6 +57,18 @@ class RoleServiceProvider extends ServiceProvider
         $this->app->singleton(RoleDefinitionBuilder::class, fn (Application $app): RoleDefinitionBuilder => new RoleDefinitionBuilder(
             $app->make(CapabilityOwnerReader::class),
             $this->superRoles(),
+        ));
+
+        // Explicit: the registry checks the fluent declarations with this builder.
+        $this->app->singleton(RoleRegistry::class, fn (Application $app): RoleRegistry => new RoleRegistry(
+            $app->make(CapabilityOwnerReader::class),
+            $app->make(PostTypeCapabilityMap::class),
+            $app->make(RoleDefinitionBuilder::class),
+        ));
+
+        $this->app->singleton(RoleDeclarer::class, fn (Application $app): RoleDeclarer => new RoleDeclarer(
+            $app->make(RoleRegistry::class),
+            (new WordPressLateRefresh($app->make(WordPressRoleInjector::class)))->__invoke(...),
         ));
 
         $this->app->singleton(WordPressRoleInjector::class, fn (Application $app): WordPressRoleInjector => new WordPressRoleInjector(
