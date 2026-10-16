@@ -6,6 +6,7 @@ use Brain\Monkey\Functions;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
 use Pollora\Asset\Application\Services\MissingBuilds;
+use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Asset\UI\Http\MissingBuildNotice;
@@ -132,6 +133,8 @@ describe('ViteManager without a build', function (): void {
 
 describe('MissingBuildNotice', function (): void {
     beforeEach(function (): void {
+        // The notice as the provider builds it: manifest paths from the project root, and the doctor command
+        app()->register(AssetServiceProvider::class);
         Functions\when('current_user_can')->justReturn(true);
         Functions\when('esc_html')->returnArg();
         Functions\when('esc_html__')->returnArg();

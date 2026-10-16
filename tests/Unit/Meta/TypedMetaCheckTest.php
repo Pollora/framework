@@ -9,7 +9,7 @@ use Pollora\Meta\Application\Services\MetaAuditor;
 use Pollora\Meta\Application\Services\MetaSchemaBuilder;
 use Pollora\Meta\Application\Services\MetaSchemaRepository;
 use Pollora\Meta\Domain\Services\MetaValueCaster;
-use Pollora\Meta\Infrastructure\Checks\TypedMetaCheck;
+use Pollora\Meta\Infrastructure\Laravel\TypedMetaCheck;
 use Tests\Unit\Meta\Fixtures\ArrayMetaInventory;
 use Tests\Unit\Meta\Fixtures\ArticleExtras;
 use Tests\Unit\Meta\Fixtures\BookGenre;

@@ -12,11 +12,11 @@ use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Role\Application\Services\RoleDefinitionBuilder;
 use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
-use Pollora\Role\Infrastructure\Middleware\EnsureUserHasRole;
-use Pollora\Role\Infrastructure\Providers\RoleServiceProvider;
+use Pollora\Role\Infrastructure\Laravel\Console\RoleMakeCommand;
+use Pollora\Role\Infrastructure\Laravel\EnsureUserHasRole;
+use Pollora\Role\Infrastructure\Laravel\RoleDirective;
+use Pollora\Role\Infrastructure\Laravel\RoleServiceProvider;
 use Pollora\Role\Infrastructure\Services\RoleDiscovery;
-use Pollora\Role\UI\Console\RoleMakeCommand;
-use Pollora\Role\UI\View\RoleDirective;
 use Psr\Log\LoggerInterface;
 
 beforeEach(function (): void {
