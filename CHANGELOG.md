@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.36.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.36.1...develop)
+
+## [v13.36.1](https://github.com/Pollora/framework/compare/v13.36.0...v13.36.1) - 2026-10-16
 
 ### Added
 - Block Bindings live in their own package, [`pollora/block-bindings`](https://github.com/Pollora/block-bindings), which the framework requires: the resolver, the source builder and registry, `BindingContext`, the four sources Pollora ships (`pollora/post-meta`, `pollora/term-meta`, `pollora/author-meta`, `pollora/option`), `BlockBindingDiscovery`, the WordPress adapters, the editor data and script (`block-bindings.js` ships with the package) and the preview route, with their tests. Class names do not change. The framework keeps what needs Laravel: `BlockBindingServiceProvider`, `config/block-bindings.php`, the Laravel implementations of the package's contracts (`LaravelMethodInvoker`, `LaravelBindingEvents`, `LaravelPostFinder`), `pollora:binding:list`, `pollora:make:binding` and the `pollora:doctor` check
