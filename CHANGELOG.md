@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.36.1...develop)
 
+### Added
+- A `Role` facade declares roles and capabilities the fluent way, besides `#[Role]` and `#[ModifyRole]`: `Role::make('event_manager', 'Event manager')->inherits('author')->grantsPostType(Event::class, Access::Editor)->grants('export_attendees')->without('publish_posts')`, `Role::modify('editor')` and `Role::capabilitySet(EventCap::class)`. The names are those of the attributes and of their arguments, and the same code checks both, so a mistake is refused with the same reason, naming the call (`Role::make('x') at file:line`). There is nothing to register: the declarations are checked when WordPress builds its roles. It comes with `pollora/roles` 0.2
+
+### Changed
+- `RoleServiceProvider` binds `RoleRegistry` with its `RoleDefinitionBuilder` and adds `RoleDeclarer`, the service the facade forwards to
+
 ## [v13.36.1](https://github.com/Pollora/framework/compare/v13.36.0...v13.36.1) - 2026-10-16
 
 ### Added
