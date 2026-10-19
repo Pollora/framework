@@ -9,10 +9,14 @@ use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\Application;
 use Pollora\Doctor\Domain\Enums\RunContext;
+use Pollora\Hook\Async\PendingAsync;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\HookInterface;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Laravel\MediaCheck;
 use Pollora\Media\Infrastructure\Laravel\MediaServiceProvider;
+use Pollora\Media\Infrastructure\WordPress\AsyncThumbnails;
 use Pollora\Media\Infrastructure\WordPress\StreamWrapper;
 use Pollora\Media\Infrastructure\WordPress\WordPressMedia;
 
@@ -33,6 +37,7 @@ beforeEach(function (): void {
         ]));
         $app->singleton('filesystem', fn (Application $app): FilesystemManager => new FilesystemManager($app));
         $app->alias('filesystem', Factory::class);
+        $app->instance(Action::class, $this->action = Mockery::mock(Action::class)->shouldIgnoreMissing());
 
         $provider = new MediaServiceProvider($app);
         $provider->register();
@@ -69,7 +74,7 @@ it('puts the media on the disk named by media.disk, with the URL of the disk', f
     Filters\expectAdded('pre_wp_unique_filename_file_list')->once();
     Filters\expectAdded('wp_resource_hints')->once();
 
-    Monkey\Functions\expect('add_action')->once();
+    Monkey\Actions\expectAdded('delete_attachment')->once();
 
     $provider->boot();
 
@@ -141,4 +146,14 @@ it('has a doctor check that is skipped without a disk, ok with one that works, a
         ->and($left->summary)->toContain('1 file(s)')
         ->and($left->details[0])->toBe('2026/stray.jpg is only local')
         ->and($clean->status->name)->toBe('Ok');
+});
+
+it('hands the framework hook service to the module, so the thumbnails of an upload can be deferred', function (): void {
+    [$app, $provider] = ($this->makeApp)(['disk' => 'uploads', 'async_thumbnails' => true]);
+    Filters\expectAdded('intermediate_image_sizes_advanced')->once();
+    Filters\expectAdded('wp_generate_attachment_metadata')->once();
+    $this->action->shouldReceive('add')->with(AsyncThumbnails::HOOK, Mockery::type('array'))->once()->andReturn(Mockery::mock(HookInterface::class));
+    $this->action->shouldReceive('async')->once()->andReturn(new PendingAsync(static function (): void {}));
+
+    $provider->boot();
 });

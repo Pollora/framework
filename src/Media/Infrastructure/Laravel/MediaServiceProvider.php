@@ -9,6 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\FilesystemOperator;
 use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
+use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Flysystem\FlysystemMediaStorage;
@@ -45,6 +46,7 @@ class MediaServiceProvider extends ServiceProvider
         $this->app->singleton(WordPressMedia::class, fn (Application $app): WordPressMedia => new WordPressMedia(
             $app->make(MediaStorage::class),
             $app->make(MediaConfig::class),
+            $app->make(Action::class),
         ));
     }
 
