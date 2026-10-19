@@ -70,6 +70,16 @@ final readonly class MediaCheck implements CheckInterface
             );
         }
 
+        $unsigned = $this->privateMediaWithoutSignature($storage);
+
+        if ($unsigned !== null) {
+            return CheckResult::warning(
+                sprintf('The disk "%s" cannot sign URLs, and %d media are private: their plain URL is served.', $this->disk, $unsigned),
+                [],
+                'A private media needs a disk that signs URLs (S3 and compatible services), or a signature of your own with the pollora/media/signed_url filter',
+            );
+        }
+
         $left = $this->leftBehind($storage);
 
         if ($left !== []) {
@@ -81,6 +91,20 @@ final readonly class MediaCheck implements CheckInterface
         }
 
         return CheckResult::ok(sprintf('The disk "%s" takes a file; media are served from %s.', $this->disk, $config->url));
+    }
+
+    /**
+     * How many media are private, when the disk cannot sign a URL for them; null when it can, or when none is.
+     */
+    private function privateMediaWithoutSignature(MediaStorage $storage): ?int
+    {
+        if (! function_exists('get_posts') || $storage->temporaryUrl('.pollora-media-probe', new \DateTimeImmutable('+1 minute')) !== null) {
+            return null;
+        }
+
+        $private = \get_posts(['post_type' => 'attachment', 'post_status' => 'any', 'meta_key' => '_pollora_media_private', 'meta_value' => '1', 'fields' => 'ids', 'numberposts' => 100]);
+
+        return $private === [] ? null : count($private);
     }
 
     /**

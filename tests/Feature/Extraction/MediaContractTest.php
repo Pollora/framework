@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Brain\Monkey;
 use Brain\Monkey\Filters;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\Application;
@@ -13,6 +14,9 @@ use Pollora\Hook\Async\PendingAsync;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\HookInterface;
 use Pollora\Media\Domain\Contracts\MediaStorage;
+use Pollora\Media\Domain\Events\MediaDeleted;
+use Pollora\Media\Domain\Events\MediaStored;
+use Pollora\Media\Domain\Events\MediaVisibilityChanged;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Laravel\MediaCheck;
 use Pollora\Media\Infrastructure\Laravel\MediaServiceProvider;
@@ -151,9 +155,57 @@ it('has a doctor check that is skipped without a disk, ok with one that works, a
 it('hands the framework hook service to the module, so the thumbnails of an upload can be deferred', function (): void {
     [$app, $provider] = ($this->makeApp)(['disk' => 'uploads', 'async_thumbnails' => true]);
     Filters\expectAdded('intermediate_image_sizes_advanced')->once();
-    Filters\expectAdded('wp_generate_attachment_metadata')->once();
+    Filters\expectAdded('wp_generate_attachment_metadata')->twice(); // the thumbnails, and private media
     $this->action->shouldReceive('add')->with(AsyncThumbnails::HOOK, Mockery::type('array'))->once()->andReturn(Mockery::mock(HookInterface::class));
     $this->action->shouldReceive('async')->once()->andReturn(new PendingAsync(static function (): void {}));
 
     $provider->boot();
+});
+
+it('relays the three actions of the module as Laravel events', function (): void {
+    [$app, $provider] = ($this->makeApp)(['disk' => 'uploads']);
+    $dispatched = [];
+    $app->instance('events', $events = Mockery::mock(Dispatcher::class));
+    $events->shouldReceive('dispatch')->andReturnUsing(function (object $event) use (&$dispatched): void {
+        $dispatched[] = $event;
+    });
+    $callbacks = [];
+    $this->action->shouldReceive('add')->andReturnUsing(function (string $hook, callable $callback) use (&$callbacks) {
+        $callbacks[$hook] = $callback;
+
+        return Mockery::mock(HookInterface::class);
+    });
+    Filters\expectAdded('upload_dir');
+
+    $provider->boot();
+    $callbacks['pollora/media/stored']('2026/a.jpg', 5);
+    $callbacks['pollora/media/deleted'](7, ['2026/a.jpg']);
+    $callbacks['pollora/media/visibility_changed'](7, true);
+
+    expect($dispatched)->toHaveCount(3)
+        ->and($dispatched[0])->toEqual(new MediaStored('2026/a.jpg', 5))
+        ->and($dispatched[1])->toEqual(new MediaDeleted(7, ['2026/a.jpg']))
+        ->and($dispatched[2])->toEqual(new MediaVisibilityChanged(7, true));
+});
+
+it('signs a URL through the Laravel disk, and gives null when the disk cannot', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+
+    expect($app->make(MediaStorage::class)->temporaryUrl('a.jpg', new DateTimeImmutable('+1 hour')))->toBeNull();
+});
+
+it('has a doctor check that warns of private media on a disk that cannot sign', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    Monkey\Functions\when('get_posts')->justReturn([7, 8]);
+    $check = new MediaCheck(
+        'uploads',
+        fn () => $app->make(MediaStorage::class),
+        fn () => $app->make(MediaConfig::class),
+        sys_get_temp_dir().'/pollora-media-no-local-'.bin2hex(random_bytes(3)),
+    );
+
+    $result = $check->run(RunContext::Console);
+
+    expect($result->status->name)->toBe('Warning')
+        ->and($result->summary)->toContain('cannot sign URLs')->toContain('2 media');
 });
