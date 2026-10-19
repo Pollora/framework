@@ -72,6 +72,39 @@ return [
         'max_bytes' => 30 * 1024 * 1024,
         'concurrency' => 4,
         'wait' => 10,
+
+        /*
+        |----------------------------------------------------------------------
+        | Who makes the sizes
+        |----------------------------------------------------------------------
+        |
+        | 'pollora' makes the sizes itself: files of the library, made on demand.
+        | 'bunny' and 'imgproxy' leave it to a service: the URL of a size changes
+        | shape, no file is made. Define the classes or presets at the service
+        | from the declared sizes with `php artisan pollora:media:thumbs:export`.
+        |
+        */
+
+        'driver' => env('MEDIA_THUMBNAILS_DRIVER', 'pollora'),
+
+        // Bunny Optimizer: media.url must be the pull zone. The pull zone id and
+        // the access key are only used to export the image classes.
+        'bunny' => [
+            'pull_zone' => env('BUNNY_PULL_ZONE'),
+            'api_key' => env('BUNNY_API_KEY'),
+        ],
+
+        // imgproxy 4.x in presets-only mode. The key and the salt are the
+        // hexadecimal IMGPROXY_KEY and IMGPROXY_SALT of the server, the signature
+        // size its IMGPROXY_SIGNATURE_SIZE. The source is 'url' (the URL of the
+        // library) or 's3' (the object of the bucket of the media disk).
+        'imgproxy' => [
+            'url' => env('IMGPROXY_URL'),
+            'key' => env('IMGPROXY_KEY'),
+            'salt' => env('IMGPROXY_SALT'),
+            'signature_size' => (int) env('IMGPROXY_SIGNATURE_SIZE', 32),
+            'source' => env('IMGPROXY_SOURCE', 'url'),
+        ],
     ],
 
 ];

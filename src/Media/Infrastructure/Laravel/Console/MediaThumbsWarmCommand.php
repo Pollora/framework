@@ -21,6 +21,12 @@ class MediaThumbsWarmCommand extends Command
 {
     public function handle(WordPressMedia $media, MediaStorage $storage): int
     {
+        if (! $media->thumbnailDriver()->makesFiles()) {
+            $this->components->warn(sprintf('The "%s" driver makes the sizes itself: there is nothing to warm.', $media->thumbnailExporter()->configuredDriver()));
+
+            return self::SUCCESS;
+        }
+
         try {
             $report = (new SizeWarmer($media->declaredSizes(), $storage))->warm(
                 $this->option('size') ?: null,
