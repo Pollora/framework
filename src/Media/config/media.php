@@ -54,4 +54,24 @@ return [
 
     'async_thumbnails' => false,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Sizes made on demand
+    |--------------------------------------------------------------------------
+    |
+    | A declared image size that is not eager() is made the first time its URL is
+    | asked for, then served as a file. These limits keep that from costing the
+    | server too much: sizes made at the same time, and the biggest original that
+    | gets a size (a bigger one stays downloadable). A request that waits more than
+    | 'wait' seconds for a place is handed a size that already exists.
+    |
+    */
+
+    'thumbnails' => [
+        'max_pixels' => 50_000_000,
+        'max_bytes' => 30 * 1024 * 1024,
+        'concurrency' => 4,
+        'wait' => 10,
+    ],
+
 ];
