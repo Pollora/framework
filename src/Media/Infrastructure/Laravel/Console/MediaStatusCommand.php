@@ -28,7 +28,7 @@ class MediaStatusCommand extends Command
             return self::SUCCESS;
         }
 
-        $status = (new MediaStatus(app(MediaStorage::class), app(MediaConfig::class)))->check();
+        $status = (new MediaStatus(resolve(MediaStorage::class), resolve(MediaConfig::class)))->check();
 
         $this->components->twoColumnDetail('Disk', $disk);
         $this->components->twoColumnDetail('Public URL', $status['url']);
