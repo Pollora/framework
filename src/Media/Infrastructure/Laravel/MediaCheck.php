@@ -32,6 +32,7 @@ final readonly class MediaCheck implements CheckInterface
      * @param  Closure(): MediaStorage  $storage  Resolved only when a disk is set
      * @param  Closure(): MediaConfig  $config
      * @param  (Closure(): ImageSizes)|null  $sizes  The declared image sizes
+     * @param  (Closure(): list<string>)|null  $thumbnailProblems  What keeps the sizes from being served by the driver that is set
      */
     public function __construct(
         private ?string $disk,
@@ -39,6 +40,7 @@ final readonly class MediaCheck implements CheckInterface
         private Closure $config,
         private string $localUploads,
         private ?Closure $sizes = null,
+        private ?Closure $thumbnailProblems = null,
     ) {}
 
     public function id(): string
@@ -84,13 +86,13 @@ final readonly class MediaCheck implements CheckInterface
             );
         }
 
-        $sizeProblems = $this->sizeProblems();
+        $sizeProblems = [...$this->sizeProblems(), ...($this->thumbnailProblems instanceof Closure ? ($this->thumbnailProblems)() : [])];
 
         if ($sizeProblems !== []) {
             return CheckResult::warning(
                 sprintf('%d problem(s) with the declared image sizes.', count($sizeProblems)),
                 $sizeProblems,
-                'Fix the declaration (cover(), scale() or contain() with the dimensions it needs), or choose a format the image editor of this server can write (WebP: GD and Imagick; AVIF depends on the server)',
+                'Fix the declaration (cover(), scale() or contain() with the dimensions it needs), choose a format the image editor of this server can write (WebP: GD and Imagick; AVIF depends on the server), or complete media.thumbnails.bunny / media.thumbnails.imgproxy',
             );
         }
 

@@ -19,10 +19,12 @@ use Pollora\Media\Domain\Events\MediaDeleted;
 use Pollora\Media\Domain\Events\MediaStored;
 use Pollora\Media\Domain\Events\MediaVisibilityChanged;
 use Pollora\Media\Domain\Models\MediaConfig;
+use Pollora\Media\Domain\Models\ThumbnailDriverSettings;
 use Pollora\Media\Infrastructure\Flysystem\FlysystemMediaStorage;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaFilesCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaStatusCommand;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsExportCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsPruneCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsWarmCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaVisibilityCommand;
@@ -56,6 +58,7 @@ class MediaServiceProvider extends ServiceProvider
             fn (): MediaConfig => $app->make(MediaConfig::class),
             rtrim((string) (defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR : public_path('content')), '/').'/uploads',
             static fn (): ImageSizes => $app->make(ImageSizes::class),
+            static fn (): array => $app->make(WordPressMedia::class)->thumbnailProblems(),
         ));
 
         // The file names of the sizes are signed with the application key.
@@ -69,6 +72,7 @@ class MediaServiceProvider extends ServiceProvider
             $app->make(Action::class),
             $app->make(ImageSizes::class),
             limits: $this->thumbnailLimits($app),
+            thumbnails: $this->thumbnailDriver($app),
         ));
     }
 
@@ -80,7 +84,7 @@ class MediaServiceProvider extends ServiceProvider
         $this->app->tag([MediaCheck::class], DoctorServiceProvider::CHECKS_TAG);
 
         if ($this->app->runningInConsole()) {
-            $this->commands([MediaStatusCommand::class, MediaMigrateCommand::class, MediaFilesCommand::class, MediaVisibilityCommand::class, MediaThumbsWarmCommand::class, MediaThumbsPruneCommand::class]);
+            $this->commands([MediaStatusCommand::class, MediaMigrateCommand::class, MediaFilesCommand::class, MediaVisibilityCommand::class, MediaThumbsWarmCommand::class, MediaThumbsPruneCommand::class, MediaThumbsExportCommand::class]);
         }
 
         if ($this->diskName() === null) {
@@ -133,6 +137,27 @@ class MediaServiceProvider extends ServiceProvider
             (int) $config->get('media.thumbnails.max_bytes', $defaults->maxBytes),
             (int) $config->get('media.thumbnails.concurrency', $defaults->concurrency),
             (int) $config->get('media.thumbnails.wait', $defaults->wait),
+        );
+    }
+
+    private function thumbnailDriver(Application $app): ThumbnailDriverSettings
+    {
+        $config = $app->make('config');
+        $disk = $this->diskName();
+        $source = (string) $config->get('media.thumbnails.imgproxy.source', 'url');
+        $bucket = $source === 's3' && $disk !== null ? $config->get("filesystems.disks.{$disk}.bucket") : null;
+        $optional = static fn (string $key): ?string => is_scalar($value = $config->get($key)) && (string) $value !== '' ? (string) $value : null;
+
+        return new ThumbnailDriverSettings(
+            (string) $config->get('media.thumbnails.driver', ThumbnailDriverSettings::POLLORA),
+            $optional('media.thumbnails.bunny.pull_zone'),
+            $optional('media.thumbnails.bunny.api_key'),
+            $optional('media.thumbnails.imgproxy.url'),
+            $optional('media.thumbnails.imgproxy.key'),
+            $optional('media.thumbnails.imgproxy.salt'),
+            (int) $config->get('media.thumbnails.imgproxy.signature_size', 32),
+            $source,
+            is_string($bucket) && $bucket !== '' ? $bucket : null,
         );
     }
 

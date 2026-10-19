@@ -16,16 +16,26 @@ use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\HookInterface;
 use Pollora\Media\Application\Services\ImageSizes;
 use Pollora\Media\Domain\Contracts\MediaStorage;
+use Pollora\Media\Domain\Enums\Fit;
 use Pollora\Media\Domain\Events\MediaDeleted;
 use Pollora\Media\Domain\Events\MediaStored;
 use Pollora\Media\Domain\Events\MediaVisibilityChanged;
+use Pollora\Media\Domain\Models\ImageSizeSpec;
 use Pollora\Media\Domain\Models\MediaConfig;
+use Pollora\Media\Domain\Services\ImgproxySigner;
+use Pollora\Media\Infrastructure\BunnyThumbnailDriver;
+use Pollora\Media\Infrastructure\ImgproxyThumbnailDriver;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsExportCommand;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsWarmCommand;
 use Pollora\Media\Infrastructure\Laravel\MediaCheck;
 use Pollora\Media\Infrastructure\Laravel\MediaServiceProvider;
+use Pollora\Media\Infrastructure\PolloraThumbnailDriver;
 use Pollora\Media\Infrastructure\WordPress\AsyncThumbnails;
 use Pollora\Media\Infrastructure\WordPress\StreamWrapper;
 use Pollora\Media\Infrastructure\WordPress\WordPressMedia;
 use Pollora\Support\Facades\ImageSize;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * The media library on a Laravel disk, with the real provider, the real filesystem manager and a real local
@@ -280,4 +290,115 @@ it('has a doctor check that reports a .htaccess that cuts the fallback in the up
     rmdir($local);
 
     expect($result->status->name)->toBe('Warning')->and($result->summary)->toContain('.htaccess');
+});
+
+it('makes the sizes itself unless media.thumbnails.driver says otherwise', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+
+    expect($app->make(WordPressMedia::class)->thumbnailDriver())->toBeInstanceOf(PolloraThumbnailDriver::class);
+});
+
+it('hands the Bunny driver to the module, which makes no file', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads', 'thumbnails' => ['driver' => 'bunny']]);
+    $driver = $app->make(WordPressMedia::class)->thumbnailDriver();
+
+    expect($driver)->toBeInstanceOf(BunnyThumbnailDriver::class)->and($driver->makesFiles())->toBeFalse();
+});
+
+it('hands the imgproxy driver to the module, with the URL, key, salt and signature size of media.thumbnails.imgproxy', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads', 'url' => 'https://media.client.fr', 'thumbnails' => ['driver' => 'imgproxy', 'imgproxy' => [
+        'url' => 'https://img.client.fr/', 'key' => '736563726574', 'salt' => '68656C6C6F', 'signature_size' => '16',
+    ]]]);
+    $driver = $app->make(WordPressMedia::class)->thumbnailDriver();
+    $url = $driver->url('2026/10/photo.jpg', new ImageSizeSpec('card', Fit::Cover, 600, 400), 3000, 2000);
+    $path = '/card/plain/https://media.client.fr/2026/10/photo.jpg@webp';
+
+    expect($driver)->toBeInstanceOf(ImgproxyThumbnailDriver::class)
+        ->and($url)->toBe('https://img.client.fr/'.(new ImgproxySigner('736563726574', '68656C6C6F', 16))->sign($path).$path);
+});
+
+it('takes the bucket of the disk as the imgproxy source when the source is s3', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads', 'thumbnails' => ['driver' => 'imgproxy', 'imgproxy' => [
+        'url' => 'https://img.client.fr', 'key' => '736563726574', 'salt' => '68656C6C6F', 'source' => 's3',
+    ]]]);
+    $app->make('config')->set('filesystems.disks.uploads.bucket', 'client-media');
+
+    $url = $app->make(WordPressMedia::class)->thumbnailDriver()->url('a.jpg', new ImageSizeSpec('card', Fit::Cover, 600, 400), 3000, 2000);
+
+    expect($url)->toContain('/card/plain/s3://client-media/a.jpg@webp');
+});
+
+it('ships the settings of the drivers of the sizes, off by default', function (): void {
+    $config = require __DIR__.'/../../../src/Media/config/media.php';
+
+    expect($config['thumbnails']['driver'])->toBe('pollora')
+        ->and($config['thumbnails']['bunny'])->toHaveKeys(['pull_zone', 'api_key'])
+        ->and($config['thumbnails']['imgproxy'])->toHaveKeys(['url', 'key', 'salt', 'signature_size', 'source'])
+        ->and($config['thumbnails']['imgproxy']['signature_size'])->toBe(32);
+});
+
+/**
+ * @param  array<string, mixed>  $input
+ * @return array{0: int, 1: string}
+ */
+function runMediaCommand(Application $app, string $command, array $input = []): array
+{
+    $instance = $app->make($command);
+    $instance->setLaravel($app);
+
+    $output = new BufferedOutput;
+    $status = $instance->run(new ArrayInput($input), $output);
+
+    return [$status, $output->fetch()];
+}
+
+it('exports the declared sizes as imgproxy presets with pollora:media:thumbs:export, without the key or the salt', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads', 'url' => 'https://media.client.fr', 'thumbnails' => ['driver' => 'imgproxy', 'imgproxy' => [
+        'url' => 'https://img.client.fr', 'key' => '736563726574', 'salt' => '68656C6C6F',
+    ]]]);
+    $app->make(ImageSizes::class)->add('card')->cover(600, 400)->webp(75);
+
+    [$status, $output] = runMediaCommand($app, MediaThumbsExportCommand::class);
+
+    expect($status)->toBe(0)
+        ->and($output)->toContain('IMGPROXY_PRESETS=card=resize:fill-down:600:400:0/quality:75')
+        ->and($output)->toContain('IMGPROXY_ONLY_PRESETS=true')
+        ->and($output)->toContain('IMGPROXY_ALLOWED_SOURCES=https://media.client.fr/')
+        ->and($output)->not->toContain('736563726574')->not->toContain('68656C6C6F');
+});
+
+it('says what to set when the pull zone or the key is missing for a Bunny export', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads', 'thumbnails' => ['driver' => 'bunny']]);
+
+    [$status, $output] = runMediaCommand($app, MediaThumbsExportCommand::class);
+
+    expect($status)->toBe(1)->and($output)->toContain('pull_zone');
+});
+
+it('has nothing to export for the default driver, and nothing to warm for a service', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    [$status, $output] = runMediaCommand($app, MediaThumbsExportCommand::class);
+
+    expect($status)->toBe(1)->and($output)->toContain('nothing to export');
+
+    [$bunny] = ($this->makeApp)(['disk' => 'uploads', 'thumbnails' => ['driver' => 'bunny']]);
+    [$status, $output] = runMediaCommand($bunny, MediaThumbsWarmCommand::class);
+
+    expect($status)->toBe(0)->and($output)->toContain('nothing to warm');
+});
+
+it('has a doctor check that reports a driver of the sizes it could not use', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads', 'thumbnails' => ['driver' => 'imgproxy']]);
+    Monkey\Functions\when('get_posts')->justReturn([]);
+    $log = tempnam(sys_get_temp_dir(), 'media-log');
+    $previous = ini_set('error_log', $log);
+
+    try {
+        $result = $app->make(MediaCheck::class)->run(RunContext::Console);
+    } finally {
+        ini_set('error_log', (string) $previous);
+        unlink($log);
+    }
+
+    expect($result->status->name)->toBe('Warning')->and($result->details[0])->toContain('"imgproxy"');
 });
