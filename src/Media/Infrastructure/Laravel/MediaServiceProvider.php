@@ -12,6 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use League\Flysystem\FilesystemOperator;
 use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Media\Application\Services\ImageSizes;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Events\MediaDeleted;
 use Pollora\Media\Domain\Events\MediaStored;
@@ -21,6 +22,8 @@ use Pollora\Media\Infrastructure\Flysystem\FlysystemMediaStorage;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaFilesCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaStatusCommand;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsPruneCommand;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsWarmCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaVisibilityCommand;
 use Pollora\Media\Infrastructure\WordPress\WordPressMedia;
 use RuntimeException;
@@ -51,12 +54,19 @@ class MediaServiceProvider extends ServiceProvider
             fn (): MediaStorage => $app->make(MediaStorage::class),
             fn (): MediaConfig => $app->make(MediaConfig::class),
             rtrim((string) (defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR : public_path('content')), '/').'/uploads',
+            static fn (): ImageSizes => $app->make(ImageSizes::class),
+        ));
+
+        // The file names of the sizes are signed with the application key.
+        $this->app->singleton(ImageSizes::class, fn (Application $app): ImageSizes => new ImageSizes(
+            static fn (): string => (string) $app->make('config')->get('app.key'),
         ));
 
         $this->app->singleton(WordPressMedia::class, fn (Application $app): WordPressMedia => new WordPressMedia(
             $app->make(MediaStorage::class),
             $app->make(MediaConfig::class),
             $app->make(Action::class),
+            $app->make(ImageSizes::class),
         ));
     }
 
@@ -68,7 +78,7 @@ class MediaServiceProvider extends ServiceProvider
         $this->app->tag([MediaCheck::class], DoctorServiceProvider::CHECKS_TAG);
 
         if ($this->app->runningInConsole()) {
-            $this->commands([MediaStatusCommand::class, MediaMigrateCommand::class, MediaFilesCommand::class, MediaVisibilityCommand::class]);
+            $this->commands([MediaStatusCommand::class, MediaMigrateCommand::class, MediaFilesCommand::class, MediaVisibilityCommand::class, MediaThumbsWarmCommand::class, MediaThumbsPruneCommand::class]);
         }
 
         if ($this->diskName() === null) {
