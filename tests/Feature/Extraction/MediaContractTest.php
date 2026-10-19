@@ -8,8 +8,10 @@ use Illuminate\Config\Repository;
 use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\Application;
+use Pollora\Doctor\Domain\Enums\RunContext;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Models\MediaConfig;
+use Pollora\Media\Infrastructure\Laravel\MediaCheck;
 use Pollora\Media\Infrastructure\Laravel\MediaServiceProvider;
 use Pollora\Media\Infrastructure\WordPress\StreamWrapper;
 use Pollora\Media\Infrastructure\WordPress\WordPressMedia;
@@ -110,4 +112,30 @@ it('ships a config file whose disk is off by default', function (): void {
         ->and($defaults['cache_control'])->toBe('public, max-age=31536000, immutable')
         ->and($defaults['private']['expiry'])->toBe('+6 hours')
         ->and($defaults['async_thumbnails'])->toBeFalse();
+});
+
+it('has a doctor check that is skipped without a disk, ok with one that works, and warns of files left in the local folder', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    $local = sys_get_temp_dir().'/pollora-media-local-'.bin2hex(random_bytes(4));
+    mkdir($local.'/2026', 0777, true);
+    file_put_contents($local.'/2026/stray.jpg', 'x');
+    file_put_contents($this->root.'/there.jpg', 'x');
+    file_put_contents($local.'/there.jpg', 'x');
+    $make = static fn (?string $disk) => new MediaCheck(
+        $disk,
+        fn () => $app->make(MediaStorage::class),
+        fn () => $app->make(MediaConfig::class),
+        $local,
+    );
+
+    $off = $make(null)->run(RunContext::Console);
+    $left = $make('uploads')->run(RunContext::Console);
+    unlink($local.'/2026/stray.jpg');
+    $clean = $make('uploads')->run(RunContext::Console);
+
+    expect($off->status->name)->toBe('Skipped')
+        ->and($left->status->name)->toBe('Warning')
+        ->and($left->summary)->toContain('1 file(s)')
+        ->and($left->details[0])->toBe('2026/stray.jpg is only local')
+        ->and($clean->status->name)->toBe('Ok');
 });

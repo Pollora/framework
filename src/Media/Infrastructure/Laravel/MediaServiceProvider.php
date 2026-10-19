@@ -8,6 +8,7 @@ use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\FilesystemOperator;
+use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Flysystem\FlysystemMediaStorage;
@@ -34,6 +35,13 @@ class MediaServiceProvider extends ServiceProvider
 
         $this->app->singleton(MediaStorage::class, fn (Application $app): MediaStorage => new FlysystemMediaStorage($this->filesystem($app)));
 
+        $this->app->singleton(MediaCheck::class, fn (Application $app): MediaCheck => new MediaCheck(
+            $this->diskName(),
+            fn (): MediaStorage => $app->make(MediaStorage::class),
+            fn (): MediaConfig => $app->make(MediaConfig::class),
+            rtrim((string) (defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR : public_path('content')), '/').'/uploads',
+        ));
+
         $this->app->singleton(WordPressMedia::class, fn (Application $app): WordPressMedia => new WordPressMedia(
             $app->make(MediaStorage::class),
             $app->make(MediaConfig::class),
@@ -43,6 +51,9 @@ class MediaServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([__DIR__.'/../../config/media.php' => config_path('media.php')], 'media-config');
+
+        // A check of pollora:doctor and Site Health
+        $this->app->tag([MediaCheck::class], DoctorServiceProvider::CHECKS_TAG);
 
         if ($this->app->runningInConsole()) {
             $this->commands([MediaStatusCommand::class, MediaMigrateCommand::class]);
