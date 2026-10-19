@@ -13,6 +13,7 @@ use League\Flysystem\FilesystemOperator;
 use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Media\Application\Services\ImageSizes;
+use Pollora\Media\Application\Services\ThumbnailLimits;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Events\MediaDeleted;
 use Pollora\Media\Domain\Events\MediaStored;
@@ -67,6 +68,7 @@ class MediaServiceProvider extends ServiceProvider
             $app->make(MediaConfig::class),
             $app->make(Action::class),
             $app->make(ImageSizes::class),
+            limits: $this->thumbnailLimits($app),
         ));
     }
 
@@ -119,6 +121,19 @@ class MediaServiceProvider extends ServiceProvider
                 return null;
             }
         };
+    }
+
+    private function thumbnailLimits(Application $app): ThumbnailLimits
+    {
+        $config = $app->make('config');
+        $defaults = new ThumbnailLimits;
+
+        return new ThumbnailLimits(
+            (int) $config->get('media.thumbnails.max_pixels', $defaults->maxPixels),
+            (int) $config->get('media.thumbnails.max_bytes', $defaults->maxBytes),
+            (int) $config->get('media.thumbnails.concurrency', $defaults->concurrency),
+            (int) $config->get('media.thumbnails.wait', $defaults->wait),
+        );
     }
 
     private function diskName(): ?string

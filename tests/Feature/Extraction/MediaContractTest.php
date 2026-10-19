@@ -258,3 +258,26 @@ it('has a doctor check that reports declarations it could not make into a size',
         ->and($result->summary)->toContain('declared image sizes')
         ->and($result->details[0])->toContain('broken');
 });
+
+it('hands the limits of the sizes made on demand to the module, from media.thumbnails', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads', 'thumbnails' => ['concurrency' => 2, 'wait' => 3, 'max_pixels' => 1000]]);
+
+    $limits = (new ReflectionProperty(WordPressMedia::class, 'limits'))->getValue($app->make(WordPressMedia::class));
+
+    expect([$limits->concurrency, $limits->wait, $limits->maxPixels, $limits->maxBytes])->toBe([2, 3, 1000, 31_457_280]);
+});
+
+it('has a doctor check that reports a .htaccess that cuts the fallback in the uploads folder', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    $local = sys_get_temp_dir().'/pollora-media-htaccess-'.bin2hex(random_bytes(3));
+    mkdir($local, 0777, true);
+    file_put_contents($local.'/.htaccess', "RewriteEngine On\nRewriteRule .* - [F]\n");
+    Monkey\Functions\when('get_posts')->justReturn([]);
+    $check = new MediaCheck('uploads', fn () => $app->make(MediaStorage::class), fn () => $app->make(MediaConfig::class), $local);
+
+    $result = $check->run(RunContext::Console);
+    unlink($local.'/.htaccess');
+    rmdir($local);
+
+    expect($result->status->name)->toBe('Warning')->and($result->summary)->toContain('.htaccess');
+});

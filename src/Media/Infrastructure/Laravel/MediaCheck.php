@@ -94,6 +94,16 @@ final readonly class MediaCheck implements CheckInterface
             );
         }
 
+        $rewrite = $this->rewriteInUploads();
+
+        if ($rewrite !== null) {
+            return CheckResult::warning(
+                'A .htaccess in the uploads folder stops the sizes made on demand from reaching PHP.',
+                [$rewrite.' contains RewriteEngine On: Apache then ignores the rules of the folders above it'],
+                'Remove RewriteEngine On from that file (a security plugin usually adds it), or declare the sizes you use eager()',
+            );
+        }
+
         $left = $this->leftBehind($storage);
 
         if ($left !== []) {
@@ -136,6 +146,16 @@ final readonly class MediaCheck implements CheckInterface
         }
 
         return $problems;
+    }
+
+    /**
+     * The `.htaccess` of the uploads folder that restarts Apache's rewriting, if there is one: it cuts the fallback for missing sizes.
+     */
+    private function rewriteInUploads(): ?string
+    {
+        $file = $this->localUploads.'/.htaccess';
+
+        return is_file($file) && stripos((string) file_get_contents($file), 'RewriteEngine On') !== false ? $file : null;
     }
 
     /**
