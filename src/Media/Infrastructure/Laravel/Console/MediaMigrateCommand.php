@@ -21,7 +21,7 @@ use Pollora\Media\Infrastructure\WordPress\UrlReplacement;
  * --execute; the source is never changed.
  */
 #[Description('Copy the media files from a disk to another, and optionally replace their URLs in the database')]
-#[Signature('pollora:media:migrate {--from= : Disk to copy from (default: the uploads folder WordPress uses without the module)} {--to= : Disk to copy to (default: media.disk)} {--execute : Copy the files; without it, only list what would be copied} {--replace-urls : Replace the old base URL with the public URL in the database} {--old-url= : The base URL to replace}')]
+#[Signature('pollora:media:migrate {--from= : Disk to copy from (default: the uploads folder WordPress uses without the module)} {--to= : Disk to copy to (default: media.disk)} {--execute : Copy the files; without it, only list what would be copied} {--exclude=* : A pattern of the paths to leave out, such as woocommerce_uploads/* (repeat the option for several)} {--replace-urls : Replace the old base URL with the public URL in the database} {--old-url= : The base URL to replace}')]
 class MediaMigrateCommand extends Command
 {
     public function handle(Factory $disks, MediaConfig $config): int
@@ -40,13 +40,14 @@ class MediaMigrateCommand extends Command
             : new FlysystemMediaStorage(new Filesystem(new LocalFilesystemAdapter(public_path('content/uploads'))));
 
         $execute = (bool) $this->option('execute');
-        $report = (new MediaMigrator($source, $this->storageOf($disks, $to)))->migrate(! $execute, function (string $path, string $outcome): void {
+        $exclude = array_values(array_filter(array_map('strval', (array) $this->option('exclude'))));
+        $report = (new MediaMigrator($source, $this->storageOf($disks, $to), $config->cacheControl))->migrate(! $execute, function (string $path, string $outcome): void {
             if ($outcome === 'fail') {
                 $this->components->warn('Could not copy '.$path);
             }
-        });
+        }, $exclude);
 
-        $this->components->info(sprintf('%s %d file(s); %d already there; %d failed.', $execute ? 'Copied' : 'Would copy', count($report->copied), count($report->skipped), count($report->failed)));
+        $this->components->info(sprintf('%s %d file(s); %d already there; %d left out; %d failed.', $execute ? 'Copied' : 'Would copy', count($report->copied), count($report->skipped), count($report->excluded), count($report->failed)));
 
         if ($this->option('replace-urls')) {
             $old = (string) ($this->option('old-url') ?: rtrim((string) config('app.url'), '/').'/content/uploads');

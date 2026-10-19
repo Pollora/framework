@@ -29,6 +29,12 @@ final readonly class MediaCheck implements CheckInterface
     private const int SAMPLE = 200;
 
     /**
+     * Folders of the uploads that hold private files (protected downloads, logs, form attachments, backups).
+     * The media disk serves every file to anyone who knows the URL, so they must stay where the server protects them.
+     */
+    private const array PRIVATE_FOLDERS = ['woocommerce_uploads', 'wc-logs', 'gravity_forms', 'wpforms', 'updraft', 'ai1wm-backups'];
+
+    /**
      * @param  Closure(): MediaStorage  $storage  Resolved only when a disk is set
      * @param  Closure(): MediaConfig  $config
      * @param  (Closure(): ImageSizes)|null  $sizes  The declared image sizes
@@ -73,6 +79,16 @@ final readonly class MediaCheck implements CheckInterface
                 sprintf('The media disk "%s" does not take a file.', $this->disk),
                 [(string) $status['error']],
                 'Check the disk in config/filesystems.php (credentials, bucket, endpoint), then run php artisan pollora:media:status',
+            );
+        }
+
+        $exposed = $this->privateFoldersOnDisk($storage);
+
+        if ($exposed !== []) {
+            return CheckResult::warning(
+                sprintf('%d folder(s) of private files are on the media disk, where any visitor who knows a URL can read them: %s.', count($exposed), implode(', ', $exposed)),
+                array_map(static fn (string $folder): string => $folder.'/ is served publicly', $exposed),
+                'Delete them from the disk, and migrate with php artisan pollora:media:migrate --exclude='.$exposed[0].'/* so they stay where the server protects them',
             );
         }
 
@@ -161,6 +177,28 @@ final readonly class MediaCheck implements CheckInterface
     }
 
     /**
+     * The folders of private files that hold something on the media disk.
+     *
+     * @return list<string>
+     */
+    private function privateFoldersOnDisk(MediaStorage $storage): array
+    {
+        $found = [];
+
+        foreach (self::PRIVATE_FOLDERS as $folder) {
+            try {
+                if ($storage->list($folder) !== []) {
+                    $found[] = $folder;
+                }
+            } catch (Throwable) {
+                continue;
+            }
+        }
+
+        return $found;
+    }
+
+    /**
      * How many media are private, when the disk cannot sign a URL for them; null when it can, or when none is.
      */
     private function privateMediaWithoutSignature(MediaStorage $storage): ?int
@@ -172,6 +210,20 @@ final readonly class MediaCheck implements CheckInterface
         $private = \get_posts(['post_type' => 'attachment', 'post_status' => 'any', 'meta_key' => '_pollora_media_private', 'meta_value' => '1', 'fields' => 'ids', 'numberposts' => 100]);
 
         return $private === [] ? null : count($private);
+    }
+
+    /**
+     * A file of a folder that is kept local on purpose, so it is not a file the migration forgot.
+     */
+    private function isPrivateFolder(string $relative): bool
+    {
+        foreach (self::PRIVATE_FOLDERS as $folder) {
+            if (str_starts_with($relative, $folder.'/')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -197,6 +249,10 @@ final readonly class MediaCheck implements CheckInterface
             }
 
             $relative = ltrim(substr($file->getPathname(), strlen($this->localUploads)), '/');
+
+            if ($this->isPrivateFolder($relative)) {
+                continue;
+            }
 
             try {
                 if (! $storage->exists($relative)) {
