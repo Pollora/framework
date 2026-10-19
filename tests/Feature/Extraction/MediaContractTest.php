@@ -9,10 +9,12 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Facade;
 use Pollora\Doctor\Domain\Enums\RunContext;
 use Pollora\Hook\Async\PendingAsync;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\HookInterface;
+use Pollora\Media\Application\Services\ImageSizes;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Events\MediaDeleted;
 use Pollora\Media\Domain\Events\MediaStored;
@@ -23,6 +25,7 @@ use Pollora\Media\Infrastructure\Laravel\MediaServiceProvider;
 use Pollora\Media\Infrastructure\WordPress\AsyncThumbnails;
 use Pollora\Media\Infrastructure\WordPress\StreamWrapper;
 use Pollora\Media\Infrastructure\WordPress\WordPressMedia;
+use Pollora\Support\Facades\ImageSize;
 
 /**
  * The media library on a Laravel disk, with the real provider, the real filesystem manager and a real local
@@ -154,8 +157,8 @@ it('has a doctor check that is skipped without a disk, ok with one that works, a
 
 it('hands the framework hook service to the module, so the thumbnails of an upload can be deferred', function (): void {
     [$app, $provider] = ($this->makeApp)(['disk' => 'uploads', 'async_thumbnails' => true]);
-    Filters\expectAdded('intermediate_image_sizes_advanced')->once();
-    Filters\expectAdded('wp_generate_attachment_metadata')->twice(); // the thumbnails, and private media
+    Filters\expectAdded('intermediate_image_sizes_advanced')->twice(); // the thumbnails, and the declared sizes
+    Filters\expectAdded('wp_generate_attachment_metadata')->times(3); // the thumbnails, private media, the declared sizes
     $this->action->shouldReceive('add')->with(AsyncThumbnails::HOOK, Mockery::type('array'))->once()->andReturn(Mockery::mock(HookInterface::class));
     $this->action->shouldReceive('async')->once()->andReturn(new PendingAsync(static function (): void {}));
 
@@ -208,4 +211,50 @@ it('has a doctor check that warns of private media on a disk that cannot sign', 
 
     expect($result->status->name)->toBe('Warning')
         ->and($result->summary)->toContain('cannot sign URLs')->toContain('2 media');
+});
+
+it('declares image sizes through the facade, on the registry the module uses, signed with the application key', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    $app['config']->set('app.key', 'base64:test-application-key');
+    Facade::clearResolvedInstances();
+    Facade::setFacadeApplication($app);
+
+    try {
+        ImageSize::add('card')->cover(600, 400)->webp(75);
+        ImageSize::add('hero')->scale(width: 1920)->widths([640]);
+
+        $sizes = $app->make(ImageSizes::class);
+        $file = $sizes->names()->for('2026/10/photo.jpg', $sizes->get('card'), 3000, 2000);
+
+        expect(array_keys($sizes->all()))->toBe(['card', 'hero'])
+            ->and($sizes)->toBe($app->make(ImageSizes::class))
+            ->and($app->make(WordPressMedia::class)->imageSizes())->toBe($sizes)
+            ->and($file)->toMatch('#^2026/10/photo-card-600x400-[0-9a-f]{12}\.webp$#');
+
+        $app['config']->set('app.key', 'base64:another-key');
+        expect($sizes->names()->for('2026/10/photo.jpg', $sizes->get('card'), 3000, 2000))->not->toBe($file);
+    } finally {
+        Facade::clearResolvedInstances();
+        Facade::setFacadeApplication(null);
+    }
+});
+
+it('has a doctor check that reports declarations it could not make into a size', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    $sizes = new ImageSizes(fn (): string => 'k');
+    $sizes->add('broken')->cover(600);
+    $check = new MediaCheck(
+        'uploads',
+        fn () => $app->make(MediaStorage::class),
+        fn () => $app->make(MediaConfig::class),
+        sys_get_temp_dir().'/pollora-media-no-local-'.bin2hex(random_bytes(3)),
+        fn (): ImageSizes => $sizes,
+    );
+    Monkey\Functions\when('get_posts')->justReturn([]);
+
+    $result = $check->run(RunContext::Console);
+
+    expect($result->status->name)->toBe('Warning')
+        ->and($result->summary)->toContain('declared image sizes')
+        ->and($result->details[0])->toContain('broken');
 });

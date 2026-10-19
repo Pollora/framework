@@ -8,8 +8,10 @@ use Closure;
 use Pollora\Doctor\Domain\Contracts\CheckInterface;
 use Pollora\Doctor\Domain\Enums\RunContext;
 use Pollora\Doctor\Domain\Models\CheckResult;
+use Pollora\Media\Application\Services\ImageSizes;
 use Pollora\Media\Application\Services\MediaStatus;
 use Pollora\Media\Domain\Contracts\MediaStorage;
+use Pollora\Media\Domain\Enums\OutputFormat;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Throwable;
 
@@ -29,12 +31,14 @@ final readonly class MediaCheck implements CheckInterface
     /**
      * @param  Closure(): MediaStorage  $storage  Resolved only when a disk is set
      * @param  Closure(): MediaConfig  $config
+     * @param  (Closure(): ImageSizes)|null  $sizes  The declared image sizes
      */
     public function __construct(
         private ?string $disk,
         private Closure $storage,
         private Closure $config,
         private string $localUploads,
+        private ?Closure $sizes = null,
     ) {}
 
     public function id(): string
@@ -80,6 +84,16 @@ final readonly class MediaCheck implements CheckInterface
             );
         }
 
+        $sizeProblems = $this->sizeProblems();
+
+        if ($sizeProblems !== []) {
+            return CheckResult::warning(
+                sprintf('%d problem(s) with the declared image sizes.', count($sizeProblems)),
+                $sizeProblems,
+                'Fix the declaration (cover(), scale() or contain() with the dimensions it needs), or choose a format the image editor of this server can write (WebP: GD and Imagick; AVIF depends on the server)',
+            );
+        }
+
         $left = $this->leftBehind($storage);
 
         if ($left !== []) {
@@ -91,6 +105,37 @@ final readonly class MediaCheck implements CheckInterface
         }
 
         return CheckResult::ok(sprintf('The disk "%s" takes a file; media are served from %s.', $this->disk, $config->url));
+    }
+
+    /**
+     * Declarations that could not make a size, and sizes in a format this server's image editor cannot write.
+     *
+     * @return list<string>
+     */
+    private function sizeProblems(): array
+    {
+        if (! $this->sizes instanceof Closure) {
+            return [];
+        }
+
+        $sizes = ($this->sizes)();
+        $problems = $sizes->refusals();
+
+        if (function_exists('wp_image_editor_supports')) {
+            foreach ($sizes->all() as $spec) {
+                $mime = match ($spec->format) {
+                    OutputFormat::Webp => 'image/webp',
+                    OutputFormat::Avif => 'image/avif',
+                    OutputFormat::Original => null,
+                };
+
+                if ($mime !== null && ! \wp_image_editor_supports(['mime_type' => $mime])) {
+                    $problems[] = sprintf('The size "%s" is written in %s, which the image editor of this server cannot write.', $spec->name, $mime);
+                }
+            }
+        }
+
+        return $problems;
     }
 
     /**
