@@ -7,21 +7,31 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\View\Compilers\BladeCompiler;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
+use Pollora\Role\Application\Services\CapabilityOwnerReader;
+use Pollora\Role\Application\Services\RoleDeclarer;
 use Pollora\Role\Application\Services\RoleDefinitionBuilder;
 use Pollora\Role\Application\Services\RoleRegistry;
+use Pollora\Role\Domain\Enums\Access;
+use Pollora\Role\Domain\Services\PostTypeCapabilityMap;
 use Pollora\Role\Domain\Services\RoleCompiler;
+use Pollora\Role\Infrastructure\Adapters\WordPressRoleInjector;
 use Pollora\Role\Infrastructure\Laravel\EnsureUserHasRole;
 use Pollora\Role\Infrastructure\Laravel\RoleServiceProvider;
+use Pollora\Support\Facades\Role as RoleFacade;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Tests\Unit\Role\Fixtures\EditorAdjustments;
 use Tests\Unit\Role\Fixtures\Event;
+use Tests\Unit\Role\Fixtures\EventCap;
 use Tests\Unit\Role\Fixtures\EventManager;
 use Tests\Unit\Role\Fixtures\Genre;
 use Tests\Unit\Role\Fixtures\Venue;
+
+require_once dirname(__DIR__, 2).'/Unit/Role/Fixtures/wordpress-roles.php';
 
 /**
  * Roles declared in code, from the attributes to the capabilities WordPress stores, with the real provider, the
@@ -95,4 +105,82 @@ it('aliases the role middleware and compiles @role once the application has boot
 
     expect($router->getMiddleware()['role'] ?? null)->toBe(EnsureUserHasRole::class)
         ->and($blade->compileString("@role('editor') shown @endrole"))->toContain('endif');
+});
+
+it('declares roles with the fluent API through the container and the facade, to the same roles as the attributes', function (): void {
+    Facade::clearResolvedInstances();
+    Facade::setFacadeApplication($this->app);
+
+    try {
+        $registry = $this->app->make(RoleRegistry::class);
+        $registry->addPostType(Event::class);
+        $registry->addPostType(Venue::class);
+        $registry->addTaxonomy(Genre::class);
+
+        RoleFacade::make('event_manager', 'Event manager')
+            ->inherits('author')
+            ->grantsPostType(Event::class, Access::Editor)
+            ->grantsPostType('venue', Access::Author)
+            ->grantsTaxonomy(Genre::class)
+            ->grants(EventCap::ExportAttendees, 'scan_tickets')
+            ->grants('upload_files')
+            ->without('publish_posts');
+        RoleFacade::modify('editor')
+            ->grantsPostType(Event::class, Access::Contributor)
+            ->grants(EventCap::ScanTickets)
+            ->without('edit_theme_options');
+
+        $declarer = $this->app->make(RoleDeclarer::class);
+        $viaFacade = $this->app->make(RoleCompiler::class)->compile(
+            $this->stored,
+            $registry->definitions(),
+            $registry->modifications(),
+            ['administrator'],
+            $registry->declaredCapabilities(),
+        );
+
+        $other = new RoleRegistry(new CapabilityOwnerReader, new PostTypeCapabilityMap);
+        $other->addPostType(Event::class);
+        $other->addPostType(Venue::class);
+        $other->addTaxonomy(Genre::class);
+        $builder = $this->app->make(RoleDefinitionBuilder::class);
+        $other->addRole($builder->build(EventManager::class));
+        $other->addModification($builder->build(EditorAdjustments::class));
+        $viaAttributes = $this->app->make(RoleCompiler::class)->compile($this->stored, $other->definitions(), $other->modifications(), ['administrator'], $other->declaredCapabilities());
+
+        expect($viaFacade)->toBe($viaAttributes)
+            ->and($declarer)->toBe($this->app->make(RoleDeclarer::class))
+            ->and($registry->refusals())->toBe([]);
+    } finally {
+        Facade::clearResolvedInstances();
+        Facade::setFacadeApplication(null);
+    }
+});
+
+it('names the call in the facade that declared a role in what it refuses', function (): void {
+    Facade::clearResolvedInstances();
+    Facade::setFacadeApplication($this->app);
+
+    try {
+        RoleFacade::make('editor', 'Editor');
+
+        expect($this->app->make(RoleRegistry::class)->refusals()[0])->toStartWith("Role::make('editor') at ".__FILE__.':');
+    } finally {
+        Facade::clearResolvedInstances();
+        Facade::setFacadeApplication(null);
+    }
+});
+
+it('checks fluent declarations in the registry the injector compiles', function (): void {
+    $this->app->make(RoleDeclarer::class)->make('meddler', 'Meddler')->grants('edit_users');
+    $this->app->make(RoleDeclarer::class)->make('usher', 'Usher')->inherits('subscriber');
+
+    $wpRoles = new WP_Roles;
+    $wpRoles->roles = $this->stored;
+
+    $injector = $this->app->make(WordPressRoleInjector::class);
+    $injector->inject($wpRoles);
+
+    expect($wpRoles->roles)->toHaveKey('usher')->not->toHaveKey('meddler')
+        ->and($injector->warnings()[0])->toContain('allowSensitive: true');
 });
