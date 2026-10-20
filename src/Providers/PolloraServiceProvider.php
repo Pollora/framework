@@ -27,6 +27,7 @@ use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
 use Pollora\Logging\Infrastructure\Providers\LoggingServiceProvider;
 use Pollora\Login\Infrastructure\Providers\LoginServiceProvider;
 use Pollora\Mail\WordPressMailServiceProvider;
+use Pollora\Media\Infrastructure\Laravel\MediaServiceProvider;
 use Pollora\Meta\Infrastructure\Laravel\MetaServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
@@ -88,6 +89,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(PostTypeServiceProvider::class);
         $this->app->register(MetaServiceProvider::class);
         $this->app->register(RoleServiceProvider::class);
+        $this->app->register(MediaServiceProvider::class);
         $this->app->register(BlockBindingServiceProvider::class);
 
         // WordPress REST API
