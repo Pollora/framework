@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.36.1...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.37.0...develop)
+
+## [v13.37.0](https://github.com/Pollora/framework/compare/v13.36.1...v13.37.0) - 2026-10-20
 
 ### Added
 - Media, anchor of a cover: `ImageSize::add('portrait')->cover(400, 500, Anchor::Top)` keeps the top of the image instead of its centre (`Pollora\Media\Domain\Enums\Anchor`, the nine positions of `add_image_size()`). It never changes the dimensions of the size, changes the name of the files and the version of a service URL, becomes a `gravity` in the imgproxy preset, and is refused by Bunny, which `pollora:media:thumbs:export` and `pollora:doctor` report. It comes with `pollora/media` 0.8
