@@ -316,11 +316,12 @@ it('hands the imgproxy driver to the module, with the URL, key, salt and signatu
         'url' => 'https://img.client.fr/', 'key' => '736563726574', 'salt' => '68656C6C6F', 'signature_size' => '16',
     ]]]);
     $driver = $app->make(WordPressMedia::class)->thumbnailDriver();
-    $url = $driver->url('2026/10/photo.jpg', new ImageSizeSpec('card', Fit::Cover, 600, 400), 3000, 2000);
+    $spec = new ImageSizeSpec('card', Fit::Cover, 600, 400);
+    $url = $driver->url('2026/10/photo.jpg', $spec, 3000, 2000);
     $path = '/card/plain/https://media.client.fr/2026/10/photo.jpg@webp';
 
     expect($driver)->toBeInstanceOf(ImgproxyThumbnailDriver::class)
-        ->and($url)->toBe('https://img.client.fr/'.(new ImgproxySigner('736563726574', '68656C6C6F', 16))->sign($path).$path);
+        ->and($url)->toBe('https://img.client.fr/'.(new ImgproxySigner('736563726574', '68656C6C6F', 16))->sign($path).$path.'?v='.$spec->version());
 });
 
 it('takes the bucket of the disk as the imgproxy source when the source is s3', function (): void {
