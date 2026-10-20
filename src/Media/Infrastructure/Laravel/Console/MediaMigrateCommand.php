@@ -40,7 +40,7 @@ class MediaMigrateCommand extends Command
             : new FlysystemMediaStorage(new Filesystem(new LocalFilesystemAdapter(public_path('content/uploads'))));
 
         $execute = (bool) $this->option('execute');
-        $exclude = array_values(array_filter(array_map('strval', (array) $this->option('exclude'))));
+        $exclude = array_values(array_filter(array_map(strval(...), (array) $this->option('exclude'))));
         $report = (new MediaMigrator($source, $this->storageOf($disks, $to), $config->cacheControl))->migrate(! $execute, function (string $path, string $outcome): void {
             if ($outcome === 'fail') {
                 $this->components->warn('Could not copy '.$path);

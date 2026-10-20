@@ -494,7 +494,7 @@ final class RecordingMediaAdapter implements FilesystemAdapter
     /** @var array<string, array{cache: mixed, visibility: mixed}> */
     public array $writes = [];
 
-    private LocalFilesystemAdapter $inner;
+    private readonly LocalFilesystemAdapter $inner;
 
     public function __construct(string $root)
     {
