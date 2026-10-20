@@ -6,6 +6,7 @@ use Rector\Config\RectorConfig;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ScalarParamTypeByMethodCallTypeRector;
 use RectorLaravel\Rector\ArrayDimFetch\ServerVariableToRequestFacadeRector;
+use RectorLaravel\Rector\FuncCall\UnlinkFuncCallToFileFacadeDeleteRector;
 use RectorLaravel\Rector\MethodCall\ContainerBindConcreteWithClosureOnlyRector;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
@@ -22,6 +23,10 @@ return RectorConfig::configure()
         ScalarParamTypeByMethodCallTypeRector::class => [
             __DIR__.'/src/Models/Concerns/HasTypedMeta.php',
         ],
+        // rector-laravel 2.7 turns every unlink() into File::delete(). The
+        // cleanup of temp files, caches and test fixtures runs where the
+        // application may not be booted, and the facade would need it.
+        UnlinkFuncCallToFileFacadeDeleteRector::class,
         ContainerBindConcreteWithClosureOnlyRector::class => [
             __DIR__.'/src/Hook/Infrastructure/Providers/HookServiceProvider.php',
         ],
