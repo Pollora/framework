@@ -10,6 +10,11 @@ use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Facade;
+use League\Flysystem\Config;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use Pollora\Doctor\Domain\Enums\RunContext;
 use Pollora\Hook\Async\PendingAsync;
 use Pollora\Hook\Domain\Contract\Action;
@@ -25,6 +30,7 @@ use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Domain\Services\ImgproxySigner;
 use Pollora\Media\Infrastructure\BunnyThumbnailDriver;
 use Pollora\Media\Infrastructure\ImgproxyThumbnailDriver;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsExportCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsWarmCommand;
 use Pollora\Media\Infrastructure\Laravel\MediaCheck;
@@ -402,4 +408,201 @@ it('has a doctor check that reports a driver of the sizes it could not use', fun
     }
 
     expect($result->status->name)->toBe('Warning')->and($result->details[0])->toContain('"imgproxy"');
+});
+
+function removeMediaTestDirectory(string $path): void
+{
+    foreach (glob($path.'/{,.}[!.]*', GLOB_BRACE) ?: [] as $entry) {
+        is_dir($entry) ? removeMediaTestDirectory($entry) : unlink($entry);
+    }
+
+    @rmdir($path);
+}
+
+it('leaves out of pollora:media:migrate what --exclude names, and says how many', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    $source = $this->root.'-source';
+    mkdir($source.'/2026/10', 0777, true);
+    mkdir($source.'/woocommerce_uploads', 0777, true);
+    mkdir($source.'/wc-logs', 0777, true);
+    file_put_contents($source.'/2026/10/photo.jpg', 'photo');
+    file_put_contents($source.'/woocommerce_uploads/invoice.pdf', 'secret');
+    file_put_contents($source.'/wc-logs/error.log', 'log');
+    $app['config']->set('filesystems.disks.source', ['driver' => 'local', 'root' => $source]);
+
+    [$status, $output] = runMediaCommand($app, MediaMigrateCommand::class, [
+        '--from' => 'source', '--execute' => true, '--exclude' => ['woocommerce_uploads/*', 'wc-logs/*'],
+    ]);
+
+    $left = [file_exists($this->root.'/woocommerce_uploads/invoice.pdf'), file_exists($this->root.'/wc-logs/error.log')];
+    $copied = file_exists($this->root.'/2026/10/photo.jpg');
+    removeMediaTestDirectory($source);
+
+    expect($status)->toBe(0)
+        ->and($copied)->toBeTrue()
+        ->and($left)->toBe([false, false])
+        ->and($output)->toContain('Copied 1 file(s)')
+        ->and($output)->toContain('2 left out');
+});
+
+it('copies everything in pollora:media:migrate when nothing is excluded', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    $source = $this->root.'-source-all';
+    mkdir($source.'/wc-logs', 0777, true);
+    file_put_contents($source.'/wc-logs/error.log', 'log');
+    $app['config']->set('filesystems.disks.source', ['driver' => 'local', 'root' => $source]);
+
+    [$status, $output] = runMediaCommand($app, MediaMigrateCommand::class, ['--from' => 'source', '--execute' => true]);
+    $copied = file_exists($this->root.'/wc-logs/error.log');
+    removeMediaTestDirectory($source);
+
+    expect($status)->toBe(0)->and($copied)->toBeTrue()->and($output)->toContain('0 left out');
+});
+
+it('does not call a deliberately local folder a file left behind', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    Monkey\Functions\when('get_posts')->justReturn([]);
+    $local = sys_get_temp_dir().'/pollora-media-local-'.bin2hex(random_bytes(4));
+    mkdir($local.'/woocommerce_uploads', 0777, true);
+    mkdir($local.'/wc-logs', 0777, true);
+    file_put_contents($local.'/woocommerce_uploads/invoice.pdf', 'x');
+    file_put_contents($local.'/wc-logs/error.log', 'x');
+
+    $result = (new MediaCheck('uploads', fn () => $app->make(MediaStorage::class), fn () => $app->make(MediaConfig::class), $local))->run(RunContext::Console);
+
+    expect($result->status->name)->toBe('Ok');
+});
+
+it('has a doctor check that warns when a folder of private files is on the media disk, where it is served to anyone', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads']);
+    $local = sys_get_temp_dir().'/pollora-media-local-'.bin2hex(random_bytes(4));
+    mkdir($local, 0777, true);
+    mkdir($this->root.'/woocommerce_uploads', 0777, true);
+    file_put_contents($this->root.'/woocommerce_uploads/invoice.pdf', 'x');
+
+    $result = (new MediaCheck('uploads', fn () => $app->make(MediaStorage::class), fn () => $app->make(MediaConfig::class), $local))->run(RunContext::Console);
+
+    expect($result->status->name)->toBe('Warning')
+        ->and($result->summary)->toContain('woocommerce_uploads')
+        ->and($result->fix)->toContain('--exclude');
+});
+
+/**
+ * A local adapter that remembers the options each write was given, as an S3 adapter would read them.
+ */
+final class RecordingMediaAdapter implements FilesystemAdapter
+{
+    /** @var array<string, array{cache: mixed, visibility: mixed}> */
+    public array $writes = [];
+
+    private readonly LocalFilesystemAdapter $inner;
+
+    public function __construct(string $root)
+    {
+        $this->inner = new LocalFilesystemAdapter($root);
+    }
+
+    public function fileExists(string $path): bool
+    {
+        return $this->inner->fileExists($path);
+    }
+
+    public function directoryExists(string $path): bool
+    {
+        return $this->inner->directoryExists($path);
+    }
+
+    public function write(string $path, string $contents, Config $config): void
+    {
+        $this->writes[$path] = ['cache' => $config->get('CacheControl'), 'visibility' => $config->get('visibility')];
+        $this->inner->write($path, $contents, $config);
+    }
+
+    public function writeStream(string $path, $contents, Config $config): void
+    {
+        $this->writes[$path] = ['cache' => $config->get('CacheControl'), 'visibility' => $config->get('visibility')];
+        $this->inner->writeStream($path, $contents, $config);
+    }
+
+    public function read(string $path): string
+    {
+        return $this->inner->read($path);
+    }
+
+    public function readStream(string $path)
+    {
+        return $this->inner->readStream($path);
+    }
+
+    public function delete(string $path): void
+    {
+        $this->inner->delete($path);
+    }
+
+    public function deleteDirectory(string $path): void
+    {
+        $this->inner->deleteDirectory($path);
+    }
+
+    public function createDirectory(string $path, Config $config): void
+    {
+        $this->inner->createDirectory($path, $config);
+    }
+
+    public function setVisibility(string $path, string $visibility): void
+    {
+        $this->inner->setVisibility($path, $visibility);
+    }
+
+    public function visibility(string $path): FileAttributes
+    {
+        return $this->inner->visibility($path);
+    }
+
+    public function mimeType(string $path): FileAttributes
+    {
+        return $this->inner->mimeType($path);
+    }
+
+    public function lastModified(string $path): FileAttributes
+    {
+        return $this->inner->lastModified($path);
+    }
+
+    public function fileSize(string $path): FileAttributes
+    {
+        return $this->inner->fileSize($path);
+    }
+
+    public function listContents(string $path, bool $deep): iterable
+    {
+        return $this->inner->listContents($path, $deep);
+    }
+
+    public function move(string $source, string $destination, Config $config): void
+    {
+        $this->inner->move($source, $destination, $config);
+    }
+
+    public function copy(string $source, string $destination, Config $config): void
+    {
+        $this->inner->copy($source, $destination, $config);
+    }
+}
+
+it('sends the cache header of media.cache_control, and the visibility of the source, with each file pollora:media:migrate copies', function (): void {
+    [$app] = ($this->makeApp)(['disk' => 'uploads', 'cache_control' => 'public, max-age=31536000, immutable']);
+    $source = $this->root.'-source-headers';
+    mkdir($source, 0777, true);
+    file_put_contents($source.'/photo.jpg', 'photo');
+    $app['config']->set('filesystems.disks.source', ['driver' => 'local', 'root' => $source]);
+    $adapter = new RecordingMediaAdapter($this->root);
+    $app['filesystem']->set('uploads', new Illuminate\Filesystem\FilesystemAdapter(new Filesystem($adapter), $adapter, ['root' => $this->root]));
+
+    [$status] = runMediaCommand($app, MediaMigrateCommand::class, ['--from' => 'source', '--execute' => true]);
+    removeMediaTestDirectory($source);
+
+    expect($status)->toBe(0)
+        ->and($adapter->writes['photo.jpg']['cache'])->toBe('public, max-age=31536000, immutable')
+        ->and($adapter->writes['photo.jpg']['visibility'])->toBe('public');
 });
