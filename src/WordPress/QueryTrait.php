@@ -168,6 +168,12 @@ trait QueryTrait
      * The test is which script PHP is running, not a list of filenames: any
      * entry point WordPress grows later is covered without being named, and a
      * project adding its own is too.
+     *
+     * A server may start another script that includes the front controller:
+     * Valet and Herd run their own `server.php`, which requires
+     * `public/index.php`, so `SCRIPT_FILENAME` is not the front controller
+     * there. The request is still Laravel's, and a front controller PHP has
+     * included proves it — WordPress's entry points never include it.
      */
     private function laravelIsServingTheRequest(): bool
     {
@@ -193,6 +199,7 @@ trait QueryTrait
             return true;
         }
 
-        return $running === $frontController;
+        return $running === $frontController
+            || in_array($frontController, array_map('realpath', get_included_files()), true);
     }
 }

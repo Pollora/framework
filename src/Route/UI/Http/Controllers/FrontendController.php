@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Pollora\Route\UI\Http\Controllers;
 
 use Illuminate\Foundation\Exceptions\RegisterErrorViewPaths;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
 use Pollora\Route\Application\Services\AnsweringTemplate;
 use Pollora\Route\Domain\Enums\TemplateOutcome;
 use Pollora\Route\Domain\Models\TemplateResolution;
+use Pollora\Route\UI\Http\Responses\PublicDirectoryIndexRedirect;
 use Pollora\Route\UI\Http\Responses\SetupRequiredResponse;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
 
@@ -48,8 +50,14 @@ class FrontendController
     /**
      * Handle the request using WordPress template hierarchy.
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|RedirectResponse
     {
+        // A directory of public/ (the admin at /cms/wp-admin/) has an index.php
+        // a document-root server runs by itself; Valet and Herd do not
+        if ($redirect = PublicDirectoryIndexRedirect::for($request, public_path())) {
+            return $redirect;
+        }
+
         // WordPress loads once the database is configured: until then there is
         // no hierarchy to ask (Pollora/pollora#78)
         if (! $this->wordPressIsLoaded()) {
