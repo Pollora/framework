@@ -91,7 +91,7 @@ class DatabaseConfig
             ),
             password: password(
                 label: 'Database password?',
-                required: 'Database password is required'
+                hint: 'Leave empty if the database user has no password.'
             ),
             siteUrl: text(
                 label: 'Site URL?',
