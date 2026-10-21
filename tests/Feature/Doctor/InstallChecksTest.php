@@ -11,6 +11,7 @@ use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Adapters\LaravelDiscoveryCacheManagerFactory;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryCacheManager;
 use Pollora\Doctor\Domain\Enums\RunContext;
+use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\DiscoveryCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\EnvironmentFileCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
@@ -151,6 +152,30 @@ describe('Environment file', function (): void {
         file_put_contents($this->project.'/.env', "APP_URL=https://site.test\nDB_CONNECTION=mysql\nDB_HOST=db\nDB_DATABASE=db\nDB_USERNAME=db\n");
 
         expect((new EnvironmentFileCheck)->run(RunContext::Console)->status->value)->toBe('ok');
+    });
+});
+
+describe('Application URL', function (): void {
+    it('warns when APP_URL has no scheme, and says what Pollora reads', function (): void {
+        config(['app.url' => 'pollora.test']);
+
+        $result = (new AppUrlCheck)->run(RunContext::Console);
+
+        expect($result->status->value)->toBe('warning')
+            ->and($result->details)->toContain('Pollora reads it as http://pollora.test')
+            ->and($result->fix)->toContain('APP_URL=http://pollora.test');
+    });
+
+    it('passes a URL with a scheme, and a port', function (string $url): void {
+        config(['app.url' => $url]);
+
+        expect((new AppUrlCheck)->run(RunContext::Console)->status->value)->toBe('ok');
+    })->with(['https://pollora.test', 'http://localhost:8000']);
+
+    it('is skipped without an APP_URL', function (): void {
+        config(['app.url' => '']);
+
+        expect((new AppUrlCheck)->run(RunContext::Console)->status->value)->toBe('skipped');
     });
 });
 

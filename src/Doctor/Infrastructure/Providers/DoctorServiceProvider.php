@@ -6,6 +6,7 @@ namespace Pollora\Doctor\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Doctor\Application\Services\Doctor;
+use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\AssetBuildCheck;
 use Pollora\Doctor\Infrastructure\Checks\BlockRegistrationCheck;
 use Pollora\Doctor\Infrastructure\Checks\BlockThemeRoutesCheck;
@@ -39,6 +40,7 @@ class DoctorServiceProvider extends ServiceProvider
         WordPressCorePatchCheck::class,
         PatchesLockCheck::class,
         EnvironmentFileCheck::class,
+        AppUrlCheck::class,
         DevelopmentCachesCheck::class,
         DiscoveryCacheCheck::class,
         AssetBuildCheck::class,

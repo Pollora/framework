@@ -5,7 +5,15 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.38.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.38.1...develop)
+
+## [v13.38.1](https://github.com/Pollora/framework/compare/v13.38.0...v13.38.1) - 2026-10-21
+
+### Fixed
+- An `APP_URL` without a scheme (`APP_URL=pollora.test`, written by hand in `.env`) no longer breaks the site: every Artisan command failed with `Undefined array key "host"`, and `/wp-admin/` answered a 404 because WordPress built its URLs relative to the current path. The value is read as `http://pollora.test` for `WP_HOME`, `WP_SITEURL`, the cookie path and the console host (#518)
+
+### Added
+- `pollora:doctor` warns when `APP_URL` has no scheme, and gives the value to write
 
 ## [v13.38.0](https://github.com/Pollora/framework/compare/v13.37.1...v13.38.0) - 2026-10-21
 
