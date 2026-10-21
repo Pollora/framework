@@ -12,6 +12,7 @@ use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 use Pollora\Services\WordPress\Installation\InstallationService;
 use Pollora\Services\WordPress\Installation\WordPressInstallationException;
+use Pollora\WordPress\AppUrl;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
@@ -152,7 +153,7 @@ class LaunchPadInstallCommand extends Command
      */
     private function projectName(): string
     {
-        $host = parse_url((string) config('app.url'), PHP_URL_HOST);
+        $host = AppUrl::host((string) config('app.url'));
 
         if (is_string($host) && str_contains($host, '.')) {
             return explode('.', $host)[0];

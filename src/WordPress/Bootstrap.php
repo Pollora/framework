@@ -468,11 +468,11 @@ class Bootstrap
             Constant::queue('ABSPATH', $basePath.$wpPath);
         }
 
-        $appUrl = config('app.url');
-        Constant::queue('WP_SITEURL', rtrim((string) $appUrl, '/').'/'.ltrim(str_replace('public/', '', $wpPath), '/'));
+        $appUrl = AppUrl::normalize((string) config('app.url'));
+        Constant::queue('WP_SITEURL', rtrim($appUrl, '/').'/'.ltrim(str_replace('public/', '', $wpPath), '/'));
         Constant::queue('WP_HOME', $appUrl);
         Constant::queue('WP_CONTENT_DIR', $basePath.$contentPath);
-        Constant::queue('WP_CONTENT_URL', rtrim((string) $appUrl, '/').'/content');
+        Constant::queue('WP_CONTENT_URL', rtrim($appUrl, '/').'/content');
 
         // Apply constants once all are queued
         Constant::apply();
@@ -481,6 +481,6 @@ class Bootstrap
     private function setConsoleServerVariables(): void
     {
         $_SERVER['SERVER_PROTOCOL'] = 'https';
-        $_SERVER['HTTP_HOST'] = parse_url((string) config('app.url'))['host'];
+        $_SERVER['HTTP_HOST'] = AppUrl::host((string) config('app.url')) ?? 'localhost';
     }
 }

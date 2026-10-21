@@ -6,6 +6,7 @@ namespace Pollora\Doctor\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Doctor\Application\Services\Doctor;
+use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\AssetBuildCheck;
 use Pollora\Doctor\Infrastructure\Checks\BlockRegistrationCheck;
 use Pollora\Doctor\Infrastructure\Checks\BlockThemeRoutesCheck;
@@ -16,6 +17,7 @@ use Pollora\Doctor\Infrastructure\Checks\LegacyBlocksDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
+use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
 use Pollora\Doctor\Infrastructure\Checks\SymlinkedDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\TemplatePlaceholdersCheck;
 use Pollora\Doctor\Infrastructure\Checks\WordPressCorePatchCheck;
@@ -39,6 +41,7 @@ class DoctorServiceProvider extends ServiceProvider
         WordPressCorePatchCheck::class,
         PatchesLockCheck::class,
         EnvironmentFileCheck::class,
+        AppUrlCheck::class,
         DevelopmentCachesCheck::class,
         DiscoveryCacheCheck::class,
         AssetBuildCheck::class,
@@ -49,6 +52,7 @@ class DoctorServiceProvider extends ServiceProvider
         BlockThemeRoutesCheck::class,
         LegacyBlocksDirectoryCheck::class,
         BlockRegistrationCheck::class,
+        PublicRootCheck::class,
     ];
 
     public function register(): void

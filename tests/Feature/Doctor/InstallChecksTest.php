@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Composer\InstalledVersions;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Http;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
@@ -11,9 +12,11 @@ use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Adapters\LaravelDiscoveryCacheManagerFactory;
 use Pollora\Discovery\Infrastructure\Services\DiscoveryCacheManager;
 use Pollora\Doctor\Domain\Enums\RunContext;
+use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\DiscoveryCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\EnvironmentFileCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
+use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
 use Pollora\Doctor\Infrastructure\Checks\WordPressCorePatchCheck;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 
@@ -151,6 +154,62 @@ describe('Environment file', function (): void {
         file_put_contents($this->project.'/.env', "APP_URL=https://site.test\nDB_CONNECTION=mysql\nDB_HOST=db\nDB_DATABASE=db\nDB_USERNAME=db\n");
 
         expect((new EnvironmentFileCheck)->run(RunContext::Console)->status->value)->toBe('ok');
+    });
+});
+
+describe('Application URL', function (): void {
+    it('warns when APP_URL has no scheme, and says what Pollora reads', function (): void {
+        config(['app.url' => 'pollora.test']);
+
+        $result = (new AppUrlCheck)->run(RunContext::Console);
+
+        expect($result->status->value)->toBe('warning')
+            ->and($result->details)->toContain('Pollora reads it as http://pollora.test')
+            ->and($result->fix)->toContain('APP_URL=http://pollora.test');
+    });
+
+    it('passes a URL with a scheme, and a port', function (string $url): void {
+        config(['app.url' => $url]);
+
+        expect((new AppUrlCheck)->run(RunContext::Console)->status->value)->toBe('ok');
+    })->with(['https://pollora.test', 'http://localhost:8000']);
+
+    it('is skipped without an APP_URL', function (): void {
+        config(['app.url' => '']);
+
+        expect((new AppUrlCheck)->run(RunContext::Console)->status->value)->toBe('skipped');
+    });
+});
+
+describe('Document root', function (): void {
+    it('is an error when .env is served, the folder exposed being the project', function (): void {
+        config(['app.url' => 'http://pollora.test']);
+        Http::fake(['pollora.test/.env' => Http::response("APP_NAME=Pollora\nAPP_KEY=base64:abc\n")]);
+
+        $result = (new PublicRootCheck)->run(RunContext::Http);
+
+        expect($result->status->value)->toBe('error')
+            ->and($result->fix)->toContain('public/');
+    });
+
+    it('passes when .env is not served, or when a catch-all page answers 200 without it', function (int $status, string $body): void {
+        config(['app.url' => 'http://pollora.test']);
+        Http::fake(['pollora.test/.env' => Http::response($body, $status)]);
+
+        expect((new PublicRootCheck)->run(RunContext::Http)->status->value)->toBe('ok');
+    })->with([[404, 'Not found'], [200, '<html>home</html>']]);
+
+    it('is skipped when the site cannot request itself', function (): void {
+        config(['app.url' => 'http://pollora.test']);
+        Http::fake(fn () => throw new RuntimeException('timeout'));
+
+        expect((new PublicRootCheck)->run(RunContext::Http)->status->value)->toBe('skipped');
+    });
+
+    it('is skipped without an APP_URL', function (): void {
+        config(['app.url' => '']);
+
+        expect((new PublicRootCheck)->run(RunContext::Http)->status->value)->toBe('skipped');
     });
 });
 

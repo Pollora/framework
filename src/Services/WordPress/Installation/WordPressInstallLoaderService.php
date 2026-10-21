@@ -7,6 +7,7 @@ namespace Pollora\Services\WordPress\Installation;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Config;
 use Pollora\Hook\Domain\Contract\Filter;
+use Pollora\WordPress\AppUrl;
 
 /**
  * Service for loading WordPress core files and initializing the environment.
@@ -153,10 +154,10 @@ class WordPressInstallLoaderService
      */
     private function defineConstants(): self
     {
-        $appUrl = Config::get('app.url');
+        $appUrl = AppUrl::normalize((string) Config::get('app.url'));
 
         if (! defined('COOKIEHASH')) {
-            define('COOKIEHASH', md5((string) $appUrl));
+            define('COOKIEHASH', md5($appUrl));
         }
 
         $cookiePath = $this->getCookiePath($appUrl);
