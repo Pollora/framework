@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/cms/wp-admin/`, the address `pollora:install` prints for the admin, answered a 404 under Valet and Herd, which hand every URL that is not a file to the front controller. A request for a `public/` directory that holds an `index.php` is now sent to that file
 
 ### Added
+- Site Health reports an error when the web server serves `.env`: MAMP, Apache or nginx pointed at the project folder instead of `public/` expose the application key and the database password, and answer the site with a 404. The check requests `/.env` and says to point the document root to `public/`
 - `pollora:doctor` warns when `APP_URL` has no scheme, and gives the value to write
 
 ## [v13.38.0](https://github.com/Pollora/framework/compare/v13.37.1...v13.38.0) - 2026-10-21

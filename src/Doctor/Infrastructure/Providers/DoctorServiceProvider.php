@@ -17,6 +17,7 @@ use Pollora\Doctor\Infrastructure\Checks\LegacyBlocksDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
+use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
 use Pollora\Doctor\Infrastructure\Checks\SymlinkedDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\TemplatePlaceholdersCheck;
 use Pollora\Doctor\Infrastructure\Checks\WordPressCorePatchCheck;
@@ -51,6 +52,7 @@ class DoctorServiceProvider extends ServiceProvider
         BlockThemeRoutesCheck::class,
         LegacyBlocksDirectoryCheck::class,
         BlockRegistrationCheck::class,
+        PublicRootCheck::class,
     ];
 
     public function register(): void
