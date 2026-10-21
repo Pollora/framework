@@ -12,7 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - An `APP_URL` without a scheme (`APP_URL=pollora.test`, written by hand in `.env`) no longer breaks the site: every Artisan command failed with `Undefined array key "host"`, and `/wp-admin/` answered a 404 because WordPress built its URLs relative to the current path. The value is read as `http://pollora.test` for `WP_HOME`, `WP_SITEURL`, the cookie path and the console host (#518)
 
+- The home page of a site served by Valet or Herd no longer redirects to itself. Both run the site through their own `server.php`, which includes `public/index.php`, so `SCRIPT_FILENAME` is not the front controller. Pollora took the request for a WordPress entry point and sent it to the home URL, in an endless loop. A front controller PHP has included now counts as Laravel serving the request
+- `/cms/wp-admin/`, the address `pollora:install` prints for the admin, answered a 404 under Valet and Herd, which hand every URL that is not a file to the front controller. A request for a `public/` directory that holds an `index.php` is now sent to that file
+
 ### Added
+- Site Health reports an error when the web server serves `.env`: MAMP, Apache or nginx pointed at the project folder instead of `public/` expose the application key and the database password, and answer the site with a 404. The check requests `/.env` and says to point the document root to `public/`
 - `pollora:doctor` warns when `APP_URL` has no scheme, and gives the value to write
 
 ## [v13.38.0](https://github.com/Pollora/framework/compare/v13.37.1...v13.38.0) - 2026-10-21

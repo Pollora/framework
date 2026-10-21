@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Composer\InstalledVersions;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Http;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
@@ -15,6 +16,7 @@ use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\DiscoveryCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\EnvironmentFileCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
+use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
 use Pollora\Doctor\Infrastructure\Checks\WordPressCorePatchCheck;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 
@@ -176,6 +178,38 @@ describe('Application URL', function (): void {
         config(['app.url' => '']);
 
         expect((new AppUrlCheck)->run(RunContext::Console)->status->value)->toBe('skipped');
+    });
+});
+
+describe('Document root', function (): void {
+    it('is an error when .env is served, the folder exposed being the project', function (): void {
+        config(['app.url' => 'http://pollora.test']);
+        Http::fake(['pollora.test/.env' => Http::response("APP_NAME=Pollora\nAPP_KEY=base64:abc\n")]);
+
+        $result = (new PublicRootCheck)->run(RunContext::Http);
+
+        expect($result->status->value)->toBe('error')
+            ->and($result->fix)->toContain('public/');
+    });
+
+    it('passes when .env is not served, or when a catch-all page answers 200 without it', function (int $status, string $body): void {
+        config(['app.url' => 'http://pollora.test']);
+        Http::fake(['pollora.test/.env' => Http::response($body, $status)]);
+
+        expect((new PublicRootCheck)->run(RunContext::Http)->status->value)->toBe('ok');
+    })->with([[404, 'Not found'], [200, '<html>home</html>']]);
+
+    it('is skipped when the site cannot request itself', function (): void {
+        config(['app.url' => 'http://pollora.test']);
+        Http::fake(fn () => throw new RuntimeException('timeout'));
+
+        expect((new PublicRootCheck)->run(RunContext::Http)->status->value)->toBe('skipped');
+    });
+
+    it('is skipped without an APP_URL', function (): void {
+        config(['app.url' => '']);
+
+        expect((new PublicRootCheck)->run(RunContext::Http)->status->value)->toBe('skipped');
     });
 });
 
