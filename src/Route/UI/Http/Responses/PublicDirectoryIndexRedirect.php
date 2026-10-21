@@ -31,6 +31,12 @@ final class PublicDirectoryIndexRedirect
             return null;
         }
 
+        // The content folders answer the site's 404 on purpose (see the
+        // skeleton's .htaccess): redirecting would tell a visitor they exist
+        if (preg_match('#^/(cms/wp-content|content)(/|$)#', $path) === 1) {
+            return null;
+        }
+
         $root = realpath($publicPath);
         $directory = realpath($publicPath.$path);
 

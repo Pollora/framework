@@ -9,6 +9,10 @@ beforeEach(function (): void {
     $this->public = sys_get_temp_dir().'/pollora-public-'.bin2hex(random_bytes(6));
     mkdir($this->public.'/cms/wp-admin', 0777, true);
     mkdir($this->public.'/cms/empty', 0777, true);
+    mkdir($this->public.'/cms/wp-content/plugins', 0777, true);
+    mkdir($this->public.'/content/plugins', 0777, true);
+    touch($this->public.'/cms/wp-content/plugins/index.php');
+    touch($this->public.'/content/plugins/index.php');
     touch($this->public.'/index.php');
     touch($this->public.'/cms/wp-admin/index.php');
     touch($this->public.'/cms/wp-login.php');
@@ -40,6 +44,8 @@ describe('PublicDirectoryIndexRedirect', function (): void {
         'the root' => '/',
         'a WordPress page' => '/sample-page/',
         'outside public' => '/../',
+        'WordPress content folder' => '/cms/wp-content/plugins/',
+        'content folder' => '/content/plugins/',
     ]);
 
     it('only redirects reads', function (): void {
