@@ -200,6 +200,6 @@ trait QueryTrait
         }
 
         return $running === $frontController
-            || in_array($frontController, array_map('realpath', get_included_files()), true);
+            || in_array($frontController, array_map(realpath(...), get_included_files()), true);
     }
 }

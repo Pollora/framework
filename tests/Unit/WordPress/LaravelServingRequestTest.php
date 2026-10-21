@@ -82,7 +82,7 @@ describe('QueryTrait::laravelIsServingTheRequest()', function (): void {
         expect(servingProbe()->serving())->toBeFalse();
     });
 
-    it('says yes when a server script such as Valet\'s server.php includes the front controller', function (): void {
+    it("says yes when a server script such as Valet's server.php includes the front controller", function (): void {
         $server = $this->dir.'/server.php';
         touch($server);
         $_SERVER['SCRIPT_FILENAME'] = $server;

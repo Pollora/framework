@@ -54,7 +54,7 @@ class FrontendController
     {
         // A directory of public/ (the admin at /cms/wp-admin/) has an index.php
         // a document-root server runs by itself; Valet and Herd do not
-        if ($redirect = PublicDirectoryIndexRedirect::for($request, public_path())) {
+        if (($redirect = PublicDirectoryIndexRedirect::for($request, public_path())) instanceof RedirectResponse) {
             return $redirect;
         }
 
