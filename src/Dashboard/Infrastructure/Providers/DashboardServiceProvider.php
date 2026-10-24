@@ -6,7 +6,9 @@ namespace Pollora\Dashboard\Infrastructure\Providers;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use Pollora\Dashboard\Domain\Contracts\WordPressEnvironmentInterface;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
+use Pollora\Dashboard\Infrastructure\Adapters\WordPressEnvironment;
 use Pollora\Dashboard\UI\Console\StatusCommand;
 use Pollora\Dashboard\UI\Http\DashboardController;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
@@ -24,11 +26,14 @@ class DashboardServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(WordPressEnvironmentInterface::class, WordPressEnvironment::class);
+
         $this->app->singleton(SystemInfoCollector::class, fn ($app): SystemInfoCollector => new SystemInfoCollector(
             $app->make(VersionComparator::class),
             $app->make(DiscoveryManager::class),
             $app,
             Application::VERSION,
+            $app->make(WordPressEnvironmentInterface::class),
         ));
 
         if ($this->app->runningInConsole()) {

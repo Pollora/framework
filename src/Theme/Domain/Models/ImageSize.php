@@ -13,6 +13,7 @@ namespace Pollora\Theme\Domain\Models;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Pollora\Theme\Domain\Contracts\ThemeFeatureRegistrarInterface;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 use Psr\Container\ContainerInterface;
 
@@ -42,8 +43,10 @@ class ImageSize implements ThemeComponent
     {
         $images = ThemeConfig::get('images', []);
 
+        $features = $this->app->get(ThemeFeatureRegistrarInterface::class);
+
         foreach ($images as $name => $sizes) {
-            \add_image_size(
+            $features->addImageSize(
                 $name,
                 $sizes[0] ?? 0,
                 $sizes[1] ?? 0,

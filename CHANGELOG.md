@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.38.1...develop)
 
+### Changed
+- The domain layer no longer calls WordPress or imports the Infrastructure layer (harness rules ARCH-01 and ARCH-02). Theme menus, sidebars and image sizes are registered through `ThemeFeatureRegistrarInterface`, the theme URI filters resolve through `ContentUrlResolverInterface` and `ThemeAssetUrlResolverInterface`, the dashboard reads WordPress through `WordPressEnvironmentInterface`, `AbstractTaxonomy` translates its default labels through `LabelTranslatorInterface`, and `WooCommerceService` asks `WooCommerceEnvironmentInterface` about the child theme. Each port is bound to a WordPress adapter by its module's service provider; behaviour and public signatures are unchanged
+
 ## [v13.38.1](https://github.com/Pollora/framework/compare/v13.38.0...v13.38.1) - 2026-10-21
 
 ### Fixed
