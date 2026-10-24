@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters;
 
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceEnvironmentInterface;
+
 /**
  * Adapter for WordPress WooCommerce-specific functionality.
  *
  * This class provides an abstraction layer for WordPress and WooCommerce
  * specific functions, making the domain layer more testable and independent.
  */
-class WordPressWooCommerceAdapter
+class WordPressWooCommerceAdapter implements WooCommerceEnvironmentInterface
 {
     /**
      * Locate a template using WordPress locate_template function.

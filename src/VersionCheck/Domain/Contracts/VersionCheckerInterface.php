@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Pollora\VersionCheck\Domain\Contracts;
 
-use Pollora\VersionCheck\Infrastructure\Services\PackagistVersionChecker;
-
 /**
  * Contract for checking Pollora framework version information.
  *
  * Implementations are responsible for determining the currently installed
  * version and fetching the latest available version from a remote source.
- *
- * @see PackagistVersionChecker
+ * The framework's own implementation, PackagistVersionChecker, lives in the
+ * Infrastructure layer of this module and asks Packagist.
  */
 interface VersionCheckerInterface
 {
