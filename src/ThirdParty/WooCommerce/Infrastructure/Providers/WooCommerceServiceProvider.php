@@ -53,9 +53,8 @@ class WooCommerceServiceProvider extends ServiceProvider
      */
     private function registerDomainServices(): void
     {
-        $this->app->singleton(WooCommerceService::class, fn (Container $app): WooCommerceService => new WooCommerceService(
-            $app->make(WooCommerceEnvironmentInterface::class)
-        ));
+        // Autowired: the container hands it the bound WooCommerceEnvironmentInterface
+        $this->app->singleton(WooCommerceService::class);
     }
 
     /**

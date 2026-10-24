@@ -38,7 +38,10 @@ describe('WordPressEnvironment', function (): void {
     })->with([true, false]);
 
     it('reads the permalink structure from the option', function (): void {
-        Functions\expect('get_option')->once()->with('permalink_structure', '')->andReturn('/%postname%/');
+        // The suite stubs get_option() for every test; override the stub
+        Functions\when('get_option')->alias(
+            fn (string $option, mixed $default = false): mixed => $option === 'permalink_structure' ? '/%postname%/' : $default
+        );
 
         expect((new WordPressEnvironment)->permalinkStructure())->toBe('/%postname%/');
     });

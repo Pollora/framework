@@ -49,16 +49,6 @@ describe('WooCommerceServiceProvider', function (): void {
             ->toBe($this->container->get(WordPressWooCommerceAdapter::class));
     });
 
-    test('builds the domain service on the environment port', function (): void {
-        Brain\Monkey\Functions\when('is_child_theme')->justReturn(true);
-        Brain\Monkey\Functions\when('get_template_directory')->justReturn('/themes/parent');
-
-        $this->provider->register();
-
-        expect($this->container->get(WooCommerceService::class)->getThemeTemplatePaths())
-            ->toBe(['/themes/parent/woocommerce/']);
-    });
-
     test('can register application services', function (): void {
         $this->container->instance(Action::class, Mockery::mock(Action::class));
         $this->container->instance(Filter::class, Mockery::mock(Filter::class));

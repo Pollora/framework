@@ -12,9 +12,6 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <logging>
-        <junit outputFile="build/debug-junit.xml"/>
-    </logging>
     <source>
         <include>
             <directory>src</directory>
