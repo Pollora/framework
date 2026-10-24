@@ -13,8 +13,6 @@ class WordPressLabelTranslator implements LabelTranslatorInterface
 {
     public function translate(string $text, string $domain): string
     {
-        $translated = __($text, $domain);
-
-        return is_string($translated) ? $translated : $text;
+        return __($text, $domain);
     }
 }

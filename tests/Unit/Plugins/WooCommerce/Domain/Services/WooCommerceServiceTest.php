@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceEnvironmentInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
+use Pollora\ThirdParty\WooCommerce\Domain\Support\DefaultWooCommerceEnvironment;
 
 /**
  * An environment double: a child theme of /themes/parent or not, and the
@@ -70,6 +71,14 @@ describe('WooCommerceService', function (): void {
 
     test('knows of no child theme without an environment', function (): void {
         expect($this->service->getThemeTemplatePaths())->toBe([]);
+    });
+
+    test('has a default environment that knows nothing of the theme', function (): void {
+        $environment = new DefaultWooCommerceEnvironment;
+
+        expect($environment->isChildTheme())->toBeFalse()
+            ->and($environment->getTemplateDirectory())->toBe('')
+            ->and($environment->getWooCommerceTemplatePath())->toBe('woocommerce/');
     });
 
     test('can detect woocommerce status screen', function (): void {

@@ -10,6 +10,9 @@ use Pollora\Dashboard\Infrastructure\Adapters\WordPressEnvironment;
 /**
  * The WordPress side of the dashboard's environment port: the calls the
  * SystemInfoCollector used to make itself, with the same guards.
+ *
+ * activeTheme() is covered in tests/Feature/Dashboard: defining wp_get_theme()
+ * here would leak into unit tests that rely on it being undefined.
  */
 describe('WordPressEnvironment', function (): void {
     it('implements the domain port', function (): void {
@@ -60,24 +63,6 @@ describe('WordPressEnvironment', function (): void {
 
         expect($environment->taxonomyLabel('genre'))->toBe('Genres')
             ->and($environment->taxonomyLabel('unknown'))->toBeNull();
-    });
-
-    it('reads the active theme from wp_get_theme()', function (): void {
-        Functions\when('wp_get_theme')->justReturn(new class
-        {
-            public function get(string $header): string
-            {
-                return ['Name' => 'Apiary', 'Version' => '1.2.0'][$header] ?? '';
-            }
-
-            public function get_template(): string
-            {
-                return 'apiary';
-            }
-        });
-
-        expect((new WordPressEnvironment)->activeTheme())
-            ->toBe(['name' => 'Apiary', 'version' => '1.2.0', 'template' => 'apiary']);
     });
 });
 

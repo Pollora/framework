@@ -18,11 +18,7 @@ final readonly class WordPressEnvironment implements WordPressEnvironmentInterfa
     {
         // get_locale() reads the object cache, which is not there before
         // WordPress has loaded far enough to answer.
-        if (! function_exists('get_locale') || ! function_exists('wp_cache_get')) {
-            return null;
-        }
-
-        return (string) get_locale();
+        return function_exists('get_locale') && function_exists('wp_cache_get') ? (string) get_locale() : null;
     }
 
     public function version(): ?string
@@ -42,35 +38,23 @@ final readonly class WordPressEnvironment implements WordPressEnvironmentInterfa
 
     public function postTypeLabel(string $slug): ?string
     {
-        if (! function_exists('get_post_type_object')) {
-            return null;
-        }
-
-        $object = get_post_type_object($slug);
+        $object = function_exists('get_post_type_object') ? get_post_type_object($slug) : null;
 
         return $object !== null && isset($object->labels->name) ? $object->labels->name : null;
     }
 
     public function taxonomyLabel(string $slug): ?string
     {
-        if (! function_exists('get_taxonomy')) {
-            return null;
-        }
-
-        $object = get_taxonomy($slug);
+        $object = function_exists('get_taxonomy') ? get_taxonomy($slug) : false;
 
         return $object !== false && isset($object->labels->name) ? $object->labels->name : null;
     }
 
     public function activeTheme(): ?array
     {
-        if (! function_exists('wp_get_theme')) {
-            return null;
-        }
+        $theme = function_exists('wp_get_theme') ? wp_get_theme() : null;
 
-        $theme = wp_get_theme();
-
-        return [
+        return $theme === null ? null : [
             'name' => (string) $theme->get('Name'),
             'version' => (string) $theme->get('Version'),
             'template' => (string) $theme->get_template(),
