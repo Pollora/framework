@@ -33,9 +33,9 @@ describe('AbstractTaxonomy labels', function (): void {
 
     it('translates every label template in the pollora text domain', function (): void {
         $asked = new ArrayObject;
-        AbstractTaxonomy::useLabelTranslator(new class($asked) implements LabelTranslatorInterface
+        AbstractTaxonomy::useLabelTranslator(new readonly class($asked) implements LabelTranslatorInterface
         {
-            public function __construct(private readonly ArrayObject $asked) {}
+            public function __construct(private ArrayObject $asked) {}
 
             public function translate(string $text, string $domain): string
             {
