@@ -31,11 +31,12 @@ describe('WordPressEnvironment', function (): void {
         expect((new WordPressEnvironment)->version())->toBe('6.8.1');
     });
 
-    it('reads the multisite flag from is_multisite()', function (bool $multisite): void {
-        Functions\when('is_multisite')->justReturn($multisite);
-
-        expect((new WordPressEnvironment)->isMultisite())->toBe($multisite);
-    })->with([true, false]);
+    it('is not multisite while WordPress is not loaded', function (): void {
+        // is_multisite() is deliberately left undefined: once Brain Monkey
+        // defines a function it stays defined for the whole run, and the async
+        // hook runner in pollora/hook relies on this one being absent.
+        expect((new WordPressEnvironment)->isMultisite())->toBeFalse();
+    });
 
     it('reads the permalink structure from the option', function (): void {
         // The suite stubs get_option() for every test; override the stub

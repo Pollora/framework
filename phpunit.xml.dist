@@ -12,14 +12,6 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <logging>
-        <junit outputFile="build/debug-junit.xml"/>
-    </logging>
-    <coverage>
-        <report>
-            <text outputFile="build/debug-coverage.txt" showUncoveredFiles="true" showOnlySummary="false"/>
-        </report>
-    </coverage>
     <source>
         <include>
             <directory>src</directory>
