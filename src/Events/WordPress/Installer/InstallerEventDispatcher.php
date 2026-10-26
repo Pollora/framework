@@ -220,7 +220,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         $type = Request::post('action2') !== null ? INPUT_POST : INPUT_GET;
 
         // Get the plugins that are being deleted
-        $plugins = filter_input($type, 'checked', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+        $plugins = filter_input($type, 'checked', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY);
         $_plugins = $this->getPlugins();
 
         $pluginsToDelete = [];

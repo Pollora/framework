@@ -1,8 +1,8 @@
 includes:
+    - vendor/pollora/harness/presets/phpstan/base.neon
+    - vendor/pollora/harness/presets/phpstan/laravel.neon
     - phpstan-baseline.neon
     - phpstan-ignore-rules.neon
-    - vendor/larastan/larastan/extension.neon
-    - vendor/szepeviktor/phpstan-wordpress/extension.neon
 
 parameters:
     bootstrapFiles:

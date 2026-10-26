@@ -1,0 +1,8 @@
+{
+    "profile": "framework",
+    "mode": "observe",
+    "ratchet": {
+        "phpstan_level": 5,
+        "phpstan_baseline": 66
+    }
+}

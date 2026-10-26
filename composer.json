@@ -119,7 +119,8 @@
         "mockery/mockery": "^1.6.15",
         "wp-cli/wp-cli": "^2.12",
         "larastan/larastan": "^3.13",
-        "orchestra/testbench": "^11.3.0"
+        "orchestra/testbench": "^11.3.0",
+        "pollora/harness": "^0.1.1"
     },
     "autoload-dev": {
         "psr-4": {
@@ -151,6 +152,8 @@
             "@test:types",
             "@test:unit",
             "@test:type-coverage"
-        ]
+        ],
+        "qa": "@php vendor/bin/pollora-qa check",
+        "qa:fast": "@php vendor/bin/pollora-qa check --fast"
     }
 }
