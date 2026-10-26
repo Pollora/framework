@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Taxonomy\Domain\Models;
 
 use Pollora\Support\Domain\StringHelper;
+use Pollora\Taxonomy\Domain\Contracts\LabelTranslatorInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyAttributeInterface;
 
 /**
@@ -14,6 +15,25 @@ use Pollora\Taxonomy\Domain\Contracts\TaxonomyAttributeInterface;
  */
 abstract class AbstractTaxonomy implements TaxonomyAttributeInterface
 {
+    /**
+     * Translates the default labels; set once by the taxonomy service provider.
+     *
+     * A taxonomy class is instantiated by discovery, or by the application,
+     * without arguments, so the translator cannot arrive through the
+     * constructor without breaking every subclass that declares its own.
+     */
+    private static ?LabelTranslatorInterface $labelTranslator = null;
+
+    /**
+     * Set the translator the default labels go through.
+     *
+     * Without one, the label templates are used untranslated.
+     */
+    public static function useLabelTranslator(?LabelTranslatorInterface $translator): void
+    {
+        self::$labelTranslator = $translator;
+    }
+
     /**
      * Arguments set by attributes.
      *
@@ -133,34 +153,44 @@ abstract class AbstractTaxonomy implements TaxonomyAttributeInterface
             'singular_name' => $name,
             'menu_name' => $pluralName,
             /* translators: %s: taxonomy general name (plural) */
-            'all_items' => sprintf(__('All %s', 'pollora'), $pluralName),
+            'all_items' => sprintf($this->translateLabel('All %s'), $pluralName),
             /* translators: %s: taxonomy singular name */
-            'edit_item' => sprintf(__('Edit %s', 'pollora'), $name),
+            'edit_item' => sprintf($this->translateLabel('Edit %s'), $name),
             /* translators: %s: taxonomy singular name */
-            'view_item' => sprintf(__('View %s', 'pollora'), $name),
+            'view_item' => sprintf($this->translateLabel('View %s'), $name),
             /* translators: %s: taxonomy singular name */
-            'update_item' => sprintf(__('Update %s', 'pollora'), $name),
+            'update_item' => sprintf($this->translateLabel('Update %s'), $name),
             /* translators: %s: taxonomy singular name */
-            'add_new_item' => sprintf(__('Add New %s', 'pollora'), $name),
+            'add_new_item' => sprintf($this->translateLabel('Add New %s'), $name),
             /* translators: %s: taxonomy singular name */
-            'new_item_name' => sprintf(__('New %s Name', 'pollora'), $name),
+            'new_item_name' => sprintf($this->translateLabel('New %s Name'), $name),
             /* translators: %s: taxonomy general name (plural) */
-            'search_items' => sprintf(__('Search %s', 'pollora'), $pluralName),
+            'search_items' => sprintf($this->translateLabel('Search %s'), $pluralName),
             /* translators: %s: taxonomy general name (plural) */
-            'popular_items' => sprintf(__('Popular %s', 'pollora'), $pluralName),
+            'popular_items' => sprintf($this->translateLabel('Popular %s'), $pluralName),
             /* translators: %s: taxonomy general name (plural) */
-            'separate_items_with_commas' => sprintf(__('Separate %s with commas', 'pollora'), $pluralName),
+            'separate_items_with_commas' => sprintf($this->translateLabel('Separate %s with commas'), $pluralName),
             /* translators: %s: taxonomy general name (plural) */
-            'add_or_remove_items' => sprintf(__('Add or remove %s', 'pollora'), $pluralName),
+            'add_or_remove_items' => sprintf($this->translateLabel('Add or remove %s'), $pluralName),
             /* translators: %s: taxonomy general name (plural) */
-            'choose_from_most_used' => sprintf(__('Choose from the most used %s', 'pollora'), $pluralName),
+            'choose_from_most_used' => sprintf($this->translateLabel('Choose from the most used %s'), $pluralName),
             /* translators: %s: taxonomy general name (plural) */
-            'not_found' => sprintf(__('No %s found', 'pollora'), $pluralName),
+            'not_found' => sprintf($this->translateLabel('No %s found'), $pluralName),
             /* translators: %s: taxonomy singular name */
-            'parent_item' => sprintf(__('Parent %s', 'pollora'), $name),
+            'parent_item' => sprintf($this->translateLabel('Parent %s'), $name),
             /* translators: %s: taxonomy singular name */
-            'parent_item_colon' => sprintf(__('Parent %s:', 'pollora'), $name),
+            'parent_item_colon' => sprintf($this->translateLabel('Parent %s:'), $name),
         ];
+    }
+
+    /**
+     * Translate a label template in the framework's text domain.
+     */
+    private function translateLabel(string $text): string
+    {
+        return self::$labelTranslator instanceof LabelTranslatorInterface
+            ? self::$labelTranslator->translate($text, 'pollora')
+            : $text;
     }
 
     /**

@@ -2,8 +2,24 @@
 
 declare(strict_types=1);
 
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceEnvironmentInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
+use Pollora\ThirdParty\WooCommerce\Domain\Support\DefaultWooCommerceEnvironment;
+
+/**
+ * An environment double: a child theme of /themes/parent or not, and the
+ * override folder WooCommerce declares.
+ */
+function wooCommerceEnvironment(bool $childTheme, string $templatePath = 'woocommerce/'): WooCommerceEnvironmentInterface
+{
+    $environment = Mockery::mock(WooCommerceEnvironmentInterface::class);
+    $environment->shouldReceive('isChildTheme')->andReturn($childTheme);
+    $environment->shouldReceive('getTemplateDirectory')->andReturn('/themes/parent');
+    $environment->shouldReceive('getWooCommerceTemplatePath')->andReturn($templatePath);
+
+    return $environment;
+}
 
 describe('WooCommerceService', function (): void {
     beforeEach(function (): void {
@@ -32,24 +48,37 @@ describe('WooCommerceService', function (): void {
     });
 
     test('can get theme template paths for child themes', function (): void {
-        Brain\Monkey\Functions\when('is_child_theme')->justReturn(true);
-        Brain\Monkey\Functions\when('get_template_directory')->justReturn('/themes/parent');
+        $service = new WooCommerceService(wooCommerceEnvironment(true));
 
-        $mockWC = Mockery::mock();
-        $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
-        Brain\Monkey\Functions\when('WC')->justReturn($mockWC);
-
-        $paths = $this->service->getThemeTemplatePaths();
+        $paths = $service->getThemeTemplatePaths();
 
         expect($paths)->toContain('/themes/parent/woocommerce/');
     });
 
-    test('returns empty array for non-child themes', function (): void {
-        Brain\Monkey\Functions\when('is_child_theme')->justReturn(false);
+    test('uses the override folder WooCommerce declares for child themes', function (): void {
+        $service = new WooCommerceService(wooCommerceEnvironment(true, 'shop/'));
 
-        $paths = $this->service->getThemeTemplatePaths();
+        expect($service->getThemeTemplatePaths())->toBe(['/themes/parent/shop/']);
+    });
+
+    test('returns empty array for non-child themes', function (): void {
+        $service = new WooCommerceService(wooCommerceEnvironment(false));
+
+        $paths = $service->getThemeTemplatePaths();
 
         expect($paths)->toBe([]);
+    });
+
+    test('knows of no child theme without an environment', function (): void {
+        expect($this->service->getThemeTemplatePaths())->toBe([]);
+    });
+
+    test('has a default environment that knows nothing of the theme', function (): void {
+        $environment = new DefaultWooCommerceEnvironment;
+
+        expect($environment->isChildTheme())->toBeFalse()
+            ->and($environment->getTemplateDirectory())->toBe('')
+            ->and($environment->getWooCommerceTemplatePath())->toBe('woocommerce/');
     });
 
     test('can detect woocommerce status screen', function (): void {
@@ -88,19 +117,15 @@ describe('WooCommerceService', function (): void {
         expect($result)->toBeFalse();
     });
 
-    test('can get woocommerce template path with WC available', function (): void {
-        $mockWC = Mockery::mock();
-        $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
-        Brain\Monkey\Functions\when('WC')->justReturn($mockWC);
+    test('can get woocommerce template path from the environment', function (): void {
+        $service = new WooCommerceService(wooCommerceEnvironment(false, 'shop/'));
 
-        $path = $this->service->getWooCommerceTemplatePath();
+        $path = $service->getWooCommerceTemplatePath();
 
-        expect($path)->toBe('woocommerce/');
+        expect($path)->toBe('shop/');
     });
 
-    test('returns default path when WC not available', function (): void {
-        Brain\Monkey\Functions\when('WC')->justReturn();
-
+    test('returns default path without an environment', function (): void {
         $path = $this->service->getWooCommerceTemplatePath();
 
         expect($path)->toBe('woocommerce/');
@@ -111,14 +136,9 @@ describe('WooCommerceService', function (): void {
             define('WC_ABSPATH', '/plugin/woocommerce/');
         }
 
-        Brain\Monkey\Functions\when('is_child_theme')->justReturn(true);
-        Brain\Monkey\Functions\when('get_template_directory')->justReturn('/themes/parent');
+        $service = new WooCommerceService(wooCommerceEnvironment(true));
 
-        $mockWC = Mockery::mock();
-        $mockWC->shouldReceive('template_path')->andReturn('woocommerce/');
-        Brain\Monkey\Functions\when('WC')->justReturn($mockWC);
-
-        $paths = $this->service->getAllTemplatePaths();
+        $paths = $service->getAllTemplatePaths();
 
         expect($paths)->toContain('/plugin/woocommerce/templates/');
         expect($paths)->toContain('/themes/parent/woocommerce/');

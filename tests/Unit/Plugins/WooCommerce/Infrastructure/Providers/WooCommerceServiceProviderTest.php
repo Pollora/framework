@@ -9,6 +9,7 @@ use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceEnvironmentInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
@@ -38,6 +39,14 @@ describe('WooCommerceServiceProvider', function (): void {
         expect($this->container->has(WordPressWooCommerceAdapter::class))->toBeTrue();
         expect($this->container->has(WooCommerceIntegrationInterface::class))->toBeTrue();
         expect($this->container->has(TemplateResolverInterface::class))->toBeTrue();
+    });
+
+    test('binds the environment port to the WordPress adapter', function (): void {
+        $this->provider->register();
+
+        expect($this->container->get(WooCommerceEnvironmentInterface::class))
+            ->toBeInstanceOf(WordPressWooCommerceAdapter::class)
+            ->toBe($this->container->get(WordPressWooCommerceAdapter::class));
     });
 
     test('can register application services', function (): void {

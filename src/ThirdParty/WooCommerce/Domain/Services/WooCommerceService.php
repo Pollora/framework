@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace Pollora\ThirdParty\WooCommerce\Domain\Services;
 
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceEnvironmentInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
+use Pollora\ThirdParty\WooCommerce\Domain\Support\DefaultWooCommerceEnvironment;
 
 /**
  * Domain service for WooCommerce business logic.
  *
  * This service contains pure domain logic for WooCommerce
- * integration without external dependencies.
+ * integration; what it needs to know about the active theme and the plugin
+ * comes through WooCommerceEnvironmentInterface.
  */
 class WooCommerceService
 {
+    public function __construct(
+        private readonly WooCommerceEnvironmentInterface $environment = new DefaultWooCommerceEnvironment
+    ) {}
+
     /**
      * Get default WooCommerce template paths.
      *
@@ -41,13 +48,8 @@ class WooCommerceService
         $paths = [];
 
         // Add parent theme templates in woocommerce/ subfolder if child theme is active
-        if (function_exists('is_child_theme') && is_child_theme() && function_exists('get_template_directory')) {
-            $templatePath = 'woocommerce/';
-            if (function_exists('WC') && WC() && method_exists(WC(), 'template_path')) {
-                $templatePath = WC()->template_path();
-            }
-
-            $paths[] = get_template_directory().'/'.$templatePath;
+        if ($this->environment->isChildTheme()) {
+            $paths[] = $this->environment->getTemplateDirectory().'/'.$this->environment->getWooCommerceTemplatePath();
         }
 
         return $paths;
@@ -77,11 +79,7 @@ class WooCommerceService
      */
     public function getWooCommerceTemplatePath(): string
     {
-        if (function_exists('WC') && WC() && method_exists(WC(), 'template_path')) {
-            return WC()->template_path();
-        }
-
-        return 'woocommerce/';
+        return $this->environment->getWooCommerceTemplatePath();
     }
 
     /**

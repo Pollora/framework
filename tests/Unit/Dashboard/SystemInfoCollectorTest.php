@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Nwidart\Modules\Module;
 use Pollora\Attributes\PostType;
 use Pollora\Attributes\Taxonomy;
+use Pollora\Dashboard\Domain\Contracts\WordPressEnvironmentInterface;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
@@ -28,6 +29,7 @@ function createCollector(
     ?DiscoveryManager $manager = null,
     ?ContainerInterface $container = null,
     string $laravelVersion = '11.0.0',
+    ?WordPressEnvironmentInterface $wordpress = null,
 ): SystemInfoCollector {
     $comparator ??= new VersionComparator(
         Mockery::mock(VersionCheckerInterface::class, [
@@ -39,7 +41,11 @@ function createCollector(
     $manager ??= Mockery::mock(DiscoveryManager::class);
     $container ??= Mockery::mock(ContainerInterface::class);
 
-    return new SystemInfoCollector($comparator, $manager, $container, $laravelVersion);
+    if (! $wordpress instanceof WordPressEnvironmentInterface) {
+        return new SystemInfoCollector($comparator, $manager, $container, $laravelVersion);
+    }
+
+    return new SystemInfoCollector($comparator, $manager, $container, $laravelVersion, $wordpress);
 }
 
 describe('SystemInfoCollector', function (): void {
@@ -108,6 +114,16 @@ describe('SystemInfoCollector', function (): void {
             expect($info['laravel'])->toBe('11.0.0');
             expect($info)->toHaveKeys(['php', 'laravel', 'wordpress']);
         });
+
+        it('reports Unknown for WordPress when it runs without WordPress', function (): void {
+            expect(createCollector()->collectEnvironmentInfo()['wordpress'])->toBe('Unknown');
+        });
+
+        it('reports the WordPress version the environment gives', function (): void {
+            $wordpress = Mockery::mock(WordPressEnvironmentInterface::class, ['version' => '6.8.1']);
+
+            expect(createCollector(wordpress: $wordpress)->collectEnvironmentInfo()['wordpress'])->toBe('6.8.1');
+        });
     });
 
     describe('collectWordPressConfig', function (): void {
@@ -118,6 +134,22 @@ describe('SystemInfoCollector', function (): void {
             expect($info)->toHaveKeys(['debug', 'multisite', 'permalink_structure']);
             expect($info['debug'])->toBeBool();
             expect($info['multisite'])->toBeBool();
+        });
+
+        it('reports the multisite flag and permalink structure the environment gives', function (): void {
+            $wordpress = Mockery::mock(WordPressEnvironmentInterface::class, [
+                'isMultisite' => true,
+                'permalinkStructure' => '/%postname%/',
+            ]);
+
+            expect(createCollector(wordpress: $wordpress)->collectWordPressConfig())->toMatchArray([
+                'multisite' => true,
+                'permalink_structure' => '/%postname%/',
+            ]);
+        });
+
+        it('calls an empty permalink structure Plain', function (): void {
+            expect(createCollector()->collectWordPressConfig()['permalink_structure'])->toBe('Plain');
         });
     });
 
@@ -159,6 +191,22 @@ describe('SystemInfoCollector', function (): void {
 
             expect($info['post_types']['items'][0])->toMatchArray(['slug' => 'synthese-presse', 'label' => 'Synthèses de presse'])
                 ->and($info['taxonomies']['items'][0])->toMatchArray(['slug' => 'theme-presse', 'label' => 'Thèmes de presse']);
+        });
+
+        it('prefers the label WordPress registered over the attribute', function (): void {
+            $manager = Mockery::mock(DiscoveryManager::class);
+            $manager->shouldReceive('getDiscoveredItems')->with('post_types')->andReturn([['class' => SyntheseDePresse::class]]);
+            $manager->shouldReceive('getDiscoveredItems')->with('taxonomies')->andReturn([['class' => ThemeDePresse::class]]);
+            $manager->shouldReceive('getDiscoveredItems')->withAnyArgs()->andReturn([]);
+
+            $wordpress = Mockery::mock(WordPressEnvironmentInterface::class);
+            $wordpress->shouldReceive('postTypeLabel')->with('synthese-presse')->andReturn('Revues de presse');
+            $wordpress->shouldReceive('taxonomyLabel')->with('theme-presse')->andReturn('Rubriques');
+
+            $info = createCollector(manager: $manager, wordpress: $wordpress)->collectDiscoveryInfo();
+
+            expect($info['post_types']['items'][0]['label'])->toBe('Revues de presse')
+                ->and($info['taxonomies']['items'][0]['label'])->toBe('Rubriques');
         });
 
         it('collects hook counts by type', function (): void {
@@ -340,6 +388,13 @@ describe('SystemInfoCollector', function (): void {
                 'template' => 'Unknown',
             ]);
         });
+
+        it('returns the active theme the environment gives', function (): void {
+            $theme = ['name' => 'Apiary', 'version' => '1.2.0', 'template' => 'apiary'];
+            $wordpress = Mockery::mock(WordPressEnvironmentInterface::class, ['activeTheme' => $theme]);
+
+            expect(createCollector(wordpress: $wordpress)->collectThemeInfo())->toBe($theme);
+        });
     });
 
     describe('collectTranslationInfo', function (): void {
@@ -364,10 +419,19 @@ describe('SystemInfoCollector', function (): void {
         });
 
         it('reports the WordPress locale', function (): void {
-            \Brain\Monkey\Functions\when('get_locale')->justReturn('fr_FR');
+            $wordpress = Mockery::mock(WordPressEnvironmentInterface::class, ['locale' => 'fr_FR']);
 
-            expect(createCollector()->collectTranslationInfo()['wordpress_locale'])->toBe('fr_FR');
+            expect(createCollector(wordpress: $wordpress)->collectTranslationInfo()['wordpress_locale'])->toBe('fr_FR');
         });
+
+        it('reports an Unknown WordPress locale when there is none', function (?string $locale): void {
+            $wordpress = Mockery::mock(WordPressEnvironmentInterface::class, ['locale' => $locale]);
+
+            expect(createCollector(wordpress: $wordpress)->collectTranslationInfo()['wordpress_locale'])->toBe('Unknown');
+        })->with([
+            'not loaded' => [null],
+            'empty' => [''],
+        ]);
 
         it('reports the locale the bound translator declares', function (): void {
             $container = Mockery::mock(ContainerInterface::class);

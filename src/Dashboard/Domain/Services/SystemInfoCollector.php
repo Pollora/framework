@@ -7,6 +7,8 @@ namespace Pollora\Dashboard\Domain\Services;
 use Nwidart\Modules\Contracts\RepositoryInterface;
 use Pollora\Attributes\PostType;
 use Pollora\Attributes\Taxonomy;
+use Pollora\Dashboard\Domain\Contracts\WordPressEnvironmentInterface;
+use Pollora\Dashboard\Domain\Support\UnavailableWordPressEnvironment;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Modules\Application\Services\ModuleStates;
 use Pollora\Modules\Application\Services\ModuleVersions;
@@ -29,6 +31,7 @@ final readonly class SystemInfoCollector
         private DiscoveryManager $discoveryManager,
         private ContainerInterface $container,
         private string $laravelVersion = '',
+        private WordPressEnvironmentInterface $wordpress = new UnavailableWordPressEnvironment,
     ) {}
 
     /**
@@ -65,9 +68,7 @@ final readonly class SystemInfoCollector
      */
     public function collectTranslationInfo(): array
     {
-        $wordpressLocale = function_exists('get_locale') && function_exists('wp_cache_get')
-            ? (string) get_locale()
-            : 'Unknown';
+        $wordpressLocale = $this->wordpress->locale() ?? 'Unknown';
 
         return [
             'override_active' => $this->isTranslationOverrideActive(),
@@ -156,9 +157,7 @@ final readonly class SystemInfoCollector
      */
     public function collectEnvironmentInfo(): array
     {
-        $wpVersion = function_exists('get_bloginfo')
-            ? (string) get_bloginfo('version')
-            : 'Unknown';
+        $wpVersion = $this->wordpress->version() ?? 'Unknown';
 
         return [
             'php' => PHP_VERSION,
@@ -173,10 +172,8 @@ final readonly class SystemInfoCollector
     public function collectWordPressConfig(): array
     {
         $debug = defined('WP_DEBUG') && WP_DEBUG;
-        $multisite = function_exists('is_multisite') && is_multisite();
-        $permalink = function_exists('get_option')
-            ? (string) get_option('permalink_structure', '')
-            : '';
+        $multisite = $this->wordpress->isMultisite();
+        $permalink = $this->wordpress->permalinkStructure();
 
         return [
             'debug' => $debug,
@@ -290,28 +287,14 @@ final readonly class SystemInfoCollector
 
     private function getPostTypeLabel(string $slug, string $class, ?string $plural = null): string
     {
-        if (function_exists('get_post_type_object')) {
-            $object = get_post_type_object($slug);
-
-            if ($object !== null && isset($object->labels->name)) {
-                return $object->labels->name;
-            }
-        }
-
-        return $plural ?? StringHelper::headline(class_basename($class));
+        return $this->wordpress->postTypeLabel($slug)
+            ?? $plural ?? StringHelper::headline(class_basename($class));
     }
 
     private function getTaxonomyLabel(string $slug, string $class, ?string $plural = null): string
     {
-        if (function_exists('get_taxonomy')) {
-            $object = get_taxonomy($slug);
-
-            if ($object !== false && isset($object->labels->name)) {
-                return $object->labels->name;
-            }
-        }
-
-        return $plural ?? StringHelper::headline(class_basename($class));
+        return $this->wordpress->taxonomyLabel($slug)
+            ?? $plural ?? StringHelper::headline(class_basename($class));
     }
 
     /**
@@ -506,16 +489,7 @@ final readonly class SystemInfoCollector
      */
     public function collectThemeInfo(): array
     {
-        if (! function_exists('wp_get_theme')) {
-            return ['name' => 'Unknown', 'version' => 'Unknown', 'template' => 'Unknown'];
-        }
-
-        $theme = wp_get_theme();
-
-        return [
-            'name' => (string) $theme->get('Name'),
-            'version' => (string) $theme->get('Version'),
-            'template' => (string) $theme->get_template(),
-        ];
+        return $this->wordpress->activeTheme()
+            ?? ['name' => 'Unknown', 'version' => 'Unknown', 'template' => 'Unknown'];
     }
 }

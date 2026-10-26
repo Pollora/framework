@@ -18,6 +18,7 @@ use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Services\Translater;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Pollora\Theme\Domain\Contracts\ThemeFeatureRegistrarInterface;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 use Psr\Container\ContainerInterface;
 
@@ -77,7 +78,7 @@ class Menus implements ThemeComponent
         $translater = new Translater($menus, 'menus');
         $menus = $translater->translate(['*']);
 
-        \register_nav_menus($menus);
+        $this->app->get(ThemeFeatureRegistrarInterface::class)->registerNavMenus($menus);
     }
 
     /**

@@ -12,6 +12,7 @@ use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\ThirdParty\WooCommerce\Application\UseCases\RegisterWooCommerceHooksUseCase;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\ComingSoonHandlerInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\TemplateResolverInterface;
+use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceEnvironmentInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Contracts\WooCommerceIntegrationInterface;
 use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
 use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
@@ -52,6 +53,7 @@ class WooCommerceServiceProvider extends ServiceProvider
      */
     private function registerDomainServices(): void
     {
+        // Autowired: the container hands it the bound WooCommerceEnvironmentInterface
         $this->app->singleton(WooCommerceService::class);
     }
 
@@ -62,6 +64,7 @@ class WooCommerceServiceProvider extends ServiceProvider
     {
         // Register the WordPress adapter
         $this->app->singleton(WordPressWooCommerceAdapter::class);
+        $this->app->singleton(WooCommerceEnvironmentInterface::class, fn (Container $app): WordPressWooCommerceAdapter => $app->make(WordPressWooCommerceAdapter::class));
 
         // Register the main WooCommerce integration implementation
         $this->app->singleton(WooCommerceIntegrationInterface::class, fn (Container $app): WooCommerce => new WooCommerce(
