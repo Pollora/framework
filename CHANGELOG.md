@@ -8,8 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.38.1...develop)
 
 ### Changed
+- The Pollora harness (`pollora/harness`) checks the repository in observe mode: `composer qa` runs the quality gates, `api-surface.json` records the public surface (attributes, hooks, configuration keys, commands), and a workflow reports the findings without blocking a merge. Nothing changes at run time
 - The domain layer no longer calls WordPress or imports the Infrastructure layer (harness rules ARCH-01 and ARCH-02). Theme menus, sidebars and image sizes are registered through `ThemeFeatureRegistrarInterface`, the theme URI filters resolve through `ContentUrlResolverInterface` and `ThemeAssetUrlResolverInterface`, the dashboard reads WordPress through `WordPressEnvironmentInterface`, `AbstractTaxonomy` translates its default labels through `LabelTranslatorInterface`, and `WooCommerceService` asks `WooCommerceEnvironmentInterface` about the child theme. Each port is bound to a WordPress adapter by its module's service provider; behaviour and public signatures are unchanged
 - `pollora/wp-rest` ^0.2 is accepted: a REST route without a permission stays public and now calls `_doing_it_wrong()`, outside REST responses. Declare `permissionCallback: Everyone::class` for a route that is public on purpose, or return `true` from the `pollora/wp_rest/private_by_default` filter to refuse such routes today
+
+### Fixed
+- The tests run with the lowest dependencies on PHP 8.3 and later: `antecedent/patchwork` 2.2 is required in development, as older versions break PHPUnit's code
+- `filter_input()` reads the plugins to delete with `FILTER_UNSAFE_RAW`, the same filter as `FILTER_DEFAULT`, which PHP 8.5 deprecates
 
 ## [v13.38.1](https://github.com/Pollora/framework/compare/v13.38.0...v13.38.1) - 2026-10-21
 

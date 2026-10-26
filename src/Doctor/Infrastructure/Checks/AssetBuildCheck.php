@@ -109,7 +109,7 @@ final readonly class AssetBuildCheck implements CheckInterface
             }
 
             return [
-                sprintf('%s: its hot file points to %s, which answers %d for Vite\'s client: what answers there is not the dev server — it is stopped, or its port is not exposed', $module->label(), $url, $status),
+                sprintf("%s: its hot file points to %s, which answers %d for Vite's client: what answers there is not the dev server — it is stopped, or its port is not exposed", $module->label(), $url, $status),
                 sprintf('cd %s && npm run dev, with its port exposed to the browser (DDEV: web_extra_exposed_ports, container_port 5173); or delete %s', $module->relativeRoot(), $this->relative($module->hotFile)),
             ];
         }
