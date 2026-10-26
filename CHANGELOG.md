@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pollora/wp-rest` ^0.2 is accepted: a REST route without a permission stays public and now calls `_doing_it_wrong()`, outside REST responses. Declare `permissionCallback: Everyone::class` for a route that is public on purpose, or return `true` from the `pollora/wp_rest/private_by_default` filter to refuse such routes today
 
 ### Fixed
+- The tests run with the lowest dependencies on PHP 8.3 and later: `antecedent/patchwork` 2.2 is required in development, as older versions break PHPUnit's code
 - `filter_input()` reads the plugins to delete with `FILTER_UNSAFE_RAW`, the same filter as `FILTER_DEFAULT`, which PHP 8.5 deprecates
 
 ## [v13.38.1](https://github.com/Pollora/framework/compare/v13.38.0...v13.38.1) - 2026-10-21
