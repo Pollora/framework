@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Pollora\WordPress\Exceptions\WordPressNotLoadedException;
 
 /**
  * Trait providing WordPress query functionality.
@@ -85,12 +86,12 @@ trait QueryTrait
      * renders a page from `template_redirect` (WooCommerce's Review Order 404)
      * then gets the theme's view composers and shared data.
      *
-     * @throws \RuntimeException If WordPress core functions are not available
+     * @throws WordPressNotLoadedException If WordPress core functions are not available
      */
     protected function runWp(): void
     {
         if (! function_exists('wp')) {
-            throw new \RuntimeException('The WordPress core functions are not available. Ensure WordPress is loaded.');
+            throw WordPressNotLoadedException::coreFunctionsMissing();
         }
 
         if (! $this->laravelIsServingTheRequest()) {

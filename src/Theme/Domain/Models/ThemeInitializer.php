@@ -16,6 +16,7 @@ use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
+use Pollora\Theme\Domain\Exceptions\ThemeSetupException;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 
 /**
@@ -78,7 +79,7 @@ class ThemeInitializer implements ThemeComponent
             }
 
             if (! $this->themeService instanceof ThemeService) {
-                throw new \RuntimeException('Unable to resolve ThemeService. Make sure it is properly registered.');
+                throw ThemeSetupException::serviceNotRegistered();
             }
         }
 
@@ -166,7 +167,7 @@ class ThemeInitializer implements ThemeComponent
     {
         // Theme name is required for self-registered themes
         if (in_array($themeName, [null, '', '0'], true)) {
-            throw new \RuntimeException('Theme name is required for self-registered themes.');
+            throw ThemeSetupException::nameRequired();
         }
 
         $this->getThemeService()->load($themeName);

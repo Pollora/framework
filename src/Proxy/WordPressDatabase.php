@@ -6,7 +6,7 @@ namespace Pollora\Proxy;
 
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
+use Pollora\Proxy\Exceptions\UnsupportedDatabaseCallException;
 use wpdb;
 
 /**
@@ -114,12 +114,10 @@ class WordPressDatabase extends wpdb
      * @param  bool  $new_link  Whether to force a new connection
      * @param  int  $client_flags  Client connection flags
      *
-     * @throws RuntimeException Always throws to prevent usage
+     * @throws UnsupportedDatabaseCallException Always throws to prevent usage
      */
     public function mysql_connect(bool $new_link = false, int $client_flags = 0): never
     {
-        throw new RuntimeException(
-            'Using mysql_connect is deprecated and not supported. Please use mysqli_real_connect.'
-        );
+        throw UnsupportedDatabaseCallException::mysqlConnect();
     }
 }
