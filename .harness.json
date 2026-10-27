@@ -7,7 +7,7 @@
     },
     "observed": [
         "Rector",
-        "Tests and architecture",
-        "Dependency analysis"
+        "Dependency analysis",
+        "Security patterns"
     ]
 }
