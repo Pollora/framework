@@ -24,11 +24,11 @@
     "require": {
         "php": "^8.3",
         "pollora/helper-overrider": "^1.2",
-        "illuminate/auth": "^13.38",
-        "illuminate/support": "^13.38",
-        "illuminate/database": "^13.38",
-        "illuminate/routing": "^13.38",
-        "illuminate/console": "^13.38",
+        "illuminate/auth": "^13.39",
+        "illuminate/support": "^13.39",
+        "illuminate/database": "^13.39",
+        "illuminate/routing": "^13.39",
+        "illuminate/console": "^13.39",
         "pollora/abilities": "^1.0",
         "pollora/ajax": "^1.1",
         "pollora/assets": "^0.1",
@@ -54,7 +54,7 @@
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.0",
         "symfony/process": "^7.4 || ^8.0",
-        "illuminate/config": "^13.38",
+        "illuminate/config": "^13.39",
         "laravel/prompts": "^0.3.25"
     },
     "autoload": {
