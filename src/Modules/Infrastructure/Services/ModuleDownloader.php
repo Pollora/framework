@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\Modules\Infrastructure\Services;
 
-use Exception;
 use Illuminate\Support\Facades\Http;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
+use Pollora\Modules\Domain\Exceptions\ModuleException;
 use ZipArchive;
 
 /**
@@ -78,7 +78,7 @@ class ModuleDownloader
      * @param  string  $destination  The base path where the module should be extracted.
      * @return string Path to the extracted module folder.
      *
-     * @throws Exception
+     * @throws ModuleException
      */
     public function downloadAndExtract(string $destination): string
     {
@@ -132,7 +132,7 @@ class ModuleDownloader
         $response = Http::get('https://api.github.com/repos/'.$this->repository);
 
         if (! $response->successful()) {
-            throw new Exception('Unable to fetch repository information for '.$this->repository);
+            throw ModuleException::repositoryUnreachable($this->repository);
         }
 
         return $response->json();
@@ -301,7 +301,7 @@ class ModuleDownloader
         $response = Http::withOptions(['stream' => true])->get($url);
 
         if (! $response->successful()) {
-            throw new Exception('Unable to download archive from '.$url);
+            throw ModuleException::archiveNotDownloaded($url);
         }
 
         file_put_contents($tempPath, $response->body());
@@ -327,7 +327,7 @@ class ModuleDownloader
         $zip = new ZipArchive;
 
         if ($zip->open($tempPath) !== true) {
-            throw new Exception('Unable to open ZIP archive: '.$tempPath);
+            throw ModuleException::archiveNotReadable($tempPath);
         }
 
         $zip->extractTo($extractPath);
@@ -348,7 +348,7 @@ class ModuleDownloader
             ->first();
 
         if (! $subfolder) {
-            throw new Exception('No extracted folder found in '.$extractPath);
+            throw ModuleException::archiveEmpty($extractPath);
         }
 
         return $extractPath.'/'.$subfolder;

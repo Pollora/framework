@@ -7,7 +7,7 @@ namespace Pollora\Modules\Infrastructure\Activation;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Query\Builder;
 use Pollora\Modules\Domain\Contracts\ModuleStateConnector;
-use RuntimeException;
+use Pollora\Modules\Domain\Exceptions\ModuleStateException;
 use Throwable;
 
 /**
@@ -128,7 +128,7 @@ class DatabaseStateConnector implements ModuleStateConnector
                     ['option_value' => $value, 'autoload' => 'off'],
                 );
             } catch (Throwable $throwable) {
-                throw new RuntimeException(sprintf('Cannot write the module states to the %s option: %s', $this->option, $throwable->getMessage()), 0, $throwable);
+                throw ModuleStateException::cannotWriteOption($this->option, $throwable);
             }
         }
 
