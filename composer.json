@@ -110,7 +110,7 @@
         "pollora/woocommerce": "WooCommerce's Blade templates, Route::wp() conditions, Coming Soon page and events"
     },
     "require-dev": {
-        "driftingly/rector-laravel": "^2.6",
+        "driftingly/rector-laravel": "^2.7",
         "laravel/pint": "^v1.32.1",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
