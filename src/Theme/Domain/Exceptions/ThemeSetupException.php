@@ -19,7 +19,7 @@ final class ThemeSetupException extends RuntimeException
 
     public static function nameRequired(): self
     {
-        return new self('Theme name is required for self-registered themes. Pass the theme\'s directory name.');
+        return new self("Theme name is required for self-registered themes. Pass the theme's directory name.");
     }
 
     public static function collectionFactoryMissing(): self
