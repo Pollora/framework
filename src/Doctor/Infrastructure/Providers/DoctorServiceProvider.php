@@ -20,6 +20,7 @@ use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
 use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
 use Pollora\Doctor\Infrastructure\Checks\SymlinkedDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\TemplatePlaceholdersCheck;
+use Pollora\Doctor\Infrastructure\Checks\WooCommercePackageCheck;
 use Pollora\Doctor\Infrastructure\Checks\WordPressCorePatchCheck;
 use Pollora\Doctor\UI\Console\DoctorCommand;
 use Pollora\Doctor\UI\Http\SiteHealthTests;
@@ -53,6 +54,7 @@ class DoctorServiceProvider extends ServiceProvider
         LegacyBlocksDirectoryCheck::class,
         BlockRegistrationCheck::class,
         PublicRootCheck::class,
+        WooCommercePackageCheck::class,
     ];
 
     public function register(): void

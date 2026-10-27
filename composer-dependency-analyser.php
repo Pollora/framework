@@ -21,9 +21,6 @@ return $configuration
         'DB',
         'GFAPI',
         'WP',
-        'WC_Order',
-        'Pollora\ThirdParty\WooCommerce\View\WooCommerceTemplateResolver',
-        'Pollora\ThirdParty\WooCommerce\WooCommerce',
     ])
 
     // The framework requires the illuminate/* components it uses; when laravel/framework is installed (Testbench, a Pollora project)

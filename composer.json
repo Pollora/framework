@@ -106,6 +106,9 @@
             "ignore-abandoned": ["symplify/rule-doc-generator-contracts"]
         }
     },
+    "suggest": {
+        "pollora/woocommerce": "WooCommerce's Blade templates, Route::wp() conditions, Coming Soon page and events"
+    },
     "require-dev": {
         "driftingly/rector-laravel": "^2.6",
         "laravel/pint": "^v1.32.1",

@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.38.1...develop)
 
+### Added
+- `pollora:doctor` and Site Health check that WooCommerce, when active, has its Pollora integration installed: it warns, and gives `composer require pollora/woocommerce`, when it does not
+- `pollora/woocommerce` is suggested in `composer.json`
+
 ### Changed
+- **WooCommerce moved to its own package, `pollora/woocommerce`. Install it if the project runs WooCommerce: `composer require pollora/woocommerce`.** The framework no longer ships the integration (`Pollora\ThirdParty\WooCommerce`, the WooCommerce events in `Pollora\Events\WordPress\Plugins\WooCommerce`, the `shop`/`product`/`cart`… `Route::wp()` conditions in `wordpress.plugin_conditions`): without the package a WooCommerce shop loses its Blade templates, those conditions, the Coming Soon page and the events, with no error. The package keeps the old class names working, aliased to `Pollora\WooCommerce\…`, until the next major release; a project's own `wordpress.plugin_conditions` still win, and the `wordpress.plugin_conditions.woocommerce` defaults stay in `config/wordpress.php` until the next major release. The core now names no third-party plugin (ARCH-05), so that rule no longer needs its seven `nosemgrep` notes
 - The harness's security patterns gate blocks: the seven places where the core still names WooCommerce (ARCH-05) carry a `nosemgrep` note saying they go with the extraction into a package of its own, so any new bare exception, `unserialize()` or third-party plugin reference in the core is stopped. Only Rector is still reported without blocking
 - The harness's dependency analysis (ARCH-07) blocks: `composer-dependency-analyser.php` scans `src/` and `tests/` and lists, with its reason, each package the code names without requiring it (Laravel's components, Symfony and PSR libraries, PHP extensions) and each requirement it does not name (patches, the helper loader, the Bedrock autoloader)
 - Theme setup errors, the languages API, a WordPress query run before WordPress is loaded and the legacy `mysql_connect()` call throw named exceptions (`ThemeSetupException`, `LanguageApiException`, `WordPressNotLoadedException`, `UnsupportedDatabaseCallException`, all `RuntimeException`s) instead of a bare `RuntimeException`; an unknown plugin throws `PluginException::notFound()` (an `Exception`, as before). The messages keep their beginning and say what to check

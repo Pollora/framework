@@ -6,9 +6,6 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Http\Response;
-use Pollora\ThirdParty\WooCommerce\Domain\Models\Template;
-use Pollora\ThirdParty\WooCommerce\Domain\Services\WooCommerceService;
-use Pollora\ThirdParty\WooCommerce\Infrastructure\Adapters\WordPressWooCommerceAdapter;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /*
@@ -145,9 +142,6 @@ function setupDefaultWordPressStubs(): void
     });
     \Brain\Monkey\Functions\when('get_query_var')->alias(fn ($var): string => $var === 'post_type' ? 'page' : '');
     \Brain\Monkey\Functions\when('get_post_meta')->justReturn('');
-
-    // WooCommerce
-    \Brain\Monkey\Functions\stubs(['WC' => null]);
 
     // Transient functions
     \Brain\Monkey\Functions\stubs([
@@ -390,77 +384,4 @@ if (! function_exists('route_condition_test')) {
     {
         return false;
     }
-}
-
-/*
-|--------------------------------------------------------------------------
-| Test Factory Functions
-|--------------------------------------------------------------------------
-*/
-
-/**
- * Create a real Template instance for testing.
- */
-function createTestTemplate(string $path = '/test/template.php', bool $isBladeTemplate = false): Template
-{
-    return new Template($path, basename($path, '.php'), $isBladeTemplate);
-}
-
-/**
- * Create a mock WooCommerceService for testing.
- */
-function createMockWooCommerceService(array $templates = []): object
-{
-    $service = Mockery::mock(WooCommerceService::class);
-
-    $service->shouldReceive('getAllTemplatePaths')
-        ->andReturn(['/path/to/woocommerce/templates/'])
-        ->byDefault();
-
-    $service->shouldReceive('getWooCommerceTemplatePath')
-        ->andReturn('woocommerce/')
-        ->byDefault();
-
-    $service->shouldReceive('isWooCommerceStatusScreen')
-        ->withAnyArgs()
-        ->andReturn(false)
-        ->byDefault();
-
-    foreach ($templates as $path => $template) {
-        $service->shouldReceive('createTemplate')
-            ->with($path)
-            ->andReturn($template);
-    }
-
-    return $service;
-}
-
-/**
- * Create a mock WordPressWooCommerceAdapter for testing.
- */
-function createMockWooCommerceAdapter(): object
-{
-    $adapter = Mockery::mock(WordPressWooCommerceAdapter::class);
-
-    $adapter->shouldReceive('isAdmin')
-        ->andReturn(false)
-        ->byDefault();
-
-    $adapter->shouldReceive('isDoingAjax')
-        ->andReturn(false)
-        ->byDefault();
-
-    $adapter->shouldReceive('getCurrentScreen')
-        ->andReturn(null)
-        ->byDefault();
-
-    $adapter->shouldReceive('locateTemplate')
-        ->andReturn('')
-        ->byDefault();
-
-    $adapter->shouldReceive('addThemeSupport')
-        ->andReturn(true)
-        ->byDefault();
-
-    return $adapter;
 }
