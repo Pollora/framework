@@ -6,6 +6,7 @@ namespace Pollora\Theme\Infrastructure\Providers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Pollora\BlockPattern\UI\PatternComponent;
+use Pollora\Theme\Domain\Exceptions\ThemeSetupException;
 use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\Menus;
 use Pollora\Theme\Domain\Models\Sidebar;
@@ -58,11 +59,7 @@ class ThemeComponentProvider
             $instance->register();
         } catch (\Throwable $throwable) {
             if (config('app.debug')) {
-                throw new \RuntimeException(
-                    sprintf('Failed to register component %s: ', $component).$throwable->getMessage(),
-                    0,
-                    $throwable
-                );
+                throw ThemeSetupException::componentFailed($component, $throwable);
             }
 
             // Log error but continue in production

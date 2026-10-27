@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\Services\WordPress\Installation;
 
+use Pollora\Services\WordPress\Installation\Exceptions\LanguageApiException;
+
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\search;
 use function Laravel\Prompts\spin;
@@ -80,7 +82,7 @@ class LanguageService
      *
      * @return array<string, string> Associative array of language codes and names
      *
-     * @throws \RuntimeException If API request fails
+     * @throws LanguageApiException If API request fails
      */
     private function getAvailableLanguages(): array
     {
@@ -91,7 +93,7 @@ class LanguageService
             );
 
             if ($response === false) {
-                throw new \RuntimeException('Failed to fetch languages from WordPress API');
+                throw LanguageApiException::unreachable();
             }
 
             return $this->parseLanguagesResponse($response);
@@ -108,13 +110,13 @@ class LanguageService
      * @param  string  $response  Raw JSON response from WordPress API
      * @return array<string, string> Formatted array of language codes and names
      *
-     * @throws \RuntimeException If response parsing fails
+     * @throws LanguageApiException If response parsing fails
      */
     private function parseLanguagesResponse(string $response): array
     {
         $data = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException('Invalid JSON response from WordPress API');
+            throw LanguageApiException::invalidResponse();
         }
 
         if (! isset($data['translations'])) {

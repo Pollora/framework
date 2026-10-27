@@ -7,6 +7,7 @@ namespace Pollora\Theme\UI\Console;
 use Illuminate\Config\Repository;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Pollora\Theme\Domain\Exceptions\ThemeSetupException;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 
 /**
@@ -99,7 +100,7 @@ abstract class BaseThemeCommand extends Command
         $templatePath = $this->getTemplatePath($templateName);
 
         if ($templatePath === null) {
-            throw new \RuntimeException(sprintf('The stub template "%s" is not bundled with the framework.', $templateName));
+            throw ThemeSetupException::stubNotBundled($templateName);
         }
 
         $content = $this->files->get($templatePath);
