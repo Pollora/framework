@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Activation;
 
 use Pollora\Modules\Domain\Contracts\ModuleStateConnector;
-use RuntimeException;
+use Pollora\Modules\Domain\Exceptions\ModuleStateException;
 
 /**
  * States in modules_statuses.json, in nwidart/laravel-modules' own format: the
@@ -70,7 +70,7 @@ class JsonStateConnector implements ModuleStateConnector
     private function write(array $states): void
     {
         if (@file_put_contents($this->path, json_encode($states, JSON_PRETTY_PRINT)) === false) {
-            throw new RuntimeException(sprintf('Cannot write the module states to %s.', $this->path));
+            throw ModuleStateException::cannotWriteFile($this->path);
         }
 
         $this->states = $states;

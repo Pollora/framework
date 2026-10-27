@@ -211,3 +211,5 @@ When answering questions about framework features, consult the online documentat
 - Breaking changes must be documented with `**BREAKING**:` prefix in the changelog
 - The **documentation submodule** (`documentation/`) must also be updated when public-facing behavior changes (commands, directives, configuration)
 - The skeleton repository (`Pollora/pollora`) is versioned independently but follows the same major version alignment
+
+The Pollora harness rules for this repository: @AGENTS.md

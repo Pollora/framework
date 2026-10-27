@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Support;
 
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
+use Pollora\Theme\Domain\Exceptions\ThemeSetupException;
 
 /**
  * Theme configuration access utility class.
@@ -40,9 +41,7 @@ class ThemeConfig
         if (! self::$configRepository instanceof ConfigRepositoryInterface) {
             // If no default is provided, throw the exception
             if (func_num_args() === 1) {
-                throw new \RuntimeException(
-                    'ConfigRepository not initialized. Call ThemeConfig::setRepository() before using this class.'
-                );
+                throw ThemeSetupException::configRepositoryMissing();
             }
 
             // Return the default value if repository is not initialized

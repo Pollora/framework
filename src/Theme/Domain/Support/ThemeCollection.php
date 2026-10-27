@@ -6,6 +6,7 @@ namespace Pollora\Theme\Domain\Support;
 
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Collection\Domain\Contracts\CollectionInterface;
+use Pollora\Theme\Domain\Exceptions\ThemeSetupException;
 
 /**
  * Theme collection utility class.
@@ -31,14 +32,12 @@ class ThemeCollection
      * @param  array  $items  Items to collect
      * @return CollectionInterface Framework-agnostic collection
      *
-     * @throws \RuntimeException If the collection factory is not set
+     * @throws ThemeSetupException If the collection factory is not set
      */
     public static function make(array $items = []): CollectionInterface
     {
         if (! self::$collectionFactory instanceof CollectionFactoryInterface) {
-            throw new \RuntimeException(
-                'CollectionFactory not initialized. Call ThemeCollection::setFactory() before using this class.'
-            );
+            throw ThemeSetupException::collectionFactoryMissing();
         }
 
         return self::$collectionFactory->make($items);

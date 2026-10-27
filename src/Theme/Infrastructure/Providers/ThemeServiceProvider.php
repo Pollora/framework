@@ -17,6 +17,9 @@ use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
+use Pollora\Theme\Domain\Contracts\ContentUrlResolverInterface;
+use Pollora\Theme\Domain\Contracts\ThemeAssetUrlResolverInterface;
+use Pollora\Theme\Domain\Contracts\ThemeFeatureRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeJsonResolverInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -27,10 +30,13 @@ use Pollora\Theme\Infrastructure\Adapters\DomainContainerAdapter;
 use Pollora\Theme\Infrastructure\Models\LaravelThemeModule;
 use Pollora\Theme\Infrastructure\Repositories\ThemeRepository;
 use Pollora\Theme\Infrastructure\Services\EditorStyleResolver;
+use Pollora\Theme\Infrastructure\Services\ThemeAssetFileResolver;
 use Pollora\Theme\Infrastructure\Services\ThemeAutoloader;
 use Pollora\Theme\Infrastructure\Services\ThemeJsonResolver;
 use Pollora\Theme\Infrastructure\Services\ThemeUpdateGuard;
+use Pollora\Theme\Infrastructure\Services\WordPressContentUrlResolver;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
+use Pollora\Theme\Infrastructure\Services\WordPressThemeFeatureRegistrar;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
@@ -259,6 +265,11 @@ class ThemeServiceProvider extends ServiceProvider
     {
         // WordPress theme interface adapter
         $this->app->singleton(WordPressThemeInterface::class, WordPressThemeAdapter::class);
+
+        // Ports the theme components reach WordPress and the asset build through
+        $this->app->singleton(ThemeFeatureRegistrarInterface::class, WordPressThemeFeatureRegistrar::class);
+        $this->app->singleton(ContentUrlResolverInterface::class, WordPressContentUrlResolver::class);
+        $this->app->singleton(ThemeAssetUrlResolverInterface::class, ThemeAssetFileResolver::class);
 
         // WordPress theme parser
         $this->app->singleton(WordPressThemeParser::class);

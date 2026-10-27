@@ -6,14 +6,17 @@ namespace Pollora\Taxonomy\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Taxonomy\Application\Services\TaxonomyService;
+use Pollora\Taxonomy\Domain\Contracts\LabelTranslatorInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyRegistryInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyRepositoryInterface;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
+use Pollora\Taxonomy\Domain\Models\AbstractTaxonomy;
 use Pollora\Taxonomy\Infrastructure\Adapters\WordPressTaxonomyRegistry;
 use Pollora\Taxonomy\Infrastructure\Factories\TaxonomyFactory;
 use Pollora\Taxonomy\Infrastructure\Repositories\TaxonomyRepository;
 use Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery;
+use Pollora\Taxonomy\Infrastructure\Services\WordPressLabelTranslator;
 use Pollora\Taxonomy\UI\Console\TaxonomyMakeCommand;
 
 /**
@@ -32,6 +35,11 @@ class TaxonomyServiceProvider extends ServiceProvider
         // Bind interfaces to implementations
         $this->app->singleton(TaxonomyFactoryInterface::class, TaxonomyFactory::class);
         $this->app->singleton(TaxonomyRegistryInterface::class, WordPressTaxonomyRegistry::class);
+        $this->app->singleton(LabelTranslatorInterface::class, WordPressLabelTranslator::class);
+
+        // Taxonomy classes are built without arguments: hand their default
+        // labels the translator once, rather than through every constructor
+        AbstractTaxonomy::useLabelTranslator($this->app->make(LabelTranslatorInterface::class));
 
         // Register the repository
         $this->app->singleton(TaxonomyRepositoryInterface::class, fn ($app): TaxonomyRepository => new TaxonomyRepository(

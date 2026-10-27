@@ -46,7 +46,7 @@ final readonly class BlockThemeRoutesCheck implements CheckInterface
 
         foreach ($this->router->getRoutes()->getRoutes() as $route) {
             if ($route instanceof Route && $route->isWordPressRoute() && $route->hasCondition()) {
-                $routes[] = sprintf('Route::wp(\'%s\') → %s', $route->getCondition(), $route->getActionName());
+                $routes[] = sprintf("Route::wp('%s') → %s", $route->getCondition(), $route->getActionName());
             }
         }
 

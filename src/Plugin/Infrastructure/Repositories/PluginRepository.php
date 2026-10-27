@@ -10,6 +10,7 @@ use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Collection\Infrastructure\Adapters\LaravelCollectionAdapter;
 use Pollora\Modules\Domain\Contracts\ModuleRepositoryInterface;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
+use Pollora\Plugin\Domain\Exceptions\PluginException;
 use Pollora\Plugin\Domain\Support\PluginCollection;
 use Pollora\Plugin\Infrastructure\Models\LaravelPluginModule;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
@@ -145,7 +146,7 @@ class PluginRepository implements ModuleRepositoryInterface
         $plugin = $this->find($name);
 
         if (! $plugin instanceof PluginModuleInterface) {
-            throw new \Exception(sprintf("Plugin '%s' not found", $name));
+            throw PluginException::notFound($name);
         }
 
         return $plugin;

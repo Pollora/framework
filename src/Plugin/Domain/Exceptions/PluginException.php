@@ -106,4 +106,12 @@ final class PluginException extends Exception
     {
         return new self(sprintf("Plugin '%s' has invalid structure: %s", $pluginName, $structureIssue), $code, $previous);
     }
+
+    /**
+     * @param  string  $name  The plugin that was asked for
+     */
+    public static function notFound(string $name): self
+    {
+        return new self(sprintf("Plugin '%s' not found. Check the name against the plugins that pollora:plugin:list shows.", $name));
+    }
 }

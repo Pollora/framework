@@ -5,7 +5,28 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.38.1...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.0...develop)
+
+## [v13.39.0](https://github.com/Pollora/framework/compare/v13.38.1...v13.39.0) - 2026-10-27
+
+### Added
+- `pollora:doctor` and Site Health check that WooCommerce, when active, has its Pollora integration installed: it warns, and gives `composer require pollora/woocommerce`, when it does not
+- `pollora/woocommerce` is suggested in `composer.json`
+
+### Changed
+- The framework requires Laravel 13.39 (`illuminate/*` `^13.39`)
+- **WooCommerce moved to its own package, `pollora/woocommerce`. Install it if the project runs WooCommerce: `composer require pollora/woocommerce`.** The framework no longer ships the integration (`Pollora\ThirdParty\WooCommerce`, the WooCommerce events in `Pollora\Events\WordPress\Plugins\WooCommerce`, the `shop`/`product`/`cart`… `Route::wp()` conditions in `wordpress.plugin_conditions`): without the package a WooCommerce shop loses its Blade templates, those conditions, the Coming Soon page and the events, with no error. The package keeps the old class names working, aliased to `Pollora\WooCommerce\…`, until the next major release; a project's own `wordpress.plugin_conditions` still win, and the `wordpress.plugin_conditions.woocommerce` defaults stay in `config/wordpress.php` until the next major release. The core now names no third-party plugin (ARCH-05), so that rule no longer needs its seven `nosemgrep` notes
+- The Pollora harness (`pollora/harness`) checks the repository, and a failing gate blocks a merge: `composer qa` runs the style, static analysis, Rector, tests and architecture rules, dependency policy and analysis, security patterns (bare exceptions, `unserialize()` calls, third-party plugin references in the core), audit, public surface and ratchet gates, and `api-surface.json` records the public surface (attributes, hooks, configuration keys, commands). Nothing changes at run time
+- The harness's dependency analysis (ARCH-07) blocks: `composer-dependency-analyser.php` scans `src/` and `tests/` and lists, with its reason, each package the code names without requiring it (Laravel's components, Symfony and PSR libraries, PHP extensions) and each requirement it does not name (patches, the helper loader, the Bedrock autoloader)
+- Theme setup errors, the languages API, a WordPress query run before WordPress is loaded and the legacy `mysql_connect()` call throw named exceptions (`ThemeSetupException`, `LanguageApiException`, `WordPressNotLoadedException`, `UnsupportedDatabaseCallException`, all `RuntimeException`s) instead of a bare `RuntimeException`; an unknown plugin throws `PluginException::notFound()` (an `Exception`, as before). The messages keep their beginning and say what to check
+- A media disk that is missing, has no Flysystem driver, or has no URL throws the named `MediaDiskException` (a `RuntimeException`, so a `catch (RuntimeException)` keeps working; the messages keep their beginning and now say how to fix it) instead of a bare `RuntimeException`
+- Module errors throw named exceptions instead of a bare `RuntimeException` or `Exception`: `ModuleStateException` (a module cannot be switched or its state written) and `ModuleComponentException` (a component fails to initialise in debug mode) extend `RuntimeException`, and the downloader's failures are now `ModuleException` (an `Exception`, as before). The messages keep their beginning, and now say what to check
+- The domain layer no longer calls WordPress or imports the Infrastructure layer (harness rules ARCH-01 and ARCH-02). Theme menus, sidebars and image sizes are registered through `ThemeFeatureRegistrarInterface`, the theme URI filters resolve through `ContentUrlResolverInterface` and `ThemeAssetUrlResolverInterface`, the dashboard reads WordPress through `WordPressEnvironmentInterface`, `AbstractTaxonomy` translates its default labels through `LabelTranslatorInterface`, and `WooCommerceService` asks `WooCommerceEnvironmentInterface` about the child theme. Each port is bound to a WordPress adapter by its module's service provider; behaviour and public signatures are unchanged
+- `pollora/wp-rest` ^0.2 is accepted: a REST route without a permission stays public and now calls `_doing_it_wrong()`, outside REST responses. Declare `permissionCallback: Everyone::class` for a route that is public on purpose, or return `true` from the `pollora/wp_rest/private_by_default` filter to refuse such routes today
+
+### Fixed
+- The tests run with the lowest dependencies on PHP 8.3 and later: `antecedent/patchwork` 2.2 is required in development, as older versions break PHPUnit's code
+- `filter_input()` reads the plugins to delete with `FILTER_UNSAFE_RAW`, the same filter as `FILTER_DEFAULT`, which PHP 8.5 deprecates
 
 ## [v13.38.1](https://github.com/Pollora/framework/compare/v13.38.0...v13.38.1) - 2026-10-21
 

@@ -8,6 +8,7 @@ use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Services\Translater;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
+use Pollora\Theme\Domain\Contracts\ThemeFeatureRegistrarInterface;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 use Psr\Container\ContainerInterface;
 
@@ -39,8 +40,10 @@ class Sidebar implements ThemeComponent
         $translater = new Translater($sidebars, 'sidebars');
         $sidebars = $translater->translate(['*.name', '*.description']);
 
+        $features = $this->app->get(ThemeFeatureRegistrarInterface::class);
+
         foreach ($sidebars as $value) {
-            \register_sidebar($value);
+            $features->registerSidebar($value);
         }
     }
 }

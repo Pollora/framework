@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Pollora\Theme\Domain\Models;
 
 use Pollora\Asset\Application\Services\AssetManager;
-use Pollora\Asset\Infrastructure\Services\AssetFile;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
+use Pollora\Theme\Domain\Contracts\ContentUrlResolverInterface;
+use Pollora\Theme\Domain\Contracts\ThemeAssetUrlResolverInterface;
 use Pollora\Theme\Domain\Contracts\ThemeComponent;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Contracts\WordPressThemeInterface;
+use Pollora\Theme\Domain\Exceptions\ThemeSetupException;
 use Pollora\Theme\Domain\Support\ThemeConfig;
 
 /**
@@ -77,7 +79,7 @@ class ThemeInitializer implements ThemeComponent
             }
 
             if (! $this->themeService instanceof ThemeService) {
-                throw new \RuntimeException('Unable to resolve ThemeService. Make sure it is properly registered.');
+                throw ThemeSetupException::serviceNotRegistered();
             }
         }
 
@@ -165,7 +167,7 @@ class ThemeInitializer implements ThemeComponent
     {
         // Theme name is required for self-registered themes
         if (in_array($themeName, [null, '', '0'], true)) {
-            throw new \RuntimeException('Theme name is required for self-registered themes.');
+            throw ThemeSetupException::nameRequired();
         }
 
         $this->getThemeService()->load($themeName);
@@ -241,7 +243,7 @@ class ThemeInitializer implements ThemeComponent
         // asset has, which is what theme_file_uri now answers — but a URL
         // that does not resolve is still better than a path that says where
         // the site lives on disk.
-        return \content_url('themes');
+        return $this->app->get(ContentUrlResolverInterface::class)->contentUrl('themes');
     }
 
     /**
@@ -281,13 +283,13 @@ class ThemeInitializer implements ThemeComponent
     {
         foreach ($this->manifestCandidates($file, $this->assetRoot()) as $candidate) {
             try {
-                $url = (string) (new AssetFile($candidate))->from('theme');
+                $url = $this->app->get(ThemeAssetUrlResolverInterface::class)->assetUrl($candidate);
             } catch (\Throwable) {
-                // AssetFile means to swallow a missing manifest entry, but it
-                // logs before returning, and the logger is itself something
-                // that can be absent. An exception escaping here would break
-                // get_theme_file_uri() for every caller — the opposite of the
-                // fallback this method exists to provide.
+                // The asset resolver means to swallow a missing manifest
+                // entry, but it logs before returning, and the logger is
+                // itself something that can be absent. An exception escaping
+                // here would break get_theme_file_uri() for every caller — the
+                // opposite of the fallback this method exists to provide.
                 continue;
             }
 

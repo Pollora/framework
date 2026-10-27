@@ -114,7 +114,7 @@ class Attachment extends \Pollora\Colt\Model\Attachment
         }
 
         // WordPress stores this as a serialized array
-        $unserialized = is_string($metaValue) ? unserialize($metaValue, ['allowed_classes' => false]) : null;
+        $unserialized = is_string($metaValue) ? unserialize($metaValue, ['allowed_classes' => false]) : null; // nosemgrep -- allowed_classes is false: no object can be instantiated
         if (! is_array($unserialized)) {
             return [];
         }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Container\Container;
+use Pollora\Modules\Domain\Exceptions\ModuleComponentException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -90,11 +91,7 @@ class ModuleComponentManager
             }
         } catch (\Throwable $throwable) {
             if (config('app.debug')) {
-                throw new \RuntimeException(
-                    sprintf('Failed to initialize component %s for module %s: ', $componentClass, $moduleId).$throwable->getMessage(),
-                    0,
-                    $throwable
-                );
+                throw ModuleComponentException::initializationFailed($componentClass, $moduleId, $throwable);
             }
 
             $this->logger?->error(sprintf('Component initialization failed: %s for module %s', $componentClass, $moduleId), ['exception' => $throwable]);

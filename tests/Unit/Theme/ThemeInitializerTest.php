@@ -9,6 +9,8 @@ use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Theme\Domain\Contracts\ContainerInterface;
+use Pollora\Theme\Domain\Contracts\ContentUrlResolverInterface;
+use Pollora\Theme\Domain\Contracts\ThemeAssetUrlResolverInterface;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
@@ -60,9 +62,11 @@ afterEach(function (): void {
  * hooks it registered so the test can fire them.
  *
  * @param  string|null  $themePath  the active theme's own directory, or null for no active theme
+ * @param  array<string, string>  $built  the files the asset build knows, and the URL it gave each
+ * @param  ThemeAssetUrlResolverInterface|null  $assetUrl  a resolver to use instead of one answering from $built
  * @return array{initializer: ThemeInitializer, actions: array<string, callable>, filters: array<string, callable>, directories: ArrayObject<int, string>}
  */
-function initializerUnderTest(?string $themePath): array
+function initializerUnderTest(?string $themePath, array $built = [], ?ThemeAssetUrlResolverInterface $assetUrl = null): array
 {
     $actions = [];
     $filters = [];
@@ -114,7 +118,19 @@ function initializerUnderTest(?string $themePath): array
     $themeService = m::mock(ThemeService::class);
     $themeService->shouldReceive('load')->andReturnNull();
 
+    $contentUrl = m::mock(ContentUrlResolverInterface::class);
+    $contentUrl->shouldReceive('contentUrl')->andReturnUsing(
+        fn (string $path = ''): string => 'https://example.test/content'.($path === '' ? '' : '/'.$path)
+    );
+
+    if (! $assetUrl instanceof ThemeAssetUrlResolverInterface) {
+        $assetUrl = m::mock(ThemeAssetUrlResolverInterface::class);
+        $assetUrl->shouldReceive('assetUrl')->andReturnUsing(fn (string $file): string => $built[$file] ?? '');
+    }
+
     $container = m::mock(ContainerInterface::class);
+    $container->shouldReceive('get')->with(ContentUrlResolverInterface::class)->andReturn($contentUrl);
+    $container->shouldReceive('get')->with(ThemeAssetUrlResolverInterface::class)->andReturn($assetUrl);
     $container->shouldReceive('get')->with(Action::class)->andReturn($action);
     $container->shouldReceive('get')->with(Filter::class)->andReturn($filter);
     $container->shouldReceive('get')->with(WordPressThemeInterface::class)->andReturn($wpTheme);
@@ -214,6 +230,27 @@ describe('theme URI filters', function (): void {
             ->toBe('https://example.test/themes/default/style.css');
     });
 
+    it('answers with the URL the build gave the file', function (): void {
+        $harness = initializerUnderTest('/srv/site/themes/default', [
+            'app.js' => 'https://example.test/build/theme/default/assets/app-4f2a.js',
+        ]);
+        $filter = $harness['filters']['theme_file_uri'];
+
+        expect($filter('https://example.test/themes/default/app.js', 'app.js'))
+            ->toBe('https://example.test/build/theme/default/assets/app-4f2a.js');
+    });
+
+    it('falls back to WordPress when the asset resolver throws', function (): void {
+        $resolver = m::mock(ThemeAssetUrlResolverInterface::class);
+        $resolver->shouldReceive('assetUrl')->andThrow(new RuntimeException('No logger bound'));
+
+        $harness = initializerUnderTest('/srv/site/themes/default', assetUrl: $resolver);
+        $filter = $harness['filters']['theme_file_uri'];
+
+        expect($filter('https://example.test/themes/default/app.js', 'app.js'))
+            ->toBe('https://example.test/themes/default/app.js');
+    });
+
     it('does not try to resolve a file it was not given', function (mixed $file): void {
         $harness = initializerUnderTest('/srv/site/themes/default');
         $filter = $harness['filters']['theme_file_uri'];
@@ -227,10 +264,6 @@ describe('theme URI filters', function (): void {
     ]);
 
     it('replaces a theme root that is a filesystem path', function (): void {
-        Brain\Monkey\Functions\when('content_url')->alias(
-            fn (string $path = ''): string => 'https://example.test/content'.($path === '' ? '' : '/'.$path)
-        );
-
         $harness = initializerUnderTest('/srv/site/themes/default');
 
         // WordPress falls back to the path itself for a theme root it cannot
