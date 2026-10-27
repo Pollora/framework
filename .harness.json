@@ -1,8 +1,13 @@
 {
     "profile": "framework",
-    "mode": "observe",
+    "mode": "enforce",
     "ratchet": {
         "phpstan_level": 5,
         "phpstan_baseline": 66
-    }
+    },
+    "observed": [
+        "Rector",
+        "Dependency analysis",
+        "Security patterns"
+    ]
 }

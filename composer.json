@@ -121,7 +121,7 @@
         "wp-cli/wp-cli": "^2.12",
         "larastan/larastan": "^3.13",
         "orchestra/testbench": "^11.3.0",
-        "pollora/harness": "^0.1.1"
+        "pollora/harness": "^0.1.6"
     },
     "autoload-dev": {
         "psr-4": {
