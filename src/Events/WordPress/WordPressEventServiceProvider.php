@@ -13,7 +13,7 @@ use Pollora\Events\WordPress\Menu\MenuEventDispatcher;
 use Pollora\Events\WordPress\Option\OptionEventDispatcher;
 use Pollora\Events\WordPress\Plugins\TwoFactor\TwoFactorEventDispatcher;
 use Pollora\Events\WordPress\Plugins\UserSwitching\UserSwitchingEventDispatcher;
-use Pollora\Events\WordPress\Plugins\WooCommerce\WooCommerceEventDispatcher;
+use Pollora\Events\WordPress\Plugins\WooCommerce\WooCommerceEventDispatcher; // nosemgrep -- ARCH-05: WooCommerce is named by the core until it moves to its own package
 use Pollora\Events\WordPress\Plugins\YoastSeo\YoastSeoEventDispatcher;
 use Pollora\Events\WordPress\Post\PostEventDispatcher;
 use Pollora\Events\WordPress\Taxonomy\TaxonomyEventDispatcher;

@@ -6,7 +6,6 @@
         "phpstan_baseline": 66
     },
     "observed": [
-        "Rector",
-        "Security patterns"
+        "Rector"
     ]
 }

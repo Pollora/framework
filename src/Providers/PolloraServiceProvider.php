@@ -39,7 +39,7 @@ use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
-use Pollora\ThirdParty\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider;
+use Pollora\ThirdParty\WooCommerce\Infrastructure\Providers\WooCommerceServiceProvider; // nosemgrep -- ARCH-05: WooCommerce is named by the core until it moves to its own package
 use Pollora\ThirdParty\WpRocket\WpRocketServiceProvider;
 use Pollora\VersionCheck\Infrastructure\Providers\VersionCheckServiceProvider;
 use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;

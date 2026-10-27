@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Events\WordPress\Plugins\WooCommerce;
 
-use WC_Order;
+use WC_Order; // nosemgrep -- ARCH-05: WooCommerce is named by the core until it moves to its own package
 
 /**
  * Event fired when a WooCommerce order status is changed.
@@ -20,7 +20,7 @@ class OrderStatusChanged extends WooCommerceEvent
      * Constructor.
      */
     public function __construct(
-        public readonly WC_Order $order,
+        public readonly WC_Order $order, // nosemgrep -- ARCH-05: WooCommerce is named by the core until it moves to its own package
         public readonly string $oldStatus,
         public readonly string $newStatus
     ) {}

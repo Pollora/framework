@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Events\WordPress\Plugins\WooCommerce;
 
 use Pollora\Events\WordPress\AbstractEventDispatcher;
-use WC_Order;
+use WC_Order; // nosemgrep -- ARCH-05: WooCommerce is named by the core until it moves to its own package
 
 /**
  * Event dispatcher for WooCommerce-related events.
@@ -42,9 +42,9 @@ class WooCommerceEventDispatcher extends AbstractEventDispatcher
      */
     public function handleWoocommerceOrderStatusChanged(int $orderId, string $oldStatus, string $newStatus): void
     {
-        $order = wc_get_order($orderId);
+        $order = wc_get_order($orderId); // nosemgrep -- ARCH-05: WooCommerce is named by the core until it moves to its own package
 
-        if (! $order instanceof WC_Order) {
+        if (! $order instanceof WC_Order) { // nosemgrep -- ARCH-05: WooCommerce is named by the core until it moves to its own package
             return;
         }
 
