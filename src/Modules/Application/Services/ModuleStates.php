@@ -9,9 +9,9 @@ use Illuminate\Contracts\Container\Container;
 use Nwidart\Modules\Contracts\ActivatorInterface;
 use Pollora\Modules\Domain\Contracts\ModuleStateConnector;
 use Pollora\Modules\Domain\Exceptions\ModuleLockedException;
+use Pollora\Modules\Domain\Exceptions\ModuleStateException;
 use Pollora\Modules\Infrastructure\Activation\ConnectorActivator;
 use Pollora\Modules\Infrastructure\Activation\JsonStateConnector;
-use RuntimeException;
 
 /**
  * The modules an administrator sees and switches: their state, why a switch is
@@ -111,24 +111,24 @@ class ModuleStates
      * Switch a module. It applies from the next request: module providers
      * registered before anything could switch them.
      *
-     * @throws RuntimeException When the module is unknown, locked or cannot be written
+     * @throws ModuleStateException When the module is unknown, locked or cannot be written
      */
     public function switch(string $name, bool $enable): void
     {
         $module = $this->available() ? $this->app->make('modules')->find($name) : null;
 
         if ($module === null) {
-            throw new RuntimeException(sprintf(__('Module %s does not exist.', 'pollora'), $name));
+            throw ModuleStateException::because(sprintf(__('Module %s does not exist.', 'pollora'), $name));
         }
 
         if (! $this->togglesEnabled()) {
-            throw new RuntimeException(__('Switching modules from the admin is turned off (MODULES_ADMIN_TOGGLE).', 'pollora'));
+            throw ModuleStateException::because(__('Switching modules from the admin is turned off (MODULES_ADMIN_TOGGLE).', 'pollora'));
         }
 
         try {
             $enable ? $module->enable() : $module->disable();
         } catch (ModuleLockedException $moduleLockedException) {
-            throw new RuntimeException($moduleLockedException->getMessage(), 0, $moduleLockedException);
+            throw ModuleStateException::because($moduleLockedException->getMessage(), $moduleLockedException);
         }
     }
 

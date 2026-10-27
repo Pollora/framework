@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Activation;
 
 use Pollora\Modules\Domain\Contracts\ModuleStateConnector;
-use RuntimeException;
+use Pollora\Modules\Domain\Exceptions\ModuleStateException;
 
 /**
  * States shipped with the code: `connectors.config.states`, or the
@@ -41,7 +41,7 @@ class ConfigStateConnector implements ModuleStateConnector
 
     public function set(string $module, bool $enabled): void
     {
-        throw new RuntimeException('Module states come from the configuration: change config/modules.php or MODULES_ENABLED / MODULES_DISABLED.');
+        throw ModuleStateException::comesFromConfiguration();
     }
 
     public function forget(string $module): void
