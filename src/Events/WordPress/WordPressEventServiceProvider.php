@@ -13,7 +13,6 @@ use Pollora\Events\WordPress\Menu\MenuEventDispatcher;
 use Pollora\Events\WordPress\Option\OptionEventDispatcher;
 use Pollora\Events\WordPress\Plugins\TwoFactor\TwoFactorEventDispatcher;
 use Pollora\Events\WordPress\Plugins\UserSwitching\UserSwitchingEventDispatcher;
-use Pollora\Events\WordPress\Plugins\WooCommerce\WooCommerceEventDispatcher; // nosemgrep -- ARCH-05: WooCommerce is named by the core until it moves to its own package
 use Pollora\Events\WordPress\Plugins\YoastSeo\YoastSeoEventDispatcher;
 use Pollora\Events\WordPress\Post\PostEventDispatcher;
 use Pollora\Events\WordPress\Taxonomy\TaxonomyEventDispatcher;
@@ -46,7 +45,6 @@ class WordPressEventServiceProvider extends ServiceProvider
         $this->app->singleton(CommentEventDispatcher::class);
         $this->app->singleton(BlogEventDispatcher::class);
         $this->app->singleton(InstallerEventDispatcher::class);
-        $this->app->singleton(WooCommerceEventDispatcher::class);
         $this->app->singleton(YoastSeoEventDispatcher::class);
         $this->app->singleton(TwoFactorEventDispatcher::class);
         $this->app->singleton(UserSwitchingEventDispatcher::class);
@@ -67,7 +65,6 @@ class WordPressEventServiceProvider extends ServiceProvider
         $this->app->make(CommentEventDispatcher::class)->registerEvents();
         $this->app->make(BlogEventDispatcher::class)->registerEvents();
         $this->app->make(InstallerEventDispatcher::class)->registerEvents();
-        $this->app->make(WooCommerceEventDispatcher::class)->registerEvents();
         $this->app->make(YoastSeoEventDispatcher::class)->registerEvents();
         $this->app->make(TwoFactorEventDispatcher::class)->registerEvents();
         $this->app->make(UserSwitchingEventDispatcher::class)->registerEvents();

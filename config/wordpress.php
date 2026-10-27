@@ -58,6 +58,8 @@ return [
      */
     'enable_mail_handling' => true,
 
+    // Kept so this release adds nothing to remove from your config: pollora/woocommerce sets the same
+    // conditions itself, and these keys go with the next major release.
     'plugin_conditions' => [
         'woocommerce' => [
             // WooCommerce conditions

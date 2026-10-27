@@ -55,30 +55,6 @@ parameters:
 			path: src/Events/WordPress/Plugins/GravityForms/GravityFormsEventDispatcher.php
 
 		-
-			message: '#^Parameter \$order of method Pollora\\Events\\WordPress\\Plugins\\WooCommerce\\OrderStatusChanged\:\:__construct\(\) has invalid type WC_Order\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Events/WordPress/Plugins/WooCommerce/OrderStatusChanged.php
-
-		-
-			message: '#^Property Pollora\\Events\\WordPress\\Plugins\\WooCommerce\\OrderStatusChanged\:\:\$order has unknown class WC_Order as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Events/WordPress/Plugins/WooCommerce/OrderStatusChanged.php
-
-		-
-			message: '#^Class WC_Order not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
-
-		-
-			message: '#^Function wc_get_order not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Events/WordPress/Plugins/WooCommerce/WooCommerceEventDispatcher.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta_value\.$#'
 			identifier: property.notFound
 			count: 1
@@ -191,24 +167,6 @@ parameters:
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
 			path: src/Theme/Infrastructure/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\View\\WooCommerceTemplateResolver not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/ThirdParty/WooCommerce/Infrastructure/Providers/WooCommerceServiceProvider.php
-
-		-
-			message: '#^Class Pollora\\ThirdParty\\WooCommerce\\WooCommerce not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/ThirdParty/WooCommerce/Infrastructure/Providers/WooCommerceServiceProvider.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Contracts\\View\\View\:\:makeLoader\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/ThirdParty/WooCommerce/Infrastructure/Services/WooCommerce.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Contracts\\View\\View\:\:makeLoader\(\)\.$#'
