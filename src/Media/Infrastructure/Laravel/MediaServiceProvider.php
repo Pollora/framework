@@ -18,6 +18,7 @@ use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Events\MediaDeleted;
 use Pollora\Media\Domain\Events\MediaStored;
 use Pollora\Media\Domain\Events\MediaVisibilityChanged;
+use Pollora\Media\Domain\Exceptions\MediaDiskException;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Domain\Models\ThumbnailDriverSettings;
 use Pollora\Media\Infrastructure\Flysystem\FlysystemMediaStorage;
@@ -170,10 +171,10 @@ class MediaServiceProvider extends ServiceProvider
 
     private function filesystem(Application $app): FilesystemOperator
     {
-        $disk = $this->diskName() ?? throw new RuntimeException('config/media.php has no "disk": the media module is off.');
+        $disk = $this->diskName() ?? throw MediaDiskException::notConfigured();
         $driver = $app->make(Factory::class)->disk($disk)->getDriver();
 
-        return $driver instanceof FilesystemOperator ? $driver : throw new RuntimeException(sprintf('The disk "%s" has no Flysystem driver.', $disk));
+        return $driver instanceof FilesystemOperator ? $driver : throw MediaDiskException::withoutFlysystemDriver($disk);
     }
 
     private function mediaConfig(Application $app): MediaConfig
@@ -183,7 +184,7 @@ class MediaServiceProvider extends ServiceProvider
         $url = $config->get('media.url') ?? ($disk === null ? null : $config->get("filesystems.disks.{$disk}.url"));
 
         if (! is_string($url) || $url === '') {
-            throw new RuntimeException(sprintf('Set media.url (MEDIA_URL), or the "url" of the disk "%s": a media URL is built from it.', (string) $disk));
+            throw MediaDiskException::withoutUrl((string) $disk);
         }
 
         return new MediaConfig(

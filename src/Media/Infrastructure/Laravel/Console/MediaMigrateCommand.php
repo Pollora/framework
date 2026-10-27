@@ -12,6 +12,7 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Pollora\Media\Application\Services\MediaMigrator;
+use Pollora\Media\Domain\Exceptions\MediaDiskException;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Flysystem\FlysystemMediaStorage;
 use Pollora\Media\Infrastructure\WordPress\UrlReplacement;
@@ -68,6 +69,6 @@ class MediaMigrateCommand extends Command
     {
         $driver = $disks->disk($name)->getDriver();
 
-        return new FlysystemMediaStorage($driver instanceof FilesystemOperator ? $driver : throw new \RuntimeException(sprintf('The disk "%s" has no Flysystem driver.', $name)));
+        return new FlysystemMediaStorage($driver instanceof FilesystemOperator ? $driver : throw MediaDiskException::withoutFlysystemDriver($name));
     }
 }

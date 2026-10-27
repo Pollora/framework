@@ -239,7 +239,7 @@ class Bootstrap
                 ->where('option_name', 'active_plugins')
                 ->value('option_value');
 
-            $allPlugins = $raw ? (array) @unserialize($raw, ['allowed_classes' => false]) : [];
+            $allPlugins = $raw ? (array) @unserialize($raw, ['allowed_classes' => false]) : []; // nosemgrep -- allowed_classes is false: no object can be instantiated
         } catch (\Throwable) {
             return [];
         }
