@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.0...develop)
 
 ### Fixed
+- `tests/e2e/package-lock.json` is refreshed with `npm audit fix` (`zod` 4.6.7, `puppeteer-core` 25.16.0 and their dependencies) to fix known vulnerabilities in these development dependencies
 - `fast-uri` is updated to 3.1.9 in `package-lock.json` and `tests/e2e/package-lock.json` to fix known vulnerabilities in these development dependencies
 
 ## [v13.39.0](https://github.com/Pollora/framework/compare/v13.38.1...v13.39.0) - 2026-10-27
