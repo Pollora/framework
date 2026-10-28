@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.0...develop)
 
 ### Changed
+- `pollora/colt` is accepted as `^10.0.1 || ^11.0`: Colt 11 requires PHP 8.3 and declares strict types; the packages that require Colt (`pollora/block-bindings`) can move to 11 first, the framework follows
 - `pollora/query` is required as `^2.0` (it was `^1.0 || ^2.0`): the 1.x line is no longer accepted
 
 ### Fixed
