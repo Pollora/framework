@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.0...develop)
 
 ### Changed
+- **WP Rocket moved to its own package, `pollora/wp-rocket`. Install it if the project runs WP Rocket: `composer require pollora/wp-rocket`.** The framework no longer registers `WpRocketServiceProvider`, which kept WP Rocket from writing its rules into `.htaccess` and from setting `WP_CACHE` (both off unless `wordpress.wprocket.generate_htaccess` / `set_cache_constant` say otherwise). Without the package, an active WP Rocket does both on its own. The old class name `Pollora\ThirdParty\WpRocket\WpRocketServiceProvider` still resolves once the package is installed, and `wordpress.wprocket` is unchanged
+- `pollora:doctor` and Site Health check that WP Rocket, when active, has its Pollora integration installed; `pollora/wp-rocket` is suggested in `composer.json`
 - **`pollora/colt` `^11.0`** (it was `^10.0.1`; `^10.0.1 || ^11.0` on `develop`): Colt 11 requires PHP 8.3, declares strict types and adds return types to its public methods, so a model that extends one of Colt's and overrides a method must be compatible. `pollora/block-bindings` is required as `^0.2` (it needs Colt 11) and `pollora/query` as `^2.0 || ^3.0` (3.0 only raises its PHP requirement to 8.3)
 - Dependabot watches the npm lock files (`/` and `tests/e2e`) and opens its pull requests, security updates included, against `develop`: a security update used to target `main`, which broke the Gitflow
 - `pollora/colt` is accepted as `^10.0.1 || ^11.0`: Colt 11 requires PHP 8.3 and declares strict types; the packages that require Colt (`pollora/block-bindings`) can move to 11 first, the framework follows
