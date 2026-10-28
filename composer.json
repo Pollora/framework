@@ -107,7 +107,8 @@
         }
     },
     "suggest": {
-        "pollora/woocommerce": "WooCommerce's Blade templates, Route::wp() conditions, Coming Soon page and events"
+        "pollora/woocommerce": "WooCommerce's Blade templates, Route::wp() conditions, Coming Soon page and events",
+        "pollora/wp-rocket": "Keeps WP Rocket from writing .htaccess and setting WP_CACHE unless the project asks for it"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.6",
