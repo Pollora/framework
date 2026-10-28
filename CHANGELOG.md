@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.0...develop)
 
+### Fixed
+- The end-to-end test of the module list no longer fails when WordPress shows its own warning notice, as it does while a core update is available
+
 ### Changed
 - **WP Rocket moved to its own package, `pollora/wp-rocket`. Install it if the project runs WP Rocket: `composer require pollora/wp-rocket`.** The framework no longer registers `WpRocketServiceProvider`, which kept WP Rocket from writing its rules into `.htaccess` and from setting `WP_CACHE` (both off unless `wordpress.wprocket.generate_htaccess` / `set_cache_constant` say otherwise). Without the package, an active WP Rocket does both on its own. The old class name `Pollora\ThirdParty\WpRocket\WpRocketServiceProvider` still resolves once the package is installed, and `wordpress.wprocket` is unchanged
 - `pollora:doctor` and Site Health check that WP Rocket, when active, has its Pollora integration installed; `pollora/wp-rocket` is suggested in `composer.json`
