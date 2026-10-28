@@ -61,6 +61,7 @@ test.describe('Plugins › Modules', () => {
     test('warns that the JSON file does not survive a deployment', async ({ admin, page }) => {
         await admin.visitAdminPage('plugins.php', 'page=pollora-modules');
 
-        await expect(page.locator('.notice-warning')).toContainText('Stored in modules_statuses.json — the next deployment resets it.');
+        // Not every .notice-warning of the page: WordPress adds its own when a core update is available.
+        await expect(page.locator('.notice-warning', { hasText: 'Stored in modules_statuses.json' })).toContainText('the next deployment resets it.');
     });
 });
