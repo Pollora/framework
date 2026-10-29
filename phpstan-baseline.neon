@@ -55,12 +55,6 @@ parameters:
 			path: src/Events/WordPress/Plugins/GravityForms/GravityFormsEventDispatcher.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta_value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Models/Attachment.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedConfigPath\(\)\.$#'
 			identifier: method.notFound
 			count: 1

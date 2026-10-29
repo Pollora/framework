@@ -39,7 +39,6 @@ use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
-use Pollora\ThirdParty\WpRocket\WpRocketServiceProvider;
 use Pollora\VersionCheck\Infrastructure\Providers\VersionCheckServiceProvider;
 use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
 use Pollora\View\ViewServiceProvider;
@@ -117,7 +116,6 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
-        $this->app->register(WpRocketServiceProvider::class);
         $this->app->register(WordPressEventServiceProvider::class);
         $this->app->register(TemplateHierarchyServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);

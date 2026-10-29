@@ -33,7 +33,7 @@
         "pollora/ajax": "^1.1",
         "pollora/assets": "^0.1",
         "pollora/attributes": "^0.1.1 || ^1.0",
-        "pollora/block-bindings": "^0.1",
+        "pollora/block-bindings": "^0.2",
         "pollora/discovery": "^0.1 || ^1.0",
         "pollora/entity": "^1.2",
         "pollora/media": "^0.8",
@@ -46,16 +46,16 @@
         "pollora/wp-rest": "^0.1 || ^0.2 || ^1.0",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^2.0",
-        "pollora/colt": "^10.0.1",
+        "pollora/colt": "^11.0",
         "log1x/sage-directives": "^2.0",
         "roots/bedrock-autoloader": "^1.1",
-        "pollora/query": "^1.0 || ^2.0",
+        "pollora/query": "^2.0 || ^3.0",
         "spatie/php-structure-discoverer": "^2.4",
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.0",
         "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.39",
-        "laravel/prompts": "^0.3.25"
+        "laravel/prompts": "^0.3.26"
     },
     "autoload": {
         "psr-4": {
@@ -107,7 +107,8 @@
         }
     },
     "suggest": {
-        "pollora/woocommerce": "WooCommerce's Blade templates, Route::wp() conditions, Coming Soon page and events"
+        "pollora/woocommerce": "WooCommerce's Blade templates, Route::wp() conditions, Coming Soon page and events",
+        "pollora/wp-rocket": "Keeps WP Rocket from writing .htaccess and setting WP_CACHE unless the project asks for it"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.6",
