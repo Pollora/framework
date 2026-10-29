@@ -43,7 +43,7 @@
         "pollora/roles": "^0.2",
         "pollora/schedule": "^1.0",
         "pollora/wp-cli": "^0.1 || ^1.0",
-        "pollora/wp-rest": "^0.1 || ^0.2 || ^1.0",
+        "pollora/wp-rest": "^0.1 || ^0.2 || ^1.0 || ^2.0",
         "watson/rememberable": "^7.1",
         "cweagans/composer-patches": "^2.0",
         "pollora/colt": "^11.0",

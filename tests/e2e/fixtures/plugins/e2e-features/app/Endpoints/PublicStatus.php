@@ -6,11 +6,12 @@ namespace Plugin\E2eFeatures\Endpoints;
 
 use Pollora\Attributes\WpRestRoute;
 use Pollora\Attributes\WpRestRoute\Method;
+use Pollora\WpRest\Permissions\Everyone;
 
 /**
- * No permission declared: the route is public.
+ * Public on purpose: Everyone says so, a route that declares no permission is refused.
  */
-#[WpRestRoute('e2e/v1', '/public')]
+#[WpRestRoute('e2e/v1', '/public', permissionCallback: Everyone::class)]
 class PublicStatus
 {
     /** @return array{route: string} */
