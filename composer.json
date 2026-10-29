@@ -35,7 +35,7 @@
         "pollora/attributes": "^0.1.1 || ^1.0",
         "pollora/block-bindings": "^0.2",
         "pollora/discovery": "^0.1 || ^1.0",
-        "pollora/entity": "^1.2 || ^2.0",
+        "pollora/entity": "^2.0",
         "pollora/media": "^0.8",
         "pollora/meta": "^0.1",
         "pollora/hook": "^2.0.1",

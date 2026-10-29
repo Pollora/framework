@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `pollora/wp-rest` is accepted at `^2.0`. Version 2.0 refuses a REST route that declares no permission: declare `Everyone::class` on the routes that are public on purpose, or return `false` from the `pollora/wp-rest/private_by_default` filter while migrating. The framework keeps accepting the 0.x and 1.x versions
-- `pollora/entity` is accepted at `^1.2 || ^2.0`: entity 2.0 only raises its PHP requirement to 8.3, which the framework already requires
+- `pollora/entity` is required at `^2.0` (it was `^1.2`): entity 2.0 only raises its PHP requirement to 8.3, which the framework already requires
 - The development tooling moves up: `@commitlint/cli` and `@commitlint/config-conventional` 21 (they need Node 22.12 or later; the repository's rules still apply), `prettier` 3.9.10, and, for the end-to-end suite, `@playwright/test` 1.64.1 and `@wordpress/e2e-test-utils-playwright` 3.1.0, both pinned as before. `lint-staged` is removed, with its configuration: it was configured but no git hook ever ran it (the only hook is `commit-msg`)
 - Dependabot ignores the major versions of `@types/node` in `tests/e2e`: the suite runs on Node 22
 
