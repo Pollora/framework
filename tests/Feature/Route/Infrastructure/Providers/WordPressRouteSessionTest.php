@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -32,9 +31,9 @@ beforeEach(function (): void {
 /** @return list<string> */
 function gatheredMiddleware(): array
 {
-    $route = Route::middleware('web')->group(fn () => Route::wp('home', fn (): string => ''));
+    Route::middleware('web')->group(fn () => Route::wp('home', fn (): string => ''));
 
-    return app('router')->gatherRouteMiddleware(app('router')->getRoutes()->getRoutes()[0]);
+    return resolve('router')->gatherRouteMiddleware(resolve('router')->getRoutes()->getRoutes()[0]);
 }
 
 describe('Route::wp() session middleware', function (): void {
@@ -53,7 +52,6 @@ describe('Route::wp() session middleware', function (): void {
             ->not->toContain(StartSession::class)
             ->not->toContain(ShareErrorsFromSession::class)
             ->not->toContain(PreventRequestForgery::class)
-            ->not->toContain(ValidateCsrfToken::class)
             ->toContain(RouteServiceProvider::WORDPRESS_MIDDLEWARE[0]);
     });
 });
