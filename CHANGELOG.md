@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `pollora/entity` is accepted at `^1.2 || ^2.0`: entity 2.0 only raises its PHP requirement to 8.3, which the framework already requires
-- The development tooling moves up: `@commitlint/cli` and `@commitlint/config-conventional` 21 (they need Node 22.12 or later; the repository's rules still apply), `prettier` 3.9.10, and, for the end-to-end suite, `@playwright/test` 1.64.1 and `@wordpress/e2e-test-utils-playwright` 3.1.0, both pinned as before. `lint-staged` stays on 15: version 17 needs Node 22.22.1 and no git hook runs it
+- The development tooling moves up: `@commitlint/cli` and `@commitlint/config-conventional` 21 (they need Node 22.12 or later; the repository's rules still apply), `prettier` 3.9.10, and, for the end-to-end suite, `@playwright/test` 1.64.1 and `@wordpress/e2e-test-utils-playwright` 3.1.0, both pinned as before. `lint-staged` is removed, with its configuration: it was configured but no git hook ever ran it (the only hook is `commit-msg`)
 - Dependabot ignores the major versions of `@types/node` in `tests/e2e`: the suite runs on Node 22
 
 ## [v13.39.1](https://github.com/Pollora/framework/compare/v13.39.0...v13.39.1) - 2026-10-28
