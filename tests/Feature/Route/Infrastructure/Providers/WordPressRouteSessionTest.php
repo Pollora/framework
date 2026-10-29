@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
@@ -24,7 +25,7 @@ beforeEach(function (): void {
     $this->app['router']->middlewareGroup('web', [
         StartSession::class,
         ShareErrorsFromSession::class,
-        ValidateCsrfToken::class,
+        PreventRequestForgery::class,
     ]);
 });
 
@@ -40,7 +41,7 @@ describe('Route::wp() session middleware', function (): void {
     it('keeps the session stack of the web group by default', function (): void {
         $middleware = gatheredMiddleware();
 
-        expect($middleware)->toContain(StartSession::class, ShareErrorsFromSession::class, ValidateCsrfToken::class);
+        expect($middleware)->toContain(StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class);
     });
 
     it('leaves the session stack off when wordpress.sessions is false', function (): void {
@@ -51,6 +52,7 @@ describe('Route::wp() session middleware', function (): void {
         expect($middleware)
             ->not->toContain(StartSession::class)
             ->not->toContain(ShareErrorsFromSession::class)
+            ->not->toContain(PreventRequestForgery::class)
             ->not->toContain(ValidateCsrfToken::class)
             ->toContain(RouteServiceProvider::WORDPRESS_MIDDLEWARE[0]);
     });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Route\Infrastructure\Providers;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Session\Middleware\StartSession;
@@ -56,11 +57,14 @@ class RouteServiceProvider extends ServiceProvider
 
     /**
      * Session stack of Laravel's `web` group, left out of WordPress routes
-     * when `wordpress.sessions` is false.
+     * when `wordpress.sessions` is false. Laravel 13 names the CSRF
+     * middleware PreventRequestForgery; ValidateCsrfToken is its alias and is
+     * kept for applications that still list it.
      */
     public const SESSION_MIDDLEWARE = [
         StartSession::class,
         ShareErrorsFromSession::class,
+        PreventRequestForgery::class,
         ValidateCsrfToken::class,
     ];
 
