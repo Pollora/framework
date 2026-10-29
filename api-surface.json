@@ -121,6 +121,7 @@
         "config:wordpress.plugin_conditions.woocommerce.is_product_tag": "key",
         "config:wordpress.plugin_conditions.woocommerce.is_shop": "key",
         "config:wordpress.plugin_conditions.woocommerce.is_wc_endpoint_url": "key",
+        "config:wordpress.sessions": "key",
         "hook:pollora/async/recover": "hook",
         "hook:pollora/login/credit": "hook",
         "hook:pollora/login/logo": "hook",

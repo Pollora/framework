@@ -58,6 +58,17 @@ return [
      */
     'enable_mail_handling' => true,
 
+    /**
+     * Laravel session on Route::wp() routes.
+     *
+     * Routes declared in routes/web.php inherit the `web` group, which starts a
+     * session (a row in the sessions table and two cookies) on every request.
+     * Set to false to leave the session, error-sharing and CSRF middleware off
+     * Route::wp() routes; Laravel-native routes are not affected.
+     * csrf_token(), old() and flash data then have nothing to read from.
+     */
+    'sessions' => true,
+
     // Kept so this release adds nothing to remove from your config: pollora/woocommerce sets the same
     // conditions itself, and these keys go with the next major release.
     'plugin_conditions' => [
