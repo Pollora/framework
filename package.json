@@ -21,7 +21,7 @@
     "@commitlint/config-conventional": "^19.8.1",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
-    "prettier": "^3.5.3"
+    "prettier": "^3.9.10"
   },
   "lint-staged": {
     "**/*.{js,md,yml,mjs}": "prettier --write"
