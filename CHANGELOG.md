@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.1...develop)
 
+### Changed
+- The development tooling moves up: `@commitlint/cli` and `@commitlint/config-conventional` 21 (they need Node 22.12 or later; the repository's rules still apply), `prettier` 3.9.10, and, for the end-to-end suite, `@playwright/test` 1.64.1 and `@wordpress/e2e-test-utils-playwright` 3.1.0, both pinned as before. `lint-staged` stays on 15: version 17 needs Node 22.22.1 and no git hook runs it
+- Dependabot ignores the major versions of `@types/node` in `tests/e2e`: the suite runs on Node 22
+
 ## [v13.39.1](https://github.com/Pollora/framework/compare/v13.39.0...v13.39.1) - 2026-10-28
 
 ### Changed
