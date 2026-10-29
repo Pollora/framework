@@ -63,12 +63,21 @@ test.describe('A post type declared by a plugin', () => {
 });
 
 test.describe('REST routes declared by #[WpRestRoute]', () => {
-    test('a route with no permission is public', async () => {
+    test('a route declared public with Everyone answers a visitor', async () => {
         const context = await visitor();
         const response = await context.get(homeUrl('/wp-json/e2e/v1/public'));
 
         expect(response.status()).toBe(200);
         expect(await response.json()).toEqual({ route: 'public' });
+        await context.dispose();
+    });
+
+    test('a route with no permission is refused', async () => {
+        const context = await visitor();
+        const response = await context.get(homeUrl('/wp-json/e2e/v1/undeclared'));
+
+        expect(response.status()).toBe(401);
+        expect((await response.json()).code).toBe('rest_forbidden');
         await context.dispose();
     });
 
