@@ -35,7 +35,7 @@
         "pollora/attributes": "^0.1.1 || ^1.0",
         "pollora/block-bindings": "^0.2",
         "pollora/discovery": "^0.1 || ^1.0",
-        "pollora/entity": "^1.2",
+        "pollora/entity": "^2.0",
         "pollora/media": "^0.8",
         "pollora/meta": "^0.1",
         "pollora/hook": "^2.0.1",
@@ -52,7 +52,7 @@
         "pollora/query": "^2.0 || ^3.0",
         "spatie/php-structure-discoverer": "^2.4",
         "coduo/php-humanizer": "5.0.3",
-        "nwidart/laravel-modules": "^13.0",
+        "nwidart/laravel-modules": "^13.2",
         "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.39",
         "laravel/prompts": "^0.3.26"
@@ -125,7 +125,7 @@
         "wp-cli/wp-cli": "^2.12",
         "larastan/larastan": "^3.13",
         "orchestra/testbench": "^11.3.0",
-        "pollora/harness": "^0.1.8"
+        "pollora/harness": "^0.1.13"
     },
     "autoload-dev": {
         "psr-4": {

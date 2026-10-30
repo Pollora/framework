@@ -6,6 +6,7 @@ namespace Plugin\E2eFeatures\Endpoints;
 
 use Pollora\Attributes\WpRestRoute;
 use Pollora\Attributes\WpRestRoute\Method;
+use Pollora\WpRest\Permissions\Everyone;
 
 /**
  * What `__()` answers, on each side of the helper that shares the name: WordPress keeps
@@ -13,7 +14,7 @@ use Pollora\Attributes\WpRestRoute\Method;
  * with replacements to Laravel. This plugin's fr_FR catalogue is what WordPress finds,
  * whatever the site's language.
  */
-#[WpRestRoute('e2e/v1', '/translations')]
+#[WpRestRoute('e2e/v1', '/translations', permissionCallback: Everyone::class)]
 class Translations
 {
     /** @return array{wordpress: string, untranslated: string, laravel: string, wpNative: string} */

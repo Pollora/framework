@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Pollora\Route\Infrastructure\Providers;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Pollora\Route\Application\Services\AnsweringTemplate;
 use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
 use Pollora\Route\Application\UseCases\RegisterWordPressTypesUseCase;
@@ -49,6 +52,17 @@ class RouteServiceProvider extends ServiceProvider
         WordPressHeaders::class,
         WordPressShutdown::class,
         WordPressTemplateEnhancement::class,
+    ];
+
+    /**
+     * Session stack of Laravel's `web` group, left out of WordPress routes
+     * when `wordpress.sessions` is false. PreventRequestForgery is
+     * the Laravel 13 CSRF middleware (ValidateCsrfToken is deprecated).
+     */
+    public const SESSION_MIDDLEWARE = [
+        StartSession::class,
+        ShareErrorsFromSession::class,
+        PreventRequestForgery::class,
     ];
 
     /**
@@ -196,6 +210,10 @@ class RouteServiceProvider extends ServiceProvider
 
             // Add WordPress middleware
             $route->middleware(RouteServiceProvider::WORDPRESS_MIDDLEWARE);
+
+            if (! config('wordpress.sessions', true)) {
+                $route->withoutMiddleware(RouteServiceProvider::SESSION_MIDDLEWARE);
+            }
 
             return $route;
         });

@@ -5,7 +5,19 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.1...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.2...develop)
+
+## [v13.39.2](https://github.com/Pollora/framework/compare/v13.39.1...v13.39.2) - 2026-10-30
+
+### Added
+- **`wordpress.sessions`**: `Route::wp()` routes no longer have to start a Laravel session. Routes declared in `routes/web.php` inherit the `web` group, so every anonymous request to a `Route::wp()` route started a session (a row in `sessions`, the `<app>_session` and `XSRF-TOKEN` cookies). With `'sessions' => false` in `config/wordpress.php`, those routes drop `StartSession`, `ShareErrorsFromSession` and the CSRF middleware (`PreventRequestForgery`, which `ValidateCsrfToken` extends), and `csrf_token()`, `old()` and flash data have nothing to read from there. The default is `true`: nothing changes for an existing site. Laravel-native routes keep the full `web` group, and the template hierarchy fallback is not affected
+
+### Changed
+- `pollora/entity` is required at `^2.0` (it was `^1.2`): entity 2.0 only raises its PHP requirement to 8.3, which the framework already requires
+- `nwidart/laravel-modules` is required at `^13.2` (it was `^13.0`). Its 13.2.0 release changes how a custom `stubs.path` is enabled and how a custom `paths.generator.*` entry without a `namespace` gets its namespace; a project on the default configuration needs no change
+- The development tooling moves up: `@commitlint/cli` and `@commitlint/config-conventional` 21 (they need Node 22.12 or later; the repository's rules still apply), `prettier` 3.9.10, and, for the end-to-end suite, `@playwright/test` 1.64.1 and `@wordpress/e2e-test-utils-playwright` 3.1.0, both pinned as before. `lint-staged` is removed, with its configuration: it was configured but no git hook ever ran it (the only hook is `commit-msg`)
+- Dependabot ignores the major versions of `@types/node` in `tests/e2e`: the suite runs on Node 22
+- The development dependency `pollora/harness` is required at `^0.1.13`
 
 ## [v13.39.1](https://github.com/Pollora/framework/compare/v13.39.0...v13.39.1) - 2026-10-28
 

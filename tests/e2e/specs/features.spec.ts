@@ -63,7 +63,7 @@ test.describe('A post type declared by a plugin', () => {
 });
 
 test.describe('REST routes declared by #[WpRestRoute]', () => {
-    test('a route with no permission is public', async () => {
+    test('a route declared public with Everyone answers a visitor', async () => {
         const context = await visitor();
         const response = await context.get(homeUrl('/wp-json/e2e/v1/public'));
 
