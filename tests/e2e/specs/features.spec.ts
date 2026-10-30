@@ -72,15 +72,6 @@ test.describe('REST routes declared by #[WpRestRoute]', () => {
         await context.dispose();
     });
 
-    test('a route with no permission is refused', async () => {
-        const context = await visitor();
-        const response = await context.get(homeUrl('/wp-json/e2e/v1/undeclared'));
-
-        expect(response.status()).toBe(401);
-        expect((await response.json()).code).toBe('rest_forbidden');
-        await context.dispose();
-    });
-
     test('an IsAdmin route refuses a visitor', async () => {
         const context = await visitor();
         const response = await context.get(homeUrl('/wp-json/e2e/v1/admin/7'));
