@@ -53,7 +53,7 @@
         "spatie/php-structure-discoverer": "^2.4",
         "coduo/php-humanizer": "5.0.3",
         "nwidart/laravel-modules": "^13.2",
-        "symfony/process": "^7.4 || ^8.0",
+        "symfony/process": "^8.1.10",
         "illuminate/config": "^13.39",
         "laravel/prompts": "^0.3.26"
     },
