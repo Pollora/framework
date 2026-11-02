@@ -5,10 +5,13 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.2...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.39.3...develop)
+
+## [v13.39.3](https://github.com/Pollora/framework/compare/v13.39.2...v13.39.3) - 2026-11-02
 
 ### Changed
 - **`pollora/wp-rest` 2.0 is accepted, and `composer update` installs it: a REST route that declares no permission is refused** (`rest_forbidden`, 401 for a visitor, 403 for a logged-in user), where it used to stay public. Before updating, declare `permissionCallback: Everyone::class` on the routes that are public on purpose, or a permission such as `IsLoggedIn`. To keep the old behaviour for a while, return `false` from the `pollora/wp-rest/private_by_default` filter: WordPress then tells, with `WP_DEBUG`, which route to fix. To stay on the previous version, require `"pollora/wp-rest": "^0.2"` (there is no 1.x). The framework accepts `^0.1 || ^0.2 || ^1.0 || ^2.0`
+- The development files (`.harness.json`, `AGENTS.md`, `api-surface.json`, `composer-dependency-analyser.php`, `.gitignore`) are kept out of the distribution archive, and `pollora/harness` is required at `^0.1.15`
 
 ## [v13.39.2](https://github.com/Pollora/framework/compare/v13.39.1...v13.39.2) - 2026-10-30
 
