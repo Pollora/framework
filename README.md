@@ -97,6 +97,10 @@ All notable changes are documented in [CHANGELOG.md](CHANGELOG.md).
 
 Pollora builds on the work of [Roots](https://roots.io), a constant source of inspiration: themes, blocks and plugins are built with `@roots/vite-plugin`, the project follows the Bedrock layout with `roots/bedrock-autoloader`, and Blade ships [Sage Directives](https://github.com/Log1x/sage-directives). The WordPress models are built on [Colt](https://github.com/Pollora/colt), a fork of [Corcel](https://github.com/corcel/corcel).
 
+## Support the project
+
+If Pollora is useful to you, **[star the skeleton](https://github.com/Pollora/pollora)**, the repository you install from: it helps other WordPress developers find it. Questions and ideas are welcome in [GitHub Discussions](https://github.com/Pollora/pollora/discussions).
+
 ## Contributing
 
 Contributions are welcome: see the [contributing guide](CONTRIBUTING.md). Report security issues privately, as described in the [security policy](SECURITY.md).
