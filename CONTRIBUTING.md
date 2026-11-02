@@ -36,8 +36,8 @@ outlines our guidelines and conventions.
   composer test
   ```
   This executes Rector, Pint, PHPStan and the unit tests.
-- Pull requests must pass the CI pipeline. Aim for 100% coverage as enforced by
-  the test configuration.
+- Pull requests must pass the CI pipeline. A pull request must not lower
+  the line coverage recorded in `.harness.json`, and the type coverage stays at 98% or more.
 
 ## Commit Messages
 
