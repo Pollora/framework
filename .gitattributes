@@ -20,3 +20,9 @@
 /rector.php export-ignore
 /testbench.yaml export-ignore
 /tests export-ignore
+# Pollora harness (QA-06): development files stay out of the archive Composer downloads
+/.gitignore export-ignore
+/.harness.json export-ignore
+/AGENTS.md export-ignore
+/api-surface.json export-ignore
+/composer-dependency-analyser.php export-ignore
