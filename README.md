@@ -82,7 +82,7 @@ Learn more:
 
 ```bash
 composer test                # Run all checks (Rector, Pint, PHPStan, Pest, type coverage)
-composer test:unit           # Run Pest tests with 100% coverage requirement
+composer test:unit           # Run the Pest tests
 composer test:types          # Run PHPStan static analysis
 composer test:lint           # Check code style with Pint
 composer test:refacto        # Check refactoring rules with Rector
