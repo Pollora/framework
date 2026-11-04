@@ -102,7 +102,7 @@ describe('DiscoveryRegistrar', function (): void {
     });
 
     it('gracefully handles unresolvable bindings', function (): void {
-        $this->container->singleton('App\\BrokenDiscovery', fn () => throw new RuntimeException('Cannot resolve'));
+        $this->container->singleton('App\\BrokenDiscovery', fn (): never => throw new RuntimeException('Cannot resolve'));
 
         $engine = createMockRegistrarEngine();
         $engine->shouldNotReceive('addDiscovery');
