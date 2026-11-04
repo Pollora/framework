@@ -118,7 +118,7 @@
         "symfony/var-dumper": "^7.4 || ^8.0",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "^7.1",
-        "symplify/vendor-patches": "^12.1",
+        "symplify/vendor-patches": "^12.2",
         "antecedent/patchwork": "^2.2",
         "brain/monkey": "^2.7",
         "mockery/mockery": "^1.6.15",
