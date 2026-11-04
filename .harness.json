@@ -3,6 +3,7 @@
     "mode": "enforce",
     "ratchet": {
         "phpstan_level": 5,
-        "phpstan_baseline": 58
+        "phpstan_baseline": 58,
+        "coverage": 53
     }
 }

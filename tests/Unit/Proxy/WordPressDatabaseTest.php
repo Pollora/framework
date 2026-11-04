@@ -143,7 +143,7 @@ describe('WordPressDatabase', function (): void {
     it('throws RuntimeException on mysql_connect', function (): void {
         $proxy = new WordPressDatabase;
 
-        expect(fn () => $proxy->mysql_connect())
+        expect(fn (): never => $proxy->mysql_connect())
             ->toThrow(RuntimeException::class, 'Using mysql_connect is deprecated');
     });
 });

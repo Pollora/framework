@@ -14,7 +14,7 @@ Pollora is a Laravel & WordPress integration framework that creates a "sweet ble
 ddev exec --dir /var/www/html/vendor/pollora/framework composer test
 
 # Individual test commands
-ddev exec --dir /var/www/html/vendor/pollora/framework composer test:unit          # Run PHPUnit tests with coverage (requires 100% coverage)
+ddev exec --dir /var/www/html/vendor/pollora/framework composer test:unit          # Run the Pest tests
 ddev exec --dir /var/www/html/vendor/pollora/framework composer test:types         # Run PHPStan static analysis
 ddev exec --dir /var/www/html/vendor/pollora/framework composer test:lint          # Test code formatting with Pint
 ddev exec --dir /var/www/html/vendor/pollora/framework composer test:refacto       # Test refactoring rules with Rector (dry-run)
@@ -25,7 +25,8 @@ ddev exec --dir /var/www/html/vendor/pollora/framework composer refacto         
 ```
 
 ### Key Quality Standards
-- **Test Coverage**: 100% test coverage is required (`--min=100`)
+- **Type Coverage**: at least 98% (`composer test:type-coverage`, enforced by the CI)
+- **Line Coverage**: tracked, not a fixed target. The Harness ratchet (`coverage` in `.harness.json`) fails a change that lowers it, so a pull request that adds code adds the tests that keep the figure up
 - **Static Analysis**: PHPStan level 5 with WordPress and Laravel extensions
 - **Code Style**: Laravel Pint for PHP formatting, Prettier for JS/MD/YAML
 - **Refactoring**: Rector with Laravel-specific rules

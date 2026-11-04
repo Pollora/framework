@@ -201,7 +201,7 @@ describe('Document root', function (): void {
 
     it('is skipped when the site cannot request itself', function (): void {
         config(['app.url' => 'http://pollora.test']);
-        Http::fake(fn () => throw new RuntimeException('timeout'));
+        Http::fake(fn (): never => throw new RuntimeException('timeout'));
 
         expect((new PublicRootCheck)->run(RunContext::Http)->status->value)->toBe('skipped');
     });
