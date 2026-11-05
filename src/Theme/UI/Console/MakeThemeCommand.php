@@ -263,7 +263,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      */
     protected function activateWordPressPlugins(array $packages): void
     {
-        if (! function_exists('activate_plugin')) {
+        if (! $this->wordPressCanActivatePlugins()) {
             return;
         }
 
@@ -284,6 +284,12 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return;
         }
 
+        if (! did_action('plugins_loaded')) {
+            $this->activatePluginsInNewProcess($plugins);
+
+            return;
+        }
+
         foreach ($plugins as $slug) {
             $pluginFile = $this->findPluginEntryFile($slug);
 
@@ -293,12 +299,71 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
                 continue;
             }
 
-            $result = activate_plugin($pluginFile);
+            $result = $this->activatePlugin($pluginFile);
 
             if (is_wp_error($result)) {
                 $this->error(sprintf('Failed to activate "%s": %s', $slug, $result->get_error_message()));
             } else {
                 $this->info(sprintf('Plugin "%s" activated.', $slug));
+            }
+        }
+    }
+
+    protected function wordPressCanActivatePlugins(): bool
+    {
+        return function_exists('activate_plugin');
+    }
+
+    /**
+     * Activate one plugin in this process (WordPress fully loaded).
+     *
+     * @return \WP_Error|null
+     */
+    protected function activatePlugin(string $pluginFile): mixed
+    {
+        return activate_plugin($pluginFile);
+    }
+
+    /**
+     * Activate plugins from a fresh process, when WordPress is only partly loaded here.
+     *
+     * A first install runs this command with WordPress in SHORTINIT: activate_plugin()
+     * exists but crashes, and an activation hook would run without plugins_loaded or
+     * init. A new process loads WordPress fully, now that it is installed.
+     *
+     * @param  array<string, string>  $plugins  Map of package name => plugin directory slug.
+     */
+    protected function activatePluginsInNewProcess(array $plugins): void
+    {
+        $files = [];
+
+        foreach ($plugins as $slug) {
+            $file = $this->findPluginEntryFile($slug);
+
+            if ($file === null) {
+                $this->warn(sprintf('Could not find entry file for plugin "%s".', $slug));
+
+                continue;
+            }
+
+            $files[$slug] = $file;
+        }
+
+        if ($files === []) {
+            return;
+        }
+
+        $process = new Process([PHP_BINARY, 'artisan', 'pollora:plugin:activate', ...array_values($files)], base_path());
+        $process->setTimeout(120);
+        $process->run(function ($type, string|iterable $buffer): void {
+            $this->getOutput()->write($buffer);
+        });
+
+        if (! $process->isSuccessful()) {
+            $this->warn('The plugins could not be activated now. Activate them once the installation is done:');
+
+            foreach (array_keys($files) as $slug) {
+                $this->line(sprintf('  wp plugin activate %s', $slug));
             }
         }
     }
@@ -313,7 +378,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      * @param  array<int, string>  $packages  Composer package names.
      * @return array<string, string> Map of package name => plugin directory slug.
      */
-    private function resolveWordPressPlugins(array $packages): array
+    protected function resolveWordPressPlugins(array $packages): array
     {
         $installedPlugins = InstalledVersions::getInstalledPackagesByType('wordpress-plugin');
         $plugins = [];
@@ -337,7 +402,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      * @param  string  $slug  The plugin directory name (e.g. "woocommerce").
      * @return string|null The plugin-relative path (e.g. "woocommerce/woocommerce.php"), or null if not found.
      */
-    private function findPluginEntryFile(string $slug): ?string
+    protected function findPluginEntryFile(string $slug): ?string
     {
         $pluginDir = defined('WP_PLUGIN_DIR')
             ? WP_PLUGIN_DIR.'/'.$slug
