@@ -129,7 +129,7 @@ function pluginActivation(int $pluginsLoaded): array
             return ['wp-plugin/woocommerce' => 'woocommerce'];
         }
 
-        protected function findPluginEntryFile(string $slug): ?string
+        protected function findPluginEntryFile(string $slug): string
         {
             return $slug.'/'.$slug.'.php';
         }
@@ -143,6 +143,7 @@ function pluginActivation(int $pluginsLoaded): array
 
     $input = new ArrayInput([], new InputDefinition);
     $input->setInteractive(false);
+
     $command->setInput($input);
     $command->setOutput(new OutputStyle($input, new BufferedOutput));
 
