@@ -13,6 +13,7 @@ use Pollora\Plugin\Application\Services\PluginRegistrar;
 use Pollora\Plugin\Infrastructure\Repositories\PluginRepository;
 use Pollora\Plugin\Infrastructure\Services\PluginAutoloader;
 use Pollora\Plugin\Infrastructure\Services\WordPressPluginParser;
+use Pollora\Plugin\UI\Console\Commands\PluginActivateCommand;
 use Pollora\Plugin\UI\Console\Commands\PluginListCommand;
 use Pollora\Plugin\UI\Console\Commands\PluginStatusCommand;
 use Pollora\Plugin\UI\Console\MakePluginCommand;
@@ -115,6 +116,7 @@ class PluginServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MakePluginCommand::class,
+                PluginActivateCommand::class,
                 PluginStatusCommand::class,
                 PluginListCommand::class,
             ]);
@@ -163,6 +165,7 @@ class PluginServiceProvider extends ServiceProvider
             'plugin.manager',
             'plugin.registrar',
             MakePluginCommand::class,
+            PluginActivateCommand::class,
             PluginStatusCommand::class,
             PluginListCommand::class,
         ];
