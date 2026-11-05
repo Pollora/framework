@@ -6,7 +6,6 @@ namespace Pollora\Schedule\Application\Services;
 
 use Illuminate\Contracts\Config\Repository;
 use Pollora\Schedule\Event;
-use Pollora\Schedule\Infrastructure\Drivers\LaravelQueueDriver;
 use Pollora\Schedule\Schedule;
 use Pollora\Schedule\Support\CronIndex;
 
@@ -18,6 +17,11 @@ use Pollora\Schedule\Support\CronIndex;
  */
 final readonly class ScheduleStatus
 {
+    /**
+     * Name the queue driver files its events under (LaravelQueueDriver::NAME).
+     */
+    private const string QUEUE_DRIVER = 'laravel';
+
     public function __construct(private Repository $config) {}
 
     /**
@@ -90,7 +94,7 @@ final readonly class ScheduleStatus
     {
         $limit = time() - $this->lateAfter();
 
-        return count(array_filter(Schedule::engine()->index(), static fn (Event $event): bool => $event->driver === LaravelQueueDriver::NAME && $event->timestamp < $limit));
+        return count(array_filter(Schedule::engine()->index(), static fn (Event $event): bool => $event->driver === self::QUEUE_DRIVER && $event->timestamp < $limit));
     }
 
     /**

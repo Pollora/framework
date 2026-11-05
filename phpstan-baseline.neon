@@ -69,12 +69,6 @@ parameters:
 		-
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
 			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: src/Plugin/Infrastructure/Models/LaravelPluginModule.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 10
 			path: src/Media/config/media.php
 
@@ -153,12 +147,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Illuminate\\Container\\Container\:\:getCachedServicesPath\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Theme/Infrastructure/Models/LaravelThemeModule.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
 			path: src/Theme/Infrastructure/Models/LaravelThemeModule.php
 
