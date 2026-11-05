@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.0...develop)
 
+### Added
+- `pollora:make:post-type` (and its `pollora:make-posttype` alias) can create the theme views of the new post type: `--single-view` writes `single-{slug}.blade.php`, `--archive-view` writes `archive-{slug}.blade.php`, `--with-views` writes both. They go to `resources/views` of the theme given with `--theme`, or of the active theme, and are named after the slug discovery registers the post type under (cut to 20 characters), so the template hierarchy renders them with no route. An existing view is left as it is, with a warning
+
 ## [v13.40.0](https://github.com/Pollora/framework/compare/v13.39.3...v13.40.0) - 2026-11-04
 
 ### Changed
