@@ -7,12 +7,15 @@ use Illuminate\Config\Repository;
 use Illuminate\Console\OutputStyle;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
+use Laravel\Prompts\ConfirmPrompt;
+use Laravel\Prompts\Prompt;
 use Pollora\Theme\Application\Services\ThemeAvailability;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
@@ -87,4 +90,78 @@ it('does nothing when the generated theme is already the active one', function (
     Functions\when('get_stylesheet')->justReturn('my-journal');
 
     expect(activates(activationCommand(['--activate' => true], themeMissing: false)))->toBeFalse();
+});
+
+/**
+ * A first install runs the command with WordPress only partly loaded: activate_plugin() crashed
+ * there in plugin_basename(), so the activation moves to a fresh process.
+ *
+ * @return array{0: array<int, string>, 1: array<int, string>} Plugins activated here, plugins handed to a new process.
+ */
+function pluginActivation(int $pluginsLoaded): array
+{
+    Functions\when('did_action')->justReturn($pluginsLoaded);
+    Prompt::fallbackWhen(true);
+    ConfirmPrompt::fallbackUsing(fn (): bool => true);
+
+    $command = new class(new Repository, new Filesystem) extends MakeThemeCommand
+    {
+        /** @var array<int, string> */
+        public array $handedOver = [];
+
+        /** @var array<int, string> */
+        public array $activated = [];
+
+        protected function wordPressCanActivatePlugins(): bool
+        {
+            return true;
+        }
+
+        protected function activatePlugin(string $pluginFile): mixed
+        {
+            $this->activated[] = $pluginFile;
+
+            return null;
+        }
+
+        protected function resolveWordPressPlugins(array $packages): array
+        {
+            return ['wp-plugin/woocommerce' => 'woocommerce'];
+        }
+
+        protected function findPluginEntryFile(string $slug): string
+        {
+            return $slug.'/'.$slug.'.php';
+        }
+
+        protected function activatePluginsInNewProcess(array $plugins): void
+        {
+            $this->handedOver = array_values($plugins);
+        }
+    };
+    $command->setLaravel(app());
+
+    $input = new ArrayInput([], new InputDefinition);
+    $input->setInteractive(false);
+
+    $command->setInput($input);
+    $command->setOutput(new OutputStyle($input, new BufferedOutput));
+
+    (fn () => $this->activateWordPressPlugins(['wp-plugin/woocommerce']))->call($command);
+
+    return [$command->activated, $command->handedOver];
+}
+
+it('hands plugin activation to a new process while WordPress is not fully loaded', function (): void {
+    [$activated, $handedOver] = pluginActivation(pluginsLoaded: 0);
+
+    expect($activated)->toBe([])
+        ->and($handedOver)->toBe(['woocommerce']);
+});
+
+it('activates plugins in place once WordPress is fully loaded', function (): void {
+    [$activated, $handedOver] = pluginActivation(pluginsLoaded: 1);
+
+    expect($activated)->toBe(['woocommerce/woocommerce.php'])
+        ->and($handedOver)->toBe([]);
 });

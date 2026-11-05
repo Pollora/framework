@@ -5,7 +5,15 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.1...develop)
+
+## [v13.40.1](https://github.com/Pollora/framework/compare/v13.40.0...v13.40.1) - 2026-11-05
+
+### Added
+- **`pollora:plugin:activate`**: activates WordPress plugins, given as paths relative to the plugins directory (`woocommerce/woocommerce.php`), and refuses to run when WordPress is not fully loaded
+
+### Fixed
+- **`pollora new` no longer crashes when a theme template requires a WordPress plugin and you activate it** (`arsort(): Argument #1 ($array) must be of type array, null given`). The E-commerce template (`pollora/theme-apiary`) always hit it: it requires WooCommerce. On a first install `pollora:make:theme` runs in the process that has just installed WordPress, which is only partly loaded (`SHORTINIT`), and `activate_plugin()` failed there before the theme build and the theme activation. The plugins are now activated by a fresh `pollora:plugin:activate` process, where WordPress loads completely and the activation hooks run. If that process fails, the install carries on and prints the `wp plugin activate <slug>` to run afterwards (Pollora/pollora#274)
 
 ## [v13.40.0](https://github.com/Pollora/framework/compare/v13.39.3...v13.40.0) - 2026-11-04
 
