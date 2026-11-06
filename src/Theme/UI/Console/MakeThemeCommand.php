@@ -353,13 +353,7 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return;
         }
 
-        $process = new Process([PHP_BINARY, 'artisan', 'pollora:plugin:activate', ...array_values($files)], base_path());
-        $process->setTimeout(120);
-        $process->run(function ($type, string|iterable $buffer): void {
-            $this->getOutput()->write($buffer);
-        });
-
-        if (! $process->isSuccessful()) {
+        if (! $this->runInNewProcess('pollora:plugin:activate', array_values($files))) {
             $this->warn('The plugins could not be activated now. Activate them once the installation is done:');
 
             foreach (array_keys($files) as $slug) {
@@ -488,10 +482,47 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
             return;
         }
 
+        // A first install runs here with WordPress only partly loaded (SHORTINIT),
+        // where switch_theme() fails on functions that are not defined yet.
+        if (! did_action('plugins_loaded')) {
+            $this->activateThemeInNewProcess($name);
+
+            return;
+        }
+
         // switch_theme(), not the options alone: it fires switch_theme and
         // after_switch_theme, which plugins and themes set themselves up on.
         switch_theme($name);
         $this->info(sprintf('Theme "%s" is now the active WordPress theme.', $name));
+    }
+
+    /**
+     * Activate the theme from a fresh process, where WordPress loads completely.
+     */
+    protected function activateThemeInNewProcess(string $name): void
+    {
+        if ($this->runInNewProcess('pollora:theme:activate', [$name])) {
+            return;
+        }
+
+        $this->warn('The theme could not be activated now. Activate it once the installation is done:');
+        $this->line(sprintf('  wp theme activate %s', $name));
+    }
+
+    /**
+     * Run an artisan command in a new PHP process, streaming its output.
+     *
+     * @param  array<int, string>  $arguments
+     */
+    protected function runInNewProcess(string $command, array $arguments): bool
+    {
+        $process = new Process([PHP_BINARY, 'artisan', $command, ...$arguments], base_path());
+        $process->setTimeout(120);
+        $process->run(function ($type, string|iterable $buffer): void {
+            $this->getOutput()->write($buffer);
+        });
+
+        return $process->isSuccessful();
     }
 
     protected function shouldActivateTheme(string $name): bool
