@@ -66,6 +66,7 @@ function activates(MakeThemeCommand $command): bool
 }
 
 beforeEach(function (): void {
+    Functions\when('did_action')->justReturn(1);
     Functions\when('get_stylesheet')->justReturn('twentytwentyfive');
     Functions\when('get_stylesheet_directory')->justReturn('/nope');
 });
@@ -164,4 +165,58 @@ it('activates plugins in place once WordPress is fully loaded', function (): voi
 
     expect($activated)->toBe(['woocommerce/woocommerce.php'])
         ->and($handedOver)->toBe([]);
+});
+
+/**
+ * A first install runs the command with WordPress only partly loaded, where switch_theme()
+ * fails on functions that are not defined yet: the activation moves to a fresh process.
+ *
+ * @return array<int, array{0: string, 1: array<int, string>}> The commands run in a new process.
+ */
+function themeActivationProcesses(int $pluginsLoaded, bool $processSucceeds = true): array
+{
+    Functions\when('did_action')->justReturn($pluginsLoaded);
+    $switched = [];
+    Functions\when('switch_theme')->alias(function (string $stylesheet) use (&$switched): void {
+        $switched[] = $stylesheet;
+    });
+
+    $command = new class(new Repository, new Filesystem) extends MakeThemeCommand
+    {
+        /** @var array<int, array{0: string, 1: array<int, string>}> */
+        public array $processes = [];
+
+        public bool $processSucceeds = true;
+
+        protected function runInNewProcess(string $command, array $arguments): bool
+        {
+            $this->processes[] = [$command, $arguments];
+
+            return $this->processSucceeds;
+        }
+    };
+    $command->processSucceeds = $processSucceeds;
+    $command->setDefinition((new MakeThemeCommand(new Repository, new Filesystem))->getDefinition());
+    $command->setLaravel(app());
+
+    $input = new ArrayInput(['name' => 'my-journal', '--activate' => true], $command->getDefinition());
+    $input->setInteractive(false);
+
+    $command->setInput($input);
+    $command->setOutput(new OutputStyle($input, new BufferedOutput));
+    (new ReflectionProperty($command, 'theme'))->setValue($command, new ThemeMetadata('my-journal', '/tmp/themes'));
+
+    (fn () => $this->promptAndSetActiveTheme())->call($command);
+
+    expect($switched)->toBe([]);
+
+    return $command->processes;
+}
+
+it('hands the theme activation to a new process while WordPress is not fully loaded', function (): void {
+    expect(themeActivationProcesses(pluginsLoaded: 0))->toBe([['pollora:theme:activate', ['my-journal']]]);
+});
+
+it('keeps going when the new process cannot activate the theme', function (): void {
+    expect(themeActivationProcesses(pluginsLoaded: 0, processSucceeds: false))->toHaveCount(1);
 });
