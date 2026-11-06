@@ -7,6 +7,7 @@ namespace Pollora\Theme\Infrastructure\Models;
 use Illuminate\Container\Container;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Env;
 use Illuminate\Support\Str;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Theme\Domain\Models\ThemeModule;
@@ -36,7 +37,7 @@ class LaravelThemeModule extends ThemeModule
     public function getCachedServicesPath(): string
     {
         // Check if we are running on a Laravel Vapor managed instance
-        if (! is_null(config('vapor.maintenance_mode', env('VAPOR_MAINTENANCE_MODE')))) {
+        if (! is_null(config('vapor.maintenance_mode', Env::get('VAPOR_MAINTENANCE_MODE')))) {
             return Str::replaceLast('config.php', $this->getSnakeName().'_theme.php', $this->app->getCachedConfigPath());
         }
 

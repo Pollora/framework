@@ -4,38 +4,10 @@ declare(strict_types=1);
 
 namespace Pollora\Route\Infrastructure\Services\Contracts;
 
-/**
- * Interface for resolving WordPress types.
+use Pollora\Route\Domain\Contracts\WordPressTypeResolverInterface as DomainWordPressTypeResolverInterface;
+
+/*
+ * The interface moved to the domain layer, where the application layer may
+ * depend on it. The former name keeps working.
  */
-interface WordPressTypeResolverInterface
-{
-    /**
-     * Resolve a WordPress type by its class name.
-     */
-    public function resolve(string $typeName): mixed;
-
-    /**
-     * Resolve WP_Post object.
-     */
-    public function resolvePost(): ?\WP_Post;
-
-    /**
-     * Resolve WP_Term object.
-     */
-    public function resolveTerm(): ?\WP_Term;
-
-    /**
-     * Resolve WP_User object.
-     */
-    public function resolveUser(): ?\WP_User;
-
-    /**
-     * Resolve WP_Query object.
-     */
-    public function resolveQuery(): ?\WP_Query;
-
-    /**
-     * Resolve WP object.
-     */
-    public function resolveWP(): ?\WP;
-}
+class_alias(DomainWordPressTypeResolverInterface::class, 'Pollora\\Route\\Infrastructure\\Services\\Contracts\\WordPressTypeResolverInterface');

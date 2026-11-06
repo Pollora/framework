@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
+use Pollora\Route\Domain\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Services\Resolvers\WordPressTypeResolver;
 
 describe('WordPressTypeResolver', function (): void {

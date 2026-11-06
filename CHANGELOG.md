@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `pollora:make:post-type` (and its `pollora:make-posttype` alias) can create the theme views of the new post type: `--single-view` writes `single-{slug}.blade.php`, `--archive-view` writes `archive-{slug}.blade.php`, `--with-views` writes both. They go to `resources/views` of the theme given with `--theme`, or of the active theme, and are named after the slug discovery registers the post type under (cut to 20 characters), so the template hierarchy renders them with no route. An existing view is left as it is, with a warning
 
+### Changed
+- The architecture rules of the Pollora harness (`tests/Arch.php`) now run in CI: `pollora/harness` is required at `^0.1.23` and the workflow calls it at `v0.1.23`. Two rules stay exempted in `.harness.json` with a reason (ARCH-01 and ARCH-03, the dependencies the Modules, Plugin and Theme application layers still have on infrastructure); the number of exempted rules is capped by the ratchet
+- `PluginManager` and `ThemeManager` read the console detection service from the container they receive instead of the `resolve()` helper, and the plugin and theme modules read `VAPOR_MAINTENANCE_MODE` from the environment variables instead of `env()` outside a configuration file. Nothing changes for a site
+- `WordPressTypeResolverInterface` moved to `Pollora\Route\Domain\Contracts`; the former name, `Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface`, is an alias and keeps working
+- `PackageVersionChecker` depends on the new `Pollora\VersionCheck\Domain\Contracts\VersionSourceResolver`, which `VersionSources` implements and the container binds to it
+
 ## [v13.40.0](https://github.com/Pollora/framework/compare/v13.39.3...v13.40.0) - 2026-11-04
 
 ### Changed

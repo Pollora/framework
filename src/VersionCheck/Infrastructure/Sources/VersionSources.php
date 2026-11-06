@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\VersionCheck\Infrastructure\Sources;
 
 use Pollora\VersionCheck\Domain\Contracts\VersionSource;
+use Pollora\VersionCheck\Domain\Contracts\VersionSourceResolver;
 
 /**
  * Where a package's releases are read, from the repositories of the project's
@@ -18,7 +19,7 @@ use Pollora\VersionCheck\Domain\Contracts\VersionSource;
  * The first one that knows the package answers: a repository that does not
  * serve it (401, 403, 404) hands over to the next, as in Composer.
  */
-class VersionSources
+class VersionSources implements VersionSourceResolver
 {
     /**
      * @var array<int, array<string, mixed>>|null

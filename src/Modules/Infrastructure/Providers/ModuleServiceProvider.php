@@ -32,6 +32,7 @@ use Pollora\Modules\UI\Console\ModuleFrontendCommand;
 use Pollora\Modules\UI\Console\ModuleOutdatedCommand;
 use Pollora\Modules\UI\Http\ModulesAdminPage;
 use Pollora\Modules\UI\Http\ModuleVersionsHealthCheck;
+use Pollora\VersionCheck\Domain\Contracts\VersionSourceResolver;
 use Pollora\VersionCheck\Infrastructure\Sources\HttpGet;
 use Pollora\VersionCheck\Infrastructure\Sources\VersionSources;
 
@@ -68,6 +69,8 @@ class ModuleServiceProvider extends ServiceProvider
             base_path('composer.json'),
             $app->make('config')->get('modules.versions.github_token'),
         ));
+
+        $this->app->bind(VersionSourceResolver::class, VersionSources::class);
     }
 
     public function boot(): void
