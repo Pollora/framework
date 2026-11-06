@@ -5,7 +5,26 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.2...develop)
+
+## [v13.40.2](https://github.com/Pollora/framework/compare/v13.40.1...v13.40.2) - 2026-11-06
+
+### Added
+- **`pollora:theme:activate`**: makes a theme the active WordPress theme, given by its directory name, and refuses to run when WordPress is not fully loaded
+
+### Fixed
+- **`pollora new` no longer ends in an error after the theme is built.** On a first install `pollora:make:theme` runs in the process that has just installed WordPress, which is only partly loaded (`SHORTINIT`): `switch_theme()` failed there with `Call to undefined function wp_set_template_globals()`. The theme was left active, but the install exited with code 1 and never showed its success message. The theme is now activated by a fresh `pollora:theme:activate` process; if that fails, the install carries on and prints the `wp theme activate <name>` to run afterwards. v13.40.1 fixed the same cause for the plugins the theme requires (Pollora/pollora#274)
+
+## [v13.40.1](https://github.com/Pollora/framework/compare/v13.40.0...v13.40.1) - 2026-11-05
+
+### Added
+- **`pollora:plugin:activate`**: activates WordPress plugins, given as paths relative to the plugins directory (`woocommerce/woocommerce.php`), and refuses to run when WordPress is not fully loaded
+
+### Fixed
+- **`pollora new` no longer crashes when a theme template requires a WordPress plugin and you activate it** (`arsort(): Argument #1 ($array) must be of type array, null given`). The E-commerce template (`pollora/theme-apiary`) always hit it: it requires WooCommerce. On a first install `pollora:make:theme` runs in the process that has just installed WordPress, which is only partly loaded (`SHORTINIT`), and `activate_plugin()` failed there before the theme build and the theme activation. The plugins are now activated by a fresh `pollora:plugin:activate` process, where WordPress loads completely and the activation hooks run. If that process fails, the install carries on and prints the `wp plugin activate <slug>` to run afterwards (Pollora/pollora#274)
+
+### Added
+- `pollora:make:post-type` (and its `pollora:make-posttype` alias) can create the theme views of the new post type: `--single-view` writes `single-{slug}.blade.php`, `--archive-view` writes `archive-{slug}.blade.php`, `--with-views` writes both. They go to `resources/views` of the theme given with `--theme`, or of the active theme, and are named after the slug discovery registers the post type under (cut to 20 characters), so the template hierarchy renders them with no route. An existing view is left as it is, with a warning
 
 ### Changed
 - The architecture rules of the Pollora harness (`tests/Arch.php`) now run in CI: `pollora/harness` is required at `^0.1.23` and the workflow calls it at `v0.1.23`. Two rules stay exempted in `.harness.json` with a reason (ARCH-01 and ARCH-03, the dependencies the Modules, Plugin and Theme application layers still have on infrastructure); the number of exempted rules is capped by the ratchet

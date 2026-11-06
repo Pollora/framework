@@ -1,0 +1,47 @@
+@extends('layouts.app')
+
+@section('content')
+    <header class="mx-auto max-w-5xl px-6 pt-16 lg:px-8">
+        <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            {{ post_type_archive_title('', false) }}
+        </h1>
+    </header>
+
+    @hasposts
+        <section class="mx-auto max-w-5xl px-6 py-12 lg:px-8">
+            <div class="grid gap-8 sm:grid-cols-2">
+                @posts
+                    <article class="group relative rounded-2xl border border-border bg-white p-6 transition hover:border-primary/20 hover:shadow-md">
+                        @if(has_post_thumbnail())
+                            <div class="mb-4 overflow-hidden rounded-xl">
+                                {!! get_the_post_thumbnail(null, 'large', ['class' => 'h-48 w-full object-cover']) !!}
+                            </div>
+                        @endif
+                        <h2 class="text-lg font-semibold text-foreground group-hover:text-primary transition">
+                            <a href="@permalink" class="no-underline text-inherit">
+                                <span class="absolute inset-0"></span>
+                                @title
+                            </a>
+                        </h2>
+                        <div class="mt-2 text-sm leading-relaxed text-muted line-clamp-3">
+                            @excerpt
+                        </div>
+                    </article>
+                @endposts
+            </div>
+
+            @if(get_next_posts_link() || get_previous_posts_link())
+                <nav class="mt-12 flex justify-between gap-4">
+                    <div>{!! get_previous_posts_link('&larr; Newer') !!}</div>
+                    <div>{!! get_next_posts_link('Older &rarr;') !!}</div>
+                </nav>
+            @endif
+        </section>
+    @endhasposts
+
+    @noposts
+        <div class="mx-auto max-w-3xl px-6 py-32 text-center lg:px-8">
+            <p class="text-muted">Nothing published yet.</p>
+        </div>
+    @endnoposts
+@endsection
