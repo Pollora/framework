@@ -5,7 +5,15 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.1...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.2...develop)
+
+## [v13.40.2](https://github.com/Pollora/framework/compare/v13.40.1...v13.40.2) - 2026-11-06
+
+### Added
+- **`pollora:theme:activate`**: makes a theme the active WordPress theme, given by its directory name, and refuses to run when WordPress is not fully loaded
+
+### Fixed
+- **`pollora new` no longer ends in an error after the theme is built.** On a first install `pollora:make:theme` runs in the process that has just installed WordPress, which is only partly loaded (`SHORTINIT`): `switch_theme()` failed there with `Call to undefined function wp_set_template_globals()`. The theme was left active, but the install exited with code 1 and never showed its success message. The theme is now activated by a fresh `pollora:theme:activate` process; if that fails, the install carries on and prints the `wp theme activate <name>` to run afterwards. v13.40.1 fixed the same cause for the plugins the theme requires (Pollora/pollora#274)
 
 ## [v13.40.1](https://github.com/Pollora/framework/compare/v13.40.0...v13.40.1) - 2026-11-05
 
