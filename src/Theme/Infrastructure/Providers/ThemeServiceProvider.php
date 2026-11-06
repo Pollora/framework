@@ -38,6 +38,7 @@ use Pollora\Theme\Infrastructure\Services\WordPressContentUrlResolver;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeAdapter;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeFeatureRegistrar;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
+use Pollora\Theme\UI\Console\Commands\ThemeActivateCommand;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
@@ -572,6 +573,7 @@ class ThemeServiceProvider extends ServiceProvider
             'theme.generator' => fn ($app): MakeThemeCommand => new MakeThemeCommand($app->make('config'), $app->make('files')),
             'theme.remover' => fn ($app): RemoveThemeCommand => new RemoveThemeCommand($app->make('config'), $app->make('files')),
             'theme.status' => fn ($app): ThemeStatusCommand => new ThemeStatusCommand,
+            'theme.activator' => fn ($app): ThemeActivateCommand => new ThemeActivateCommand,
         ];
 
         foreach ($commands as $name => $factory) {
