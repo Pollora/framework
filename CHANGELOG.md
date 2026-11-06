@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **`pollora new` no longer crashes when a theme template requires a WordPress plugin and you activate it** (`arsort(): Argument #1 ($array) must be of type array, null given`). The E-commerce template (`pollora/theme-apiary`) always hit it: it requires WooCommerce. On a first install `pollora:make:theme` runs in the process that has just installed WordPress, which is only partly loaded (`SHORTINIT`), and `activate_plugin()` failed there before the theme build and the theme activation. The plugins are now activated by a fresh `pollora:plugin:activate` process, where WordPress loads completely and the activation hooks run. If that process fails, the install carries on and prints the `wp plugin activate <slug>` to run afterwards (Pollora/pollora#274)
 
+### Added
+- `pollora:make:post-type` (and its `pollora:make-posttype` alias) can create the theme views of the new post type: `--single-view` writes `single-{slug}.blade.php`, `--archive-view` writes `archive-{slug}.blade.php`, `--with-views` writes both. They go to `resources/views` of the theme given with `--theme`, or of the active theme, and are named after the slug discovery registers the post type under (cut to 20 characters), so the template hierarchy renders them with no route. An existing view is left as it is, with a warning
+
 ## [v13.40.0](https://github.com/Pollora/framework/compare/v13.39.3...v13.40.0) - 2026-11-04
 
 ### Changed

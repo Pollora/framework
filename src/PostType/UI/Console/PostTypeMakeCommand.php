@@ -6,19 +6,30 @@ namespace Pollora\PostType\UI\Console;
 
 use Illuminate\Console\Attributes\Aliases;
 use Illuminate\Console\Attributes\Description;
+use Pollora\Attributes\PostType;
 use Pollora\Console\AbstractGeneratorCommand;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Artisan command to generate a new custom post type class.
  *
  * This command creates a new PHP class decorated with the #[PostType] attribute
  * and other PHP attributes for WordPress custom post type registration.
+ *
+ * `--single-view`, `--archive-view` and `--with-views` also create the
+ * single-{slug} and archive-{slug} Blade views in the theme given with `--theme`,
+ * or in the active theme. The template hierarchy picks them up with no route.
  */
 #[Description('Create a new WordPress custom post type class')]
 #[Aliases(['pollora:make-posttype'])]
 class PostTypeMakeCommand extends AbstractGeneratorCommand
 {
+    /**
+     * Views directory, relative to the theme root.
+     */
+    private const string VIEWS_DIRECTORY = 'resources/views';
+
     /**
      * The console command name.
      *
@@ -39,6 +50,65 @@ class PostTypeMakeCommand extends AbstractGeneratorCommand
     protected string $subPath = 'Cms/PostTypes';
 
     /**
+     * Execute the console command.
+     */
+    public function handle(): ?bool
+    {
+        if (parent::handle() === false) {
+            return false;
+        }
+
+        $withViews = (bool) $this->option('with-views');
+
+        $templates = array_keys(array_filter([
+            'single' => $withViews || $this->option('single-view'),
+            'archive' => $withViews || $this->option('archive-view'),
+        ]));
+
+        if ($templates !== []) {
+            $this->createViews($templates);
+        }
+
+        return null;
+    }
+
+    /**
+     * Create a {template}-{slug}.blade.php view per template in the given or active theme.
+     *
+     * @param  list<string>  $templates
+     */
+    protected function createViews(array $templates): void
+    {
+        $theme = ($this->hasThemeOption() ? $this->resolveTheme() : null) ?? $this->getActiveTheme();
+
+        if (! $theme) {
+            $this->components->error('No active theme found, views not created.');
+
+            return;
+        }
+
+        // Same slug discovery registers the post type under, so WordPress picks the views up
+        $slug = (new PostType)->resolveSlug($this->qualifyClass($this->getNameInput()));
+
+        $viewsPath = $this->getThemePath($theme).'/'.self::VIEWS_DIRECTORY;
+
+        foreach ($templates as $template) {
+            $path = $viewsPath.'/'.$template.'-'.$slug.'.blade.php';
+
+            if ($this->files->exists($path)) {
+                $this->components->warn(sprintf('View [%s] already exists.', $path));
+
+                continue;
+            }
+
+            $this->makeDirectory($path);
+            $this->files->put($path, $this->files->get(__DIR__.'/stubs/'.$template.'.blade.php.stub'));
+
+            $this->components->success(sprintf('View [%s] created successfully.', $path));
+        }
+    }
+
+    /**
      * Get the stub file for the generator.
      */
     protected function getStub(): string
@@ -53,6 +123,19 @@ class PostTypeMakeCommand extends AbstractGeneratorCommand
     {
         return [
             ['name', InputArgument::REQUIRED, 'The name of the post type class'],
+        ];
+    }
+
+    /**
+     * Get the console command options.
+     */
+    protected function getOptions(): array
+    {
+        return [
+            ...parent::getOptions(),
+            ['single-view', null, InputOption::VALUE_NONE, 'Also create a single-{slug}.blade.php view in the theme'],
+            ['archive-view', null, InputOption::VALUE_NONE, 'Also create an archive-{slug}.blade.php view in the theme'],
+            ['with-views', null, InputOption::VALUE_NONE, 'Also create both the single and archive views in the theme'],
         ];
     }
 
