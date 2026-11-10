@@ -43,6 +43,8 @@ function i18nWiringCatalogue(array $words): void
     };
 
     Functions\when('get_locale')->justReturn('fr_FR');
+    Functions\when('get_translations_for_domain')->justReturn(new stdClass);
+    Functions\when('has_filter')->justReturn(false);
     Functions\when('translate')->alias(fn (string $text, string $domain = 'default'): string => $lookup($domain.'|'.$text, $text));
     Functions\when('_x')->alias(fn (string $text, string $context, string $domain = 'default'): string => $lookup($domain.'|'.$context.'|'.$text, $text));
     Container::getInstance()->instance('translator', new class
