@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Mockery as m;
 use Pollora\Route\Application\UseCases\RegisterWordPressTypesUseCase;
-use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
+use Pollora\Route\Domain\Contracts\WordPressTypeResolverInterface;
 use Psr\Log\LoggerInterface;
 
 beforeEach(function (): void {

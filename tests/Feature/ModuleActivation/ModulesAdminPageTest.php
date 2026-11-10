@@ -10,6 +10,7 @@ use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Modules\Infrastructure\Activation\ConnectorActivator;
 use Pollora\Modules\Infrastructure\Activation\JsonStateConnector;
 use Pollora\Modules\UI\Http\ModulesAdminPage;
+use Pollora\VersionCheck\Domain\Contracts\VersionSourceResolver;
 use Pollora\VersionCheck\Infrastructure\Sources\HttpGet;
 use Pollora\VersionCheck\Infrastructure\Sources\VersionSources;
 
@@ -100,7 +101,8 @@ beforeEach(function (): void {
         }
     });
 
-    $this->app->instance(VersionSources::class, new VersionSources(new HttpGet, $this->directory.'/composer.json'));
+    $this->app->instance(VersionSources::class, $sources = new VersionSources(new HttpGet, $this->directory.'/composer.json'));
+    $this->app->instance(VersionSourceResolver::class, $sources);
 
     $this->page = $this->app->make(ModulesAdminPage::class);
 });

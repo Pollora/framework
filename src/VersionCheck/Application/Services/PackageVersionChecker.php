@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Pollora\VersionCheck\Application\Services;
 
 use Composer\InstalledVersions;
+use Pollora\VersionCheck\Domain\Contracts\VersionSourceResolver;
 use Pollora\VersionCheck\Domain\Services\StableVersions;
-use Pollora\VersionCheck\Infrastructure\Sources\VersionSources;
 
 /**
  * Whether an installed Composer package is up to date.
@@ -22,7 +22,7 @@ class PackageVersionChecker
 
     public const int NEGATIVE_TTL = 3600;
 
-    public function __construct(private readonly VersionSources $sources) {}
+    public function __construct(private readonly VersionSourceResolver $sources) {}
 
     public function current(string $package): ?string
     {

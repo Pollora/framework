@@ -3,7 +3,18 @@
     "mode": "enforce",
     "ratchet": {
         "phpstan_level": 5,
-        "phpstan_baseline": 58,
-        "coverage": 53
-    }
+        "phpstan_baseline": 56,
+        "coverage": 53,
+        "exempted_rules": 2
+    },
+    "allow_rules": [
+        {
+            "rule": "ARCH-01",
+            "reason": "Modules\\Domain and Plugin\\Domain extend Illuminate\\Support\\Collection (ModuleCollection, PluginCollection); both are published classes, so removing the dependency changes the public contract. To lift at the next major."
+        },
+        {
+            "rule": "ARCH-03",
+            "reason": "The application layer of Modules, Plugin and Theme still builds Infrastructure services directly (registrars, managers, discovery orchestrator), and the module named Application is read as a layer. Route, Schedule and VersionCheck are fixed; the rest needs ports, one module at a time."
+        }
+    ]
 }
