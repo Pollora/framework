@@ -141,3 +141,15 @@ it('writes each view as its stub', function (string $template): void {
 
     expect(file_get_contents(($this->viewsDir)().'/'.$template.'-car.blade.php'))->toBe(file_get_contents($stub));
 })->with(['single', 'archive']);
+
+it('takes the archive view text from translations every theme already has', function (): void {
+    $this->artisan('pollora:make:post-type', ['name' => 'Car', '--theme' => 'test-theme', '--archive-view' => true])->assertSuccessful();
+
+    $view = file_get_contents(($this->viewsDir)().'/archive-car.blade.php');
+
+    // WordPress core translates the pagination labels, the post type's labels the empty state
+    expect($view)->toContain("__('Newer posts')")
+        ->toContain("__('Older posts')")
+        ->toContain('get_queried_object()->labels->not_found')
+        ->not->toContain('Nothing published yet.');
+});

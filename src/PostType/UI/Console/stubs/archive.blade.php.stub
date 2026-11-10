@@ -32,8 +32,8 @@
 
             @if(get_next_posts_link() || get_previous_posts_link())
                 <nav class="mt-12 flex justify-between gap-4">
-                    <div>{!! get_previous_posts_link('&larr; Newer') !!}</div>
-                    <div>{!! get_next_posts_link('Older &rarr;') !!}</div>
+                    <div>{!! get_previous_posts_link('&larr; '.__('Newer posts')) !!}</div>
+                    <div>{!! get_next_posts_link(__('Older posts').' &rarr;') !!}</div>
                 </nav>
             @endif
         </section>
@@ -41,7 +41,7 @@
 
     @noposts
         <div class="mx-auto max-w-3xl px-6 py-32 text-center lg:px-8">
-            <p class="text-muted">Nothing published yet.</p>
+            <p class="text-muted">{{ get_queried_object()->labels->not_found }}</p>
         </div>
     @endnoposts
 @endsection
