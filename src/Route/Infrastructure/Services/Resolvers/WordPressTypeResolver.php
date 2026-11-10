@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Route\Infrastructure\Services\Resolvers;
 
-use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
+use Pollora\Route\Domain\Contracts\WordPressTypeResolverInterface;
 
 /**
  * Concrete implementation for resolving WordPress types.

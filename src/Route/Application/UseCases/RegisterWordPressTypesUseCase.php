@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Route\Application\UseCases;
 
 use Illuminate\Contracts\Container\Container;
-use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
+use Pollora\Route\Domain\Contracts\WordPressTypeResolverInterface;
 use Psr\Log\LoggerInterface;
 
 /**

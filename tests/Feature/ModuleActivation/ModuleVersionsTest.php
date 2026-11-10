@@ -10,6 +10,7 @@ use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Modules\UI\Console\ModuleOutdatedCommand;
 use Pollora\Modules\UI\Http\ModuleVersionsHealthCheck;
 use Pollora\VersionCheck\Application\Services\PackageVersionChecker;
+use Pollora\VersionCheck\Domain\Contracts\VersionSourceResolver;
 use Pollora\VersionCheck\Domain\Services\StableVersions;
 use Pollora\VersionCheck\Infrastructure\Sources\ComposerRepositorySource;
 use Pollora\VersionCheck\Infrastructure\Sources\FirstAnsweringSource;
@@ -215,7 +216,8 @@ describe('ModuleVersions', function (): void {
                 }, array_keys($this->paths));
             }
         });
-        $this->app->instance(VersionSources::class, new VersionSources(new HttpGet, $this->directory.'/composer.json'));
+        $this->app->instance(VersionSources::class, $sources = new VersionSources(new HttpGet, $this->directory.'/composer.json'));
+        $this->app->instance(VersionSourceResolver::class, $sources);
 
         fakeHttp(['https://repo.packagist.org/p2/nwidart/laravel-modules.json' => ['packages' => ['nwidart/laravel-modules' => [['version' => '99.0.0']]]]]);
     });

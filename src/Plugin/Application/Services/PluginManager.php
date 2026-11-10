@@ -63,7 +63,7 @@ class PluginManager
         protected ?ModuleRepositoryInterface $repository = null,
         ?ConsoleDetectionService $consoleDetectionService = null
     ) {
-        $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
+        $this->consoleDetectionService = $consoleDetectionService ?? $app->get(ConsoleDetectionService::class);
     }
 
     /**

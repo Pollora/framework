@@ -88,7 +88,7 @@ class ThemeManager implements ThemeService
         protected ?ThemeRegistrarInterface $registrar = null,
         ?ConsoleDetectionService $consoleDetectionService = null
     ) {
-        $this->consoleDetectionService = $consoleDetectionService ?? resolve(ConsoleDetectionService::class);
+        $this->consoleDetectionService = $consoleDetectionService ?? $app->make(ConsoleDetectionService::class);
     }
 
     /**

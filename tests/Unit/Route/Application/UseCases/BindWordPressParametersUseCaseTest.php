@@ -5,8 +5,8 @@ declare(strict_types=1);
 use Illuminate\Http\Request;
 use Mockery as m;
 use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
+use Pollora\Route\Domain\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Models\Route;
-use Pollora\Route\Infrastructure\Services\Contracts\WordPressTypeResolverInterface;
 use Psr\Log\LoggerInterface;
 
 beforeEach(function (): void {
