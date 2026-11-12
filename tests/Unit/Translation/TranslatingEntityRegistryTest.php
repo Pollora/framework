@@ -34,20 +34,18 @@ $GLOBALS['i18nWiring'] = ['calls' => [], 'words' => []];
  */
 function i18nWiringCatalogue(array $words): void
 {
-    $GLOBALS['i18nWiring'] = ['calls' => [], 'words' => $words];
+    $GLOBALS['i18nWiring'] = ['calls' => [], 'words' => $words, 'filters' => []];
 
     $lookup = function (string $key, string $text) {
         $GLOBALS['i18nWiring']['calls'][] = $key;
 
-        return $GLOBALS['i18nWiring']['words'][$key] ?? $text;
+        return i18nWiringFiltered($GLOBALS['i18nWiring']['words'][$key] ?? $text, $text, explode('|', $key)[0]);
     };
 
     Functions\when('get_locale')->justReturn('fr_FR');
     defined('WP_LANG_DIR') || define('WP_LANG_DIR', '/tmp/wp-lang');
     // The catalogue of the framework counts as loaded: the registry does not try to load it.
     $GLOBALS['l10n']['pollora'] = new stdClass;
-    Functions\when('get_translations_for_domain')->justReturn(new stdClass);
-    Functions\when('has_filter')->justReturn(false);
     Functions\when('translate')->alias(fn (string $text, string $domain = 'default'): string => $lookup($domain.'|'.$text, $text));
     Functions\when('_x')->alias(fn (string $text, string $context, string $domain = 'default'): string => $lookup($domain.'|'.$context.'|'.$text, $text));
     Container::getInstance()->instance('translator', new class
@@ -57,9 +55,25 @@ function i18nWiringCatalogue(array $words): void
             $domain = is_string($replace) ? $replace : 'default';
             $GLOBALS['i18nWiring']['calls'][] = $domain.'|'.$key;
 
-            return $GLOBALS['i18nWiring']['words'][$domain.'|'.$key] ?? $key;
+            return i18nWiringFiltered($GLOBALS['i18nWiring']['words'][$domain.'|'.$key] ?? $key, $key, $domain);
         }
     });
+}
+
+/**
+ * What WordPress does after the catalogue answered: the `gettext` filters, then the `gettext_{domain}` ones.
+ *
+ * @param  array<string, callable>  $filters  Added by a test: 'gettext' or 'gettext_my-theme' => fn (string $translation, string $text, string $domain): string
+ */
+function i18nWiringFiltered(string $translation, string $text, string $domain): string
+{
+    foreach (['gettext', 'gettext_'.$domain] as $hook) {
+        if (isset($GLOBALS['i18nWiring']['filters'][$hook])) {
+            $translation = $GLOBALS['i18nWiring']['filters'][$hook]($translation, $text, $domain);
+        }
+    }
+
+    return $translation;
 }
 
 /**

@@ -42,11 +42,6 @@ if (! function_exists('load_textdomain')) {
     }
 }
 
-/** WordPress's stand-in for a domain with no catalogue, which these tests do not load. */
-if (! class_exists('NOOP_Translations')) {
-    class NOOP_Translations {}
-}
-
 /*
  * The default labels of a post type or a taxonomy are built on init, from the singular and
  * plural names translated in the text domain of the entity. Without a catalogue they are
@@ -310,30 +305,30 @@ describe('default labels with a catalogue', function (): void {
         expect($recorder->registered['args']['labels']['menu_name'])->toBe('Bibliotheque');
     });
 
-    it('do not look the names up in a domain with no catalogue, and still ask for the templates', function (): void {
+    it('still ask for the names with no catalogue, so that the gettext filters apply to them', function (): void {
         i18nWiringCatalogue([]);
-        Functions\when('get_translations_for_domain')->justReturn(new NOOP_Translations);
-        Functions\when('has_filter')->justReturn(false);
-
+        $GLOBALS['i18nWiring']['filters'] = [
+            'gettext' => fn (string $translation, string $text): string => $text === 'Book' ? 'Livre' : $translation,
+            'gettext_my-theme' => fn (string $translation, string $text): string => $text === 'Books' ? 'Livres' : $translation,
+        ];
         $recorder = i18nWiringRecorder();
 
         (new TranslatingEntityRegistry($recorder))->register('book', ['labels' => TranslatingEntityRegistry::defaultLabels('post_type', 'Book', 'Books'), 'text_domain' => 'my-theme'], ['singular' => 'Book', 'plural' => 'Books']);
 
-        expect(i18nWiringCalls())->not->toContain('my-theme|Book')
-            ->and(i18nWiringCalls())->not->toContain('my-theme|Books')
-            ->and(i18nWiringCalls())->toContain('pollora|Add New %s')
-            ->and($recorder->registered['args']['labels'])->toBe(i18nLabelsBookPostType())
-            ->and($recorder->registered['names'])->toBe(['singular' => 'Book', 'plural' => 'Books']);
+        expect($recorder->registered['names'])->toBe(['singular' => 'Livre', 'plural' => 'Livres'])
+            ->and($recorder->registered['args']['labels']['singular_name'])->toBe('Livre')
+            ->and($recorder->registered['args']['labels']['add_new_item'])->toBe('Add New Livre');
     });
 
-    it('look the names up in a domain with no catalogue when a plugin translates through the gettext filter', function (): void {
+    it('give the names back unchanged with no catalogue and no filter, after asking for them', function (): void {
         i18nWiringCatalogue([]);
-        Functions\when('get_translations_for_domain')->justReturn(new NOOP_Translations);
-        Functions\when('has_filter')->justReturn(10);
+        $recorder = i18nWiringRecorder();
 
-        (new TranslatingEntityRegistry(i18nWiringRecorder()))->register('book', ['labels' => TranslatingEntityRegistry::defaultLabels('post_type', 'Book', 'Books'), 'text_domain' => 'my-theme'], ['singular' => 'Book', 'plural' => 'Books']);
+        (new TranslatingEntityRegistry($recorder))->register('book', ['labels' => TranslatingEntityRegistry::defaultLabels('post_type', 'Book', 'Books'), 'text_domain' => 'my-theme'], ['singular' => 'Book', 'plural' => 'Books']);
 
-        expect(i18nWiringCalls())->toContain('my-theme|Book')->toContain('my-theme|Books');
+        expect(i18nWiringCalls())->toContain('my-theme|Book')->toContain('my-theme|Books')->toContain('pollora|Add New %s')
+            ->and($recorder->registered['args']['labels'])->toBe(i18nLabelsBookPostType())
+            ->and($recorder->registered['names'])->toBe(['singular' => 'Book', 'plural' => 'Books']);
     });
 
     it('look each name up once, and no template more than the discovery did', function (): void {
@@ -415,16 +410,22 @@ describe('texts an attribute writes', function (): void {
             ->and($calls)->not->toHaveKey('my-theme|Add New %s');
     });
 
-    it('are not looked up in a domain with nothing to translate them', function (): void {
+    it('are still looked up with no catalogue, so that the gettext filters of the site and of the domain apply', function (): void {
         i18nWiringCatalogue([]);
-        Functions\when('get_translations_for_domain')->justReturn(new NOOP_Translations);
-        Functions\when('has_filter')->justReturn(false);
+        $GLOBALS['i18nWiring']['filters'] = [
+            'gettext' => fn (string $translation, string $text): string => $text === 'Library' ? 'Bibliotheque' : $translation,
+            'gettext_my-theme' => fn (string $translation, string $text): string => $text === 'Cover' ? 'Couverture' : ($text === 'ISBN' ? 'ISBN FR' : $translation),
+        ];
         $recorder = i18nWiringRecorder();
 
         (new TranslatingEntityRegistry($recorder))->register('book', i18nTextsArguments(), ['singular' => 'Book', 'plural' => 'Books']);
+        $args = $recorder->registered['args'];
 
-        expect(array_filter(i18nWiringCalls(), fn (string $call): bool => str_starts_with($call, 'my-theme|')))->toBe([])
-            ->and($recorder->registered['args']['label'])->toBe('Library');
+        expect($args['label'])->toBe('Bibliotheque')
+            ->and($args['labels']['menu_name'])->toBe('Bibliotheque')
+            ->and($args['featured_image'])->toBe('Couverture')
+            ->and($args['admin_cols']['isbn']['title'])->toBe('ISBN FR')
+            ->and($args['description'])->toBe('All the books');
     });
 
     it('are left alone in an entity that did not ask for default labels', function (): void {

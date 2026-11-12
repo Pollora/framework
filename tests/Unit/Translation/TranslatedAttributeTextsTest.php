@@ -172,8 +172,6 @@ function i18nDriftWordPress(): void
     defined('WP_LANG_DIR') || define('WP_LANG_DIR', '/tmp/wp-lang');
     Functions\when('get_locale')->justReturn('fr_FR');
     $GLOBALS['l10n']['pollora'] = new stdClass;
-    Functions\when('get_translations_for_domain')->justReturn(new stdClass);
-    Functions\when('has_filter')->justReturn(false);
     Functions\when('translate')->alias(fn (string $text, string $domain = 'default'): string => $domain === 'drift-domain' && in_array($text, $GLOBALS['i18nDrift'], true) ? 'T:'.$text : $text);
     Functions\when('_x')->alias(fn (string $text): string => $text);
 

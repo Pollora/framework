@@ -30,7 +30,8 @@ use Pollora\I18n\Runtime\Translator;
  * entity that did not ask for default labels is registered with the arguments it has, resolved.
  *
  * A text with no translation comes back as it was, so a label written directly in the
- * language of the site stays. Nothing is looked up when nothing could translate it.
+ * language of the site stays. Every text goes through __(), even when no catalogue is
+ * loaded for its domain, so that the `gettext` filters (and `gettext_{domain}`) still apply.
  */
 final readonly class TranslatingEntityRegistry implements EntityRegistryPort
 {
@@ -135,13 +136,9 @@ final readonly class TranslatingEntityRegistry implements EntityRegistryPort
         [$kind, $rawSingular, $rawPlural] = $labels[self::DEFAULT_LABELS];
         unset($labels[self::DEFAULT_LABELS]);
 
-        $translating = ! $this->hasNothingToLookUp($domain);
-        $singular = $translating ? $this->translateText($rawSingular, $domain) : $rawSingular;
-        $plural = $translating ? $this->translateText($rawPlural, $domain) : $rawPlural;
-
-        if ($translating) {
-            [$args, $labels] = $this->withTranslatedExplicitTexts($args, $labels, $domain);
-        }
+        $singular = $this->translateText($rawSingular, $domain);
+        $plural = $this->translateText($rawPlural, $domain);
+        [$args, $labels] = $this->withTranslatedExplicitTexts($args, $labels, $domain);
 
         $args['labels'] = array_merge(
             $kind === self::TAXONOMY
@@ -192,21 +189,6 @@ final readonly class TranslatingEntityRegistry implements EntityRegistryPort
         }
 
         return [$args, $labels];
-    }
-
-    /**
-     * Whether __() would give the text back: no catalogue for the domain and nothing on the `gettext` filter.
-     *
-     * Reads what WordPress keeps in memory. A domain with no catalogue is a NOOP_Translations
-     * (the site in its source language, or a theme with no file for the locale), and stays one
-     * after the first lookup, where is_textdomain_loaded() would say true. A plugin that
-     * translates through the `gettext` filter still gets its lookups.
-     */
-    private function hasNothingToLookUp(string $domain): bool
-    {
-        return function_exists('get_translations_for_domain')
-            && is_a(get_translations_for_domain($domain), 'NOOP_Translations')
-            && ! has_filter('gettext');
     }
 
     /**
