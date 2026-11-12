@@ -242,20 +242,20 @@ msgstr "Polloraの更新について詳しく見る"
 
 #, php-format
 msgid "No %s found in Trash"
-msgstr ""
+msgstr "ゴミ箱に%sが見つかりませんでした"
 
 #, php-format
 msgid "%s Archives"
-msgstr ""
+msgstr "%sアーカイブ"
 
 #, php-format
 msgid "%s Attributes"
-msgstr ""
+msgstr "%sの属性"
 
 #, php-format
 msgid "Insert into %s"
-msgstr ""
+msgstr "%sに挿入"
 
 #, php-format
 msgid "Uploaded to this %s"
-msgstr ""
+msgstr "この%sにアップロード"

@@ -242,20 +242,20 @@ msgstr "Más información sobre la actualización de Pollora"
 
 #, php-format
 msgid "No %s found in Trash"
-msgstr ""
+msgstr "No se encontraron %s en la papelera"
 
 #, php-format
 msgid "%s Archives"
-msgstr ""
+msgstr "Archivo de %s"
 
 #, php-format
 msgid "%s Attributes"
-msgstr ""
+msgstr "Atributos de %s"
 
 #, php-format
 msgid "Insert into %s"
-msgstr ""
+msgstr "Insertar en %s"
 
 #, php-format
 msgid "Uploaded to this %s"
-msgstr ""
+msgstr "Subido a: %s"
