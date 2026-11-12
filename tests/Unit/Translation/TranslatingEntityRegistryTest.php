@@ -43,6 +43,9 @@ function i18nWiringCatalogue(array $words): void
     };
 
     Functions\when('get_locale')->justReturn('fr_FR');
+    defined('WP_LANG_DIR') || define('WP_LANG_DIR', '/tmp/wp-lang');
+    // The catalogue of the framework counts as loaded: the registry does not try to load it.
+    $GLOBALS['l10n']['pollora'] = new stdClass;
     Functions\when('get_translations_for_domain')->justReturn(new stdClass);
     Functions\when('has_filter')->justReturn(false);
     Functions\when('translate')->alias(fn (string $text, string $domain = 'default'): string => $lookup($domain.'|'.$text, $text));
