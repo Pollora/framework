@@ -34,7 +34,7 @@ if (! function_exists('determine_locale')) {
 }
 
 if (! function_exists('load_textdomain')) {
-    function load_textdomain(string $domain, string $mofile): bool
+    function load_textdomain(string $domain, string $mofile, ?string $locale = null): bool
     {
         $GLOBALS['i18nLoader']['loads'][] = $domain.'|'.$mofile;
 

@@ -36,7 +36,7 @@ function i18nWiringCatalogue(array $words): void
 {
     $GLOBALS['i18nWiring'] = ['calls' => [], 'words' => $words, 'filters' => []];
 
-    $lookup = function (string $key, string $text) {
+    $lookup = function (string $key, string $text): string {
         $GLOBALS['i18nWiring']['calls'][] = $key;
 
         return i18nWiringFiltered($GLOBALS['i18nWiring']['words'][$key] ?? $text, $text, explode('|', $key)[0]);
