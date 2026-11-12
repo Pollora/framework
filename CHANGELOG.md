@@ -5,7 +5,13 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.3...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.42.0...develop)
+
+## [v13.42.0](https://github.com/Pollora/framework/compare/v13.40.3...v13.42.0) - 2026-11-12
+
+### Changed
+- The framework requires Laravel 13.42 (`illuminate/*` `^13.42`)
+- The archive view that `pollora:make:post-type --archive-view` generates takes its text from translations WordPress and the post type already carry, instead of fixed English: `__('Newer posts')` and `__('Older posts')` for the pagination links (core's `default` domain) and the post type's own `not_found` label for the empty state (it said `Newer`, `Older` and `Nothing published yet.`). Only views generated from now on change: the command never overwrites an existing view (#597)
 
 ## [v13.40.3](https://github.com/Pollora/framework/compare/v13.40.2...v13.40.3) - 2026-11-10
 
