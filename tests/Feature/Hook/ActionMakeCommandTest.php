@@ -47,7 +47,11 @@ it('generates the class in the custom path with --path', function (): void {
 
     $this->artisan('pollora:make:action', ['name' => 'SyncToCrm', '--path' => $customDir, '--hook' => 'save_post'])->assertSuccessful();
 
-    expect(collect(File::allFiles(base_path($customDir))))->not->toBeEmpty();
+    $generated = (string) collect(File::allFiles(base_path($customDir)))->first()?->getContents();
+
+    expect($generated)
+        ->toContain('namespace '.app()->getNamespace().'Cms\\Hooks;')
+        ->and($generated)->not->toContain('namespace AppCms\\');
 
     File::deleteDirectory(base_path($customDir));
 });

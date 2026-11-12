@@ -78,7 +78,7 @@ trait HasPathSupport
             'path' => $path,
             'namespace' => 'App', // Default namespace for custom paths
             'source_path' => $path,
-            'source_namespace' => 'App',
+            'source_namespace' => app()->getNamespace(),
         ];
     }
 }
