@@ -182,21 +182,25 @@ msgstr ""
 #. translators: %s: post type general name (plural)
 #. translators: %s: taxonomy general name (plural)
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:106
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:126
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:106
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:256
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:285
 #, php-format
 msgid "All %s"
 msgstr ""
 
+#. translators: %s: post type general name (plural)
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:107
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:236
 msgid "Add New"
 msgstr ""
 
 #. translators: %s: post type singular name
 #. translators: %s: taxonomy singular name
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:109
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:134
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:110
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:238
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:293
 #, php-format
 msgid "Add New %s"
 msgstr ""
@@ -204,23 +208,28 @@ msgstr ""
 #. translators: %s: post type singular name
 #. translators: %s: taxonomy singular name
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:111
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:128
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:107
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:240
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:287
 #, php-format
 msgid "Edit %s"
 msgstr ""
 
 #. translators: %s: post type singular name
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:113
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:242
 #, php-format
 msgid "New %s"
 msgstr ""
 
 #. translators: %s: post type singular name
+#. translators: %s: post type general name (plural)
 #. translators: %s: taxonomy singular name
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:115
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:130
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:108
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:244
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:246
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:289
 #, php-format
 msgid "View %s"
 msgstr ""
@@ -228,8 +237,9 @@ msgstr ""
 #. translators: %s: post type general name (plural)
 #. translators: %s: taxonomy general name (plural)
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:117
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:138
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:112
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:248
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:297
 #, php-format
 msgid "Search %s"
 msgstr ""
@@ -237,8 +247,9 @@ msgstr ""
 #. translators: %s: post type general name (plural)
 #. translators: %s: taxonomy general name (plural)
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:119
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:148
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:117
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:250
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:307
 #, php-format
 msgid "No %s found"
 msgstr ""
@@ -252,57 +263,58 @@ msgstr ""
 #. translators: %s: post type singular name
 #. translators: %s: taxonomy singular name
 #: PostType/Infrastructure/Adapters/WordPressPostTypeRegistry.php:123
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:152
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:119
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:254
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:311
 #, php-format
 msgid "Parent %s:"
 msgstr ""
 
 #. translators: %s: taxonomy singular name
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:132
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:109
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:291
 #, php-format
 msgid "Update %s"
 msgstr ""
 
 #. translators: %s: taxonomy singular name
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:136
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:111
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:295
 #, php-format
 msgid "New %s Name"
 msgstr ""
 
 #. translators: %s: taxonomy general name (plural)
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:140
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:113
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:299
 #, php-format
 msgid "Popular %s"
 msgstr ""
 
 #. translators: %s: taxonomy general name (plural)
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:142
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:114
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:301
 #, php-format
 msgid "Separate %s with commas"
 msgstr ""
 
 #. translators: %s: taxonomy general name (plural)
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:144
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:115
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:303
 #, php-format
 msgid "Add or remove %s"
 msgstr ""
 
 #. translators: %s: taxonomy general name (plural)
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:146
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:116
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:305
 #, php-format
 msgid "Choose from the most used %s"
 msgstr ""
 
 #. translators: %s: taxonomy singular name
-#: Taxonomy/Domain/Models/AbstractTaxonomy.php:150
 #: Taxonomy/Infrastructure/Adapters/WordPressTaxonomyRegistry.php:118
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:309
 #, php-format
 msgid "Parent %s"
 msgstr ""
@@ -365,4 +377,34 @@ msgstr ""
 
 #: Login/Infrastructure/Services/LoginScreen.php:125
 msgid "Powered by Pollora"
+msgstr ""
+
+#. translators: %s: post type general name (plural)
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:252
+#, php-format
+msgid "No %s found in Trash"
+msgstr ""
+
+#. translators: %s: post type singular name
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:258
+#, php-format
+msgid "%s Archives"
+msgstr ""
+
+#. translators: %s: post type singular name
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:260
+#, php-format
+msgid "%s Attributes"
+msgstr ""
+
+#. translators: %s: post type singular name
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:262
+#, php-format
+msgid "Insert into %s"
+msgstr ""
+
+#. translators: %s: post type singular name
+#: Translation/Infrastructure/Adapters/TranslatingEntityRegistry.php:264
+#, php-format
+msgid "Uploaded to this %s"
 msgstr ""

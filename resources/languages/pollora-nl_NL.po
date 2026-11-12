@@ -239,3 +239,23 @@ msgstr "Je gebruikt Pollora %1$s. De nieuwste versie is %2$s. %3$sChangelog beki
 
 msgid "Learn more about updating Pollora"
 msgstr "Meer informatie over het bijwerken van Pollora"
+
+#, php-format
+msgid "No %s found in Trash"
+msgstr ""
+
+#, php-format
+msgid "%s Archives"
+msgstr ""
+
+#, php-format
+msgid "%s Attributes"
+msgstr ""
+
+#, php-format
+msgid "Insert into %s"
+msgstr ""
+
+#, php-format
+msgid "Uploaded to this %s"
+msgstr ""

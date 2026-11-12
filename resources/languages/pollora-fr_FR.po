@@ -241,3 +241,23 @@ msgid "Learn more about updating Pollora"
 msgstr "En savoir plus sur la mise à jour de Pollora"
 msgid "Powered by Pollora"
 msgstr "Propulsé par Pollora"
+
+#, php-format
+msgid "No %s found in Trash"
+msgstr ""
+
+#, php-format
+msgid "%s Archives"
+msgstr ""
+
+#, php-format
+msgid "%s Attributes"
+msgstr ""
+
+#, php-format
+msgid "Insert into %s"
+msgstr ""
+
+#, php-format
+msgid "Uploaded to this %s"
+msgstr ""
