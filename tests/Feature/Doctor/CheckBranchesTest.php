@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
+use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\RouteCollection;
@@ -14,6 +15,7 @@ use Pollora\Discovery\Infrastructure\Services\DiscoveryCacheManager;
 use Pollora\Doctor\Application\Services\Doctor;
 use Pollora\Doctor\Domain\Contracts\CheckInterface;
 use Pollora\Doctor\Domain\Enums\RunContext;
+use Pollora\Doctor\Domain\Models\CheckResult;
 use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\AssetBuildCheck;
 use Pollora\Doctor\Infrastructure\Checks\BlockRegistrationCheck;
@@ -415,7 +417,7 @@ function covThemeAvailable(): ThemeAvailability
 {
     $registrar = Mockery::mock(ThemeRegistrarInterface::class);
     $registrar->shouldReceive('getActiveTheme')->andReturn(Mockery::mock(ThemeModuleInterface::class));
-    $container = new Illuminate\Container\Container;
+    $container = new Container;
     $container->instance(ThemeRegistrarInterface::class, $registrar);
 
     return new ThemeAvailability($container);
@@ -492,9 +494,9 @@ describe('DoctorServiceProvider', function (): void {
                 return [RunContext::Http];
             }
 
-            public function run(RunContext $context): Pollora\Doctor\Domain\Models\CheckResult
+            public function run(RunContext $context): CheckResult
             {
-                return Pollora\Doctor\Domain\Models\CheckResult::ok('fine');
+                return CheckResult::ok('fine');
             }
         };
         $this->app->instance(Doctor::class, new Doctor([$httpCheck]));

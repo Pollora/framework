@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 use Brain\Monkey\Functions;
 use Nwidart\Modules\Module;
+use Pollora\Attributes\PostType;
+use Pollora\Attributes\Taxonomy;
 use Pollora\Dashboard\Domain\Contracts\WordPressEnvironmentInterface;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Dashboard\UI\Http\DashboardController;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
+use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
+use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
+
+#[PostType('press-summary', singular: 'Press summary', plural: 'Press summaries')]
+class CovDashboardPressSummary {}
+
+#[Taxonomy('press-topic', singular: 'Press topic', plural: 'Press topics')]
+class CovDashboardPressTopic {}
 
 /**
  * Render the dashboard page for a collector fed by controlled inputs.
@@ -18,12 +28,18 @@ use Psr\Container\ContainerInterface;
  * @param  array<string, list<array<string, string>>>  $discovered
  * @param  array<string, mixed>  $stats
  */
-function renderDashboardPage(string $current, string $latest, array $discovered = [], array $stats = [], ?object $modules = null, bool $debug = false): string
+function renderDashboardPage(string $current, string $latest, array $discovered = [], array $stats = [], ?object $modules = null, bool $multisite = false, ?object $cacheDriver = null): string
 {
     $manager = Mockery::mock(DiscoveryManager::class);
     $manager->shouldReceive('getDiscoveredItems')->andReturnUsing(fn (string $id): array => $discovered[$id] ?? []);
     $manager->shouldReceive('getPerformanceStats')->andReturn($stats);
-    $manager->shouldReceive('getEngine')->andThrow(new RuntimeException('no engine'));
+    if ($cacheDriver === null) {
+        $manager->shouldReceive('getEngine')->andThrow(new RuntimeException('no engine'));
+    } else {
+        $engine = Mockery::mock(DiscoveryEngineInterface::class);
+        $engine->shouldReceive('getCacheDriver')->andReturn($cacheDriver);
+        $manager->shouldReceive('getEngine')->andReturn($engine);
+    }
 
     $container = Mockery::mock(ContainerInterface::class);
     $container->shouldReceive('get')->with('translator')->andThrow(new RuntimeException('none'));
@@ -37,7 +53,7 @@ function renderDashboardPage(string $current, string $latest, array $discovered 
     $wordpress = Mockery::mock(WordPressEnvironmentInterface::class);
     $wordpress->shouldReceive('locale')->andReturn('fr_FR');
     $wordpress->shouldReceive('version')->andReturn('7.1.3');
-    $wordpress->shouldReceive('isMultisite')->andReturn(false);
+    $wordpress->shouldReceive('isMultisite')->andReturn($multisite);
     $wordpress->shouldReceive('permalinkStructure')->andReturn('');
     $wordpress->shouldReceive('postTypeLabel')->andReturn(null);
     $wordpress->shouldReceive('taxonomyLabel')->andReturn(null);
@@ -182,5 +198,33 @@ describe('DashboardController', function (): void {
             ->toContain('https://example.test/wp-admin/plugins.php?page=')
             ->not->toContain('Stored in')
             ->not->toContain('No modules installed.');
+    });
+
+    it('lists a post type and a taxonomy with their label, slug and class', function (): void {
+        $html = renderDashboardPage('13.40.0', '13.40.0', [
+            'post_types' => [['class' => CovDashboardPressSummary::class]],
+            'taxonomies' => [['class' => CovDashboardPressTopic::class]],
+        ]);
+
+        expect($html)->toContain('<div class="pollora-entity-label">Press summaries</div>')
+            ->toContain('<span class="pollora-entity-slug">press-summary</span>')
+            ->toContain('<div class="pollora-entity-label">Press topics</div>')
+            ->toContain('<span class="pollora-entity-slug">press-topic</span>')
+            ->toContain('<div class="pollora-entity-meta">'.CovDashboardPressSummary::class.'</div>')
+            ->and(substr_count($html, 'None discovered.'))->toBe(4);
+    });
+
+    it('flags a multisite install', function (): void {
+        expect(renderDashboardPage('13.40.0', '13.40.0', multisite: true))->toContain('pollora-badge--gradient">Yes</span>')
+            ->and(renderDashboardPage('13.40.0', '13.40.0'))->toContain('pollora-badge--gray">No</span>');
+    });
+
+    it('shows the discovery cache as enabled with the name of its driver', function (): void {
+        $driver = Mockery::mock(LaravelDiscoverCacheDriver::class);
+
+        $html = renderDashboardPage('13.40.0', '13.40.0', cacheDriver: $driver);
+
+        expect($html)->toContain('<td>Driver</td><td>'.(new ReflectionClass($driver))->getShortName().'</td>')
+            ->toContain('<td>Status</td><td><span class="pollora-badge pollora-badge--green">Enabled</span></td>');
     });
 });

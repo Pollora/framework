@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Contracts\Foundation\Application;
 use Nwidart\Modules\Module;
+use Pollora\Attributes\PostType;
+use Pollora\Attributes\Taxonomy;
 use Pollora\Dashboard\Domain\Contracts\WordPressEnvironmentInterface;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Dashboard\UI\Console\StatusCommand;
@@ -15,13 +18,19 @@ use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
 
+#[PostType('press-summary', singular: 'Press summary', plural: 'Press summaries')]
+class CovStatusPressSummary {}
+
+#[Taxonomy('press-topic', singular: 'Press topic', plural: 'Press topics')]
+class CovStatusPressTopic {}
+
 /**
  * Bind a collector fed by controlled inputs and register the command.
  *
  * @param  array<string, list<array<string, string>>>  $discovered
  * @param  array<string, mixed>  $stats
  */
-function bindStatusCollector(Illuminate\Contracts\Foundation\Application $app, string $current, string $latest, array $discovered = [], array $stats = [], ?array $modules = null): void
+function bindStatusCollector(Application $app, string $current, string $latest, array $discovered = [], array $stats = [], ?array $modules = null): void
 {
     $checker = Mockery::mock(VersionCheckerInterface::class, [
         'getCurrentVersion' => $current,
@@ -53,6 +62,8 @@ function bindStatusCollector(Illuminate\Contracts\Foundation\Application $app, s
     $wordpress = Mockery::mock(WordPressEnvironmentInterface::class);
     $wordpress->shouldReceive('locale')->andReturn('fr_FR');
     $wordpress->shouldReceive('version')->andReturn('7.1.3');
+    $wordpress->shouldReceive('postTypeLabel')->andReturn(null);
+    $wordpress->shouldReceive('taxonomyLabel')->andReturn(null);
     $wordpress->shouldReceive('isMultisite')->andReturn(true);
     $wordpress->shouldReceive('permalinkStructure')->andReturn('/%postname%/');
     $wordpress->shouldReceive('activeTheme')->andReturn(['name' => 'Nectar', 'version' => '1.7.0', 'template' => 'nectar']);
@@ -104,6 +115,8 @@ describe('pollora:status', function (): void {
 
     it('lists every discovered item with its counts', function (): void {
         bindStatusCollector($this->app, '13.40.0', '13.40.0', [
+            'post_types' => [['class' => CovStatusPressSummary::class]],
+            'taxonomies' => [['class' => CovStatusPressTopic::class]],
             'hooks' => [['type' => 'action'], ['type' => 'action'], ['type' => 'filter']],
             'wp_rest_routes' => [['class' => 'App\\Rest\\Posts']],
             'wp_cli_commands' => [['class' => 'App\\Cli\\Sync']],
@@ -112,7 +125,10 @@ describe('pollora:status', function (): void {
         ], ['context' => ['cache_hits' => 4, 'cache_misses' => 1, 'classes_processed' => 12]]);
 
         $this->artisan('pollora:status')
-            ->expectsOutputToContain('Post Types: 0 registered (via discovery)')
+            ->expectsOutputToContain('Post Types: 1 registered (via discovery)')
+            ->expectsOutputToContain('· Press summaries [press-summary] — '.CovStatusPressSummary::class)
+            ->expectsOutputToContain('Taxonomies: 1 registered')
+            ->expectsOutputToContain('· Press topics [press-topic] — '.CovStatusPressTopic::class)
             ->expectsOutputToContain('Hooks: 3 registered (2 actions, 1 filters)')
             ->expectsOutputToContain('REST API routes: 1 registered')
             ->expectsOutputToContain('· App\\Rest\\Posts')
