@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
@@ -119,7 +120,7 @@ describe('pollora:make:module overwriting and enabling', function (): void {
     });
 
     it('enables the module through module:enable when it is available', function (): void {
-        $command = new #[\Illuminate\Console\Attributes\Signature('module:enable {module*}')] class extends Command
+        $command = new #[Signature('module:enable {module*}')] class extends Command
         {
             /** @var list<string> */
             public static array $enabled = [];
