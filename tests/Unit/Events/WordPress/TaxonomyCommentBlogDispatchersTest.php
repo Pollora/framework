@@ -253,6 +253,7 @@ describe('BlogEventDispatcher', function (): void {
         foreach (['handleArchiveBlog', 'handleUnarchiveBlog', 'handleMakeSpamBlog', 'handleMakeHamBlog', 'handleMatureBlog', 'handleUnmatureBlog', 'handleMakeDeleteBlog', 'handleMakeUndeleteBlog'] as $handler) {
             $this->dispatcher->{$handler}(404);
         }
+
         $this->dispatcher->handleUpdateBlogPublic(404, '1');
 
         expect($this->log)->toHaveCount(0);

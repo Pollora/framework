@@ -124,7 +124,7 @@ describe('MediaEventDispatcher', function (): void {
     });
 
     it('ignores a missing attachment', function (): void {
-        Functions\when('get_post')->justReturn(null);
+        Functions\when('get_post')->justReturn();
 
         $this->dispatcher->handleAddAttachment(7);
 

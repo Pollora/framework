@@ -44,6 +44,8 @@ namespace Pollora\Events\WordPress\Installer {
 }
 
 namespace Tests\Unit\Events\Fixtures {
+    use Pollora\Events\WordPress\Installer\InstallerEventDispatcher;
+
     /**
      * @param  array<string, callable>  $functions
      */
@@ -82,7 +84,7 @@ namespace Tests\Unit\Events\Fixtures {
         public function offsetUnset(mixed $offset): void {}
     }
 
-    class TestableInstallerDispatcher extends \Pollora\Events\WordPress\Installer\InstallerEventDispatcher
+    class TestableInstallerDispatcher extends InstallerEventDispatcher
     {
         /** @var array<string, array<string, mixed>> */
         public array $plugins = [];

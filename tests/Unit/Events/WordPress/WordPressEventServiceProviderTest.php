@@ -18,7 +18,7 @@ beforeEach(function (): void {
 
     $action = Mockery::mock(Action::class);
     $action->shouldReceive('add')->andReturnUsing(function (string $hook, callable|array $callback, int $priority = 10, int $args = 1) {
-        $this->hooks[] = compact('hook', 'callback', 'priority', 'args');
+        $this->hooks[] = ['hook' => $hook, 'callback' => $callback, 'priority' => $priority, 'args' => $args];
 
         return Mockery::mock(HookInterface::class);
     });

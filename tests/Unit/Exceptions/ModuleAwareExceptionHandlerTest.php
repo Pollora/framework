@@ -6,6 +6,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
 use Illuminate\Contracts\View\View;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
@@ -110,8 +111,9 @@ describe('ModuleAwareExceptionHandler rendering', function (): void {
     it('shows the exception message and the view debugging data in debug mode', function (): void {
         $app = pollora_handler_app(['app' => ['debug' => true]]);
         $app->instance('request', pollora_html_request());
+
         $data = [];
-        $finder = new FileViewFinder(new Illuminate\Filesystem\Filesystem, ['/views/app']);
+        $finder = new FileViewFinder(new Filesystem, ['/views/app']);
         $app->make('view')->shouldReceive('getFinder')->andReturn($finder);
         $app->make('view')->shouldReceive('exists')->andReturnUsing(fn (string $view): bool => $view === 'errors.404');
         $app->make('view')->shouldReceive('make')->andReturnUsing(function (string $view, array $viewData) use (&$data): View {
@@ -133,8 +135,9 @@ describe('ModuleAwareExceptionHandler rendering', function (): void {
     it('falls back to the status message in debug mode when the exception has no message', function (): void {
         $app = pollora_handler_app(['app' => ['debug' => true]]);
         $app->instance('request', pollora_html_request());
+
         $data = [];
-        $app->make('view')->shouldReceive('getFinder')->andReturn(new FileViewFinder(new Illuminate\Filesystem\Filesystem, []));
+        $app->make('view')->shouldReceive('getFinder')->andReturn(new FileViewFinder(new Filesystem, []));
         $app->make('view')->shouldReceive('exists')->andReturn(true);
         $app->make('view')->shouldReceive('make')->andReturnUsing(function (string $view, array $viewData) use (&$data): View {
             $data = $viewData;
@@ -278,7 +281,7 @@ describe('ModuleAwareExceptionHandler debug information', function (): void {
     it('describes the candidates for a status 500 when the exception is not an HTTP exception', function (): void {
         $app = pollora_handler_app(['app' => ['debug' => true]]);
         $app->instance('request', pollora_html_request());
-        $app->make('view')->shouldReceive('getFinder')->andReturn(new FileViewFinder(new Illuminate\Filesystem\Filesystem, ['/views']));
+        $app->make('view')->shouldReceive('getFinder')->andReturn(new FileViewFinder(new Filesystem, ['/views']));
         $app->make('view')->shouldReceive('exists')->andReturnUsing(fn (string $view): bool => $view === 'errors.5xx');
 
         $info = (new ModuleAwareExceptionHandler($app))->getErrorViewDebugInfo(new RuntimeException('x'), pollora_html_request());
@@ -292,7 +295,7 @@ describe('ModuleAwareExceptionHandler debug information', function (): void {
     it('uses the status code of an HTTP exception', function (): void {
         $app = pollora_handler_app(['app' => ['debug' => true]]);
         $app->instance('request', pollora_html_request());
-        $app->make('view')->shouldReceive('getFinder')->andReturn(new FileViewFinder(new Illuminate\Filesystem\Filesystem, []));
+        $app->make('view')->shouldReceive('getFinder')->andReturn(new FileViewFinder(new Filesystem, []));
         $app->make('view')->shouldReceive('exists')->andReturn(false);
 
         $info = (new ModuleAwareExceptionHandler($app))->getErrorViewDebugInfo(new HttpException(503), pollora_html_request());

@@ -83,7 +83,7 @@ describe('NpmRunner process', function (): void {
     });
 
     it('throws when the command fails, with its exit code and output', function (): void {
-        $run = fn () => pollora_run_npm_command($this->directory, [PHP_BINARY, '-r', 'fwrite(STDERR, "build broke"); exit(3);']);
+        $run = fn (): string => pollora_run_npm_command($this->directory, [PHP_BINARY, '-r', 'fwrite(STDERR, "build broke"); exit(3);']);
 
         expect($run)->toThrow(ProcessFailedException::class, 'build broke');
     });

@@ -79,6 +79,8 @@ namespace {
 }
 
 namespace Tests\Unit\Support\Fixtures {
+    use Illuminate\Support\Collection;
+
     /**
      * @param  array<string, callable>  $functions
      */
@@ -89,15 +91,11 @@ namespace Tests\Unit\Support\Fixtures {
 
     class FakeMenuItem extends \WP_Post
     {
-        public int $menu_item_parent = 0;
+        public ?Collection $children = null;
 
-        public ?\Illuminate\Support\Collection $children = null;
-
-        public function __construct(int $id = 0, int $parent = 0, public string $title = '')
+        public function __construct(int $id = 0, public int $menu_item_parent = 0, public string $title = '')
         {
             $this->ID = $id;
-            $this->menu_item_parent = $parent;
-            $this->title = $title;
         }
     }
 }

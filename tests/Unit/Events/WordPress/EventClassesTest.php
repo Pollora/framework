@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+use Pollora\Events\WordPress\Installer\Plugin\PluginActivated;
+use Pollora\Events\WordPress\Installer\Theme\ThemeActivated;
+use Pollora\Events\WordPress\Plugins\TwoFactor\TwoFactorConfigurationChanged;
+use Pollora\Events\WordPress\Taxonomy\TermUpdated;
+use Pollora\Events\WordPress\User\UserCreated;
+use Pollora\Events\WordPress\Widget\WidgetMoved;
+use Pollora\Events\WordPress\Widget\WidgetReordered;
 use Tests\Unit\Events\Fixtures\FakeComment;
 use Tests\Unit\Events\Fixtures\FakePost;
 use Tests\Unit\Events\Fixtures\FakeSite;
@@ -99,7 +106,7 @@ describe('WordPress event classes', function (): void {
         $first = new FakeTerm('first');
         $second = new FakeTerm('second');
 
-        $event = new Pollora\Events\WordPress\Taxonomy\TermUpdated($first, $second);
+        $event = new TermUpdated($first, $second);
 
         expect($event->term)->toBe($first)
             ->and($event->previousTerm)->toBe($second);
@@ -108,7 +115,7 @@ describe('WordPress event classes', function (): void {
 
 describe('WordPress event classes with derived state', function (): void {
     it('keeps a moved widget in its new sidebar', function (): void {
-        $event = new Pollora\Events\WordPress\Widget\WidgetMoved('text-2', 'sidebar-1', 'footer', 'Text', 'Hello');
+        $event = new WidgetMoved('text-2', 'sidebar-1', 'footer', 'Text', 'Hello');
 
         expect($event->widgetId)->toBe('text-2')
             ->and($event->oldSidebarId)->toBe('sidebar-1')
@@ -119,7 +126,7 @@ describe('WordPress event classes with derived state', function (): void {
     });
 
     it('identifies a reordered sidebar rather than a widget', function (): void {
-        $event = new Pollora\Events\WordPress\Widget\WidgetReordered('sidebar-1', ['a', 'b'], ['b', 'a']);
+        $event = new WidgetReordered('sidebar-1', ['a', 'b'], ['b', 'a']);
 
         expect($event->sidebarId)->toBe('sidebar-1')
             ->and($event->widgetId)->toBe('')
@@ -129,8 +136,8 @@ describe('WordPress event classes with derived state', function (): void {
     });
 
     it('defaults optional data of installer events', function (): void {
-        $plugin = new Pollora\Events\WordPress\Installer\Plugin\PluginActivated('Akismet');
-        $theme = new Pollora\Events\WordPress\Installer\Theme\ThemeActivated('Nectar');
+        $plugin = new PluginActivated('Akismet');
+        $theme = new ThemeActivated('Nectar');
 
         expect($plugin->name)->toBe('Akismet')
             ->and($plugin->version)->toBeNull()
@@ -143,8 +150,8 @@ describe('WordPress event classes with derived state', function (): void {
     it('defaults optional data of user and two-factor events', function (): void {
         $user = new FakeUser(5);
 
-        $created = new Pollora\Events\WordPress\User\UserCreated($user);
-        $changed = new Pollora\Events\WordPress\Plugins\TwoFactor\TwoFactorConfigurationChanged($user, 'enabled', 'totp');
+        $created = new UserCreated($user);
+        $changed = new TwoFactorConfigurationChanged($user, 'enabled', 'totp');
 
         expect($created->creator)->toBeNull()
             ->and($changed->oldValue)->toBeNull()

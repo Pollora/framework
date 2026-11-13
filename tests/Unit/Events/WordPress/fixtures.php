@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Events\Fixtures;
 
+use Illuminate\Contracts\Events\Dispatcher;
+use Pollora\Hook\Domain\Contract\Action;
+
 /*
  * Minimal WordPress object doubles shared by the event tests. The WordPress
  * classes are only declared when no other test did it first, and the doubles
@@ -40,12 +43,7 @@ if (! class_exists('WP_Upgrader', false)) {
 
 class FakePost extends \WP_Post
 {
-    public string $post_type = 'post';
-
-    public function __construct(public string $label = 'post', string $postType = 'post')
-    {
-        $this->post_type = $postType;
-    }
+    public function __construct(public string $label = 'post', public string $post_type = 'post') {}
 }
 
 class FakeComment extends \WP_Comment
@@ -121,10 +119,10 @@ function make_dispatcher(string $class): array
 {
     $log = new \ArrayObject;
 
-    $events = \Mockery::mock(\Illuminate\Contracts\Events\Dispatcher::class);
+    $events = \Mockery::mock(Dispatcher::class);
     $events->shouldReceive('dispatch')->andReturnUsing(function (object $event) use ($log): void {
         $log[] = $event;
     });
 
-    return [new $class($events, \Mockery::mock(\Pollora\Hook\Domain\Contract\Action::class)), $log];
+    return [new $class($events, \Mockery::mock(Action::class)), $log];
 }

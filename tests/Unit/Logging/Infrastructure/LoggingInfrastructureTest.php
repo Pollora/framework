@@ -64,13 +64,13 @@ describe('WordPressErrorHookRegistrar', function (): void {
 
         $action = Mockery::mock(Action::class);
         $action->shouldReceive('add')->andReturnUsing(function (string $hook, callable $callback, int $priority = 10, int $args = 1) {
-            $this->actions[$hook] = compact('callback', 'priority', 'args');
+            $this->actions[$hook] = ['callback' => $callback, 'priority' => $priority, 'args' => $args];
 
             return Mockery::mock(HookInterface::class);
         });
         $filter = Mockery::mock(Filter::class);
         $filter->shouldReceive('add')->andReturnUsing(function (string $hook, callable $callback, int $priority = 10, int $args = 1) {
-            $this->filters[$hook] = compact('callback', 'priority', 'args');
+            $this->filters[$hook] = ['callback' => $callback, 'priority' => $priority, 'args' => $args];
 
             return Mockery::mock(HookInterface::class);
         });
@@ -111,7 +111,7 @@ describe('WordPressErrorHookRegistrar', function (): void {
     })->with(['doing_it_wrong_trigger_error', 'deprecated_function_trigger_error', 'deprecated_argument_trigger_error']);
 
     it('stays silent when the logging service cannot be resolved', function (): void {
-        $this->app->bind(WordPressErrorLoggingService::class, fn () => throw new RuntimeException('no service'));
+        $this->app->bind(WordPressErrorLoggingService::class, fn (): never => throw new RuntimeException('no service'));
 
         $this->actions['doing_it_wrong_run']['callback']('fn_a', 'message a', '6.0');
         $this->actions['deprecated_function_run']['callback']('fn_b', 'replacement b', '5.0');

@@ -27,11 +27,9 @@ describe('UserEventDispatcher', function (): void {
         [$this->dispatcher, $this->log] = make_dispatcher(UserEventDispatcher::class);
         $this->user = new FakeUser(7);
 
-        Functions\when('get_user_by')->alias(function (string $field, mixed $value): ?object {
-            return match ([$field, $value]) {
-                ['id', 7], ['email', 'jane@example.com'], ['login', 'jane'] => $this->user,
-                default => null,
-            };
+        Functions\when('get_user_by')->alias(fn (string $field, mixed $value): ?object => match ([$field, $value]) {
+            ['id', 7], ['email', 'jane@example.com'], ['login', 'jane'] => $this->user,
+            default => null,
         });
         Functions\when('is_email')->alias(fn (string $value): bool => str_contains($value, '@'));
     });
@@ -133,7 +131,7 @@ describe('UserEventDispatcher', function (): void {
         Functions\when('get_user_by')->justReturn($user);
         Functions\when('wp_roles')->justReturn(new class
         {
-            public function get_role(string $role): object
+            public function get_role(string $role): stdClass
             {
                 return (object) ['name' => ucfirst($role).' role'];
             }
@@ -153,7 +151,7 @@ describe('UserEventDispatcher', function (): void {
     it('reports a deletion only once', function (): void {
         Functions\when('wp_roles')->justReturn(new class
         {
-            public function get_role(string $role): object
+            public function get_role(string $role): stdClass
             {
                 return (object) ['name' => $role];
             }
