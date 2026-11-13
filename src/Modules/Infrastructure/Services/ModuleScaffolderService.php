@@ -61,6 +61,8 @@ class ModuleScaffolderService
         ?callable $fileFilter = null,
         array $removeDirs = []
     ): bool {
+        $workDir = null;
+
         try {
             $downloader = new ModuleDownloader($repository);
 
@@ -70,7 +72,13 @@ class ModuleScaffolderService
 
             $output->writeln('<info>Downloading from '.$repository.($version ? sprintf(' (version: %s)', $version) : '').'...</info>');
 
-            $extractedPath = $downloader->downloadAndExtract($basePath);
+            // The archive is unpacked in a scratch directory of its own, never
+            // under $basePath: the downloader nests it in a folder named after the
+            // repository, which is also what a theme or plugin copied from that
+            // repository is called, so cleaning up "the extraction folder" used to
+            // delete the module that had just been generated.
+            $workDir = $this->createWorkDirectory();
+            $extractedPath = $downloader->downloadAndExtract($workDir);
 
             $this->ensureDirectoryExists($targetPath);
             $this->copyDirectoryWithReplacements($extractedPath, $targetPath, $replacements, $fileFilter);
@@ -78,8 +86,6 @@ class ModuleScaffolderService
             foreach ($removeDirs as $dir) {
                 $this->removeDirectory($targetPath.'/'.$dir);
             }
-
-            $this->removeDirectory(dirname($extractedPath));
 
             $output->writeln('<info>Downloaded and extracted successfully.</info>');
 
@@ -89,7 +95,28 @@ class ModuleScaffolderService
             $output->writeln('<comment>Falling back to generating default structure...</comment>');
 
             return false;
+        } finally {
+            if ($workDir !== null) {
+                $this->removeDirectory($workDir);
+            }
         }
+    }
+
+    /**
+     * Create a unique, hidden scratch directory that can never be a scaffold target.
+     *
+     * It lives in the system temporary directory: files are copied one by one
+     * into the target, so being on another filesystem does not matter.
+     */
+    private function createWorkDirectory(): string
+    {
+        $path = rtrim(sys_get_temp_dir(), '/').'/.pollora-scaffold-'.bin2hex(random_bytes(8));
+
+        if (! mkdir($path, 0700, true) && ! is_dir($path)) {
+            throw new \RuntimeException('Unable to create the working directory '.$path);
+        }
+
+        return $path;
     }
 
     /**
