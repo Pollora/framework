@@ -105,6 +105,8 @@ it('ignores abstract classes', function (): void {
     [$discovery, $registered] = ajaxDiscoveryWithRecorder();
 
     discoverAjaxClass($discovery, AjaxDiscoveryAbstractFixture::class);
+    expect($discovery->getItems()->count())->toBe(0);
+
     $discovery->apply();
 
     expect($registered)->toHaveCount(0);
@@ -118,6 +120,8 @@ it('ignores structures that are not classes', function (): void {
         DiscoveredInterface::fromReflection(new ReflectionClass(Countable::class)),
         new ReflectionCache
     );
+    expect($discovery->getItems()->count())->toBe(0);
+
     $discovery->apply();
 
     expect($registered)->toHaveCount(0);
@@ -131,6 +135,8 @@ it('does not fail on a class that cannot be reflected', function (): void {
         new DiscoveredClass('Missing', __FILE__, 'Not\\Existing', false, false, false, null, [], []),
         new ReflectionCache
     );
+    expect($discovery->getItems()->count())->toBe(0);
+
     $discovery->apply();
 
     expect($registered)->toHaveCount(0);

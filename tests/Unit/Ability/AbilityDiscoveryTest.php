@@ -184,6 +184,8 @@ it('ignores classes without the attribute', function (): void {
     [$discovery, $service] = abilityDiscoveryOnService();
 
     discoverAbilityClass($discovery, AbilityDiscoveryPlainFixture::class);
+    expect($discovery->getItems()->count())->toBe(0);
+
     $discovery->apply();
 
     expect($service->pending())->toBe([]);
@@ -193,6 +195,8 @@ it('ignores abstract classes even when they carry the attribute', function (): v
     [$discovery, $service] = abilityDiscoveryOnService();
 
     discoverAbilityClass($discovery, AbilityDiscoveryAbstractFixture::class);
+    expect($discovery->getItems()->count())->toBe(0);
+
     $discovery->apply();
 
     expect($service->pending())->toBe([]);
@@ -206,6 +210,8 @@ it('ignores structures that are not classes', function (): void {
         DiscoveredInterface::fromReflection(new ReflectionClass(Countable::class)),
         new ReflectionCache
     );
+    expect($discovery->getItems()->count())->toBe(0);
+
     $discovery->apply();
 
     expect($service->pending())->toBe([]);
@@ -219,6 +225,8 @@ it('does not fail on a class that cannot be reflected', function (): void {
         new DiscoveredClass('Missing', __FILE__, 'Not\\Existing', false, false, false, null, [], []),
         new ReflectionCache
     );
+    expect($discovery->getItems()->count())->toBe(0);
+
     $discovery->apply();
 
     expect($service->pending())->toBe([]);
