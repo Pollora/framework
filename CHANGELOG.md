@@ -5,7 +5,37 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.40.3...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.42.0...develop)
+
+### Added
+- **Gravity Forms events.** `GravityFormsEventDispatcher` is now registered, on sites where Gravity Forms is loaded only (nothing is hooked without it), and every hook it declares has a handler, checked against Gravity Forms 2.9.31. Nine events are new: `FormActivated`, `FormDeactivated`, `FormDuplicated`, `FormViewsDeleted`, `FormsImported`, `EntriesExported`, `EntryNoteDeleted`, `EntryReadUpdated` and `EntryStarredUpdated`. Until now the dispatcher was never registered, so no Gravity Forms event was ever dispatched (#624)
+- `pollora:make:model --force` overwrites an existing model, like the other generators (#621)
+- `pollora:make:theme --force` and `pollora:make:plugin --force` delete an existing theme or plugin and generate it again. They ask to type its name to confirm, never delete in non-interactive mode, never follow a symbolic link, and refuse the active theme or plugin when WordPress can tell. Without `--force` the folder is still refused, with the same message (#626)
+
+### Changed
+- **The `pollora:make:*` generators exit with code 1, not 0, when they refuse to write** (name reserved by PHP, file already there without `--force`). Scripts that read that 0 must be adapted. The signature of `AbstractGeneratorCommand::handle()` is unchanged (#625)
+- Gravity Forms dispatcher: `gform_pre_confirmation_save` and `gform_pre_notification_save` are filters and are no longer hooked as actions, so `ConfirmationCreated`, `ConfirmationUpdated`, `NotificationCreated` and `NotificationUpdated` are not dispatched; `gform_confirmation_status` and `gform_notification_status` do not exist in Gravity Forms and are removed; `gform_delete_entry` replaces the deprecated `gform_delete_lead` (#624)
+- `PluginInstalled` is dispatched only when WordPress can name the plugin's main file, and reads its name and version there. It used to be dispatched with an empty name and version, because the plugin folder was read as a file (#622)
+- `PluginAutoloader::getPluginNamespace()` returns the StudlyCase namespace `registerModule()` registers (`Plugin\Acme\` for `acme`, not `Plugin\acme\`), so `isPluginRegistered('acme')` is true for a registered plugin (#623)
+- The framework no longer publishes `public/wp-config.php` (the source file was never shipped: `vendor:publish --tag=public` printed an error and exited 0), so the `public` tag publishes nothing. The project skeleton provides that file (#629)
+
+### Fixed
+- **Sub-menu items came out in reverse order.** `RecursiveMenuIterator` built the tree on a reversed collection: for `A > (B, C)` it returned `A > (C, B)`. The top level was already right and is unchanged (#618, #612)
+- **JSON requests got the HTML error views of the modules.** `ModuleAwareExceptionHandler::shouldRenderHtmlResponse()` was always true; it now follows Laravel (`! $request->expectsJson()`) (#619, #613)
+- **The theme console commands ignored a custom `theme.path`.** `BaseThemeCommand` read a `theme.directory` key the configuration does not define, so `make:theme`, `theme:delete` and the commands built on it kept using `base_path('themes')` (#620, #614)
+- `WidgetReordered` is dispatched when a sidebar's widgets are reordered, and no longer when one is replaced by another (the condition was inverted); a replacement dispatches `WidgetAdded` and `WidgetRemoved` (#622)
+- `WordPressUpdated` is dispatched on a core update: `_core_updated_successfully` was missing from the hooks of `InstallerEventDispatcher` (#622)
+- Gravity Forms: the handler of `gform_post_note_added` required more arguments than the hook passes (an `ArgumentCountError` inside the site when a note was added), and a `WP_Error` returned by `GFAPI::get_entry()` was treated as an entry (#624)
+- `ThemeManager::resetCache()` and `PluginManager::resetCache()` no longer throw a `TypeError` when there is no discovery service; a plugin added with `PluginRepository::add()` before the first scan is no longer lost; the cookie path of the install loader is no longer `//` for an `APP_URL` ending with a slash; `ThemeMetadata::getThemeAppDir()` joins with one separator; `Menus::applyRule()` no longer gives `" foo"` for an empty `class`; `DatabaseService` writes its progress to the screen (it was missing the `info()` import) (#623)
+- `pollora:doctor` no longer reports a hidden file of the uploads (`.htaccess`, anything under a dot-folder) as left behind on the media disk (#628)
+- `LaravelDiscoveryCache::flush()` forgets only the keys the adapter wrote, instead of emptying the whole application cache (#629)
+- **`pollora:make:theme`, `pollora:make:plugin` and `pollora:make:module` no longer delete what they have just generated when it is named like the template repository.** The cleanup removed the extraction folder, which is that folder, and the command still reported success. The archive is now unpacked in a unique scratch directory (in the system temporary directory) that is the only thing removed afterwards, even when the download or the copy fails; the downloaded zip is no longer left in `storage/app/tmp` when the archive is unreadable (#630, #627)
+
+## [v13.42.0](https://github.com/Pollora/framework/compare/v13.40.3...v13.42.0) - 2026-11-12
+
+### Changed
+- The framework requires Laravel 13.42 (`illuminate/*` `^13.42`)
+- The archive view that `pollora:make:post-type --archive-view` generates takes its text from translations WordPress and the post type already carry, instead of fixed English: `__('Newer posts')` and `__('Older posts')` for the pagination links (core's `default` domain) and the post type's own `not_found` label for the empty state (it said `Newer`, `Older` and `Nothing published yet.`). Only views generated from now on change: the command never overwrites an existing view (#597)
 
 ## [v13.40.3](https://github.com/Pollora/framework/compare/v13.40.2...v13.40.3) - 2026-11-10
 
