@@ -59,7 +59,7 @@ class TaxonomyRepository implements TaxonomyRepositoryInterface
      */
     public function findBySlug(string $slug): ?object
     {
-        // Check if it exists in WordPress registry
+        // Read the taxonomies this repository keeps in memory (not the WordPress registry)
         return $this->taxonomies[$slug] ?? null;
     }
 
