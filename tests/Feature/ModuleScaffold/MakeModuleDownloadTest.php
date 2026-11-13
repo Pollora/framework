@@ -28,6 +28,7 @@ function templateArchive(string $path): string
 {
     $zip = new ZipArchive;
     $zip->open($path, ZipArchive::CREATE);
+
     $files = [
         'module-default-main/README.md' => '# %module_name%',
         'module-default-main/LICENSE' => 'MIT',
@@ -42,6 +43,7 @@ function templateArchive(string $path): string
     foreach ($files as $name => $content) {
         $zip->addFromString($name, $content);
     }
+
     $zip->close();
 
     return (string) file_get_contents($path);
@@ -117,12 +119,10 @@ describe('pollora:make:module overwriting and enabling', function (): void {
     });
 
     it('enables the module through module:enable when it is available', function (): void {
-        $command = new class extends Command
+        $command = new #[\Illuminate\Console\Attributes\Signature('module:enable {module*}')] class extends Command
         {
             /** @var list<string> */
             public static array $enabled = [];
-
-            protected $signature = 'module:enable {module*}';
 
             public function handle(): void
             {

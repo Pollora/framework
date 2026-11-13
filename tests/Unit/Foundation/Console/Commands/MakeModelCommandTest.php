@@ -19,6 +19,7 @@ function runMakeModel(Application $app, array $input): array
 {
     $command = new MakeModelCommand(new Filesystem);
     $command->setLaravel($app);
+
     $output = new BufferedOutput;
     $status = $command->run(new ArrayInput($input), $output);
 
@@ -35,7 +36,7 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     (new Filesystem)->deleteDirectory($this->base);
-    Container::setInstance(null);
+    Container::setInstance();
 });
 
 describe('pollora:make:model', function (): void {

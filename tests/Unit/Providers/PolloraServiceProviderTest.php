@@ -31,7 +31,7 @@ final class PolloraTextDomainProbe
     public static string $locale = 'en_US';
 
     /** @var null|callable(string, string): bool */
-    public static $loader = null;
+    public static $loader;
 
     public static function reset(): void
     {

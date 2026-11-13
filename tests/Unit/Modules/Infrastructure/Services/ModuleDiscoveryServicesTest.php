@@ -29,6 +29,7 @@ function discoveryRemoveDir(string $dir): void
     if (! is_dir($dir)) {
         return;
     }
+
     $items = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
         RecursiveIteratorIterator::CHILD_FIRST
@@ -36,6 +37,7 @@ function discoveryRemoveDir(string $dir): void
     foreach ($items as $item) {
         $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
     }
+
     rmdir($dir);
 }
 
@@ -81,6 +83,7 @@ describe('ModuleDiscoveryOrchestrator', function (): void {
 
         $unbound = new ModuleDiscoveryOrchestrator(new Container);
         $unbound->discover($this->dir);
+
         expect($unbound->discoverAndReturn($this->dir))->toBe([]);
     });
 
@@ -135,6 +138,7 @@ describe('ModuleDiscoveryOrchestrator', function (): void {
 
         $orchestrator->discoverLaravelModules();
         $orchestrator->applyLaravelModules();
+
         expect($orchestrator->discoverAndReturnLaravelModules())->toBe([]);
     });
 
@@ -165,7 +169,7 @@ describe('ModuleDiscoveryOrchestrator', function (): void {
         $orchestrator->discoverFrameworkModule('Blog');
 
         expect($orchestrator->discoverAndReturnFrameworkModules())->toBe(['Blog' => ['Domain' => ['x' => [1]]]]);
-        Container::setInstance(null);
+        Container::setInstance();
     });
 });
 
@@ -305,7 +309,7 @@ describe('FrameworkModuleDiscovery', function (): void {
     });
 
     afterEach(function (): void {
-        Container::setInstance(null);
+        Container::setInstance();
         discoveryRemoveDir($this->dir);
     });
 

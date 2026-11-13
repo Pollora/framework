@@ -33,6 +33,7 @@ function smallRemove(string $dir): void
     if (! is_dir($dir)) {
         return;
     }
+
     $items = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
         RecursiveIteratorIterator::CHILD_FIRST
@@ -40,6 +41,7 @@ function smallRemove(string $dir): void
     foreach ($items as $item) {
         $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
     }
+
     rmdir($dir);
 }
 
@@ -138,6 +140,7 @@ describe('ModuleAutoloader sources and registration', function (): void {
         $loader = new ClassLoader($this->dir.'/vendor-a');
         $app = new Container;
         $app->instance(ModuleAutoloader::CLASS_LOADER, $loader);
+
         $autoloader = new ModuleAutoloader($app);
         $before = count(spl_autoload_functions());
 
@@ -165,6 +168,7 @@ describe('LaravelModuleAssets', function (): void {
         $assets = new LaravelModuleAssets($this->app, $this->moduleAssets);
 
         $assets->setUp();
+
         $this->app->instance('modules', new class
         {
             public function allEnabled(): array
@@ -197,10 +201,11 @@ describe('LaravelModuleAssets', function (): void {
         foreach (['Blog', 'ShopFront', 'Plain', 'Known'] as $name) {
             mkdir($this->dir.'/'.$name, 0777, true);
         }
+
         file_put_contents($this->dir.'/ShopFront/vite.config.ts', '');
         file_put_contents($this->dir.'/Known/vite.config.js', '');
         file_put_contents($this->dir.'/Blog/vite.config.mjs', '');
-        $modules = array_map(fn (string $n): object => new class($n, $this->dir.'/'.$n.'/')
+        $modules = array_map(fn (string $n): object => new readonly class($n, $this->dir.'/'.$n.'/')
         {
             public function __construct(private string $n, private string $p) {}
 
@@ -214,7 +219,7 @@ describe('LaravelModuleAssets', function (): void {
                 return $this->p;
             }
         }, ['Blog', 'ShopFront', 'Plain', 'Known']);
-        $this->app->instance('modules', new class($modules)
+        $this->app->instance('modules', new readonly class($modules)
         {
             public function __construct(private array $m) {}
 

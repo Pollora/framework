@@ -139,6 +139,7 @@ describe('ModulesAdminPage menu and plugin views', function (): void {
         });
         $this->app->forgetInstance('modules');
         $this->app->offsetUnset('modules');
+
         $page = new ModulesAdminPage($this->app->make(ModuleStates::class), $this->app->make(ModuleVersions::class));
 
         $page->addMenuPage();

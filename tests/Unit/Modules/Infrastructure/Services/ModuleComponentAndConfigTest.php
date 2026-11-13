@@ -34,7 +34,7 @@ class ComponentFixtureBroken
 
 afterEach(function (): void {
     Mockery::close();
-    Container::setInstance(null);
+    Container::setInstance();
 });
 
 describe('ModuleComponentManager', function (): void {
@@ -99,9 +99,9 @@ describe('ModuleComponentManager', function (): void {
         try {
             $this->manager->initializeModuleComponents('m');
             $this->fail('An exception was expected.');
-        } catch (ModuleComponentException $exception) {
-            expect($exception->getMessage())->toContain('ComponentFixtureBroken', 'module m', 'component exploded')
-                ->and($exception->getPrevious())->toBeInstanceOf(RuntimeException::class);
+        } catch (ModuleComponentException $moduleComponentException) {
+            expect($moduleComponentException->getMessage())->toContain('ComponentFixtureBroken', 'module m', 'component exploded')
+                ->and($moduleComponentException->getPrevious())->toBeInstanceOf(RuntimeException::class);
         }
     });
 
@@ -131,6 +131,7 @@ describe('ModuleConfigurationLoader', function (): void {
         foreach (glob($this->dir.'/config/*') ?: [] as $file) {
             unlink($file);
         }
+
         @rmdir($this->dir.'/config');
         @rmdir($this->dir);
     });

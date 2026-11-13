@@ -16,7 +16,7 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
-    Container::setInstance(null);
+    Container::setInstance();
     Mockery::close();
 });
 
@@ -94,7 +94,7 @@ describe('route debugging helpers', function (): void {
 
     it('put the failure in the report instead of throwing', function (): void {
         $this->container->forgetInstance('router');
-        $this->container->bind('router', fn () => throw new RuntimeException('no router'));
+        $this->container->bind('router', fn (): never => throw new RuntimeException('no router'));
 
         expect(pollora_debug_route_registration()['error'])->toBe('no router');
     });
@@ -113,7 +113,7 @@ describe('route debugging helpers', function (): void {
 
     it('list no module route when the router is unavailable', function (): void {
         $this->container->forgetInstance('router');
-        $this->container->bind('router', fn () => throw new RuntimeException('no router'));
+        $this->container->bind('router', fn (): never => throw new RuntimeException('no router'));
 
         expect(pollora_list_module_routes())->toBe([]);
     });

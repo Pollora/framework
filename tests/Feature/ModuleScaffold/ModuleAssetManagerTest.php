@@ -73,6 +73,7 @@ describe('ModuleAssetManager asset containers', function (): void {
 
         $assets->setupModuleAssetContainer('Crm', $this->module, 'plugin', 'crm-slug');
         $assets->setupModuleAssetContainer('Seo', $this->module, 'plugin');
+
         $returned = $assets->setupModuleAssetContainer('Shop', $this->module, 'module', 'shop');
 
         expect($names)->toBe(['plugin.crm-slug', 'plugin.Seo', 'module.shop'])
@@ -198,6 +199,7 @@ describe('ModuleAssetManager view paths', function (): void {
         $factory->shouldReceive('getFinder')->andReturn($finder);
         $app = new Container;
         $app->instance('view', $factory);
+
         $assets = new ModuleAssetManager($app);
 
         $assets->registerModuleViewPaths($this->module, 'plugin');
@@ -211,6 +213,7 @@ describe('ModuleAssetManager view paths', function (): void {
         $factory->shouldReceive('getFinder')->andThrow(new RuntimeException('no finder'));
         $app = new Container;
         $app->instance('view', $factory);
+
         $logged = loggedErrors($app);
 
         (new ModuleAssetManager($app))->registerModuleViewPaths($this->module, 'theme');
