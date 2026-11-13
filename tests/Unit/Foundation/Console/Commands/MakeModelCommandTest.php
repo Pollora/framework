@@ -6,6 +6,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
+use Pollora\Console\AbstractGeneratorCommand;
 use Pollora\Foundation\Console\Commands\MakeModelCommand;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -76,7 +77,55 @@ describe('pollora:make:model', function (): void {
         $result = runMakeModel($this->app, ['name' => 'Tag']);
 
         expect(file_get_contents($this->base.'/app/Models/Tag.php'))->toBe('<?php // mine')
+            ->and($result['status'])->toBe(1)
             ->and($result['output'])->toContain('Model already exists');
+    });
+
+    it('overwrites an existing model with --force', function (): void {
+        runMakeModel($this->app, ['name' => 'Tag']);
+        file_put_contents($this->base.'/app/Models/Tag.php', '<?php // mine');
+
+        $result = runMakeModel($this->app, ['name' => 'Tag', '--force' => true]);
+
+        expect($result['status'])->toBe(0)
+            ->and(file_get_contents($this->base.'/app/Models/Tag.php'))->toContain('class Tag extends Model')
+            ->and($result['output'])->not->toContain('already exists');
+    });
+
+    it('exits with 1 when a subclass redeclares handle() and returns false itself', function (): void {
+        $command = new class(new Filesystem) extends AbstractGeneratorCommand
+        {
+            protected $name = 'test:refusing';
+
+            protected $type = 'Test';
+
+            public function handle(): bool
+            {
+                $this->components->error('Refused by the subclass.');
+
+                return false;
+            }
+
+            protected function getStub(): string
+            {
+                return '';
+            }
+        };
+        $command->setLaravel($this->app);
+
+        $output = new BufferedOutput;
+        $status = $command->run(new ArrayInput(['name' => 'Tag']), $output);
+
+        expect($status)->toBe(1)
+            ->and($output->fetch())->toContain('Refused by the subclass.');
+    });
+
+    it('declares --force without taking the -f shortcut of --fillable', function (): void {
+        $definition = (new MakeModelCommand(new Filesystem))->getDefinition();
+
+        expect($definition->hasOption('force'))->toBeTrue()
+            ->and($definition->getOption('force')->acceptValue())->toBeFalse()
+            ->and($definition->getOptionForShortcut('f')->getName())->toBe('fillable');
     });
 
     it('prefers a stub published at the project root over the bundled one', function (): void {
@@ -91,7 +140,7 @@ describe('pollora:make:model', function (): void {
     it('refuses a name PHP reserves', function (): void {
         $result = runMakeModel($this->app, ['name' => 'Class']);
 
-        expect($result['status'])->toBe(0)
+        expect($result['status'])->toBe(1)
             ->and($result['output'])->toContain('reserved by PHP')
             ->and(is_dir($this->base.'/app/Models'))->toBeFalse();
     });

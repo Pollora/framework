@@ -98,6 +98,14 @@ class FakeUpgrader extends \WP_Upgrader
 
     public array $result = [];
 
+    /** What Plugin_Upgrader::plugin_info() returns: the main file of the installed plugin. */
+    public string|false $pluginInfo = false;
+
+    public function plugin_info(): string|false
+    {
+        return $this->pluginInfo;
+    }
+
     /**
      * @param  array<string, mixed>  $skinProperties
      */

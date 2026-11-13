@@ -9,6 +9,8 @@ use Pollora\Services\WordPress\Database\DatabaseConnectionService;
 use Pollora\Services\WordPress\Database\EnvironmentFileHandler;
 use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
 
+use function Laravel\Prompts\info;
+
 /**
  * Service for handling WordPress database configuration and connection.
  *

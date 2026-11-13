@@ -116,6 +116,28 @@ describe('RecursiveMenuIterator from a menu location', function (): void {
         expect(pollora_walk_menu($menu))->toBe(['Home', 'Shop', '-Shoes', '--Boots']);
     });
 
+    it('keeps the menu order at every level of the tree', function (): void {
+        $items = [
+            new FakeMenuItem(1, 0, 'A'),
+            new FakeMenuItem(2, 1, 'B'),
+            new FakeMenuItem(5, 2, 'B1'),
+            new FakeMenuItem(6, 2, 'B2'),
+            new FakeMenuItem(3, 1, 'C'),
+            new FakeMenuItem(4, 0, 'D'),
+        ];
+        $menuObject = (object) ['term_id' => 5];
+
+        support_wordpress([
+            'get_nav_menu_locations' => fn (): array => ['primary' => 5],
+            'wp_get_nav_menu_object' => fn (int $id): ?object => $id === 5 ? $menuObject : null,
+            'wp_get_nav_menu_items' => fn (object $menu): array => $menu === $menuObject ? $items : [],
+        ]);
+
+        $menu = new RecursiveMenuIterator('primary');
+
+        expect(pollora_walk_menu($menu))->toBe(['A', '-B', '--B1', '--B2', '-C', 'D']);
+    });
+
     it('is empty when no menu is assigned to the location', function (): void {
         support_wordpress(['get_nav_menu_locations' => fn (): array => ['footer' => 9]]);
 

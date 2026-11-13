@@ -205,6 +205,71 @@ describe('ModuleScaffolderService downloadAndScaffold', function (): void {
             ->and($output->fetch())->toContain('Downloading from Pollora/plugin-default (version: v1.0.0)', 'Downloaded and extracted successfully');
     });
 
+    it('keeps the generated module when it is named like the template repository', function (): void {
+        Http::fake(['github.com/*' => Http::response(scaffoldArchive($this->tmp.'/a.zip'))]);
+        $output = new BufferedOutput;
+        $base = $this->tmp.'/plugins';
+
+        $ok = $this->service->downloadAndScaffold('Pollora/plugin-default', $base, $base.'/plugin-default', ['{{name}}' => 'Crm'], 'v1.0.0', $output);
+
+        expect($ok)->toBeTrue()
+            ->and(file_get_contents($base.'/plugin-default/readme.txt'))->toBe('Plugin Crm')
+            ->and(scandir($base))->toBe(['.', '..', 'plugin-default']);
+    });
+
+    it('leaves nothing behind after a success', function (): void {
+        Http::fake(['github.com/*' => Http::response(scaffoldArchive($this->tmp.'/a.zip'))]);
+        $before = glob(sys_get_temp_dir().'/.pollora-scaffold-*');
+        $base = $this->tmp.'/plugins';
+
+        $this->service->downloadAndScaffold('Pollora/plugin-default', $base, $base.'/crm', [], 'v1.0.0', new BufferedOutput);
+
+        expect(scandir($base))->toBe(['.', '..', 'crm'])
+            ->and(glob(sys_get_temp_dir().'/.pollora-scaffold-*'))->toBe($before)
+            ->and(glob($this->tmp.'/storage/app/tmp/*'))->toBe([]);
+    });
+
+    it('leaves nothing behind after a failed download', function (): void {
+        Http::fake(['github.com/*' => Http::response('', 404)]);
+        $before = glob(sys_get_temp_dir().'/.pollora-scaffold-*');
+        $base = $this->tmp.'/plugins';
+        File::ensureDirectoryExists($base);
+
+        $ok = $this->service->downloadAndScaffold('Pollora/plugin-default', $base, $base.'/plugin-default', [], 'v9', new BufferedOutput);
+
+        expect($ok)->toBeFalse()
+            ->and(scandir($base))->toBe(['.', '..'])
+            ->and(glob(sys_get_temp_dir().'/.pollora-scaffold-*'))->toBe($before)
+            ->and(glob($this->tmp.'/storage/app/tmp/*'))->toBe([]);
+    });
+
+    it('leaves nothing behind when the archive is not a valid zip', function (): void {
+        Http::fake(['github.com/*' => Http::response('this is not a zip')]);
+        $before = glob(sys_get_temp_dir().'/.pollora-scaffold-*');
+        $base = $this->tmp.'/plugins';
+        File::ensureDirectoryExists($base);
+
+        $ok = $this->service->downloadAndScaffold('Pollora/plugin-default', $base, $base.'/plugin-default', [], 'v1', new BufferedOutput);
+
+        expect($ok)->toBeFalse()
+            ->and(scandir($base))->toBe(['.', '..'])
+            ->and(glob(sys_get_temp_dir().'/.pollora-scaffold-*'))->toBe($before)
+            ->and(glob($this->tmp.'/storage/app/tmp/*'))->toBe([]);
+    });
+
+    it('never deletes a neighbouring directory', function (): void {
+        Http::fake(['github.com/*' => Http::response(scaffoldArchive($this->tmp.'/a.zip'))]);
+        $base = $this->tmp.'/plugins';
+        scaffoldSource($base.'/other-plugin', ['keep.txt' => 'mine']);
+        scaffoldSource($base.'/plugin-default-old', ['keep.txt' => 'mine too']);
+
+        $this->service->downloadAndScaffold('Pollora/plugin-default', $base, $base.'/plugin-default', [], 'v1', new BufferedOutput);
+
+        expect(file_get_contents($base.'/other-plugin/keep.txt'))->toBe('mine')
+            ->and(file_get_contents($base.'/plugin-default-old/keep.txt'))->toBe('mine too')
+            ->and(file_exists($base.'/plugin-default/readme.txt'))->toBeTrue();
+    });
+
     it('reports the failure and asks for the fallback when the download fails', function (): void {
         Http::fake(['github.com/*' => Http::response('', 404)]);
         $output = new BufferedOutput;

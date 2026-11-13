@@ -152,7 +152,6 @@ final class StringHelper
             '/([^aeiouy])y$/i' => '$1ies',
             '/(fe?)$/i' => 'ves',
             '/s$/i' => 'ses',
-            '/$/' => 's',
         ];
 
         foreach ($rules as $pattern => $replacement) {
@@ -161,7 +160,8 @@ final class StringHelper
             }
         }
 
-        return $value.'s';
+        // Final rule, kept as a regex: "$" also matches before a trailing newline, which "$value.'s'" would not.
+        return (string) preg_replace('/$/', 's', $value);
     }
 
     /**

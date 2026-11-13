@@ -392,4 +392,14 @@ describe('resetCache()', function (): void {
 
         expect($discovery->resets)->toBe(1);
     });
+
+    it('resets the repository without a discovery service', function (): void {
+        $repository = Mockery::mock(ModuleRepositoryInterface::class);
+        $repository->shouldReceive('resetCache')->once();
+        $manager = pluginManagerOn($this->root, $repository);
+
+        expect($manager->discovery)->toBeNull();
+
+        $manager->resetCache();
+    });
 });

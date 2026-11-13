@@ -81,7 +81,13 @@ final readonly class LaravelDiscoveryCache implements DiscoveryCacheInterface
         $ttl ??= $this->defaultTtl;
         $serializedItems = $items->__serialize();
 
-        return $this->cache->put($this->prefixKey($key), $serializedItems, $ttl);
+        $stored = $this->cache->put($this->prefixKey($key), $serializedItems, $ttl);
+
+        if ($stored) {
+            $this->remember($key);
+        }
+
+        return $stored;
     }
 
     /**
@@ -97,9 +103,18 @@ final readonly class LaravelDiscoveryCache implements DiscoveryCacheInterface
      */
     public function flush(): bool
     {
-        // Laravel doesn't provide a way to flush by prefix, so we'll flush all
-        // In a real implementation, you might want to track keys and delete individually
-        return $this->cache->flush();
+        // Laravel cannot list or flush keys by prefix, so the keys written here are
+        // tracked in an index entry and only those are forgotten: the rest of the
+        // application's cache is left alone.
+        $flushed = true;
+
+        foreach ($this->writtenKeys() as $key) {
+            $flushed = $this->cache->forget($this->prefixKey($key)) && $flushed;
+        }
+
+        $this->cache->forget($this->indexKey());
+
+        return $flushed;
     }
 
     /**
@@ -135,5 +150,35 @@ final readonly class LaravelDiscoveryCache implements DiscoveryCacheInterface
     private function prefixKey(string $key): string
     {
         return $this->prefix.$key;
+    }
+
+    /**
+     * Record a key in the index of the keys written under this prefix
+     */
+    private function remember(string $key): void
+    {
+        $keys = $this->writtenKeys();
+
+        if (! in_array($key, $keys, true)) {
+            $keys[] = $key;
+            $this->cache->forever($this->indexKey(), $keys);
+        }
+    }
+
+    /**
+     * The keys written under this prefix, without the prefix
+     *
+     * @return list<string>
+     */
+    private function writtenKeys(): array
+    {
+        $keys = $this->cache->get($this->indexKey(), []);
+
+        return is_array($keys) ? array_values(array_filter($keys, is_string(...))) : [];
+    }
+
+    private function indexKey(): string
+    {
+        return $this->prefixKey('__index__');
     }
 }

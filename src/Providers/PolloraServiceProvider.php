@@ -144,15 +144,11 @@ class PolloraServiceProvider extends ServiceProvider
     /**
      * Perform post-registration booting of services.
      *
-     * Publishes necessary configuration files and assets to the public directory.
-     * This includes the WordPress configuration file that bridges Laravel and WordPress.
+     * Loads the framework translations. Nothing is published: the public directory,
+     * wp-config.php included, comes with the project skeleton.
      */
     public function boot(): void
     {
-        $this->publishes([
-            __DIR__.'/../../public/wp-config.php' => public_path(),
-        ], 'public');
-
         $this->loadPolloraTextDomain();
     }
 

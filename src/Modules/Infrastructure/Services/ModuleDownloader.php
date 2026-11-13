@@ -88,14 +88,15 @@ class ModuleDownloader
 
         $this->ensureDirectoryExists(dirname($tempPath));
 
-        $this->downloadFile($url, $tempPath);
+        try {
+            $this->downloadFile($url, $tempPath);
 
-        $extractPath = $this->prepareExtractionPath($destination);
-        $finalPath = $this->extractArchive($tempPath, $extractPath);
+            $extractPath = $this->prepareExtractionPath($destination);
 
-        $this->cleanupTempFile($tempPath);
-
-        return $finalPath;
+            return $this->extractArchive($tempPath, $extractPath);
+        } finally {
+            $this->cleanupTempFile($tempPath);
+        }
     }
 
     /**

@@ -310,4 +310,14 @@ describe('ThemeManager module delegation', function (): void {
 
         expect($discovery->resets)->toBe(1);
     });
+
+    it('resets the repository without a discovery service', function (): void {
+        $repo = Mockery::mock(ModuleRepositoryInterface::class);
+        $repo->shouldReceive('resetCache')->once();
+        $manager = managerMake('/themes', null, null, $repo);
+
+        expect($manager->discovery)->toBeNull();
+
+        $manager->resetCache();
+    });
 });

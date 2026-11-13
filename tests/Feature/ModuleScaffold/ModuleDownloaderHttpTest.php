@@ -134,6 +134,7 @@ describe('ModuleDownloader over HTTP', function (): void {
 
         expect(fn (): string => downloaderIn($this->tmp)->setVersion('v1')->downloadAndExtract($this->tmp.'/themes'))
             ->toThrow(ModuleException::class);
+        expect(glob($this->tmp.'/scratch/*'))->toBe([]);
     });
 
     it('throws when the archive holds no folder', function (): void {
