@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
+use Illuminate\Contracts\Events\Dispatcher;
 use Pollora\Events\WordPress\Installer\Plugin\PluginActivated;
 use Pollora\Events\WordPress\Installer\Plugin\PluginDeactivated;
 use Pollora\Events\WordPress\Installer\Plugin\PluginInstalled;
@@ -12,6 +13,8 @@ use Pollora\Events\WordPress\Installer\Theme\ThemeDeleted;
 use Pollora\Events\WordPress\Installer\Theme\ThemeInstalled;
 use Pollora\Events\WordPress\Installer\Theme\ThemeUpdated;
 use Pollora\Events\WordPress\Installer\WordPressUpdated;
+use Pollora\Hook\Domain\Contract\Action;
+use Pollora\Hook\Domain\Contract\HookInterface;
 use Tests\Unit\Events\Fixtures\FakeTheme;
 use Tests\Unit\Events\Fixtures\FakeUpgrader;
 use Tests\Unit\Events\Fixtures\TestableInstallerDispatcher;
@@ -46,11 +49,14 @@ describe('InstallerEventDispatcher plugins', function (): void {
         ];
     });
 
-    it('dispatches PluginInstalled with the name and version read from the plugin header', function (): void {
-        installer_wordpress(['get_plugin_data' => fn (string $file): array => ['Name' => 'Akismet', 'Version' => '5.1']]);
+    it('dispatches PluginInstalled with the name and version read from the main plugin file', function (): void {
+        installer_wordpress(['get_plugin_data' => fn (string $file): array => $file === WP_PLUGIN_DIR.'/akismet/akismet.php'
+            ? ['Name' => 'Akismet', 'Version' => '5.1']
+            : throw new LogicException($file)]);
 
         $upgrader = new FakeUpgrader(['result' => ['destination_name' => 'akismet', 'local_destination' => '/wp/plugins']]);
         $upgrader->result = ['destination_name' => 'akismet'];
+        $upgrader->pluginInfo = 'akismet/akismet.php';
 
         $this->dispatcher->handleUpgraderProcessComplete($upgrader, ['type' => 'plugin', 'action' => 'install']);
 
@@ -59,6 +65,32 @@ describe('InstallerEventDispatcher plugins', function (): void {
             ->and($this->log[0]->name)->toBe('Akismet')
             ->and($this->log[0]->version)->toBe('5.1')
             ->and($this->log[0]->slug)->toBe('akismet');
+    });
+
+    it('reads the plugin header from the file whose name differs from the folder', function (): void {
+        installer_wordpress(['get_plugin_data' => fn (string $file): array => $file === WP_PLUGIN_DIR.'/my-plugin/main.php'
+            ? ['Name' => 'My Plugin', 'Version' => '2.0']
+            : throw new LogicException($file)]);
+
+        $upgrader = new FakeUpgrader(['result' => ['destination_name' => 'my-plugin']]);
+        $upgrader->result = ['destination_name' => 'my-plugin'];
+        $upgrader->pluginInfo = 'my-plugin/main.php';
+
+        $this->dispatcher->handleUpgraderProcessComplete($upgrader, ['type' => 'plugin', 'action' => 'install']);
+
+        expect($this->log)->toHaveCount(1)
+            ->and($this->log[0]->name)->toBe('My Plugin')
+            ->and($this->log[0]->version)->toBe('2.0')
+            ->and($this->log[0]->slug)->toBe('my-plugin');
+    });
+
+    it('does not dispatch PluginInstalled when WordPress finds no main file for the installed plugin', function (): void {
+        $upgrader = new FakeUpgrader(['result' => ['destination_name' => 'akismet']]);
+        $upgrader->result = ['destination_name' => 'akismet'];
+
+        $this->dispatcher->handleUpgraderProcessComplete($upgrader, ['type' => 'plugin', 'action' => 'install']);
+
+        expect($this->log)->toHaveCount(0);
     });
 
     it('ignores an installation that left no destination', function (string $type): void {
@@ -264,6 +296,21 @@ describe('InstallerEventDispatcher core', function (): void {
 
     afterEach(function (): void {
         [$GLOBALS['wp_version'], $GLOBALS['pagenow']] = $this->previous;
+    });
+
+    it('hooks the core update handler to the action WordPress fires once the core is updated', function (): void {
+        $hooks = [];
+        $action = Mockery::mock(Action::class);
+        $action->shouldReceive('add')->andReturnUsing(function (string $hook, array $callback) use (&$hooks): HookInterface {
+            $hooks[$hook] = $callback[1];
+
+            return Mockery::mock(HookInterface::class);
+        });
+
+        (new TestableInstallerDispatcher(Mockery::mock(Dispatcher::class), $action))->registerEvents();
+
+        expect($hooks)->toHaveKey('_core_updated_successfully')
+            ->and($hooks['_core_updated_successfully'])->toBe('handleCoreUpdatedSuccessfully');
     });
 
     it('reports a core update started from the update screen as manual', function (): void {

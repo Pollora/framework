@@ -11,6 +11,7 @@ use Pollora\Events\WordPress\Widget\WidgetAdded;
 use Pollora\Events\WordPress\Widget\WidgetEventDispatcher;
 use Pollora\Events\WordPress\Widget\WidgetMoved;
 use Pollora\Events\WordPress\Widget\WidgetRemoved;
+use Pollora\Events\WordPress\Widget\WidgetReordered;
 use Pollora\Events\WordPress\Widget\WidgetUpdated;
 use Tests\Unit\Events\Fixtures\FakeTerm;
 
@@ -176,6 +177,36 @@ describe('WidgetEventDispatcher', function (): void {
             ->and($moved->newSidebarId)->toBe('footer')
             ->and($moved->widgetName)->toBe('Text')
             ->and($moved->widgetTitle)->toBe('Hello');
+    });
+
+    it('reports a pure reorder of a sidebar as WidgetReordered and nothing else', function (array $old, array $new): void {
+        $this->dispatcher->handleUpdateOptionSidebarsWidgets(['footer' => $old], ['footer' => $new]);
+
+        expect($this->log)->toHaveCount(1)
+            ->and($this->log[0])->toBeInstanceOf(WidgetReordered::class)
+            ->and($this->log[0]->sidebarId)->toBe('footer')
+            ->and($this->log[0]->oldOrder)->toBe($old)
+            ->and($this->log[0]->newOrder)->toBe($new);
+    })->with([
+        'two widgets swapped' => [['text-2', 'text-3'], ['text-3', 'text-2']],
+        'three widgets rotated' => [['search-1', 'text-2', 'text-3'], ['text-3', 'search-1', 'text-2']],
+        'duplicates in another order' => [['text-2', 'text-2', 'text-3'], ['text-2', 'text-3', 'text-2']],
+    ]);
+
+    it('reports a replaced widget as added and removed, not as reordered', function (): void {
+        $this->dispatcher->handleUpdateOptionSidebarsWidgets(['footer' => ['text-2', 'text-3']], ['footer' => ['text-2', 'search-1']]);
+
+        expect($this->log)->toHaveCount(2)
+            ->and($this->log[0])->toBeInstanceOf(WidgetAdded::class)
+            ->and($this->log[0]->widgetId)->toBe('search-1')
+            ->and($this->log[1])->toBeInstanceOf(WidgetRemoved::class)
+            ->and($this->log[1]->widgetId)->toBe('text-3');
+    });
+
+    it('does not report a reorder when a duplicated widget is swapped for another one', function (): void {
+        $this->dispatcher->handleUpdateOptionSidebarsWidgets(['footer' => ['text-2', 'text-2']], ['footer' => ['text-2', 'text-3']]);
+
+        expect(collect($this->log)->contains(fn (object $event): bool => $event instanceof WidgetReordered))->toBeFalse();
     });
 
     it('reports nothing when the sidebars did not change', function (): void {
