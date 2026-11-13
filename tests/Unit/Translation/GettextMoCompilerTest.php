@@ -27,32 +27,33 @@ function covReadMoFile(string $path): array
     return ['__magic' => dechex($header[1])] + $result;
 }
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->dir = sys_get_temp_dir().'/pollora-mo-'.uniqid();
     mkdir($this->dir);
     $this->compiler = new GettextMoCompiler;
 });
 
-afterEach(function () {
+afterEach(function (): void {
     foreach (glob($this->dir.'/*') ?: [] as $f) {
         unlink($f);
     }
+
     rmdir($this->dir);
 });
 
-describe('GettextMoCompiler', function () {
-    it('returns false when the source file does not exist', function () {
+describe('GettextMoCompiler', function (): void {
+    it('returns false when the source file does not exist', function (): void {
         expect($this->compiler->compile($this->dir.'/missing.po'))->toBeFalse();
     });
 
-    it('returns false and writes nothing when the po file has no entries', function () {
+    it('returns false and writes nothing when the po file has no entries', function (): void {
         file_put_contents($this->dir.'/empty.po', "# just a comment\n");
 
         expect($this->compiler->compile($this->dir.'/empty.po'))->toBeFalse()
             ->and(file_exists($this->dir.'/empty.mo'))->toBeFalse();
     });
 
-    it('compiles a po file into a mo file next to it with the gettext magic number', function () {
+    it('compiles a po file into a mo file next to it with the gettext magic number', function (): void {
         file_put_contents($this->dir.'/fr.po', "msgid \"Hello\"\nmsgstr \"Bonjour\"\n");
 
         expect($this->compiler->compile($this->dir.'/fr.po'))->toBeTrue();
@@ -62,7 +63,7 @@ describe('GettextMoCompiler', function () {
             ->and($mo['Hello'])->toBe('Bonjour');
     });
 
-    it('writes to the requested output file', function () {
+    it('writes to the requested output file', function (): void {
         file_put_contents($this->dir.'/fr.po', "msgid \"Yes\"\nmsgstr \"Oui\"\n");
 
         expect($this->compiler->compile($this->dir.'/fr.po', $this->dir.'/custom.mo'))->toBeTrue()
@@ -70,7 +71,7 @@ describe('GettextMoCompiler', function () {
             ->and(file_exists($this->dir.'/fr.mo'))->toBeFalse();
     });
 
-    it('joins multi-line strings, unescapes sequences and qualifies contexts with EOT', function () {
+    it('joins multi-line strings, unescapes sequences and qualifies contexts with EOT', function (): void {
         $po = <<<'PO'
 # comment
 msgid ""
@@ -97,7 +98,7 @@ PO;
             ->and($mo[''])->toBe("Project-Id-Version: x\n");
     });
 
-    it('flushes the last entry even without a trailing blank line', function () {
+    it('flushes the last entry even without a trailing blank line', function (): void {
         file_put_contents($this->dir.'/b.po', "msgid \"A\"\nmsgstr \"B\"");
 
         $this->compiler->compile($this->dir.'/b.po');
@@ -105,7 +106,7 @@ PO;
         expect(covReadMoFile($this->dir.'/b.mo')['A'])->toBe('B');
     });
 
-    it('compiles every po file of a directory and counts the successes', function () {
+    it('compiles every po file of a directory and counts the successes', function (): void {
         file_put_contents($this->dir.'/one.po', "msgid \"A\"\nmsgstr \"B\"\n");
         file_put_contents($this->dir.'/two.po', "msgid \"C\"\nmsgstr \"D\"\n");
         file_put_contents($this->dir.'/empty.po', "\n");
@@ -117,7 +118,7 @@ PO;
             ->and(file_exists($this->dir.'/empty.mo'))->toBeFalse();
     });
 
-    it('returns zero for a directory that does not exist', function () {
+    it('returns zero for a directory that does not exist', function (): void {
         expect($this->compiler->compileDirectory($this->dir.'/nope'))->toBe(0);
     });
 });

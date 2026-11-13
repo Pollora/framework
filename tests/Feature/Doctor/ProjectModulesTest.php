@@ -77,6 +77,7 @@ describe('ActiveTheme', function (): void {
         foreach (['a', 'b', 'c'] as $name) {
             ($this->put)($theme.'/patterns/'.$name.'.php');
         }
+
         Functions\when('get_stylesheet_directory')->justReturn($theme);
 
         expect(ActiveTheme::files('patterns', ['php'], 2))->toHaveCount(2);

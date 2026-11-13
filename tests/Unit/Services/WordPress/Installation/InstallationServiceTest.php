@@ -105,12 +105,12 @@ describe('InstallationService::install', function (): void {
     });
 
     it('throws the WordPress error message when the installation fails', function (): void {
-        expect(fn () => covRunInstall(new CovWpErrorDouble))
+        expect(fn (): array => covRunInstall(new CovWpErrorDouble))
             ->toThrow(WordPressInstallationException::class, 'Database is gone');
     });
 
     it('throws when the upload directory cannot be prepared', function (): void {
-        expect(fn () => covRunInstall(['user_id' => 1], ['error' => 'Unable to create directory wp-content/uploads']))
+        expect(fn (): array => covRunInstall(['user_id' => 1], ['error' => 'Unable to create directory wp-content/uploads']))
             ->toThrow(WordPressInstallationException::class, 'Unable to create directory wp-content/uploads');
     });
 });

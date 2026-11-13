@@ -167,7 +167,7 @@ describe('pollora:status', function (): void {
         $states = Mockery::mock(ModuleStates::class);
         $states->shouldReceive('connector')->andReturn($connector);
 
-        bindStatusCollector($this->app, '13.40.0', '13.40.0', modules: compact('repo', 'versions', 'states'));
+        bindStatusCollector($this->app, '13.40.0', '13.40.0', modules: ['repo' => $repo, 'versions' => $versions, 'states' => $states]);
 
         $this->artisan('pollora:status')
             ->expectsOutputToContain('Modules: 2 total (1 enabled, 1 disabled)')

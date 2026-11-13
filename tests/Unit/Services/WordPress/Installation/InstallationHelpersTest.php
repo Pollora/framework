@@ -52,6 +52,6 @@ describe('LanguageService translations API response', function (): void {
     });
 
     it('rejects a response that is not JSON', function () use ($parse): void {
-        expect(fn () => $parse('<html>502</html>'))->toThrow(LanguageApiException::class, 'Invalid JSON response');
+        expect(fn (): array => $parse('<html>502</html>'))->toThrow(LanguageApiException::class, 'Invalid JSON response');
     });
 });

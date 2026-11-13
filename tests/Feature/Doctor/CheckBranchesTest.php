@@ -67,6 +67,7 @@ beforeEach(function (): void {
     $this->previousBasePath = app()->basePath();
     app()->setBasePath($this->root);
     app()->usePublicPath($this->root.'/public');
+
     Functions\when('get_stylesheet_directory')->alias(fn (): string => $this->theme);
     Functions\when('get_stylesheet')->justReturn('journal');
 
@@ -343,6 +344,7 @@ describe('Template placeholders', function (): void {
         foreach (range(1, 8) as $i) {
             covPut($this->theme.'/part'.$i.'.php', '<?php // %theme_x%');
         }
+
         $theme = new ProjectModule('theme', 'journal', $this->theme, 'h', 'b');
 
         $result = (new TemplatePlaceholdersCheck(($this->modulesOf)($theme)))->run(RunContext::Console);
@@ -438,7 +440,7 @@ describe('Asset builds (dev server probe)', function (): void {
     });
 
     it('reports a hot file whose dev server does not answer', function (): void {
-        Http::fake(fn () => throw new RuntimeException('connection refused'));
+        Http::fake(fn (): never => throw new RuntimeException('connection refused'));
         covPut($this->theme.'/vite.config.js', '');
         covPut($this->root.'/public/theme.hot', 'http://localhost:5173');
         $theme = new ProjectModule('theme', 'journal', $this->theme, $this->root.'/public/theme.hot', 'build/theme');

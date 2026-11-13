@@ -24,8 +24,8 @@ describe('DatabaseConnectionService', function (): void {
         try {
             (new DatabaseConnectionService)->ensureConnection(covUnreachableDatabase());
             $thrown = null;
-        } catch (DatabaseConnectionException $e) {
-            $thrown = $e;
+        } catch (DatabaseConnectionException $databaseConnectionException) {
+            $thrown = $databaseConnectionException;
         }
 
         expect($thrown)->toBeInstanceOf(DatabaseConnectionException::class)
