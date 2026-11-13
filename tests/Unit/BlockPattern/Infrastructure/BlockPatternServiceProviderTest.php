@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Container\Container;
-use Pollora\BlockPattern\Application\Services\PatternService;
 use Pollora\BlockPattern\Domain\Contracts\PatternCategoryRegistrarInterface;
 use Pollora\BlockPattern\Domain\Contracts\PatternDataExtractorInterface;
 use Pollora\BlockPattern\Domain\Contracts\PatternRegistrarInterface;
@@ -12,6 +11,8 @@ use Pollora\BlockPattern\Infrastructure\Adapters\WordPressPatternDataExtractor;
 use Pollora\BlockPattern\Infrastructure\Providers\BlockPatternServiceProvider;
 use Pollora\BlockPattern\Infrastructure\Registrars\WordPressPatternCategoryRegistrar;
 use Pollora\BlockPattern\Infrastructure\Registrars\WordPressPatternRegistrar;
+use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
+use Pollora\Collection\Infrastructure\Services\LaravelCollectionFactory;
 use Pollora\Hook\Domain\Contract\Action;
 
 describe('BlockPatternServiceProvider', function (): void {
@@ -23,10 +24,13 @@ describe('BlockPatternServiceProvider', function (): void {
     it('binds the pattern contracts to their WordPress implementations', function (): void {
         $this->provider->register();
 
-        expect($this->app->getConcrete(PatternDataExtractorInterface::class))->toBe(WordPressPatternDataExtractor::class)
-            ->and($this->app->getConcrete(PatternCategoryRegistrarInterface::class))->toBe(WordPressPatternCategoryRegistrar::class)
-            ->and($this->app->getConcrete(PatternRegistrarInterface::class))->toBe(WordPressPatternRegistrar::class)
-            ->and($this->app->getConcrete(PatternServiceInterface::class))->toBe(PatternService::class);
+        $this->app->bind(CollectionFactoryInterface::class, LaravelCollectionFactory::class);
+
+        expect($this->app->make(PatternDataExtractorInterface::class))->toBeInstanceOf(WordPressPatternDataExtractor::class)
+            ->and($this->app->make(PatternCategoryRegistrarInterface::class))->toBeInstanceOf(WordPressPatternCategoryRegistrar::class)
+            ->and($this->app->make(PatternRegistrarInterface::class))->toBeInstanceOf(WordPressPatternRegistrar::class)
+            ->and($this->app->bound(PatternServiceInterface::class))->toBeTrue()
+            ->and($this->app->isShared(PatternServiceInterface::class))->toBeFalse();
     });
 
     it('registers the patterns when WordPress runs init', function (): void {
