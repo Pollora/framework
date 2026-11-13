@@ -444,30 +444,35 @@ describe('pollora:make:theme plugins and activation', function (): void {
     });
 
     it('finds the conventional entry file of a plugin, then falls back to scanning for the header', function (): void {
-        $pluginsDir = defined('WP_PLUGIN_DIR') ? WP_PLUGIN_DIR : base_path('public/content/plugins');
-        $conventional = 'pollora-cov-conv-'.bin2hex(random_bytes(3));
-        $fallback = 'pollora-cov-fall-'.bin2hex(random_bytes(3));
-        $none = 'pollora-cov-none-'.bin2hex(random_bytes(3));
-        mkdir($pluginsDir.'/'.$conventional, 0777, true);
-        mkdir($pluginsDir.'/'.$fallback, 0777, true);
-        mkdir($pluginsDir.'/'.$none, 0777, true);
-        file_put_contents($pluginsDir.'/'.$conventional.'/'.$conventional.'.php', "<?php\n/* Plugin Name: Conv */");
-        file_put_contents($pluginsDir.'/'.$fallback.'/helper.php', '<?php // no header');
-        file_put_contents($pluginsDir.'/'.$fallback.'/main.php', "<?php\n/* Plugin Name: Main */");
-        file_put_contents($pluginsDir.'/'.$none.'/readme.php', '<?php // nothing');
+        // WP_PLUGIN_DIR is a constant other tests define differently, so the lookup runs in its own process.
+        $pluginsDir = sys_get_temp_dir().'/pollora-plugins-'.bin2hex(random_bytes(6));
+        mkdir($pluginsDir.'/conventional', 0777, true);
+        mkdir($pluginsDir.'/fallback');
+        mkdir($pluginsDir.'/headerless');
+        file_put_contents($pluginsDir.'/conventional/conventional.php', "<?php\n/* Plugin Name: Conv */");
+        file_put_contents($pluginsDir.'/fallback/helper.php', '<?php // no header');
+        file_put_contents($pluginsDir.'/fallback/main.php', "<?php\n/* Plugin Name: Main */");
+        file_put_contents($pluginsDir.'/headerless/readme.php', '<?php // nothing');
+
+        $script = <<<'PHP'
+            require $argv[1].'/vendor/autoload.php';
+            define('WP_PLUGIN_DIR', $argv[2]);
+            $command = new class(new Illuminate\Config\Repository, new Illuminate\Filesystem\Filesystem) extends Pollora\Theme\UI\Console\MakeThemeCommand {
+                public function find(string $slug): ?string { return $this->findPluginEntryFile($slug); }
+            };
+            echo json_encode(array_map($command->find(...), ['conventional', 'fallback', 'headerless', 'missing']));
+            PHP;
 
         try {
-            $find = fn (string $slug): ?string => (fn () => $this->findPluginEntryFile($slug))->call($this->command);
-
-            expect($find($conventional))->toBe($conventional.'/'.$conventional.'.php')
-                ->and($find($fallback))->toBe($fallback.'/main.php')
-                ->and($find($none))->toBeNull()
-                ->and($find('pollora-cov-missing-'.bin2hex(random_bytes(3))))->toBeNull();
+            $process = new Symfony\Component\Process\Process([PHP_BINARY, '-r', $script, dirname(__DIR__, 3), $pluginsDir]);
+            $process->run();
+            $found = json_decode($process->getOutput(), true);
         } finally {
-            foreach ([$conventional, $fallback, $none] as $slug) {
-                consoleRemove($pluginsDir.'/'.$slug);
-            }
+            consoleRemove($pluginsDir);
         }
+
+        expect($process->isSuccessful())->toBeTrue($process->getErrorOutput())
+            ->and($found)->toBe(['conventional/conventional.php', 'fallback/main.php', null, null]);
     });
 
     it('only keeps packages Composer knows as WordPress plugins', function (): void {
