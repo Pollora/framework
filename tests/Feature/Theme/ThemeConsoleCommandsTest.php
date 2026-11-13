@@ -533,3 +533,188 @@ describe('pollora:make:theme plugins and activation', function (): void {
             ->and($validation)->toBe(['Repository is required', 'Repository must be in owner/repo format', null]);
     });
 });
+
+describe('pollora:make:theme plugin activation branches', function (): void {
+    function pluginCommand(array $resolved, array $entryFiles, bool $canActivate = true, bool $processSucceeds = true, mixed $activationResult = null): object
+    {
+        $command = new class(new Repository, new Filesystem) extends MakeThemeCommand
+        {
+            public array $resolved = [];
+
+            public array $entryFiles = [];
+
+            public bool $canActivate = true;
+
+            public bool $processSucceeds = true;
+
+            public mixed $activationResult = null;
+
+            public array $activated = [];
+
+            public array $processes = [];
+
+            protected function wordPressCanActivatePlugins(): bool
+            {
+                return $this->canActivate;
+            }
+
+            protected function resolveWordPressPlugins(array $packages): array
+            {
+                return $this->resolved;
+            }
+
+            protected function findPluginEntryFile(string $slug): ?string
+            {
+                return $this->entryFiles[$slug] ?? null;
+            }
+
+            protected function activatePlugin(string $pluginFile): mixed
+            {
+                $this->activated[] = $pluginFile;
+
+                return $this->activationResult;
+            }
+
+            protected function runInNewProcess(string $command, array $arguments): bool
+            {
+                $this->processes[] = [$command, $arguments];
+
+                return $this->processSucceeds;
+            }
+
+            public BufferedOutput $buffer;
+
+            public function activate(array $packages): void
+            {
+                $this->activateWordPressPlugins($packages);
+            }
+        };
+        $command->resolved = $resolved;
+        $command->entryFiles = $entryFiles;
+        $command->canActivate = $canActivate;
+        $command->processSucceeds = $processSucceeds;
+        $command->activationResult = $activationResult;
+        $command->setLaravel(app());
+        $input = new ArrayInput([], new Symfony\Component\Console\Input\InputDefinition);
+        $input->setInteractive(false);
+        $command->setInput($input);
+        $command->buffer = $buffer = new BufferedOutput;
+        $command->setOutput(new OutputStyle($input, $buffer));
+
+        return $command;
+    }
+
+    beforeEach(function (): void {
+        Prompt::fallbackWhen(true);
+        Laravel\Prompts\ConfirmPrompt::fallbackUsing(fn (): bool => true);
+        Brain\Monkey\Functions\when('did_action')->justReturn(1);
+    });
+
+    afterEach(function (): void {
+        Prompt::fallbackWhen(false);
+    });
+
+    it('does not look for plugins when WordPress cannot activate them', function (): void {
+        $command = pluginCommand(['a/b' => 'b'], ['b' => 'b/b.php'], canActivate: false);
+
+        $command->activate(['a/b']);
+
+        expect($command->activated)->toBe([])->and($command->processes)->toBe([]);
+    });
+
+    it('does nothing when none of the installed packages is a WordPress plugin', function (): void {
+        $command = pluginCommand([], []);
+
+        $command->activate(['a/b']);
+
+        expect($command->activated)->toBe([])->and($command->buffer->fetch())->toBe('');
+    });
+
+    it('asks once for a single plugin and by count for several, and activates nothing when declined', function (): void {
+        $labels = [];
+        Laravel\Prompts\ConfirmPrompt::fallbackUsing(function (Laravel\Prompts\ConfirmPrompt $prompt) use (&$labels): bool {
+            $labels[] = $prompt->label;
+
+            return false;
+        });
+        $single = pluginCommand(['wpackagist-plugin/woocommerce' => 'woocommerce'], ['woocommerce' => 'woocommerce/woocommerce.php']);
+        $several = pluginCommand(['a/one' => 'one', 'a/two' => 'two'], ['one' => 'one/one.php', 'two' => 'two/two.php']);
+
+        $single->activate(['wpackagist-plugin/woocommerce']);
+        $several->activate(['a/one', 'a/two']);
+
+        expect($labels)->toBe(['Activate the WordPress plugin "woocommerce"?', 'Activate 2 WordPress plugins?'])
+            ->and($single->activated)->toBe([])
+            ->and($several->activated)->toBe([]);
+    });
+
+    it('activates the plugins it finds and warns about the one without entry file', function (): void {
+        $command = pluginCommand(['a/one' => 'one', 'a/lost' => 'lost'], ['one' => 'one/one.php']);
+
+        $command->activate(['a/one', 'a/lost']);
+        $output = $command->buffer->fetch();
+
+        expect($command->activated)->toBe(['one/one.php'])
+            ->and($output)->toContain('Could not find entry file for plugin "lost".')
+            ->and($output)->toContain('Plugin "one" activated.');
+    });
+
+    it('reports the WordPress error when a plugin fails to activate', function (): void {
+        $error = new class extends WP_Error
+        {
+            public function get_error_message(): string
+            {
+                return 'Fatal in plugin';
+            }
+        };
+        $command = pluginCommand(['a/one' => 'one'], ['one' => 'one/one.php'], activationResult: $error);
+
+        $command->activate(['a/one']);
+
+        expect($command->buffer->fetch())->toContain('Failed to activate "one": Fatal in plugin');
+    });
+
+    it('tells how to activate the plugins by hand when the new process fails', function (): void {
+        Brain\Monkey\Functions\when('did_action')->justReturn(0);
+        $command = pluginCommand(['a/one' => 'one', 'a/lost' => 'lost'], ['one' => 'one/one.php'], processSucceeds: false);
+
+        $command->activate(['a/one', 'a/lost']);
+        $output = $command->buffer->fetch();
+
+        expect($command->processes)->toBe([['pollora:plugin:activate', ['one/one.php']]])
+            ->and($output)->toContain('Could not find entry file for plugin "lost".')
+            ->and($output)->toContain('The plugins could not be activated now.')
+            ->and($output)->toContain('wp plugin activate one');
+    });
+
+    it('starts no process when no plugin has an entry file', function (): void {
+        Brain\Monkey\Functions\when('did_action')->justReturn(0);
+        $command = pluginCommand(['a/lost' => 'lost'], []);
+
+        $command->activate(['a/lost']);
+
+        expect($command->processes)->toBe([]);
+    });
+});
+
+describe('pollora:make:theme default translation compiler', function (): void {
+    it('compiles the .po files itself when no compiler is bound', function (): void {
+        $dir = consoleTempDir();
+        mkdir($dir.'/t/languages', 0777, true);
+        file_put_contents($dir.'/t/languages/fr.po', "msgid \"\"\nmsgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n\nmsgid \"Hello\"\nmsgstr \"Bonjour\"\n");
+        $command = makeThemeCommand($dir);
+        $command->setLaravel(app());
+        $output = new BufferedOutput;
+        $command->setOutput(new OutputStyle(new ArrayInput([]), $output));
+        (new ReflectionProperty($command, 'theme'))->setValue($command, new ThemeMetadata('t', $dir));
+
+        try {
+            (fn () => $this->compileTranslations())->call($command);
+            $compiled = file_exists($dir.'/t/languages/fr.mo');
+        } finally {
+            consoleRemove($dir);
+        }
+
+        expect($compiled)->toBeTrue()->and($output->fetch())->toContain('Compiled 1 translation file(s).');
+    });
+});
