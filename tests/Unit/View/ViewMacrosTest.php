@@ -50,7 +50,7 @@ describe('View::getCompiled() macro', function (): void {
 
 describe('View::makeLoader() macro', function (): void {
     it('writes a stable loader that renders the view by name', function (): void {
-        $path = '/v/it\'s.blade.php';
+        $path = "/v/it's.blade.php";
         $loader = macroView("pages.it's", $path)->makeLoader();
 
         expect($loader)->toBe($this->dir.'/'.md5($path).'-loader.php')

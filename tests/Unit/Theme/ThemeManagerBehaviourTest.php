@@ -14,6 +14,7 @@ use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
 use Pollora\Theme\Application\Services\ThemeManager;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Exceptions\ThemeException;
+use Pollora\Theme\Domain\Models\ThemeMetadata;
 use Pollora\Theme\Domain\Models\ThemeModule;
 
 function managerThemesRoot(): string
@@ -29,13 +30,16 @@ function managerRemove(string $dir): void
     if (! is_dir($dir)) {
         return;
     }
+
     foreach (scandir($dir) as $entry) {
         if ($entry === '.' || $entry === '..') {
             continue;
         }
+
         $path = $dir.'/'.$entry;
         is_dir($path) ? managerRemove($path) : unlink($path);
     }
+
     rmdir($dir);
 }
 
@@ -87,13 +91,14 @@ describe('ThemeManager loading', function (): void {
         };
         $app = new ManagerTestContainer;
         $app->instance('view', $view);
+
         $loader = Mockery::mock(Loader::class);
         $loader->shouldReceive('addNamespace')->once()->with('child', $root.'/child/lang');
 
         try {
             $manager = managerMake($root, $app, $loader);
             $manager->load('child');
-            $result = [$manager->theme()->getName(), array_map(fn ($t) => $t->getName(), $manager->getParentThemes())];
+            $result = [$manager->theme()->getName(), array_map(fn (ThemeMetadata $t): string => $t->getName(), $manager->getParentThemes())];
         } finally {
             managerRemove($root);
         }

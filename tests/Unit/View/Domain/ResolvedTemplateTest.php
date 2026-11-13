@@ -58,7 +58,7 @@ describe('ResolvedTemplate', function (): void {
     ])->throws(InvalidArgumentException::class);
 
     it('names the field that is empty in the exception message', function (): void {
-        expect(fn () => new ResolvedTemplate('', '/p', false))->toThrow(InvalidArgumentException::class, 'Template name cannot be empty')
-            ->and(fn () => new ResolvedTemplate('a.php', '', false))->toThrow(InvalidArgumentException::class, 'File path cannot be empty');
+        expect(fn (): ResolvedTemplate => new ResolvedTemplate('', '/p', false))->toThrow(InvalidArgumentException::class, 'Template name cannot be empty')
+            ->and(fn (): ResolvedTemplate => new ResolvedTemplate('a.php', '', false))->toThrow(InvalidArgumentException::class, 'File path cannot be empty');
     });
 });

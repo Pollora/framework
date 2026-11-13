@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 
 final class ExplodingThemeComponent
 {
-    public function register(): void
+    public function register(): never
     {
         throw new RuntimeException('component exploded');
     }
@@ -35,6 +35,7 @@ function componentProvider(bool $debug, ?LoggerInterface $logger, array $compone
     if ($logger instanceof LoggerInterface) {
         $app->instance(LoggerInterface::class, $logger);
     }
+
     Container::setInstance($app);
 
     $provider = new ThemeComponentProvider($app);
@@ -60,8 +61,8 @@ describe('ThemeComponentProvider failures', function (): void {
     it('keeps the original exception as the cause', function (): void {
         try {
             componentProvider(true, null, [ExplodingThemeComponent::class])->register();
-        } catch (ThemeSetupException $e) {
-            expect($e->getPrevious())->toBeInstanceOf(RuntimeException::class);
+        } catch (ThemeSetupException $themeSetupException) {
+            expect($themeSetupException->getPrevious())->toBeInstanceOf(RuntimeException::class);
 
             return;
         }

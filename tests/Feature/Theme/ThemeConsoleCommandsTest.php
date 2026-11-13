@@ -29,6 +29,11 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Process\Process;
 
+function consoleCall(object $object, string $method, mixed ...$arguments): mixed
+{
+    return (new ReflectionMethod($object, $method))->invoke($object, ...$arguments);
+}
+
 function consoleTempDir(): string
 {
     $dir = sys_get_temp_dir().'/pollora-console-'.bin2hex(random_bytes(6));
@@ -50,6 +55,7 @@ function consoleRun(Command $command, array $parameters = [], bool $interactive 
     $command->setLaravel(app());
     $input = new ArrayInput($parameters);
     $input->setInteractive($interactive);
+
     $output = new BufferedOutput;
     $code = $command->run($input, $output);
 
@@ -227,6 +233,7 @@ describe('pollora:make:theme', function (): void {
     it('rejects an invalid theme name before downloading anything', function (): void {
         $scaffolder = m::mock(ModuleScaffolderService::class);
         $scaffolder->shouldNotReceive('downloadAndScaffold');
+
         app()->instance(ModuleScaffolderService::class, $scaffolder);
 
         [$code, $output] = consoleRun(makeThemeCommand($this->dir), ['name' => 'bad/name']);
@@ -238,6 +245,7 @@ describe('pollora:make:theme', function (): void {
         mkdir($this->dir.'/taken');
         $scaffolder = m::mock(ModuleScaffolderService::class);
         $scaffolder->shouldNotReceive('downloadAndScaffold');
+
         app()->instance(ModuleScaffolderService::class, $scaffolder);
 
         [$code, $output] = consoleRun(makeThemeCommand($this->dir), ['name' => 'taken']);
@@ -297,7 +305,7 @@ describe('pollora:make:theme', function (): void {
         });
         $command = new class(new Repository(['theme' => ['directory' => $this->dir]]), new Filesystem) extends MakeThemeCommand
         {
-            protected function promptForRepository(): ?string
+            protected function promptForRepository(): string
             {
                 return '';
             }
@@ -314,7 +322,7 @@ describe('pollora:make:theme', function (): void {
     it('validates names: required, charset and uniqueness', function (): void {
         mkdir($this->dir.'/taken');
         $command = makeThemeCommand($this->dir);
-        $validate = fn (string $value): ?string => (fn () => $this->validateValue($value))->call($command);
+        $validate = fn (string $value): ?string => (fn (): ?string => $this->validateValue($value))->call($command);
 
         expect($validate(''))->toBe('Name is required.')
             ->and($validate('0'))->toBe('Name is required.')
@@ -325,7 +333,7 @@ describe('pollora:make:theme', function (): void {
 
     it('maps theme.structure to container folders with defaults', function (): void {
         $command = makeThemeCommand($this->dir, ['structure' => ['assets' => 'src/assets', 'views' => 'tpl']]);
-        $folders = (function () {
+        $folders = (function (): array {
             $this->setupContainerFolders();
 
             return $this->containerFolder;
@@ -342,7 +350,7 @@ describe('pollora:make:theme', function (): void {
 
     it('offers prompts with defaults for the theme options', function (): void {
         $command = makeThemeCommand($this->dir);
-        $options = (fn () => $this->promptForMissingOptionsUsing())->call($command);
+        $options = consoleCall($command, 'promptForMissingOptionsUsing');
 
         expect(array_keys($options))->toBe(['theme-author', 'theme-author-uri', 'theme-uri', 'theme-description', 'theme-version'])
             ->and($options['theme-author']['default'])->toBe('Pollora')
@@ -352,7 +360,7 @@ describe('pollora:make:theme', function (): void {
     it('prompts for a missing name with the default theme name', function (): void {
         TextPrompt::fallbackUsing(fn (TextPrompt $prompt): string => $prompt->default);
         $command = makeThemeCommand($this->dir);
-        $arguments = (fn () => $this->promptForMissingArgumentsUsing())->call($command);
+        $arguments = consoleCall($command, 'promptForMissingArgumentsUsing');
 
         expect($arguments['name']())->toBe('default');
     });
@@ -365,11 +373,12 @@ describe('pollora:make:theme', function (): void {
         app()->instance(TranslationCompilerInterface::class, $compiler);
         $command = makeThemeCommand($this->dir);
         $command->setLaravel(app());
+
         $output = new BufferedOutput;
         $command->setOutput(new OutputStyle(new ArrayInput([]), $output));
         (new ReflectionProperty($command, 'theme'))->setValue($command, new ThemeMetadata('t', $this->dir));
 
-        (fn () => $this->compileTranslations())->call($command);
+        consoleCall($command, 'compileTranslations');
 
         expect($output->fetch())->toContain('Compiled 2 translation file(s).');
     });
@@ -378,12 +387,13 @@ describe('pollora:make:theme', function (): void {
         mkdir($this->dir.'/t/languages', 0777, true);
         $compiler = m::mock(TranslationCompilerInterface::class);
         $compiler->shouldNotReceive('compileDirectory');
+
         app()->instance(TranslationCompilerInterface::class, $compiler);
         $command = makeThemeCommand($this->dir);
         $command->setLaravel(app());
         (new ReflectionProperty($command, 'theme'))->setValue($command, new ThemeMetadata('t', $this->dir));
 
-        $result = (fn () => $this->compileTranslations())->call($command);
+        $result = consoleCall($command, 'compileTranslations');
 
         expect($result)->toBeNull();
     });
@@ -395,6 +405,7 @@ describe('pollora:make:theme requirements', function (): void {
         Prompt::fallbackWhen(true);
         $this->command = makeThemeCommand($this->dir);
         $this->command->setLaravel(app());
+
         $this->output = new BufferedOutput;
         $this->command->setOutput(new OutputStyle(new ArrayInput([]), $this->output));
         (new ReflectionProperty($this->command, 'theme'))->setValue($this->command, new ThemeMetadata('t', $this->dir));
@@ -441,6 +452,7 @@ describe('pollora:make:theme plugins and activation', function (): void {
         Prompt::fallbackWhen(true);
         $this->command = makeThemeCommand(sys_get_temp_dir());
         $this->command->setLaravel(app());
+
         $this->output = new BufferedOutput;
         $this->command->setOutput(new OutputStyle(new ArrayInput([]), $this->output));
     });
@@ -492,6 +504,7 @@ describe('pollora:make:theme plugins and activation', function (): void {
         $registrar->shouldReceive('getActiveTheme')->andReturn(consoleTheme('other'));
         $container = new Container;
         $container->instance(ThemeRegistrarInterface::class, $registrar);
+
         app()->instance(ThemeAvailability::class, new ThemeAvailability($container));
         $this->command->setInput(tap(new ArrayInput(['name' => 'x'], $this->command->getDefinition()), fn ($input) => $input->setInteractive(true)));
         $ask = fn (): bool => (fn () => $this->shouldActivateTheme('mine'))->call($this->command);
@@ -508,16 +521,17 @@ describe('pollora:make:theme plugins and activation', function (): void {
         $command = makeThemeCommand(sys_get_temp_dir());
         $command->setInput(new ArrayInput(['name' => 'x', '--repository' => 'acme/own'], (new MakeThemeCommand(new Repository, new Filesystem))->getDefinition()));
 
-        expect((fn () => $this->promptForRepository())->call($command))->toBe('acme/own');
+        expect(consoleCall($command, 'promptForRepository'))->toBe('acme/own');
     });
 
     it('maps each template choice to its repository and validates a custom one', function (): void {
         $command = makeThemeCommand(sys_get_temp_dir());
         $command->setInput(new ArrayInput(['name' => 'x'], (new MakeThemeCommand(new Repository, new Filesystem))->getDefinition()));
+
         $choose = function (string $choice) use ($command): ?string {
             SelectPrompt::fallbackUsing(fn (): string => $choice);
 
-            return (fn () => $this->promptForRepository())->call($command);
+            return consoleCall($command, 'promptForRepository');
         };
 
         expect($choose('default'))->toBe('pollora/theme-default')
@@ -601,10 +615,14 @@ describe('pollora:make:theme plugin activation branches', function (): void {
         $command->processSucceeds = $processSucceeds;
         $command->activationResult = $activationResult;
         $command->setLaravel(app());
+
         $input = new ArrayInput([], new InputDefinition);
         $input->setInteractive(false);
+
         $command->setInput($input);
-        $command->buffer = $buffer = new BufferedOutput;
+        $command->buffer = new BufferedOutput;
+
+        $buffer = $command->buffer;
         $command->setOutput(new OutputStyle($input, $buffer));
 
         return $command;
@@ -658,6 +676,7 @@ describe('pollora:make:theme plugin activation branches', function (): void {
         $command = pluginCommand(['a/one' => 'one', 'a/lost' => 'lost'], ['one' => 'one/one.php']);
 
         $command->activate(['a/one', 'a/lost']);
+
         $output = $command->buffer->fetch();
 
         expect($command->activated)->toBe(['one/one.php'])
@@ -685,6 +704,7 @@ describe('pollora:make:theme plugin activation branches', function (): void {
         $command = pluginCommand(['a/one' => 'one', 'a/lost' => 'lost'], ['one' => 'one/one.php'], processSucceeds: false);
 
         $command->activate(['a/one', 'a/lost']);
+
         $output = $command->buffer->fetch();
 
         expect($command->processes)->toBe([['pollora:plugin:activate', ['one/one.php']]])
@@ -710,12 +730,13 @@ describe('pollora:make:theme default translation compiler', function (): void {
         file_put_contents($dir.'/t/languages/fr.po', "msgid \"\"\nmsgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n\nmsgid \"Hello\"\nmsgstr \"Bonjour\"\n");
         $command = makeThemeCommand($dir);
         $command->setLaravel(app());
+
         $output = new BufferedOutput;
         $command->setOutput(new OutputStyle(new ArrayInput([]), $output));
         (new ReflectionProperty($command, 'theme'))->setValue($command, new ThemeMetadata('t', $dir));
 
         try {
-            (fn () => $this->compileTranslations())->call($command);
+            consoleCall($command, 'compileTranslations');
             $compiled = file_exists($dir.'/t/languages/fr.mo');
         } finally {
             consoleRemove($dir);

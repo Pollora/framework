@@ -123,6 +123,7 @@ describe('LaravelThemeModule registration', function (): void {
         file_put_contents($dir.'/boot.php', "<?php define('{$marker}', true);");
         $app = new Container;
         $app->instance('config', new Repository);
+
         $module = new LaravelThemeModule('demo', $dir, $app);
         $module->set('files', ['boot.php', 'missing.php']);
 
@@ -157,6 +158,7 @@ describe('LaravelThemeModule registration', function (): void {
         file_put_contents($dir.'/config/menus.php', "<?php return ['primary' => 'Primary'];");
         $app = new Container;
         $app->instance('config', $config = new Repository);
+
         $callbacks = [];
         $action = m::mock(Action::class);
         $action->shouldReceive('add')->andReturnUsing(function (string $hook, Closure $callback) use (&$callbacks): HookInterface {
@@ -186,6 +188,7 @@ describe('LaravelThemeModule registration', function (): void {
         file_put_contents($dir.'/config/sidebars.php', '<?php return [];');
         $app = new Container;
         $app->instance('config', $config = new Repository);
+
         $module = new LaravelThemeModule('demo', $dir, $app);
 
         try {
@@ -204,6 +207,7 @@ describe('LaravelThemeModule registration', function (): void {
         mkdir($dir.'/languages');
         $app = new Container;
         $app->instance('config', new Repository);
+
         $translator = new class
         {
             public array $namespaces = [];
@@ -228,6 +232,7 @@ describe('LaravelThemeModule registration', function (): void {
         $dir = laravelModuleDir();
         $app = new Container;
         $app->instance('config', new Repository);
+
         $translator = new class
         {
             public int $calls = 0;

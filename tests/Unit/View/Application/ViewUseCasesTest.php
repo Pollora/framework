@@ -26,6 +26,7 @@ describe('ResolveBladeTemplateUseCase', function (): void {
     it('hands back the template path unchanged when the file does not exist', function (): void {
         $finder = m::mock(TemplateFinderInterface::class);
         $finder->shouldNotReceive('getViewNameFromPath');
+
         $useCase = new ResolveBladeTemplateUseCase($finder, m::mock(ViewFactory::class));
 
         expect($useCase->execute('/no/such/page.blade.php'))->toBe('/no/such/page.blade.php');

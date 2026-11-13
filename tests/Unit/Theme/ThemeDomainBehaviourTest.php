@@ -216,6 +216,7 @@ describe('DomainContainerAdapter', function (): void {
         $app = new Container;
         $app->instance('config', new Repository(['a' => 1]));
         $app->bind('thing', fn (): stdClass => new stdClass);
+
         $adapter = new DomainContainerAdapter($app);
 
         expect($adapter->has('thing'))->toBeTrue()

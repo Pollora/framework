@@ -34,6 +34,7 @@ function hierarchyViewsDir(array $files): string
         if (! is_dir(dirname($path))) {
             mkdir(dirname($path), 0777, true);
         }
+
         file_put_contents($path, $content);
     }
 
@@ -58,6 +59,7 @@ describe('WordPressTemplateHierarchyFilter hierarchy', function (): void {
     it('also keeps the classic order when a block theme does not support block templates', function (): void {
         Functions\when('wp_is_block_theme')->justReturn(true);
         Functions\when('current_theme_supports')->justReturn(false);
+
         $finder = m::mock(TemplateFinderInterface::class);
         $finder->shouldReceive('locate')->andReturn(['/v/page.blade.php']);
 
@@ -68,6 +70,7 @@ describe('WordPressTemplateHierarchyFilter hierarchy', function (): void {
         Functions\when('wp_is_block_theme')->justReturn(true);
         Functions\when('current_theme_supports')->alias(fn (string $feature): bool => $feature === 'block-templates');
         Functions\when('get_page_template_slug')->justReturn('');
+
         $finder = m::mock(TemplateFinderInterface::class);
         $finder->shouldReceive('locate')->andReturn(['/v/page.blade.php']);
 
@@ -80,6 +83,7 @@ describe('WordPressTemplateHierarchyFilter hierarchy', function (): void {
         Functions\when('wp_is_block_theme')->justReturn(true);
         Functions\when('current_theme_supports')->alias(fn (string $feature): bool => $feature === 'block-templates');
         Functions\when('get_page_template_slug')->justReturn('landing');
+
         $finder = m::mock(TemplateFinderInterface::class);
         $finder->shouldReceive('locate')->andReturn(['/v/landing.blade.php', '/v/page.blade.php']);
 
@@ -116,7 +120,7 @@ describe('WordPressTemplateHierarchyFilter template include', function (): void 
 describe('WordPressTemplateHierarchyFilter theme templates', function (): void {
     beforeEach(function (): void {
         $this->cache = [];
-        Functions\when('wp_cache_get')->alias(fn (string $key) => $this->cache[$key] ?? false);
+        Functions\when('wp_cache_get')->alias(fn (string $key): mixed => $this->cache[$key] ?? false);
         Functions\when('wp_cache_set')->alias(function (string $key, $value): bool {
             $this->cache[$key] = $value;
 

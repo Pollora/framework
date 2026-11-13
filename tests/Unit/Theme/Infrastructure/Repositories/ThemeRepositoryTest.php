@@ -87,6 +87,7 @@ describe('ThemeRepository', function (): void {
         $app = new Container;
         $app->instance(ThemeRegistrarInterface::class, repoRegistrar(null, new RuntimeException('kaput')));
         $app->instance(LoggerInterface::class, $logger);
+
         $repo = new ThemeRepository($app, new WordPressThemeParser, Mockery::mock(CollectionFactoryInterface::class));
 
         expect($repo->all())->toBe([]);

@@ -44,6 +44,7 @@ function registrarCleanup(string $dir): void
     foreach (glob($dir.'/*') ?: [] as $entry) {
         @rmdir($entry);
     }
+
     @rmdir($dir);
 }
 
@@ -51,6 +52,7 @@ function registrarRun(Container $container, string $dir): ThemeModuleInterface
 {
     Functions\when('get_stylesheet')->justReturn('demo');
     Functions\when('get_stylesheet_directory')->justReturn($dir);
+
     $parser = Mockery::mock(WordPressThemeParser::class);
     $parser->shouldReceive('parseThemeHeaders')->andReturn(['Theme Name' => 'Demo']);
 
@@ -84,6 +86,7 @@ describe('ThemeRegistrar wiring', function (): void {
         $container = new Container;
         $repository = Mockery::mock(ModuleRepositoryInterface::class);
         $repository->shouldNotReceive('resetCache');
+
         $container->instance(ModuleRepositoryInterface::class, $repository);
 
         registrarRun($container, registrarThemeDir());
@@ -125,6 +128,7 @@ describe('ThemeRegistrar wiring', function (): void {
         $container = new Container;
         $discovery = Mockery::mock(ModuleDiscoveryOrchestrator::class);
         $discovery->shouldNotReceive('discover');
+
         $container->instance(ModuleDiscoveryOrchestratorInterface::class, $discovery);
 
         registrarRun($container, registrarThemeDir());

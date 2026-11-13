@@ -225,6 +225,7 @@ describe('ThemeServiceProvider editor styles', function (): void {
         if ($resolver instanceof EditorStyleResolver) {
             $app->instance(EditorStyleResolver::class, $resolver);
         }
+
         themeProviderCall(new ThemeServiceProvider($app), 'registerEditorStyles');
 
         return $captured;
@@ -247,6 +248,7 @@ describe('ThemeServiceProvider editor styles', function (): void {
         Functions\when('current_theme_supports')->alias(fn (string $feature): bool => $feature === 'editor-styles');
         Functions\when('get_stylesheet')->justReturn('demo');
         Functions\when('home_url')->alias(fn (string $path): string => 'https://site.test'.$path);
+
         $resolver = m::mock(EditorStyleResolver::class);
         $resolver->shouldReceive('resolve')->with('demo')->andReturn(['build/a.css', 'build/b.css']);
         $added = [];
