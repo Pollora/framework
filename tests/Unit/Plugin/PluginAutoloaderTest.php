@@ -43,8 +43,9 @@ afterEach(function (): void {
     removePluginAutoloaderTree($this->root);
 });
 
-it('keeps plugin classes under the Plugin namespace', function (): void {
-    expect($this->autoloader->getPluginNamespace('acme'))->toBe('Plugin\\acme\\');
+it('keeps plugin classes under the Plugin namespace, in StudlyCase like registerModule()', function (): void {
+    expect($this->autoloader->getPluginNamespace('acme'))->toBe('Plugin\\Acme\\')
+        ->and($this->autoloader->getPluginNamespace('my-plugin'))->toBe('Plugin\\MyPlugin\\');
 });
 
 it('maps a plugin to its app directory, even when it also has a src directory', function (): void {
@@ -70,11 +71,18 @@ it('knows which plugins are registered', function (): void {
         ->and($this->autoloader->isPluginRegistered('other'))->toBeFalse();
 });
 
+it('finds a registered plugin module under the name it was given', function (): void {
+    $this->autoloader->registerPlugin(new PluginModule('acme', $this->root.'/with-app'));
+
+    expect($this->autoloader->isPluginRegistered('acme'))->toBeTrue()
+        ->and($this->autoloader->getPluginSourcePath('acme'))->toBe($this->root.'/with-app/app');
+});
+
 it('lists only the Plugin namespaces', function (): void {
     $this->autoloader->registerPluginByPath('app', $this->root.'/with-app');
     $this->autoloader->registerModule(new PluginModule('theme-ish', $this->root.'/with-src'), 'theme');
 
-    expect(array_keys($this->autoloader->getRegisteredPluginNamespaces()))->toBe(['Plugin\\app\\'])
+    expect(array_keys($this->autoloader->getRegisteredPluginNamespaces()))->toBe(['Plugin\\App\\'])
         ->and($this->autoloader->getRegisteredNamespaces())->toHaveCount(2);
 });
 
