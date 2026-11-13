@@ -12,7 +12,7 @@ use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
  * A configuration pointing at a port nobody listens on, so the connection
  * is refused at once without touching the network.
  */
-function unreachableDatabase(): DatabaseConfig
+function covUnreachableDatabase(): DatabaseConfig
 {
     return new DatabaseConfig('127.0.0.1', 1, 'nope', 'nobody', '', 'http://localhost');
 }
@@ -22,7 +22,7 @@ describe('DatabaseConnectionService', function (): void {
         Prompt::fake(['n', Key::ENTER]);
 
         try {
-            (new DatabaseConnectionService)->ensureConnection(unreachableDatabase());
+            (new DatabaseConnectionService)->ensureConnection(covUnreachableDatabase());
             $thrown = null;
         } catch (DatabaseConnectionException $e) {
             $thrown = $e;
@@ -42,7 +42,7 @@ describe('DatabaseConnectionService', function (): void {
         ];
         Prompt::fake($answers);
 
-        expect(fn (): DatabaseConfig => (new DatabaseConnectionService)->ensureConnection(unreachableDatabase()))
+        expect(fn (): DatabaseConfig => (new DatabaseConnectionService)->ensureConnection(covUnreachableDatabase()))
             ->toThrow(DatabaseConnectionException::class);
     });
 });
