@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Infrastructure\Providers\ApplicationServiceProvider;
+use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
 use Pollora\Modules\Infrastructure\Providers\ModuleServiceProvider;
 use Pollora\Providers\PolloraServiceProvider;
@@ -73,7 +74,7 @@ describe('PolloraServiceProvider', function (): void {
         expect($registered)->toHaveCount(count(array_unique($registered)))
             ->and($registered)->toContain(ModuleServiceProvider::class, ArtisanServiceProvider::class, RouteServiceProvider::class)
             ->and($registered[0])->toBe(ApplicationServiceProvider::class)
-            ->and(end($registered))->toBe(Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider::class)
+            ->and(end($registered))->toBe(DoctorServiceProvider::class)
             ->and(array_search(WordPressServiceProvider::class, $registered, true))->toBeGreaterThan(array_search(RouteServiceProvider::class, $registered, true))
             ->and(array_filter($registered, fn (string $p): bool => ! class_exists($p)))->toBe([]);
     });

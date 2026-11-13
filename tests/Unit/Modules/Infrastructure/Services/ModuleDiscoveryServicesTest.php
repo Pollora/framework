@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use Nwidart\Modules\Contracts\RepositoryInterface;
 use Nwidart\Modules\Module;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
@@ -148,7 +149,7 @@ describe('ModuleDiscoveryOrchestrator', function (): void {
     it('delegates framework module operations and reports modules with a DDD structure', function (): void {
         mkdir($this->dir.'/app/Blog/Domain', 0777, true);
         mkdir($this->dir.'/app/Plain', 0777, true);
-        $app = new Illuminate\Foundation\Application($this->dir);
+        $app = new Application($this->dir);
         $manager = Mockery::mock(DiscoveryManager::class);
         $manager->shouldReceive('discoverAllInLocation')->andReturn(['x' => [1]]);
         $app->instance(DiscoveryManager::class, $manager);
@@ -300,7 +301,7 @@ describe('FrameworkModuleDiscovery', function (): void {
         mkdir($this->dir.'/app/Shop/Application', 0777, true);
         mkdir($this->dir.'/app/Plain', 0777, true);
         file_put_contents($this->dir.'/app/file.txt', 'x');
-        $this->app = new Illuminate\Foundation\Application($this->dir);
+        $this->app = new Application($this->dir);
     });
 
     afterEach(function (): void {

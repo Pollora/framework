@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -33,7 +34,7 @@ use Pollora\VersionCheck\Infrastructure\Sources\VersionSources;
  *
  * @return object{actions: array<string, callable>, filters: array<string, callable>}
  */
-function recordingHooks(Illuminate\Contracts\Foundation\Application $app): object
+function recordingHooks(Application $app): object
 {
     $recorder = new class
     {

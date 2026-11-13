@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
@@ -9,6 +10,7 @@ use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Modules\Infrastructure\Services\ModuleAssetManager;
+use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -16,7 +18,7 @@ use Psr\Log\LoggerInterface;
  */
 function loggedErrors(Illuminate\Contracts\Container\Container $app): object
 {
-    $logger = new class extends Psr\Log\AbstractLogger
+    $logger = new class extends AbstractLogger
     {
         /** @var list<string> */
         public array $messages = [];
@@ -164,7 +166,7 @@ describe('ModuleAssetManager includes and directives', function (): void {
 
 describe('ModuleAssetManager view paths', function (): void {
     it('does nothing when no view factory is bound', function (): void {
-        $app = new Illuminate\Container\Container;
+        $app = new Container;
 
         (new ModuleAssetManager($app))->registerModuleViewPaths($this->module, 'theme', 'demo');
 
@@ -181,7 +183,7 @@ describe('ModuleAssetManager view paths', function (): void {
 
             return $factory;
         });
-        $app = new Illuminate\Container\Container;
+        $app = new Container;
         $app->instance('view', $factory);
 
         (new ModuleAssetManager($app))->registerModuleViewPaths($this->module, 'plugin', 'demo');
@@ -194,7 +196,7 @@ describe('ModuleAssetManager view paths', function (): void {
         $finder = new FileViewFinder(new Filesystem, []);
         $factory = Mockery::mock(Factory::class);
         $factory->shouldReceive('getFinder')->andReturn($finder);
-        $app = new Illuminate\Container\Container;
+        $app = new Container;
         $app->instance('view', $factory);
         $assets = new ModuleAssetManager($app);
 
@@ -207,7 +209,7 @@ describe('ModuleAssetManager view paths', function (): void {
     it('logs a view factory failure instead of breaking the boot', function (): void {
         $factory = Mockery::mock(Factory::class);
         $factory->shouldReceive('getFinder')->andThrow(new RuntimeException('no finder'));
-        $app = new Illuminate\Container\Container;
+        $app = new Container;
         $app->instance('view', $factory);
         $logged = loggedErrors($app);
 

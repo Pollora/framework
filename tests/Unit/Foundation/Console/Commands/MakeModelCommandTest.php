@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
@@ -29,7 +30,7 @@ beforeEach(function (): void {
     mkdir($this->base.'/app', 0777, true);
     file_put_contents($this->base.'/composer.json', json_encode(['autoload' => ['psr-4' => ['App\\' => 'app/']]]));
     $this->app = new Application($this->base);
-    $this->app->instance('config', new Illuminate\Config\Repository([]));
+    $this->app->instance('config', new Repository([]));
 });
 
 afterEach(function (): void {

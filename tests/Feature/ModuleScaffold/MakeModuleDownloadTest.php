@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
+use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
 use Pollora\Modules\UI\Console\MakeModuleCommand;
-use Illuminate\Contracts\Console\Kernel;
 
 beforeEach(function (): void {
     $this->root = sys_get_temp_dir().'/pollora-make-module-dl-'.uniqid();
@@ -116,7 +117,7 @@ describe('pollora:make:module overwriting and enabling', function (): void {
     });
 
     it('enables the module through module:enable when it is available', function (): void {
-        $command = new class extends Illuminate\Console\Command
+        $command = new class extends Command
         {
             /** @var list<string> */
             public static array $enabled = [];
