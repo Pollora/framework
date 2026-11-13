@@ -79,16 +79,16 @@ describe('PolloraServiceProvider', function (): void {
             ->and(array_filter($registered, fn (string $p): bool => ! class_exists($p)))->toBe([]);
     });
 
-    it('offers the wp-config bridge for publishing under the public tag', function (): void {
-        $app = new Application(sys_get_temp_dir().'/pollora-provider-'.uniqid());
+    it('offers nothing for publishing whose source file is missing from the framework', function (): void {
+        (new PolloraServiceProvider(new Application(sys_get_temp_dir().'/pollora-provider-'.uniqid())))->boot();
 
-        (new PolloraServiceProvider($app))->boot();
+        $missing = array_filter(
+            array_keys(ServiceProvider::pathsToPublish(PolloraServiceProvider::class)),
+            fn (string $source): bool => ! file_exists($source),
+        );
 
-        $paths = ServiceProvider::pathsToPublish(PolloraServiceProvider::class, 'public');
-
-        expect($paths)->toHaveCount(1)
-            ->and(array_key_first($paths))->toEndWith('/public/wp-config.php')
-            ->and($paths[array_key_first($paths)])->toBe($app->publicPath());
+        expect($missing)->toBe([])
+            ->and(ServiceProvider::pathsToPublish(PolloraServiceProvider::class, 'public'))->toBe([]);
     });
 
     it('prefers the translations a site provides over the bundled ones', function (): void {
