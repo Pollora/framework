@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Support\Facades\File;
+use Pollora\Modules\Domain\Exceptions\ModuleScaffoldException;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -113,7 +114,7 @@ class ModuleScaffolderService
         $path = rtrim(sys_get_temp_dir(), '/').'/.pollora-scaffold-'.bin2hex(random_bytes(8));
 
         if (! mkdir($path, 0700, true) && ! is_dir($path)) {
-            throw new \RuntimeException('Unable to create the working directory '.$path);
+            throw ModuleScaffoldException::cannotCreateWorkDirectory($path);
         }
 
         return $path;
