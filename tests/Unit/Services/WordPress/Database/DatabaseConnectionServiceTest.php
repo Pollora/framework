@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Laravel\Prompts\Key;
+use Laravel\Prompts\Output\BufferedConsoleOutput;
 use Laravel\Prompts\Prompt;
 use Pollora\Services\WordPress\Database\DatabaseConnectionService;
 use Pollora\Services\WordPress\Installation\DatabaseConnectionException;
@@ -16,6 +17,10 @@ function covUnreachableDatabase(): DatabaseConfig
 {
     return new DatabaseConfig('127.0.0.1', 1, 'nope', 'nobody', '', 'http://localhost');
 }
+
+afterEach(function (): void {
+    (new ReflectionProperty(Prompt::class, 'output'))->setValue(null, null);
+});
 
 describe('DatabaseConnectionService', function (): void {
     it('gives up with a clear exception when the connection fails and the user declines to retry', function (): void {
@@ -41,8 +46,15 @@ describe('DatabaseConnectionService', function (): void {
             'n', Key::ENTER,
         ];
         Prompt::fake($answers);
+        $output = new BufferedConsoleOutput;
+        Prompt::setOutput($output);
 
         expect(fn (): DatabaseConfig => (new DatabaseConnectionService)->ensureConnection(covUnreachableDatabase()))
             ->toThrow(DatabaseConnectionException::class);
+
+        $rendered = $output->content();
+        expect($rendered)->toContain('Database host?')
+            ->toContain('Site URL?')
+            ->and(substr_count($rendered, 'Database connection failed:'))->toBe(2);
     });
 });
