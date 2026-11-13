@@ -115,6 +115,7 @@ class MakeModelCommand extends AbstractGeneratorCommand
         return array_merge(
             parent::getOptions(),
             [
+                ['force', null, InputOption::VALUE_NONE, 'Create the model even if it already exists'],
                 ['fillable', 'f', InputOption::VALUE_OPTIONAL, 'The fillable attributes'],
                 ['pivot', 'p', InputOption::VALUE_NONE, 'Indicates if the generated model should be a custom intermediate table model'],
             ]
