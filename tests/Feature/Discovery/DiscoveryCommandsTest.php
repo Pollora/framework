@@ -18,7 +18,7 @@ use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
 /**
  * An engine without any optional capability, like a legacy engine.
  */
-class CovBareDiscoveryEngine implements DiscoveryEngineInterface
+class ContentBareDiscoveryEngine implements DiscoveryEngineInterface
 {
     /** @var list<DiscoveryLocationInterface> */
     public array $locations = [];
@@ -92,7 +92,7 @@ class CovBareDiscoveryEngine implements DiscoveryEngineInterface
 /**
  * An engine that exposes its cache driver and its statistics.
  */
-class CovRichDiscoveryEngine extends CovBareDiscoveryEngine
+class ContentRichDiscoveryEngine extends ContentBareDiscoveryEngine
 {
     public function __construct(public ?object $driver = null, public mixed $stats = [])
     {
@@ -113,7 +113,7 @@ class CovRichDiscoveryEngine extends CovBareDiscoveryEngine
     }
 }
 
-function covDiscoveryManager(DiscoveryEngineInterface $engine, array $discoveries = [], array $items = []): DiscoveryManager&Mockery\MockInterface
+function contentDiscoveryManager(DiscoveryEngineInterface $engine, array $discoveries = [], array $items = []): DiscoveryManager&Mockery\MockInterface
 {
     $manager = Mockery::mock(DiscoveryManager::class);
     $manager->shouldReceive('getEngine')->andReturn($engine);
@@ -124,7 +124,7 @@ function covDiscoveryManager(DiscoveryEngineInterface $engine, array $discoverie
     return $manager;
 }
 
-function covModuleOrchestrator(array $laravel = [], array $framework = []): ModuleDiscoveryOrchestratorInterface&Mockery\MockInterface
+function contentModuleOrchestrator(array $laravel = [], array $framework = []): ModuleDiscoveryOrchestratorInterface&Mockery\MockInterface
 {
     $orchestrator = Mockery::mock(ModuleDiscoveryOrchestratorInterface::class);
     $orchestrator->shouldReceive('discoverAndReturnLaravelModules')->andReturn($laravel);
@@ -140,15 +140,15 @@ beforeEach(function (): void {
 
 describe('discovery:run', function (): void {
     it('runs every discovery, then the Laravel and framework module discoveries, and totals the items', function (): void {
-        $manager = covDiscoveryManager(
-            new CovRichDiscoveryEngine(new stdClass),
+        $manager = contentDiscoveryManager(
+            new ContentRichDiscoveryEngine(new stdClass),
             ['hooks' => Mockery::mock(DiscoveryInterface::class), 'blocks' => Mockery::mock(DiscoveryInterface::class)],
             ['hooks' => [1, 2, 3], 'blocks' => [1]],
         );
         $manager->shouldReceive('discover')->once()->ordered();
         $manager->shouldReceive('apply')->once()->ordered();
 
-        $orchestrator = covModuleOrchestrator(
+        $orchestrator = contentModuleOrchestrator(
             laravel: ['blog' => ['hooks' => [1, 2]]],
             framework: ['shop' => ['hooks' => [1], 'blocks' => [1, 2]]],
         );
@@ -172,12 +172,12 @@ describe('discovery:run', function (): void {
     });
 
     it('says the cache is disabled for a null cache driver and does not clear it', function (): void {
-        $manager = covDiscoveryManager(new CovRichDiscoveryEngine(new NullDiscoverCacheDriver));
+        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine(new NullDiscoverCacheDriver));
         $manager->shouldReceive('discover');
         $manager->shouldReceive('apply');
         $manager->shouldNotReceive('clearCache');
 
-        $orchestrator = covModuleOrchestrator();
+        $orchestrator = contentModuleOrchestrator();
         $orchestrator->shouldReceive('discoverLaravelModules', 'applyLaravelModules', 'discoverFrameworkModules', 'applyFrameworkModules');
 
         $this->app->instance(DiscoveryManager::class, $manager);
@@ -190,12 +190,12 @@ describe('discovery:run', function (): void {
     });
 
     it('clears the discovery cache first when it is asked to and the cache is enabled', function (): void {
-        $manager = covDiscoveryManager(new CovRichDiscoveryEngine(new stdClass));
+        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine(new stdClass));
         $manager->shouldReceive('clearCache')->once()->ordered();
         $manager->shouldReceive('discover')->once()->ordered();
         $manager->shouldReceive('apply')->once()->ordered();
 
-        $orchestrator = covModuleOrchestrator();
+        $orchestrator = contentModuleOrchestrator();
         $orchestrator->shouldReceive('discoverLaravelModules', 'applyLaravelModules', 'discoverFrameworkModules', 'applyFrameworkModules');
 
         $this->app->instance(DiscoveryManager::class, $manager);
@@ -207,13 +207,13 @@ describe('discovery:run', function (): void {
     });
 
     it('fails without applying anything when the requested discovery is unknown', function (): void {
-        $manager = covDiscoveryManager(new CovBareDiscoveryEngine);
+        $manager = contentDiscoveryManager(new ContentBareDiscoveryEngine);
         $manager->shouldReceive('hasDiscovery')->with('nope')->andReturn(false);
         $manager->shouldNotReceive('discover');
         $manager->shouldNotReceive('apply');
 
         $this->app->instance(DiscoveryManager::class, $manager);
-        $this->app->instance(ModuleDiscoveryOrchestratorInterface::class, covModuleOrchestrator());
+        $this->app->instance(ModuleDiscoveryOrchestratorInterface::class, contentModuleOrchestrator());
 
         $this->artisan('discovery:run', ['--discovery' => 'nope'])
             ->expectsOutputToContain("Discovery 'nope' not found!")
@@ -221,12 +221,12 @@ describe('discovery:run', function (): void {
     });
 
     it('applies a single discovery only once the user confirms', function (): void {
-        $manager = covDiscoveryManager(new CovBareDiscoveryEngine, ['hooks' => Mockery::mock(DiscoveryInterface::class)], ['hooks' => [1, 2]]);
+        $manager = contentDiscoveryManager(new ContentBareDiscoveryEngine, ['hooks' => Mockery::mock(DiscoveryInterface::class)], ['hooks' => [1, 2]]);
         $manager->shouldReceive('hasDiscovery')->with('hooks')->andReturn(true);
         $manager->shouldReceive('discover')->once();
         $manager->shouldReceive('apply')->once();
 
-        $orchestrator = covModuleOrchestrator();
+        $orchestrator = contentModuleOrchestrator();
         $orchestrator->shouldNotReceive('discoverLaravelModules');
 
         $this->app->instance(DiscoveryManager::class, $manager);
@@ -240,13 +240,13 @@ describe('discovery:run', function (): void {
     });
 
     it('leaves a single discovery unapplied when the user declines', function (): void {
-        $manager = covDiscoveryManager(new CovBareDiscoveryEngine, ['hooks' => Mockery::mock(DiscoveryInterface::class)]);
+        $manager = contentDiscoveryManager(new ContentBareDiscoveryEngine, ['hooks' => Mockery::mock(DiscoveryInterface::class)]);
         $manager->shouldReceive('hasDiscovery')->with('hooks')->andReturn(true);
         $manager->shouldReceive('discover')->once();
         $manager->shouldNotReceive('apply');
 
         $this->app->instance(DiscoveryManager::class, $manager);
-        $this->app->instance(ModuleDiscoveryOrchestratorInterface::class, covModuleOrchestrator());
+        $this->app->instance(ModuleDiscoveryOrchestratorInterface::class, contentModuleOrchestrator());
 
         $this->artisan('discovery:run', ['--discovery' => 'hooks'])
             ->expectsConfirmation('Apply discovered items?', 'no')
@@ -254,12 +254,12 @@ describe('discovery:run', function (): void {
     });
 
     it('reports the failure and exits with an error when a discovery throws', function (): void {
-        $manager = covDiscoveryManager(new CovBareDiscoveryEngine);
+        $manager = contentDiscoveryManager(new ContentBareDiscoveryEngine);
         $manager->shouldReceive('discover')->andThrow(new RuntimeException('scan exploded'));
         $manager->shouldNotReceive('apply');
 
         $this->app->instance(DiscoveryManager::class, $manager);
-        $this->app->instance(ModuleDiscoveryOrchestratorInterface::class, covModuleOrchestrator());
+        $this->app->instance(ModuleDiscoveryOrchestratorInterface::class, contentModuleOrchestrator());
 
         $this->artisan('discovery:run')
             ->expectsOutputToContain('Discovery process failed: scan exploded')
@@ -283,10 +283,10 @@ describe('discovery:run', function (): void {
             ],
             'static_cache_size' => 6,
         ];
-        $manager = covDiscoveryManager(new CovRichDiscoveryEngine(new stdClass, $stats));
+        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine(new stdClass, $stats));
         $manager->shouldReceive('discover', 'apply');
 
-        $orchestrator = covModuleOrchestrator();
+        $orchestrator = contentModuleOrchestrator();
         $orchestrator->shouldReceive('discoverLaravelModules', 'applyLaravelModules', 'discoverFrameworkModules', 'applyFrameworkModules');
 
         $this->app->instance(DiscoveryManager::class, $manager);
@@ -309,10 +309,10 @@ describe('discovery:run', function (): void {
     });
 
     it('warns instead of failing when the engine has no performance statistics', function (): void {
-        $manager = covDiscoveryManager(new CovBareDiscoveryEngine);
+        $manager = contentDiscoveryManager(new ContentBareDiscoveryEngine);
         $manager->shouldReceive('discover', 'apply');
 
-        $orchestrator = covModuleOrchestrator();
+        $orchestrator = contentModuleOrchestrator();
         $orchestrator->shouldReceive('discoverLaravelModules', 'applyLaravelModules', 'discoverFrameworkModules', 'applyFrameworkModules');
 
         $this->app->instance(DiscoveryManager::class, $manager);
@@ -324,10 +324,10 @@ describe('discovery:run', function (): void {
     });
 
     it('warns instead of failing when reading the statistics throws', function (): void {
-        $manager = covDiscoveryManager(new CovRichDiscoveryEngine(new stdClass, new RuntimeException('no stats today')));
+        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine(new stdClass, new RuntimeException('no stats today')));
         $manager->shouldReceive('discover', 'apply');
 
-        $orchestrator = covModuleOrchestrator();
+        $orchestrator = contentModuleOrchestrator();
         $orchestrator->shouldReceive('discoverLaravelModules', 'applyLaravelModules', 'discoverFrameworkModules', 'applyFrameworkModules');
 
         $this->app->instance(DiscoveryManager::class, $manager);
@@ -363,10 +363,10 @@ describe('discovery:clear', function (): void {
                 $this->forgotten[] = $id;
             }
         };
-        $engine = new CovRichDiscoveryEngine($driver);
+        $engine = new ContentRichDiscoveryEngine($driver);
         $engine->locations = [new DiscoveryLocation('Tests\\', '/some/path'), new DiscoveryLocation('App\\', '/other/path')];
 
-        $manager = covDiscoveryManager($engine);
+        $manager = contentDiscoveryManager($engine);
         $manager->shouldReceive('clearCache')->once();
         $this->app->instance(DiscoveryManager::class, $manager);
 
@@ -379,7 +379,7 @@ describe('discovery:clear', function (): void {
     });
 
     it('still clears the manager cache and says so when the cache is disabled', function (): void {
-        $manager = covDiscoveryManager(new CovRichDiscoveryEngine(new NullDiscoverCacheDriver));
+        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine(new NullDiscoverCacheDriver));
         $manager->shouldReceive('clearCache')->once();
         $this->app->instance(DiscoveryManager::class, $manager);
 
@@ -390,7 +390,7 @@ describe('discovery:clear', function (): void {
     });
 
     it('explains that the engine has no cache driver to clear', function (): void {
-        $manager = covDiscoveryManager(new CovBareDiscoveryEngine);
+        $manager = contentDiscoveryManager(new ContentBareDiscoveryEngine);
         $manager->shouldReceive('clearCache')->once();
         $this->app->instance(DiscoveryManager::class, $manager);
 
@@ -400,7 +400,7 @@ describe('discovery:clear', function (): void {
     });
 
     it('explains that no cache driver is configured', function (): void {
-        $manager = covDiscoveryManager(new CovRichDiscoveryEngine(null));
+        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine(null));
         $manager->shouldReceive('clearCache')->once();
         $this->app->instance(DiscoveryManager::class, $manager);
 
@@ -410,7 +410,7 @@ describe('discovery:clear', function (): void {
     });
 
     it('explains that a driver without forget cannot be cleared', function (): void {
-        $manager = covDiscoveryManager(new CovRichDiscoveryEngine(new stdClass));
+        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine(new stdClass));
         $manager->shouldReceive('clearCache')->once();
         $this->app->instance(DiscoveryManager::class, $manager);
 
@@ -420,7 +420,7 @@ describe('discovery:clear', function (): void {
     });
 
     it('fails with an error message when clearing throws', function (): void {
-        $manager = covDiscoveryManager(new CovBareDiscoveryEngine);
+        $manager = contentDiscoveryManager(new ContentBareDiscoveryEngine);
         $manager->shouldReceive('clearCache')->andThrow(new RuntimeException('disk full'));
         $this->app->instance(DiscoveryManager::class, $manager);
 

@@ -9,7 +9,7 @@ use Pollora\Discovery\Domain\Models\DiscoveryItems;
 use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Adapters\LaravelDiscoveryCache;
 
-function covDiscoveredItems(): DiscoveryItems
+function contentDiscoveredItems(): DiscoveryItems
 {
     $items = new DiscoveryItems;
     $items->add(new DiscoveryLocation('App\\', __DIR__), ['class' => 'App\\Foo']);
@@ -24,7 +24,7 @@ describe('LaravelDiscoveryCache', function (): void {
     });
 
     it('gives back the discovered items it was given', function (): void {
-        $items = covDiscoveredItems();
+        $items = contentDiscoveredItems();
 
         expect($this->cache->put('hooks', $items))->toBeTrue()
             ->and($this->cache->has('hooks'))->toBeTrue()
@@ -37,7 +37,7 @@ describe('LaravelDiscoveryCache', function (): void {
     });
 
     it('prefixes the keys it writes so they cannot collide with other cache users', function (): void {
-        $this->cache->put('hooks', covDiscoveredItems());
+        $this->cache->put('hooks', contentDiscoveredItems());
 
         expect($this->store->has('pollora.discovery.hooks'))->toBeTrue()
             ->and($this->store->has('hooks'))->toBeFalse();
@@ -45,7 +45,7 @@ describe('LaravelDiscoveryCache', function (): void {
 
     it('uses the prefix it is configured with', function (): void {
         $custom = new LaravelDiscoveryCache($this->store, 'custom.');
-        $custom->put('hooks', covDiscoveredItems());
+        $custom->put('hooks', contentDiscoveredItems());
 
         expect($this->store->has('custom.hooks'))->toBeTrue()
             ->and($this->cache->has('hooks'))->toBeFalse();
@@ -58,8 +58,8 @@ describe('LaravelDiscoveryCache', function (): void {
     });
 
     it('forgets a single key and leaves the others', function (): void {
-        $this->cache->put('hooks', covDiscoveredItems());
-        $this->cache->put('blocks', covDiscoveredItems());
+        $this->cache->put('hooks', contentDiscoveredItems());
+        $this->cache->put('blocks', contentDiscoveredItems());
 
         expect($this->cache->forget('hooks'))->toBeTrue()
             ->and($this->cache->has('hooks'))->toBeFalse()
@@ -67,8 +67,8 @@ describe('LaravelDiscoveryCache', function (): void {
     });
 
     it('empties the whole cache on flush', function (): void {
-        $this->cache->put('hooks', covDiscoveredItems());
-        $this->cache->put('blocks', covDiscoveredItems());
+        $this->cache->put('hooks', contentDiscoveredItems());
+        $this->cache->put('blocks', contentDiscoveredItems());
 
         expect($this->cache->flush())->toBeTrue()
             ->and($this->cache->has('hooks'))->toBeFalse()
@@ -82,15 +82,15 @@ describe('LaravelDiscoveryCache', function (): void {
 
         $cache = new LaravelDiscoveryCache($store);
 
-        expect($cache->put('hooks', covDiscoveredItems(), 120))->toBeTrue()
-            ->and($cache->put('blocks', covDiscoveredItems()))->toBeTrue();
+        expect($cache->put('hooks', contentDiscoveredItems(), 120))->toBeTrue()
+            ->and($cache->put('blocks', contentDiscoveredItems()))->toBeTrue();
     });
 
     it('uses the default ttl it is configured with', function (): void {
         $store = Mockery::mock(Repository::class);
         $store->shouldReceive('put')->once()->with('x.hooks', Mockery::type('array'), 30)->andReturn(true);
 
-        expect((new LaravelDiscoveryCache($store, 'x.', 30))->put('hooks', covDiscoveredItems()))->toBeTrue();
+        expect((new LaravelDiscoveryCache($store, 'x.', 30))->put('hooks', contentDiscoveredItems()))->toBeTrue();
     });
 
     it('builds the same key whatever the order of the locations', function (): void {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Brain\Monkey\Functions;
 use Pollora\PostType\Infrastructure\Adapters\WordPressPostTypeRegistry;
 
-function covPostTypeEntity(string $slug, array $args = [], string $singular = 'Book', string $plural = 'Books'): object
+function contentPostTypeEntity(string $slug, array $args = [], string $singular = 'Book', string $plural = 'Books'): object
 {
     return new class($slug, $args, $singular, $plural)
     {
@@ -47,7 +47,7 @@ describe('WordPressPostTypeRegistry', function (): void {
             return new stdClass;
         });
 
-        $registered = (new WordPressPostTypeRegistry)->register(covPostTypeEntity('book', ['public' => true]));
+        $registered = (new WordPressPostTypeRegistry)->register(contentPostTypeEntity('book', ['public' => true]));
 
         expect($registered)->toBeTrue()
             ->and($captured[0])->toBe('book')
@@ -62,7 +62,7 @@ describe('WordPressPostTypeRegistry', function (): void {
             return new stdClass;
         });
 
-        (new WordPressPostTypeRegistry)->register(covPostTypeEntity('book'));
+        (new WordPressPostTypeRegistry)->register(contentPostTypeEntity('book'));
 
         expect($captured['labels'])->toMatchArray([
             'name' => 'Books',
@@ -86,7 +86,7 @@ describe('WordPressPostTypeRegistry', function (): void {
             return new stdClass;
         });
 
-        (new WordPressPostTypeRegistry)->register(covPostTypeEntity('book', ['labels' => ['name' => 'Library']]));
+        (new WordPressPostTypeRegistry)->register(contentPostTypeEntity('book', ['labels' => ['name' => 'Library']]));
 
         expect($captured['labels'])->toBe(['name' => 'Library']);
     });
@@ -94,14 +94,14 @@ describe('WordPressPostTypeRegistry', function (): void {
     it('refuses an entity without a slug and does not call WordPress', function (): void {
         Functions\expect('register_post_type')->never();
 
-        expect((new WordPressPostTypeRegistry)->register(covPostTypeEntity('')))->toBeFalse()
+        expect((new WordPressPostTypeRegistry)->register(contentPostTypeEntity('')))->toBeFalse()
             ->and((new WordPressPostTypeRegistry)->register(new stdClass))->toBeFalse();
     });
 
     it('reports a failure when WordPress answers with an error', function (): void {
         Functions\expect('register_post_type')->once()->andReturn(new WP_Error('invalid', 'nope'));
 
-        expect((new WordPressPostTypeRegistry)->register(covPostTypeEntity('book')))->toBeFalse();
+        expect((new WordPressPostTypeRegistry)->register(contentPostTypeEntity('book')))->toBeFalse();
     });
 
     it('asks WordPress whether a post type exists', function (): void {

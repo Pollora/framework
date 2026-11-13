@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyRegistryInterface;
 use Pollora\Taxonomy\Infrastructure\Repositories\TaxonomyRepository;
 
-function covRepositoryTaxonomy(string $slug): object
+function contentRepositoryTaxonomy(string $slug): object
 {
     return new class($slug)
     {
@@ -25,7 +25,7 @@ describe('TaxonomyRepository', function (): void {
     });
 
     it('registers a saved taxonomy with WordPress and remembers it', function (): void {
-        $genre = covRepositoryTaxonomy('genre');
+        $genre = contentRepositoryTaxonomy('genre');
         $this->registry->shouldReceive('register')->once()->with($genre)->andReturn(true);
 
         expect($this->repository->save($genre))->toBeTrue()
@@ -37,13 +37,13 @@ describe('TaxonomyRepository', function (): void {
     it('returns the registry answer when WordPress refuses the registration', function (): void {
         $this->registry->shouldReceive('register')->once()->andReturn(false);
 
-        expect($this->repository->save(covRepositoryTaxonomy('genre')))->toBeFalse();
+        expect($this->repository->save(contentRepositoryTaxonomy('genre')))->toBeFalse();
     });
 
     it('refuses to save a taxonomy without a slug', function (): void {
         $this->registry->shouldNotReceive('register');
 
-        expect($this->repository->save(covRepositoryTaxonomy('')))->toBeFalse()
+        expect($this->repository->save(contentRepositoryTaxonomy('')))->toBeFalse()
             ->and($this->repository->save(new stdClass))->toBeFalse()
             ->and($this->repository->count())->toBe(0);
     });
@@ -63,7 +63,7 @@ describe('TaxonomyRepository', function (): void {
     it('knows a taxonomy from its own memory without asking WordPress', function (): void {
         $this->registry->shouldReceive('register')->andReturn(true);
         $this->registry->shouldNotReceive('exists');
-        $this->repository->save(covRepositoryTaxonomy('genre'));
+        $this->repository->save(contentRepositoryTaxonomy('genre'));
 
         expect($this->repository->exists('genre'))->toBeTrue();
     });
@@ -78,7 +78,7 @@ describe('TaxonomyRepository', function (): void {
 
     it('forgets a removed taxonomy and tolerates removing an unknown one', function (): void {
         $this->registry->shouldReceive('register')->andReturn(true);
-        $this->repository->save(covRepositoryTaxonomy('genre'));
+        $this->repository->save(contentRepositoryTaxonomy('genre'));
 
         expect($this->repository->remove('genre'))->toBeTrue()
             ->and($this->repository->findAll())->toBe([])
@@ -87,8 +87,8 @@ describe('TaxonomyRepository', function (): void {
 
     it('empties its memory when the cache is cleared', function (): void {
         $this->registry->shouldReceive('register')->andReturn(true);
-        $this->repository->save(covRepositoryTaxonomy('genre'));
-        $this->repository->save(covRepositoryTaxonomy('theme'));
+        $this->repository->save(contentRepositoryTaxonomy('genre'));
+        $this->repository->save(contentRepositoryTaxonomy('theme'));
 
         $this->repository->clearCache();
 

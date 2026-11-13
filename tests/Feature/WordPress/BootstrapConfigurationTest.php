@@ -16,7 +16,7 @@ use Pollora\WordPress\Config\ConstantManager;
  * A constant manager that records what Bootstrap queues instead of defining
  * real constants, which would stay for the rest of the process.
  */
-final class CovRecordingConstantManager extends ConstantManager
+final class ContentRecordingConstantManager extends ConstantManager
 {
     /** @var array<string, mixed> */
     public array $queued = [];
@@ -34,7 +34,7 @@ final class CovRecordingConstantManager extends ConstantManager
     }
 }
 
-function covBootstrap(bool $console = false, bool $wpCli = false, bool $debug = false, ?Action $action = null): Bootstrap
+function contentBootstrap(bool $console = false, bool $wpCli = false, bool $debug = false, ?Action $action = null): Bootstrap
 {
     $detector = Mockery::mock(ConsoleDetectionService::class);
     $detector->shouldReceive('isConsole')->andReturn($console);
@@ -46,7 +46,7 @@ function covBootstrap(bool $console = false, bool $wpCli = false, bool $debug = 
     return new Bootstrap($detector, $debugDetector, $action ?? Mockery::mock(Action::class));
 }
 
-function covInvoke(object $object, string $method, mixed ...$arguments): mixed
+function contentInvoke(object $object, string $method, mixed ...$arguments): mixed
 {
     return (new ReflectionMethod($object, $method))->invoke($object, ...$arguments);
 }
@@ -56,7 +56,7 @@ function covInvoke(object $object, string $method, mixed ...$arguments): mixed
  *
  * @return ArrayObject<int, array{string, mixed, int}>
  */
-function covRecordFilters(): ArrayObject
+function contentRecordFilters(): ArrayObject
 {
     $added = new ArrayObject;
     Functions\when('add_filter')->alias(function (string $hook, $callback, int $priority = 10) use ($added): bool {
@@ -69,7 +69,7 @@ function covRecordFilters(): ArrayObject
 }
 
 beforeEach(function (): void {
-    $this->constants = new CovRecordingConstantManager;
+    $this->constants = new ContentRecordingConstantManager;
     Constant::swap($this->constants);
 });
 
@@ -78,7 +78,7 @@ describe('Bootstrap constants', function (): void {
         config()->set('app.url', 'https://example.test');
         config()->set('wordpress.constants', []);
 
-        covInvoke(covBootstrap(), 'setLocationConstants');
+        contentInvoke(contentBootstrap(), 'setLocationConstants');
 
         expect($this->constants->queued)->toMatchArray([
             'WP_PATH' => 'public/cms/',
@@ -93,7 +93,7 @@ describe('Bootstrap constants', function (): void {
         config()->set('wordpress.constants', []);
         $this->app->instance('request', Request::create('/'));
 
-        covInvoke(covBootstrap(debug: $debug), 'defineWordPressConstants');
+        contentInvoke(contentBootstrap(debug: $debug), 'defineWordPressConstants');
 
         expect($this->constants->queued)->toMatchArray([
             'WP_DEBUG' => $debug,
@@ -109,7 +109,7 @@ describe('Bootstrap constants', function (): void {
         config()->set('wordpress.constants', []);
         $this->app->instance('request', Request::create($uri));
 
-        covInvoke(covBootstrap(console: $console), 'defineWordPressConstants');
+        contentInvoke(contentBootstrap(console: $console), 'defineWordPressConstants');
 
         expect($this->constants->queued['WP_USE_THEMES'])->toBe($expected);
     })->with([
@@ -122,19 +122,19 @@ describe('Bootstrap constants', function (): void {
         config()->set('wordpress.constants', ['my_flag' => 'on', 'WP_POST_REVISIONS' => 9]);
         $this->app->instance('request', Request::create('/'));
 
-        covInvoke(covBootstrap(), 'defineWordPressConstants');
+        contentInvoke(contentBootstrap(), 'defineWordPressConstants');
 
         expect($this->constants->queued)->toMatchArray(['MY_FLAG' => 'on', 'WP_POST_REVISIONS' => 9]);
     });
 
     it('describes the database to WordPress with the host and port joined', function (): void {
-        $bootstrap = covBootstrap();
+        $bootstrap = contentBootstrap();
         (new ReflectionProperty(Bootstrap::class, 'db'))->setValue($bootstrap, [
             'database' => 'shop', 'username' => 'root', 'password' => 'secret', 'host' => 'db',
             'port' => '3307', 'charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci', 'prefix' => 'wp_',
         ]);
 
-        covInvoke($bootstrap, 'setDatabaseConstants');
+        contentInvoke($bootstrap, 'setDatabaseConstants');
 
         expect($this->constants->queued)->toBe([
             'DB_NAME' => 'shop',
@@ -148,10 +148,10 @@ describe('Bootstrap constants', function (): void {
     });
 
     it('leaves out the database settings that are missing and keeps a host without port', function (): void {
-        $bootstrap = covBootstrap();
+        $bootstrap = contentBootstrap();
         (new ReflectionProperty(Bootstrap::class, 'db'))->setValue($bootstrap, ['database' => 'shop', 'host' => 'db', 'port' => null]);
 
-        covInvoke($bootstrap, 'setDatabaseConstants');
+        contentInvoke($bootstrap, 'setDatabaseConstants');
 
         expect($this->constants->queued)->toBe(['DB_NAME' => 'shop', 'DB_HOST' => 'db']);
     });
@@ -161,7 +161,7 @@ describe('Bootstrap constants', function (): void {
         config()->set('app.url', 'https://cli.example.test');
 
         try {
-            covInvoke(covBootstrap(), 'setConsoleServerVariables');
+            contentInvoke(contentBootstrap(), 'setConsoleServerVariables');
 
             expect($_SERVER['HTTP_HOST'])->toBe('cli.example.test')
                 ->and($_SERVER['SERVER_PROTOCOL'])->toBe('https');
@@ -175,7 +175,7 @@ describe('Bootstrap lightweight requests', function (): void {
     it('treats only /api/ requests of the web as lightweight', function (bool $console, string $uri, bool $expected): void {
         $this->app->instance('request', Request::create($uri));
 
-        expect(covInvoke(covBootstrap(console: $console), 'isLightweightRequest'))->toBe($expected);
+        expect(contentInvoke(contentBootstrap(console: $console), 'isLightweightRequest'))->toBe($expected);
     })->with([
         'api route' => [false, '/api/posts', true],
         'front page' => [false, '/', false],
@@ -185,18 +185,18 @@ describe('Bootstrap lightweight requests', function (): void {
 
     it('loads every plugin when the configuration does not restrict them', function (mixed $setting): void {
         config()->set('wordpress.api_plugins', $setting);
-        $added = covRecordFilters();
+        $added = contentRecordFilters();
 
-        covInvoke(covBootstrap(), 'applyLightweightFilters');
+        contentInvoke(contentBootstrap(), 'applyLightweightFilters');
 
         expect($added)->toHaveCount(0);
     })->with(['not configured' => [null], 'wildcard' => [['*']], 'wildcard among others' => [['seo', '*']]]);
 
     it('loads no plugin at all when the configured list is empty', function (): void {
         config()->set('wordpress.api_plugins', []);
-        $added = covRecordFilters();
+        $added = contentRecordFilters();
 
-        covInvoke(covBootstrap(), 'applyLightweightFilters');
+        contentInvoke(contentBootstrap(), 'applyLightweightFilters');
 
         expect($added->getArrayCopy())->toBe([['pre_option_active_plugins', '__return_empty_array', 10]]);
     });
@@ -212,9 +212,9 @@ describe('Bootstrap lightweight requests', function (): void {
             'seo-extra/extra.php',
         ]));
 
-        $added = covRecordFilters();
+        $added = contentRecordFilters();
 
-        covInvoke(covBootstrap(), 'applyLightweightFilters');
+        contentInvoke(contentBootstrap(), 'applyLightweightFilters');
 
         expect($added)->toHaveCount(1)
             ->and($added[0][0])->toBe('pre_option_active_plugins')
@@ -229,13 +229,13 @@ describe('Bootstrap lightweight requests', function (): void {
     it('allows nothing when the plugin list cannot be read', function (): void {
         DB::shouldReceive('table')->andThrow(new RuntimeException('no database'));
 
-        expect(covInvoke(covBootstrap(), 'resolveAllowedPlugins', ['seo']))->toBe([]);
+        expect(contentInvoke(contentBootstrap(), 'resolveAllowedPlugins', ['seo']))->toBe([]);
     });
 
     it('allows nothing when no plugin is active', function (): void {
         DB::shouldReceive('table->where->value')->andReturn(null);
 
-        expect(covInvoke(covBootstrap(), 'resolveAllowedPlugins', ['seo']))->toBe([]);
+        expect(contentInvoke(contentBootstrap(), 'resolveAllowedPlugins', ['seo']))->toBe([]);
     });
 });
 
@@ -249,7 +249,7 @@ describe('Bootstrap error handling', function (): void {
         });
 
         try {
-            covInvoke(covBootstrap(), 'withWordPressErrorHandling', function (): void {
+            contentInvoke(contentBootstrap(), 'withWordPressErrorHandling', function (): void {
                 trigger_error('old api', E_USER_DEPRECATED);
                 trigger_error('careful', E_USER_WARNING);
             });
@@ -266,7 +266,7 @@ describe('Bootstrap error handling', function (): void {
 
         try {
             try {
-                covInvoke(covBootstrap(), 'withWordPressErrorHandling', function (): void {
+                contentInvoke(contentBootstrap(), 'withWordPressErrorHandling', function (): void {
                     throw new RuntimeException('boom');
                 });
             } catch (RuntimeException) {
@@ -291,9 +291,9 @@ describe('Bootstrap action hooks', function (): void {
 
             return $action;
         });
-        covRecordFilters();
+        contentRecordFilters();
 
-        covInvoke(covBootstrap(wpCli: true, action: $action), 'setupActionHooks');
+        contentInvoke(contentBootstrap(wpCli: true, action: $action), 'setupActionHooks');
 
         expect($calls)->toHaveCount(1)
             ->and($calls[0][0])->toBe('init')
@@ -308,9 +308,9 @@ describe('Bootstrap action hooks', function (): void {
 
             return $action;
         });
-        covRecordFilters();
+        contentRecordFilters();
 
-        covInvoke(covBootstrap(action: $action), 'setupActionHooks');
+        contentInvoke(contentBootstrap(action: $action), 'setupActionHooks');
 
         expect($calls)->toHaveCount(1)
             ->and($calls[0][0])->toBe('network_site_url')
@@ -320,9 +320,9 @@ describe('Bootstrap action hooks', function (): void {
     it('leaves alone a template that is not a Blade file', function (): void {
         $action = Mockery::mock(Action::class);
         $action->shouldReceive('add')->with('network_site_url', Mockery::any(), 10, 3);
-        $added = covRecordFilters();
+        $added = contentRecordFilters();
 
-        covInvoke(covBootstrap(action: $action), 'setupActionHooks');
+        contentInvoke(contentBootstrap(action: $action), 'setupActionHooks');
 
         [$hook, $callback, $priority] = $added[0];
 
@@ -340,7 +340,7 @@ describe('Bootstrap boot', function (): void {
         $action = Mockery::mock(Action::class);
         $action->shouldReceive('add')->with('init', Mockery::type('callable'), 1);
 
-        covBootstrap(console: true, wpCli: true, action: $action)->boot();
+        contentBootstrap(console: true, wpCli: true, action: $action)->boot();
 
         expect($this->constants->queued)->toMatchArray(['WP_INSTALLING' => true]);
     });
@@ -351,7 +351,7 @@ describe('Bootstrap boot', function (): void {
         $action = Mockery::mock(Action::class);
         $action->shouldReceive('add')->once()->with('network_site_url', Mockery::type('callable'), 10, 3);
 
-        covBootstrap(action: $action)->boot();
+        contentBootstrap(action: $action)->boot();
 
         expect($this->constants->queued)->not->toHaveKey('WP_INSTALLING');
     });

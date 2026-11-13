@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Pollora\PostType\Domain\Contracts\PostTypeRegistryInterface;
 use Pollora\PostType\Infrastructure\Repositories\PostTypeRepository;
 
-function covRepositoryPostType(string $slug): object
+function contentRepositoryPostType(string $slug): object
 {
     return new class($slug)
     {
@@ -25,7 +25,7 @@ describe('PostTypeRepository', function (): void {
     });
 
     it('registers a saved post type with WordPress and remembers it', function (): void {
-        $book = covRepositoryPostType('book');
+        $book = contentRepositoryPostType('book');
         $this->registry->shouldReceive('register')->once()->with($book)->andReturn(true);
 
         expect($this->repository->save($book))->toBeTrue()
@@ -37,13 +37,13 @@ describe('PostTypeRepository', function (): void {
     it('returns the registry answer when WordPress refuses the registration', function (): void {
         $this->registry->shouldReceive('register')->once()->andReturn(false);
 
-        expect($this->repository->save(covRepositoryPostType('book')))->toBeFalse();
+        expect($this->repository->save(contentRepositoryPostType('book')))->toBeFalse();
     });
 
     it('refuses to save a post type without a slug', function (): void {
         $this->registry->shouldNotReceive('register');
 
-        expect($this->repository->save(covRepositoryPostType('')))->toBeFalse()
+        expect($this->repository->save(contentRepositoryPostType('')))->toBeFalse()
             ->and($this->repository->save(new stdClass))->toBeFalse()
             ->and($this->repository->count())->toBe(0);
     });
@@ -63,7 +63,7 @@ describe('PostTypeRepository', function (): void {
     it('knows a post type from its own memory without asking WordPress', function (): void {
         $this->registry->shouldReceive('register')->andReturn(true);
         $this->registry->shouldNotReceive('exists');
-        $this->repository->save(covRepositoryPostType('book'));
+        $this->repository->save(contentRepositoryPostType('book'));
 
         expect($this->repository->exists('book'))->toBeTrue();
     });
@@ -78,7 +78,7 @@ describe('PostTypeRepository', function (): void {
 
     it('forgets a removed post type and tolerates removing an unknown one', function (): void {
         $this->registry->shouldReceive('register')->andReturn(true);
-        $this->repository->save(covRepositoryPostType('book'));
+        $this->repository->save(contentRepositoryPostType('book'));
 
         expect($this->repository->remove('book'))->toBeTrue()
             ->and($this->repository->findAll())->toBe([])
@@ -87,8 +87,8 @@ describe('PostTypeRepository', function (): void {
 
     it('empties its memory when the cache is cleared', function (): void {
         $this->registry->shouldReceive('register')->andReturn(true);
-        $this->repository->save(covRepositoryPostType('book'));
-        $this->repository->save(covRepositoryPostType('movie'));
+        $this->repository->save(contentRepositoryPostType('book'));
+        $this->repository->save(contentRepositoryPostType('movie'));
 
         $this->repository->clearCache();
 

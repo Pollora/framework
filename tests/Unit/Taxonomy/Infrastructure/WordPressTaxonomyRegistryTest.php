@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Brain\Monkey\Functions;
 use Pollora\Taxonomy\Infrastructure\Adapters\WordPressTaxonomyRegistry;
 
-function covTaxonomyEntity(string $slug, array $args = [], string|array|null $objectType = null): object
+function contentTaxonomyEntity(string $slug, array $args = [], string|array|null $objectType = null): object
 {
     return new class($slug, $args, $objectType)
     {
@@ -51,7 +51,7 @@ describe('WordPressTaxonomyRegistry', function (): void {
             return new stdClass;
         });
 
-        $registered = (new WordPressTaxonomyRegistry)->register(covTaxonomyEntity('genre', ['hierarchical' => true], ['book', 'movie']));
+        $registered = (new WordPressTaxonomyRegistry)->register(contentTaxonomyEntity('genre', ['hierarchical' => true], ['book', 'movie']));
 
         expect($registered)->toBeTrue()
             ->and($captured[0])->toBe('genre')
@@ -87,7 +87,7 @@ describe('WordPressTaxonomyRegistry', function (): void {
             return new stdClass;
         });
 
-        (new WordPressTaxonomyRegistry)->register(covTaxonomyEntity('genre'));
+        (new WordPressTaxonomyRegistry)->register(contentTaxonomyEntity('genre'));
 
         expect($captured['labels'])->toMatchArray([
             'name' => 'Genres',
@@ -111,7 +111,7 @@ describe('WordPressTaxonomyRegistry', function (): void {
             return new stdClass;
         });
 
-        (new WordPressTaxonomyRegistry)->register(covTaxonomyEntity('genre', ['labels' => ['name' => 'Shelves']]));
+        (new WordPressTaxonomyRegistry)->register(contentTaxonomyEntity('genre', ['labels' => ['name' => 'Shelves']]));
 
         expect($captured['labels'])->toBe(['name' => 'Shelves']);
     });
@@ -119,14 +119,14 @@ describe('WordPressTaxonomyRegistry', function (): void {
     it('refuses an entity without a slug and does not call WordPress', function (): void {
         Functions\expect('register_taxonomy')->never();
 
-        expect((new WordPressTaxonomyRegistry)->register(covTaxonomyEntity('')))->toBeFalse()
+        expect((new WordPressTaxonomyRegistry)->register(contentTaxonomyEntity('')))->toBeFalse()
             ->and((new WordPressTaxonomyRegistry)->register(new stdClass))->toBeFalse();
     });
 
     it('reports a failure when WordPress answers with an error', function (): void {
         Functions\expect('register_taxonomy')->once()->andReturn(new WP_Error('invalid', 'nope'));
 
-        expect((new WordPressTaxonomyRegistry)->register(covTaxonomyEntity('genre')))->toBeFalse();
+        expect((new WordPressTaxonomyRegistry)->register(contentTaxonomyEntity('genre')))->toBeFalse();
     });
 
     it('asks WordPress whether a taxonomy exists', function (): void {
