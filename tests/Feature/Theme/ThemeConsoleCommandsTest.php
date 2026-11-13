@@ -72,7 +72,7 @@ function consoleTheme(string $name, bool $enabled = true): ThemeModuleInterface
 
 function makeThemeCommand(string $themesDir, array $config = []): MakeThemeCommand
 {
-    $command = new class(new Repository(['theme' => ['directory' => $themesDir, ...$config]]), new Filesystem) extends MakeThemeCommand
+    $command = new class(new Repository(['theme' => ['path' => $themesDir, ...$config]]), new Filesystem) extends MakeThemeCommand
     {
         public int $npmRuns = 0;
 
@@ -145,7 +145,7 @@ describe('pollora:theme:delete', function (): void {
 
     function removeCommand(string $themes, bool $confirm, array $config = []): RemoveThemeCommand
     {
-        $command = new class(new Repository(['theme' => ['directory' => $themes, ...$config]]), new Filesystem, $confirm) extends RemoveThemeCommand
+        $command = new class(new Repository(['theme' => ['path' => $themes, ...$config]]), new Filesystem, $confirm) extends RemoveThemeCommand
         {
             public function __construct(Repository $config, Filesystem $files, private readonly bool $answer)
             {
@@ -303,7 +303,7 @@ describe('pollora:make:theme', function (): void {
         makeThemeScaffolder(true, function (array $args) use (&$received): void {
             $received = array_combine(['repository', 'basePath', 'targetPath', 'replacements', 'version', 'output', 'fileFilter', 'removeDirs'], array_pad($args, 8, null));
         });
-        $command = new class(new Repository(['theme' => ['directory' => $this->dir]]), new Filesystem) extends MakeThemeCommand
+        $command = new class(new Repository(['theme' => ['path' => $this->dir]]), new Filesystem) extends MakeThemeCommand
         {
             protected function promptForRepository(): string
             {
