@@ -24,11 +24,11 @@
     "require": {
         "php": "^8.3",
         "pollora/helper-overrider": "^1.2",
-        "illuminate/auth": "^13.40",
-        "illuminate/support": "^13.40",
-        "illuminate/database": "^13.40",
-        "illuminate/routing": "^13.40",
-        "illuminate/console": "^13.40",
+        "illuminate/auth": "^13.42",
+        "illuminate/support": "^13.42",
+        "illuminate/database": "^13.42",
+        "illuminate/routing": "^13.42",
+        "illuminate/console": "^13.42",
         "pollora/abilities": "^1.0",
         "pollora/ajax": "^1.1",
         "pollora/assets": "^0.1",
@@ -52,9 +52,9 @@
         "pollora/query": "^2.0 || ^3.0",
         "spatie/php-structure-discoverer": "^2.4",
         "coduo/php-humanizer": "5.0.3",
-        "nwidart/laravel-modules": "^13.2",
+        "nwidart/laravel-modules": "^13.3",
         "symfony/process": "^7.4 || ^8.0",
-        "illuminate/config": "^13.40",
+        "illuminate/config": "^13.42",
         "laravel/prompts": "^0.3.26"
     },
     "autoload": {
@@ -123,7 +123,7 @@
         "brain/monkey": "^2.7",
         "mockery/mockery": "^1.6.15",
         "wp-cli/wp-cli": "^2.12",
-        "larastan/larastan": "^3.13",
+        "larastan/larastan": "^3.14",
         "orchestra/testbench": "^11.3.0",
         "pollora/harness": "^0.1.23"
     },

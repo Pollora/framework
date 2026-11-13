@@ -31,7 +31,10 @@ describe('WordPressTypeResolverInterface', function (): void {
     it('is still implemented by the resolver under the former name', function (): void {
         $former = 'Pollora\\Route\\Infrastructure\\Services\\Contracts\\WordPressTypeResolverInterface';
 
-        expect(is_subclass_of(WordPressTypeResolver::class, $former))->toBeTrue();
+        // The former name is an alias made when its file is autoloaded: load it here instead of
+        // relying on the test above having done it, so this test passes alone and in any order.
+        expect(interface_exists($former))->toBeTrue()
+            ->and(is_subclass_of(WordPressTypeResolver::class, $former))->toBeTrue();
     });
 });
 

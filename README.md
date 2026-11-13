@@ -30,7 +30,7 @@ composer create-project pollora/pollora my-project
 Requirements:
 
 - PHP 8.4+ for a new project (the skeleton's lock file ships Symfony 8; this package alone accepts PHP 8.3)
-- Laravel 13.40 (Pollora's version numbers follow the Laravel release it is built on)
+- Laravel 13.42 (Pollora's version numbers follow the Laravel release it is built on)
 - WordPress 7.1+
 
 ## Quick start
@@ -63,7 +63,7 @@ class Seo
 - **Blade templates** with [Sage Directives](https://log1x.github.io/sage-directives-docs/) for WordPress data
 - **Theme system** with dynamic PSR-4 autoloading, parent/child theme support, and Vite asset management
 - **WordPress authentication** guard and password hashing integration
-- **Event dispatching** for WordPress core, WooCommerce, Gravity Forms, and Yoast SEO
+- **Event dispatching** for WordPress core, Gravity Forms, and Yoast SEO
 - **Module system** via [nwidart/laravel-modules](https://github.com/nwidart/laravel-modules)
 - **`pollora:doctor`**, which finds the setups that fail without an error and prints the fix (also in Tools › Site Health)
 

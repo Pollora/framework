@@ -72,7 +72,7 @@ abstract class BaseThemeCommand extends Command
      */
     protected function getThemesPath(): string
     {
-        return $this->config->get('theme.directory', base_path('themes'));
+        return $this->config->get('theme.path', base_path('themes'));
     }
 
     /**

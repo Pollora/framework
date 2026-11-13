@@ -55,11 +55,11 @@ final class RecursiveMenuIterator extends AbstractRecursiveIterator
         }
 
         $menu = wp_get_nav_menu_object($navLocations[$menuName]);
-        $items = collect(wp_get_nav_menu_items($menu))->keyBy('ID')->reverse();
+        $items = collect(wp_get_nav_menu_items($menu))->keyBy('ID');
 
         $this->buildMenuTree($items);
 
-        return $items->filter(fn ($item): bool => $item->menu_item_parent == 0)->reverse()->values();
+        return $items->filter(fn ($item): bool => $item->menu_item_parent == 0)->values();
     }
 
     /**
