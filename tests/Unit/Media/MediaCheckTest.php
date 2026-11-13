@@ -194,9 +194,23 @@ describe('MediaCheck', function (): void {
     it('ignores an uploads .htaccess that does not restart rewriting', function (): void {
         mkdir($this->tmp, 0777, true);
         file_put_contents($this->tmp.'/.htaccess', "Options -Indexes\n");
-        $this->storage->files['.htaccess'] = 'x';
 
         expect(contentMediaCheck('uploads', $this->storage, $this->tmp)->run(RunContext::Console)->status->name)->toBe('Ok');
+    });
+
+    it('ignores hidden files and folders of the local uploads, but still lists a normal file', function (): void {
+        mkdir($this->tmp.'/.cache/deep', 0777, true);
+        mkdir($this->tmp.'/2026', 0777, true);
+        file_put_contents($this->tmp.'/.htaccess', "Options -Indexes\n");
+        file_put_contents($this->tmp.'/.cache/deep/thumb.jpg', 'x');
+        file_put_contents($this->tmp.'/2026/.hidden.jpg', 'x');
+        file_put_contents($this->tmp.'/2026/photo.jpg', 'x');
+
+        $result = contentMediaCheck('uploads', $this->storage, $this->tmp)->run(RunContext::Console);
+
+        expect($result->status->name)->toBe('Warning')
+            ->and($result->summary)->toContain('1 file(s)')
+            ->and($result->details)->toBe(['2026/photo.jpg is only local']);
     });
 
     it('does not count the private folders of the local uploads as files the migration forgot', function (): void {
