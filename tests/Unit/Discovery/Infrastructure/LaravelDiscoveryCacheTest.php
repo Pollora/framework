@@ -66,7 +66,7 @@ describe('LaravelDiscoveryCache', function (): void {
             ->and($this->cache->has('blocks'))->toBeTrue();
     });
 
-    it('empties the whole cache on flush', function (): void {
+    it('empties the keys it wrote on flush', function (): void {
         $this->cache->put('hooks', contentDiscoveredItems());
         $this->cache->put('blocks', contentDiscoveredItems());
 
@@ -75,8 +75,47 @@ describe('LaravelDiscoveryCache', function (): void {
             ->and($this->cache->has('blocks'))->toBeFalse();
     });
 
+    it('leaves the keys of other cache users alone on flush', function (): void {
+        $this->store->put('app.settings', 'kept', 60);
+        $this->store->forever('pollora.other', 'kept');
+
+        $this->cache->put('hooks', contentDiscoveredItems());
+
+        $this->cache->flush();
+
+        expect($this->store->get('app.settings'))->toBe('kept')
+            ->and($this->store->get('pollora.other'))->toBe('kept')
+            ->and($this->cache->has('hooks'))->toBeFalse();
+    });
+
+    it('flushes what another instance with the same prefix wrote', function (): void {
+        (new LaravelDiscoveryCache($this->store))->put('hooks', contentDiscoveredItems());
+
+        $this->cache->flush();
+
+        expect($this->cache->has('hooks'))->toBeFalse();
+    });
+
+    it('flushes only its own prefix', function (): void {
+        $custom = new LaravelDiscoveryCache($this->store, 'custom.');
+        $custom->put('hooks', contentDiscoveredItems());
+
+        $this->cache->put('hooks', contentDiscoveredItems());
+
+        $this->cache->flush();
+
+        expect($custom->has('hooks'))->toBeTrue()
+            ->and($this->cache->has('hooks'))->toBeFalse();
+    });
+
+    it('can flush before anything was written', function (): void {
+        expect($this->cache->flush())->toBeTrue();
+    });
+
     it('stores items for the ttl it is given', function (): void {
         $store = Mockery::mock(Repository::class);
+        $store->shouldReceive('get')->with('pollora.discovery.__index__', [])->andReturn([]);
+        $store->shouldReceive('forever')->with('pollora.discovery.__index__', Mockery::type('array'))->andReturn(true);
         $store->shouldReceive('put')->once()->with('pollora.discovery.hooks', Mockery::type('array'), 120)->andReturn(true);
         $store->shouldReceive('put')->once()->with('pollora.discovery.blocks', Mockery::type('array'), 86400)->andReturn(true);
 
@@ -88,6 +127,8 @@ describe('LaravelDiscoveryCache', function (): void {
 
     it('uses the default ttl it is configured with', function (): void {
         $store = Mockery::mock(Repository::class);
+        $store->shouldReceive('get')->with('x.__index__', [])->andReturn([]);
+        $store->shouldReceive('forever')->with('x.__index__', Mockery::type('array'))->andReturn(true);
         $store->shouldReceive('put')->once()->with('x.hooks', Mockery::type('array'), 30)->andReturn(true);
 
         expect((new LaravelDiscoveryCache($store, 'x.', 30))->put('hooks', contentDiscoveredItems()))->toBeTrue();
