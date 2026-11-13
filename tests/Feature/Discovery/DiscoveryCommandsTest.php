@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Mockery\MockInterface;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
@@ -94,9 +95,7 @@ class ContentBareDiscoveryEngine implements DiscoveryEngineInterface
  */
 class ContentRichDiscoveryEngine extends ContentBareDiscoveryEngine
 {
-    public function __construct(public ?object $driver = null, public mixed $stats = [])
-    {
-    }
+    public function __construct(public ?object $driver = null, public mixed $stats = []) {}
 
     public function getCacheDriver(): ?object
     {
@@ -113,7 +112,7 @@ class ContentRichDiscoveryEngine extends ContentBareDiscoveryEngine
     }
 }
 
-function contentDiscoveryManager(DiscoveryEngineInterface $engine, array $discoveries = [], array $items = []): DiscoveryManager&Mockery\MockInterface
+function contentDiscoveryManager(DiscoveryEngineInterface $engine, array $discoveries = [], array $items = []): DiscoveryManager&MockInterface
 {
     $manager = Mockery::mock(DiscoveryManager::class);
     $manager->shouldReceive('getEngine')->andReturn($engine);
@@ -124,7 +123,7 @@ function contentDiscoveryManager(DiscoveryEngineInterface $engine, array $discov
     return $manager;
 }
 
-function contentModuleOrchestrator(array $laravel = [], array $framework = []): ModuleDiscoveryOrchestratorInterface&Mockery\MockInterface
+function contentModuleOrchestrator(array $laravel = [], array $framework = []): ModuleDiscoveryOrchestratorInterface&MockInterface
 {
     $orchestrator = Mockery::mock(ModuleDiscoveryOrchestratorInterface::class);
     $orchestrator->shouldReceive('discoverAndReturnLaravelModules')->andReturn($laravel);

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Artisan;
+use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 use Pollora\PostType\Domain\Contracts\PostTypeRegistryInterface;
 use Pollora\PostType\Domain\Contracts\PostTypeRepositoryInterface;
@@ -12,7 +13,6 @@ use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
 use Pollora\PostType\Infrastructure\Repositories\PostTypeRepository;
 use Pollora\PostType\Infrastructure\Services\PostTypeDiscovery;
-use Pollora\PostType\Application\Services\PostTypeService;
 use Pollora\PostType\UI\Console\PostTypeMakeCommand;
 
 beforeEach(function (): void {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\URL;
+use Mockery\MockInterface;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
 use Pollora\Hook\Domain\Contract\Action;
@@ -20,7 +21,7 @@ use Pollora\WordPress\Config\ConstantServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
 
 /**
- * @return array{WordPressServiceProvider, Mockery\MockInterface}
+ * @return array{WordPressServiceProvider, MockInterface}
  */
 function contentWordPressProvider(object $app, bool $console): array
 {
@@ -30,7 +31,7 @@ function contentWordPressProvider(object $app, bool $console): array
     $app->instance(ConsoleDetectionService::class, $detector);
     $app->instance(DebugDetectorInterface::class, Mockery::mock(DebugDetectorInterface::class));
 
-    if (! $app->bound(Action::class) || ! $app->make(Action::class) instanceof Mockery\MockInterface) {
+    if (! $app->bound(Action::class) || ! $app->make(Action::class) instanceof MockInterface) {
         $app->instance(Action::class, Mockery::mock(Action::class));
     }
 

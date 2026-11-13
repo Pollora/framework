@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Brain\Monkey\Functions;
 use Illuminate\Container\Container;
-use Pollora\BlockPattern\Application\Services\PatternService;
 use Pollora\BlockPattern\Domain\Contracts\PatternServiceInterface;
 use Pollora\BlockPattern\Domain\Models\Pattern;
 use Pollora\BlockPattern\Infrastructure\Registrars\PatternCategoryRegistrar;
