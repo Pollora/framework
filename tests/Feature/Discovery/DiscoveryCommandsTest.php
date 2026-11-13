@@ -399,7 +399,7 @@ describe('discovery:clear', function (): void {
     });
 
     it('explains that no cache driver is configured', function (): void {
-        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine(null));
+        $manager = contentDiscoveryManager(new ContentRichDiscoveryEngine);
         $manager->shouldReceive('clearCache')->once();
         $this->app->instance(DiscoveryManager::class, $manager);
 

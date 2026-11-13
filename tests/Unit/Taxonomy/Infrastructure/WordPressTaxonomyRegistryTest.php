@@ -7,12 +7,12 @@ use Pollora\Taxonomy\Infrastructure\Adapters\WordPressTaxonomyRegistry;
 
 function contentTaxonomyEntity(string $slug, array $args = [], string|array|null $objectType = null): object
 {
-    return new class($slug, $args, $objectType)
+    return new readonly class($slug, $args, $objectType)
     {
         public function __construct(
-            private readonly string $slug,
-            private readonly array $args,
-            private readonly string|array|null $objectType,
+            private string $slug,
+            private array $args,
+            private string|array|null $objectType,
         ) {}
 
         public function getSlug(): string
@@ -45,7 +45,7 @@ function contentTaxonomyEntity(string $slug, array $args = [], string|array|null
 describe('WordPressTaxonomyRegistry', function (): void {
     it('hands the slug, the object types and the arguments to register_taxonomy', function (): void {
         $captured = null;
-        Functions\expect('register_taxonomy')->once()->andReturnUsing(function ($slug, $objectType, $args) use (&$captured) {
+        Functions\expect('register_taxonomy')->once()->andReturnUsing(function ($slug, $objectType, $args) use (&$captured): stdClass {
             $captured = [$slug, $objectType, $args];
 
             return new stdClass;
@@ -61,7 +61,7 @@ describe('WordPressTaxonomyRegistry', function (): void {
 
     it('attaches the taxonomy to posts when the entity has no object type method', function (): void {
         $objectType = null;
-        Functions\expect('register_taxonomy')->once()->andReturnUsing(function ($slug, $type) use (&$objectType) {
+        Functions\expect('register_taxonomy')->once()->andReturnUsing(function ($slug, $type) use (&$objectType): stdClass {
             $objectType = $type;
 
             return new stdClass;
@@ -81,7 +81,7 @@ describe('WordPressTaxonomyRegistry', function (): void {
 
     it('generates the labels from the singular and plural names when none are given', function (): void {
         $captured = null;
-        Functions\expect('register_taxonomy')->once()->andReturnUsing(function ($slug, $type, $args) use (&$captured) {
+        Functions\expect('register_taxonomy')->once()->andReturnUsing(function ($slug, $type, $args) use (&$captured): stdClass {
             $captured = $args;
 
             return new stdClass;
@@ -105,7 +105,7 @@ describe('WordPressTaxonomyRegistry', function (): void {
 
     it('keeps the labels that the entity already declares', function (): void {
         $captured = null;
-        Functions\expect('register_taxonomy')->once()->andReturnUsing(function ($slug, $type, $args) use (&$captured) {
+        Functions\expect('register_taxonomy')->once()->andReturnUsing(function ($slug, $type, $args) use (&$captured): stdClass {
             $captured = $args;
 
             return new stdClass;

@@ -7,9 +7,9 @@ use Pollora\Taxonomy\Infrastructure\Repositories\TaxonomyRepository;
 
 function contentRepositoryTaxonomy(string $slug): object
 {
-    return new class($slug)
+    return new readonly class($slug)
     {
-        public function __construct(private readonly string $slug) {}
+        public function __construct(private string $slug) {}
 
         public function getSlug(): string
         {

@@ -163,8 +163,10 @@ describe('Bootstrap constants', function (): void {
         try {
             contentInvoke(contentBootstrap(), 'setConsoleServerVariables');
 
-            expect($_SERVER['HTTP_HOST'])->toBe('cli.example.test')
-                ->and($_SERVER['SERVER_PROTOCOL'])->toBe('https');
+            $current = $_SERVER;
+
+            expect($current['HTTP_HOST'])->toBe('cli.example.test')
+                ->and($current['SERVER_PROTOCOL'])->toBe('https');
         } finally {
             $_SERVER = $server;
         }

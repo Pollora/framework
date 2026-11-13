@@ -11,9 +11,9 @@ use Pollora\Collection\Infrastructure\Services\LaravelCollectionFactory;
 
 function contentPatternTheme(mixed $textDomain = 'my-theme'): object
 {
-    return new class($textDomain)
+    return new readonly class($textDomain)
     {
-        public function __construct(private readonly mixed $textDomain) {}
+        public function __construct(private mixed $textDomain) {}
 
         public function get(string $header): mixed
         {

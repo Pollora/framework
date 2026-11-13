@@ -124,11 +124,14 @@ describe('WordPressServiceProvider', function (): void {
         [$provider, $bootstrap] = contentWordPressProvider($this->app, console: true);
         $bootstrap->shouldReceive('register');
         $bootstrap->shouldReceive('boot');
+
         $provider->register();
 
         $provider->boot();
 
-        expect($_SERVER['HTTPS'])->toBe('on')
+        $current = $_SERVER;
+
+        expect($current['HTTPS'])->toBe('on')
             ->and(url('/page'))->toStartWith('https://');
     });
 
@@ -138,6 +141,7 @@ describe('WordPressServiceProvider', function (): void {
         [$provider, $bootstrap] = contentWordPressProvider($this->app, console: true);
         $bootstrap->shouldReceive('register');
         $bootstrap->shouldReceive('boot');
+
         $provider->register();
 
         $provider->boot();

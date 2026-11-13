@@ -59,7 +59,7 @@ function contentRunPostTypeDiscovery(array $classes, ?LoggerInterface $logger = 
     $service = Mockery::mock(PostTypeServiceInterface::class);
     $service->shouldReceive('register')->andReturnUsing(
         function (string $slug, string $singular, string $plural, array $args, int $priority) use (&$registered): object {
-            $registered[] = compact('slug', 'singular', 'plural', 'args', 'priority');
+            $registered[] = ['slug' => $slug, 'singular' => $singular, 'plural' => $plural, 'args' => $args, 'priority' => $priority];
 
             return new stdClass;
         }

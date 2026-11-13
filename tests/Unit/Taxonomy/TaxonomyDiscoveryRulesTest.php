@@ -59,7 +59,7 @@ function contentRunTaxonomyDiscovery(array $classes, ?LoggerInterface $logger = 
     $service = Mockery::mock(TaxonomyServiceInterface::class);
     $service->shouldReceive('register')->andReturnUsing(
         function (string $slug, string|array $objectType, string $singular, string $plural, array $args, int $priority) use (&$registered): object {
-            $registered[] = compact('slug', 'objectType', 'singular', 'plural', 'args', 'priority');
+            $registered[] = ['slug' => $slug, 'objectType' => $objectType, 'singular' => $singular, 'plural' => $plural, 'args' => $args, 'priority' => $priority];
 
             return new stdClass;
         }

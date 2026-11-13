@@ -7,13 +7,13 @@ use Pollora\PostType\Infrastructure\Adapters\WordPressPostTypeRegistry;
 
 function contentPostTypeEntity(string $slug, array $args = [], string $singular = 'Book', string $plural = 'Books'): object
 {
-    return new class($slug, $args, $singular, $plural)
+    return new readonly class($slug, $args, $singular, $plural)
     {
         public function __construct(
-            private readonly string $slug,
-            private readonly array $args,
-            private readonly string $singular,
-            private readonly string $plural,
+            private string $slug,
+            private array $args,
+            private string $singular,
+            private string $plural,
         ) {}
 
         public function getSlug(): string
@@ -41,7 +41,7 @@ function contentPostTypeEntity(string $slug, array $args = [], string $singular 
 describe('WordPressPostTypeRegistry', function (): void {
     it('hands the slug and the arguments to register_post_type', function (): void {
         $captured = null;
-        Functions\expect('register_post_type')->once()->andReturnUsing(function ($slug, $args) use (&$captured) {
+        Functions\expect('register_post_type')->once()->andReturnUsing(function ($slug, $args) use (&$captured): stdClass {
             $captured = [$slug, $args];
 
             return new stdClass;
@@ -56,7 +56,7 @@ describe('WordPressPostTypeRegistry', function (): void {
 
     it('generates the labels from the singular and plural names when none are given', function (): void {
         $captured = null;
-        Functions\expect('register_post_type')->once()->andReturnUsing(function ($slug, $args) use (&$captured) {
+        Functions\expect('register_post_type')->once()->andReturnUsing(function ($slug, $args) use (&$captured): stdClass {
             $captured = $args;
 
             return new stdClass;
@@ -80,7 +80,7 @@ describe('WordPressPostTypeRegistry', function (): void {
 
     it('keeps the labels that the entity already declares', function (): void {
         $captured = null;
-        Functions\expect('register_post_type')->once()->andReturnUsing(function ($slug, $args) use (&$captured) {
+        Functions\expect('register_post_type')->once()->andReturnUsing(function ($slug, $args) use (&$captured): stdClass {
             $captured = $args;
 
             return new stdClass;

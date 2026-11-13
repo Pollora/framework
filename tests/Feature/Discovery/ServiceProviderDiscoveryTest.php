@@ -87,7 +87,6 @@ it('collects a class whose discovered data is incomplete by checking the class i
         extends: AbstractServiceProvider::class,
         implements: [],
         attributes: [],
-        extendsChain: null,
     );
 
     $discovery = new ServiceProviderDiscovery;

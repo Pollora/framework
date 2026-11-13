@@ -60,7 +60,7 @@ final class ContentMemoryMediaStorage implements MediaStorage
 
     public function setVisibility(string $path, string $visibility): void {}
 
-    public function temporaryUrl(string $path, DateTimeInterface $expiresAt): ?string
+    public function temporaryUrl(string $path, DateTimeInterface $expiresAt): string
     {
         return 'https://signed.test/'.$path;
     }
@@ -115,6 +115,7 @@ describe('MediaCheck', function (): void {
             foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->tmp, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $file) {
                 $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
             }
+
             rmdir($this->tmp);
         }
     });

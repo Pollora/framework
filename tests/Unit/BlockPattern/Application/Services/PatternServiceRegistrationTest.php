@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Filesystem\Filesystem;
 use Pollora\BlockPattern\Application\Services\PatternService;
 use Pollora\BlockPattern\Domain\Contracts\PatternCategoryRegistrarInterface;
 use Pollora\BlockPattern\Domain\Contracts\PatternDataExtractorInterface;
@@ -25,7 +26,7 @@ function contentPatternThemes(array $themes): string
 
         foreach ($files as $file) {
             $path = $dir.'/'.$file;
-            is_dir(dirname($path)) || mkdir(dirname($path), 0o777, true);
+            (new Filesystem)->ensureDirectoryExists(dirname($path));
             file_put_contents($path, 'x');
         }
     }
@@ -169,6 +170,7 @@ describe('PatternService registration', function (): void {
         foreach (['missing', 'empty', 'zero', 'ok'] as $name) {
             $headers[$name.'.php'] = ['slug' => 'c/'.$name, 'title' => ucfirst($name)];
         }
+
         $service = contentPatternService(contentThemeService(new ThemeMetadata('child', $this->root)), $headers, [
             'empty.php' => '',
             'zero.php' => '0',

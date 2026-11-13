@@ -77,6 +77,7 @@ describe('pollora:make:block guards', function (): void {
         foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($blocks, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $file) {
             $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
         }
+
         rmdir($blocks);
 
         $this->artisan('pollora:make:block', ['name' => 'card', '--theme' => 'test-theme'])

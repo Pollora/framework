@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\ServiceProvider;
+use Mockery\MockInterface;
 use Pollora\Block\Infrastructure\Providers\BlockServiceProvider;
 use Pollora\Block\Infrastructure\Services\EditorRuntime;
 use Pollora\Block\Infrastructure\Services\ModuleBlocksRegistrar;
@@ -19,7 +20,7 @@ use Pollora\Hook\Domain\Contract\Filter;
 beforeEach(function (): void {
     $this->actions = [];
     $action = Mockery::mock(Action::class);
-    $action->shouldReceive('add')->andReturnUsing(function (string $hook, callable $callback, int $priority = 10) use (&$action) {
+    $action->shouldReceive('add')->andReturnUsing(function (string $hook, callable $callback, int $priority = 10) use (&$action): MockInterface {
         $this->actions[] = [$hook, $callback, $priority];
 
         return $action;
@@ -28,7 +29,7 @@ beforeEach(function (): void {
 
     $this->filters = [];
     $filter = Mockery::mock(Filter::class);
-    $filter->shouldReceive('add')->andReturnUsing(function (string $hook, callable $callback, int $priority = 10, int $args = 1) use (&$filter) {
+    $filter->shouldReceive('add')->andReturnUsing(function (string $hook, callable $callback, int $priority = 10, int $args = 1) use (&$filter): MockInterface {
         $this->filters[] = [$hook, $callback, $priority, $args];
 
         return $filter;
@@ -67,7 +68,7 @@ describe('BlockServiceProvider::boot()', function (): void {
         $this->categories->shouldReceive('registerConfiguredCategories');
         $calls = [];
         // Both are final: stand-ins that answer to the same calls are bound in their place.
-        $this->app->singleton(EditorRuntime::class, function () use (&$calls) {
+        $this->app->singleton(EditorRuntime::class, function () use (&$calls): object {
             return new class($calls)
             {
                 public function __construct(private array &$calls) {}
@@ -78,7 +79,7 @@ describe('BlockServiceProvider::boot()', function (): void {
                 }
             };
         });
-        $this->app->singleton(ModuleBlocksRegistrar::class, function () use (&$calls) {
+        $this->app->singleton(ModuleBlocksRegistrar::class, function () use (&$calls): object {
             return new class($calls)
             {
                 public function __construct(private array &$calls) {}

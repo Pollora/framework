@@ -92,8 +92,10 @@ describe('WordPressTypeResolver', function (): void {
     it('resolves the queried user before the logged in one', function (): void {
         $queried = new WP_User;
         $queried->ID = 7;
+
         $current = new WP_User;
         $current->ID = 3;
+
         Functions\when('get_queried_object')->justReturn($queried);
         Functions\when('wp_get_current_user')->justReturn($current);
 
@@ -103,6 +105,7 @@ describe('WordPressTypeResolver', function (): void {
     it('falls back to the logged in user when the queried object is not a user', function (): void {
         $current = new WP_User;
         $current->ID = 3;
+
         Functions\when('get_queried_object')->justReturn(new WP_Post);
         Functions\when('wp_get_current_user')->justReturn($current);
 
@@ -112,7 +115,8 @@ describe('WordPressTypeResolver', function (): void {
     it('does not take a visitor for a user', function (): void {
         $visitor = new WP_User;
         $visitor->ID = 0;
-        Functions\when('get_queried_object')->justReturn(null);
+
+        Functions\when('get_queried_object')->justReturn();
         Functions\when('wp_get_current_user')->justReturn($visitor);
 
         expect($this->resolver->resolveUser())->toBeNull();
