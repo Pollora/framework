@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Brain\Monkey\Functions;
 use Pollora\Attributes\PostType;
 use Pollora\Attributes\PostType\Labels;
 use Pollora\Attributes\Taxonomy;
@@ -21,26 +20,7 @@ use Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery;
 use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 
-/*
- * Stand-ins for the two WordPress functions that load a catalogue. They are real functions, not Brain Monkey
- * stubs: a stub would leave the function defined for every test that runs after, each of them then failing
- * on a call it did not mock.
- */
-if (! function_exists('determine_locale')) {
-    function determine_locale(): string
-    {
-        return $GLOBALS['i18nLoader']['locale'] ?? 'en_US';
-    }
-}
-
-if (! function_exists('load_textdomain')) {
-    function load_textdomain(string $domain, string $mofile, ?string $locale = null): bool
-    {
-        $GLOBALS['i18nLoader']['loads'][] = $domain.'|'.$mofile;
-
-        return false;
-    }
-}
+require_once __DIR__.'/../wordpress-i18n-stand-ins.php';
 
 /*
  * The default labels of a post type or a taxonomy are built on init, from the singular and
@@ -445,24 +425,25 @@ describe('texts an attribute writes', function (): void {
 describe('catalogue of the framework', function (): void {
     beforeEach(function (): void {
         unset($GLOBALS['l10n']['pollora']);
-        $GLOBALS['i18nLoader'] = ['locale' => 'en_US', 'loads' => []];
+        WordPressI18nStandIn::reset();
     });
 
     afterEach(function (): void {
-        unset($GLOBALS['l10n']['pollora'], $GLOBALS['i18nLoader']);
+        unset($GLOBALS['l10n']['pollora']);
+        WordPressI18nStandIn::reset();
     });
 
     it('is loaded, the site translations first, when the default labels are built, and asked once per locale', function (): void {
         i18nWiringCatalogue([]);
         unset($GLOBALS['l10n']['pollora']);
-        $GLOBALS['i18nLoader']['locale'] = 'xx_FIRST';
+        WordPressI18nStandIn::$locale = 'xx_FIRST';
         $registry = new TranslatingEntityRegistry(i18nWiringRecorder());
         $arguments = ['labels' => TranslatingEntityRegistry::defaultLabels('post_type', 'Book', 'Books')];
 
         $registry->register('book', $arguments, []);
         $registry->register('movie', $arguments, []);
 
-        expect($GLOBALS['i18nLoader']['loads'])->toBe([
+        expect(WordPressI18nStandIn::$loads)->toBe([
             'pollora|'.WP_LANG_DIR.'/pollora/pollora-xx_FIRST.mo',
             'pollora|'.dirname(__DIR__, 3).'/resources/languages/pollora-xx_FIRST.mo',
         ]);
@@ -470,11 +451,11 @@ describe('catalogue of the framework', function (): void {
 
     it('is not loaded again when it is', function (): void {
         i18nWiringCatalogue([]);
-        $GLOBALS['i18nLoader']['locale'] = 'xx_SECOND';
+        WordPressI18nStandIn::$locale = 'xx_SECOND';
         $GLOBALS['l10n']['pollora'] = new stdClass;
 
         (new TranslatingEntityRegistry(i18nWiringRecorder()))->register('book', ['labels' => TranslatingEntityRegistry::defaultLabels('post_type', 'Book', 'Books')], []);
 
-        expect($GLOBALS['i18nLoader']['loads'])->toBe([]);
+        expect(WordPressI18nStandIn::$loads)->toBe([]);
     });
 });

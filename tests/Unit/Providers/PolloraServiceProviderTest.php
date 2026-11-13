@@ -12,50 +12,10 @@ use Pollora\Providers\PolloraServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
 
-if (! defined('WP_LANG_DIR')) {
-    define('WP_LANG_DIR', sys_get_temp_dir().'/pollora-wp-lang');
-}
-
-/**
- * What the text domain loading asks of WordPress.
- *
- * The two WordPress functions below are real, not Brain Monkey stubs: a stub
- * defined during a test outlives it, and the first test that checks
- * function_exists('determine_locale') afterwards would call a stub with no
- * expectation. With the defaults reset after each test, they behave as
- * WordPress does when nothing was customised: an en_US site, no translation
- * file loaded.
- */
-final class PolloraTextDomainProbe
-{
-    public static string $locale = 'en_US';
-
-    /** @var null|callable(string, string): bool */
-    public static $loader;
-
-    public static function reset(): void
-    {
-        self::$locale = 'en_US';
-        self::$loader = null;
-    }
-}
-
-if (! function_exists('determine_locale')) {
-    function determine_locale(): string
-    {
-        return PolloraTextDomainProbe::$locale;
-    }
-}
-
-if (! function_exists('load_textdomain')) {
-    function load_textdomain(string $domain, string $mofile, ?string $locale = null): bool
-    {
-        return PolloraTextDomainProbe::$loader === null ? false : (PolloraTextDomainProbe::$loader)($domain, $mofile);
-    }
-}
+require_once __DIR__.'/../wordpress-i18n-stand-ins.php';
 
 afterEach(function (): void {
-    PolloraTextDomainProbe::reset();
+    WordPressI18nStandIn::reset();
     Mockery::close();
 });
 
@@ -93,8 +53,8 @@ describe('PolloraServiceProvider', function (): void {
 
     it('prefers the translations a site provides over the bundled ones', function (): void {
         $loaded = [];
-        PolloraTextDomainProbe::$locale = 'fr_FR';
-        PolloraTextDomainProbe::$loader = (function (string $domain, string $file) use (&$loaded): bool {
+        WordPressI18nStandIn::$locale = 'fr_FR';
+        WordPressI18nStandIn::$loader = (function (string $domain, string $file) use (&$loaded): bool {
             $loaded[] = [$domain, $file];
 
             return true;
@@ -107,8 +67,8 @@ describe('PolloraServiceProvider', function (): void {
 
     it('falls back to the bundled translations when the site has none', function (): void {
         $loaded = [];
-        PolloraTextDomainProbe::$locale = 'de_DE';
-        PolloraTextDomainProbe::$loader = (function (string $domain, string $file) use (&$loaded): bool {
+        WordPressI18nStandIn::$locale = 'de_DE';
+        WordPressI18nStandIn::$loader = (function (string $domain, string $file) use (&$loaded): bool {
             $loaded[] = $file;
 
             return false;
