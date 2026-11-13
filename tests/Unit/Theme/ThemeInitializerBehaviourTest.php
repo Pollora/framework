@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 use Mockery as m;
+use Mockery\MockInterface;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
@@ -35,7 +36,7 @@ afterEach(function (): void {
 
 /**
  * @param  array<class-string|string, mixed>  $services  extra services the container port answers with
- * @return array{0: ThemeInitializer, 1: Mockery\MockInterface, 2: ArrayObject<string, Closure>}
+ * @return array{0: ThemeInitializer, 1: MockInterface, 2: ArrayObject<string, Closure>}
  */
 function behaviourInitializer(array $services = [], ?ThemeModuleInterface $active = null): array
 {

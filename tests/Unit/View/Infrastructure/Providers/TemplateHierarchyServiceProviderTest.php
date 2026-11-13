@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 use Illuminate\Foundation\Application;
+use Illuminate\View\Factory;
 use Illuminate\View\ViewFinderInterface;
 use Mockery as m;
 use Pollora\Filesystem\Filesystem;
@@ -25,7 +26,7 @@ function hierarchyProviderApp(?Filter $filter = null): Application
 {
     $app = new Application(sys_get_temp_dir());
     $finder = m::mock(ViewFinderInterface::class);
-    $view = m::mock(Illuminate\View\Factory::class);
+    $view = m::mock(Factory::class);
     $view->shouldReceive('getFinder')->andReturn($finder);
     $app->instance('view', $view);
     $app->instance(Filter::class, $filter ?? m::mock(Filter::class)->shouldIgnoreMissing());

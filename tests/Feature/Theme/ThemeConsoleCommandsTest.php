@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use Illuminate\Config\Repository;
+use Illuminate\Console\Command;
 use Illuminate\Console\OutputStyle;
+use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
+use Laravel\Prompts\ConfirmPrompt;
 use Laravel\Prompts\MultiSelectPrompt;
 use Laravel\Prompts\Prompt;
 use Laravel\Prompts\SelectPrompt;
@@ -16,12 +19,15 @@ use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Models\ThemeMetadata;
+use Pollora\Theme\Domain\Models\ThemeModule;
 use Pollora\Theme\UI\Console\Commands\ThemeStatusCommand;
 use Pollora\Theme\UI\Console\MakeThemeCommand;
 use Pollora\Theme\UI\Console\RemoveThemeCommand;
 use Pollora\Translation\Domain\Contracts\TranslationCompilerInterface;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Process\Process;
 
 function consoleTempDir(): string
 {
@@ -39,7 +45,7 @@ function consoleRemove(string $dir): void
 /**
  * @return array{0: int, 1: string}
  */
-function consoleRun(Illuminate\Console\Command $command, array $parameters = [], bool $interactive = false): array
+function consoleRun(Command $command, array $parameters = [], bool $interactive = false): array
 {
     $command->setLaravel(app());
     $input = new ArrayInput($parameters);
@@ -52,7 +58,7 @@ function consoleRun(Illuminate\Console\Command $command, array $parameters = [],
 
 function consoleTheme(string $name, bool $enabled = true): ThemeModuleInterface
 {
-    $theme = new Pollora\Theme\Domain\Models\ThemeModule($name, '/themes/'.$name);
+    $theme = new ThemeModule($name, '/themes/'.$name);
     $theme->setEnabled($enabled);
 
     return $theme;
@@ -464,7 +470,7 @@ describe('pollora:make:theme plugins and activation', function (): void {
             PHP;
 
         try {
-            $process = new Symfony\Component\Process\Process([PHP_BINARY, '-r', $script, dirname(__DIR__, 3), $pluginsDir]);
+            $process = new Process([PHP_BINARY, '-r', $script, dirname(__DIR__, 3), $pluginsDir]);
             $process->run();
             $found = json_decode($process->getOutput(), true);
         } finally {
@@ -484,7 +490,7 @@ describe('pollora:make:theme plugins and activation', function (): void {
     it('asks to replace the active theme and follows the answer', function (): void {
         $registrar = m::mock(ThemeRegistrarInterface::class);
         $registrar->shouldReceive('getActiveTheme')->andReturn(consoleTheme('other'));
-        $container = new Illuminate\Container\Container;
+        $container = new Container;
         $container->instance(ThemeRegistrarInterface::class, $registrar);
         app()->instance(ThemeAvailability::class, new ThemeAvailability($container));
         $this->command->setInput(tap(new ArrayInput(['name' => 'x'], $this->command->getDefinition()), fn ($input) => $input->setInteractive(true)));
@@ -595,7 +601,7 @@ describe('pollora:make:theme plugin activation branches', function (): void {
         $command->processSucceeds = $processSucceeds;
         $command->activationResult = $activationResult;
         $command->setLaravel(app());
-        $input = new ArrayInput([], new Symfony\Component\Console\Input\InputDefinition);
+        $input = new ArrayInput([], new InputDefinition);
         $input->setInteractive(false);
         $command->setInput($input);
         $command->buffer = $buffer = new BufferedOutput;
@@ -606,7 +612,7 @@ describe('pollora:make:theme plugin activation branches', function (): void {
 
     beforeEach(function (): void {
         Prompt::fallbackWhen(true);
-        Laravel\Prompts\ConfirmPrompt::fallbackUsing(fn (): bool => true);
+        ConfirmPrompt::fallbackUsing(fn (): bool => true);
         Brain\Monkey\Functions\when('did_action')->justReturn(1);
     });
 
@@ -632,7 +638,7 @@ describe('pollora:make:theme plugin activation branches', function (): void {
 
     it('asks once for a single plugin and by count for several, and activates nothing when declined', function (): void {
         $labels = [];
-        Laravel\Prompts\ConfirmPrompt::fallbackUsing(function (Laravel\Prompts\ConfirmPrompt $prompt) use (&$labels): bool {
+        ConfirmPrompt::fallbackUsing(function (ConfirmPrompt $prompt) use (&$labels): bool {
             $labels[] = $prompt->label;
 
             return false;

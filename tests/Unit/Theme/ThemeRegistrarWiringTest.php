@@ -13,6 +13,7 @@ use Pollora\Modules\Infrastructure\Services\ModuleConfigurationLoader;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
 use Pollora\Modules\Infrastructure\Services\ModuleRouteLoader;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
+use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 use Pollora\Theme\Domain\Models\ImageSize;
 use Pollora\Theme\Domain\Models\Menus;
@@ -46,7 +47,7 @@ function registrarCleanup(string $dir): void
     @rmdir($dir);
 }
 
-function registrarRun(Container $container, string $dir): Pollora\Theme\Domain\Contracts\ThemeModuleInterface
+function registrarRun(Container $container, string $dir): ThemeModuleInterface
 {
     Functions\when('get_stylesheet')->justReturn('demo');
     Functions\when('get_stylesheet_directory')->justReturn($dir);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
+use Illuminate\Filesystem\Filesystem;
 use Mockery as m;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\HookInterface;
@@ -20,7 +21,7 @@ function laravelModuleDir(): string
 
 function laravelModuleCleanup(string $dir): void
 {
-    (new Illuminate\Filesystem\Filesystem)->deleteDirectory($dir);
+    (new Filesystem)->deleteDirectory($dir);
 }
 
 describe('LaravelThemeModule paths', function (): void {

@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\View\Engine;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\View\Engine;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application;
+use Illuminate\View\Compilers\CompilerInterface;
 use Illuminate\View\Engines\CompilerEngine;
 use Illuminate\View\Factory;
 use Illuminate\View\View;
@@ -23,7 +25,7 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     Container::setInstance($this->previousContainer);
-    (new Illuminate\Filesystem\Filesystem)->deleteDirectory($this->dir);
+    (new Filesystem)->deleteDirectory($this->dir);
 });
 
 function macroView(string $name, string $path, ?Engine $engine = null): View
@@ -33,7 +35,7 @@ function macroView(string $name, string $path, ?Engine $engine = null): View
 
 describe('View::getCompiled() macro', function (): void {
     it('gives the compiled path when the engine compiles Blade', function (): void {
-        $compiler = Mockery::mock(Illuminate\View\Compilers\CompilerInterface::class);
+        $compiler = Mockery::mock(CompilerInterface::class);
         $compiler->shouldReceive('getCompiledPath')->with('/v/page.blade.php')->andReturn('/c/abc.php');
         $engine = Mockery::mock(CompilerEngine::class);
         $engine->shouldReceive('getCompiler')->andReturn($compiler);

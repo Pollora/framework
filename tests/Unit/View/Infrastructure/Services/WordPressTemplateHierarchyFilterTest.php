@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\ViewFinderInterface;
 use Mockery as m;
 use Pollora\View\Application\UseCases\MakeTemplateIncludableUseCase;
@@ -41,7 +42,7 @@ function hierarchyViewsDir(array $files): string
 
 function hierarchyRemove(string $dir): void
 {
-    (new Illuminate\Filesystem\Filesystem)->deleteDirectory($dir);
+    (new Filesystem)->deleteDirectory($dir);
 }
 
 describe('WordPressTemplateHierarchyFilter hierarchy', function (): void {
@@ -125,7 +126,7 @@ describe('WordPressTemplateHierarchyFilter theme templates', function (): void {
             'landing.blade.php' => "{{-- Template Name: Landing --}}\n<div></div>",
             'sub/product.blade.php' => "{{-- Template Name:  Product page  --}}\n{{-- Template Post Type: product, page --}}",
             'plain.blade.php' => '<div>no header</div>',
-            'legacy.php' => "{{-- Template Name: Not Blade --}}",
+            'legacy.php' => '{{-- Template Name: Not Blade --}}',
         ]);
         $this->views = m::mock(ViewFinderInterface::class);
         $this->views->shouldReceive('getPaths')->andReturn([$this->dir, '/does/not/exist']);

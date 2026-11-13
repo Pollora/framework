@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
+use Illuminate\Contracts\Translation\Loader;
+use Illuminate\Foundation\Application;
 use Mockery as m;
+use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
@@ -58,12 +61,12 @@ describe('ThemeServiceProvider registration', function (): void {
     });
 
     it('binds the registrar, the container port and the theme manager', function (): void {
-        $this->app->instance(Pollora\Application\Application\Services\ConsoleDetectionService::class, m::mock(Pollora\Application\Application\Services\ConsoleDetectionService::class));
+        $this->app->instance(ConsoleDetectionService::class, m::mock(ConsoleDetectionService::class));
         $this->app->instance('translator', new class
         {
-            public function getLoader(): Illuminate\Contracts\Translation\Loader
+            public function getLoader(): Loader
             {
-                return Mockery::mock(Illuminate\Contracts\Translation\Loader::class);
+                return m::mock(Loader::class);
             }
         });
         expect($this->app->make(ThemeRegistrarInterface::class))->toBeInstanceOf(ThemeRegistrar::class)
@@ -208,7 +211,7 @@ describe('ThemeServiceProvider boot', function (): void {
 });
 
 describe('ThemeServiceProvider editor styles', function (): void {
-    function themeProviderEditorCallback(Illuminate\Foundation\Application $app, ?EditorStyleResolver $resolver = null): Closure
+    function themeProviderEditorCallback(Application $app, ?EditorStyleResolver $resolver = null): Closure
     {
         $captured = null;
         $action = m::mock(Action::class);
@@ -259,7 +262,7 @@ describe('ThemeServiceProvider editor styles', function (): void {
 });
 
 describe('ThemeServiceProvider theme.json filter', function (): void {
-    function themeProviderThemeJsonCallback(Illuminate\Foundation\Application $app, ?ThemeJsonResolverInterface $resolver): Closure
+    function themeProviderThemeJsonCallback(Application $app, ?ThemeJsonResolverInterface $resolver): Closure
     {
         $captured = null;
         $filter = m::mock(Filter::class);
