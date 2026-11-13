@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Brain\Monkey\Functions;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Application\Infrastructure\Providers\ApplicationServiceProvider;
@@ -16,7 +15,48 @@ if (! defined('WP_LANG_DIR')) {
     define('WP_LANG_DIR', sys_get_temp_dir().'/pollora-wp-lang');
 }
 
-afterEach(fn () => Mockery::close());
+/**
+ * What the text domain loading asks of WordPress.
+ *
+ * The two WordPress functions below are real, not Brain Monkey stubs: a stub
+ * defined during a test outlives it, and the first test that checks
+ * function_exists('determine_locale') afterwards would call a stub with no
+ * expectation. With the defaults reset after each test, they behave as
+ * WordPress does when nothing was customised: an en_US site, no translation
+ * file loaded.
+ */
+final class PolloraTextDomainProbe
+{
+    public static string $locale = 'en_US';
+
+    /** @var null|callable(string, string): bool */
+    public static $loader = null;
+
+    public static function reset(): void
+    {
+        self::$locale = 'en_US';
+        self::$loader = null;
+    }
+}
+
+if (! function_exists('determine_locale')) {
+    function determine_locale(): string
+    {
+        return PolloraTextDomainProbe::$locale;
+    }
+}
+
+if (! function_exists('load_textdomain')) {
+    function load_textdomain(string $domain, string $mofile): bool
+    {
+        return PolloraTextDomainProbe::$loader === null ? false : (PolloraTextDomainProbe::$loader)($domain, $mofile);
+    }
+}
+
+afterEach(function (): void {
+    PolloraTextDomainProbe::reset();
+    Mockery::close();
+});
 
 describe('PolloraServiceProvider', function (): void {
     it('registers every framework provider exactly once, in a stable order', function (): void {
@@ -40,8 +80,6 @@ describe('PolloraServiceProvider', function (): void {
 
     it('offers the wp-config bridge for publishing under the public tag', function (): void {
         $app = new Application(sys_get_temp_dir().'/pollora-provider-'.uniqid());
-        Functions\when('determine_locale')->justReturn('fr_FR');
-        Functions\when('load_textdomain')->justReturn(true);
 
         (new PolloraServiceProvider($app))->boot();
 
@@ -54,8 +92,8 @@ describe('PolloraServiceProvider', function (): void {
 
     it('prefers the translations a site provides over the bundled ones', function (): void {
         $loaded = [];
-        Functions\when('determine_locale')->justReturn('fr_FR');
-        Functions\when('load_textdomain')->alias(function (string $domain, string $file) use (&$loaded): bool {
+        PolloraTextDomainProbe::$locale = 'fr_FR';
+        PolloraTextDomainProbe::$loader = (function (string $domain, string $file) use (&$loaded): bool {
             $loaded[] = [$domain, $file];
 
             return true;
@@ -68,8 +106,8 @@ describe('PolloraServiceProvider', function (): void {
 
     it('falls back to the bundled translations when the site has none', function (): void {
         $loaded = [];
-        Functions\when('determine_locale')->justReturn('de_DE');
-        Functions\when('load_textdomain')->alias(function (string $domain, string $file) use (&$loaded): bool {
+        PolloraTextDomainProbe::$locale = 'de_DE';
+        PolloraTextDomainProbe::$loader = (function (string $domain, string $file) use (&$loaded): bool {
             $loaded[] = $file;
 
             return false;

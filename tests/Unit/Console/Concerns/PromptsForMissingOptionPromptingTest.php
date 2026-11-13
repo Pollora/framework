@@ -151,3 +151,58 @@ describe('PromptsForMissingOption prompting', function (): void {
             ->and($result['after'])->toBe(1);
     });
 });
+
+/**
+ * @param  array<string, string>  $config  Option => label (the bare string form)
+ * @param  list<string>  $keys
+ * @return array<string, mixed>
+ */
+function runBareLabelCommand(array $config, array $keys): array
+{
+    Prompt::fake($keys);
+
+    $command = new class($config) extends Command implements PromptsForMissingOptionContract
+    {
+        use PromptsForMissingOption;
+
+        /** @var array<string, mixed> */
+        public array $received = [];
+
+        /** @param array<string, string> $config */
+        public function __construct(private readonly array $config)
+        {
+            parent::__construct('bare');
+            $this->addOption('title', null, InputOption::VALUE_REQUIRED);
+        }
+
+        protected function execute(InputInterface $input, OutputInterface $output): int
+        {
+            $this->received = $input->getOptions();
+
+            return self::SUCCESS;
+        }
+
+        protected function promptForMissingOptionsUsing(): array
+        {
+            return $this->config;
+        }
+    };
+
+    $command->run(new ArrayInput([]), new BufferedOutput);
+
+    return $command->received;
+}
+
+describe('PromptsForMissingOption bare configuration', function (): void {
+    it('asks a text question from a bare label, with no default', function (): void {
+        $received = runBareLabelCommand(['title' => 'Title?'], [...str_split('Hello'), Key::ENTER]);
+
+        expect($received['title'])->toBe('Hello');
+    });
+
+    it('asks nothing when the command declares no question', function (): void {
+        $received = runBareLabelCommand([], []);
+
+        expect($received['title'])->toBeNull();
+    });
+});
