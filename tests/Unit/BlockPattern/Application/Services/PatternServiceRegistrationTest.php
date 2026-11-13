@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Brain\Monkey\Functions;
 use Illuminate\Filesystem\Filesystem;
 use Pollora\BlockPattern\Application\Services\PatternService;
 use Pollora\BlockPattern\Domain\Contracts\PatternCategoryRegistrarInterface;
@@ -90,6 +91,14 @@ describe('PatternService registration', function (): void {
     beforeEach(function (): void {
         $this->root = null;
         $this->registered = [];
+
+        // These tests are about the theme path, not about WordPress. Other test
+        // files define wp_get_theme() for the whole process; when it exists, it
+        // must hand back an object, and when it does not, it must stay undefined
+        // so that the pattern service tests that rely on that keep passing.
+        if (function_exists('wp_get_theme')) {
+            Functions\when('wp_get_theme')->alias(fn (): object => new stdClass);
+        }
     });
 
     afterEach(function (): void {
