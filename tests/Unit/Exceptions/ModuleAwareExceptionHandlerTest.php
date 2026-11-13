@@ -11,6 +11,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Routing\ResponseFactory;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\View\Factory as ViewFactory;
 use Illuminate\View\FileViewFinder;
 use Pollora\Exceptions\Infrastructure\Handlers\ModuleAwareExceptionHandler;
@@ -54,6 +55,8 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     Mockery::close();
+    Facade::clearResolvedInstances();
+    Facade::setFacadeApplication(null);
     Container::setInstance($this->previousContainer);
 });
 
@@ -164,7 +167,9 @@ describe('ModuleAwareExceptionHandler rendering', function (): void {
         $app = pollora_handler_app(['app' => ['debug' => false]]);
         $app->make('view')->shouldReceive('exists')->andReturn(false);
 
-        $response = (new ModuleAwareExceptionHandler($app))->render(pollora_json_request(), new NotFoundHttpException('gone'));
+        Facade::setFacadeApplication($app); // Laravel's HTML fallback uses the facades
+        $app->make('view')->shouldReceive('replaceNamespace')->andReturnNull();
+        $response = (new ModuleAwareExceptionHandler($app))->render(pollora_html_request(), new NotFoundHttpException('gone'));
 
         expect($response->getStatusCode())->toBe(404);
     });
@@ -174,18 +179,42 @@ describe('ModuleAwareExceptionHandler rendering', function (): void {
         $logger = Mockery::mock(LoggerInterface::class);
         $logger->shouldReceive('error')->once()->with('Failed to render module error view: view crashed');
         $app->instance(LoggerInterface::class, $logger);
-        $app->make('view')->shouldReceive('exists')->andThrow(new RuntimeException('view crashed'));
+        $crashed = false;
+        // Crashes on the module lookup only: Laravel's own fallback asks the same factory afterwards.
+        $app->make('view')->shouldReceive('exists')->andReturnUsing(function () use (&$crashed): bool {
+            if (! $crashed) {
+                $crashed = true;
 
-        $response = (new ModuleAwareExceptionHandler($app))->render(pollora_json_request(), new NotFoundHttpException('gone'));
+                throw new RuntimeException('view crashed');
+            }
+
+            return false;
+        });
+
+        Facade::setFacadeApplication($app); // Laravel's HTML fallback uses the facades
+        $app->make('view')->shouldReceive('replaceNamespace')->andReturnNull();
+        $response = (new ModuleAwareExceptionHandler($app))->render(pollora_html_request(), new NotFoundHttpException('gone'));
 
         expect($response->getStatusCode())->toBe(404);
     });
 
     it('survives a rendering failure when no logger is available', function (): void {
         $app = pollora_handler_app(['app' => ['debug' => false]]);
-        $app->make('view')->shouldReceive('exists')->andThrow(new RuntimeException('view crashed'));
+        $crashed = false;
+        // Crashes on the module lookup only: Laravel's own fallback asks the same factory afterwards.
+        $app->make('view')->shouldReceive('exists')->andReturnUsing(function () use (&$crashed): bool {
+            if (! $crashed) {
+                $crashed = true;
 
-        $response = (new ModuleAwareExceptionHandler($app))->render(pollora_json_request(), new NotFoundHttpException('gone'));
+                throw new RuntimeException('view crashed');
+            }
+
+            return false;
+        });
+
+        Facade::setFacadeApplication($app); // Laravel's HTML fallback uses the facades
+        $app->make('view')->shouldReceive('replaceNamespace')->andReturnNull();
+        $response = (new ModuleAwareExceptionHandler($app))->render(pollora_html_request(), new NotFoundHttpException('gone'));
 
         expect($response->getStatusCode())->toBe(404);
     });
@@ -202,6 +231,49 @@ describe('ModuleAwareExceptionHandler rendering', function (): void {
 
         // The logger expectation above is verified when the test ends; the handler stays usable.
         expect($handler->shouldReport(new RuntimeException('boom')))->toBeTrue();
+    });
+});
+
+describe('ModuleAwareExceptionHandler content negotiation', function (): void {
+    it('decides between HTML and JSON the way Laravel does', function (?string $accept, bool $ajax, bool $expected): void {
+        $handler = new ModuleAwareExceptionHandler(pollora_handler_app());
+        $method = new ReflectionMethod($handler, 'shouldRenderHtmlResponse');
+
+        // Request::create() adds a browser-like Accept header by default: set or remove it explicitly.
+        $request = Request::create('/page', 'GET', [], [], [], $ajax ? ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'] : []);
+        $accept === null ? $request->headers->remove('Accept') : $request->headers->set('Accept', $accept);
+
+        expect($method->invoke($handler, $request))->toBe($expected);
+    })->with([
+        'Accept JSON' => ['application/json', false, false],
+        'Accept HTML' => ['text/html', false, true],
+        'no Accept header' => [null, false, true],
+        'AJAX without a specific Accept' => ['*/*', true, false],
+    ]);
+
+    it('does not try the module views for an HTTP exception on a JSON request', function (): void {
+        $app = pollora_handler_app(['app' => ['debug' => false]]);
+        $app->make('view')->shouldReceive('exists')->andReturn(true);
+        $app->make('view')->shouldReceive('make')->andReturn(Mockery::mock(View::class, ['render' => '<h1>Module 404</h1>']));
+
+        $response = (new ModuleAwareExceptionHandler($app))->render(pollora_json_request(), new NotFoundHttpException('gone'));
+
+        expect($response->getStatusCode())->toBe(404)
+            ->and($response->headers->get('Content-Type'))->toContain('application/json')
+            ->and(json_decode($response->getContent(), true))->toBe(['message' => 'gone']);
+    });
+
+    it('renders the module view for an HTTP exception on a request without Accept header', function (): void {
+        $app = pollora_handler_app(['app' => ['debug' => false]]);
+        $app->make('view')->shouldReceive('exists')->andReturnUsing(fn (string $view): bool => $view === 'errors.404');
+        $app->make('view')->shouldReceive('make')->andReturn(Mockery::mock(View::class, ['render' => '<h1>Module 404</h1>']));
+        $request = Request::create('/missing');
+        $request->headers->remove('Accept');
+
+        $response = (new ModuleAwareExceptionHandler($app))->render($request, new NotFoundHttpException('gone'));
+
+        expect($response->getStatusCode())->toBe(404)
+            ->and($response->getContent())->toBe('<h1>Module 404</h1>');
     });
 });
 
