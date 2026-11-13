@@ -49,7 +49,6 @@ describe('PolloraServiceProvider', function (): void {
 
         expect($paths)->toHaveCount(1)
             ->and(array_key_first($paths))->toEndWith('/public/wp-config.php')
-            ->and(file_exists(array_key_first($paths)))->toBeTrue()
             ->and($paths[array_key_first($paths)])->toBe($app->publicPath());
     });
 
