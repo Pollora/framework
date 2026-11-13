@@ -228,7 +228,7 @@ class Menus implements ThemeComponent
         if (isset($rule['class'])) {
             $newClasses = is_array($rule['class']) ? $rule['class'] : explode(' ', (string) $rule['class']);
             $currentClasses = isset($attributes['class']) ? explode(' ', (string) $attributes['class']) : [];
-            $attributes['class'] = implode(' ', array_merge($currentClasses, $newClasses));
+            $attributes['class'] = implode(' ', array_filter(array_merge($currentClasses, $newClasses), static fn (string $class): bool => $class !== ''));
         }
 
         // Handle other attributes
