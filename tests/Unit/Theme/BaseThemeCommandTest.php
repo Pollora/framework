@@ -11,9 +11,9 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 
-function baseThemeCommand(string $themesDir, string $name = 'demo'): BaseThemeCommand
+function baseThemeCommand(?string $themesDir, string $name = 'demo'): BaseThemeCommand
 {
-    $command = new class(new Repository(['theme' => ['directory' => $themesDir]]), new Filesystem) extends BaseThemeCommand
+    $command = new class(new Repository($themesDir === null ? [] : ['theme' => ['path' => $themesDir]]), new Filesystem) extends BaseThemeCommand
     {
         public function themesPath(): string
         {
@@ -66,8 +66,24 @@ afterEach(function (): void {
 });
 
 describe('BaseThemeCommand', function (): void {
-    it('reads the themes directory from theme.directory', function (): void {
+    it('reads the themes directory from theme.path', function (): void {
         expect(baseThemeCommand($this->dir)->themesPath())->toBe($this->dir);
+    });
+
+    it('does not read the themes directory from a theme.directory key', function (): void {
+        $command = new class(new Repository(['theme' => ['directory' => $this->dir]]), new Filesystem) extends BaseThemeCommand
+        {
+            public function themesPath(): string
+            {
+                return $this->getThemesPath();
+            }
+        };
+
+        expect($command->themesPath())->toBe('/srv/site/themes');
+    });
+
+    it('defaults the themes directory to base_path(themes) without configuration', function (): void {
+        expect(baseThemeCommand(null)->themesPath())->toBe('/srv/site/themes');
     });
 
     it('reports whether the named theme directory exists', function (): void {
