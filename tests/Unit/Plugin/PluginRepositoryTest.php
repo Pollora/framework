@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 use Pollora\Collection\Infrastructure\Adapters\LaravelCollectionAdapter;
+use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Domain\Exceptions\PluginException;
 use Pollora\Plugin\Domain\Models\PluginModule;
 use Pollora\Plugin\Domain\Support\PluginCollection;
@@ -149,7 +150,7 @@ describe('lookup', function (): void {
     });
 
     it('throws a helpful exception for an unknown plugin', function (): void {
-        expect(fn () => pluginRepositoryOn($this->root)->findOrFail('ghost'))
+        expect(fn (): PluginModuleInterface => pluginRepositoryOn($this->root)->findOrFail('ghost'))
             ->toThrow(PluginException::class, "Plugin 'ghost' not found. Check the name against the plugins that pollora:plugin:list shows.");
     });
 
@@ -216,6 +217,7 @@ describe('adding and removing', function (): void {
     it('adds a plugin under its lower-cased name', function (): void {
         $repository = pluginRepositoryOn($this->root);
         $repository->all();
+
         $extra = new PluginModule('Extra', '/somewhere/Extra');
 
         $repository->add('Extra', $extra);
@@ -259,6 +261,7 @@ describe('register() and boot()', function (): void {
             $module->setEnabled($enabled);
             $repository->add($name, $module);
         }
+
         // Add the plugins before the scan would overwrite them.
         (new ReflectionProperty($repository, 'cached'))->setValue($repository, true);
 
@@ -291,6 +294,7 @@ describe('register() and boot()', function (): void {
             }
         };
         $failing->enable();
+
         $fine = new class('fine', '/p/fine') extends PluginModule
         {
             public bool $registered = false;

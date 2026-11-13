@@ -30,6 +30,7 @@ function makePluginAsking(ModuleScaffolderService $scaffolder, array $input): ar
 
     $input = new ArrayInput($input, $command->getDefinition());
     $input->setInteractive(false);
+
     $output = new BufferedOutput;
     $command->setInput($input);
     $command->setOutput(new OutputStyle($input, $output));
@@ -77,7 +78,7 @@ it('only accepts a repository in owner/repo form', function (): void {
     $verdicts = [];
     SelectPrompt::fallbackUsing(fn (): string => 'repository');
     TextPrompt::fallbackUsing(function (TextPrompt $prompt) use (&$verdicts): string {
-        $validate = (fn () => $this->validate)->call($prompt);
+        $validate = (fn (): mixed => $this->validate)->call($prompt);
         $verdicts = [$validate(''), $validate('no-slash'), $validate('owner/repo')];
 
         return 'owner/repo';

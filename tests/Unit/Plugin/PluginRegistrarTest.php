@@ -181,6 +181,7 @@ describe('wiring into the module services', function (): void {
     it('only resets the cache of a plugin repository', function (): void {
         $repository = Mockery::mock(ModuleRepositoryInterface::class);
         $repository->shouldNotReceive('resetCache');
+
         $this->container->instance(ModuleRepositoryInterface::class, $repository);
 
         $this->registrar->register('acme', makeRegistrarPlugin($this->root, 'acme'));
@@ -211,6 +212,7 @@ describe('wiring into the module services', function (): void {
         foreach (['includes', 'classes', 'vendor', 'node_modules', 'assets', 'languages', '.git', 'dist'] as $directory) {
             mkdir($path.'/'.$directory, 0755, true);
         }
+
         file_put_contents($path.'/acme.php', "<?php\n/*\nPlugin Name: Acme\n*/");
         file_put_contents($path.'/readme.txt', 'not a directory');
 

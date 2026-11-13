@@ -18,24 +18,42 @@ use Spatie\StructureDiscoverer\Data\DiscoveredInterface;
 final class AjaxDiscoveryFixture
 {
     #[Ajax('fixture_default')]
-    public function byDefault(): void {}
+    public function byDefault(): string
+    {
+        return 'default';
+    }
 
     #[Ajax('fixture_guest', AjaxAccess::GUEST)]
-    public function forGuests(): void {}
+    public function forGuests(): string
+    {
+        return 'guests';
+    }
 
     #[Ajax('fixture_all', access: AjaxAccess::ALL)]
-    public function forEveryone(): void {}
+    public function forEveryone(): string
+    {
+        return 'everyone';
+    }
 
-    public function notAnAction(): void {}
+    public function notAnAction(): string
+    {
+        return $this->hidden();
+    }
 
     #[Ajax('fixture_private')]
-    private function hidden(): void {}
+    private function hidden(): string
+    {
+        return 'hidden';
+    }
 }
 
 abstract class AjaxDiscoveryAbstractFixture
 {
     #[Ajax('fixture_abstract')]
-    public function action(): void {}
+    public function action(): string
+    {
+        return 'abstract';
+    }
 }
 
 /**

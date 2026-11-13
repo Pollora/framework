@@ -193,7 +193,7 @@ describe('sorting', function (): void {
 });
 
 it('reports a failure while listing plugins', function (): void {
-    $manager = pluginListManager([], fn () => throw new RuntimeException('database offline'));
+    $manager = pluginListManager([], fn (): never => throw new RuntimeException('database offline'));
 
     [$status, $output] = runPluginList($manager);
 

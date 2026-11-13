@@ -176,6 +176,7 @@ describe('register()', function (): void {
     it('leaves translations alone when there is no languages directory', function (): void {
         $translator = Mockery::mock();
         $translator->shouldNotReceive('addNamespace');
+
         $this->app->instance('translator', $translator);
 
         $this->module->register();

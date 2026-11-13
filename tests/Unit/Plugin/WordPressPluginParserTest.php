@@ -22,36 +22,38 @@ afterEach(function (): void {
     foreach (glob($this->dir.'/*/*') ?: [] as $file) {
         unlink($file);
     }
+
     foreach (glob($this->dir.'/*') ?: [] as $entry) {
         is_dir($entry) ? rmdir($entry) : unlink($entry);
     }
+
     rmdir($this->dir);
 });
 
 function fullPluginHeader(): string
 {
-    return <<<'PHP'
-<?php
-/**
- * Plugin Name: Acme Shop
- * Plugin URI: https://example.test/acme-shop
- * Description: Sells things.
- * Version: 2.3.1
- * Author: Acme
- * Author URI: https://example.test
- * Text Domain: acme-shop
- * Domain Path: /lang
- * Requires at least: 6.4
- * Tested up to: 6.8
- * Requires PHP: 8.2
- * Network: true
- * License: GPL-2.0
- * License URI: https://example.test/license
- * Update URI: https://example.test/update
- */
-
-defined('ABSPATH') || exit;
-PHP;
+    return <<<'PHP_WRAP'
+    <?php
+    /**
+     * Plugin Name: Acme Shop
+     * Plugin URI: https://example.test/acme-shop
+     * Description: Sells things.
+     * Version: 2.3.1
+     * Author: Acme
+     * Author URI: https://example.test
+     * Text Domain: acme-shop
+     * Domain Path: /lang
+     * Requires at least: 6.4
+     * Tested up to: 6.8
+     * Requires PHP: 8.2
+     * Network: true
+     * License: GPL-2.0
+     * License URI: https://example.test/license
+     * Update URI: https://example.test/update
+     */
+    
+    defined('ABSPATH') || exit;
+    PHP_WRAP;
 }
 
 it('reads every standard header of a plugin file', function (): void {

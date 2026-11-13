@@ -31,7 +31,7 @@ function pluginStatusManager(?Closure $failing = null): PluginManager
 
         return $modules;
     });
-    $repository->shouldReceive('find')->andReturnUsing(fn (string $name) => $modules[$name] ?? null);
+    $repository->shouldReceive('find')->andReturnUsing(fn (string $name): ?PluginModule => $modules[$name] ?? null);
     $repository->shouldReceive('allEnabled')->andReturn(array_filter($modules, fn (PluginModule $m): bool => $m->isEnabled()));
     $repository->shouldReceive('allDisabled')->andReturn(array_filter($modules, fn (PluginModule $m): bool => $m->isDisabled()));
 
@@ -156,7 +156,7 @@ describe('for all plugins', function (): void {
     });
 
     it('reports a failure while reading the plugins', function (): void {
-        $manager = pluginStatusManager(fn () => throw new RuntimeException('database offline'));
+        $manager = pluginStatusManager(fn (): never => throw new RuntimeException('database offline'));
 
         [$status, $output] = runPluginStatus($manager);
 

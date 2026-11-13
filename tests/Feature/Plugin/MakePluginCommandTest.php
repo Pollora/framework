@@ -49,6 +49,7 @@ function runMakePlugin(MakePluginCommand $command, array $input): array
 {
     $input = new ArrayInput($input);
     $input->setInteractive(false);
+
     $output = new BufferedOutput;
 
     return [$command->run($input, $output), $output->fetch()];
@@ -63,6 +64,7 @@ function makePluginPrepared(MakePluginCommand $command, string $name, array $opt
 {
     $input = new ArrayInput(['name' => $name, ...$options], $command->getDefinition());
     $input->setInteractive(false);
+
     $command->setInput($input);
     $command->setOutput(new OutputStyle($input, new BufferedOutput));
     (new ReflectionProperty($command, 'plugin'))->setValue($command, (new ReflectionMethod($command, 'makePlugin'))->invoke($command, $name));
@@ -120,7 +122,7 @@ describe('handle()', function (): void {
         $this->scaffolder->shouldReceive('downloadAndScaffold')->andReturnFalse();
         $this->scaffolder->shouldNotReceive('copyDirectory');
 
-        [$status, $output] = runMakePlugin(makePluginCommandIn($this->pluginsPath, $this->scaffolder, template: null), [
+        [$status, $output] = runMakePlugin(makePluginCommandIn($this->pluginsPath, $this->scaffolder), [
             'name' => 'acme-shop', '--repository' => 'acme/starter',
         ]);
 
@@ -259,9 +261,9 @@ describe('options', function (): void {
 describe('asset files of the template', function (): void {
     it('leaves the asset tooling out unless assets are included', function (string $path, bool $excluded): void {
         $command = makePluginPrepared(makePluginCommandIn($this->pluginsPath, $this->scaffolder), 'acme');
-        $item = new class($path)
+        $item = new readonly class($path)
         {
-            public function __construct(private readonly string $path) {}
+            public function __construct(private string $path) {}
 
             public function getRelativePathname(): string
             {

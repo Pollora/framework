@@ -52,8 +52,9 @@ function pluginManagerRepository(PluginModule ...$modules): ModuleRepositoryInte
     foreach ($modules as $module) {
         $byName[$module->getName()] = $module;
     }
+
     $repository->shouldReceive('all')->andReturn($byName);
-    $repository->shouldReceive('find')->andReturnUsing(fn (string $name) => $byName[$name] ?? null);
+    $repository->shouldReceive('find')->andReturnUsing(fn (string $name): ?PluginModule => $byName[$name] ?? null);
 
     return $repository;
 }
@@ -280,8 +281,8 @@ describe('activation', function (): void {
         $thrown = null;
         try {
             pluginManagerOn($this->root, $repository)->activatePlugin('acme');
-        } catch (PluginException $exception) {
-            $thrown = $exception;
+        } catch (PluginException $pluginException) {
+            $thrown = $pluginException;
         }
 
         expect($thrown?->getMessage())->toBe("Plugin 'acme' activation failed: boom")

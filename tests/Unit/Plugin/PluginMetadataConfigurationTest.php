@@ -13,6 +13,7 @@ afterEach(function (): void {
     foreach (glob($this->base.'/acme/*') ?: [] as $file) {
         unlink($file);
     }
+
     rmdir($this->base.'/acme');
     rmdir($this->base);
 });

@@ -77,9 +77,9 @@ function abilityDiscoveryOnService(?LoggerInterface $logger = null, bool $catego
         }
     };
 
-    $categoryRegistrar = new class($categoryExists) implements AbilityCategoryRegistrarPort
+    $categoryRegistrar = new readonly class($categoryExists) implements AbilityCategoryRegistrarPort
     {
-        public function __construct(private readonly bool $exists) {}
+        public function __construct(private bool $exists) {}
 
         public function register(AbilityCategory $category): bool
         {
@@ -121,7 +121,7 @@ it('queues each decorated handler on the factory without publishing it', functio
 
     $pending = $service->pending();
 
-    expect(array_map(fn ($ability) => $ability->name, $pending))->toBe(['fixture/read-things', 'fixture/delete-things'])
+    expect(array_map(fn (Pollora\Abilities\Domain\Model\Ability $ability): string => $ability->name, $pending))->toBe(['fixture/read-things', 'fixture/delete-things'])
         ->and($pending[0]->label)->toBe('Read things')
         ->and($pending[0]->description)->toBe('Reads things')
         ->and($pending[0]->category)->toBe('fixture-things')
@@ -148,7 +148,7 @@ it('declares the category named by the attribute so the attribute alone is enoug
     discoverAbilityClass($discovery, AbilityDiscoveryHandlerFixture::class);
     $discovery->apply();
 
-    expect(array_map(fn ($category) => $category->slug, $service->pendingCategories()))->toBe(['fixture-things']);
+    expect(array_map(fn (AbilityCategory $category): string => $category->slug, $service->pendingCategories()))->toBe(['fixture-things']);
 });
 
 it('does not redeclare a category that WordPress already knows', function (): void {
@@ -177,7 +177,7 @@ it('reports a decorated class that does not implement the handler contract, and 
     expect($logged)->toHaveCount(1)
         ->and($logged[0])->toContain(AbilityDiscoveryNotAHandlerFixture::class)
         ->and($logged[0])->toContain('fixture/not-a-handler')
-        ->and(array_map(fn ($ability) => $ability->name, $service->pending()))->toBe(['fixture/read-things']);
+        ->and(array_map(fn (Pollora\Abilities\Domain\Model\Ability $ability): string => $ability->name, $service->pending()))->toBe(['fixture/read-things']);
 });
 
 it('ignores classes without the attribute', function (): void {
@@ -250,5 +250,5 @@ it('reports an ability it could not build and goes on with the others', function
 
     expect($logged)->toHaveCount(1)
         ->and($logged[0])->toContain('Failed to register ability from Not\\Existing\\Handler')
-        ->and(array_map(fn ($ability) => $ability->name, $service->pending()))->toBe(['fixture/read-things']);
+        ->and(array_map(fn (Pollora\Abilities\Domain\Model\Ability $ability): string => $ability->name, $service->pending()))->toBe(['fixture/read-things']);
 });
