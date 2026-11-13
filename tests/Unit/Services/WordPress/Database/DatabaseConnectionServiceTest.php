@@ -8,6 +8,7 @@ use Laravel\Prompts\Prompt;
 use Pollora\Services\WordPress\Database\DatabaseConnectionService;
 use Pollora\Services\WordPress\Installation\DatabaseConnectionException;
 use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
  * A configuration pointing at a port nobody listens on, so the connection
@@ -19,7 +20,7 @@ function covUnreachableDatabase(): DatabaseConfig
 }
 
 afterEach(function (): void {
-    (new ReflectionProperty(Prompt::class, 'output'))->setValue(null, null);
+    Prompt::setOutput(new ConsoleOutput);
 });
 
 describe('DatabaseConnectionService', function (): void {
