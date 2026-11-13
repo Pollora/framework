@@ -79,6 +79,25 @@ describe('pollora:make:model', function (): void {
             ->and($result['output'])->toContain('Model already exists');
     });
 
+    it('overwrites an existing model with --force', function (): void {
+        runMakeModel($this->app, ['name' => 'Tag']);
+        file_put_contents($this->base.'/app/Models/Tag.php', '<?php // mine');
+
+        $result = runMakeModel($this->app, ['name' => 'Tag', '--force' => true]);
+
+        expect($result['status'])->toBe(0)
+            ->and(file_get_contents($this->base.'/app/Models/Tag.php'))->toContain('class Tag extends Model')
+            ->and($result['output'])->not->toContain('already exists');
+    });
+
+    it('declares --force without taking the -f shortcut of --fillable', function (): void {
+        $definition = (new MakeModelCommand(new Filesystem))->getDefinition();
+
+        expect($definition->hasOption('force'))->toBeTrue()
+            ->and($definition->getOption('force')->acceptValue())->toBeFalse()
+            ->and($definition->getOptionForShortcut('f')->getName())->toBe('fillable');
+    });
+
     it('prefers a stub published at the project root over the bundled one', function (): void {
         mkdir($this->base.'/stubs', 0777, true);
         file_put_contents($this->base.'/stubs/model.stub', "<?php\nnamespace {{ namespace }};\nclass {{ model }} {} // custom {{ table }}\n");
