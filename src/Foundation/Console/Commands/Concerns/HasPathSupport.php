@@ -56,7 +56,7 @@ trait HasPathSupport
     /**
      * Resolve custom path location.
      *
-     * @return array{type: string, path: string, namespace: string}
+     * @return array{type: string, path: string, namespace: string, source_path: string, source_namespace: string}
      *
      * @throws InvalidArgumentException When custom path is empty
      */
@@ -77,6 +77,8 @@ trait HasPathSupport
             'type' => 'custom',
             'path' => $path,
             'namespace' => 'App', // Default namespace for custom paths
+            'source_path' => $path,
+            'source_namespace' => app()->getNamespace(),
         ];
     }
 }
