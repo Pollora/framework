@@ -129,6 +129,16 @@ describe('scanning', function (): void {
         expect($repository->count())->toBe(4);
     });
 
+    it('keeps a plugin added before the first read', function (): void {
+        $repository = pluginRepositoryOn($this->root);
+        $added = new PluginModule('Epsilon', $this->root.'/Epsilon');
+
+        $repository->add('Epsilon', $added);
+
+        expect($repository->find('epsilon'))->toBe($added)
+            ->and(array_keys($repository->all()))->toBe(['alpha', 'beta', 'gamma', 'epsilon']);
+    });
+
     it('rescans on demand', function (): void {
         $repository = pluginRepositoryOn($this->root);
         $repository->all();

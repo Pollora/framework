@@ -35,6 +35,14 @@ describe('ThemeMetadata', function (): void {
         expect($meta->getThemeAppFile('boot.php'))->toStartWith('/b/t')->toEndWith('boot.php');
     });
 
+    it('builds the app directory with a single separator', function (): void {
+        $meta = new ThemeMetadata('t', '/b');
+
+        expect($meta->getThemeAppDir())->toBe('/b/t')
+            ->and($meta->getThemeAppDir('inc'))->toBe('/b/t/inc')
+            ->and($meta->getThemeAppFile('boot.php'))->toBe('/b/t/boot.php');
+    });
+
     it('has no parent and no config before the configuration is loaded', function (): void {
         $meta = new ThemeMetadata('t', '/nope');
         $meta->loadConfiguration();

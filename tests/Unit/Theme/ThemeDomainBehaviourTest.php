@@ -79,6 +79,14 @@ describe('Menus attribute rules', function (): void {
         expect($this->menus->handleItemAttributes(['class' => 'menu-item'], $item, $args, 0)['class'])->toBe('menu-item a b');
     });
 
+    it('does not start the class with a space when the existing class is empty', function (): void {
+        $args = (object) ['item_config' => [['depth' => 0, 'class' => 'foo']]];
+        $item = (object) ['menu_order' => 1];
+
+        expect($this->menus->handleItemAttributes(['class' => ''], $item, $args, 0)['class'])->toBe('foo')
+            ->and($this->menus->handleItemAttributes([], $item, $args, 0)['class'])->toBe('foo');
+    });
+
     it('restricts a rule to one menu order with eq', function (): void {
         $args = (object) ['item_config' => [['depth' => 0, 'eq' => 2, 'class' => 'second']]];
 
