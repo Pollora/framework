@@ -9,6 +9,7 @@ use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
 use Pollora\PostType\Infrastructure\Services\PostTypeDiscovery;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Psr\Log\LoggerInterface;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredInterface;
@@ -93,7 +94,7 @@ describe('PostTypeDiscovery rules', function (): void {
             ->and($registered[0]['singular'])->toBe('Content book review')
             ->and($registered[0]['plural'])->toBe('Content book reviews')
             ->and($registered[0]['priority'])->toBe(5)
-            ->and($registered[0]['args']['labels']['name'])->toBe('Content book reviews')
+            ->and($registered[0]['args']['labels'])->toBe([TranslatingEntityRegistry::DEFAULT_LABELS => ['post_type', 'Content book review', 'Content book reviews']])
             ->and($registered[0]['args']['text_domain'])->toBe('pollora');
     });
 
@@ -101,7 +102,7 @@ describe('PostTypeDiscovery rules', function (): void {
         [$registered] = contentRunPostTypeDiscovery([ContentFilmWithArgs::class]);
 
         expect($registered[0]['args'])->toMatchArray(['menu_position' => 12, 'public' => true])
-            ->and($registered[0]['args']['labels']['singular_name'])->toBe('Movie');
+            ->and($registered[0]['args']['labels'])->toBe([TranslatingEntityRegistry::DEFAULT_LABELS => ['post_type', 'Movie', 'Movies']]);
     });
 
     it('only picks up concrete classes that carry the attribute', function (): void {

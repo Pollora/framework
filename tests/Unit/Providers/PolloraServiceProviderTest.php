@@ -14,8 +14,18 @@ use Pollora\WordPress\WordPressServiceProvider;
 
 require_once __DIR__.'/../wordpress-i18n-stand-ins.php';
 
+/*
+ * loadFrameworkTextDomain() remembers the locales it has already tried for the whole process, and does nothing
+ * when the catalogue is loaded: the locales used here (it_IT, nl_NL) are used by no other test, and the
+ * catalogue is forgotten before each test.
+ */
+beforeEach(function (): void {
+    unset($GLOBALS['l10n']['pollora']);
+});
+
 afterEach(function (): void {
     WordPressI18nStandIn::reset();
+    unset($GLOBALS['l10n']['pollora']);
     Mockery::close();
 });
 
@@ -53,7 +63,7 @@ describe('PolloraServiceProvider', function (): void {
 
     it('prefers the translations a site provides over the bundled ones', function (): void {
         $loaded = [];
-        WordPressI18nStandIn::$locale = 'fr_FR';
+        WordPressI18nStandIn::$locale = 'it_IT';
         WordPressI18nStandIn::$loader = (function (string $domain, string $file) use (&$loaded): bool {
             $loaded[] = [$domain, $file];
 
@@ -62,12 +72,12 @@ describe('PolloraServiceProvider', function (): void {
 
         (new PolloraServiceProvider(new Application(sys_get_temp_dir().'/pollora-provider-'.uniqid())))->boot();
 
-        expect($loaded)->toBe([['pollora', WP_LANG_DIR.'/pollora/pollora-fr_FR.mo']]);
+        expect($loaded)->toBe([['pollora', WP_LANG_DIR.'/pollora/pollora-it_IT.mo']]);
     });
 
     it('falls back to the bundled translations when the site has none', function (): void {
         $loaded = [];
-        WordPressI18nStandIn::$locale = 'de_DE';
+        WordPressI18nStandIn::$locale = 'nl_NL';
         WordPressI18nStandIn::$loader = (function (string $domain, string $file) use (&$loaded): bool {
             $loaded[] = $file;
 
@@ -77,8 +87,8 @@ describe('PolloraServiceProvider', function (): void {
         (new PolloraServiceProvider(new Application(sys_get_temp_dir().'/pollora-provider-'.uniqid())))->boot();
 
         expect($loaded)->toHaveCount(2)
-            ->and($loaded[0])->toBe(WP_LANG_DIR.'/pollora/pollora-de_DE.mo')
-            ->and($loaded[1])->toEndWith('/resources/languages/pollora-de_DE.mo')
+            ->and($loaded[0])->toBe(WP_LANG_DIR.'/pollora/pollora-nl_NL.mo')
+            ->and($loaded[1])->toEndWith('/resources/languages/pollora-nl_NL.mo')
             ->and(file_exists($loaded[1]))->toBeTrue();
     });
 });

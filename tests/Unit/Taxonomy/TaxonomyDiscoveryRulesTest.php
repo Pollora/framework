@@ -9,6 +9,7 @@ use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 use Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Psr\Log\LoggerInterface;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredInterface;
@@ -94,7 +95,7 @@ describe('TaxonomyDiscovery rules', function (): void {
             ->and($registered[0]['singular'])->toBe('Content book shelf')
             ->and($registered[0]['plural'])->toBe('Content book shelves')
             ->and($registered[0]['priority'])->toBe(5)
-            ->and($registered[0]['args']['labels']['name'])->toBe('Content book shelves')
+            ->and($registered[0]['args']['labels'])->toBe([TranslatingEntityRegistry::DEFAULT_LABELS => ['taxonomy', 'Content book shelf', 'Content book shelves']])
             ->and($registered[0]['args']['text_domain'])->toBe('pollora');
     });
 
@@ -109,7 +110,7 @@ describe('TaxonomyDiscovery rules', function (): void {
         [$registered] = contentRunTaxonomyDiscovery([ContentFilmGenre::class]);
 
         expect($registered[0]['args']['rewrite'])->toBe(['slug' => 'genres'])
-            ->and($registered[0]['args']['labels']['singular_name'])->toBe('Genre');
+            ->and($registered[0]['args']['labels'])->toBe([TranslatingEntityRegistry::DEFAULT_LABELS => ['taxonomy', 'Genre', 'Genres']]);
     });
 
     it('only picks up concrete classes that carry the attribute', function (): void {
