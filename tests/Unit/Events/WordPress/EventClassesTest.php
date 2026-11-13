@@ -74,7 +74,7 @@ function pollora_event_argument(ReflectionParameter $parameter, int $index): mix
 describe('WordPress event classes', function (): void {
     it('covers the whole event catalogue', function (): void {
         // Concrete events only: a new event class must be added to the catalogue knowingly.
-        expect(pollora_concrete_event_classes())->toHaveCount(85);
+        expect(pollora_concrete_event_classes())->toHaveCount(94);
     });
 
     it('exposes every constructor argument unchanged', function (string $class): void {

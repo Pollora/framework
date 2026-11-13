@@ -41,7 +41,7 @@ it('registers the WordPress hooks of every dispatcher on boot', function (): voi
     $this->provider->register();
     $this->provider->boot();
 
-    $registered = collect($this->hooks)->mapWithKeys(fn (array $hook): array => [$hook['hook'].'|'.$hook['callback'][0]::class => $hook['callback'][1]]);
+    $registered = collect($this->hooks)->filter(fn (array $hook): bool => is_array($hook['callback']))->mapWithKeys(fn (array $hook): array => [$hook['hook'].'|'.$hook['callback'][0]::class => $hook['callback'][1]]);
 
     expect($registered['transition_post_status|'.PostEventDispatcher::class])->toBe('handleTransitionPostStatus')
         ->and($registered['deleted_post|'.PostEventDispatcher::class])->toBe('handleDeletedPost')
@@ -65,6 +65,7 @@ it('only registers hooks that have a handler to call', function (): void {
     $this->provider->boot();
 
     $uncallable = collect($this->hooks)
+        ->filter(fn (array $hook): bool => is_array($hook['callback']))
         ->reject(fn (array $hook): bool => is_callable($hook['callback']))
         ->map(fn (array $hook): string => $hook['callback'][0]::class.'::'.$hook['callback'][1])
         ->all();
