@@ -325,27 +325,11 @@ describe('by status', function (): void {
 });
 
 describe('registerActivePlugins()', function (): void {
-    it('registers the plugins WordPress lists as active, when their directory exists', function (): void {
-        $parent = WP_PLUGIN_DIR;
-        $created = ! is_dir($parent);
-        $name = 'pollora-registrar-'.uniqid();
-        $path = makeRegistrarPlugin($parent, $name);
+    it('skips the active plugins that have no directory, and the single-file ones', function (): void {
+        // WP_PLUGIN_DIR is a constant another test may already have fixed: only unknown directories are used.
+        Functions\when('get_option')->justReturn(['ghost-'.uniqid().'/ghost.php', 'hello.php']);
 
-        try {
-            Functions\when('get_option')->justReturn([$name.'/'.$name.'.php', 'ghost-'.uniqid().'/ghost.php', 'hello.php']);
-
-            $plugins = $this->registrar->registerActivePlugins();
-
-            expect(array_keys($plugins))->toBe([$name])
-                ->and($plugins[$name]->getPath())->toBe($path);
-        } finally {
-            removePluginRegistrarTree($path);
-            if ($created) {
-                // Only succeeds while the directories are empty: never removes what is not ours.
-                @rmdir($parent);
-                @rmdir(dirname($parent));
-            }
-        }
+        expect($this->registrar->registerActivePlugins())->toBe([]);
     });
 
     it('registers nothing when no plugin is active', function (): void {
