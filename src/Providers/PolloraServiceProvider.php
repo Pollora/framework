@@ -39,6 +39,7 @@ use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Pollora\VersionCheck\Infrastructure\Providers\VersionCheckServiceProvider;
 use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
 use Pollora\View\ViewServiceProvider;
@@ -152,26 +153,13 @@ class PolloraServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load the 'pollora' text domain for framework translations.
+     * Load the 'pollora' text domain for framework translations, unless the default labels already did.
      *
      * Checks for user-provided translations in `wp-content/languages/pollora/`
      * first, then falls back to the framework's bundled translations.
      */
     private function loadPolloraTextDomain(): void
     {
-        if (! function_exists('load_textdomain')) {
-            return;
-        }
-
-        $locale = determine_locale();
-        $moFile = sprintf('pollora-%s.mo', $locale);
-
-        // User-provided translations take priority
-        $loaded = load_textdomain('pollora', WP_LANG_DIR.'/pollora/'.$moFile);
-
-        // Fall back to bundled translations
-        if (! $loaded) {
-            load_textdomain('pollora', dirname(__DIR__, 2).'/resources/languages/'.$moFile);
-        }
+        TranslatingEntityRegistry::loadFrameworkTextDomain();
     }
 }

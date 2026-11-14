@@ -19,6 +19,7 @@ use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Entity\Adapter\Out\WordPress\PostTypeRegistryAdapter;
 use Pollora\Entity\Domain\Model\PostType as EntityPostType;
 use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -231,7 +232,7 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
         $textDomain = $postType->textDomain ?? 'pollora';
 
         $initialArgs = [
-            'labels' => $this->generateLabels($singular, $plural, $textDomain),
+            'labels' => TranslatingEntityRegistry::defaultLabels(TranslatingEntityRegistry::POST_TYPE, $singular, $plural),
             'text_domain' => $textDomain,
         ];
 
@@ -412,51 +413,6 @@ final class PostTypeDiscovery implements ConfigurableDiscoveryInterface, Discove
         }
 
         return Str::plural($singular);
-    }
-
-    /**
-     * Generate WordPress labels array from singular and plural names.
-     *
-     * @param  string  $singular  The singular name
-     * @param  string  $plural  The plural name
-     * @return array<string, string> The labels array
-     */
-    private function generateLabels(string $singular, string $plural, string $textDomain = 'pollora'): array
-    {
-        return [
-            'name' => $plural,
-            'singular_name' => $singular,
-            /* translators: %s: post type general name (plural) */
-            'add_new' => __('Add New', $textDomain),
-            /* translators: %s: post type singular name */
-            'add_new_item' => sprintf(__('Add New %s', $textDomain), $singular),
-            /* translators: %s: post type singular name */
-            'edit_item' => sprintf(__('Edit %s', $textDomain), $singular),
-            /* translators: %s: post type singular name */
-            'new_item' => sprintf(__('New %s', $textDomain), $singular),
-            /* translators: %s: post type singular name */
-            'view_item' => sprintf(__('View %s', $textDomain), $singular),
-            /* translators: %s: post type general name (plural) */
-            'view_items' => sprintf(__('View %s', $textDomain), $plural),
-            /* translators: %s: post type general name (plural) */
-            'search_items' => sprintf(__('Search %s', $textDomain), $plural),
-            /* translators: %s: post type general name (plural) */
-            'not_found' => sprintf(__('No %s found', $textDomain), $plural),
-            /* translators: %s: post type general name (plural) */
-            'not_found_in_trash' => sprintf(__('No %s found in Trash', $textDomain), $plural),
-            /* translators: %s: post type singular name */
-            'parent_item_colon' => sprintf(__('Parent %s:', $textDomain), $singular),
-            /* translators: %s: post type general name (plural) */
-            'all_items' => sprintf(__('All %s', $textDomain), $plural),
-            /* translators: %s: post type singular name */
-            'archives' => sprintf(__('%s Archives', $textDomain), $singular),
-            /* translators: %s: post type singular name */
-            'attributes' => sprintf(__('%s Attributes', $textDomain), $singular),
-            /* translators: %s: post type singular name */
-            'insert_into_item' => sprintf(__('Insert into %s', $textDomain), $singular),
-            /* translators: %s: post type singular name */
-            'uploaded_to_this_item' => sprintf(__('Uploaded to this %s', $textDomain), $singular),
-        ];
     }
 
     /**

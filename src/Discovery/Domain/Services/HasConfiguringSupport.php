@@ -6,6 +6,7 @@ namespace Pollora\Discovery\Domain\Services;
 
 use Pollora\Discovery\Domain\Contracts\ReflectionCacheInterface;
 use Pollora\Entity\Application\Service\EntityRegistrationService;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 
 /**
  * Trait providing support for the configuring lifecycle hook.
@@ -98,7 +99,7 @@ trait HasConfiguringSupport
      */
     protected function registerEntity(object $entity, string $registryClass): void
     {
-        $registry = new $registryClass;
+        $registry = new TranslatingEntityRegistry(new $registryClass);
         $registrationService = new EntityRegistrationService($registry);
         $registrationService->registerEntity($entity);
     }

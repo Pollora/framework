@@ -32,13 +32,14 @@
         "pollora/abilities": "^1.0",
         "pollora/ajax": "^1.1",
         "pollora/assets": "^0.1",
-        "pollora/attributes": "^0.1.1 || ^1.0",
+        "pollora/attributes": "^0.1.2 || ^1.0",
         "pollora/block-bindings": "^0.2",
         "pollora/discovery": "^0.1 || ^1.0",
         "pollora/entity": "^2.0",
         "pollora/media": "^0.8",
         "pollora/meta": "^0.1",
         "pollora/hook": "^2.0.1",
+        "pollora/i18n": "^0.1.1",
         "pollora/option": "^1.1",
         "pollora/roles": "^0.2",
         "pollora/schedule": "^1.0",
@@ -107,6 +108,7 @@
         }
     },
     "suggest": {
+        "nikic/php-parser": "^5.0, needed by the pollora:i18n:extract command to read the attributes of PHP files (console only, never loaded by a web request)",
         "pollora/woocommerce": "WooCommerce's Blade templates, Route::wp() conditions, Coming Soon page and events",
         "pollora/wp-rocket": "Keeps WP Rocket from writing .htaccess and setting WP_CACHE unless the project asks for it"
     },

@@ -16,6 +16,7 @@ use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Pollora\Hook\Domain\Contract\Action as ActionService;
 use Pollora\PostType\Domain\Contracts\PostTypeServiceInterface;
 use Pollora\PostType\Infrastructure\Services\PostTypeDiscovery;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 
 #[PostType('fixture_book', singular: 'Book', plural: 'Books')]
@@ -87,11 +88,13 @@ it('registers the arguments its attributes declare', function (): void {
         ->and($registered['args'])->not->toHaveKey('priority');
 });
 
-it('merges declared labels into the generated ones', function (): void {
+it('hands the declared labels over with a request for the default ones, built on init', function (): void {
     $labels = registeredPostType(DiscoveredBook::class)['args']['labels'];
 
-    expect($labels['menu_name'])->toBe('Library')
-        ->and($labels['singular_name'])->toBe('Book');
+    expect($labels)->toBe([
+        TranslatingEntityRegistry::DEFAULT_LABELS => [TranslatingEntityRegistry::POST_TYPE, 'Book', 'Books'],
+        'menu_name' => 'Library',
+    ]);
 });
 
 it('turns method attributes into callbacks on the declaring class', function (): void {

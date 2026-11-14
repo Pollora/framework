@@ -12,50 +12,20 @@ use Pollora\Providers\PolloraServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\WordPress\WordPressServiceProvider;
 
-if (! defined('WP_LANG_DIR')) {
-    define('WP_LANG_DIR', sys_get_temp_dir().'/pollora-wp-lang');
-}
+require_once __DIR__.'/../wordpress-i18n-stand-ins.php';
 
-/**
- * What the text domain loading asks of WordPress.
- *
- * The two WordPress functions below are real, not Brain Monkey stubs: a stub
- * defined during a test outlives it, and the first test that checks
- * function_exists('determine_locale') afterwards would call a stub with no
- * expectation. With the defaults reset after each test, they behave as
- * WordPress does when nothing was customised: an en_US site, no translation
- * file loaded.
+/*
+ * loadFrameworkTextDomain() remembers the locales it has already tried for the whole process, and does nothing
+ * when the catalogue is loaded: the locales used here (it_IT, nl_NL) are used by no other test, and the
+ * catalogue is forgotten before each test.
  */
-final class PolloraTextDomainProbe
-{
-    public static string $locale = 'en_US';
-
-    /** @var null|callable(string, string): bool */
-    public static $loader;
-
-    public static function reset(): void
-    {
-        self::$locale = 'en_US';
-        self::$loader = null;
-    }
-}
-
-if (! function_exists('determine_locale')) {
-    function determine_locale(): string
-    {
-        return PolloraTextDomainProbe::$locale;
-    }
-}
-
-if (! function_exists('load_textdomain')) {
-    function load_textdomain(string $domain, string $mofile, ?string $locale = null): bool
-    {
-        return PolloraTextDomainProbe::$loader === null ? false : (PolloraTextDomainProbe::$loader)($domain, $mofile);
-    }
-}
+beforeEach(function (): void {
+    unset($GLOBALS['l10n']['pollora']);
+});
 
 afterEach(function (): void {
-    PolloraTextDomainProbe::reset();
+    WordPressI18nStandIn::reset();
+    unset($GLOBALS['l10n']['pollora']);
     Mockery::close();
 });
 
@@ -93,8 +63,8 @@ describe('PolloraServiceProvider', function (): void {
 
     it('prefers the translations a site provides over the bundled ones', function (): void {
         $loaded = [];
-        PolloraTextDomainProbe::$locale = 'fr_FR';
-        PolloraTextDomainProbe::$loader = (function (string $domain, string $file) use (&$loaded): bool {
+        WordPressI18nStandIn::$locale = 'it_IT';
+        WordPressI18nStandIn::$loader = (function (string $domain, string $file) use (&$loaded): bool {
             $loaded[] = [$domain, $file];
 
             return true;
@@ -102,13 +72,13 @@ describe('PolloraServiceProvider', function (): void {
 
         (new PolloraServiceProvider(new Application(sys_get_temp_dir().'/pollora-provider-'.uniqid())))->boot();
 
-        expect($loaded)->toBe([['pollora', WP_LANG_DIR.'/pollora/pollora-fr_FR.mo']]);
+        expect($loaded)->toBe([['pollora', WP_LANG_DIR.'/pollora/pollora-it_IT.mo']]);
     });
 
     it('falls back to the bundled translations when the site has none', function (): void {
         $loaded = [];
-        PolloraTextDomainProbe::$locale = 'de_DE';
-        PolloraTextDomainProbe::$loader = (function (string $domain, string $file) use (&$loaded): bool {
+        WordPressI18nStandIn::$locale = 'nl_NL';
+        WordPressI18nStandIn::$loader = (function (string $domain, string $file) use (&$loaded): bool {
             $loaded[] = $file;
 
             return false;
@@ -117,8 +87,8 @@ describe('PolloraServiceProvider', function (): void {
         (new PolloraServiceProvider(new Application(sys_get_temp_dir().'/pollora-provider-'.uniqid())))->boot();
 
         expect($loaded)->toHaveCount(2)
-            ->and($loaded[0])->toBe(WP_LANG_DIR.'/pollora/pollora-de_DE.mo')
-            ->and($loaded[1])->toEndWith('/resources/languages/pollora-de_DE.mo')
+            ->and($loaded[0])->toBe(WP_LANG_DIR.'/pollora/pollora-nl_NL.mo')
+            ->and($loaded[1])->toEndWith('/resources/languages/pollora-nl_NL.mo')
             ->and(file_exists($loaded[1]))->toBeTrue();
     });
 });
