@@ -16,6 +16,7 @@ use Pollora\Media\Infrastructure\Flysystem\FlysystemMediaStorage;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaFilesCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaStatusCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsPruneCommand;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaVisibilityCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsWarmCommand;
 use Pollora\Media\Infrastructure\WordPress\WordPressMedia;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -311,5 +312,59 @@ describe('pollora:media:migrate', function (): void {
         expect($code)->toBe(0)
             ->and($output)->toContain('posts.post_content')
             ->and($output)->toContain('would replace 1 row(s)');
+    });
+});
+
+describe('pollora:media:visibility', function (): void {
+    beforeEach(function (): void {
+        $this->app->instance(WordPressMedia::class, new WordPressMedia($this->storage, $this->config, null, $this->sizes));
+        $this->storage->write('2026/11/photo.jpg', 'x');
+        $this->meta = [];
+        Functions\when('update_post_meta')->alias(function (int $id, string $key, string $value): bool {
+            $this->meta[] = ['update', $id, $key, $value];
+
+            return true;
+        });
+        Functions\when('delete_post_meta')->alias(function (int $id, string $key): bool {
+            $this->meta[] = ['delete', $id, $key];
+
+            return true;
+        });
+    });
+
+    it('makes every file of a media private and remembers it in the meta', function (): void {
+        Functions\when('wp_get_attachment_metadata')->justReturn(['file' => '2026/11/photo.jpg']);
+
+        [$code, $output] = runMediaConsoleCommand(new MediaVisibilityCommand, $this->app, ['id' => '7', '--private' => true]);
+
+        expect($code)->toBe(0)
+            ->and($output)->toContain('1 file(s) made private.')
+            ->and($this->meta)->toHaveCount(1)
+            ->and($this->meta[0][0])->toBe('update')
+            ->and($this->meta[0][1])->toBe(7);
+    });
+
+    it('makes a media public by default and drops the private meta', function (): void {
+        Functions\when('wp_get_attachment_metadata')->justReturn(['file' => '2026/11/photo.jpg']);
+
+        [$code, $output] = runMediaConsoleCommand(new MediaVisibilityCommand, $this->app, ['id' => '7']);
+
+        expect($code)->toBe(0)
+            ->and($output)->toContain('1 file(s) made public.')
+            ->and($this->meta[0][0])->toBe('delete');
+    });
+
+    it('fails and names each file the disk could not change', function (): void {
+        Functions\when('wp_get_attachment_metadata')->justReturn(['file' => '2026/11/photo.jpg', 'sizes' => ['thumbnail' => ['file' => 'missing-150x150.jpg']]]);
+        $disk = Mockery::mock(MediaStorage::class);
+        $disk->shouldReceive('setVisibility')->with('2026/11/photo.jpg', 'private')->once();
+        $disk->shouldReceive('setVisibility')->with('2026/11/missing-150x150.jpg', 'private')->andThrow(new RuntimeException('no such file'));
+        $this->app->instance(WordPressMedia::class, new WordPressMedia($disk, $this->config, null, $this->sizes));
+
+        [$code, $output] = runMediaConsoleCommand(new MediaVisibilityCommand, $this->app, ['id' => '7', '--private' => true]);
+
+        expect($code)->toBe(1)
+            ->and($output)->toContain('1 file(s) made private.')
+            ->and($output)->toContain('Not changed: 2026/11/missing-150x150.jpg');
     });
 });
