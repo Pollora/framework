@@ -8,6 +8,17 @@ use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Laravel\MediaCheck;
 
+/*
+ * wp_image_editor_supports() is a plain function, not a Brain Monkey stub: once a test has defined it, every later
+ * MediaCheck of the process finds it, so it keeps answering "yes" until a test sets $GLOBALS['content_image_editor'].
+ */
+if (! function_exists('wp_image_editor_supports')) {
+    function wp_image_editor_supports($args = [])
+    {
+        return isset($GLOBALS['content_image_editor']) ? ($GLOBALS['content_image_editor'])($args) : true;
+    }
+}
+
 /**
  * A disk that lives in an array.
  */
@@ -235,14 +246,18 @@ describe('MediaCheck', function (): void {
     });
 
     it('warns of sizes written in a format the image editor of this server cannot write', function (): void {
-        Brain\Monkey\Functions\when('wp_image_editor_supports')->alias(fn (array $args): bool => $args['mime_type'] === 'image/webp');
+        $GLOBALS['content_image_editor'] = fn (array $args): bool => $args['mime_type'] === 'image/webp';
         $sizes = new ImageSizes(fn (): string => 'key');
         $sizes->add('card')->cover(600, 400)->webp();
         $sizes->add('hero')->cover(1600, 600)->avif();
         $sizes->add('plain')->cover(300, 300)->original();
         $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn (): ImageSizes => $sizes);
 
-        $result = $check->run(RunContext::Console);
+        try {
+            $result = $check->run(RunContext::Console);
+        } finally {
+            unset($GLOBALS['content_image_editor']);
+        }
 
         expect($result->status->name)->toBe('Warning')
             ->and($result->details)->toBe(['The size "hero" is written in image/avif, which the image editor of this server cannot write.']);
