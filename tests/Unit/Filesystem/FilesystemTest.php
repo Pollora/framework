@@ -58,6 +58,19 @@ describe('Filesystem', function (): void {
                 ->toBe('../../log/file.txt');
         });
 
+        it('answers ./ for the directory the base file sits in', function (): void {
+            expect($this->filesystem->getRelativePath('/a/b/c', '/a/b/'))->toBe('./');
+        });
+
+        it('prefixes ./ when the first segment holds a colon, so it is not read as a URL scheme', function (): void {
+            expect($this->filesystem->getRelativePath('/a/b/', '/a/b/c:d'))->toBe('./c:d')
+                ->and($this->filesystem->getRelativePath('/a/', '/a/b:c/d'))->toBe('./b:c/d');
+        });
+
+        it('leaves a colon alone when a slash comes before it', function (): void {
+            expect($this->filesystem->getRelativePath('/a/b/c', '/x/y:z'))->toBe('../../x/y:z');
+        });
+
         it('handles paths with backslashes', function (): void {
             expect($this->filesystem->getRelativePath('C:\\Users\\test\\dir', 'C:\\Users\\test\\file.txt'))
                 ->toBe('file.txt');
