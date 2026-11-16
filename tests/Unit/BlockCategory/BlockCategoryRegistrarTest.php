@@ -8,11 +8,16 @@ use Pollora\Collection\Infrastructure\Adapters\LaravelCollectionAdapter;
 
 describe('BlockCategoryRegistrar', function (): void {
     it('adds nothing to the editor when there is no category', function (): void {
-        Functions\when('add_filter')->alias(fn (): never => throw new LogicException('no filter expected'));
+        $added = false;
+        Functions\when('add_filter')->alias(function () use (&$added): bool {
+            $added = true;
+
+            return true;
+        });
 
         (new BlockCategoryRegistrar)->registerCategories(new LaravelCollectionAdapter([]));
 
-        expect(true)->toBeTrue();
+        expect($added)->toBeFalse();
     });
 
     it('appends the categories after the ones WordPress already has', function (): void {
