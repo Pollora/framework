@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use Illuminate\Console\Application;
 use Illuminate\Console\Attributes\Signature;
+use Illuminate\Console\Command;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
+use Laravel\Prompts\Key;
+use Laravel\Prompts\Prompt;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\WordPress\Commands\LaunchPadSetupCommand;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -62,8 +65,8 @@ function runSetupCommand(bool $configured, bool $interactive, array $parameters 
             parent::configurePrompts($input);
 
             if ($this->promptable) {
-                Laravel\Prompts\Prompt::interactive(true);
-                Laravel\Prompts\Prompt::fallbackWhen(false);
+                Prompt::interactive(true);
+                Prompt::fallbackWhen(false);
             }
         }
 
@@ -75,7 +78,7 @@ function runSetupCommand(bool $configured, bool $interactive, array $parameters 
     $command->setLaravel($container);
 
     $application->addCommand($command);
-    $application->addCommand(new #[Signature('key:generate')] class extends Illuminate\Console\Command
+    $application->addCommand(new #[Signature('key:generate')] class extends Command
     {
         public function handle(): int
         {
@@ -153,19 +156,19 @@ describe('pollora:env:setup from composer create-project', function (): void {
 
 describe('pollora:env:setup with a terminal', function (): void {
     afterEach(function (): void {
-        Laravel\Prompts\Prompt::interactive(false);
-        Laravel\Prompts\Prompt::fallbackWhen(false);
+        Prompt::interactive(false);
+        Prompt::fallbackWhen(false);
     });
 
     beforeEach(function (): void {
-        Laravel\Prompts\Prompt::fake([
-            Laravel\Prompts\Key::ENTER,
-            Laravel\Prompts\Key::ENTER,
+        Prompt::fake([
+            Key::ENTER,
+            Key::ENTER,
             ...str_split('pollora'),
-            Laravel\Prompts\Key::ENTER,
-            Laravel\Prompts\Key::ENTER,
-            Laravel\Prompts\Key::ENTER,
-            Laravel\Prompts\Key::ENTER,
+            Key::ENTER,
+            Key::ENTER,
+            Key::ENTER,
+            Key::ENTER,
         ]);
     });
 

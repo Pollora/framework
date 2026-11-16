@@ -6,6 +6,7 @@ use Illuminate\Container\Container;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
+use Psr\Log\LoggerInterface;
 
 function setupRegistrarMocks(Container $container, $parser): void
 {
@@ -90,12 +91,12 @@ describe('ThemeRegistrar discovery log', function (): void {
     function registrarLoggingInto(bool $debug): array
     {
         $lines = new ArrayObject;
-        $logger = Mockery::mock(Psr\Log\LoggerInterface::class);
+        $logger = Mockery::mock(LoggerInterface::class);
         $logger->shouldReceive('error')->andReturnUsing(function (string $message) use ($lines): void {
             $lines[] = $message;
         });
         $container = new Container;
-        $container->instance(Psr\Log\LoggerInterface::class, $logger);
+        $container->instance(LoggerInterface::class, $logger);
 
         $registrar = new class($container, Mockery::mock(WordPressThemeParser::class), $debug) extends ThemeRegistrar
         {

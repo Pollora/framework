@@ -6,18 +6,21 @@ use Brain\Monkey\Functions;
 use Illuminate\Config\Repository;
 use Illuminate\Console\Command;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Foundation\Application;
 use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Pollora\Media\Application\Services\ImageSizes;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Flysystem\FlysystemMediaStorage;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaFilesCommand;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaStatusCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsPruneCommand;
-use Pollora\Media\Infrastructure\Laravel\Console\MediaVisibilityCommand;
 use Pollora\Media\Infrastructure\Laravel\Console\MediaThumbsWarmCommand;
+use Pollora\Media\Infrastructure\Laravel\Console\MediaVisibilityCommand;
 use Pollora\Media\Infrastructure\WordPress\WordPressMedia;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -182,7 +185,7 @@ describe('pollora:media:migrate', function (): void {
         mkdir($this->from.'/woocommerce_uploads');
         file_put_contents($this->from.'/woocommerce_uploads/secret.zip', 'zip');
 
-        $this->disks = Mockery::mock(Illuminate\Contracts\Filesystem\Factory::class);
+        $this->disks = Mockery::mock(Factory::class);
         $this->disks->shouldReceive('disk')->with('old')->andReturn(new class($this->from)
         {
             public function __construct(private string $path) {}
@@ -201,19 +204,19 @@ describe('pollora:media:migrate', function (): void {
                 return new Filesystem(new LocalFilesystemAdapter($this->path));
             }
         });
-        $this->app->instance(Illuminate\Contracts\Filesystem\Factory::class, $this->disks);
+        $this->app->instance(Factory::class, $this->disks);
     });
 
     it('asks for a target disk when none is given or configured', function (): void {
         $this->app->instance('config', new Repository(['media' => ['disk' => null]]));
 
-        [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app);
+        [$code, $output] = runMediaConsoleCommand(new MediaMigrateCommand, $this->app);
 
         expect($code)->toBe(1)->and($output)->toContain('Name the target disk with --to, or set media.disk.');
     });
 
     it('copies nothing in a dry run and says what it would copy', function (): void {
-        [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new']);
+        [$code, $output] = runMediaConsoleCommand(new MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new']);
 
         expect($code)->toBe(0)
             ->and($output)->toContain('Would copy 3 file(s); 0 already there; 0 left out; 0 failed.')
@@ -225,7 +228,7 @@ describe('pollora:media:migrate', function (): void {
         mkdir($this->to.'/2026/11', 0777, true);
         file_put_contents($this->to.'/2026/11/doc.pdf', 'pdf');
 
-        [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, [
+        [$code, $output] = runMediaConsoleCommand(new MediaMigrateCommand, $this->app, [
             '--from' => 'old', '--to' => 'new', '--execute' => true, '--exclude' => ['woocommerce_uploads/*'],
         ]);
 
@@ -236,10 +239,10 @@ describe('pollora:media:migrate', function (): void {
     });
 
     it('fails and names the file it could not copy', function (): void {
-        $broken = Mockery::mock(League\Flysystem\FilesystemOperator::class);
+        $broken = Mockery::mock(FilesystemOperator::class);
         $broken->shouldReceive('fileExists')->andReturn(false);
         $broken->shouldReceive('write', 'writeStream')->andThrow(new RuntimeException('disk full'));
-        $disks = Mockery::mock(Illuminate\Contracts\Filesystem\Factory::class);
+        $disks = Mockery::mock(Factory::class);
         $disks->shouldReceive('disk')->with('old')->andReturn(new class($this->from)
         {
             public function __construct(private string $path) {}
@@ -258,9 +261,9 @@ describe('pollora:media:migrate', function (): void {
                 return $this->driver;
             }
         });
-        $this->app->instance(Illuminate\Contracts\Filesystem\Factory::class, $disks);
+        $this->app->instance(Factory::class, $disks);
 
-        [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new', '--execute' => true]);
+        [$code, $output] = runMediaConsoleCommand(new MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new', '--execute' => true]);
 
         expect($code)->toBe(1)
             ->and($output)->toContain('Could not copy 2026/11/photo.jpg')
@@ -304,7 +307,7 @@ describe('pollora:media:migrate', function (): void {
         $this->app->instance('config', new Repository(['media' => ['disk' => 'cdn'], 'app' => ['url' => 'http://app.test/']]));
 
         try {
-            [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new', '--replace-urls' => true]);
+            [$code, $output] = runMediaConsoleCommand(new MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new', '--replace-urls' => true]);
         } finally {
             unset($GLOBALS['wpdb']);
         }

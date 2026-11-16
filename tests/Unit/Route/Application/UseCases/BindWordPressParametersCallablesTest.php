@@ -7,6 +7,7 @@ use Mockery as m;
 use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
 use Pollora\Route\Domain\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Models\Route;
+use Psr\Log\LoggerInterface;
 
 beforeEach(function (): void {
     if (! class_exists('WP_Post')) {
@@ -97,7 +98,7 @@ describe('BindWordPressParametersUseCase callable kinds', function (): void {
 
     it('logs and binds nothing for a callable PHP accepts through __callStatic but has no method behind', function (): void {
         $this->typeResolver->shouldNotReceive('resolve');
-        $logger = m::mock(Psr\Log\LoggerInterface::class);
+        $logger = m::mock(LoggerInterface::class);
         $logger->shouldReceive('error')->once()->with('Failed to get callable reflection', m::on(
             fn (array $context): bool => $context['exception'] instanceof ReflectionException && $context['callable'] === [RouteActionsWithPost::class, 'ghost']
         ));

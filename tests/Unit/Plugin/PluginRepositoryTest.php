@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use Pollora\Collection\Infrastructure\Adapters\LaravelCollectionAdapter;
 use Pollora\Plugin\Domain\Contracts\PluginModuleInterface;
 use Pollora\Plugin\Domain\Exceptions\PluginException;
@@ -416,8 +418,8 @@ describe('PluginRepository scanning failures', function (): void {
 
     it('reads the plugins directory from the plugin.path configuration when WP_PLUGIN_DIR is not defined', function (): void {
         $previous = Container::getInstance();
-        $app = new Illuminate\Foundation\Application($this->root);
-        $app->instance('config', new Illuminate\Config\Repository(['plugin' => ['path' => $this->root.'/']]));
+        $app = new Application($this->root);
+        $app->instance('config', new Repository(['plugin' => ['path' => $this->root.'/']]));
         Container::setInstance($app);
 
         try {

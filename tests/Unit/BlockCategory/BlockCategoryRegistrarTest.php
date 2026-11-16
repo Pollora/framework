@@ -32,8 +32,8 @@ describe('BlockCategoryRegistrar', function (): void {
 
         expect($hooks)->toHaveKey('block_categories_all')
             ->and($hooks['block_categories_all']([['slug' => 'text', 'title' => 'Text']]))->toBe([
-            ['slug' => 'text', 'title' => 'Text'],
-            ['slug' => 'news', 'title' => 'News'],
-        ]);
+                ['slug' => 'text', 'title' => 'Text'],
+                ['slug' => 'news', 'title' => 'News'],
+            ]);
     });
 });

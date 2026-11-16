@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Pollora\Doctor\Domain\Enums\RunContext;
+use Pollora\Media\Application\Services\ImageSizes;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Laravel\MediaCheck;
@@ -235,7 +236,7 @@ describe('MediaCheck', function (): void {
 
     it('warns of sizes written in a format the image editor of this server cannot write', function (): void {
         Brain\Monkey\Functions\when('wp_image_editor_supports')->alias(fn (array $args): bool => $args['mime_type'] === 'image/webp');
-        $sizes = new Pollora\Media\Application\Services\ImageSizes(fn (): string => 'key');
+        $sizes = new ImageSizes(fn (): string => 'key');
         $sizes->add('card')->cover(600, 400)->webp();
         $sizes->add('hero')->cover(1600, 600)->avif();
         $sizes->add('plain')->cover(300, 300)->original();
@@ -248,7 +249,7 @@ describe('MediaCheck', function (): void {
     });
 
     it('lists the declarations that could not make a size', function (): void {
-        $sizes = new Pollora\Media\Application\Services\ImageSizes(fn (): string => 'key');
+        $sizes = new ImageSizes(fn (): string => 'key');
         $sizes->add('broken');
         $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn () => $sizes);
 

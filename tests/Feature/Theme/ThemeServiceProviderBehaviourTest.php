@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use Mockery as m;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
+use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
@@ -318,7 +319,7 @@ describe('ThemeServiceProvider deferred utility setup', function (): void {
         $app = new Application(sys_get_temp_dir());
         $provider = new ThemeServiceProvider($app);
         $factory = m::mock(CollectionFactoryInterface::class);
-        $factory->shouldReceive('make')->with([1])->once()->andReturn(m::mock(Pollora\Collection\Domain\Contracts\CollectionInterface::class));
+        $factory->shouldReceive('make')->with([1])->once()->andReturn(m::mock(CollectionInterface::class));
 
         themeProviderCall($provider, 'initializeThemeCollection');
         $app->singleton(CollectionFactoryInterface::class, fn () => $factory);

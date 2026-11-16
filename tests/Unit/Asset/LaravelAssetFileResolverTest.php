@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Container\Container;
-use Pollora\Asset\Infrastructure\Laravel\LaravelAssetFileResolver;
 use Pollora\Asset\Application\Services\AssetManager;
+use Pollora\Asset\Infrastructure\Laravel\LaravelAssetFileResolver;
 use Psr\Log\LoggerInterface;
 
 describe('LaravelAssetFileResolver', function (): void {

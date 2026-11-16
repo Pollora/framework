@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 use Illuminate\Foundation\Application;
 use Illuminate\Mail\Message;
+use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Mail;
 use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Mail\Mailer;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
 /**
@@ -24,12 +27,12 @@ beforeEach(function (): void {
     $this->email = new Email;
     $this->sentHtml = null;
     Mail::swap($fake = Mockery::mock('mailer'));
-    $fake->shouldReceive('html')->andReturnUsing(function (string $html, Closure $callback): Illuminate\Mail\SentMessage {
+    $fake->shouldReceive('html')->andReturnUsing(function (string $html, Closure $callback): SentMessage {
         $this->sentHtml = $html;
         $this->email->html($html);
         $callback(new Message($this->email));
 
-        return new Illuminate\Mail\SentMessage(new Symfony\Component\Mailer\SentMessage((new Email)->from('from@example.test')->to('to@example.test')->text('x'), new Symfony\Component\Mailer\Envelope(new Symfony\Component\Mime\Address('from@example.test'), [new Symfony\Component\Mime\Address('to@example.test')])));
+        return new SentMessage(new Symfony\Component\Mailer\SentMessage((new Email)->from('from@example.test')->to('to@example.test')->text('x'), new Envelope(new Address('from@example.test'), [new Address('to@example.test')])));
     });
 });
 
@@ -42,7 +45,7 @@ describe('Mailer::send', function (): void {
     it('sends the HTML body to the recipient, with the subject', function (): void {
         $sent = $this->mailer->send('jane@example.test', 'Welcome', '<p>Hi</p>');
 
-        expect($sent)->toBeInstanceOf(Illuminate\Mail\SentMessage::class)
+        expect($sent)->toBeInstanceOf(SentMessage::class)
             ->and($this->sentHtml)->toBe('<p>Hi</p>')
             ->and($this->email->getSubject())->toBe('Welcome')
             ->and($this->email->getTo()[0]->getAddress())->toBe('jane@example.test');

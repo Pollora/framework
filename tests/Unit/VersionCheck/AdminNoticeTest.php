@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Facade;
 use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Pollora\VersionCheck\UI\Http\AdminNotice;
@@ -71,7 +73,7 @@ describe('AdminNotice dismissal', function (): void {
     });
 
     afterEach(function (): void {
-        Illuminate\Support\Facades\Facade::clearResolvedInstances();
+        Facade::clearResolvedInstances();
     });
 
     it('stores the dismissed version for the current user', function (): void {
@@ -81,7 +83,7 @@ describe('AdminNotice dismissal', function (): void {
 
             return true;
         });
-        Illuminate\Support\Facades\Request::swap(new Illuminate\Http\Request([], ['version' => '13.40.1'], [], [], [], ['REQUEST_METHOD' => 'POST']));
+        Illuminate\Support\Facades\Request::swap(new Request([], ['version' => '13.40.1'], [], [], [], ['REQUEST_METHOD' => 'POST']));
 
         $this->notice->dismiss();
 
@@ -95,7 +97,7 @@ describe('AdminNotice dismissal', function (): void {
 
             return true;
         });
-        Illuminate\Support\Facades\Request::swap(new Illuminate\Http\Request([], [], [], [], [], ['REQUEST_METHOD' => 'POST']));
+        Illuminate\Support\Facades\Request::swap(new Request([], [], [], [], [], ['REQUEST_METHOD' => 'POST']));
 
         $this->notice->dismiss();
 

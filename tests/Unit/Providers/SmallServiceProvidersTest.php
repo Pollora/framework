@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Foundation\Application;
+use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Facade;
 use Pollora\Auth\AuthServiceProvider;
 use Pollora\Auth\WordPressGuard;
@@ -98,7 +100,7 @@ describe('WordPressMailServiceProvider', function (): void {
     it('sends through the Laravel mailer from pre_wp_mail, answering whether it worked', function (bool $works): void {
         $mailer = Mockery::mock(Mailer::class);
         $mailer->shouldReceive('send')->once()->with('a@example.test', 'Hi', 'Body', 'X-Test: 1', ['/tmp/f'])
-            ->andReturn($works ? Mockery::mock(Illuminate\Mail\SentMessage::class) : null);
+            ->andReturn($works ? Mockery::mock(SentMessage::class) : null);
         $this->app->instance('wp.mail', $mailer);
 
         $filter = Mockery::mock(Filter::class);
@@ -118,7 +120,7 @@ describe('AuthServiceProvider', function (): void {
         $app->instance('auth', $manager = new AuthManager($app));
         $app->instance(AuthManager::class, $manager);
         Facade::setFacadeApplication($app);
-        $app->instance(Illuminate\Contracts\Auth\Access\Gate::class, $gate = Mockery::mock(Illuminate\Contracts\Auth\Access\Gate::class));
+        $app->instance(Gate::class, $gate = Mockery::mock(Gate::class));
         $gate->shouldReceive('after')->once();
 
         (new AuthServiceProvider($app))->register();

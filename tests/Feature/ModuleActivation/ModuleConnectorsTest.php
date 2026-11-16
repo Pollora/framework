@@ -7,10 +7,13 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use Nwidart\Modules\Contracts\ActivatorInterface;
+use Nwidart\Modules\Module;
+use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Modules\Domain\Contracts\ModuleStateConnector;
 use Pollora\Modules\Domain\Events\ModuleDisabled;
 use Pollora\Modules\Domain\Events\ModuleEnabled;
 use Pollora\Modules\Domain\Exceptions\ModuleLockedException;
+use Pollora\Modules\Domain\Exceptions\ModuleStateException;
 use Pollora\Modules\Infrastructure\Activation\ConfigStateConnector;
 use Pollora\Modules\Infrastructure\Activation\ConnectorActivator;
 use Pollora\Modules\Infrastructure\Activation\DatabaseStateConnector;
@@ -112,7 +115,7 @@ describe('DatabaseStateConnector', function (): void {
     it('refuses to write when the options table cannot take the row', function (): void {
         $connector = (new ModuleConnectors($this->app))->make('database');
 
-        expect(fn () => $connector->set('Crm', true))->toThrow(Pollora\Modules\Domain\Exceptions\ModuleStateException::class);
+        expect(fn () => $connector->set('Crm', true))->toThrow(ModuleStateException::class);
     });
 
     it('never unserializes the stored value', function (): void {
@@ -196,7 +199,7 @@ describe('ConnectorActivator', function (): void {
     });
 
     it('enables, disables and sets a module given as an object, and reads its status back', function (): void {
-        $module = Mockery::mock(Nwidart\Modules\Module::class);
+        $module = Mockery::mock(Module::class);
         $module->shouldReceive('getName')->andReturn('Shop');
         $activator = new ConnectorActivator($this->app);
 
@@ -211,9 +214,9 @@ describe('ConnectorActivator', function (): void {
     });
 
     it('deletes a module that has a state, and ignores one that has none', function (): void {
-        $known = Mockery::mock(Nwidart\Modules\Module::class);
+        $known = Mockery::mock(Module::class);
         $known->shouldReceive('getName')->andReturn('Blog');
-        $unknown = Mockery::mock(Nwidart\Modules\Module::class);
+        $unknown = Mockery::mock(Module::class);
         $unknown->shouldReceive('getName')->andReturn('Ghost');
         $activator = new ConnectorActivator($this->app);
 
@@ -224,14 +227,14 @@ describe('ConnectorActivator', function (): void {
     });
 
     it('clears the discovery cache when a state changes, and carries on when it cannot', function (): void {
-        $manager = Mockery::mock(Pollora\Discovery\Application\Services\DiscoveryManager::class);
+        $manager = Mockery::mock(DiscoveryManager::class);
         $manager->shouldReceive('clearCache')->once();
-        $this->app->instance(Pollora\Discovery\Application\Services\DiscoveryManager::class, $manager);
+        $this->app->instance(DiscoveryManager::class, $manager);
         (new ConnectorActivator($this->app))->setActiveByName('Shop', true);
 
-        $broken = Mockery::mock(Pollora\Discovery\Application\Services\DiscoveryManager::class);
+        $broken = Mockery::mock(DiscoveryManager::class);
         $broken->shouldReceive('clearCache')->once()->andThrow(new RuntimeException('cache locked'));
-        $this->app->instance(Pollora\Discovery\Application\Services\DiscoveryManager::class, $broken);
+        $this->app->instance(DiscoveryManager::class, $broken);
         (new ConnectorActivator($this->app))->setActiveByName('Blog', true);
 
         expect((new JsonStateConnector($this->statuses))->all())->toMatchArray(['Shop' => true, 'Blog' => true]);
