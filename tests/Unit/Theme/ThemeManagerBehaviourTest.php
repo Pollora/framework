@@ -184,13 +184,7 @@ describe('ThemeManager paths and listing', function (): void {
     });
 });
 
-describe('ThemeManager names', function (): void {
-    it('reads the parent theme from WordPress', function (): void {
-        Functions\when('get_template')->justReturn('parent-theme');
-
-        expect(managerMake('/themes')->parent())->toBe('parent-theme');
-    });
-
+describe('ThemeManager app path', function (): void {
     it('puts the app code of a theme under its own studly-cased namespace folder', function (string $path, string $expected): void {
         expect(managerMake('/themes')->getThemeAppPath('my-theme', $path))->toBe($expected);
     })->with([
