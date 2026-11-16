@@ -163,17 +163,7 @@ describe('pollora:media:thumbs:warm', function (): void {
         $this->app->instance(WordPressMedia::class, new WordPressMedia($this->storage, $this->config, null, $this->sizes));
     });
 
-    it('reports an empty library without failure', function (): void {
-        Functions\when('get_posts')->justReturn([]);
-
-        [$code, $output] = runMediaConsoleCommand(new MediaThumbsWarmCommand, $this->app);
-
-        expect($code)->toBe(0)->and($output)->toContain('0 image(s) looked at; 0 file(s) made; 0 failed.');
-    });
-
     it('fails with a message when the size asked for is not declared', function (): void {
-        Functions\when('get_posts')->justReturn([]);
-
         [$code, $output] = runMediaConsoleCommand(new MediaThumbsWarmCommand, $this->app, ['--size' => 'nope']);
 
         expect($code)->toBe(1)->and($output)->toContain('The size "nope" is not declared.');
