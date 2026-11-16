@@ -21,7 +21,10 @@ require_once __DIR__.'/Fixtures/DiscoveryAttributes.php';
 final class HandledByItsAttributesTaxonomy
 {
     #[ZzDiscoveryHandlesMethod]
-    public function handledMethod(): void {}
+    public function handledMethod(): string
+    {
+        return 'handled';
+    }
 }
 
 #[Taxonomy('broken-class-attr')]
@@ -32,7 +35,10 @@ final class BrokenClassAttributeTaxonomy {}
 final class BrokenMethodAttributeTaxonomy
 {
     #[ZzDiscoveryBrokenOnMethod]
-    public function broken(): void {}
+    public function broken(): string
+    {
+        return 'broken';
+    }
 }
 
 /**

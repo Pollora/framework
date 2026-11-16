@@ -21,7 +21,10 @@ require_once __DIR__.'/Fixtures/DiscoveryAttributes.php';
 final class HandledByItsAttributesPostType
 {
     #[ZzDiscoveryHandlesMethod]
-    public function handledMethod(): void {}
+    public function handledMethod(): string
+    {
+        return 'handled';
+    }
 }
 
 #[PostType('broken-class-attr')]
@@ -32,7 +35,10 @@ final class BrokenClassAttributePostType {}
 final class BrokenMethodAttributePostType
 {
     #[ZzDiscoveryBrokenOnMethod]
-    public function broken(): void {}
+    public function broken(): string
+    {
+        return 'broken';
+    }
 }
 
 /**

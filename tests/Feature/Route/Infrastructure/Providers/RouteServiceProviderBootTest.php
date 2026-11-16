@@ -53,7 +53,7 @@ describe('Route::wp() macro', function (): void {
 
 function fallbackRoutes(): array
 {
-    return array_values(array_filter(Route::getRoutes()->getRoutes(), fn ($route): bool => $route->uri() === '{any}'));
+    return array_values(array_filter(Route::getRoutes()->getRoutes(), fn (Illuminate\Routing\Route $route): bool => $route->uri() === '{any}'));
 }
 
 describe('RouteServiceProvider boot', function (): void {

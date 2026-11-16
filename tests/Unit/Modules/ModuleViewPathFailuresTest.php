@@ -34,7 +34,9 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     foreach (['/resources/views', '/resources', ''] as $directory) {
-        is_dir($this->module.$directory) && rmdir($this->module.$directory);
+        if (is_dir($this->module.$directory)) {
+            rmdir($this->module.$directory);
+        }
     }
 
     Mockery::close();

@@ -204,6 +204,7 @@ describe('ConnectorActivator', function (): void {
         $activator = new ConnectorActivator($this->app);
 
         $activator->enable($module);
+
         expect($activator->hasStatus($module, true))->toBeTrue();
 
         $activator->disable($module);

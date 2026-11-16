@@ -61,7 +61,7 @@ final class RouteActionsWithPost
 {
     public function show(WP_Post $post): string
     {
-        return 'show';
+        return 'show '.$post::class;
     }
 
     public static function __callStatic(string $name, array $arguments): string

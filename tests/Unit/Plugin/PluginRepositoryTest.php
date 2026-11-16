@@ -359,7 +359,7 @@ describe('PluginRepository scanning failures', function (): void {
     {
         $parser = Mockery::mock(WordPressPluginParser::class);
         $parser->shouldReceive('hasValidPluginHeaders')->andReturn(true);
-        $parser->shouldReceive('parsePluginHeaders')->andReturnUsing(fn () => $headers instanceof Throwable ? throw $headers : $headers);
+        $parser->shouldReceive('parsePluginHeaders')->andReturnUsing(fn (): array => $headers instanceof Throwable ? throw $headers : $headers);
         $container = new Container;
 
         if ($logger instanceof LoggerInterface) {

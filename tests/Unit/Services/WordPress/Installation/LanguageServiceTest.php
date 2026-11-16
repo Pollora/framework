@@ -18,7 +18,7 @@ final class TranslationsApiStandIn
 
     private int $position = 0;
 
-    public function stream_open(string $path, string $mode, int $options, ?string &$openedPath): bool
+    public function stream_open(): bool
     {
         return self::$body !== null;
     }

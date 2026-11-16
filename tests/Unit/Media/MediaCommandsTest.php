@@ -63,6 +63,7 @@ afterEach(function (): void {
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $file) {
         $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
     }
+
     rmdir($this->root);
     Mockery::close();
 });
@@ -186,7 +187,7 @@ describe('pollora:media:migrate', function (): void {
         file_put_contents($this->from.'/woocommerce_uploads/secret.zip', 'zip');
 
         $this->disks = Mockery::mock(Factory::class);
-        $this->disks->shouldReceive('disk')->with('old')->andReturn(new class($this->from)
+        $this->disks->shouldReceive('disk')->with('old')->andReturn(new readonly class($this->from)
         {
             public function __construct(private string $path) {}
 
@@ -195,7 +196,7 @@ describe('pollora:media:migrate', function (): void {
                 return new Filesystem(new LocalFilesystemAdapter($this->path));
             }
         });
-        $this->disks->shouldReceive('disk')->with('new')->andReturn(new class($this->to)
+        $this->disks->shouldReceive('disk')->with('new')->andReturn(new readonly class($this->to)
         {
             public function __construct(private string $path) {}
 
@@ -243,7 +244,7 @@ describe('pollora:media:migrate', function (): void {
         $broken->shouldReceive('fileExists')->andReturn(false);
         $broken->shouldReceive('write', 'writeStream')->andThrow(new RuntimeException('disk full'));
         $disks = Mockery::mock(Factory::class);
-        $disks->shouldReceive('disk')->with('old')->andReturn(new class($this->from)
+        $disks->shouldReceive('disk')->with('old')->andReturn(new readonly class($this->from)
         {
             public function __construct(private string $path) {}
 
@@ -252,7 +253,7 @@ describe('pollora:media:migrate', function (): void {
                 return new Filesystem(new LocalFilesystemAdapter($this->path));
             }
         });
-        $disks->shouldReceive('disk')->with('new')->andReturn(new class($broken)
+        $disks->shouldReceive('disk')->with('new')->andReturn(new readonly class($broken)
         {
             public function __construct(private object $driver) {}
 

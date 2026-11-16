@@ -62,7 +62,7 @@ describe('LaravelDiscoveryCacheManagerFactory', function (): void {
         expect(factoryLoggerOf(factoryManager($container)))->toBe($logger);
 
         $broken = new Container;
-        $broken->bind(LoggerInterface::class, fn () => throw new RuntimeException('no logger'));
+        $broken->bind(LoggerInterface::class, fn (): never => throw new RuntimeException('no logger'));
 
         expect(factoryLoggerOf(factoryManager($broken)))->toBeNull();
     });

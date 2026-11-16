@@ -124,7 +124,7 @@ describe('BaseThemeCommand', function (): void {
                 return $this->fromTemplate($template, $replacements);
             }
 
-            protected function getTemplatePath(string $templateName): ?string
+            protected function getTemplatePath(string $templateName): string
             {
                 return $this->stub;
             }

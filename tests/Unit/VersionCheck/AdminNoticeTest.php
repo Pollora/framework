@@ -69,7 +69,7 @@ describe('AdminNotice dismissal', function (): void {
         Brain\Monkey\Functions\when('check_ajax_referer')->justReturn(true);
         Brain\Monkey\Functions\when('sanitize_text_field')->returnArg();
         Brain\Monkey\Functions\when('get_current_user_id')->justReturn(5);
-        Brain\Monkey\Functions\when('wp_die')->justReturn(null);
+        Brain\Monkey\Functions\when('wp_die')->justReturn();
     });
 
     afterEach(function (): void {

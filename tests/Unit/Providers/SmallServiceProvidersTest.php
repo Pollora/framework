@@ -80,6 +80,7 @@ describe('WordPressMailServiceProvider', function (): void {
         $this->app = new Application(sys_get_temp_dir());
         $this->app->instance('config', new Repository);
         $this->app->instance(Filter::class, Mockery::mock(Filter::class));
+
         $this->provider = new WordPressMailServiceProvider($this->app);
         $this->provider->register();
     });

@@ -24,11 +24,13 @@ function runMetaAuditText(array $rows): array
     $app = new Application(sys_get_temp_dir());
     $schemas = new MetaSchemaRepository;
     $schemas->add((new MetaSchemaBuilder)->build(Event::class));
+
     Functions\when('is_serialized')->justReturn(false);
     $app->instance(MetaAuditor::class, new MetaAuditor($schemas, new ArrayMetaInventory($rows), new MetaValueCaster));
 
     $command = new MetaAuditCommand;
     $command->setLaravel($app);
+
     $output = new BufferedOutput;
     $code = $command->run(new ArrayInput([]), $output);
     Container::setInstance(new Container);

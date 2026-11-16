@@ -75,6 +75,7 @@ describe('LaravelModuleDiscovery failures', function (): void {
         $manager->shouldReceive('discoverAllInLocation')->andThrow(new RuntimeException('manager failed'));
         $this->container->instance(DiscoveryManager::class, $manager);
         $this->container->instance(LoggerInterface::class, discoveryFailureLogger('Discovery error for module Blog'));
+
         $module = Mockery::mock(Module::class);
         $module->shouldReceive('getName')->andReturn('Blog');
         $module->shouldReceive('getPath')->andReturn($dir);
@@ -89,7 +90,7 @@ describe('LaravelModuleDiscovery failures', function (): void {
     });
 
     it('works without a logger when the container cannot build one', function (): void {
-        $this->container->bind(LoggerInterface::class, fn () => throw new RuntimeException('no logger'));
+        $this->container->bind(LoggerInterface::class, fn (): never => throw new RuntimeException('no logger'));
         $this->repo->shouldReceive('allEnabled')->andReturn([failingDiscoveryModule('getPath')]);
 
         (new LaravelModuleDiscovery($this->container))->discoverLaravelModules();
@@ -112,7 +113,7 @@ describe('FrameworkModuleDiscovery failures', function (): void {
     });
 
     it('works without a logger when the container cannot build one', function (): void {
-        $this->app->bind(LoggerInterface::class, fn () => throw new RuntimeException('no logger'));
+        $this->app->bind(LoggerInterface::class, fn (): never => throw new RuntimeException('no logger'));
 
         expect((new FrameworkModuleDiscovery($this->app))->getDiscoveredModules())->toBe([]);
     });

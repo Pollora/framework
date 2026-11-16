@@ -240,7 +240,7 @@ describe('MediaCheck', function (): void {
         $sizes->add('card')->cover(600, 400)->webp();
         $sizes->add('hero')->cover(1600, 600)->avif();
         $sizes->add('plain')->cover(300, 300)->original();
-        $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn () => $sizes);
+        $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn (): ImageSizes => $sizes);
 
         $result = $check->run(RunContext::Console);
 
@@ -251,7 +251,8 @@ describe('MediaCheck', function (): void {
     it('lists the declarations that could not make a size', function (): void {
         $sizes = new ImageSizes(fn (): string => 'key');
         $sizes->add('broken');
-        $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn () => $sizes);
+
+        $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn (): ImageSizes => $sizes);
 
         $result = $check->run(RunContext::Console);
 

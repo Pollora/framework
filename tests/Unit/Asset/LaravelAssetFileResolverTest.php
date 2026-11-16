@@ -13,7 +13,7 @@ describe('LaravelAssetFileResolver', function (): void {
         $logger->shouldReceive('error')->once()->with('Error in AssetFile::__toString', ['error' => 'no manager', 'path' => 'images/logo.svg']);
 
         $app = new Container;
-        $app->bind(AssetManager::class, fn () => throw new RuntimeException('no manager'));
+        $app->bind(AssetManager::class, fn (): never => throw new RuntimeException('no manager'));
         $app->instance(LoggerInterface::class, $logger);
 
         expect((new LaravelAssetFileResolver($app))('images/logo.svg', 'theme'))->toBe('');

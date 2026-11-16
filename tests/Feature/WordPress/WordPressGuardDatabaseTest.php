@@ -40,15 +40,15 @@ beforeEach(function (): void {
 
     $this->current = [];
     $this->actions = [];
-    Functions\when('wp_set_current_user')->alias(function (int $id) {
+    Functions\when('wp_set_current_user')->alias(function (int $id): null {
         $this->current[] = $id;
 
         return null;
     });
-    Functions\when('wp_set_auth_cookie')->alias(function (int $id, bool $remember = false, string|bool $secure = '') {
+    Functions\when('wp_set_auth_cookie')->alias(function (int $id, bool $remember = false, string|bool $secure = ''): void {
         $this->cookies[] = [$id, $remember];
     });
-    Functions\when('do_action')->alias(function (string $hook, mixed ...$args) {
+    Functions\when('do_action')->alias(function (string $hook, mixed ...$args): void {
         $this->actions[] = $hook;
     });
     $this->cookies = [];
