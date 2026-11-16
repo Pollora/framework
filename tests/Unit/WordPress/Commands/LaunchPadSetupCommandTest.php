@@ -153,7 +153,7 @@ describe('pollora:env:setup from composer create-project', function (): void {
 
 describe('pollora:env:setup with a terminal', function (): void {
     afterEach(function (): void {
-        (new ReflectionProperty(Laravel\Prompts\Prompt::class, 'interactive'))->setValue(null, null);
+        Laravel\Prompts\Prompt::interactive(false);
         Laravel\Prompts\Prompt::fallbackWhen(false);
     });
 
