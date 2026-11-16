@@ -126,3 +126,15 @@ it('says a capability of a super role was declared by the project', function ():
 
     expect($code)->toBe(0)->and($from['scan_tickets'])->toBe('super role: declared by the project');
 });
+
+it('prints the roles as a table with their origin, capability count and users', function (): void {
+    [$code, $output] = runRoleCommand(new RoleListCommand, $this->app);
+
+    expect($code)->toBe(0)
+        ->and($output)->toContain('Role')
+        ->and($output)->toContain('Origin')
+        ->and($output)->toContain('event_manager')
+        ->and($output)->toContain('declared by')
+        ->and($output)->toContain('stored, modified by')
+        ->and($output)->toContain('administrator');
+});
