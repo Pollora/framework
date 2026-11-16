@@ -95,6 +95,26 @@ describe('DatabaseStateConnector', function (): void {
             ->and($connector->writable())->toBeFalse();
     });
 
+    it('forgets a module, leaving the others stored', function (): void {
+        createOptionsTable();
+        $connector = (new ModuleConnectors($this->app))->make('database');
+        $connector->set('Crm', true);
+        $connector->set('Blog', false);
+
+        $connector->forget('Crm');
+
+        $row = resolve('db')->connection('wordpress')->table('options')->where('option_name', 'pollora_modules')->first();
+
+        expect(json_decode($row->option_value, true))->toBe(['Blog' => false])
+            ->and($connector->all())->toBe(['Blog' => false]);
+    });
+
+    it('refuses to write when the options table cannot take the row', function (): void {
+        $connector = (new ModuleConnectors($this->app))->make('database');
+
+        expect(fn () => $connector->set('Crm', true))->toThrow(Pollora\Modules\Domain\Exceptions\ModuleStateException::class);
+    });
+
     it('never unserializes the stored value', function (): void {
         createOptionsTable();
         resolve('db')->connection('wordpress')->table('options')->insert(['option_name' => 'pollora_modules', 'option_value' => serialize(['Crm' => true])]);
