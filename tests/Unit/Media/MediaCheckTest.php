@@ -232,4 +232,48 @@ describe('MediaCheck', function (): void {
             ->and($result->summary)->toContain('7 file(s)')
             ->and($result->details)->toHaveCount(5);
     });
+
+    it('warns of sizes written in a format the image editor of this server cannot write', function (): void {
+        Brain\Monkey\Functions\when('wp_image_editor_supports')->alias(fn (array $args): bool => $args['mime_type'] === 'image/webp');
+        $sizes = new Pollora\Media\Application\Services\ImageSizes(fn (): string => 'key');
+        $sizes->add('card')->cover(600, 400)->webp();
+        $sizes->add('hero')->cover(1600, 600)->avif();
+        $sizes->add('plain')->cover(300, 300)->original();
+        $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn () => $sizes);
+
+        $result = $check->run(RunContext::Console);
+
+        expect($result->status->name)->toBe('Warning')
+            ->and($result->details)->toBe(['The size "hero" is written in image/avif, which the image editor of this server cannot write.']);
+    });
+
+    it('lists the declarations that could not make a size', function (): void {
+        $sizes = new Pollora\Media\Application\Services\ImageSizes(fn (): string => 'key');
+        $sizes->add('broken');
+        $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn () => $sizes);
+
+        $result = $check->run(RunContext::Console);
+
+        expect($result->status->name)->toBe('Warning')
+            ->and($result->summary)->toContain('problem(s) with the declared image sizes');
+    });
+
+    it('stops comparing local files with the disk when the disk fails on one', function (): void {
+        mkdir($this->tmp, 0777, true);
+        file_put_contents($this->tmp.'/a.jpg', 'x');
+        $failing = Mockery::mock(MediaStorage::class)->shouldIgnoreMissing();
+        $failing->shouldReceive('readStream')->andReturnUsing(function () {
+            $stream = fopen('php://memory', 'r+');
+            fwrite($stream, 'ok');
+            rewind($stream);
+
+            return $stream;
+        });
+        $failing->shouldReceive('list')->andReturn([]);
+        $failing->shouldReceive('exists')->andThrow(new RuntimeException('disk unreachable'));
+
+        $check = new MediaCheck('uploads', fn (): MediaStorage => $failing, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp);
+
+        expect($check->run(RunContext::Console)->status->name)->toBe('Ok');
+    });
 });
