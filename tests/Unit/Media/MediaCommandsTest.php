@@ -25,7 +25,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * @param  array<string, mixed>  $input
  * @return array{0: int, 1: string}
  */
-function runMediaCommand(Command $command, Application $app, array $input = []): array
+function runMediaConsoleCommand(Command $command, Application $app, array $input = []): array
 {
     Container::setInstance($app);
     $command->setLaravel($app);
@@ -67,13 +67,13 @@ describe('pollora:media:status', function (): void {
     it('says the module is off when no disk is configured', function (): void {
         $this->app->instance('config', new Repository(['media' => ['disk' => '']]));
 
-        [$code, $output] = runMediaCommand(new MediaStatusCommand, $this->app);
+        [$code, $output] = runMediaConsoleCommand(new MediaStatusCommand, $this->app);
 
         expect($code)->toBe(0)->and($output)->toContain('The media module is off');
     });
 
     it('reports the disk and its public URL, and that the disk takes a file', function (): void {
-        [$code, $output] = runMediaCommand(new MediaStatusCommand, $this->app);
+        [$code, $output] = runMediaConsoleCommand(new MediaStatusCommand, $this->app);
 
         expect($code)->toBe(0)
             ->and($output)->toContain('cdn')
@@ -86,7 +86,7 @@ describe('pollora:media:status', function (): void {
         $broken->shouldReceive('write')->andThrow(new RuntimeException('bucket is read-only'));
         $this->app->instance(MediaStorage::class, $broken);
 
-        [$code, $output] = runMediaCommand(new MediaStatusCommand, $this->app);
+        [$code, $output] = runMediaConsoleCommand(new MediaStatusCommand, $this->app);
 
         expect($code)->toBe(1)->and($output)->toContain('The disk does not take a file: bucket is read-only');
     });
@@ -103,7 +103,7 @@ describe('pollora:media:files', function (): void {
         $this->storage->write('2026/11/photo.jpg', 'x');
         Functions\when('wp_get_attachment_metadata')->justReturn(['file' => '2026/11/photo.jpg', 'sizes' => ['thumbnail' => ['file' => 'photo-150x150.jpg']]]);
 
-        [$code, $output] = runMediaCommand(new MediaFilesCommand, $this->app, ['id' => '7']);
+        [$code, $output] = runMediaConsoleCommand(new MediaFilesCommand, $this->app, ['id' => '7']);
 
         expect($code)->toBe(0)
             ->and($output)->toContain('Media 7')
@@ -116,7 +116,7 @@ describe('pollora:media:files', function (): void {
     it('fails when no file is known for the media', function (): void {
         Functions\when('wp_get_attachment_metadata')->justReturn(false);
 
-        [$code, $output] = runMediaCommand(new MediaFilesCommand, $this->app, ['id' => '8']);
+        [$code, $output] = runMediaConsoleCommand(new MediaFilesCommand, $this->app, ['id' => '8']);
 
         expect($code)->toBe(1)->and($output)->toContain('No file is known for this media.');
     });
@@ -125,7 +125,7 @@ describe('pollora:media:files', function (): void {
         Functions\when('get_post_meta')->justReturn('1');
         Functions\when('wp_get_attachment_metadata')->justReturn(false);
 
-        [, $output] = runMediaCommand(new MediaFilesCommand, $this->app, ['id' => '9']);
+        [, $output] = runMediaConsoleCommand(new MediaFilesCommand, $this->app, ['id' => '9']);
 
         expect($output)->toContain('private');
     });
@@ -138,7 +138,7 @@ describe('pollora:media:thumbs:prune', function (): void {
     });
 
     it('only lists the stale files in a dry run', function (): void {
-        [$code, $output] = runMediaCommand(new MediaThumbsPruneCommand, $this->app);
+        [$code, $output] = runMediaConsoleCommand(new MediaThumbsPruneCommand, $this->app);
 
         expect($code)->toBe(0)
             ->and($output)->toContain('Would delete 2026/11/photo-oldsize-600x400-0123456789ab.webp')
@@ -148,7 +148,7 @@ describe('pollora:media:thumbs:prune', function (): void {
     });
 
     it('deletes the stale files with --execute and keeps the original', function (): void {
-        [$code, $output] = runMediaCommand(new MediaThumbsPruneCommand, $this->app, ['--execute' => true]);
+        [$code, $output] = runMediaConsoleCommand(new MediaThumbsPruneCommand, $this->app, ['--execute' => true]);
 
         expect($code)->toBe(0)
             ->and($output)->toContain('Deleted 2026/11/photo-oldsize-600x400-0123456789ab.webp')
@@ -166,7 +166,7 @@ describe('pollora:media:thumbs:warm', function (): void {
     it('reports an empty library without failure', function (): void {
         Functions\when('get_posts')->justReturn([]);
 
-        [$code, $output] = runMediaCommand(new MediaThumbsWarmCommand, $this->app);
+        [$code, $output] = runMediaConsoleCommand(new MediaThumbsWarmCommand, $this->app);
 
         expect($code)->toBe(0)->and($output)->toContain('0 image(s) looked at; 0 file(s) made; 0 failed.');
     });
@@ -174,7 +174,7 @@ describe('pollora:media:thumbs:warm', function (): void {
     it('fails with a message when the size asked for is not declared', function (): void {
         Functions\when('get_posts')->justReturn([]);
 
-        [$code, $output] = runMediaCommand(new MediaThumbsWarmCommand, $this->app, ['--size' => 'nope']);
+        [$code, $output] = runMediaConsoleCommand(new MediaThumbsWarmCommand, $this->app, ['--size' => 'nope']);
 
         expect($code)->toBe(1)->and($output)->toContain('The size "nope" is not declared.');
     });
@@ -216,13 +216,13 @@ describe('pollora:media:migrate', function (): void {
     it('asks for a target disk when none is given or configured', function (): void {
         $this->app->instance('config', new Repository(['media' => ['disk' => null]]));
 
-        [$code, $output] = runMediaCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app);
+        [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app);
 
         expect($code)->toBe(1)->and($output)->toContain('Name the target disk with --to, or set media.disk.');
     });
 
     it('copies nothing in a dry run and says what it would copy', function (): void {
-        [$code, $output] = runMediaCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new']);
+        [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new']);
 
         expect($code)->toBe(0)
             ->and($output)->toContain('Would copy 3 file(s); 0 already there; 0 left out; 0 failed.')
@@ -234,7 +234,7 @@ describe('pollora:media:migrate', function (): void {
         mkdir($this->to.'/2026/11', 0777, true);
         file_put_contents($this->to.'/2026/11/doc.pdf', 'pdf');
 
-        [$code, $output] = runMediaCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, [
+        [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, [
             '--from' => 'old', '--to' => 'new', '--execute' => true, '--exclude' => ['woocommerce_uploads/*'],
         ]);
 
@@ -269,7 +269,7 @@ describe('pollora:media:migrate', function (): void {
         });
         $this->app->instance(Illuminate\Contracts\Filesystem\Factory::class, $disks);
 
-        [$code, $output] = runMediaCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new', '--execute' => true]);
+        [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new', '--execute' => true]);
 
         expect($code)->toBe(1)
             ->and($output)->toContain('Could not copy 2026/11/photo.jpg')
@@ -313,7 +313,7 @@ describe('pollora:media:migrate', function (): void {
         $this->app->instance('config', new Repository(['media' => ['disk' => 'cdn'], 'app' => ['url' => 'http://app.test/']]));
 
         try {
-            [$code, $output] = runMediaCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new', '--replace-urls' => true]);
+            [$code, $output] = runMediaConsoleCommand(new Pollora\Media\Infrastructure\Laravel\Console\MediaMigrateCommand, $this->app, ['--from' => 'old', '--to' => 'new', '--replace-urls' => true]);
         } finally {
             unset($GLOBALS['wpdb']);
         }
