@@ -164,3 +164,32 @@ describe('for all plugins', function (): void {
             ->and($output)->toContain('Error retrieving plugins: database offline');
     });
 });
+
+describe('plugin status failures', function (): void {
+    /**
+     * @param  array<string, array{0: bool, 1: bool}>  $states  [active, enabled] by plugin name
+     */
+    function pluginStatusManagerWithStates(array $states, ?Throwable $findFails = null): PluginManager
+    {
+        $modules = [];
+
+        foreach ($states as $name => [$active, $enabled]) {
+            $module = new PluginModule($name, '/plugins/'.$name);
+            $module->setHeaders(['Name' => ucfirst($name), 'Version' => '1.0.0']);
+            $module->setActive($active);
+            $module->setEnabled($enabled);
+            $modules[$name] = $module;
+        }
+
+        $repository = Mockery::mock(ModuleRepositoryInterface::class);
+        $repository->shouldReceive('find')->andReturnUsing(fn (string $name): ?PluginModule => $findFails instanceof Throwable ? throw $findFails : ($modules[$name] ?? null));
+
+        return new PluginManager(app(), null, $repository, Mockery::mock(ConsoleDetectionService::class));
+    }
+
+    it('fails with the reason when the plugin cannot be read', function (): void {
+        [$status, $output] = runPluginStatus(pluginStatusManagerWithStates([], new RuntimeException('repository offline')), ['plugin' => 'alpha']);
+
+        expect($status)->toBe(1)->and($output)->toContain('Error retrieving plugin information: repository offline');
+    });
+});

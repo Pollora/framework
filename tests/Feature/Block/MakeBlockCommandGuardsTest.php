@@ -106,4 +106,21 @@ describe('pollora:make:block guards', function (): void {
 
         expect($metadata['title'])->toBe('First');
     });
+
+    it('refuses a theme that has no Vite build, naming what is missing, and writes nothing', function (): void {
+        unlink($this->themeDir.'/vite.config.js');
+        unlink($this->themeDir.'/package.json');
+
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'test-theme'])
+            ->expectsOutputToContain('a block needs a Vite build')
+            ->assertFailed();
+
+        expect($this->themeDir.'/resources/views/blocks')->not->toBeDirectory();
+    });
+
+    it('refuses a module that has no directory', function (): void {
+        $this->artisan('pollora:make:block', ['name' => 'hero', '--module' => 'GhostModule'])
+            ->expectsOutputToContain('Module directory not found')
+            ->assertFailed();
+    });
 });

@@ -7,6 +7,7 @@ use Mockery as m;
 use Pollora\Route\Application\UseCases\BindWordPressParametersUseCase;
 use Pollora\Route\Domain\Contracts\WordPressTypeResolverInterface;
 use Pollora\Route\Infrastructure\Models\Route;
+use Psr\Log\LoggerInterface;
 
 beforeEach(function (): void {
     if (! class_exists('WP_Post')) {
@@ -51,6 +52,62 @@ describe('BindWordPressParametersUseCase parameter kinds', function (): void {
         $route->bind(Request::create('/post'));
 
         $this->useCase->execute($route);
+
+        expect($route->parameter('post'))->toBeNull();
+    });
+});
+
+final class RouteActionsWithPost
+{
+    public function show(WP_Post $post): string
+    {
+        return 'show '.$post::class;
+    }
+
+    public static function __callStatic(string $name, array $arguments): string
+    {
+        return 'magic';
+    }
+}
+
+describe('BindWordPressParametersUseCase callable kinds', function (): void {
+    it('reads the parameters of a [class, method] callable', function (): void {
+        $post = new WP_Post;
+        $this->typeResolver->shouldReceive('resolve')->once()->with('WP_Post')->andReturn($post);
+
+        $route = new Route(['GET'], '/post', fn (): string => 'x');
+        $route->bind(Request::create('/post'));
+        $route->setAction([...$route->getAction(), 'uses' => [new RouteActionsWithPost, 'show']]);
+
+        $this->useCase->execute($route);
+
+        expect($route->parameter('post'))->toBe($post);
+    });
+
+    it('asks WordPress for nothing when the callable cannot be read (a plain function name)', function (): void {
+        $this->typeResolver->shouldNotReceive('resolve');
+
+        $route = new Route(['GET'], '/post', fn (): string => 'x');
+        $route->bind(Request::create('/post'));
+        $route->setAction([...$route->getAction(), 'uses' => 'strtoupper']);
+
+        $this->useCase->execute($route);
+
+        expect($route->parameter('post'))->toBeNull();
+    });
+
+    it('logs and binds nothing for a callable PHP accepts through __callStatic but has no method behind', function (): void {
+        $this->typeResolver->shouldNotReceive('resolve');
+        $logger = m::mock(LoggerInterface::class);
+        $logger->shouldReceive('error')->once()->with('Failed to get callable reflection', m::on(
+            fn (array $context): bool => $context['exception'] instanceof ReflectionException && $context['callable'] === [RouteActionsWithPost::class, 'ghost']
+        ));
+
+        $route = new Route(['GET'], '/post', fn (): string => 'x');
+        $route->bind(Request::create('/post'));
+        $route->setAction([...$route->getAction(), 'uses' => [RouteActionsWithPost::class, 'ghost']]);
+
+        (new BindWordPressParametersUseCase($this->typeResolver, $logger))->execute($route);
 
         expect($route->parameter('post'))->toBeNull();
     });

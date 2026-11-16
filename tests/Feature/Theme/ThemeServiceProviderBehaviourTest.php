@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use Mockery as m;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
 use Pollora\Collection\Domain\Contracts\CollectionFactoryInterface;
+use Pollora\Collection\Domain\Contracts\CollectionInterface;
 use Pollora\Config\Domain\Contracts\ConfigRepositoryInterface;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
@@ -290,5 +291,40 @@ describe('ThemeServiceProvider theme.json filter', function (): void {
         $original = new stdClass;
 
         expect($callback($original))->toBe($original);
+    });
+});
+
+describe('ThemeServiceProvider deferred utility setup', function (): void {
+    afterEach(function (): void {
+        ThemeConfig::reset();
+        (new ReflectionProperty(ThemeCollection::class, 'collectionFactory'))->setValue(null, null);
+    });
+
+    it('hands the config repository to ThemeConfig when it is first resolved, if it was not bound yet', function (): void {
+        $app = new Application(sys_get_temp_dir());
+        $provider = new ThemeServiceProvider($app);
+        ThemeConfig::reset();
+
+        themeProviderCall($provider, 'initializeThemeConfig');
+
+        expect(ThemeConfig::isInitialized())->toBeFalse();
+
+        $app->singleton(ConfigRepositoryInterface::class, fn () => m::mock(ConfigRepositoryInterface::class));
+        $app->make(ConfigRepositoryInterface::class);
+
+        expect(ThemeConfig::isInitialized())->toBeTrue();
+    });
+
+    it('hands the collection factory to ThemeCollection when it is first resolved, if it was not bound yet', function (): void {
+        $app = new Application(sys_get_temp_dir());
+        $provider = new ThemeServiceProvider($app);
+        $factory = m::mock(CollectionFactoryInterface::class);
+        $factory->shouldReceive('make')->with([1])->once()->andReturn(m::mock(CollectionInterface::class));
+
+        themeProviderCall($provider, 'initializeThemeCollection');
+        $app->singleton(CollectionFactoryInterface::class, fn () => $factory);
+        $app->make(CollectionFactoryInterface::class);
+
+        expect(ThemeCollection::make([1]))->not->toBeNull();
     });
 });

@@ -3,9 +3,21 @@
 declare(strict_types=1);
 
 use Pollora\Doctor\Domain\Enums\RunContext;
+use Pollora\Media\Application\Services\ImageSizes;
 use Pollora\Media\Domain\Contracts\MediaStorage;
 use Pollora\Media\Domain\Models\MediaConfig;
 use Pollora\Media\Infrastructure\Laravel\MediaCheck;
+
+/*
+ * wp_image_editor_supports() is a plain function, not a Brain Monkey stub: once a test has defined it, every later
+ * MediaCheck of the process finds it, so it keeps answering "yes" until a test sets $GLOBALS['content_image_editor'].
+ */
+if (! function_exists('wp_image_editor_supports')) {
+    function wp_image_editor_supports($args = [])
+    {
+        return isset($GLOBALS['content_image_editor']) ? ($GLOBALS['content_image_editor'])($args) : true;
+    }
+}
 
 /**
  * A disk that lives in an array.
@@ -231,5 +243,54 @@ describe('MediaCheck', function (): void {
         expect($result->status->name)->toBe('Warning')
             ->and($result->summary)->toContain('7 file(s)')
             ->and($result->details)->toHaveCount(5);
+    });
+
+    it('warns of sizes written in a format the image editor of this server cannot write', function (): void {
+        $GLOBALS['content_image_editor'] = fn (array $args): bool => $args['mime_type'] === 'image/webp';
+        $sizes = new ImageSizes(fn (): string => 'key');
+        $sizes->add('card')->cover(600, 400)->webp();
+        $sizes->add('hero')->cover(1600, 600)->avif();
+        $sizes->add('plain')->cover(300, 300)->original();
+        $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn (): ImageSizes => $sizes);
+
+        try {
+            $result = $check->run(RunContext::Console);
+        } finally {
+            unset($GLOBALS['content_image_editor']);
+        }
+
+        expect($result->status->name)->toBe('Warning')
+            ->and($result->details)->toBe(['The size "hero" is written in image/avif, which the image editor of this server cannot write.']);
+    });
+
+    it('lists the declarations that could not make a size', function (): void {
+        $sizes = new ImageSizes(fn (): string => 'key');
+        $sizes->add('broken');
+
+        $check = new MediaCheck('uploads', fn (): MediaStorage => $this->storage, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp, fn (): ImageSizes => $sizes);
+
+        $result = $check->run(RunContext::Console);
+
+        expect($result->status->name)->toBe('Warning')
+            ->and($result->summary)->toContain('problem(s) with the declared image sizes');
+    });
+
+    it('stops comparing local files with the disk when the disk fails on one', function (): void {
+        mkdir($this->tmp, 0777, true);
+        file_put_contents($this->tmp.'/a.jpg', 'x');
+        $failing = Mockery::mock(MediaStorage::class)->shouldIgnoreMissing();
+        $failing->shouldReceive('readStream')->andReturnUsing(function () {
+            $stream = fopen('php://memory', 'r+');
+            fwrite($stream, 'ok');
+            rewind($stream);
+
+            return $stream;
+        });
+        $failing->shouldReceive('list')->andReturn([]);
+        $failing->shouldReceive('exists')->andThrow(new RuntimeException('disk unreachable'));
+
+        $check = new MediaCheck('uploads', fn (): MediaStorage => $failing, fn (): MediaConfig => new MediaConfig('https://cdn.test/uploads/'), $this->tmp);
+
+        expect($check->run(RunContext::Console)->status->name)->toBe('Ok');
     });
 });

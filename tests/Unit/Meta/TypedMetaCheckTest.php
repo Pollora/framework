@@ -95,3 +95,27 @@ it('reports a declaration discovery refused, with the other problems', function 
             ArticleExtras::class.': the post type "page" does not exist, so its meta are never used',
         ]);
 });
+
+it('identifies itself for the doctor and runs in the console and over HTTP', function (): void {
+    $check = ($this->check)();
+
+    expect($check->id())->toBe('typed-meta')
+        ->and($check->label())->toBe('Typed meta')
+        ->and($check->runsIn())->toBe([RunContext::Console, RunContext::Http]);
+});
+
+it('is skipped before WordPress has run init', function (): void {
+    Functions\when('did_action')->justReturn(0);
+
+    $result = ($this->check)()->run(RunContext::Console);
+
+    expect($result->status)->toBe(CheckStatus::Skipped)->and($result->summary)->toBe('WordPress is not loaded.');
+});
+
+it('has nothing to check when no meta is declared', function (): void {
+    $this->schemas = new MetaSchemaRepository;
+
+    $result = ($this->check)()->run(RunContext::Console);
+
+    expect($result->status)->toBe(CheckStatus::Ok)->and($result->summary)->toBe('No #[Meta] declared.');
+});

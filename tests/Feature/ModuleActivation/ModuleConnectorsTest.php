@@ -7,10 +7,13 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use Nwidart\Modules\Contracts\ActivatorInterface;
+use Nwidart\Modules\Module;
+use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Modules\Domain\Contracts\ModuleStateConnector;
 use Pollora\Modules\Domain\Events\ModuleDisabled;
 use Pollora\Modules\Domain\Events\ModuleEnabled;
 use Pollora\Modules\Domain\Exceptions\ModuleLockedException;
+use Pollora\Modules\Domain\Exceptions\ModuleStateException;
 use Pollora\Modules\Infrastructure\Activation\ConfigStateConnector;
 use Pollora\Modules\Infrastructure\Activation\ConnectorActivator;
 use Pollora\Modules\Infrastructure\Activation\DatabaseStateConnector;
@@ -95,6 +98,26 @@ describe('DatabaseStateConnector', function (): void {
             ->and($connector->writable())->toBeFalse();
     });
 
+    it('forgets a module, leaving the others stored', function (): void {
+        createOptionsTable();
+        $connector = (new ModuleConnectors($this->app))->make('database');
+        $connector->set('Crm', true);
+        $connector->set('Blog', false);
+
+        $connector->forget('Crm');
+
+        $row = resolve('db')->connection('wordpress')->table('options')->where('option_name', 'pollora_modules')->first();
+
+        expect(json_decode($row->option_value, true))->toBe(['Blog' => false])
+            ->and($connector->all())->toBe(['Blog' => false]);
+    });
+
+    it('refuses to write when the options table cannot take the row', function (): void {
+        $connector = (new ModuleConnectors($this->app))->make('database');
+
+        expect(fn () => $connector->set('Crm', true))->toThrow(ModuleStateException::class);
+    });
+
     it('never unserializes the stored value', function (): void {
         createOptionsTable();
         resolve('db')->connection('wordpress')->table('options')->insert(['option_name' => 'pollora_modules', 'option_value' => serialize(['Crm' => true])]);
@@ -173,6 +196,49 @@ describe('ConnectorActivator', function (): void {
         $activator->setActiveByName('Crm', true);
 
         expect(fn () => $activator->setActiveByName('Crm', false))->toThrow(ModuleLockedException::class, 'locked enabled');
+    });
+
+    it('enables, disables and sets a module given as an object, and reads its status back', function (): void {
+        $module = Mockery::mock(Module::class);
+        $module->shouldReceive('getName')->andReturn('Shop');
+        $activator = new ConnectorActivator($this->app);
+
+        $activator->enable($module);
+
+        expect($activator->hasStatus($module, true))->toBeTrue();
+
+        $activator->disable($module);
+        expect($activator->hasStatus($module, false))->toBeTrue();
+
+        $activator->setActive($module, true);
+        expect((new JsonStateConnector($this->statuses))->all()['Shop'])->toBeTrue();
+    });
+
+    it('deletes a module that has a state, and ignores one that has none', function (): void {
+        $known = Mockery::mock(Module::class);
+        $known->shouldReceive('getName')->andReturn('Blog');
+        $unknown = Mockery::mock(Module::class);
+        $unknown->shouldReceive('getName')->andReturn('Ghost');
+        $activator = new ConnectorActivator($this->app);
+
+        $activator->delete($known);
+        $activator->delete($unknown);
+
+        expect((new JsonStateConnector($this->statuses))->all())->toBe(['Crm' => true]);
+    });
+
+    it('clears the discovery cache when a state changes, and carries on when it cannot', function (): void {
+        $manager = Mockery::mock(DiscoveryManager::class);
+        $manager->shouldReceive('clearCache')->once();
+        $this->app->instance(DiscoveryManager::class, $manager);
+        (new ConnectorActivator($this->app))->setActiveByName('Shop', true);
+
+        $broken = Mockery::mock(DiscoveryManager::class);
+        $broken->shouldReceive('clearCache')->once()->andThrow(new RuntimeException('cache locked'));
+        $this->app->instance(DiscoveryManager::class, $broken);
+        (new ConnectorActivator($this->app))->setActiveByName('Blog', true);
+
+        expect((new JsonStateConnector($this->statuses))->all())->toMatchArray(['Shop' => true, 'Blog' => true]);
     });
 
     it('forgets every state on reset', function (): void {

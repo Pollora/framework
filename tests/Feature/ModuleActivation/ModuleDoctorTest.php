@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\File;
 use Nwidart\Modules\Contracts\ActivatorInterface;
 use Pollora\Doctor\Domain\Enums\RunContext;
@@ -65,6 +66,20 @@ afterEach(function (): void {
 });
 
 describe('Module activation check', function (): void {
+    it('identifies itself for the doctor and runs in the console and over HTTP', function (): void {
+        $check = $this->app->make(ModuleActivationCheck::class);
+
+        expect($check->id())->toBe('module-activation')
+            ->and($check->label())->toBe('Module activation')
+            ->and($check->runsIn())->toBe([RunContext::Console, RunContext::Http]);
+    });
+
+    it('is skipped when the modules package is not installed', function (): void {
+        $result = (new ModuleActivationCheck(new Application(sys_get_temp_dir())))->run(RunContext::Console);
+
+        expect($result->status->value)->toBe('skipped')->and($result->summary)->toContain('nwidart/laravel-modules is not installed');
+    });
+
     it('passes when the states match the modules and can be written', function (): void {
         $result = $this->app->make(ModuleActivationCheck::class)->run(RunContext::Console);
 

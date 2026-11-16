@@ -45,6 +45,11 @@ function managerRemove(string $dir): void
 
 class ManagerTestContainer extends Container
 {
+    public function path(string $path = ''): string
+    {
+        return '/base/app'.($path !== '' ? '/'.$path : '');
+    }
+
     public function basePath(string $path = ''): string
     {
         return '/base'.($path !== '' ? '/'.$path : '');
@@ -177,6 +182,16 @@ describe('ThemeManager paths and listing', function (): void {
         expect(managerMake('/themes')->path('/assets/app.css'))->toBe('/themes/demo/assets/app.css')
             ->and(managerMake('/themes')->active())->toBe('demo');
     });
+});
+
+describe('ThemeManager app path', function (): void {
+    it('puts the app code of a theme under its own studly-cased namespace folder', function (string $path, string $expected): void {
+        expect(managerMake('/themes')->getThemeAppPath('my-theme', $path))->toBe($expected);
+    })->with([
+        'no path' => ['', '/base/app'],
+        'a single segment' => ['Providers', '/base/app/Providers'],
+        'a folder and a file' => ['/Http/Controllers/Home.php/', '/base/app/Http/MyTheme/Controllers/Home.php'],
+    ]);
 });
 
 describe('ThemeManager module delegation', function (): void {

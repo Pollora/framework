@@ -120,6 +120,31 @@ describe('pollora:make:model', function (): void {
             ->and($output->fetch())->toContain('Refused by the subclass.');
     });
 
+    it('turns a failure the subclass raises with fail() into a message and exit code 1', function (): void {
+        $command = new class(new Filesystem) extends AbstractGeneratorCommand
+        {
+            protected $name = 'test:failing';
+
+            protected $type = 'Test';
+
+            public function handle(): bool
+            {
+                $this->fail('The stub could not be read.');
+            }
+
+            protected function getStub(): string
+            {
+                return '';
+            }
+        };
+        $command->setLaravel($this->app);
+
+        $output = new BufferedOutput;
+        $status = $command->run(new ArrayInput(['name' => 'Tag']), $output);
+
+        expect($status)->toBe(1)->and($output->fetch())->toContain('The stub could not be read.');
+    });
+
     it('declares --force without taking the -f shortcut of --fillable', function (): void {
         $definition = (new MakeModelCommand(new Filesystem))->getDefinition();
 

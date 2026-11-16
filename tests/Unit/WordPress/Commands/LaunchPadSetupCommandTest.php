@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use Illuminate\Console\Application;
 use Illuminate\Console\Attributes\Signature;
+use Illuminate\Console\Command;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
+use Laravel\Prompts\Key;
+use Laravel\Prompts\Prompt;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\WordPress\Commands\LaunchPadSetupCommand;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -18,10 +21,15 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * @param  array<string, mixed>  $parameters
  * @return array{exit: int, output: string}
  */
-function runSetupCommand(bool $configured, bool $interactive, array $parameters = [], bool $terminal = true): array
+function runSetupCommand(bool $configured, bool $interactive, array $parameters = [], bool $terminal = true, ?Throwable $configureFails = null, bool $promptable = false): array
 {
     $database = Mockery::mock(DatabaseService::class);
     $database->shouldReceive('isConfigured')->andReturn($configured);
+    $database->shouldReceive('configure')->andReturnUsing(function () use ($configureFails): void {
+        if ($configureFails instanceof Throwable) {
+            throw $configureFails;
+        }
+    });
 
     // Laravel commands ask their container whether unit tests are running
     $container = new class extends Container
@@ -44,11 +52,22 @@ function runSetupCommand(bool $configured, bool $interactive, array $parameters 
     $application->setAutoExit(false);
 
     // Laravel reads the signature from the class's own attributes
-    $command = new #[Signature('pollora:env:setup {--install : Suppress some informational output}')] class($database, $terminal) extends LaunchPadSetupCommand
+    $command = new #[Signature('pollora:env:setup {--install : Suppress some informational output}')] class($database, $terminal, $promptable) extends LaunchPadSetupCommand
     {
-        public function __construct(DatabaseService $database, private readonly bool $terminal)
+        public function __construct(DatabaseService $database, private readonly bool $terminal, private readonly bool $promptable)
         {
             parent::__construct($database);
+        }
+
+        // The test runs without a TTY: answer the prompts from Prompt::fake() instead of falling back to the console
+        protected function configurePrompts($input): void
+        {
+            parent::configurePrompts($input);
+
+            if ($this->promptable) {
+                Prompt::interactive(true);
+                Prompt::fallbackWhen(false);
+            }
         }
 
         protected function hasTerminal(): bool
@@ -59,6 +78,15 @@ function runSetupCommand(bool $configured, bool $interactive, array $parameters 
     $command->setLaravel($container);
 
     $application->addCommand($command);
+    $application->addCommand(new #[Signature('key:generate')] class extends Command
+    {
+        public function handle(): int
+        {
+            $this->line('key generated');
+
+            return self::SUCCESS;
+        }
+    });
 
     $input = new ArrayInput(['command' => 'pollora:env:setup', ...$parameters]);
     $input->setInteractive($interactive);
@@ -123,5 +151,44 @@ describe('pollora:env:setup from composer create-project', function (): void {
             ->toContain('DB_CONNECTION=mysql')
             ->toContain('php artisan pollora:install')
             ->not->toContain('Database name is required');
+    });
+});
+
+describe('pollora:env:setup with a terminal', function (): void {
+    afterEach(function (): void {
+        Prompt::interactive(false);
+        Prompt::fallbackWhen(false);
+    });
+
+    beforeEach(function (): void {
+        Prompt::fake([
+            Key::ENTER,
+            Key::ENTER,
+            ...str_split('pollora'),
+            Key::ENTER,
+            Key::ENTER,
+            Key::ENTER,
+            Key::ENTER,
+        ]);
+    });
+
+    it('asks for the database settings, stores them and generates the application key', function (): void {
+        $result = runSetupCommand(configured: false, interactive: true, promptable: true);
+
+        expect($result['exit'])->toBe(0)
+            ->and($result['output'])->toContain('key generated')
+            ->and($result['output'])->toContain('Environment configuration completed successfully!');
+    });
+
+    it('welcomes the user when called by the installer', function (): void {
+        $result = runSetupCommand(configured: false, interactive: true, parameters: ['--install' => true], promptable: true);
+
+        expect($result['output'])->toContain('Welcome to the Pollora installation!');
+    });
+
+    it('fails with the reason when the settings cannot be stored', function (): void {
+        $result = runSetupCommand(configured: false, interactive: true, configureFails: new RuntimeException('cannot write .env'), promptable: true);
+
+        expect($result['exit'])->toBe(1)->and($result['output'])->toContain('cannot write .env');
     });
 });

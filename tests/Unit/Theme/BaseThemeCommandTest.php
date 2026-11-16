@@ -109,4 +109,27 @@ describe('BaseThemeCommand', function (): void {
     it('refuses to render a stub that is not bundled', function (): void {
         baseThemeCommand($this->dir)->render('definitely-not-bundled');
     })->throws(ThemeSetupException::class, 'The stub template "definitely-not-bundled" is not bundled with the framework');
+
+    it('fills a bundled stub with the replacements', function (): void {
+        file_put_contents($this->dir.'/stub.txt', 'Theme {{name}} by {{author}}, {{name}} again');
+        $command = new class(new Repository(['theme' => ['path' => $this->dir]]), new Filesystem, $this->dir.'/stub.txt') extends BaseThemeCommand
+        {
+            public function __construct(Repository $config, Filesystem $files, private readonly string $stub)
+            {
+                parent::__construct($config, $files);
+            }
+
+            public function render(string $template, array $replacements = []): string
+            {
+                return $this->fromTemplate($template, $replacements);
+            }
+
+            protected function getTemplatePath(string $templateName): string
+            {
+                return $this->stub;
+            }
+        };
+
+        expect($command->render('any', ['{{name}}' => 'Demo', '{{author}}' => 'Ada']))->toBe('Theme Demo by Ada, Demo again');
+    });
 });
