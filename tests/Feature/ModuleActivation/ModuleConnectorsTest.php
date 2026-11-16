@@ -195,6 +195,48 @@ describe('ConnectorActivator', function (): void {
         expect(fn () => $activator->setActiveByName('Crm', false))->toThrow(ModuleLockedException::class, 'locked enabled');
     });
 
+    it('enables, disables and sets a module given as an object, and reads its status back', function (): void {
+        $module = Mockery::mock(Nwidart\Modules\Module::class);
+        $module->shouldReceive('getName')->andReturn('Shop');
+        $activator = new ConnectorActivator($this->app);
+
+        $activator->enable($module);
+        expect($activator->hasStatus($module, true))->toBeTrue();
+
+        $activator->disable($module);
+        expect($activator->hasStatus($module, false))->toBeTrue();
+
+        $activator->setActive($module, true);
+        expect((new JsonStateConnector($this->statuses))->all()['Shop'])->toBeTrue();
+    });
+
+    it('deletes a module that has a state, and ignores one that has none', function (): void {
+        $known = Mockery::mock(Nwidart\Modules\Module::class);
+        $known->shouldReceive('getName')->andReturn('Blog');
+        $unknown = Mockery::mock(Nwidart\Modules\Module::class);
+        $unknown->shouldReceive('getName')->andReturn('Ghost');
+        $activator = new ConnectorActivator($this->app);
+
+        $activator->delete($known);
+        $activator->delete($unknown);
+
+        expect((new JsonStateConnector($this->statuses))->all())->toBe(['Crm' => true]);
+    });
+
+    it('clears the discovery cache when a state changes, and carries on when it cannot', function (): void {
+        $manager = Mockery::mock(Pollora\Discovery\Application\Services\DiscoveryManager::class);
+        $manager->shouldReceive('clearCache')->once();
+        $this->app->instance(Pollora\Discovery\Application\Services\DiscoveryManager::class, $manager);
+        (new ConnectorActivator($this->app))->setActiveByName('Shop', true);
+
+        $broken = Mockery::mock(Pollora\Discovery\Application\Services\DiscoveryManager::class);
+        $broken->shouldReceive('clearCache')->once()->andThrow(new RuntimeException('cache locked'));
+        $this->app->instance(Pollora\Discovery\Application\Services\DiscoveryManager::class, $broken);
+        (new ConnectorActivator($this->app))->setActiveByName('Blog', true);
+
+        expect((new JsonStateConnector($this->statuses))->all())->toMatchArray(['Shop' => true, 'Blog' => true]);
+    });
+
     it('forgets every state on reset', function (): void {
         $activator = new ConnectorActivator($this->app);
 
