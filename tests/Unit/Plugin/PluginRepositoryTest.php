@@ -348,3 +348,84 @@ describe('register() and boot()', function (): void {
         expect($repository->has('failing'))->toBeTrue();
     });
 });
+
+describe('PluginRepository scanning failures', function (): void {
+    /**
+     * @param  array<string, mixed>|Throwable  $headers  What the parser answers for every plugin
+     */
+    function pluginRepositoryParsing(string $root, array|Throwable $headers, ?LoggerInterface $logger = null): PluginRepository
+    {
+        $parser = Mockery::mock(WordPressPluginParser::class);
+        $parser->shouldReceive('hasValidPluginHeaders')->andReturn(true);
+        $parser->shouldReceive('parsePluginHeaders')->andReturnUsing(fn () => $headers instanceof Throwable ? throw $headers : $headers);
+        $container = new Container;
+
+        if ($logger instanceof LoggerInterface) {
+            $container->instance(LoggerInterface::class, $logger);
+        }
+
+        return new class($container, $parser, $root) extends PluginRepository
+        {
+            public function __construct(Container $app, WordPressPluginParser $parser, private readonly string $path)
+            {
+                parent::__construct($app, $parser);
+            }
+
+            protected function getPluginsBasePath(): string
+            {
+                return $this->path;
+            }
+        };
+    }
+
+    it('skips a plugin whose headers come back empty', function (): void {
+        expect(pluginRepositoryParsing($this->root, [])->all())->toBe([]);
+    });
+
+    it('logs a plugin whose headers cannot be parsed and goes on', function (): void {
+        $logger = Mockery::mock(LoggerInterface::class);
+        $logger->shouldReceive('error')->times(3)->with(Mockery::on(fn (string $m): bool => str_starts_with($m, "[PluginRepository] Failed to create plugin module '") && str_ends_with($m, 'unreadable header')));
+
+        expect(pluginRepositoryParsing($this->root, new RuntimeException('unreadable header'), $logger)->all())->toBe([]);
+    });
+
+    it('logs a plugin whose creation fails outside the parser and keeps scanning', function (): void {
+        $logger = Mockery::mock(LoggerInterface::class);
+        $logger->shouldReceive('error')->times(3)->with(Mockery::on(fn (string $m): bool => str_contains($m, 'Failed to create plugin module for')));
+        $repository = new class(new Container, new WordPressPluginParser, $this->root) extends PluginRepository
+        {
+            public function __construct(Container $app, WordPressPluginParser $parser, private readonly string $path)
+            {
+                parent::__construct($app, $parser);
+            }
+
+            protected function getPluginsBasePath(): string
+            {
+                return $this->path;
+            }
+
+            protected function createPluginModule(string $pluginName, string $pluginPath): never
+            {
+                throw new RuntimeException('cannot build '.$pluginName);
+            }
+        };
+        (new ReflectionProperty($repository, 'app'))->getValue($repository)->instance(LoggerInterface::class, $logger);
+
+        expect($repository->all())->toBe([]);
+    });
+
+    it('reads the plugins directory from the plugin.path configuration when WP_PLUGIN_DIR is not defined', function (): void {
+        $previous = Container::getInstance();
+        $app = new Illuminate\Foundation\Application($this->root);
+        $app->instance('config', new Illuminate\Config\Repository(['plugin' => ['path' => $this->root.'/']]));
+        Container::setInstance($app);
+
+        try {
+            $names = array_keys((new PluginRepository($app, new WordPressPluginParser))->all());
+        } finally {
+            Container::setInstance($previous);
+        }
+
+        expect($names)->toBe(['alpha', 'beta', 'gamma']);
+    })->skip(defined('WP_PLUGIN_DIR'), 'WP_PLUGIN_DIR is defined in this process, so the configuration is not read');
+});
