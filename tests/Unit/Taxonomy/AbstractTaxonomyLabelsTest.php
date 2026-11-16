@@ -93,3 +93,39 @@ describe('TaxonomyServiceProvider label translator', function (): void {
             ->and($property->getValue())->toBe($translator);
     });
 });
+
+describe('AbstractTaxonomy identity', function (): void {
+    it('derives its slug from the class name until one is set', function (): void {
+        expect((new ProjectCategory)->getSlug())->toBe('project-category');
+    });
+
+    it('keeps the slug it is given', function (): void {
+        $taxonomy = new class extends AbstractTaxonomy
+        {
+            protected ?string $slug = 'work-type';
+        };
+
+        expect($taxonomy->getSlug())->toBe('work-type');
+    });
+
+    it('reads an argument an attribute set, or the default', function (): void {
+        $taxonomy = new ProjectCategory;
+        $taxonomy->setArg('hierarchical', true);
+
+        expect($taxonomy->getArg('hierarchical'))->toBeTrue()
+            ->and($taxonomy->getArg('missing', 'fallback'))->toBe('fallback');
+    });
+
+    it('attaches to the object types an attribute set before the ones the class declares', function (): void {
+        $taxonomy = new class extends AbstractTaxonomy
+        {
+            protected array|string $objectType = 'post';
+        };
+
+        expect($taxonomy->getObjectType())->toBe('post');
+
+        $taxonomy->setArg('object_type', ['book', 'film']);
+
+        expect($taxonomy->getObjectType())->toBe(['book', 'film']);
+    });
+});

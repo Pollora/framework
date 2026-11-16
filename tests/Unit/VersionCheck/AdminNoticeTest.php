@@ -60,3 +60,45 @@ describe('AdminNotice', function (): void {
         expect($output)->toBeEmpty();
     });
 });
+
+describe('AdminNotice dismissal', function (): void {
+    beforeEach(function (): void {
+        $this->notice = new AdminNotice(new VersionComparator(Mockery::mock(VersionCheckerInterface::class)));
+        Brain\Monkey\Functions\when('check_ajax_referer')->justReturn(true);
+        Brain\Monkey\Functions\when('sanitize_text_field')->returnArg();
+        Brain\Monkey\Functions\when('get_current_user_id')->justReturn(5);
+        Brain\Monkey\Functions\when('wp_die')->justReturn(null);
+    });
+
+    afterEach(function (): void {
+        Illuminate\Support\Facades\Facade::clearResolvedInstances();
+    });
+
+    it('stores the dismissed version for the current user', function (): void {
+        $stored = [];
+        Brain\Monkey\Functions\when('update_user_meta')->alias(function (int $user, string $key, string $value) use (&$stored): bool {
+            $stored[] = [$user, $key, $value];
+
+            return true;
+        });
+        Illuminate\Support\Facades\Request::swap(new Illuminate\Http\Request([], ['version' => '13.40.1'], [], [], [], ['REQUEST_METHOD' => 'POST']));
+
+        $this->notice->dismiss();
+
+        expect($stored)->toBe([[5, 'pollora_dismissed_update_version', '13.40.1']]);
+    });
+
+    it('stores nothing when no version is sent', function (): void {
+        $stored = [];
+        Brain\Monkey\Functions\when('update_user_meta')->alias(function () use (&$stored): bool {
+            $stored[] = true;
+
+            return true;
+        });
+        Illuminate\Support\Facades\Request::swap(new Illuminate\Http\Request([], [], [], [], [], ['REQUEST_METHOD' => 'POST']));
+
+        $this->notice->dismiss();
+
+        expect($stored)->toBe([]);
+    });
+});
