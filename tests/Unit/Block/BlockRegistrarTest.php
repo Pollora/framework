@@ -678,3 +678,81 @@ describe('BlockRegistrar bindings', function (): void {
             ->and($this->logger->messages('warning'))->toContain('BlockRegistrar: block "acme/event-card" lists "subtitle" in pollora.bindings, which is not one of its attributes.');
     });
 });
+
+describe('BlockRegistrar guards and assets', function (): void {
+    it('warns about a block directory without block.json', function (): void {
+        blockRegistrar()->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredBlocks)->toBe([])
+            ->and($this->logger->messages('warning'))->toContain('BlockRegistrar: block.json not found in '.$this->tempDir.'/hero');
+    });
+
+    it('warns about a block.json that is not valid JSON or has no name, and registers nothing', function (string $content): void {
+        file_put_contents($this->tempDir.'/hero/block.json', $content);
+
+        blockRegistrar()->registerDirectory($this->tempDir, 'theme');
+
+        expect($this->registeredBlocks)->toBe([])
+            ->and($this->logger->messages('warning'))->toContain('BlockRegistrar: Invalid block.json in '.$this->tempDir.'/hero');
+    })->with([
+        'broken JSON' => ['{not json'],
+        'no name' => ['{"title": "Hero"}'],
+    ]);
+
+    it('adds no bindable attribute filter when none of the listed attributes exists', function (): void {
+        $filters = bindableFilters($this->tempDir.'/card', [
+            'name' => 'acme/event-card',
+            'attributes' => ['title' => ['type' => 'string']],
+            'pollora' => ['bindings' => ['subtitle', 12]],
+            'render' => 'file:./render.blade.php',
+        ]);
+
+        expect($filters)->toBe([])
+            ->and($this->logger->messages('warning'))->toContain('BlockRegistrar: block "acme/event-card" lists "12" in pollora.bindings, which is not one of its attributes.');
+    });
+
+    it('registers the stylesheet a JS entry point makes, next to its script', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'editorScript' => 'file:./index.jsx']);
+        $vite = Mockery::mock(ViteManagerInterface::class);
+        $vite->shouldReceive('isRunningHot')->andReturn(false);
+        $vite->shouldReceive('container')->andReturn(new AssetContainer('theme.blocks', ['build_directory' => 'build/pollora-block-test-none', 'manifest_path' => 'manifest.json']));
+        $vite->shouldReceive('getAssetUrls')->andReturn(['js' => ['https://example.com/build/index.js'], 'css' => ['https://example.com/build/index.css', 'https://example.com/build/more.css']]);
+        $registrar = blockRegistrar();
+        $registrar->mockViteManager = $vite;
+
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
+        expect($this->registeredScripts['test-hero-editor-script']['src'])->toBe('https://example.com/build/index.js')
+            ->and($this->registeredStyles['test-hero-editor-script-style']['src'])->toBe('https://example.com/build/more.css');
+    });
+
+    it('turns the script of a block into a module, and leaves the other scripts alone', function (): void {
+        $filters = [];
+        $filter = Mockery::mock(HookFilter::class);
+        $filter->shouldReceive('add')->andReturnUsing(function (string $hook, Closure $callback) use (&$filters, $filter): HookFilter {
+            $filters[$hook][] = $callback;
+
+            return $filter;
+        });
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'editorScript' => 'file:./index.jsx']);
+        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), $filter);
+        $registrar->mockViteManager = createMockVite();
+        $registrar->registerBlock($this->tempDir.'/hero', 'theme');
+
+        $tag = $filters['script_loader_tag'][0];
+        $plain = '<script src="https://example.com/index.js"></script>';
+
+        expect($tag($plain, 'test-hero-editor-script'))->toBe('<script type="module" crossorigin src="https://example.com/index.js"></script>')
+            ->and($tag('<script type="module" src="x.js"></script>', 'test-hero-editor-script'))->toBe('<script type="module" src="x.js"></script>')
+            ->and($tag($plain, 'another-script'))->toBe($plain);
+    });
+
+    it('registers the editor script of every block of a directory that shares one build', function (): void {
+        writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'editorScript' => 'file:./index.jsx']);
+        writeBlock($this->tempDir.'/card', ['name' => 'test/card', 'editorScript' => 'file:./index.jsx']);
+
+        blockRegistrar(false)->registerDirectory($this->tempDir, 'theme');
+
+        expect(array_keys($this->registeredScripts))->toBe(['test-card-editor-script', 'test-hero-editor-script']);
+    });
+});
