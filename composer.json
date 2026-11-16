@@ -56,7 +56,7 @@
         "nwidart/laravel-modules": "^13.3",
         "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.42",
-        "laravel/prompts": "^0.3.26"
+        "laravel/prompts": "^0.3.27"
     },
     "autoload": {
         "psr-4": {
@@ -114,9 +114,10 @@
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.6",
-        "laravel/pint": "^v1.32.1",
+        "laravel/pint": "^v1.32.2",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
+        "phpstan/phpstan": "^2.1 <2.3.6",
         "symfony/var-dumper": "^7.4 || ^8.0",
         "szepeviktor/phpstan-wordpress": "*",
         "php-stubs/wordpress-stubs": "^7.1",
