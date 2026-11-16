@@ -492,4 +492,22 @@ describe('SystemInfoCollector', function (): void {
             ]);
         });
     });
+
+    describe('discovered items that are incomplete', function (): void {
+        it('leaves out entries without a class or a method and counts only the hooks of a known type', function (): void {
+            $manager = Mockery::mock(DiscoveryManager::class);
+            $manager->shouldReceive('getDiscoveredItems')->with('post_types')->andReturn([['slug' => 'no-class']]);
+            $manager->shouldReceive('getDiscoveredItems')->with('taxonomies')->andReturn([['slug' => 'no-class']]);
+            $manager->shouldReceive('getDiscoveredItems')->with('hooks')->andReturn([['type' => 'action'], ['type' => 'filter'], ['type' => 'async'], []]);
+            $manager->shouldReceive('getDiscoveredItems')->with('schedules')->andReturn([['class' => 'App\\Jobs\\Report'], ['method' => 'run']]);
+            $manager->shouldReceive('getDiscoveredItems')->withAnyArgs()->andReturn([]);
+
+            $info = createCollector(manager: $manager)->collectDiscoveryInfo();
+
+            expect($info['post_types']['items'])->toBe([])
+                ->and($info['taxonomies']['items'])->toBe([])
+                ->and($info['hooks'])->toBe(['count' => 2, 'actions' => 1, 'filters' => 1])
+                ->and($info['schedules']['items'])->toBe([]);
+        });
+    });
 });
