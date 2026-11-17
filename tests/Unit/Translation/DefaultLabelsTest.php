@@ -20,6 +20,8 @@ use Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery;
 use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 
+require_once __DIR__.'/Support/i18nWiring.php';
+
 require_once __DIR__.'/../wordpress-i18n-stand-ins.php';
 
 /*
