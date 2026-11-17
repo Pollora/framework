@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Ajax\Infrastructure\Services;
 
 use Pollora\Ajax\Domain\Model\AjaxAccess;
+use Pollora\Ajax\Domain\Model\AjaxAction;
 use Pollora\Ajax\Factory\AjaxFactory;
 use Pollora\Attributes\Ajax;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
@@ -112,12 +113,29 @@ final class AjaxDiscovery implements DiscoveryInterface
                 );
 
                 $ajax->access->applyTo($action);
+                $this->applyNonce($action, $ajax->nonce);
             } catch (\Throwable $e) {
                 $this->logger?->error(
                     sprintf('Failed to register Ajax action "%s" from %s::%s', $className, $methodName, $e->getMessage()),
                     ['exception' => $e]
                 );
             }
+        }
+    }
+
+    /**
+     * Passes what the attribute says about the nonce on to the action: `true` verifies a nonce named after the
+     * action, a string verifies the nonce of that name (an empty one means the action name), `false` turns the
+     * nonce off on purpose, and `null` leaves the action undecided (reported by the registrar).
+     */
+    private function applyNonce(AjaxAction $action, bool|string|null $nonce): void
+    {
+        if ($nonce === true || $nonce === '') {
+            $action->requireNonce();
+        } elseif (is_string($nonce)) {
+            $action->requireNonce($nonce);
+        } elseif ($nonce === false) {
+            $action->withoutNonce();
         }
     }
 
