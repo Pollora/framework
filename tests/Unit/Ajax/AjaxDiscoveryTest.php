@@ -192,3 +192,85 @@ it('reports an action it could not register and goes on with the others', functi
         ->and($logged[0])->toContain('Failed to register Ajax action')
         ->and(array_column($registered->getArrayCopy(), 0))->toBe(['fixture_default', 'fixture_guest']);
 });
+
+final class AjaxNonceFixture
+{
+    #[Ajax('nonce_undecided')]
+    public function undecided(): string
+    {
+        return 'undecided';
+    }
+
+    #[Ajax('nonce_verified', nonce: true)]
+    public function verified(): string
+    {
+        return 'verified';
+    }
+
+    #[Ajax('nonce_named', nonce: 'notes_form')]
+    public function named(): string
+    {
+        return 'named';
+    }
+
+    #[Ajax('nonce_empty', nonce: '')]
+    public function empty(): string
+    {
+        return 'empty';
+    }
+
+    #[Ajax('nonce_off', AjaxAccess::GUEST, nonce: false)]
+    public function off(): string
+    {
+        return 'off';
+    }
+}
+
+/**
+ * @return array{0: AjaxDiscovery, 1: ArrayObject<string, array{string, string}>}
+ */
+function ajaxNonceDiscoveryWithRecorder(): array
+{
+    $registered = new ArrayObject;
+    $registrar = new class($registered) implements AjaxActionRegistrarPort
+    {
+        public function __construct(private ArrayObject $registered) {}
+
+        public function register(AjaxAction $action): void
+        {
+            $this->registered[$action->getName()] = [$action->getNoncePolicy()->value, $action->getNonceAction()];
+        }
+    };
+
+    return [new AjaxDiscovery(new AjaxFactory(new RegisterAjaxActionService($registrar))), $registered];
+}
+
+it('passes the nonce an attribute declares on to the action', function (): void {
+    [$discovery, $registered] = ajaxNonceDiscoveryWithRecorder();
+
+    discoverAjaxClass($discovery, AjaxNonceFixture::class);
+    $discovery->apply();
+
+    expect($registered->getArrayCopy())->toBe([
+        'nonce_undecided' => ['undecided', 'nonce_undecided'],
+        'nonce_verified' => ['verify', 'nonce_verified'],
+        'nonce_named' => ['verify', 'notes_form'],
+        'nonce_empty' => ['verify', 'nonce_empty'],
+        'nonce_off' => ['disabled', 'nonce_off'],
+    ]);
+});
+
+it('keeps the access and the nonce of an attribute together', function (): void {
+    [$discovery, $registered] = ajaxDiscoveryWithRecorder();
+
+    discoverAjaxClass($discovery, AjaxNonceFixture::class);
+    $discovery->apply();
+
+    $byName = [];
+    foreach ($registered as [$name, $userType]) {
+        $byName[$name] = $userType;
+    }
+
+    expect($byName['nonce_off'])->toBe(AjaxAction::GUEST_USERS)
+        ->and($byName['nonce_verified'])->toBe(AjaxAction::LOGGED_USERS);
+});
