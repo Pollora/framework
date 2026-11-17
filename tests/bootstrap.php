@@ -43,7 +43,7 @@ if ($mutating) {
     $loadMutant = static function (string $original, string $mutant): void {
         $realOriginal = realpath($original);
 
-        if ($realOriginal === false || in_array($realOriginal, array_map('realpath', get_included_files()), true)) {
+        if ($realOriginal === false || in_array($realOriginal, array_map(realpath(...), get_included_files()), true)) {
             return;
         }
 
