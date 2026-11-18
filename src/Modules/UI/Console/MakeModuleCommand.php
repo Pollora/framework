@@ -53,7 +53,7 @@ class MakeModuleCommand extends Command
     {
         $name = (string) $this->argument('name');
 
-        if (preg_match('/^[A-Za-z][A-Za-z0-9]*$/', $name) !== 1) {
+        if (preg_match('/^[A-Za-z][A-Za-z0-9]*$/D', $name) !== 1) {
             $this->components->error(sprintf('Invalid module name "%s": letters and digits only, starting with a letter (e.g. Crm).', $name));
 
             return self::FAILURE;

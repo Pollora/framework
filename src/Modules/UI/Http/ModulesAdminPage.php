@@ -331,7 +331,7 @@ class ModulesAdminPage
     {
         $toggle = isset($request['toggle']) ? sanitize_text_field(wp_unslash((string) $request['toggle'])) : '';
 
-        if (preg_match('/^(enable|disable):(.+)$/', $toggle, $matches) === 1) {
+        if (preg_match('/^(enable|disable):(.+)$/D', $toggle, $matches) === 1) {
             return [$matches[1], [$matches[2]]];
         }
 
