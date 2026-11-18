@@ -274,3 +274,72 @@ it('keeps the access and the nonce of an attribute together', function (): void 
     expect($byName['nonce_off'])->toBe(AjaxAction::GUEST_USERS)
         ->and($byName['nonce_verified'])->toBe(AjaxAction::LOGGED_USERS);
 });
+
+final class AjaxCapabilityFixture
+{
+    #[Ajax('capability_none')]
+    public function none(): string
+    {
+        return 'none';
+    }
+
+    #[Ajax('capability_edit', nonce: true, capability: 'edit_posts')]
+    public function edit(): string
+    {
+        return 'edit';
+    }
+
+    #[Ajax('capability_all', AjaxAccess::ALL, nonce: false, capability: 'manage_options')]
+    public function all(): string
+    {
+        return 'all';
+    }
+
+    #[Ajax('capability_blank', capability: ' ')]
+    public function blank(): string
+    {
+        return 'blank';
+    }
+}
+
+it('passes the capability an attribute declares on to the action, with the nonce and the access', function (): void {
+    $registered = new ArrayObject;
+    $registrar = new class($registered) implements AjaxActionRegistrarPort
+    {
+        public function __construct(private ArrayObject $registered) {}
+
+        public function register(AjaxAction $action): void
+        {
+            $this->registered[$action->getName()] = [$action->getCapability(), $action->getNoncePolicy()->value, $action->getUserType()];
+        }
+    };
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('error')->andReturnNull();
+    $discovery = new AjaxDiscovery(new AjaxFactory(new RegisterAjaxActionService($registrar)), $logger);
+
+    discoverAjaxClass($discovery, AjaxCapabilityFixture::class);
+    $discovery->apply();
+
+    expect($registered->getArrayCopy())->toBe([
+        'capability_none' => [null, 'undecided', AjaxAction::LOGGED_USERS],
+        'capability_edit' => ['edit_posts', 'verify', AjaxAction::LOGGED_USERS],
+        'capability_all' => ['manage_options', 'disabled', AjaxAction::BOTH_USERS],
+    ]);
+});
+
+it('does not register an action whose attribute declares a blank capability, rather than registering it open', function (): void {
+    $logged = [];
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('error')->andReturnUsing(function (string $message) use (&$logged): void {
+        $logged[] = $message;
+    });
+    [$discovery, $registered] = ajaxDiscoveryWithRecorder($logger);
+
+    discoverAjaxClass($discovery, AjaxCapabilityFixture::class);
+    $discovery->apply();
+
+    expect(array_column($registered->getArrayCopy(), 0))->not->toContain('capability_blank')
+        ->and($logged)->toHaveCount(1)
+        ->and($logged[0])->toContain('Failed to register Ajax action')
+        ->and($logged[0])->toContain('the capability of the #[Ajax] attribute must not be empty');
+});
