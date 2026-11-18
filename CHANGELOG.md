@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The framework no longer publishes `public/wp-config.php` (the source file was never shipped: `vendor:publish --tag=public` printed an error and exited 0), so the `public` tag publishes nothing. The project skeleton provides that file (#629)
 
 ### Fixed
+- **The admin notices and the update dismissal checked no capability.** The Pollora update notice (framework version, changelog link) and the "no theme installed" notice (the project's shell commands) were printed on every wp-admin screen to any logged-in user, a subscriber included; `wp_ajax_pollora_dismiss_update_notice` only verified a nonce. They now require `manage_options`, like the Pollora dashboard and the Schedule migration notice; the dismissal answers 403 without it. Rule SEC-07 of the harness
 - **Sub-menu items came out in reverse order.** `RecursiveMenuIterator` built the tree on a reversed collection: for `A > (B, C)` it returned `A > (C, B)`. The top level was already right and is unchanged (#618, #612)
 - **JSON requests got the HTML error views of the modules.** `ModuleAwareExceptionHandler::shouldRenderHtmlResponse()` was always true; it now follows Laravel (`! $request->expectsJson()`) (#619, #613)
 - **The theme console commands ignored a custom `theme.path`.** `BaseThemeCommand` read a `theme.directory` key the configuration does not define, so `make:theme`, `theme:delete` and the commands built on it kept using `base_path('themes')` (#620, #614)

@@ -23,6 +23,12 @@ class AdminNotice
     /** @var string User meta key storing the version that was dismissed */
     private const string DISMISS_META_KEY = 'pollora_dismissed_update_version';
 
+    /**
+     * Capability required to see and dismiss the notice: the framework version and
+     * the update state are site-administration information, not for every logged-in user.
+     */
+    private const string CAPABILITY = 'manage_options';
+
     /** @var string WordPress nonce action for dismiss AJAX request */
     private const string NONCE_ACTION = 'pollora_dismiss_update';
 
@@ -35,10 +41,15 @@ class AdminNotice
      *
      * Outputs a warning notice with the available version, a link to the
      * changelog, and inline JavaScript to handle dismissal via AJAX.
-     * Does nothing if no update is available or the notice was already dismissed.
+     * Does nothing if the user lacks the `manage_options` capability, if no update
+     * is available or if the notice was already dismissed.
      */
     public function render(): void
     {
+        if (! current_user_can(self::CAPABILITY)) {
+            return;
+        }
+
         if (! $this->comparator->isUpdateAvailable()) {
             return;
         }
@@ -80,13 +91,18 @@ class AdminNotice
     /**
      * Handle the AJAX request to dismiss the update notice.
      *
-     * Verifies the nonce, then stores the dismissed version in user meta
+     * Verifies the nonce and the `manage_options` capability (the nonce alone only
+     * proves the request comes from a page the user loaded), then stores the dismissed version in user meta
      * so the notice is not shown again until a newer version is released.
      * Called via the `wp_ajax_pollora_dismiss_update_notice` action.
      */
     public function dismiss(): void
     {
         check_ajax_referer(self::NONCE_ACTION);
+
+        if (! current_user_can(self::CAPABILITY)) {
+            wp_die('', '', ['response' => 403]);
+        }
 
         $version = sanitize_text_field(Request::post('version') ?? '');
 
