@@ -9,36 +9,45 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Foundation\Support\RequestDiagnostics;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
+use Pollora\WordPress\WordPressServiceProvider;
 
 /**
  * Reports what a request cost, to the performance gates, and only to them.
  *
- * Off unless WP_DEBUG is on and the request sends `X-Pollora-Diagnostics: 1`
- * (see {@see RequestDiagnostics}): the production path registers nothing.
+ * Nothing is reported unless WP_DEBUG is on and the request sends
+ * `X-Pollora-Diagnostics: 1` (see {@see RequestDiagnostics}). A request without
+ * the header registers no hook at all; one with it, on a site where WP_DEBUG is
+ * off, registers them but each one answers nothing.
  *
  * - A REST response carries the report in the `X-Pollora-Diagnostics` header.
  * - An HTML page carries it in a trailing comment written at `shutdown`, after
  *   WordPress has flushed its buffers, so the count covers the whole render.
  *   A header is not possible there: a theme's output has started by then.
+ *
+ * The hooks are registered in `register()`, not `boot()`: Pollora loads WordPress
+ * and runs `wp()` while booting {@see WordPressServiceProvider},
+ * and a REST request is answered, then ends, inside that call. A provider booted
+ * after it would add its `rest_post_dispatch` filter too late to ever run. WP_DEBUG
+ * may not be defined yet at that point, so it is read when a hook runs.
  */
 class DiagnosticsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->app->singleton(RequestDiagnostics::class);
+
+        if (RequestDiagnostics::asksForReport($_SERVER)) {
+            $this->hookMeasures();
+        }
     }
 
     /**
-     * Hook the measures, when the request asked for them.
+     * Hook the measures, for a request that asked for them.
      */
-    public function boot(): void
+    private function hookMeasures(): void
     {
-        if (! RequestDiagnostics::isRequested($this->debugging(), $_SERVER)) {
-            return;
-        }
-
         $diagnostics = $this->app->make(RequestDiagnostics::class);
-        $start = (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+        $start = RequestDiagnostics::startedAt($_SERVER, microtime(true));
 
         $this->app->make('events')->listen(QueryExecuted::class, static function () use ($diagnostics): void {
             $diagnostics->recordLaravelQuery();
@@ -47,30 +56,26 @@ class DiagnosticsServiceProvider extends ServiceProvider
         $action = $this->app->make(Action::class);
         $filter = $this->app->make(Filter::class);
 
-        // Pollora boots before wp_loaded; if it did not, the boot is as long as it has been.
-        if (function_exists('did_action') && did_action('wp_loaded') > 0) {
+        // WordPress is loaded after this provider registers: wp_loaded has not fired yet.
+        $action->add('wp_loaded', static function () use ($diagnostics, $start): void {
             $diagnostics->recordBoot(microtime(true), $start);
-        } else {
-            $action->add('wp_loaded', static function () use ($diagnostics, $start): void {
-                $diagnostics->recordBoot(microtime(true), $start);
-            }, PHP_INT_MAX);
-        }
+        }, PHP_INT_MAX);
 
-        $filter->add('rest_post_dispatch', static function (mixed $response) use ($diagnostics, $start): mixed {
-            if (is_object($response) && method_exists($response, 'header')) {
-                $response->header(RequestDiagnostics::HEADER, RequestDiagnostics::headerValue(self::report($diagnostics, $start)));
+        $filter->add('rest_post_dispatch', function (mixed $response) use ($diagnostics, $start): mixed {
+            if ($this->reporting() && is_object($response) && method_exists($response, 'header')) {
+                $response->header(RequestDiagnostics::HEADER, RequestDiagnostics::headerValue($this->report($diagnostics, $start)));
             }
 
             return $response;
         }, PHP_INT_MAX);
 
-        $action->add('shutdown', static function () use ($diagnostics, $start): void {
-            if (defined('REST_REQUEST') || (function_exists('is_admin') && is_admin()) || (function_exists('wp_doing_ajax') && wp_doing_ajax())) {
+        $action->add('shutdown', function () use ($diagnostics, $start): void {
+            if (! $this->reporting() || ! RequestDiagnostics::isHtmlContext($this->isRestRequest(), $this->isAdminRequest(), $this->isAjaxRequest())) {
                 return;
             }
 
             if (RequestDiagnostics::acceptsHtmlComment(headers_list(), http_response_code())) {
-                echo RequestDiagnostics::htmlComment(self::report($diagnostics, $start));
+                echo RequestDiagnostics::htmlComment($this->report($diagnostics, $start));
             }
         }, PHP_INT_MAX);
     }
@@ -85,11 +90,43 @@ class DiagnosticsServiceProvider extends ServiceProvider
     }
 
     /**
+     * Whether this request may be reported on, now that WP_DEBUG is known.
+     */
+    private function reporting(): bool
+    {
+        return RequestDiagnostics::isRequested($this->debugging(), $_SERVER);
+    }
+
+    /**
+     * Whether WordPress is answering a REST request.
+     */
+    protected function isRestRequest(): bool
+    {
+        return defined('REST_REQUEST');
+    }
+
+    /**
+     * Whether this is a screen of the administration.
+     */
+    protected function isAdminRequest(): bool
+    {
+        return function_exists('is_admin') && is_admin();
+    }
+
+    /**
+     * Whether this is an admin-ajax request.
+     */
+    protected function isAjaxRequest(): bool
+    {
+        return function_exists('wp_doing_ajax') && wp_doing_ajax();
+    }
+
+    /**
      * The report as of now.
      *
      * @return array<string, mixed>
      */
-    private static function report(RequestDiagnostics $diagnostics, float $start): array
+    private function report(RequestDiagnostics $diagnostics, float $start): array
     {
         global $wpdb;
 

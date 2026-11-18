@@ -40,7 +40,40 @@ final class RequestDiagnostics
      */
     public static function isRequested(bool $debug, array $server): bool
     {
-        return $debug && ($server['HTTP_X_POLLORA_DIAGNOSTICS'] ?? null) === '1';
+        return $debug && self::asksForReport($server);
+    }
+
+    /**
+     * Whether the request carries the header that asks for a report, whatever WP_DEBUG says.
+     *
+     * Hooks are registered on this alone, early, when WP_DEBUG may not be defined yet;
+     * {@see isRequested()} then decides when a hook runs.
+     *
+     * @param  array<string, mixed>  $server  The request's `$_SERVER`
+     */
+    public static function asksForReport(array $server): bool
+    {
+        return ($server['HTTP_X_POLLORA_DIAGNOSTICS'] ?? null) === '1';
+    }
+
+    /**
+     * When the request started: `$_SERVER['REQUEST_TIME_FLOAT']`, or `$now` if the server gave none.
+     *
+     * @param  array<string, mixed>  $server  The request's `$_SERVER`
+     * @param  float  $now  `microtime(true)`
+     */
+    public static function startedAt(array $server, float $now): float
+    {
+        return (float) ($server['REQUEST_TIME_FLOAT'] ?? $now);
+    }
+
+    /**
+     * Whether the request is one that answers with an HTML page: not REST, not
+     * a screen of the administration, not admin-ajax.
+     */
+    public static function isHtmlContext(bool $rest, bool $admin, bool $ajax): bool
+    {
+        return ! $rest && ! $admin && ! $ajax;
     }
 
     /**

@@ -21,6 +21,40 @@ describe('RequestDiagnostics::isRequested()', function (): void {
     ]);
 });
 
+describe('RequestDiagnostics::asksForReport()', function (): void {
+    it('reads the header alone, whatever WP_DEBUG says', function (array $server, bool $expected): void {
+        expect(RequestDiagnostics::asksForReport($server))->toBe($expected);
+    })->with([
+        'sent as 1' => [['HTTP_X_POLLORA_DIAGNOSTICS' => '1'], true],
+        'absent' => [[], false],
+        'sent as 0' => [['HTTP_X_POLLORA_DIAGNOSTICS' => '0'], false],
+    ]);
+});
+
+describe('RequestDiagnostics::startedAt()', function (): void {
+    it('takes the start the server gave, as a float', function (mixed $given, float $expected): void {
+        expect(RequestDiagnostics::startedAt(['REQUEST_TIME_FLOAT' => $given], 999.0))->toBe($expected);
+    })->with([
+        'a float' => [1700.25, 1700.25],
+        'a string' => ['1700.25', 1700.25],
+    ]);
+
+    it('falls back on the current time when the server gave none', function (): void {
+        expect(RequestDiagnostics::startedAt([], 999.5))->toBe(999.5);
+    });
+});
+
+describe('RequestDiagnostics::isHtmlContext()', function (): void {
+    it('is an HTML page only when it is neither REST, nor admin, nor admin-ajax', function (bool $rest, bool $admin, bool $ajax, bool $expected): void {
+        expect(RequestDiagnostics::isHtmlContext($rest, $admin, $ajax))->toBe($expected);
+    })->with([
+        'a page' => [false, false, false, true],
+        'REST' => [true, false, false, false],
+        'admin' => [false, true, false, false],
+        'ajax' => [false, false, true, false],
+    ]);
+});
+
 describe('RequestDiagnostics::report()', function (): void {
     it('counts the Laravel queries it is told about and rounds milliseconds to a tenth', function (): void {
         $diagnostics = new RequestDiagnostics;
@@ -34,6 +68,10 @@ describe('RequestDiagnostics::report()', function (): void {
             'boot_ms' => 44.9,
             'elapsed_ms' => 500.0,
         ]);
+    });
+
+    it('rounds to one decimal, not two', function (): void {
+        expect((new RequestDiagnostics)->report(0, 10.12349, 10.0)['elapsed_ms'])->toBe(123.5);
     });
 
     it('reports no boot time until the boot was noted, rather than a made-up zero', function (): void {
@@ -72,5 +110,9 @@ describe('RequestDiagnostics::acceptsHtmlComment()', function (): void {
         'xml feed' => [['Content-Type: application/rss+xml; charset=UTF-8'], 200, false],
         'plain text' => [['Content-Type: text/plain'], 200, false],
         'redirect' => [['Content-Type: text/html'], 301, false],
+        'last status before the redirects' => [['Content-Type: text/html'], 299, true],
+        'first redirect status' => [['Content-Type: text/html'], 300, false],
+        'last redirect status' => [['Content-Type: text/html'], 399, false],
+        'first status after the redirects' => [['Content-Type: text/html'], 400, true],
     ]);
 });
