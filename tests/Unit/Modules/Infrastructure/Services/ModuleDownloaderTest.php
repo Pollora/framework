@@ -35,7 +35,14 @@ describe('ModuleDownloader validation', function (): void {
         'special chars' => ['owner/repo;rm -rf'],
         'empty string' => [''],
         'just slash' => ['/'],
+        'valid name then newline' => ["owner/repo\n"],
     ]);
+
+    it('never lets a newline reach the folder, the temp file or the URL', function (): void {
+        // `$` without D accepts a final "\n", which would then end up in the extraction folder name
+        expect(fn (): ModuleDownloader => new ModuleDownloader("Pollora/theme-default\n"))
+            ->toThrow(InvalidArgumentException::class);
+    });
 });
 
 /**
@@ -67,6 +74,11 @@ describe('ModuleDownloader::selectLatestVersion()', function (): void {
 
     it('falls back to pre-releases when a package has never had a stable one', function (): void {
         expect(latestTagAmong(['v1.0.0-beta.2', 'v1.0.0-beta.10']))->toBe('v1.0.0-beta.10');
+    });
+
+    it('does not take a tag with a trailing newline for a version', function (): void {
+        // `$` without D matched before a final "\n", so this tag used to win over v1.0.0
+        expect(latestTagAmong(['v1.0.0', "v2.0.0\n"]))->toBe('v1.0.0');
     });
 
     it('ignores tags that are not versions', function (): void {

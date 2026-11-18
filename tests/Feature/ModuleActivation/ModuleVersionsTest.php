@@ -108,6 +108,15 @@ describe('version sources', function (): void {
             ->and($sources->for('vendor/package')->releaseUrl('vendor/package', '1.0.0'))->toBe('https://packagist.org/packages/vendor/package#1.0.0');
     });
 
+    it('does not read a GitHub repository out of a URL ending with a newline', function (): void {
+        file_put_contents($this->directory.'/composer.json', json_encode(['repositories' => [
+            ['type' => 'vcs', 'url' => "https://github.com/other/billing.git\n"],
+        ]]));
+        $sources = new VersionSources(new HttpGet, $this->directory.'/composer.json');
+
+        expect($sources->for('other/billing'))->toBeInstanceOf(ComposerRepositorySource::class);
+    });
+
     it('moves on to Packagist when a private repository does not serve the package (issue #448)', function (): void {
         $requests = [];
         fakeHttp(['https://repo.packagist.org/p2/pollora/meilifacets.json' => ['packages' => ['pollora/meilifacets' => [['version' => '0.2.1'], ['version' => '0.3.0']]]]], $requests);
