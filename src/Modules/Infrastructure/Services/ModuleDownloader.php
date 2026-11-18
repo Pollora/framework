@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Modules\Infrastructure\Services;
 
 use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Modules\Domain\Exceptions\ModuleException;
 use ZipArchive;
@@ -53,7 +54,7 @@ class ModuleDownloader
     public function __construct(string $repository)
     {
         if (! preg_match('/^[a-zA-Z0-9][a-zA-Z0-9\-_.]*\/[a-zA-Z0-9][a-zA-Z0-9\-_.]*$/D', $repository)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "Repository must be in 'owner/repo' format with alphanumeric characters, hyphens, underscores, and dots only."
             );
         }
@@ -64,9 +65,20 @@ class ModuleDownloader
 
     /**
      * Set a specific version/tag to download.
+     *
+     * The tag ends up in the GitHub archive URL and in the name of the temporary
+     * file, so only a version-shaped tag is accepted: digits and dots, an optional
+     * leading "v", an optional pre-release or build suffix of letters, digits,
+     * dots and hyphens. No slash, no whitespace, no line break.
+     *
+     * @throws InvalidArgumentException When the tag is not a plain version
      */
     public function setVersion(string $version): self
     {
+        if (preg_match('/^v?\d+(?:\.\d+)*(?:[-+][0-9A-Za-z.-]+)?$/iD', $version) !== 1) {
+            throw new InvalidArgumentException(sprintf('Invalid version tag "%s": expected something like v1.2.0 or 1.2.0-beta.1.', $version));
+        }
+
         $this->version = $version;
 
         return $this;

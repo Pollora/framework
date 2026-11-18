@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Pollora\Asset\Application\Services\AssetManager;
@@ -21,6 +22,14 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     File::deleteDirectory($this->modulesPath);
+});
+
+it('refuses a module name followed by a line break and writes nothing', function (): void {
+    $status = Artisan::call('pollora:make:module', ['name' => "Crm\n", '--no-npm' => true, '--no-enable' => true]);
+
+    expect($status)->toBe(1)
+        ->and(Artisan::output())->toContain('Invalid module name')
+        ->and($this->modulesPath)->not->toBeDirectory();
 });
 
 /**

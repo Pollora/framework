@@ -39,6 +39,12 @@ describe('pollora:make:block guards', function (): void {
         expect($this->themeDir.'/resources/views/blocks')->not->toBeDirectory();
     })->with(['capitals' => ['HeroBanner'], 'underscore' => ['hero_banner'], 'leading digit' => ['1hero'], 'leading dash' => ['-hero']]);
 
+    it('refuses a name followed by a line break and writes nothing', function (): void {
+        $this->artisan('pollora:make:block', ['name' => "hero\n", '--theme' => 'test-theme'])->assertFailed();
+
+        expect($this->themeDir.'/resources/views/blocks')->not->toBeDirectory();
+    });
+
     it('refuses a theme that has no directory', function (): void {
         $this->artisan('pollora:make:block', ['name' => 'hero', '--theme' => 'ghost-theme'])
             ->expectsOutputToContain('Theme directory not found')
