@@ -1,11 +1,11 @@
 {
   "pages": {
-    "home": { "wordpress": null, "laravel": null },
-    "post": { "wordpress": null, "laravel": null },
-    "page": { "wordpress": null, "laravel": null },
-    "archive": { "wordpress": null, "laravel": null },
-    "notFound": { "wordpress": null, "laravel": null },
-    "search": { "wordpress": null, "laravel": null },
-    "rest": { "wordpress": null, "laravel": null }
+    "home": { "wordpress": 24, "laravel": 0 },
+    "post": { "wordpress": 20, "laravel": 0 },
+    "page": { "wordpress": 19, "laravel": 0 },
+    "archive": { "wordpress": 26, "laravel": 0 },
+    "notFound": { "wordpress": 15, "laravel": 0 },
+    "search": { "wordpress": 22, "laravel": 0 },
+    "rest": { "wordpress": 19, "laravel": 0 }
   }
 }
