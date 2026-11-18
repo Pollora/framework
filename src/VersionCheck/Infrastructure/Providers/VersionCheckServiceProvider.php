@@ -56,6 +56,11 @@ class VersionCheckServiceProvider extends ServiceProvider
         }
 
         $action->add('admin_notices', [$this->app->make(AdminNotice::class), 'render']);
+        // AdminNotice::dismiss() runs check_ajax_referer(NONCE_ACTION) and requires
+        // the manage_options capability (403 otherwise) before writing user meta.
+        // Not yet declared through Ajax::listen(): the capability option needs
+        // pollora/ajax 1.3, which is not published; migrate once it is.
+        // nosemgrep: pollora.sec-02.manual-ajax-hook
         $action->add('wp_ajax_pollora_dismiss_update_notice', [$this->app->make(AdminNotice::class), 'dismiss']);
 
         $filter->add('debug_information', [$this->app->make(SiteHealthCheck::class), 'addDebugInfo']);

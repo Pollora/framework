@@ -21,6 +21,7 @@ use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
+use Pollora\Foundation\Providers\DiagnosticsServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\AsyncServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
@@ -139,6 +140,9 @@ class PolloraServiceProvider extends ServiceProvider
         // Dashboard
         $this->app->register(DashboardServiceProvider::class);
         $this->app->register(DoctorServiceProvider::class);
+
+        // Query counts and boot time for the performance gates (WP_DEBUG and an explicit header only)
+        $this->app->register(DiagnosticsServiceProvider::class);
     }
 
     /**
