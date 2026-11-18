@@ -153,7 +153,7 @@ final class RequestDiagnostics
      */
     public static function acceptsHtmlComment(array $sentHeaders, int|false $status): bool
     {
-        if ($status !== false && $status >= 300 && $status < 400) {
+        if (is_int($status) && $status >= 300 && $status < 400) {
             return false;
         }
 
