@@ -341,6 +341,11 @@ jobs:
           npm ci
           npx playwright install --with-deps ${E2E_BROWSERS//,/ }
 
+      # The comparison rules of the performance gates (PERF-01, PERF-07): plain Node, no site needed.
+      - name: Unit tests of the performance helpers
+        working-directory: packages/framework/tests/e2e
+        run: npm run test:unit
+
       # DDEV serves HTTPS with a mkcert certificate when mkcert is present.
       # Say which case the runner is in rather than guessing.
       - name: Trust the site's certificate
@@ -360,6 +365,69 @@ jobs:
           E2E_SITE_DIR: ${{ github.workspace }}
           E2E_RUN_ID: ${{ github.run_id }}
         run: npx playwright test
+
+      # PERF-01: what the query budget measured, kept even when the run failed. While a page has
+      # no budget in budgets.json this is where its first reference comes from.
+      - name: Upload the measured query counts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-budgets-measured-${{ matrix.autoloader }}
+          path: packages/framework/tests/e2e/test-results/budgets.measured.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # PERF-07, nightly only, once (the default autoloader): boot, cold discovery and a
+      # thumbnail, compared with the last night that passed. The reference is a cache entry:
+      # a failing night does not save one, so the reference stays the last good night. A night
+      # without a reference (first run, cache evicted after 7 idle days) passes and becomes it.
+      # To reset the reference on purpose after an accepted slowdown, delete the cache entries
+      # named perf07-reference-* (Actions > Caches).
+      - name: Restore the performance reference
+        if: github.event_name == 'schedule' && matrix.autoloader == 'default'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/perf07-reference
+          key: perf07-reference-${{ github.run_id }}
+          restore-keys: perf07-reference-
+
+      - name: Measure boot, cold discovery and thumbnail
+        if: github.event_name == 'schedule' && matrix.autoloader == 'default'
+        working-directory: packages/framework/tests/e2e
+        env:
+          E2E_HOME_URL: https://pollora.ddev.site
+          E2E_SITE_DIR: ${{ github.workspace }}
+          E2E_RUN_ID: ${{ github.run_id }}
+          E2E_PERF: '1'
+          E2E_PERF_OUT: ${{ runner.temp }}/perf07-current/perf-metrics.json
+        run: npx playwright test perf-metrics
+
+      - name: Compare with the reference (fails past 10 %)
+        if: github.event_name == 'schedule' && matrix.autoloader == 'default'
+        working-directory: packages/framework/tests/e2e
+        run: node bin/perf-compare.ts "$RUNNER_TEMP/perf07-current/perf-metrics.json" "$RUNNER_TEMP/perf07-reference/perf-metrics.json" --tolerance=0.1
+
+      - name: Keep this night as the reference
+        if: github.event_name == 'schedule' && matrix.autoloader == 'default'
+        run: |
+          mkdir -p "$RUNNER_TEMP/perf07-reference"
+          cp "$RUNNER_TEMP/perf07-current/perf-metrics.json" "$RUNNER_TEMP/perf07-reference/perf-metrics.json"
+
+      - name: Save the performance reference
+        if: github.event_name == 'schedule' && matrix.autoloader == 'default'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/perf07-reference
+          key: perf07-reference-${{ github.run_id }}
+
+      - name: Upload the performance measures
+        if: always() && github.event_name == 'schedule' && matrix.autoloader == 'default'
+        uses: actions/upload-artifact@v7
+        with:
+          name: perf07-metrics
+          path: ${{ runner.temp }}/perf07-current/perf-metrics.json
+          if-no-files-found: ignore
+          retention-days: 90
 
       - name: Upload the browser test report
         if: failure()

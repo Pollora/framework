@@ -1,0 +1,11 @@
+{
+  "pages": {
+    "home": { "wordpress": null, "laravel": null },
+    "post": { "wordpress": null, "laravel": null },
+    "page": { "wordpress": null, "laravel": null },
+    "archive": { "wordpress": null, "laravel": null },
+    "notFound": { "wordpress": null, "laravel": null },
+    "search": { "wordpress": null, "laravel": null },
+    "rest": { "wordpress": null, "laravel": null }
+  }
+}
