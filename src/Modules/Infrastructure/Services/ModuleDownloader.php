@@ -52,7 +52,7 @@ class ModuleDownloader
      */
     public function __construct(string $repository)
     {
-        if (! preg_match('/^[a-zA-Z0-9][a-zA-Z0-9\-_.]*\/[a-zA-Z0-9][a-zA-Z0-9\-_.]*$/', $repository)) {
+        if (! preg_match('/^[a-zA-Z0-9][a-zA-Z0-9\-_.]*\/[a-zA-Z0-9][a-zA-Z0-9\-_.]*$/D', $repository)) {
             throw new \InvalidArgumentException(
                 "Repository must be in 'owner/repo' format with alphanumeric characters, hyphens, underscores, and dots only."
             );
@@ -231,7 +231,7 @@ class ModuleDownloader
      */
     private function looksLikeVersion(string $name): bool
     {
-        return preg_match('/^v?\d+(\.\d+)*(?:[-+.].*)?$/i', $name) === 1;
+        return preg_match('/^v?\d+(\.\d+)*(?:[-+.].*)?$/iD', $name) === 1;
     }
 
     /**
