@@ -5,9 +5,9 @@ declare(strict_types=1);
 use Pollora\Modules\Infrastructure\Services\ModuleDownloader;
 
 describe('ModuleDownloader version', function (): void {
-    it('accepts a version-shaped tag', function (string $version): void {
+    it('accepts a plain tag name', function (string $version): void {
         expect((new ModuleDownloader('Pollora/theme-default'))->setVersion($version))->toBeInstanceOf(ModuleDownloader::class);
-    })->with(['v1.2.0', '1.2.0', 'v9', 'v2.0.0-beta.1', '1.0.0+build.5', 'V1.0.0-RC1']);
+    })->with(['v1.2.0', '1.2.0', 'v9', 'v2.0.0-beta.1', '1.0.0+build.5', 'V1.0.0-RC1', 'release-2024', '2024.11_rc1']);
 
     it('refuses a tag that would reach the URL or the temporary file name', function (string $version): void {
         expect(fn (): ModuleDownloader => (new ModuleDownloader('Pollora/theme-default'))->setVersion($version))
@@ -18,7 +18,8 @@ describe('ModuleDownloader version', function (): void {
         'slash' => ['v1/0'],
         'space' => ['v1.0.0 x'],
         'query string' => ['v1.0.0?x=1'],
-        'branch name' => ['main'],
+        'leading hyphen' => ['-v1'],
+        'double dot' => ['v1..0'],
         'empty' => [''],
     ]);
 });

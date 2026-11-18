@@ -66,17 +66,19 @@ class ModuleDownloader
     /**
      * Set a specific version/tag to download.
      *
-     * The tag ends up in the GitHub archive URL and in the name of the temporary
-     * file, so only a version-shaped tag is accepted: digits and dots, an optional
-     * leading "v", an optional pre-release or build suffix of letters, digits,
-     * dots and hyphens. No slash, no whitespace, no line break.
+     * The tag ends up in the GitHub archive URL (`archive/refs/tags/<tag>.zip`) and in
+     * the name of the temporary file, so it must be a plain tag name: it starts with
+     * a letter or a digit and holds only letters, digits, dots, underscores, hyphens
+     * and plus signs. No slash, no whitespace, no line break, no "..", nothing that
+     * could leave the URL or the file name (`v1.2.0`, `1.0.0-beta.1`, `release-2024`
+     * are accepted; a branch name is a valid tag name but has no archive under tags).
      *
-     * @throws InvalidArgumentException When the tag is not a plain version
+     * @throws InvalidArgumentException When the tag is not a plain tag name
      */
     public function setVersion(string $version): self
     {
-        if (preg_match('/^v?\d+(?:\.\d+)*(?:[-+][0-9A-Za-z.-]+)?$/iD', $version) !== 1) {
-            throw new InvalidArgumentException(sprintf('Invalid version tag "%s": expected something like v1.2.0 or 1.2.0-beta.1.', $version));
+        if (preg_match('/^[A-Za-z0-9][A-Za-z0-9._+-]*$/D', $version) !== 1 || str_contains($version, '..')) {
+            throw new InvalidArgumentException(sprintf('Invalid version tag "%s": expected a tag name such as v1.2.0 or 1.2.0-beta.1.', $version));
         }
 
         $this->version = $version;
