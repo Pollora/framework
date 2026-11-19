@@ -5,11 +5,13 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.1...develop)
+
+## [v13.43.1](https://github.com/Pollora/framework/compare/v13.43.0...v13.43.1) - 2026-11-19
 
 ### Changed
 
-- **Accepts `pollora/media` 0.9**: the constraint is `^0.8 || ^0.9`, so a new project installs the media security fixes (declared and signed sizes only, name patterns anchored with `D`, constant-time signature comparison). It also accepts `pollora/discovery` 0.2 (`^0.1 || ^0.2 || ^1.0`), a warm cache that reads no file; that version installs only once the packages that still require `pollora/discovery` `^0.1 || ^1.0` (`block-bindings`, `meta`, `roles`, `schedule`, `wp-cli`, `wp-rest`) accept it.
+- **A new project installs `pollora/media` 0.9 and `pollora/discovery` 0.2**: the constraints are `^0.8 || ^0.9` and `^0.1 || ^0.2 || ^1.0`. `pollora/media` 0.9 brings its security fixes (declared and signed sizes only, name patterns anchored with `D`, constant-time signature comparison). `pollora/discovery` 0.2 brings a warm cache that reads no file: about 0.24 ms against about 7.9 ms cold, on 200 classes. The packages that required `pollora/discovery` `^0.1 || ^1.0` accept 0.2 in `pollora/schedule` 1.0.1, `pollora/meta` 0.1.1, `pollora/block-bindings` 0.2.1, `pollora/roles` 0.2.1, `pollora/wp-cli` 0.1.2 and `pollora/wp-rest` 2.0.1. A project that pins one of them below these versions keeps `pollora/discovery` 0.1.
 - **The architecture rules no longer fail on a layer an installed package also maps** (harness 0.1.32): `pollora/media` 0.9 adds classes to `Pollora\Media\Domain\Exceptions`, a namespace of the framework's own `src/Media`. Such a layer is reported as not evaluated instead of failing.
 
 ## [v13.43.0](https://github.com/Pollora/framework/compare/v13.42.0...v13.43.0) - 2026-11-19
