@@ -491,7 +491,7 @@ class PluginManager
     public function resetCache(): void
     {
         $this->repository?->resetCache();
-        if (method_exists($this->discovery, 'resetCache')) {
+        if (is_object($this->discovery) && method_exists($this->discovery, 'resetCache')) {
             $this->discovery->resetCache();
         }
     }

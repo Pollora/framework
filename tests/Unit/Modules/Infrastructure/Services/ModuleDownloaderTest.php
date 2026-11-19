@@ -4,6 +4,26 @@ declare(strict_types=1);
 
 use Pollora\Modules\Infrastructure\Services\ModuleDownloader;
 
+describe('ModuleDownloader version', function (): void {
+    it('accepts a plain tag name', function (string $version): void {
+        expect((new ModuleDownloader('Pollora/theme-default'))->setVersion($version))->toBeInstanceOf(ModuleDownloader::class);
+    })->with(['v1.2.0', '1.2.0', 'v9', 'v2.0.0-beta.1', '1.0.0+build.5', 'V1.0.0-RC1', 'release-2024', '2024.11_rc1']);
+
+    it('refuses a tag that would reach the URL or the temporary file name', function (string $version): void {
+        expect(fn (): ModuleDownloader => (new ModuleDownloader('Pollora/theme-default'))->setVersion($version))
+            ->toThrow(InvalidArgumentException::class, 'Invalid version tag');
+    })->with([
+        'trailing newline' => ["v1.0.0\n"],
+        'path traversal' => ['../../etc/passwd'],
+        'slash' => ['v1/0'],
+        'space' => ['v1.0.0 x'],
+        'query string' => ['v1.0.0?x=1'],
+        'leading hyphen' => ['-v1'],
+        'double dot' => ['v1..0'],
+        'empty' => [''],
+    ]);
+});
+
 describe('ModuleDownloader validation', function (): void {
     it('accepts valid repository names', function (string $repo): void {
         $downloader = new ModuleDownloader($repo);
@@ -35,7 +55,14 @@ describe('ModuleDownloader validation', function (): void {
         'special chars' => ['owner/repo;rm -rf'],
         'empty string' => [''],
         'just slash' => ['/'],
+        'valid name then newline' => ["owner/repo\n"],
     ]);
+
+    it('never lets a newline reach the folder, the temp file or the URL', function (): void {
+        // `$` without D accepts a final "\n", which would then end up in the extraction folder name
+        expect(fn (): ModuleDownloader => new ModuleDownloader("Pollora/theme-default\n"))
+            ->toThrow(InvalidArgumentException::class);
+    });
 });
 
 /**
@@ -67,6 +94,11 @@ describe('ModuleDownloader::selectLatestVersion()', function (): void {
 
     it('falls back to pre-releases when a package has never had a stable one', function (): void {
         expect(latestTagAmong(['v1.0.0-beta.2', 'v1.0.0-beta.10']))->toBe('v1.0.0-beta.10');
+    });
+
+    it('does not take a tag with a trailing newline for a version', function (): void {
+        // `$` without D matched before a final "\n", so this tag used to win over v1.0.0
+        expect(latestTagAmong(['v1.0.0', "v2.0.0\n"]))->toBe('v1.0.0');
     });
 
     it('ignores tags that are not versions', function (): void {

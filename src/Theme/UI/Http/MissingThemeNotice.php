@@ -10,7 +10,8 @@ use Pollora\Theme\Application\Services\ThemeAvailability;
  * Warns in wp-admin when the site has no theme to render with.
  *
  * Not dismissable on purpose: the front end is unusable until a theme exists,
- * so this is a setup step rather than a suggestion.
+ * so this is a setup step rather than a suggestion. Shown only to users who can
+ * manage options: it reveals the project's shell commands.
  */
 final readonly class MissingThemeNotice
 {
@@ -18,6 +19,10 @@ final readonly class MissingThemeNotice
 
     public function render(): void
     {
+        if (! current_user_can('manage_options')) {
+            return;
+        }
+
         if (! $this->availability->isMissing()) {
             return;
         }

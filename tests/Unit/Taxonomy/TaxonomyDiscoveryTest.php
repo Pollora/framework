@@ -13,6 +13,7 @@ use Pollora\Discovery\Infrastructure\Services\ReflectionCache;
 use Pollora\Hook\Domain\Contract\Action as ActionService;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
 use Pollora\Taxonomy\Infrastructure\Services\TaxonomyDiscovery;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 
 #[Taxonomy('fixture_genre', singular: 'Genre', plural: 'Genres', objectType: 'book')]
@@ -61,12 +62,14 @@ function registeredTaxonomyArgs(string $class): array
     return $registered;
 }
 
-it('registers the arguments its attributes declare, labels merged', function (): void {
+it('registers the arguments its attributes declare, labels left for init', function (): void {
     $args = registeredTaxonomyArgs(DiscoveredGenre::class);
 
     expect($args)->toMatchArray(['hierarchical' => true, 'show_in_rest' => true])
-        ->and($args['labels']['menu_name'])->toBe('Shelves')
-        ->and($args['labels']['singular_name'])->toBe('Genre');
+        ->and($args['labels'])->toBe([
+            TranslatingEntityRegistry::DEFAULT_LABELS => [TranslatingEntityRegistry::TAXONOMY, 'Genre', 'Genres'],
+            'menu_name' => 'Shelves',
+        ]);
 });
 
 it('turns a method attribute into a callback on the declaring class', function (): void {

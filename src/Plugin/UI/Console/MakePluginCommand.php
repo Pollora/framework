@@ -11,6 +11,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
 use Pollora\Console\Concerns\PromptsForMissingOption;
+use Pollora\Console\Concerns\ReplacesExistingDirectory;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
 use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Plugin\Domain\Models\PluginMetadata;
@@ -39,12 +40,13 @@ use function Laravel\Prompts\text;
     {--repo-version= : Specific version/tag to download}
     {--asset= : Include asset files (JS/CSS) with ViteJS compilation (--asset alone means true)}
     {--activate-plugin= : Activate the plugin after creation (yes/no)}
-    {--force : Force create plugin with same name}', aliases: ['pollora:make-plugin'])]
+    {--force : Delete an existing plugin of the same name (after typing its name to confirm) and generate it again}', aliases: ['pollora:make-plugin'])]
 class MakePluginCommand extends Command implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
     use PromptsForMissingOption {
         initialize as initializeMissingOptions;
     }
+    use ReplacesExistingDirectory;
 
     /**
      * List of files and directories to exclude when --asset is false.
@@ -120,8 +122,8 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
      */
     protected function validatePluginName(): bool
     {
-        $message = $this->validateValue($this->argument('name'));
-        if (! in_array($message, [null, '', '0'], true)) {
+        $message = $this->validateNameFormat($this->argument('name'));
+        if ($message !== null) {
             $this->error($message);
 
             return false;
@@ -132,6 +134,9 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
 
     /**
      * Check if the plugin can be generated.
+     *
+     * An existing folder is refused, unless --force and a typed confirmation
+     * delete it first, so that the generation then runs as for a new plugin.
      */
     protected function canGeneratePlugin(): bool
     {
@@ -140,13 +145,34 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
         }
 
         $name = $this->plugin->getName();
-        $this->error(sprintf('Plugin "%s" already exists.', $name));
+        $active = array_filter(
+            $this->activePluginFiles(),
+            static fn (string $file): bool => str_starts_with($file, $name.'/'),
+        ) !== [];
 
-        if ($this->option('force')) {
-            return $this->confirm(sprintf('Are you sure you want to override "%s" plugin folder?', $name));
+        return $this->replaceExistingDirectory('Plugin', $name, $this->getPluginsPath(), $active);
+    }
+
+    /**
+     * Plugin files (directory/main-file.php) WordPress lists as active, network-wide ones included.
+     *
+     * Empty when WordPress options are not available here: active plugins are then not detectable.
+     *
+     * @return array<int, string>
+     */
+    protected function activePluginFiles(): array
+    {
+        if (! function_exists('get_option')) {
+            return [];
         }
 
-        return false;
+        $files = (array) get_option('active_plugins', []);
+
+        if (function_exists('is_multisite') && is_multisite() && function_exists('get_site_option')) {
+            $files = [...$files, ...array_keys((array) get_site_option('active_sitewide_plugins', []))];
+        }
+
+        return array_values(array_filter($files, is_string(...)));
     }
 
     /**
@@ -418,10 +444,18 @@ class MakePluginCommand extends Command implements PromptsForMissingInput, Promp
      */
     protected function validateValue(string $value): ?string
     {
+        return $this->validateNameFormat($value)
+            ?? ($this->files->isDirectory($this->makePlugin($value)->getBasePath()) ? sprintf('Plugin "%s" already exists.', $value) : null);
+    }
+
+    /**
+     * Validate the shape of a name, whether or not a folder already bears it.
+     */
+    protected function validateNameFormat(string $value): ?string
+    {
         return match (true) {
             $value === '' || $value === '0' => 'Name is required.',
             preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== 0 && preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== false => 'Name must be alphanumeric, dash, space or underscore.',
-            $this->files->isDirectory($this->makePlugin($value)->getBasePath()) => sprintf('Plugin "%s" already exists.', $value),
             default => null,
         };
     }

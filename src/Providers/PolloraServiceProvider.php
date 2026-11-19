@@ -21,6 +21,7 @@ use Pollora\Doctor\Infrastructure\Providers\DoctorServiceProvider;
 use Pollora\Events\WordPress\WordPressEventServiceProvider;
 use Pollora\Exceptions\Infrastructure\Providers\ExceptionServiceProvider;
 use Pollora\Foundation\Providers\ArtisanServiceProvider;
+use Pollora\Foundation\Providers\DiagnosticsServiceProvider;
 use Pollora\Hashing\HashServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\AsyncServiceProvider;
 use Pollora\Hook\Infrastructure\Providers\HookServiceProvider;
@@ -39,6 +40,7 @@ use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\SchedulerServiceProvider;
 use Pollora\Taxonomy\Infrastructure\Providers\TaxonomyServiceProvider;
 use Pollora\Theme\Infrastructure\Providers\ThemeServiceProvider;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Pollora\VersionCheck\Infrastructure\Providers\VersionCheckServiceProvider;
 use Pollora\View\Infrastructure\Providers\TemplateHierarchyServiceProvider;
 use Pollora\View\ViewServiceProvider;
@@ -138,44 +140,30 @@ class PolloraServiceProvider extends ServiceProvider
         // Dashboard
         $this->app->register(DashboardServiceProvider::class);
         $this->app->register(DoctorServiceProvider::class);
+
+        // Query counts and boot time for the performance gates (WP_DEBUG and an explicit header only)
+        $this->app->register(DiagnosticsServiceProvider::class);
     }
 
     /**
      * Perform post-registration booting of services.
      *
-     * Publishes necessary configuration files and assets to the public directory.
-     * This includes the WordPress configuration file that bridges Laravel and WordPress.
+     * Loads the framework translations. Nothing is published: the public directory,
+     * wp-config.php included, comes with the project skeleton.
      */
     public function boot(): void
     {
-        $this->publishes([
-            __DIR__.'/../../public/wp-config.php' => public_path(),
-        ], 'public');
-
         $this->loadPolloraTextDomain();
     }
 
     /**
-     * Load the 'pollora' text domain for framework translations.
+     * Load the 'pollora' text domain for framework translations, unless the default labels already did.
      *
      * Checks for user-provided translations in `wp-content/languages/pollora/`
      * first, then falls back to the framework's bundled translations.
      */
     private function loadPolloraTextDomain(): void
     {
-        if (! function_exists('load_textdomain')) {
-            return;
-        }
-
-        $locale = determine_locale();
-        $moFile = sprintf('pollora-%s.mo', $locale);
-
-        // User-provided translations take priority
-        $loaded = load_textdomain('pollora', WP_LANG_DIR.'/pollora/'.$moFile);
-
-        // Fall back to bundled translations
-        if (! $loaded) {
-            load_textdomain('pollora', dirname(__DIR__, 2).'/resources/languages/'.$moFile);
-        }
+        TranslatingEntityRegistry::loadFrameworkTextDomain();
     }
 }

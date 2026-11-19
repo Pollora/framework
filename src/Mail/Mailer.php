@@ -321,11 +321,12 @@ class Mailer
      */
     private function cleanEmailAddress(string $email): string
     {
-        // Remove extra quotes and trim whitespace
-        $email = trim($email, " \"'");
+        // Remove extra quotes and every kind of surrounding whitespace: a line
+        // break left at the end of an address would end up in a mail header.
+        $email = trim($email, " \t\r\n\0\x0B\"'");
 
         // Match both quoted and unquoted names
-        if (preg_match('/^(?:"?([^"]*?)"?\s*)?<([^>]+)>$/', $email, $matches)) {
+        if (preg_match('/^(?:"?([^"]*?)"?\s*)?<([^>]+)>$/D', $email, $matches)) {
             $name = trim($matches[1]);
             $addr = trim($matches[2]);
 
@@ -365,10 +366,10 @@ class Mailer
      */
     private function parseEmailAddress(string $address): string|array
     {
-        $address = trim($address, " \"'");
+        $address = trim($address, " \t\r\n\0\x0B\"'");
 
         // Return directly if no match for "Name <email>"
-        if (preg_match('/^(?:"?([^"]*)"?\s*)?<([^>]+)>$/', $address, $matches) !== 1) {
+        if (preg_match('/^(?:"?([^"]*)"?\s*)?<([^>]+)>$/D', $address, $matches) !== 1) {
             return $address;
         }
 

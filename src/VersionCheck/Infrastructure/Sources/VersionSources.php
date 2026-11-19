@@ -51,7 +51,7 @@ class VersionSources implements VersionSourceResolver
                 continue;
             }
 
-            if ($type === 'vcs' && preg_match('#github\.com[/:]([^/]+/[^/]+?)(\.git)?/?$#', $url, $matches) === 1
+            if ($type === 'vcs' && preg_match('#github\.com[/:]([^/]+/[^/]+?)(\.git)?/?$#D', $url, $matches) === 1
                 && strtolower(basename($matches[1])) === strtolower(basename($package))) {
                 $sources[] = new GitHubSource($this->http, $matches[1], $this->gitHubToken);
             }

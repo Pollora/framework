@@ -6,6 +6,7 @@ use Illuminate\Container\Container;
 use Pollora\Theme\Application\Services\ThemeRegistrar;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Infrastructure\Services\WordPressThemeParser;
+use Psr\Log\LoggerInterface;
 
 function setupRegistrarMocks(Container $container, $parser): void
 {
@@ -80,5 +81,70 @@ describe('ThemeRegistrar', function (): void {
         $theme = $this->registrar->register();
 
         expect($theme->getHeaders())->toBe($parsedData);
+    });
+});
+
+describe('ThemeRegistrar discovery log', function (): void {
+    /**
+     * @return array{0: ThemeRegistrar, 1: ArrayObject<int, string>} A registrar and the lines it logged
+     */
+    function registrarLoggingInto(bool $debug): array
+    {
+        $lines = new ArrayObject;
+        $logger = Mockery::mock(LoggerInterface::class);
+        $logger->shouldReceive('error')->andReturnUsing(function (string $message) use ($lines): void {
+            $lines[] = $message;
+        });
+        $container = new Container;
+        $container->instance(LoggerInterface::class, $logger);
+
+        $registrar = new class($container, Mockery::mock(WordPressThemeParser::class), $debug) extends ThemeRegistrar
+        {
+            public function __construct(Container $app, WordPressThemeParser $parser, private readonly bool $debug)
+            {
+                parent::__construct($app, $parser);
+            }
+
+            protected function isDebugMode(): bool
+            {
+                return $this->debug;
+            }
+
+            public function discovered(mixed $structure, string $type, ThemeModuleInterface $theme): void
+            {
+                $this->processDiscoveredStructure($structure, $type, $theme);
+            }
+        };
+
+        return [$registrar, $lines];
+    }
+
+    it('logs each structure found in the theme when WP_DEBUG is on, by its fully qualified name', function (): void {
+        [$registrar, $lines] = registrarLoggingInto(true);
+        $theme = Mockery::mock(ThemeModuleInterface::class);
+        $theme->shouldReceive('getName')->andReturn('demo');
+
+        $registrar->discovered(new class
+        {
+            public function getFqn(): string
+            {
+                return 'Theme\\Demo\\Hooks';
+            }
+        }, 'hooks', $theme);
+        $registrar->discovered('not an object', 'blocks', $theme);
+
+        expect($lines->getArrayCopy())->toBe([
+            'Discovered hooks in theme demo: Theme\\Demo\\Hooks',
+            'Discovered blocks in theme demo: unknown',
+        ]);
+    });
+
+    it('logs nothing when WP_DEBUG is off', function (): void {
+        [$registrar, $lines] = registrarLoggingInto(false);
+        $theme = Mockery::mock(ThemeModuleInterface::class);
+
+        $registrar->discovered(new stdClass, 'hooks', $theme);
+
+        expect($lines->getArrayCopy())->toBe([]);
     });
 });

@@ -94,3 +94,47 @@ it('refuses a role WordPress does not have', function (): void {
 
     expect($code)->toBe(1)->and($output)->toContain('WordPress has no role "ghost"');
 });
+
+it('prints a declared role as a table, with its origin and what the code removes', function (): void {
+    [$code, $output] = runRoleCommand(new RoleShowCommand, $this->app, ['role' => 'event_manager']);
+
+    expect($code)->toBe(0)
+        ->and($output)->toContain('event_manager')
+        ->and($output)->toContain('inherits')
+        ->and($output)->toContain('author')
+        ->and($output)->toContain('Capability')
+        ->and($output)->toContain('granted by EventManager')
+        ->and($output)->toContain('Removed by the code: publish_posts');
+});
+
+it('prints a role the code only adjusts as stored in the database, naming what #[ModifyRole] granted', function (): void {
+    [$code, $output] = runRoleCommand(new RoleShowCommand, $this->app, ['role' => 'editor']);
+
+    expect($code)->toBe(0)
+        ->and($output)->toContain('stored in the database')
+        ->and($output)->toContain('moderate_comments')
+        ->and($output)->toContain('stored');
+});
+
+it('says a capability of a super role was declared by the project', function (): void {
+    $this->app->make(RoleRegistry::class)->addCapabilitySet(['scan_tickets']);
+    $this->wpRoles->roles['administrator']['capabilities']['scan_tickets'] = true;
+    $this->wpRoles->roles['administrator'][RoleCompiler::MARKER] = ['granted' => ['scan_tickets'], 'removed' => []];
+
+    [$code, $output] = runRoleCommand(new RoleShowCommand, $this->app, ['role' => 'administrator', '--json' => true]);
+    $from = array_column(json_decode($output, true)['capabilities'], 'from', 'capability');
+
+    expect($code)->toBe(0)->and($from['scan_tickets'])->toBe('super role: declared by the project');
+});
+
+it('prints the roles as a table with their origin, capability count and users', function (): void {
+    [$code, $output] = runRoleCommand(new RoleListCommand, $this->app);
+
+    expect($code)->toBe(0)
+        ->and($output)->toContain('Role')
+        ->and($output)->toContain('Origin')
+        ->and($output)->toContain('event_manager')
+        ->and($output)->toContain('declared by')
+        ->and($output)->toContain('stored, modified by')
+        ->and($output)->toContain('administrator');
+});

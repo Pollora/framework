@@ -63,7 +63,7 @@ class Seo
 - **Blade templates** with [Sage Directives](https://log1x.github.io/sage-directives-docs/) for WordPress data
 - **Theme system** with dynamic PSR-4 autoloading, parent/child theme support, and Vite asset management
 - **WordPress authentication** guard and password hashing integration
-- **Event dispatching** for WordPress core, WooCommerce, Gravity Forms, and Yoast SEO
+- **Event dispatching** for WordPress core, Gravity Forms, and Yoast SEO
 - **Module system** via [nwidart/laravel-modules](https://github.com/nwidart/laravel-modules)
 - **`pollora:doctor`**, which finds the setups that fail without an error and prints the fix (also in Tools › Site Health)
 

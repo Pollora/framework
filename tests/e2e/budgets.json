@@ -1,0 +1,11 @@
+{
+  "pages": {
+    "home": { "wordpress": 24, "laravel": 0 },
+    "post": { "wordpress": 20, "laravel": 0 },
+    "page": { "wordpress": 19, "laravel": 0 },
+    "archive": { "wordpress": 26, "laravel": 0 },
+    "notFound": { "wordpress": 15, "laravel": 0 },
+    "search": { "wordpress": 22, "laravel": 0 },
+    "rest": { "wordpress": 19, "laravel": 0 }
+  }
+}

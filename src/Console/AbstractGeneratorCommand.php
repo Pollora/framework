@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollora\Console;
 
 use Illuminate\Console\GeneratorCommand;
+use Illuminate\Console\ManuallyFailedException;
+use Illuminate\Contracts\Console\Isolatable;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Pollora\Foundation\Console\Commands\Concerns\HasModuleSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasNameSupport;
@@ -12,6 +14,8 @@ use Pollora\Foundation\Console\Commands\Concerns\HasPathSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasPluginSupport;
 use Pollora\Foundation\Console\Commands\Concerns\HasThemeSupport;
 use Pollora\Foundation\Console\Commands\Concerns\ResolvesLocation;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Abstract class for generating files in different locations (app, theme, plugin, module).
@@ -84,6 +88,30 @@ abstract class AbstractGeneratorCommand extends GeneratorCommand
         $this->components->success(sprintf('%s [%s] created successfully.', $info, $path));
 
         return null;
+    }
+
+    /**
+     * Run handle() and turn a refusal into a failing exit code.
+     *
+     * Laravel casts the return of handle() with (int), so the `false` a generator
+     * returns for a reserved name or an existing class would exit with 0. The
+     * return value is read here, so subclasses that redeclare handle() are covered.
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        if ($this instanceof Isolatable) {
+            return parent::execute($input, $output);
+        }
+
+        try {
+            $result = $this->laravel->call($this->handle(...));
+
+            return $result === false ? self::FAILURE : (int) $result;
+        } catch (ManuallyFailedException $manuallyFailedException) {
+            $this->components->error($manuallyFailedException->getMessage());
+
+            return self::FAILURE;
+        }
     }
 
     /**

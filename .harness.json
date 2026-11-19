@@ -4,8 +4,12 @@
     "ratchet": {
         "phpstan_level": 5,
         "phpstan_baseline": 56,
-        "coverage": 53,
+        "coverage": 94.0,
         "exempted_rules": 2
+    },
+    "mutation": {
+        "scope": "added",
+        "min": 80
     },
     "allow_rules": [
         {

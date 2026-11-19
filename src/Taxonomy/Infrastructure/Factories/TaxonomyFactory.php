@@ -9,6 +9,7 @@ use Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter;
 use Pollora\Entity\Application\Service\EntityRegistrationService;
 use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 
 /**
  * Implementation of the TaxonomyFactory interface.
@@ -48,7 +49,7 @@ class TaxonomyFactory implements TaxonomyFactoryInterface
         }
 
         // Register with WordPress using the entity registration service
-        $registry = new TaxonomyRegistryAdapter;
+        $registry = new TranslatingEntityRegistry(new TaxonomyRegistryAdapter);
         $registrationService = new EntityRegistrationService($registry);
         $registrationService->registerEntity($taxonomy);
 

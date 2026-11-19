@@ -51,4 +51,16 @@ describe('WordPressInstallLoaderService', function (): void {
 
         expect($classes)->toBe(array_values(array_unique($classes)));
     });
+
+    it('gives WordPress a cookie path that starts and ends with one slash', function (string $appUrl, string $path): void {
+        $service = (new ReflectionClass(WordPressInstallLoaderService::class))->newInstanceWithoutConstructor();
+        $method = new ReflectionMethod($service, 'getCookiePath');
+
+        expect($method->invoke($service, $appUrl))->toBe($path);
+    })->with([
+        'host only' => ['https://x.test', '/'],
+        'host and trailing slash' => ['https://x.test/', '/'],
+        'subdirectory' => ['https://x.test/sub', '/sub/'],
+        'subdirectory and trailing slash' => ['https://x.test/sub/', '/sub/'],
+    ]);
 });

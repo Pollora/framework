@@ -316,20 +316,15 @@ class ModuleAwareExceptionHandler extends Handler
     /**
      * Determine if the request expects an HTML response.
      *
-     * This method provides a compatible way to check if the request expects
-     * HTML content across different Laravel versions.
+     * Mirrors Laravel's own choice between a JSON and an HTML error response
+     * (see Handler::shouldReturnJson()): anything that does not expect JSON is
+     * rendered as HTML.
      *
      * @param  Request  $request  The HTTP request to check
      * @return bool True if the request expects HTML content
      */
     protected function shouldRenderHtmlResponse(Request $request): bool
     {
-        // Check if the request accepts HTML content
-        if (method_exists($request, 'expectsHtml')) {
-            return $request->expectsHtml();
-        }
-
-        // Fallback for older Laravel versions
-        return $request->accepts(['text/html', 'application/xhtml+xml']) !== null;
+        return ! $request->expectsJson();
     }
 }

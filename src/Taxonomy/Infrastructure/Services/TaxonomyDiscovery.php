@@ -19,6 +19,7 @@ use Pollora\Discovery\Domain\Services\IsDiscovery;
 use Pollora\Entity\Adapter\Out\WordPress\TaxonomyRegistryAdapter;
 use Pollora\Entity\Domain\Model\Taxonomy as EntityTaxonomy;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyServiceInterface;
+use Pollora\Translation\Infrastructure\Adapters\TranslatingEntityRegistry;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -236,7 +237,7 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
         $textDomain = $taxonomy->textDomain ?? 'pollora';
 
         $initialArgs = [
-            'labels' => $this->generateLabels($singular, $plural, $textDomain),
+            'labels' => TranslatingEntityRegistry::defaultLabels(TranslatingEntityRegistry::TAXONOMY, $singular, $plural),
             'text_domain' => $textDomain,
         ];
 
@@ -417,50 +418,6 @@ final class TaxonomyDiscovery implements ConfigurableDiscoveryInterface, Discove
         }
 
         return Str::plural($singular);
-    }
-
-    /**
-     * Generate WordPress labels array from singular and plural names.
-     *
-     * @param  string  $singular  The singular name
-     * @param  string  $plural  The plural name
-     * @return array<string, string> The labels array
-     */
-    private function generateLabels(string $singular, string $plural, string $textDomain = 'pollora'): array
-    {
-        return [
-            'name' => $plural,
-            'singular_name' => $singular,
-            'menu_name' => $plural,
-            /* translators: %s: taxonomy general name (plural) */
-            'all_items' => sprintf(__('All %s', $textDomain), $plural),
-            /* translators: %s: taxonomy singular name */
-            'edit_item' => sprintf(__('Edit %s', $textDomain), $singular),
-            /* translators: %s: taxonomy singular name */
-            'view_item' => sprintf(__('View %s', $textDomain), $singular),
-            /* translators: %s: taxonomy singular name */
-            'update_item' => sprintf(__('Update %s', $textDomain), $singular),
-            /* translators: %s: taxonomy singular name */
-            'add_new_item' => sprintf(__('Add New %s', $textDomain), $singular),
-            /* translators: %s: taxonomy singular name */
-            'new_item_name' => sprintf(__('New %s Name', $textDomain), $singular),
-            /* translators: %s: taxonomy general name (plural) */
-            'search_items' => sprintf(__('Search %s', $textDomain), $plural),
-            /* translators: %s: taxonomy general name (plural) */
-            'popular_items' => sprintf(__('Popular %s', $textDomain), $plural),
-            /* translators: %s: taxonomy general name (plural) */
-            'separate_items_with_commas' => sprintf(__('Separate %s with commas', $textDomain), $plural),
-            /* translators: %s: taxonomy general name (plural) */
-            'add_or_remove_items' => sprintf(__('Add or remove %s', $textDomain), $plural),
-            /* translators: %s: taxonomy general name (plural) */
-            'choose_from_most_used' => sprintf(__('Choose from the most used %s', $textDomain), $plural),
-            /* translators: %s: taxonomy general name (plural) */
-            'not_found' => sprintf(__('No %s found', $textDomain), $plural),
-            /* translators: %s: taxonomy singular name */
-            'parent_item' => sprintf(__('Parent %s', $textDomain), $singular),
-            /* translators: %s: taxonomy singular name */
-            'parent_item_colon' => sprintf(__('Parent %s:', $textDomain), $singular),
-        ];
     }
 
     /**

@@ -87,4 +87,27 @@ describe('PackagistVersionChecker', function (): void {
 
         expect($checker->getLatestVersion())->toBeNull();
     });
+
+    it('returns null when the answer is not JSON', function (): void {
+        Brain\Monkey\Functions\when('get_transient')->justReturn(false);
+        Brain\Monkey\Functions\when('is_wp_error')->justReturn(false);
+        Brain\Monkey\Functions\when('wp_remote_get')->justReturn(['body' => '<html>maintenance</html>']);
+        Brain\Monkey\Functions\when('wp_remote_retrieve_body')->alias(fn (array $response): string => $response['body']);
+
+        expect((new PackagistVersionChecker)->getLatestVersion())->toBeNull();
+    });
+
+    it('returns null when every release is a dev, alpha, beta or release candidate', function (): void {
+        Brain\Monkey\Functions\when('get_transient')->justReturn(false);
+        Brain\Monkey\Functions\when('is_wp_error')->justReturn(false);
+        Brain\Monkey\Functions\when('wp_remote_get')->justReturn(['body' => json_encode(['packages' => ['pollora/framework' => [
+            ['version' => 'dev-main'],
+            ['version' => 'v13.4.0-alpha1'],
+            ['version' => 'v13.4.0-beta2'],
+            ['version' => 'v13.4.0-RC1'],
+        ]]])]);
+        Brain\Monkey\Functions\when('wp_remote_retrieve_body')->alias(fn (array $response): string => $response['body']);
+
+        expect((new PackagistVersionChecker)->getLatestVersion())->toBeNull();
+    });
 });

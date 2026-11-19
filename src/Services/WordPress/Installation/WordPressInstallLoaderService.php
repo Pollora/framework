@@ -204,6 +204,6 @@ class WordPressInstallLoaderService
      */
     private function getCookiePath(string $appUrl): string
     {
-        return preg_replace('|https?://[^/]+|i', '', $appUrl.'/');
+        return preg_replace('|https?://[^/]+|i', '', rtrim($appUrl, '/').'/');
     }
 }

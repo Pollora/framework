@@ -134,6 +134,7 @@ describe('MissingThemePage', function (): void {
 describe('MissingThemeNotice', function (): void {
     it('warns in the admin when no theme is installed', function (): void {
         Brain\Monkey\Functions\when('get_stylesheet_directory')->justReturn('/nope');
+        Brain\Monkey\Functions\when('current_user_can')->justReturn(true);
 
         ob_start();
         (new MissingThemeNotice(themeAvailability(null)))->render();
@@ -147,8 +148,20 @@ describe('MissingThemeNotice', function (): void {
             ->and($output)->toContain('pollora/theme-buzz');
     });
 
+    it('stays silent for a user who cannot manage options, even with no theme', function (): void {
+        Brain\Monkey\Functions\when('get_stylesheet_directory')->justReturn('/nope');
+        Brain\Monkey\Functions\when('current_user_can')->justReturn(false);
+
+        ob_start();
+        (new MissingThemeNotice(themeAvailability(null)))->render();
+        $output = (string) ob_get_clean();
+
+        expect($output)->toBeEmpty();
+    });
+
     it('stays silent once a theme is installed', function (): void {
         $theme = Mockery::mock(ThemeModuleInterface::class);
+        Brain\Monkey\Functions\when('current_user_can')->justReturn(true);
 
         ob_start();
         (new MissingThemeNotice(themeAvailability($theme)))->render();

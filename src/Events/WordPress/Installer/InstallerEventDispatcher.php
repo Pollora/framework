@@ -40,6 +40,7 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
         'delete_site_transient_update_themes',
         'pre_option_uninstall_plugins',
         'pre_set_site_transient_update_plugins',
+        '_core_updated_successfully',
     ];
 
     /**
@@ -64,7 +65,13 @@ class InstallerEventDispatcher extends AbstractEventDispatcher
                     return;
                 }
 
-                $data = get_plugin_data($upgrader->skin->result['local_destination'].'/'.$path);
+                // destination_name is the plugin folder: the header is in the main file WordPress found in it.
+                $mainFile = method_exists($upgrader, 'plugin_info') ? $upgrader->plugin_info() : false;
+                if (! $mainFile) {
+                    return;
+                }
+
+                $data = get_plugin_data(WP_PLUGIN_DIR.'/'.$mainFile);
                 $this->dispatch(PluginInstalled::class, [
                     'name' => $data['Name'],
                     'version' => $data['Version'],

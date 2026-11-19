@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Ajax\Infrastructure\Services;
 
 use Pollora\Ajax\Domain\Model\AjaxAccess;
+use Pollora\Ajax\Domain\Model\AjaxAction;
 use Pollora\Ajax\Factory\AjaxFactory;
 use Pollora\Attributes\Ajax;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
@@ -89,7 +90,8 @@ final class AjaxDiscovery implements DiscoveryInterface
      *  1. Instantiates the `#[Ajax]` attribute to read action name and access level.
      *  2. Resolves the class instance from the shared instance pool (with DI).
      *  3. Calls {@see AjaxFactory::listen()} to create the action.
-     *  4. Applies the access level via {@see AjaxAccess::applyTo()}.
+     *  4. Applies the access level via {@see AjaxAccess::applyTo()}, the nonce, and the capability the attribute
+     *     requires (an empty capability is an error: the action is not registered, rather than registered open).
      */
     public function apply(): void
     {
@@ -104,6 +106,11 @@ final class AjaxDiscovery implements DiscoveryInterface
                 /** @var Ajax $ajax */
                 $ajax = $ajaxAttribute->newInstance();
 
+                if ($ajax->capability !== null && trim($ajax->capability) === '') {
+                    // Fail closed: an empty capability is a mistake, and the action must not run open to everyone.
+                    throw new \InvalidArgumentException('the capability of the #[Ajax] attribute must not be empty');
+                }
+
                 $instance = $this->getInstanceFromPool($className);
 
                 $action = $this->ajaxFactory->listen(
@@ -112,12 +119,33 @@ final class AjaxDiscovery implements DiscoveryInterface
                 );
 
                 $ajax->access->applyTo($action);
+                $this->applyNonce($action, $ajax->nonce);
+
+                if ($ajax->capability !== null) {
+                    $action->requireCapability($ajax->capability);
+                }
             } catch (\Throwable $e) {
                 $this->logger?->error(
                     sprintf('Failed to register Ajax action "%s" from %s::%s', $className, $methodName, $e->getMessage()),
                     ['exception' => $e]
                 );
             }
+        }
+    }
+
+    /**
+     * Passes what the attribute says about the nonce on to the action: `true` verifies a nonce named after the
+     * action, a string verifies the nonce of that name (an empty one means the action name), `false` turns the
+     * nonce off on purpose, and `null` leaves the action undecided (reported by the registrar).
+     */
+    private function applyNonce(AjaxAction $action, bool|string|null $nonce): void
+    {
+        if ($nonce === true || $nonce === '') {
+            $action->requireNonce();
+        } elseif (is_string($nonce)) {
+            $action->requireNonce($nonce);
+        } elseif ($nonce === false) {
+            $action->withoutNonce();
         }
     }
 

@@ -6,6 +6,7 @@ namespace Pollora\Plugin\Infrastructure\Services;
 
 use Pollora\Modules\Infrastructure\Services\ModuleAutoloader;
 use Pollora\Plugin\Domain\Models\PluginModule;
+use Pollora\Support\Domain\StringHelper;
 
 /**
  * Plugin autoloader service.
@@ -54,7 +55,7 @@ class PluginAutoloader extends ModuleAutoloader
      */
     public function getPluginNamespace(string $pluginName): string
     {
-        return $this->buildNamespace($pluginName, 'plugin');
+        return $this->buildNamespace(StringHelper::studly($pluginName), 'plugin');
     }
 
     /**

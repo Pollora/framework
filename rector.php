@@ -41,6 +41,11 @@ return RectorConfig::configure()
             // going through the facade would stop it reaching the code at all.
             __DIR__.'/tests/Unit/WordPress/LaravelServingRequestTest.php',
             __DIR__.'/tests/Unit/WordPress/DeferredTemplateRedirectTest.php',
+            // The diagnostics are asked for by a raw request header, read while the
+            // framework boots (the request object may not exist yet); its tests set
+            // that header in $_SERVER to drive the provider.
+            __DIR__.'/src/Foundation/Providers/DiagnosticsServiceProvider.php',
+            __DIR__.'/tests/Unit/Foundation/Providers/DiagnosticsServiceProviderTest.php',
         ],
         __DIR__.'/tests/Unit/helpers.php',
         // Binding sources each broken on purpose (an untyped field, a private

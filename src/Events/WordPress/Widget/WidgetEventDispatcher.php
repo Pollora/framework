@@ -78,9 +78,8 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
                 $oldSidebarWidgets = [];
             }
 
-            // Handle widget reordering
-            if (count($newSidebarWidgets) === count($oldSidebarWidgets) &&
-                array_diff($newSidebarWidgets, $oldSidebarWidgets)) {
+            // Handle widget reordering: same widgets, different order
+            if ($this->isReordered($oldSidebarWidgets, $newSidebarWidgets)) {
                 $this->dispatch(WidgetReordered::class, [$sidebarId, $oldSidebarWidgets, $newSidebarWidgets]);
 
                 continue;
@@ -111,6 +110,27 @@ class WidgetEventDispatcher extends AbstractEventDispatcher
 
         // Handle moved widgets
         $this->handleMovedWidgets($oldWidgets, $newWidgets);
+    }
+
+    /**
+     * Whether both lists hold the same widgets (duplicates included) in a different order.
+     *
+     * @param  array  $oldWidgets  Previous widget IDs of a sidebar
+     * @param  array  $newWidgets  New widget IDs of a sidebar
+     */
+    protected function isReordered(array $oldWidgets, array $newWidgets): bool
+    {
+        $oldWidgets = array_values($oldWidgets);
+        $newWidgets = array_values($newWidgets);
+
+        if ($oldWidgets === $newWidgets) {
+            return false;
+        }
+
+        sort($oldWidgets);
+        sort($newWidgets);
+
+        return $oldWidgets === $newWidgets;
     }
 
     /**

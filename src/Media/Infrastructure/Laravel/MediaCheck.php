@@ -227,6 +227,20 @@ final readonly class MediaCheck implements CheckInterface
     }
 
     /**
+     * A path with a segment that starts with a dot (.htaccess, .cache/...) is not a media.
+     */
+    private function isHidden(string $relative): bool
+    {
+        foreach (explode('/', $relative) as $segment) {
+            if (str_starts_with($segment, '.')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @return list<string>
      */
     private function leftBehind(MediaStorage $storage): array
@@ -244,11 +258,15 @@ final readonly class MediaCheck implements CheckInterface
                 continue;
             }
 
+            $relative = ltrim(substr($file->getPathname(), strlen($this->localUploads)), '/');
+
+            if ($this->isHidden($relative)) {
+                continue;
+            }
+
             if (++$seen > self::SAMPLE) {
                 break;
             }
-
-            $relative = ltrim(substr($file->getPathname(), strlen($this->localUploads)), '/');
 
             if ($this->isPrivateFolder($relative)) {
                 continue;

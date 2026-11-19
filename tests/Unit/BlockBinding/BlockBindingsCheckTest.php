@@ -107,3 +107,9 @@ it('waits for WordPress', function (): void {
 
     expect($this->check->run(RunContext::Console)->status)->toBe(CheckStatus::Skipped);
 });
+
+it('presents itself to the doctor and runs in the console and over HTTP', function (): void {
+    expect($this->check->id())->toBe('block-bindings')
+        ->and($this->check->label())->toBe('Block bindings')
+        ->and($this->check->runsIn())->toBe([RunContext::Console, RunContext::Http]);
+});

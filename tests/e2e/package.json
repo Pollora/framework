@@ -7,11 +7,14 @@
     "node": ">=22.19.0"
   },
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:unit": "node --test support/perf.test.ts",
+    "budgets:update": "E2E_UPDATE_BUDGETS=1 playwright test query-budget",
+    "perf:compare": "node bin/perf-compare.ts"
   },
   "devDependencies": {
-    "@playwright/test": "1.64.1",
+    "@playwright/test": "1.65.0",
     "@types/node": "22.20.5",
-    "@wordpress/e2e-test-utils-playwright": "3.1.0"
+    "@wordpress/e2e-test-utils-playwright": "3.2.0"
   }
 }

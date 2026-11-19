@@ -9,6 +9,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Pollora\Console\Concerns\PromptsForMissingOption;
+use Pollora\Console\Concerns\ReplacesExistingDirectory;
 use Pollora\Console\Contracts\PromptsForMissingOption as PromptsForMissingOptionContract;
 use Pollora\Modules\Infrastructure\Services\ModuleScaffolderService;
 use Pollora\Support\NpmRunner;
@@ -31,10 +32,11 @@ use function Laravel\Prompts\text;
  * setting the theme as the active WordPress theme.
  */
 #[Description('Generate theme structure by downloading from GitHub repository')]
-#[Signature('pollora:make:theme {name} {--theme-author= : Theme author name} {--theme-author-uri= : Theme author URI} {--theme-uri= : Theme URI} {--theme-description= : Theme description} {--theme-version= : Theme version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Force create theme with same name} {--activate : Activate the theme without asking} {--no-activate : Leave the active theme as it is, without asking}', aliases: ['pollora:make-theme'])]
+#[Signature('pollora:make:theme {name} {--theme-author= : Theme author name} {--theme-author-uri= : Theme author URI} {--theme-uri= : Theme URI} {--theme-description= : Theme description} {--theme-version= : Theme version} {--repository= : GitHub repository to download (owner/repo format)} {--repo-version= : Specific version/tag to download} {--force : Delete an existing theme of the same name (after typing its name to confirm) and generate it again} {--activate : Activate the theme without asking} {--no-activate : Leave the active theme as it is, without asking}', aliases: ['pollora:make-theme'])]
 class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInput, PromptsForMissingOptionContract
 {
     use PromptsForMissingOption;
+    use ReplacesExistingDirectory;
 
     /**
      * The ThemeMetadata instance representing the theme being created.
@@ -123,8 +125,8 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      */
     protected function validateThemeName(): bool
     {
-        $message = $this->validateValue($this->argument('name'));
-        if (! in_array($message, [null, '', '0'], true)) {
+        $message = $this->validateNameFormat($this->argument('name'));
+        if ($message !== null) {
             $this->error($message);
 
             return false;
@@ -135,6 +137,9 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
 
     /**
      * Check if the theme can be generated.
+     *
+     * An existing folder is refused, unless --force and a typed confirmation
+     * delete it first, so that the generation then runs as for a new theme.
      */
     protected function canGenerateTheme(): bool
     {
@@ -143,13 +148,28 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
         }
 
         $name = $this->theme->getName();
-        $this->error(sprintf('Theme "%s" already exists.', $name));
 
-        if ($this->option('force')) {
-            return true;
+        return $this->replaceExistingDirectory('Theme', $name, $this->getThemesPath(), in_array($name, $this->activeThemeNames(), true));
+    }
+
+    /**
+     * The stylesheet and template of the active theme, when WordPress can tell.
+     *
+     * Empty when WordPress is not loaded in this context: the active theme is then not detectable.
+     *
+     * @return array<int, string>
+     */
+    protected function activeThemeNames(): array
+    {
+        $names = [];
+
+        foreach (['get_stylesheet', 'get_template'] as $function) {
+            if (function_exists($function)) {
+                $names[] = (string) $function();
+            }
         }
 
-        return $this->confirm(sprintf('Are you sure you want to override "%s" theme folder?', $name));
+        return $names;
     }
 
     /**
@@ -679,10 +699,18 @@ class MakeThemeCommand extends BaseThemeCommand implements PromptsForMissingInpu
      */
     protected function validateValue(string $value): ?string
     {
+        return $this->validateNameFormat($value)
+            ?? ($this->files->isDirectory($this->makeTheme($value)->getBasePath()) ? sprintf('Theme "%s" already exists.', $value) : null);
+    }
+
+    /**
+     * Validate the shape of a name, whether or not a folder already bears it.
+     */
+    protected function validateNameFormat(string $value): ?string
+    {
         return match (true) {
             $value === '' || $value === '0' => 'Name is required.',
             preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== 0 && preg_match('/[^a-zA-Z0-9\-_\s]/', $value) !== false => 'Name must be alphanumeric, dash, space or underscore.',
-            $this->files->isDirectory($this->makeTheme($value)->getBasePath()) => sprintf('Theme "%s" already exists.', $value),
             default => null,
         };
     }

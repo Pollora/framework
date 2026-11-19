@@ -41,3 +41,17 @@ it('adds an #[Async] method, and its import, to an existing class', function ():
         ->toContain("    #[Action('save_post', priority:10)]\n    public function handleSavePost(): void")
         ->toContain("    #[Action('user_register', priority:10)]\n    #[Async]\n    public function handleUserRegister(): void");
 });
+
+it('generates the class in the custom path with --path', function (): void {
+    $customDir = 'pollora-make-action-path-'.uniqid();
+
+    $this->artisan('pollora:make:action', ['name' => 'SyncToCrm', '--path' => $customDir, '--hook' => 'save_post'])->assertSuccessful();
+
+    $generated = (string) collect(File::allFiles(base_path($customDir)))->first()?->getContents();
+
+    expect($generated)
+        ->toContain('namespace '.app()->getNamespace().'Cms\\Hooks;')
+        ->and($generated)->not->toContain('namespace AppCms\\');
+
+    File::deleteDirectory(base_path($customDir));
+});

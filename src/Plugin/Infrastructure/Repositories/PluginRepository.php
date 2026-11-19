@@ -357,6 +357,10 @@ class PluginRepository implements ModuleRepositoryInterface
      */
     public function add(string $name, PluginModuleInterface $plugin): void
     {
+        if (! $this->cached) {
+            $this->scan();
+        }
+
         $this->plugins[strtolower($name)] = $plugin;
     }
 
