@@ -26,11 +26,17 @@ class AdminNotice
     /**
      * Capability required to see and dismiss the notice: the framework version and
      * the update state are site-administration information, not for every logged-in user.
+     *
+     * Public because the AJAX action that dismisses the notice declares it
+     * (see {@see VersionCheckServiceProvider::boot()}).
      */
-    private const string CAPABILITY = 'manage_options';
+    public const string CAPABILITY = 'manage_options';
 
-    /** @var string WordPress nonce action for dismiss AJAX request */
-    private const string NONCE_ACTION = 'pollora_dismiss_update';
+    /**
+     * WordPress nonce action for the dismiss AJAX request: the notice creates the nonce with it
+     * and the AJAX action declares it with `requireNonce()`.
+     */
+    public const string NONCE_ACTION = 'pollora_dismiss_update';
 
     public function __construct(
         private readonly VersionComparator $comparator
@@ -91,19 +97,17 @@ class AdminNotice
     /**
      * Handle the AJAX request to dismiss the update notice.
      *
-     * Verifies the nonce and the `manage_options` capability (the nonce alone only
-     * proves the request comes from a page the user loaded), then stores the dismissed version in user meta
-     * so the notice is not shown again until a newer version is released.
-     * Called via the `wp_ajax_pollora_dismiss_update_notice` action.
+     * Stores the dismissed version in user meta so the notice is not shown again until a newer
+     * version is released.
+     *
+     * The request is checked before this runs: the AJAX action declared in
+     * {@see VersionCheckServiceProvider::boot()} requires the {@see self::NONCE_ACTION} nonce (a request
+     * without it gets a 403) and the {@see self::CAPABILITY} capability (a user without it gets a 403,
+     * a guest a 401; the nonce alone only proves the request comes from a page the user loaded).
+     * Do not register this method on `wp_ajax_*` by hand: it would run unchecked.
      */
     public function dismiss(): void
     {
-        check_ajax_referer(self::NONCE_ACTION);
-
-        if (! current_user_can(self::CAPABILITY)) {
-            wp_die('', '', ['response' => 403]);
-        }
-
         $version = sanitize_text_field(Request::post('version') ?? '');
 
         if ($version !== '') {

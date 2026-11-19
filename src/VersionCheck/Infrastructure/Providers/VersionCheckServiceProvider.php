@@ -7,6 +7,7 @@ namespace Pollora\VersionCheck\Infrastructure\Providers;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Hook\Domain\Contract\Action;
 use Pollora\Hook\Domain\Contract\Filter;
+use Pollora\Support\Facades\Ajax;
 use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Pollora\VersionCheck\Infrastructure\Services\PackagistVersionChecker;
@@ -22,7 +23,8 @@ use Pollora\VersionCheck\UI\Http\SiteHealthCheck;
  *
  * Hooks registered:
  * - `admin_notices`: Displays a dismissable update banner
- * - `wp_ajax_pollora_dismiss_update_notice`: Handles notice dismissal via AJAX
+ * - `wp_ajax_pollora_dismiss_update_notice`: Handles notice dismissal via AJAX, declared with `Ajax::listen()`
+ *   (a valid nonce and the `manage_options` capability are required before the handler runs)
  * - `debug_information`: Adds Pollora version info to Site Health debug data
  * - `site_status_tests`: Adds a version status test to Site Health
  */
@@ -56,12 +58,13 @@ class VersionCheckServiceProvider extends ServiceProvider
         }
 
         $action->add('admin_notices', [$this->app->make(AdminNotice::class), 'render']);
-        // AdminNotice::dismiss() runs check_ajax_referer(NONCE_ACTION) and requires
-        // the manage_options capability (403 otherwise) before writing user meta.
-        // Not yet declared through Ajax::listen(): the capability option needs
-        // pollora/ajax 1.3, which is not published; migrate once it is.
-        // nosemgrep: pollora.sec-02.manual-ajax-hook
-        $action->add('wp_ajax_pollora_dismiss_update_notice', [$this->app->make(AdminNotice::class), 'dismiss']);
+
+        // The nonce and the capability are checked by the AJAX action before dismiss() writes user meta:
+        // a request without the nonce gets a 403, so does a user without the capability, and a guest a 401.
+        // The notice's script sends the nonce in `_wpnonce`, which the check reads as well as `_ajax_nonce`.
+        Ajax::listen('pollora_dismiss_update_notice', [$this->app->make(AdminNotice::class), 'dismiss'])
+            ->requireNonce(AdminNotice::NONCE_ACTION)
+            ->requireCapability(AdminNotice::CAPABILITY);
 
         $filter->add('debug_information', [$this->app->make(SiteHealthCheck::class), 'addDebugInfo']);
         $filter->add('site_status_tests', [$this->app->make(SiteHealthCheck::class), 'addTests']);
