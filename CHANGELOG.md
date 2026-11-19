@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.0...develop)
 
+### Changed
+
+- **Accepts `pollora/media` 0.9**: the constraint is `^0.8 || ^0.9`, so a new project installs the media security fixes (declared and signed sizes only, name patterns anchored with `D`, constant-time signature comparison). It also accepts `pollora/discovery` 0.2 (`^0.1 || ^0.2 || ^1.0`), a warm cache that reads no file; that version installs only once the packages that still require `pollora/discovery` `^0.1 || ^1.0` (`block-bindings`, `meta`, `roles`, `schedule`, `wp-cli`, `wp-rest`) accept it.
+- **The architecture rules no longer fail on a layer an installed package also maps** (harness 0.1.32): `pollora/media` 0.9 adds classes to `Pollora\Media\Domain\Exceptions`, a namespace of the framework's own `src/Media`. Such a layer is reported as not evaluated instead of failing.
+
 ## [v13.43.0](https://github.com/Pollora/framework/compare/v13.42.0...v13.43.0) - 2026-11-19
 
 ### Added
