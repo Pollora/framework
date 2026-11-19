@@ -66,6 +66,16 @@ describe('Mailer email parsing', function (): void {
         expect($method->invoke($this->mailer, '"John" <john@test.com>'))->toBe('John <john@test.com>');
     });
 
+    it('drops a line break left after an address instead of keeping it for a header', function (): void {
+        $clean = $this->reflection->getMethod('cleanEmailAddress');
+        $parse = $this->reflection->getMethod('parseEmailAddress');
+
+        expect($clean->invoke($this->mailer, "user@example.com\n"))->toBe('user@example.com')
+            ->and($clean->invoke($this->mailer, "John <john@test.com>\r\n"))->toBe('John <john@test.com>')
+            ->and($parse->invoke($this->mailer, "user@example.com\n"))->toBe('user@example.com')
+            ->and($parse->invoke($this->mailer, "John <john@test.com>\n"))->toBe(['name' => 'John', 'address' => 'john@test.com']);
+    });
+
     it('cleans array of email addresses', function (): void {
         $method = $this->reflection->getMethod('cleanEmailAddresses');
         $method->setAccessible(true);

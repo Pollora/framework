@@ -53,6 +53,14 @@ it('refuses a command name that is not lowercase letters, numbers and hyphens', 
     expect(($this->generated)())->toBe([]);
 });
 
+it('refuses a command name followed by a line break', function (): void {
+    $this->artisan('pollora:make:wp-cli', ['name' => 'SyncStock', '--theme' => 'test-theme', '--command' => "sync-stock\n"])
+        ->expectsOutputToContain('Command name must only contain lowercase letters, numbers, and hyphens.')
+        ->run();
+
+    expect(($this->generated)())->toBe([]);
+});
+
 it('accepts a class name ending in Command when no command name is given', function (): void {
     $this->artisan('pollora:make:wp-cli', ['name' => 'SyncStockCommand', '--theme' => 'test-theme'])->assertSuccessful();
 

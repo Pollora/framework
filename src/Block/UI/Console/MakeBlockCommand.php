@@ -69,7 +69,7 @@ class MakeBlockCommand extends Command
     {
         $name = $this->argument('name');
 
-        if (! preg_match('/^[a-z][a-z0-9-]*$/', $name)) {
+        if (! preg_match('/^[a-z][a-z0-9-]*$/D', $name)) {
             $this->components->error(sprintf('Invalid block name "%s". Must be kebab-case (e.g. hero-banner).', $name));
 
             return self::FAILURE;
