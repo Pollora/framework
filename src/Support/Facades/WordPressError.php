@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Logging\Application\Services\WordPressErrorLoggingService;
+use Pollora\Logging\Domain\Contracts\WordPressErrorReporterInterface;
 
 /**
  * WordPress Error Facade
@@ -18,7 +18,7 @@ use Pollora\Logging\Application\Services\WordPressErrorLoggingService;
  * @method static void deprecatedFunction(string $function, string $replacement, string $version)
  * @method static void deprecatedArgument(string $function, string $message, string $version)
  *
- * @see WordPressErrorLoggingService
+ * @see WordPressErrorReporterInterface
  */
 class WordPressError extends Facade
 {
@@ -27,6 +27,6 @@ class WordPressError extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return WordPressErrorLoggingService::class;
+        return WordPressErrorReporterInterface::class;
     }
 }

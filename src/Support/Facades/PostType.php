@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
+use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 
 /**
  * @method static object make(string $slug, string $singular = null, string $plural = null, array $args = [])
@@ -46,7 +46,7 @@ use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
  * @method static object siteFilters(array $siteFilters)
  * @method static object siteSortables(array $siteSortables)
  *
- * @see PostTypeFactory
+ * @see PostTypeFactoryInterface
  * @see \Pollora\Entity\PostType
  */
 class PostType extends Facade
@@ -56,6 +56,6 @@ class PostType extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return PostTypeFactory::class;
+        return PostTypeFactoryInterface::class;
     }
 }
