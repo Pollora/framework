@@ -181,13 +181,33 @@ class LaravelModuleDiscovery implements ModuleDiscoveryInterface
     }
 
     /**
+     * The directory a module keeps its classes in: `app/`, else `src/`.
+     *
+     * The same precedence as ModuleAutoloader and the generators
+     * (ResolvesSourceDirectory), so that discovery scans the directory the
+     * classes are written to and autoloaded from. Null when the module has neither.
+     */
+    protected function sourcePath($module): ?string
+    {
+        $root = rtrim((string) $module->getPath(), '/');
+
+        foreach (['/app', '/src'] as $directory) {
+            if (is_dir($root.$directory)) {
+                return $root.$directory;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Run discovery on a specific module without applying.
      */
     protected function discoverModuleOnly($module): void
     {
-        $appPath = $module->getPath().'/app';
+        $appPath = $this->sourcePath($module);
 
-        if (! is_dir($appPath) || ! $this->container->bound(DiscoveryEngineInterface::class)) {
+        if ($appPath === null || ! $this->container->bound(DiscoveryEngineInterface::class)) {
             return;
         }
 
@@ -227,9 +247,9 @@ class LaravelModuleDiscovery implements ModuleDiscoveryInterface
      */
     protected function discoverAndReturnModule($module): array
     {
-        $appPath = $module->getPath().'/app';
+        $appPath = $this->sourcePath($module);
 
-        if (! is_dir($appPath) || ! $this->container->bound(DiscoveryManager::class)) {
+        if ($appPath === null || ! $this->container->bound(DiscoveryManager::class)) {
             return [];
         }
 

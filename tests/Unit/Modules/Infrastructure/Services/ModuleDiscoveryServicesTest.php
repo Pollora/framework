@@ -221,6 +221,44 @@ describe('LaravelModuleDiscovery', function (): void {
         discoveryRemoveDir($empty);
     });
 
+    it('scans src/ for a module that has no app/ directory', function (): void {
+        $srcOnly = discoveryTempDir();
+        mkdir($srcOnly.'/src', 0777, true);
+        $this->repo->shouldReceive('allEnabled')->andReturn([discoveryFakeModule('Blog', $srcOnly)]);
+        $engine = Mockery::mock(DiscoveryEngineInterface::class);
+        $engine->shouldReceive('addLocation')->once()->with(Mockery::on(
+            fn (DiscoveryLocationInterface $l): bool => $l->getPath() === $srcOnly.'/src'
+        ))->andReturnSelf();
+        $engine->shouldReceive('discover')->once()->andReturnSelf();
+        $engine->shouldReceive('apply')->once()->andReturnSelf();
+        $this->container->bind(DiscoveryEngineInterface::class, fn () => $engine);
+        $manager = Mockery::mock(DiscoveryManager::class);
+        $manager->shouldReceive('discoverAllInLocation')->once()->with(Mockery::on(
+            fn (DiscoveryLocationInterface $l): bool => $l->getPath() === $srcOnly.'/src'
+        ))->andReturn(['routes' => [1]]);
+        $this->container->instance(DiscoveryManager::class, $manager);
+        $discovery = new LaravelModuleDiscovery($this->container);
+
+        $discovery->discoverLaravelModules();
+        $discovery->applyLaravelModules();
+
+        expect($discovery->discoverAndReturnLaravelModules())->toBe(['Blog' => ['routes' => [1]]]);
+        discoveryRemoveDir($srcOnly);
+    });
+
+    it('prefers app/ over src/ when a module has both', function (): void {
+        mkdir($this->dir.'/src', 0777, true);
+        $this->repo->shouldReceive('allEnabled')->andReturn([discoveryFakeModule('Blog', $this->dir)]);
+        $engine = Mockery::mock(DiscoveryEngineInterface::class);
+        $engine->shouldReceive('addLocation')->once()->with(Mockery::on(
+            fn (DiscoveryLocationInterface $l): bool => $l->getPath() === $this->dir.'/app'
+        ))->andReturnSelf();
+        $engine->shouldReceive('discover')->once()->andReturnSelf();
+        $this->container->bind(DiscoveryEngineInterface::class, fn () => $engine);
+
+        (new LaravelModuleDiscovery($this->container))->discoverLaravelModules();
+    });
+
     it('discovers and applies one enabled module immediately but ignores a disabled one', function (): void {
         $this->repo->shouldReceive('find')->with('On')->andReturn(discoveryFakeModule('On', $this->dir));
         $this->repo->shouldReceive('find')->with('Off')->andReturn(discoveryFakeModule('Off', $this->dir, false));
