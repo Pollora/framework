@@ -16,7 +16,8 @@ use Pollora\WordPress\SqliteIntegration;
  * WordPress writes MySQL. Without the plugin's `db.php` drop-in, a SQLite
  * connection leaves WordPress unable to load, and the site answers 503 with
  * no hint of why. Only a project whose default connection is SQLite is
- * concerned; MySQL projects skip this check.
+ * concerned; MySQL projects skip this check. The file itself must not be readable by
+ * every account (a warning): it holds the WordPress password hashes.
  */
 final readonly class SqliteIntegrationCheck implements CheckInterface
 {
@@ -72,8 +73,33 @@ final readonly class SqliteIntegrationCheck implements CheckInterface
             );
         }
 
+        if ($file !== null && $this->isReadableByEveryone($file)) {
+            return CheckResult::warning(
+                'The SQLite database file can be read by every account on this machine.',
+                [
+                    'File: '.$file,
+                    sprintf('Mode: %04o. The file holds the WordPress password hashes.', fileperms($file) & 0777),
+                ],
+                'chmod 640 '.escapeshellarg($file).' (not 600 if PHP-FPM and the command line run as two users of one group)',
+            );
+        }
+
         return CheckResult::ok(
             'The SQLite Database Integration plugin is installed (development, CI and demos only: use MySQL or MariaDB in production).',
         );
+    }
+
+    /**
+     * Whether the file has the "others read" bit. Windows has no such mode: nothing to say there.
+     */
+    private function isReadableByEveryone(string $file): bool
+    {
+        if (DIRECTORY_SEPARATOR === '\\' || ! is_file($file)) {
+            return false;
+        }
+
+        $mode = fileperms($file);
+
+        return $mode !== false && ($mode & 0004) !== 0;
     }
 }

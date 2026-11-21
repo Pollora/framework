@@ -98,3 +98,35 @@ describe('DatabaseService::configureSqlite', function (): void {
         }
     })->skip(fn (): bool => function_exists('posix_geteuid') && posix_geteuid() === 0, 'root writes anywhere');
 });
+
+describe('DatabaseService::configureSqlite file mode', function (): void {
+    it('creates the file unreadable by others (0640) whatever the umask is, and restores the umask', function (): void {
+        $this->env->shouldReceive('updateEnvFile')->once();
+        $previous = umask(0000);
+
+        try {
+            $this->service->configureSqlite();
+            $restored = umask($previous);
+        } finally {
+            umask($previous);
+        }
+
+        clearstatcache();
+
+        expect(fileperms($this->project.'/database/database.sqlite') & 0777)->toBe(0640)
+            ->and($restored)->toBe(0000);
+    });
+
+    it('leaves the mode of a file that already exists alone', function (): void {
+        mkdir($this->project.'/database');
+        touch($this->project.'/database/database.sqlite');
+        chmod($this->project.'/database/database.sqlite', 0664);
+        $this->env->shouldReceive('updateEnvFile')->once();
+
+        $this->service->configureSqlite();
+
+        clearstatcache();
+
+        expect(fileperms($this->project.'/database/database.sqlite') & 0777)->toBe(0664);
+    });
+});

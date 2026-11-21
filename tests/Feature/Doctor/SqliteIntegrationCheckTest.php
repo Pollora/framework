@@ -95,6 +95,40 @@ describe('SQLite Database Integration plugin check', function (): void {
         expect((new SqliteIntegrationCheck)->run(RunContext::Console)->status->value)->toBe('ok');
     });
 
+    it('warns, with the chmod to run, when the database file can be read by every account', function (): void {
+        ($this->installPlugin)();
+        touch($this->project.'/public/content/db.php');
+        $file = $this->project.'/database/database.sqlite';
+        touch($file);
+        chmod($file, 0644);
+        clearstatcache();
+
+        $result = (new SqliteIntegrationCheck)->run(RunContext::Console);
+
+        expect($result->status->value)->toBe('warning')
+            ->and($result->summary)->toContain('read by every account')
+            ->and($result->details)->toContain('File: '.$file)->toContain('Mode: 0644. The file holds the WordPress password hashes.')
+            ->and($result->fix)->toContain('chmod 640')->toContain($file);
+    });
+
+    it('is satisfied by a file readable by its owner and group only', function (): void {
+        ($this->installPlugin)();
+        touch($this->project.'/public/content/db.php');
+        $file = $this->project.'/database/database.sqlite';
+        touch($file);
+        chmod($file, 0640);
+        clearstatcache();
+
+        expect((new SqliteIntegrationCheck)->run(RunContext::Console)->status->value)->toBe('ok');
+    });
+
+    it('does not warn when the database file does not exist yet', function (): void {
+        ($this->installPlugin)();
+        touch($this->project.'/public/content/db.php');
+
+        expect((new SqliteIntegrationCheck)->run(RunContext::Console)->status->value)->toBe('ok');
+    });
+
     it('is named, and runs in the console and in HTTP', function (): void {
         $check = new SqliteIntegrationCheck;
 
