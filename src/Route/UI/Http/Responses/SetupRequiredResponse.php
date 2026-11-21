@@ -7,12 +7,15 @@ namespace Pollora\Route\UI\Http\Responses;
 use Illuminate\Foundation\Exceptions\RegisterErrorViewPaths;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\View;
+use Pollora\WordPress\DatabaseSettings;
+use Pollora\WordPress\SqliteIntegration;
 
 /**
  * What the WordPress fallback route answers while WordPress is not loaded.
  *
  * Pollora loads WordPress only once Laravel's database connection points to
- * MySQL with its settings filled in. Until then there is no template
+ * MySQL with its settings filled in, or to an existing SQLite file (opt-in,
+ * for development: `pollora:install --db=sqlite`). Until then there is no template
  * hierarchy to ask, so the fallback route answers 503: with `app.debug`, a
  * page naming the missing settings and the commands to run; without it,
  * the application's or Laravel's own 503 page.
@@ -65,7 +68,8 @@ class SetupRequiredResponse
      *
      * Read from the configuration, without connecting. While the default
      * connection is not MySQL, the settings are those of the `mysql`
-     * connection, which `DB_CONNECTION=mysql` would use.
+     * connection, which `DB_CONNECTION=mysql` would use. A SQLite connection
+     * with its file in place misses nothing.
      *
      * @return list<string>
      */
@@ -75,6 +79,14 @@ class SetupRequiredResponse
         $connection = (array) config("database.connections.{$default}", []);
 
         $missing = [];
+
+        // SQLite with its file and its plugin is the opt-in of
+        // `pollora:install --db=sqlite`: nothing is missing, and the doctor
+        // says why WordPress did not load. Otherwise SQLite is only what
+        // Laravel falls back to when DB_CONNECTION is unset.
+        if (self::sqliteIsSetUp($connection)) {
+            return [];
+        }
 
         if (($connection['driver'] ?? null) !== 'mysql') {
             $missing[] = 'DB_CONNECTION=mysql';
@@ -91,15 +103,41 @@ class SetupRequiredResponse
     }
 
     /**
+     * Whether the connection is SQLite with its file and the plugin WordPress needs on it.
+     *
+     * @param  array<mixed>  $connection
+     */
+    private static function sqliteIsSetUp(array $connection): bool
+    {
+        return DatabaseSettings::isSqlite($connection)
+            && is_file((string) DatabaseSettings::sqlitePath($connection))
+            && SqliteIntegration::isInstalled();
+    }
+
+    /**
      * @param  list<string>  $missing
      */
     private static function page(array $missing): string
     {
+        $connection = (array) config('database.connections.'.config('database.default'), []);
+        $sqlite = DatabaseSettings::isSqlite($connection);
+        $sqliteFile = $sqlite && is_file((string) DatabaseSettings::sqlitePath($connection));
+
+        // Only a SQLite opt-in leaves nothing missing, with its file and its plugin
+        $sqliteNote = match (true) {
+            ! $sqlite => '',
+            $sqliteFile => '<p>A SQLite database file exists. To use it, WordPress needs the SQLite Database Integration plugin: <code>composer require '.SqliteIntegration::PACKAGE.'</code>.</p>',
+            default => '<p>For a throwaway development database instead, run <code>php artisan pollora:install --db=sqlite</code>.</p>',
+        };
+
         $settings = $missing === []
-            ? '<p>The database settings look complete, yet WordPress did not load: <code>php artisan pollora:doctor</code> says why.</p>'
+            ? ($sqlite
+                ? '<p>The SQLite database file and plugin are in place, yet WordPress did not load: <code>php artisan pollora:doctor</code> says why.</p>'
+                : '<p>The database settings look complete, yet WordPress did not load: <code>php artisan pollora:doctor</code> says why.</p>')
             : '<p>Pollora reads Laravel’s database connection. Set these in <code>.env</code>:</p><ul>'
                 .implode('', array_map(fn (string $setting): string => '<li><code>'.e($setting).'</code></li>', $missing))
-                .'</ul>';
+                .'</ul>'
+                .$sqliteNote;
 
         $commands = implode('', array_map(
             fn (string $command, string $description): string => '<li><code>'.e($command).'</code> — '.e($description).'</li>',

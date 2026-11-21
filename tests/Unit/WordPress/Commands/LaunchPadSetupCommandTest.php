@@ -52,7 +52,7 @@ function runSetupCommand(bool $configured, bool $interactive, array $parameters 
     $application->setAutoExit(false);
 
     // Laravel reads the signature from the class's own attributes
-    $command = new #[Signature('pollora:env:setup {--install : Suppress some informational output}')] class($database, $terminal, $promptable) extends LaunchPadSetupCommand
+    $command = new #[Signature('pollora:env:setup {--install : Suppress some informational output} {--db=}')] class($database, $terminal, $promptable) extends LaunchPadSetupCommand
     {
         public function __construct(DatabaseService $database, private readonly bool $terminal, private readonly bool $promptable)
         {

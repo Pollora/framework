@@ -35,3 +35,34 @@ it('writes an empty database password as an empty value', function (): void {
     expect($lines)->toContain('DB_PASSWORD=')
         ->and($lines)->toContain('DB_USERNAME=root');
 });
+
+it('leaves out a variable the file does not define, by default', function (): void {
+    (new EnvironmentFileHandler)->updateEnvFile(['DB_CONNECTION' => 'sqlite', 'DB_USERNAME' => 'admin']);
+
+    $lines = explode("\n", File::get($this->envPath));
+
+    expect($lines)->toContain('DB_USERNAME=admin')
+        ->and(implode("\n", $lines))->not->toContain('DB_CONNECTION');
+});
+
+it('appends a variable the file does not define when asked to', function (): void {
+    (new EnvironmentFileHandler)->updateEnvFile(['DB_CONNECTION' => 'sqlite', 'DB_USERNAME' => 'admin'], append: true);
+
+    expect(File::get($this->envPath))->toBe("APP_NAME=Pollora\nDB_USERNAME=admin\nDB_PASSWORD=old\nDB_CONNECTION=sqlite\n");
+});
+
+it('does not append a variable twice, nor one whose name only prefixes another', function (): void {
+    File::put($this->envPath, "DB_CONNECTION_EXTRA=x\nDB_CONNECTION=mysql");
+
+    (new EnvironmentFileHandler)->updateEnvFile(['DB_CONNECTION' => 'sqlite'], append: true);
+
+    expect(File::get($this->envPath))->toBe("DB_CONNECTION_EXTRA=x\nDB_CONNECTION=sqlite");
+});
+
+it('uncomments a variable that is only commented out, rather than appending it', function (): void {
+    File::put($this->envPath, "# DB_CONNECTION=mysql\nAPP_NAME=x\n");
+
+    (new EnvironmentFileHandler)->updateEnvFile(['DB_CONNECTION' => 'sqlite'], append: true);
+
+    expect(File::get($this->envPath))->toBe("DB_CONNECTION=sqlite\nAPP_NAME=x\n");
+});

@@ -101,10 +101,28 @@ describe('WordPressDatabase', function (): void {
         expect($proxy->hasValidConfiguration())->toBeTrue();
     });
 
-    it('has invalid configuration when driver is not mysql', function (): void {
+    it('has valid configuration with a SQLite file, which needs no host or credentials', function (): void {
+        $this->connection->shouldReceive('getConfig')
+            ->andReturn(['driver' => 'sqlite', 'database' => '/data/site.sqlite']);
+
+        $proxy = new WordPressDatabase;
+
+        expect($proxy->hasValidConfiguration())->toBeTrue();
+    });
+
+    it('has invalid configuration for a SQLite connection without a file', function (): void {
+        $this->connection->shouldReceive('getConfig')
+            ->andReturn(['driver' => 'sqlite', 'database' => ':memory:']);
+
+        $proxy = new WordPressDatabase;
+
+        expect($proxy->hasValidConfiguration())->toBeFalse();
+    });
+
+    it('has invalid configuration when driver is neither mysql nor sqlite', function (): void {
         $this->connection->shouldReceive('getConfig')
             ->andReturn([
-                'driver' => 'sqlite',
+                'driver' => 'pgsql',
                 'host' => 'localhost',
                 'database' => 'wp',
                 'username' => 'root',

@@ -13,6 +13,8 @@ use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 use Pollora\Services\WordPress\Installation\InstallationService;
 use Pollora\Services\WordPress\Installation\WordPressInstallationException;
 use Pollora\WordPress\AppUrl;
+use Pollora\WordPress\SqliteIntegration;
+use Symfony\Component\Process\Process;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
@@ -21,6 +23,7 @@ use function Laravel\Prompts\warning;
 #[Description('Install and configure WordPress')]
 #[Signature('pollora:install
         {--install : Suppress informational output for automated runs}
+        {--db= : Database to set up: mysql (the default, configured by pollora:env:setup) or sqlite (development, CI and demos only)}
         {--title= : Site title}
         {--description= : Site description}
         {--admin-user= : Admin username}
@@ -48,6 +51,13 @@ class LaunchPadInstallCommand extends Command
     public function handle(): int
     {
         $installMode = $this->option('install');
+        $db = $this->option('db');
+
+        if ($db !== null && ! in_array($db, ['mysql', 'sqlite'], true)) {
+            error('--db accepts "mysql" or "sqlite".');
+
+            return self::FAILURE;
+        }
 
         try {
             if ($this->installationService->isInstalled()) {
@@ -56,6 +66,10 @@ class LaunchPadInstallCommand extends Command
                 }
 
                 return self::SUCCESS;
+            }
+
+            if ($db === 'sqlite') {
+                return $this->installOnSqlite();
             }
 
             if (! $this->databaseService->isConfigured()) {
@@ -96,9 +110,77 @@ class LaunchPadInstallCommand extends Command
         }
 
         $this->line('  Set DB_CONNECTION=mysql and the DB_* values in .env, or run: php artisan pollora:env:setup');
+        $this->line('  For a development database without a server: php artisan pollora:install --db=sqlite');
         $this->line('  Then: php artisan pollora:install (php artisan pollora:doctor checks the project)');
 
         return $runByComposer ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * Install on a SQLite file: development, CI and demos, never production.
+     *
+     * Writes the connection to `.env`, then runs the installation in a new
+     * process: Laravel read its configuration, and WordPress its database
+     * drop-in, before this command could change them. The new process gets
+     * the connection in its environment too, since a variable the shell
+     * already holds (Docker, DDEV) wins over `.env`.
+     */
+    private function installOnSqlite(): int
+    {
+        if (! SqliteIntegration::isInstalled()) {
+            error('SQLite needs the SQLite Database Integration plugin, which is not installed.');
+            $this->line('  Run: composer require '.SqliteIntegration::PACKAGE);
+            $this->line("  The project's public/content/db.php must load it when DB_CONNECTION=sqlite (the skeleton does).");
+
+            return self::FAILURE;
+        }
+
+        $database = $this->databaseService->configureSqlite();
+
+        warning('SQLite is for development, CI and demos. Use MySQL or MariaDB in production.');
+
+        $process = new Process(
+            [PHP_BINARY, base_path('artisan'), 'pollora:install', ...$this->forwardedArguments()],
+            base_path(),
+            ['DB_CONNECTION' => 'sqlite', 'DB_DATABASE' => $database],
+            timeout: null,
+        );
+
+        if ($this->input->isInteractive() && Process::isTtySupported()) {
+            $process->setTty(true);
+        }
+
+        return $process->run(function (string $type, string $buffer): void {
+            $this->output->write($buffer);
+        });
+    }
+
+    /**
+     * The options of this run, minus --db, for the process that does the install.
+     *
+     * @return list<string>
+     */
+    private function forwardedArguments(): array
+    {
+        $arguments = [];
+
+        if ($this->option('install')) {
+            $arguments[] = '--install';
+        }
+
+        foreach (['title', 'description', 'admin-user', 'admin-email', 'admin-password', 'locale', 'public', 'theme'] as $option) {
+            $value = $this->option($option);
+
+            if (is_string($value)) {
+                $arguments[] = '--'.$option.'='.$value;
+            }
+        }
+
+        if (! $this->input->isInteractive()) {
+            $arguments[] = '--no-interaction';
+        }
+
+        return $arguments;
     }
 
     /**

@@ -142,6 +142,13 @@ describe('Environment file', function (): void {
             ->toContain('DB_HOST is set, but the connection is sqlite: DB_CONNECTION is missing or not mysql');
     });
 
+    it('accepts MySQL settings left in .env once DB_CONNECTION=sqlite says the connection is a choice', function (): void {
+        config(['database.default' => 'sqlite']);
+        file_put_contents($this->project.'/.env', "DB_CONNECTION=sqlite\nDB_HOST=db\nDB_DATABASE=database/database.sqlite\n");
+
+        expect((new EnvironmentFileCheck)->run(RunContext::Console)->status->value)->toBe('ok');
+    });
+
     it('warns when WP_HOME disagrees with the APP_URL in use', function (): void {
         config(['database.default' => 'mysql']);
         file_put_contents($this->project.'/.env', "APP_URL=https://site.test\nWP_HOME=https://old.test\n");

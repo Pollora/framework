@@ -22,16 +22,21 @@ class EnvironmentFileHandler
      * and comments. Creates new .env file from .env.example if needed.
      *
      * @param  array<string, string>  $replacements  Key-value pairs of environment variables to update
+     * @param  bool  $append  Add the variables the file does not define yet, instead of leaving them out
      *
      * @throws FileNotFoundException When neither .env nor .env.example exists
      */
-    public function updateEnvFile(array $replacements): void
+    public function updateEnvFile(array $replacements, bool $append = false): void
     {
         $envPath = base_path('.env');
 
         $envContent = File::get(base_path(File::exists('.env') ? '.env' : '.env.example'));
 
         $updatedContent = $this->processEnvContent($envContent, $replacements);
+
+        if ($append) {
+            $updatedContent = $this->appendMissing($updatedContent, $replacements);
+        }
 
         File::put($envPath, $updatedContent);
     }
@@ -54,6 +59,26 @@ class EnvironmentFileHandler
         }
 
         return implode("\n", $processed);
+    }
+
+    /**
+     * Add the variables the content does not define, each on its own line at the end.
+     *
+     * A commented `# KEY=value` line does not define the variable.
+     *
+     * @param  array<string, string>  $replacements  Key-value pairs that must exist
+     */
+    private function appendMissing(string $content, array $replacements): string
+    {
+        foreach ($replacements as $key => $value) {
+            if (preg_match('/^\s*'.preg_quote($key, '/').'\s*=/m', $content) === 1) {
+                continue;
+            }
+
+            $content = rtrim($content, "\n").sprintf("\n%s=%s\n", $key, $value);
+        }
+
+        return $content;
     }
 
     /**

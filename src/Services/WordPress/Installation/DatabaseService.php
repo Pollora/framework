@@ -8,6 +8,7 @@ use DB;
 use Pollora\Services\WordPress\Database\DatabaseConnectionService;
 use Pollora\Services\WordPress\Database\EnvironmentFileHandler;
 use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
+use Pollora\WordPress\DatabaseSettings;
 
 use function Laravel\Prompts\info;
 
@@ -19,6 +20,11 @@ use function Laravel\Prompts\info;
  */
 class DatabaseService
 {
+    /**
+     * The SQLite file used when the project does not configure one, relative to the project root.
+     */
+    public const string SQLITE_FILE = 'database/database.sqlite';
+
     /**
      * Create a new database service instance.
      *
@@ -63,6 +69,51 @@ class DatabaseService
         $this->updateConfiguration($config);
 
         info('Environment file has been saved.');
+    }
+
+    /**
+     * Point the project at a SQLite database file, for development, CI or a demo.
+     *
+     * Creates the empty file when it does not exist and writes the connection to
+     * the environment file. The file configured for the `sqlite` connection is
+     * kept when it looks like one (`.sqlite`, `.sqlite3`, `.db`); otherwise
+     * `DB_DATABASE`, which a MySQL setup fills with a database name, would be read as a
+     * path, and the default `database/database.sqlite` is used. WordPress still
+     * needs the SQLite Database Integration plugin: this does not install it.
+     *
+     * @return string The path written to `DB_DATABASE`
+     *
+     * @throws DatabaseConnectionException When the file cannot be created
+     */
+    public function configureSqlite(): string
+    {
+        $configured = config('database.connections.sqlite.database');
+
+        $path = is_string($configured) && preg_match('/\.(sqlite3?|db)$/i', $configured) === 1
+            ? $configured
+            : self::SQLITE_FILE;
+
+        // $path is never empty nor in-memory here, so there is always a file
+        $file = (string) DatabaseSettings::sqlitePath(['database' => $path]);
+
+        if (! is_file($file)) {
+            if (! is_dir(dirname($file)) && ! @mkdir(dirname($file), 0755, true) && ! is_dir(dirname($file))) {
+                throw new DatabaseConnectionException(sprintf('Cannot create the directory of the SQLite database: %s', dirname($file)));
+            }
+
+            if (@file_put_contents($file, '') === false) {
+                throw new DatabaseConnectionException(sprintf('Cannot create the SQLite database file: %s', $file));
+            }
+        }
+
+        $this->envHandler->updateEnvFile([
+            'DB_CONNECTION' => 'sqlite',
+            'DB_DATABASE' => $path,
+        ], append: true);
+
+        info('Environment file has been saved.');
+
+        return $path;
     }
 
     private function updateConfiguration(DatabaseConfig $config): void

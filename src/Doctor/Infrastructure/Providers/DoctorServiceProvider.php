@@ -18,6 +18,7 @@ use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
 use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
+use Pollora\Doctor\Infrastructure\Checks\SqliteIntegrationCheck;
 use Pollora\Doctor\Infrastructure\Checks\SymlinkedDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\TemplatePlaceholdersCheck;
 use Pollora\Doctor\Infrastructure\Checks\WooCommercePackageCheck;
@@ -43,6 +44,7 @@ class DoctorServiceProvider extends ServiceProvider
         WordPressCorePatchCheck::class,
         PatchesLockCheck::class,
         EnvironmentFileCheck::class,
+        SqliteIntegrationCheck::class,
         AppUrlCheck::class,
         DevelopmentCachesCheck::class,
         DiscoveryCacheCheck::class,

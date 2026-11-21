@@ -7,6 +7,7 @@ namespace Pollora\Proxy;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Pollora\Proxy\Exceptions\UnsupportedDatabaseCallException;
+use Pollora\WordPress\DatabaseSettings;
 use wpdb;
 
 /**
@@ -56,7 +57,8 @@ class WordPressDatabase extends wpdb
      * Verify if the current configuration is compatible with WordPress.
      *
      * Checks if all required database configuration parameters are present
-     * and if the driver is MySQL (required by WordPress).
+     * and if the driver is MySQL (required by WordPress) or SQLite. With SQLite the
+     * SQLite Database Integration plugin's drop-in replaces this proxy.
      *
      * @return bool True if configuration is valid for WordPress
      */
@@ -64,7 +66,7 @@ class WordPressDatabase extends wpdb
     {
         $config = $this->eloquentConnection->getConfig();
 
-        return isset($config['host'], $config['username'], $config['password'], $config['database']) && $config['driver'] === 'mysql';
+        return DatabaseSettings::isComplete($config);
     }
 
     /**
