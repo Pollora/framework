@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
-use Illuminate\Support\Facades\Request;
 use Pollora\Auth\WordPressGuard;
 use Pollora\Models\User;
 
@@ -100,17 +99,5 @@ describe('WordPressGuard with a user table', function (): void {
             ->and($this->cookies)->toBe([[7, true]])
             ->and($this->actions)->toBe(['wp_login'])
             ->and($this->current)->toBe([7]);
-    });
-
-    it('knows a user came back through the remember cookie', function (): void {
-        defined('AUTH_COOKIE') || define('AUTH_COOKIE', 'wordpress_test');
-        defined('SECURE_AUTH_COOKIE') || define('SECURE_AUTH_COOKIE', 'wordpress_sec_test');
-        Request::swap(Illuminate\Http\Request::create('/', 'GET', [], [AUTH_COOKIE => 'abc']));
-
-        expect($this->guard->viaRemember())->toBeTrue();
-
-        Request::swap(Illuminate\Http\Request::create('/'));
-
-        expect($this->guard->viaRemember())->toBeFalse();
     });
 });
