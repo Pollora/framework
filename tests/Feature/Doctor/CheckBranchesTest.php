@@ -24,6 +24,7 @@ use Pollora\Doctor\Infrastructure\Checks\DevelopmentCachesCheck;
 use Pollora\Doctor\Infrastructure\Checks\DiscoveryCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\EnvironmentFileCheck;
 use Pollora\Doctor\Infrastructure\Checks\LegacyBlocksDirectoryCheck;
+use Pollora\Doctor\Infrastructure\Checks\MultisiteCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
@@ -463,9 +464,9 @@ describe('DoctorServiceProvider', function (): void {
 
         $tagged = array_map(fn ($check) => $check::class, iterator_to_array($this->app->tagged(DoctorServiceProvider::CHECKS_TAG), false));
 
-        expect($tagged)->toHaveCount(17)
+        expect($tagged)->toHaveCount(18)
             ->and($tagged[0])->toBe(WordPressCorePatchCheck::class)
-            ->and($tagged[16])->toBe(WpRocketPackageCheck::class)
+            ->and($tagged[17])->toBe(MultisiteCheck::class)
             ->and($this->app->make(Doctor::class))->toBe($this->app->make(Doctor::class));
     });
 
