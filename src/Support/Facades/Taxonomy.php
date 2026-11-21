@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Taxonomy\Infrastructure\Factories\TaxonomyFactory;
+use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 
 /**
  * @method static \Pollora\Entity\Taxonomy make(string $slug, string|array $objectType, string $singular = null, string $plural = null)
@@ -38,6 +38,6 @@ class Taxonomy extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return TaxonomyFactory::class;
+        return TaxonomyFactoryInterface::class;
     }
 }
