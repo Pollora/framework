@@ -46,7 +46,7 @@ final class SqliteIntegration
     public static function loaderPath(): string
     {
         $plugins = self::$pluginsDirectory ?? match (true) {
-            defined('WP_PLUGIN_DIR') => (string) constant('WP_PLUGIN_DIR'),
+            defined('WP_PLUGIN_DIR') => constant('WP_PLUGIN_DIR'),
             // WordPress defines WP_PLUGIN_DIR after Pollora's bootstrap asks
             defined('WP_CONTENT_DIR') => constant('WP_CONTENT_DIR').'/plugins',
             default => public_path('content/plugins'),

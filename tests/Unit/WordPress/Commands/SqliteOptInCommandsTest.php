@@ -79,6 +79,11 @@ function runSqliteInstall(array $parameters, string $project, ?DatabaseService $
     $previous = Container::getInstance();
     Container::setInstance($container);
 
+    // Composer sets COMPOSER_DEV_MODE while it runs a script (`composer test:unit` in the CI): the command would then
+    // believe it is run by `composer create-project`, where a missing database is not a failure.
+    $composerMode = getenv('COMPOSER_DEV_MODE');
+    putenv('COMPOSER_DEV_MODE');
+
     $application = new Application($container, new Dispatcher($container), 'testing');
     $application->setAutoExit(false);
 
@@ -96,6 +101,10 @@ function runSqliteInstall(array $parameters, string $project, ?DatabaseService $
         $exit = $application->find('pollora:install')->run($input, $output);
     } finally {
         Container::setInstance($previous);
+
+        if ($composerMode !== false) {
+            putenv('COMPOSER_DEV_MODE='.$composerMode);
+        }
     }
 
     return ['exit' => $exit, 'output' => $output->fetch()];
