@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Two requests switching two modules at once no longer lose a switch (JSON connector).** `JsonStateConnector` wrote the whole `modules_statuses.json` from the states it had read earlier, so the later write erased the earlier one, and a reader could see the file half written (which reads as no state at all). It now takes an exclusive lock, reads the file again under it and replaces the file by a rename, keeping its mode.
+- **A Blade view loader left empty by an interrupted write no longer blanks its view for ever.** `View::makeLoader()` wrote the loader in place, only when it did not exist: an empty file left by a crash was kept, and a concurrent request could include a half-written one. The loader is written to a temporary file then renamed, and an empty one is replaced.
+
 - **In a network, the main site no longer answers with the `/cms` home URL.** WordPress removes the filters that make `WP_HOME` and `WP_SITEURL` win over the database in a network, so `home_url()` and the canonical redirect sent visitors to `/cms/...` (the installer stores that value). Bootstrap no longer defines the two constants when `MULTISITE` is declared, and rewrites the `home` option of the main site only when it is exactly the application URL followed by `/cms`. A single site is unchanged.
 - **In a network, a console command reaches the site and says why when it cannot.** The console now presents `HTTP_HOST` with the port of `APP_URL` (WordPress matches the network on the domain as stored, port included) and a default `REQUEST_URI`. When WordPress still redirects the command (host unknown to the network), the command ends with exit code 1 and a message naming the host and `DOMAIN_CURRENT_SITE`, where it used to exit with code 0 and no output. A single site is unchanged.
 
