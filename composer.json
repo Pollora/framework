@@ -114,7 +114,7 @@
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.6",
-        "laravel/pint": "^v1.32.2",
+        "laravel/pint": "^v1.32.3",
         "pestphp/pest": "^v3.8.2",
         "pestphp/pest-plugin-type-coverage": "^3.6",
         "phpstan/phpstan": "^2.1 <2.3.6",
@@ -126,7 +126,7 @@
         "brain/monkey": "^2.7",
         "mockery/mockery": "^1.6.15",
         "wp-cli/wp-cli": "^2.12",
-        "larastan/larastan": "^3.14",
+        "larastan/larastan": "^3.15",
         "orchestra/testbench": "^11.3.0",
         "pollora/harness": "^0.1.34"
     },
