@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`pollora/theme_templates` is no longer part of the recorded public surface** (`api-surface.json`). It is the key under which the template hierarchy caches the theme's templates (`wp_cache_get()`), not a hook: the harness read it as one. Nothing changes for a project.
 - **The dismissal of the update notice is declared through `Ajax::listen()`.** `pollora_dismiss_update_notice` was hooked by hand on `wp_ajax_*` and checked its nonce and capability itself; it now requires them with `->requireNonce()` and `->requireCapability('manage_options')`, which `pollora/ajax` 1.3 checks before the handler runs (nonce first, then capability). The Semgrep suppression that this hand-written hook needed is gone. What a client can observe: a request refused for a missing nonce or a missing capability now gets a JSON error with a 403 (`pollora_ajax_invalid_nonce`, `pollora_ajax_forbidden`) instead of the plain `-1` or empty 403 of `check_ajax_referer()` and `wp_die()`; the notice's script ignores the answer. `AdminNotice::NONCE_ACTION` and `AdminNotice::CAPABILITY` are public, and `AdminNotice::dismiss()` no longer checks anything itself, so it must not be hooked by hand.
 
+### Fixed
+
+- **`pollora:make:wp-cli --command` and `--subcommands` now do what the help text says** (#591). `--command=sync-stock` writes `#[WpCli('sync-stock')]` (without the option the attribute stays bare and the name still comes from the class name). `--subcommands` generates a class with no `__invoke` and two `#[Command]` methods (`run`, `status`), which `pollora/wp-cli` registers as subcommands. Both options were declared and ignored.
+- **Discovery scans `src/` for a module that has no `app/` directory** (#591). The generators and the autoloader already used `src/` as a fallback, but `LaravelModuleDiscovery` looked at `app/` only, so a command, hook or route generated with `--module` into such a module was never registered. It now picks `app/`, else `src/`, like `ModuleAutoloader`.
+
 ## [v13.43.1](https://github.com/Pollora/framework/compare/v13.43.0...v13.43.1) - 2026-11-19
 
 ### Changed

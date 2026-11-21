@@ -78,3 +78,33 @@ it('does not overwrite an existing class unless forced', function (): void {
     $this->artisan('pollora:make:wp-cli', ['name' => 'SyncStock', '--theme' => 'test-theme', '--description' => 'Second', '--force' => true])->assertSuccessful();
     expect(($this->generated)()['SyncStock.php'])->toContain(' * Second');
 });
+
+it('writes the given --command name into #[WpCli]', function (): void {
+    $this->artisan('pollora:make:wp-cli', ['name' => 'SyncStock', '--theme' => 'test-theme', '--command' => 'sync-stock'])->assertSuccessful();
+
+    expect(($this->generated)()['SyncStock.php'])
+        ->toContain("#[WpCli('sync-stock')]")
+        ->not->toContain('{{');
+});
+
+it('leaves #[WpCli] bare without --command, the name coming from the class', function (): void {
+    $this->artisan('pollora:make:wp-cli', ['name' => 'SyncStock', '--theme' => 'test-theme'])->assertSuccessful();
+
+    expect(($this->generated)()['SyncStock.php'])->toContain("#[WpCli]\nclass SyncStock");
+});
+
+it('generates a class with #[Command] subcommand methods and no __invoke with --subcommands', function (): void {
+    $this->artisan('pollora:make:wp-cli', ['name' => 'SyncStock', '--theme' => 'test-theme', '--subcommands' => true, '--command' => 'stock', '--description' => 'Stock tools'])->assertSuccessful();
+
+    $code = ($this->generated)()['SyncStock.php'];
+
+    expect($code)
+        ->toContain("#[WpCli('stock')]")
+        ->toContain('use Pollora\\Attributes\\WpCli\\Command;')
+        ->toContain("#[Command('run')]")
+        ->toContain("#[Command('status')]")
+        ->toContain(' * Stock tools')
+        ->not->toContain('__invoke')
+        ->not->toContain('{{');
+    expect(fn (): array => token_get_all($code, TOKEN_PARSE))->not->toThrow(ParseError::class);
+});
