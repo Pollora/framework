@@ -14,6 +14,7 @@ use Illuminate\Testing\TestResponse;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Route\Infrastructure\Services\WordPressRoutingService;
+use Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * Measures what an anonymous visitor costs on a `Route::wp()` route declared
@@ -65,7 +66,7 @@ beforeEach(function (): void {
 /** @return list<string> */
 function setCookieNames(TestResponse $response): array
 {
-    return array_map(fn ($cookie): string => $cookie->getName(), $response->baseResponse->headers->getCookies());
+    return array_map(fn (Cookie $cookie): string => $cookie->getName(), $response->baseResponse->headers->getCookies());
 }
 
 describe('anonymous request on a Route::wp() route', function (): void {
