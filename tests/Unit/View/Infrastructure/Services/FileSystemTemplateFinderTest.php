@@ -10,6 +10,19 @@ use Pollora\View\Application\UseCases\ResolveBladeTemplateUseCase;
 use Pollora\View\Infrastructure\Services\FileSystemTemplateFinder;
 use Pollora\View\Infrastructure\Services\WordPressTemplateHierarchyFilter;
 
+/**
+ * The temporary directory with symlinks resolved.
+ *
+ * The finder resolves the theme root with realpath(); on macOS sys_get_temp_dir()
+ * is /var/folders/..., a symlink to /private/var/folders/..., so building the
+ * fixtures from the raw value makes the path prefixes differ from one system
+ * to the other.
+ */
+function realTempDir(): string
+{
+    return realpath(sys_get_temp_dir()) ?: sys_get_temp_dir();
+}
+
 beforeEach(function (): void {
     FileSystemTemplateFinder::clearLocateCache();
 
@@ -19,7 +32,7 @@ beforeEach(function (): void {
 
 describe('FileSystemTemplateFinder::locate()', function (): void {
     it('caches results for the same template name', function (): void {
-        $tempDir = sys_get_temp_dir().'/pollora-test-'.uniqid();
+        $tempDir = realTempDir().'/pollora-test-'.uniqid();
         mkdir($tempDir, 0755, true);
         file_put_contents($tempDir.'/test.blade.php', 'test');
 
@@ -47,7 +60,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
         // Mirrors a real theme: the root holds the stub index.php WordPress
         // needs to consider the theme valid, and is registered ahead of
         // resources/views, where the actual Blade templates live.
-        $themeRoot = sys_get_temp_dir().'/pollora-theme-'.uniqid();
+        $themeRoot = realTempDir().'/pollora-theme-'.uniqid();
         $viewsPath = $themeRoot.'/resources/views';
         mkdir($viewsPath, 0755, true);
         file_put_contents($themeRoot.'/index.php', '<?php // Silence is golden...');
@@ -73,7 +86,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
     });
 
     it('still finds a classic PHP template when the theme has no Blade equivalent', function (): void {
-        $themeRoot = sys_get_temp_dir().'/pollora-theme-'.uniqid();
+        $themeRoot = realTempDir().'/pollora-theme-'.uniqid();
         mkdir($themeRoot, 0755, true);
         file_put_contents($themeRoot.'/single.php', '<?php // classic template');
 
@@ -91,7 +104,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
     });
 
     it('returns different results for different templates', function (): void {
-        $tempDir = sys_get_temp_dir().'/pollora-test-'.uniqid();
+        $tempDir = realTempDir().'/pollora-test-'.uniqid();
         mkdir($tempDir, 0755, true);
         file_put_contents($tempDir.'/single.blade.php', 'single');
         file_put_contents($tempDir.'/archive.blade.php', 'archive');
@@ -117,7 +130,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
     });
 
     it('clears cache via clearLocateCache', function (): void {
-        $tempDir = sys_get_temp_dir().'/pollora-test-'.uniqid();
+        $tempDir = realTempDir().'/pollora-test-'.uniqid();
         mkdir($tempDir, 0755, true);
         file_put_contents($tempDir.'/page.blade.php', 'page');
 
@@ -143,7 +156,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
     });
 
     it('handles array input by merging results', function (): void {
-        $tempDir = sys_get_temp_dir().'/pollora-test-'.uniqid();
+        $tempDir = realTempDir().'/pollora-test-'.uniqid();
         mkdir($tempDir, 0755, true);
         file_put_contents($tempDir.'/single.blade.php', 'single');
         file_put_contents($tempDir.'/page.blade.php', 'page');
@@ -174,7 +187,7 @@ describe('FileSystemTemplateFinder::locate()', function (): void {
  */
 describe('page template slugs', function (): void {
     beforeEach(function (): void {
-        $this->themeRoot = sys_get_temp_dir().'/pollora-theme-'.uniqid();
+        $this->themeRoot = realTempDir().'/pollora-theme-'.uniqid();
         $this->viewsPath = $this->themeRoot.'/resources/views';
         mkdir($this->viewsPath.'/landing', 0755, true);
         file_put_contents($this->themeRoot.'/index.php', '<?php // Silence is golden...');
