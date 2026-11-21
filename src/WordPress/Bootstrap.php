@@ -6,6 +6,7 @@ namespace Pollora\WordPress;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Pollora\Application\Application\Services\ConsoleDetectionService;
@@ -39,6 +40,26 @@ class Bootstrap
         $this->maybeForceUrlScheme();
         $this->setConfig();
         $this->ensureAddFilterExists();
+        $this->fixMultisiteHome();
+    }
+
+    /**
+     * Keep the main site of a network from answering with the `/cms` home URL.
+     *
+     * Registered before WordPress loads, so every read of the option is covered.
+     * Does nothing on a single site, where WP_HOME already decides.
+     */
+    private function fixMultisiteHome(): void
+    {
+        if (! Multisite::isConfigured()) {
+            return;
+        }
+
+        $appUrl = AppUrl::normalize((string) config('app.url'));
+
+        add_filter('option_home', static fn (mixed $home): mixed => Multisite::isMainSite($GLOBALS)
+            ? Multisite::mainSiteHome($home, $appUrl)
+            : $home);
     }
 
     /**
@@ -469,8 +490,13 @@ class Bootstrap
         }
 
         $appUrl = AppUrl::normalize((string) config('app.url'));
-        Constant::queue('WP_SITEURL', rtrim($appUrl, '/').'/'.ltrim(str_replace('public/', '', $wpPath), '/'));
-        Constant::queue('WP_HOME', $appUrl);
+
+        // In a network WordPress ignores these two constants for the sites it stores itself.
+        if (! Multisite::isConfigured()) {
+            Constant::queue('WP_SITEURL', rtrim($appUrl, '/').'/'.ltrim(str_replace('public/', '', $wpPath), '/'));
+            Constant::queue('WP_HOME', $appUrl);
+        }
+
         Constant::queue('WP_CONTENT_DIR', $basePath.$contentPath);
         Constant::queue('WP_CONTENT_URL', rtrim($appUrl, '/').'/content');
 
@@ -481,6 +507,40 @@ class Bootstrap
     private function setConsoleServerVariables(): void
     {
         $_SERVER['SERVER_PROTOCOL'] = 'https';
-        $_SERVER['HTTP_HOST'] = AppUrl::host((string) config('app.url')) ?? 'localhost';
+        $appUrl = (string) config('app.url');
+
+        if (! Multisite::isConfigured()) {
+            $_SERVER['HTTP_HOST'] = AppUrl::host($appUrl) ?? 'localhost';
+
+            return;
+        }
+
+        $_SERVER['HTTP_HOST'] = Multisite::consoleHost($appUrl);
+        $_SERVER['REQUEST_URI'] ??= Multisite::consoleRequestUri($appUrl);
+
+        $this->explainSilentConsoleRedirect(Request::server('HTTP_HOST'));
+    }
+
+    /**
+     * Say why a console command stopped when WordPress redirected it.
+     *
+     * A network that does not recognise the host sends a `Location` header and
+     * exits before any command runs: the console shows nothing and exits 0.
+     * The shutdown function reads the redirect status that remains and turns
+     * the silence into a message and a failing exit code.
+     */
+    private function explainSilentConsoleRedirect(string $host): void
+    {
+        register_shutdown_function(static function () use ($host): void {
+            if (! Multisite::isRedirectStatus(http_response_code())) {
+                return;
+            }
+
+            $domain = defined('DOMAIN_CURRENT_SITE') ? (string) constant('DOMAIN_CURRENT_SITE') : null;
+
+            fwrite(STDERR, Multisite::redirectMessage($host, $domain));
+
+            exit(1);
+        });
     }
 }

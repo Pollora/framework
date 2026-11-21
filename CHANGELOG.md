@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.1...develop)
 
+### Added
+
+- **`pollora:doctor` and Site Health report a WordPress network**: a "Multisite" check warns that Pollora supports a network in a limited way and lists the limits that were measured (the administration of a sub-site in a sub-directory network, Laravel queries that always read the main site's tables, the discovery cache keyed by path) and what was not verified. It is skipped on a single site. Documented in "Multisite: what works, what does not".
+
+### Fixed
+
+- **In a network, the main site no longer answers with the `/cms` home URL.** WordPress removes the filters that make `WP_HOME` and `WP_SITEURL` win over the database in a network, so `home_url()` and the canonical redirect sent visitors to `/cms/...` (the installer stores that value). Bootstrap no longer defines the two constants when `MULTISITE` is declared, and rewrites the `home` option of the main site only when it is exactly the application URL followed by `/cms`. A single site is unchanged.
+- **In a network, a console command reaches the site and says why when it cannot.** The console now presents `HTTP_HOST` with the port of `APP_URL` (WordPress matches the network on the domain as stored, port included) and a default `REQUEST_URI`. When WordPress still redirects the command (host unknown to the network), the command ends with exit code 1 and a message naming the host and `DOMAIN_CURRENT_SITE`, where it used to exit with code 0 and no output. A single site is unchanged.
+
 ### Changed
 
 - **The quality workflow runs the harness at v0.1.33, which makes six rules blocking**: SEC-02, SEC-06 and SEC-07 (Semgrep patterns), CONV-04 and CONV-06 (the names of hooks and commands) and QA-03. They were measured clean on this repository before the move.
