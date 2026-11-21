@@ -16,6 +16,7 @@ use Pollora\Doctor\Application\Services\Doctor;
 use Pollora\Doctor\Domain\Contracts\CheckInterface;
 use Pollora\Doctor\Domain\Enums\RunContext;
 use Pollora\Doctor\Domain\Models\CheckResult;
+use Pollora\Doctor\Infrastructure\Checks\ApiSecurityPluginsCheck;
 use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\AssetBuildCheck;
 use Pollora\Doctor\Infrastructure\Checks\BlockRegistrationCheck;
@@ -103,6 +104,7 @@ describe('Check identity', function (): void {
         $both = [RunContext::Console, RunContext::Http];
 
         return [
+            [ApiSecurityPluginsCheck::class, 'api-security-plugins', 'Security plugins on /api/ routes', $both],
             [AppUrlCheck::class, 'app-url', 'Application URL', $both],
             [AssetBuildCheck::class, 'asset-builds', 'Theme, plugin and module builds', $both],
             [BlockRegistrationCheck::class, 'block-registration', 'Blocks registered', [RunContext::Http]],
@@ -465,11 +467,12 @@ describe('DoctorServiceProvider', function (): void {
 
         $tagged = array_map(fn ($check) => $check::class, iterator_to_array($this->app->tagged(DoctorServiceProvider::CHECKS_TAG), false));
 
-        expect($tagged)->toHaveCount(19)
+        expect($tagged)->toHaveCount(20)
             ->and($tagged[0])->toBe(WordPressCorePatchCheck::class)
             ->and($tagged[3])->toBe(SqliteIntegrationCheck::class)
             ->and($tagged[17])->toBe(WpRocketPackageCheck::class)
             ->and($tagged[18])->toBe(MultisiteCheck::class)
+            ->and($tagged[19])->toBe(ApiSecurityPluginsCheck::class)
             ->and($this->app->make(Doctor::class))->toBe($this->app->make(Doctor::class));
     });
 

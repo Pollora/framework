@@ -6,6 +6,7 @@ namespace Pollora\Doctor\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Doctor\Application\Services\Doctor;
+use Pollora\Doctor\Infrastructure\Checks\ApiSecurityPluginsCheck;
 use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\AssetBuildCheck;
 use Pollora\Doctor\Infrastructure\Checks\BlockRegistrationCheck;
@@ -61,6 +62,7 @@ class DoctorServiceProvider extends ServiceProvider
         WooCommercePackageCheck::class,
         WpRocketPackageCheck::class,
         MultisiteCheck::class,
+        ApiSecurityPluginsCheck::class,
     ];
 
     public function register(): void
