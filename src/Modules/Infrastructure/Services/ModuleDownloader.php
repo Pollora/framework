@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Modules\Domain\Exceptions\ModuleException;
+use RuntimeException;
+use Throwable;
 use ZipArchive;
 
 /**
@@ -77,13 +79,47 @@ class ModuleDownloader
      */
     public function setVersion(string $version): self
     {
-        if (preg_match('/^[A-Za-z0-9][A-Za-z0-9._+-]*$/D', $version) !== 1 || str_contains($version, '..')) {
+        if (! $this->isPlainTagName($version)) {
             throw new InvalidArgumentException(sprintf('Invalid version tag "%s": expected a tag name such as v1.2.0 or 1.2.0-beta.1.', $version));
         }
 
         $this->version = $version;
 
         return $this;
+    }
+
+    /**
+     * Largest archive, in bytes, the downloader accepts.
+     *
+     * A module archive is source code: 100 MiB is far above any real theme or plugin
+     * and still bounds what a hostile or broken repository can make us write to disk.
+     * Override it in a subclass to change the ceiling.
+     */
+    protected function maxArchiveBytes(): int
+    {
+        return 100 * 1024 * 1024;
+    }
+
+    /**
+     * Whether a transfer in progress is over the ceiling, by its announced or its received size.
+     */
+    protected function exceedsCeiling(int $announced, int $received): bool
+    {
+        $max = $this->maxArchiveBytes();
+
+        return $announced > $max || $received > $max;
+    }
+
+    /**
+     * Whether a name can be put in a github.com URL path and a file name as a tag.
+     *
+     * The one rule shared by the version asked for ({@see setVersion()}) and the
+     * tags GitHub answers with: starts with a letter or a digit, then letters, digits,
+     * dots, underscores, hyphens and plus signs, and no "..".
+     */
+    private function isPlainTagName(string $tag): bool
+    {
+        return preg_match('/^[A-Za-z0-9][A-Za-z0-9._+-]*$/D', $tag) === 1 && ! str_contains($tag, '..');
     }
 
     /**
@@ -201,7 +237,13 @@ class ModuleDownloader
             return null;
         }
 
-        return $this->selectLatestVersion(array_column((array) $response->json(), 'name'));
+        // The names come from the API, not from the caller: keep only those setVersion() would accept
+        $names = array_filter(
+            array_column((array) $response->json(), 'name'),
+            fn ($name): bool => is_string($name) && $this->isPlainTagName($name)
+        );
+
+        return $this->selectLatestVersion(array_values($names));
     }
 
     /**
@@ -275,7 +317,14 @@ class ModuleDownloader
             return 'main';
         }
 
-        return $response->json()['default_branch'] ?? 'main';
+        $branch = $response->json()['default_branch'] ?? 'main';
+
+        // A branch name may hold slashes, but it must stay inside the URL path
+        $safe = is_string($branch)
+            && preg_match('/^[A-Za-z0-9][A-Za-z0-9._+\/-]*$/D', $branch) === 1
+            && ! str_contains($branch, '..');
+
+        return $safe ? $branch : 'main';
     }
 
     /**
@@ -309,17 +358,53 @@ class ModuleDownloader
     }
 
     /**
-     * Download file from URL.
+     * Download file from URL, straight to disk and within the size ceiling.
+     *
+     * The archive is streamed to `$tempPath` (a `sink`), never held in memory. The
+     * ceiling is enforced three ways: on the `Content-Length` header before the body
+     * is read, while the body is read (the header can be absent or false), and on the
+     * size of the file once written. An archive over the ceiling is deleted.
+     *
+     * @throws ModuleException When the download fails or the archive is too large
      */
     protected function downloadFile(string $url, string $tempPath): void
     {
-        $response = Http::withOptions(['stream' => true])->get($url);
+        $max = $this->maxArchiveBytes();
+        $tooLarge = false;
+
+        try {
+            $response = Http::withOptions([
+                'sink' => $tempPath,
+                'progress' => function (int $downloadTotal, int $downloaded) use (&$tooLarge): void {
+                    if ($this->exceedsCeiling($downloadTotal, $downloaded)) {
+                        $tooLarge = true;
+
+                        throw new RuntimeException('The archive is larger than the ceiling.');
+                    }
+                },
+            ])->get($url);
+        } catch (Throwable) {
+            $this->cleanupTempFile($tempPath);
+
+            throw $tooLarge ? ModuleException::archiveTooLarge($url, $max) : ModuleException::archiveNotDownloaded($url);
+        }
 
         if (! $response->successful()) {
+            $this->cleanupTempFile($tempPath);
+
             throw ModuleException::archiveNotDownloaded($url);
         }
 
-        file_put_contents($tempPath, $response->body());
+        // The fake client and some proxies skip the callbacks above: the written file has the last word
+        $length = $response->header('Content-Length');
+        $oversized = ($length !== '' && ctype_digit($length) && (int) $length > $max)
+            || (is_file($tempPath) && filesize($tempPath) > $max);
+
+        if ($oversized) {
+            $this->cleanupTempFile($tempPath);
+
+            throw ModuleException::archiveTooLarge($url, $max);
+        }
     }
 
     /**
