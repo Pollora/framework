@@ -29,6 +29,7 @@ use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
 use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
+use Pollora\Doctor\Infrastructure\Checks\SqliteIntegrationCheck;
 use Pollora\Doctor\Infrastructure\Checks\SymlinkedDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\TemplatePlaceholdersCheck;
 use Pollora\Doctor\Infrastructure\Checks\WooCommercePackageCheck;
@@ -464,9 +465,11 @@ describe('DoctorServiceProvider', function (): void {
 
         $tagged = array_map(fn ($check) => $check::class, iterator_to_array($this->app->tagged(DoctorServiceProvider::CHECKS_TAG), false));
 
-        expect($tagged)->toHaveCount(18)
+        expect($tagged)->toHaveCount(19)
             ->and($tagged[0])->toBe(WordPressCorePatchCheck::class)
-            ->and($tagged[17])->toBe(MultisiteCheck::class)
+            ->and($tagged[3])->toBe(SqliteIntegrationCheck::class)
+            ->and($tagged[17])->toBe(WpRocketPackageCheck::class)
+            ->and($tagged[18])->toBe(MultisiteCheck::class)
             ->and($this->app->make(Doctor::class))->toBe($this->app->make(Doctor::class));
     });
 
