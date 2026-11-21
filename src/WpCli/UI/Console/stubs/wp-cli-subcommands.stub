@@ -1,0 +1,44 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Pollora\Attributes\WpCli;
+use Pollora\Attributes\WpCli\Command;
+use WP_CLI;
+
+/**
+ * {{ description }}
+ */
+{{ attribute }}
+class {{ class }}
+{
+    /**
+     * Run the main task.
+     *
+     * @param array $arguments Positional arguments passed to the subcommand
+     * @param array $options Named options passed to the subcommand
+     * @return void
+     */
+    #[Command('run')]
+    public function run(array $arguments, array $options): void
+    {
+        // Add your subcommand logic here
+        WP_CLI::success('{{ class }} run executed successfully!');
+    }
+
+    /**
+     * Show the current status.
+     *
+     * @param array $arguments Positional arguments passed to the subcommand
+     * @param array $options Named options passed to the subcommand
+     * @return void
+     */
+    #[Command('status')]
+    public function status(array $arguments, array $options): void
+    {
+        // Add your subcommand logic here
+        WP_CLI::log('{{ class }} status.');
+    }
+}

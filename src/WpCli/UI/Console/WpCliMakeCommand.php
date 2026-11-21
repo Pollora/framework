@@ -42,7 +42,9 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
      */
     protected function getStub(): string
     {
-        return file_get_contents(__DIR__.'/stubs/wp-cli-simple.stub');
+        $stub = $this->option('subcommands') ? 'wp-cli-subcommands' : 'wp-cli-simple';
+
+        return file_get_contents(__DIR__.'/stubs/'.$stub.'.stub');
     }
 
     /**
@@ -92,14 +94,27 @@ class WpCliMakeCommand extends AbstractGeneratorCommand
      */
     protected function makeReplacements(string $stub): string
     {
-        $commandName = $this->getDefaultOption('command');
         $description = $this->getDefaultOption('description');
 
         return str_replace(
-            ['{{ commandName }}', '{{ description }}'],
-            [$commandName, $description],
+            ['{{ attribute }}', '{{ description }}'],
+            [$this->wpCliAttribute(), $description],
             $stub
         );
+    }
+
+    /**
+     * The #[WpCli] attribute to write: named when --command is given, bare otherwise.
+     *
+     * Without --command the attribute is left bare so that the name still comes
+     * from the class name at discovery, as it always did. The name was validated
+     * against /^[a-z0-9-]+$/ by handle(), so it needs no escaping in a PHP string.
+     */
+    protected function wpCliAttribute(): string
+    {
+        $name = $this->option('command');
+
+        return is_string($name) && $name !== '' ? sprintf("#[WpCli('%s')]", $name) : '#[WpCli]';
     }
 
     /**

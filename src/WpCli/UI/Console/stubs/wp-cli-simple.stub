@@ -10,7 +10,7 @@ use WP_CLI;
 /**
  * {{ description }}
  */
-#[WpCli]
+{{ attribute }}
 class {{ class }}
 {
     /**
