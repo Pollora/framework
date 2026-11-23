@@ -109,6 +109,7 @@
     },
     "suggest": {
         "nikic/php-parser": "^5.0, needed by the pollora:i18n:extract command to read the attributes of PHP files (console only, never loaded by a web request)",
+        "pollora/object-cache": "A persistent Redis object cache for WordPress (object-cache.php drop-in, Cache::store('wordpress'))",
         "pollora/woocommerce": "WooCommerce's Blade templates, Route::wp() conditions, Coming Soon page and events",
         "pollora/wp-rocket": "Keeps WP Rocket from writing .htaccess and setting WP_CACHE unless the project asks for it"
     },
