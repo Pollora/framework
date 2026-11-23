@@ -6,7 +6,6 @@ use Composer\InstalledVersions;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Http;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
-use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Adapters\LaravelDiscoveryCacheManagerFactory;
@@ -19,6 +18,7 @@ use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
 use Pollora\Doctor\Infrastructure\Checks\WordPressCorePatchCheck;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
+use Tests\Support\FakeDiscoveryEngine;
 
 if (! function_exists('putFile')) {
     function putFile(string $path, string $contents): void
@@ -224,8 +224,10 @@ describe('Discovery cache', function (): void {
     function discoveryCheck(bool $cacheEnabled, array $missing): DiscoveryCacheCheck
     {
         $location = Mockery::mock(DiscoveryLocationInterface::class);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('getLocations')->andReturn(collect([$location]));
+        $engine = new FakeDiscoveryEngine;
+        $engine->locations = [$location];
+
+        $manager = realDiscoveryManager($engine);
         $cache = Mockery::mock(DiscoveryCacheManager::class);
         $cache->shouldReceive('isCacheEnabled')->andReturn($cacheEnabled);
         $cache->shouldReceive('classesMissingFromCache')->with($location)->andReturn($missing);

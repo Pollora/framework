@@ -8,28 +8,16 @@ use Illuminate\Support\Facades\Facade;
 use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 
 /**
- * @method static \Pollora\Entity\Taxonomy make(string $slug, string|array $objectType, string $singular = null, string $plural = null)
- * @method static \Pollora\Entity\Taxonomy showTagcloud()
- * @method static \Pollora\Entity\Taxonomy setShowTagcloud(bool $showTagcloud)
- * @method static \Pollora\Entity\Taxonomy showInQuickEdit()
- * @method static \Pollora\Entity\Taxonomy setShowInQuickEdit(bool $showInQuickEdit)
- * @method static \Pollora\Entity\Taxonomy showAdminColumn()
- * @method static \Pollora\Entity\Taxonomy setShowAdminColumn(bool $showAdminColumn)
- * @method static \Pollora\Entity\Taxonomy setMetaBoxCb(callable|bool|null $metaBoxCb)
- * @method static \Pollora\Entity\Taxonomy setMetaBoxSanitizeCb(?callable $metaBoxSanitizeCb)
- * @method static \Pollora\Entity\Taxonomy setUpdateCountCallback(callable $updateCountCallback)
- * @method static \Pollora\Entity\Taxonomy setDefaultTerm(array|string $defaultTerm)
- * @method static \Pollora\Entity\Taxonomy sort()
- * @method static \Pollora\Entity\Taxonomy setSort(?bool $sort)
- * @method static \Pollora\Entity\Taxonomy setArgs(?array $args)
- * @method static \Pollora\Entity\Taxonomy checkedOntop()
- * @method static \Pollora\Entity\Taxonomy setCheckedOntop(bool $checkedOntop)
- * @method static \Pollora\Entity\Taxonomy exclusive()
- * @method static \Pollora\Entity\Taxonomy setExclusive(bool $exclusive)
- * @method static \Pollora\Entity\Taxonomy allowHierarchy()
- * @method static \Pollora\Entity\Taxonomy setAllowHierarchy(bool $allowHierarchy)
+ * Facade of the taxonomy factory.
  *
- * @see \Pollora\Entity\Taxonomy
+ * The facade exposes the factory's `make()` only. The fluent methods
+ * (`showTagcloud()`, `setExclusive()`...) belong to the taxonomy object that `make()` returns,
+ * not to the facade: `Taxonomy::make('genre', 'book')->showAdminColumn()`.
+ *
+ * @method static \Pollora\Entity\Domain\Model\Taxonomy make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5)
+ *
+ * @see TaxonomyFactoryInterface
+ * @see \Pollora\Entity\Domain\Model\Taxonomy
  */
 class Taxonomy extends Facade
 {

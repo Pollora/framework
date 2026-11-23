@@ -16,6 +16,7 @@ use Pollora\Doctor\Infrastructure\Checks\DiscoveryCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\EnvironmentFileCheck;
 use Pollora\Doctor\Infrastructure\Checks\LegacyBlocksDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\MultisiteCheck;
+use Pollora\Doctor\Infrastructure\Checks\ObjectCachePackageCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
@@ -61,6 +62,7 @@ class DoctorServiceProvider extends ServiceProvider
         PublicRootCheck::class,
         WooCommercePackageCheck::class,
         WpRocketPackageCheck::class,
+        ObjectCachePackageCheck::class,
         MultisiteCheck::class,
         ApiSecurityPluginsCheck::class,
     ];

@@ -26,6 +26,7 @@ use Pollora\Doctor\Infrastructure\Checks\DiscoveryCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\EnvironmentFileCheck;
 use Pollora\Doctor\Infrastructure\Checks\LegacyBlocksDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\MultisiteCheck;
+use Pollora\Doctor\Infrastructure\Checks\ObjectCachePackageCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
@@ -43,6 +44,7 @@ use Pollora\Hook\Domain\Contract\Filter;
 use Pollora\Theme\Application\Services\ThemeAvailability;
 use Pollora\Theme\Domain\Contracts\ThemeModuleInterface;
 use Pollora\Theme\Domain\Contracts\ThemeRegistrarInterface;
+use Tests\Support\FakeDiscoveryEngine;
 
 // Declared only for these tests when WordPress is absent: the registry the block check reads.
 if (! class_exists('WP_Block_Type_Registry')) {
@@ -192,8 +194,10 @@ describe('Discovery cache (details)', function (): void {
     function covDiscoveryCheck(bool $enabled, array $missing): DiscoveryCacheCheck
     {
         $location = Mockery::mock(DiscoveryLocationInterface::class);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('getLocations')->andReturn(collect([$location]));
+        $engine = new FakeDiscoveryEngine;
+        $engine->locations = [$location];
+
+        $manager = realDiscoveryManager($engine);
         $cache = Mockery::mock(DiscoveryCacheManager::class);
         $cache->shouldReceive('isCacheEnabled')->andReturn($enabled);
         $cache->shouldReceive('classesMissingFromCache')->with($location)->andReturn($missing);
@@ -459,7 +463,7 @@ describe('Asset builds (dev server probe)', function (): void {
 
 describe('DoctorServiceProvider', function (): void {
     it('tags the checks in reading order and builds the doctor from them', function (): void {
-        $this->app->instance(DiscoveryManager::class, Mockery::mock(DiscoveryManager::class));
+        $this->app->instance(DiscoveryManager::class, realDiscoveryManager());
         $this->app->instance(DiscoveryCacheManager::class, Mockery::mock(DiscoveryCacheManager::class));
 
         $provider = new DoctorServiceProvider($this->app);
@@ -467,12 +471,13 @@ describe('DoctorServiceProvider', function (): void {
 
         $tagged = array_map(fn ($check) => $check::class, iterator_to_array($this->app->tagged(DoctorServiceProvider::CHECKS_TAG), false));
 
-        expect($tagged)->toHaveCount(20)
+        expect($tagged)->toHaveCount(21)
             ->and($tagged[0])->toBe(WordPressCorePatchCheck::class)
             ->and($tagged[3])->toBe(SqliteIntegrationCheck::class)
             ->and($tagged[17])->toBe(WpRocketPackageCheck::class)
-            ->and($tagged[18])->toBe(MultisiteCheck::class)
-            ->and($tagged[19])->toBe(ApiSecurityPluginsCheck::class)
+            ->and($tagged[18])->toBe(ObjectCachePackageCheck::class)
+            ->and($tagged[19])->toBe(MultisiteCheck::class)
+            ->and($tagged[20])->toBe(ApiSecurityPluginsCheck::class)
             ->and($this->app->make(Doctor::class))->toBe($this->app->make(Doctor::class));
     });
 

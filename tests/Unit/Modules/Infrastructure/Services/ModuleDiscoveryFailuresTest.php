@@ -10,6 +10,7 @@ use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Modules\Infrastructure\Services\FrameworkModuleDiscovery;
 use Pollora\Modules\Infrastructure\Services\LaravelModuleDiscovery;
 use Psr\Log\LoggerInterface;
+use Tests\Support\FakeDiscoveryEngine;
 
 /**
  * A module whose own accessors fail: nothing in discovery may let that escape.
@@ -71,9 +72,8 @@ describe('LaravelModuleDiscovery failures', function (): void {
     it('logs the module and returns nothing when the discovery manager fails on it', function (): void {
         $dir = sys_get_temp_dir().'/pollora_discovery_fail_'.bin2hex(random_bytes(4));
         mkdir($dir.'/app', 0777, true);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->andThrow(new RuntimeException('manager failed'));
-        $this->container->instance(DiscoveryManager::class, $manager);
+        $engine = (new FakeDiscoveryEngine)->failOn('discover', new RuntimeException('manager failed'));
+        $this->container->instance(DiscoveryManager::class, realDiscoveryManager($engine));
         $this->container->instance(LoggerInterface::class, discoveryFailureLogger('Discovery error for module Blog'));
 
         $module = Mockery::mock(Module::class);
@@ -107,7 +107,7 @@ describe('FrameworkModuleDiscovery failures', function (): void {
     });
 
     it('finds no module when the app directory does not exist', function (): void {
-        $this->app->instance(DiscoveryManager::class, Mockery::mock(DiscoveryManager::class));
+        $this->app->instance(DiscoveryManager::class, realDiscoveryManager());
 
         expect((new FrameworkModuleDiscovery($this->app))->discoverAndReturnFrameworkModules())->toBe([]);
     });

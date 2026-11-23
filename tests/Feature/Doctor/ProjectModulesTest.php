@@ -6,7 +6,6 @@ use Brain\Monkey\Functions;
 use Illuminate\Filesystem\Filesystem;
 use Nwidart\Modules\Module;
 use Pollora\Asset\Application\Services\AssetManager;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Doctor\Infrastructure\Support\ActiveTheme;
 use Pollora\Doctor\Infrastructure\Support\ProjectModule;
 use Pollora\Doctor\Infrastructure\Support\ProjectModules;
@@ -237,12 +236,12 @@ describe('ProjectModules', function (): void {
         $registrar->shouldReceive('getRegisteredPlugins')->andReturn([$plugin]);
         $this->app->instance(PluginRegistrar::class, $registrar);
 
-        $container = Mockery::mock(AssetContainer::class);
-        $container->shouldReceive('getHotFile')->andReturn('/custom/hot');
-        $container->shouldReceive('getBuildDirectory')->andReturn('custom/build');
-        $container->shouldReceive('getManifestPath')->andReturn('custom/manifest.json');
-        $manager = Mockery::mock(AssetManager::class);
-        $manager->shouldReceive('getContainer')->with('plugin.acme-forms')->andReturn($container);
+        $manager = realAssetManager();
+        $manager->addContainer('plugin.acme-forms', [
+            'hot_file' => '/custom/hot',
+            'build_directory' => 'custom/build',
+            'manifest_path' => 'custom/manifest.json',
+        ]);
         $this->app->instance(AssetManager::class, $manager);
 
         $plugin = (new ProjectModules($this->app))->plugins()[0];
