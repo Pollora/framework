@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Brain\Monkey\Functions;
-use Pollora\Asset\Infrastructure\Services\AssetFile;
+use Pollora\Asset\Application\Services\AssetFile;
 use Pollora\Theme\Domain\Contracts\ContentUrlResolverInterface;
 use Pollora\Theme\Domain\Contracts\ThemeAssetUrlResolverInterface;
 use Pollora\Theme\Domain\Contracts\ThemeFeatureRegistrarInterface;

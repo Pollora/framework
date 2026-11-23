@@ -7,7 +7,7 @@ namespace Pollora\Asset\Infrastructure\Laravel;
 use Illuminate\Contracts\Container\Container;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Contracts\ViteManagerFactory;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
+use Pollora\Asset\Domain\Models\AssetContainer;
 use Psr\Log\LoggerInterface;
 
 /**
