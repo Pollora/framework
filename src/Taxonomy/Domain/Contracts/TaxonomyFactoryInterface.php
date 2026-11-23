@@ -17,7 +17,7 @@ interface TaxonomyFactoryInterface
      * @param  string|null  $singular  The singular label for the taxonomy
      * @param  string|null  $plural  The plural label for the taxonomy
      * @param  array<string, mixed>  $args  Additional arguments
-     * @param  int  $priority  Registration priority
+     * @param  int  $priority  Registration priority (5 by default, as the implementation and the documentation say)
      */
-    public function make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 10): mixed;
+    public function make(string $slug, string|array $objectType, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): mixed;
 }

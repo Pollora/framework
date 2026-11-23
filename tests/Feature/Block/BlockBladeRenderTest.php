@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Blade;
-use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Block\Infrastructure\Services\BlockPreview;
 use Pollora\Block\Infrastructure\Services\BlockRegistrar;
@@ -30,7 +29,7 @@ function bladeBlockRenderCallback(string $blockDir): ?Closure
         return true;
     });
 
-    $registrar = new class(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing()) extends BlockRegistrar
+    $registrar = new class(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing()) extends BlockRegistrar
     {
         protected function getBlocksViteManager(string $parentContainerName): ?ViteManagerInterface
         {
