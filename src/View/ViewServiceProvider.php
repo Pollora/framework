@@ -58,8 +58,17 @@ class ViewServiceProvider extends ViewServiceProviderBase
             $content = sprintf("<?= \\view('%s', \$data ?? get_defined_vars())->render(); ?>", addslashes($view))
                 ."\n<?php /**PATH {$path} ENDPATH**/ ?>";
 
-            if (! file_exists($loader = sprintf('%s/%s-loader.php', $compiled_path, $id))) {
-                file_put_contents($loader, $content);
+            // Written to a temporary file then renamed: a concurrent request including the loader
+            // never reads half of it, and an empty file left by an interrupted write is replaced
+            // (it is a blank page for the view, for ever, otherwise).
+            $loader = sprintf('%s/%s-loader.php', $compiled_path, $id);
+
+            if (! is_file($loader) || filesize($loader) === 0) {
+                $temporary = $loader.'.'.bin2hex(random_bytes(6)).'.tmp';
+
+                if (file_put_contents($temporary, $content) !== false && ! @rename($temporary, $loader)) {
+                    @unlink($temporary);
+                }
             }
 
             return $loader;

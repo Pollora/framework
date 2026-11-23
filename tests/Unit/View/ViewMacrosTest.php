@@ -57,6 +57,16 @@ describe('View::makeLoader() macro', function (): void {
             ->and(file_get_contents($loader))->toBe("<?= \\view('pages.it\\'s', \$data ?? get_defined_vars())->render(); ?>\n<?php /**PATH {$path} ENDPATH**/ ?>");
     });
 
+    it('replaces an empty loader left by an interrupted write, and leaves no temporary file', function (): void {
+        $path = '/v/page.blade.php';
+        $loader = $this->dir.'/'.md5($path).'-loader.php';
+        file_put_contents($loader, '');
+
+        expect(macroView('page', $path)->makeLoader())->toBe($loader)
+            ->and(file_get_contents($loader))->toContain("\\view('page'")
+            ->and(glob($this->dir.'/*.tmp'))->toBe([]);
+    });
+
     it('does not rewrite a loader that already exists', function (): void {
         $path = '/v/page.blade.php';
         $loader = $this->dir.'/'.md5($path).'-loader.php';

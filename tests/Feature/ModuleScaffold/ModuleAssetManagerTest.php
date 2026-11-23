@@ -45,29 +45,38 @@ afterEach(function (): void {
 
 describe('ModuleAssetManager asset containers', function (): void {
     it('registers a theme under the container "theme" with its build paths', function (): void {
-        $manager = Mockery::mock(AssetManager::class);
-        $manager->shouldReceive('addContainer')->once()->with('theme', [
-            'hot_file' => public_path('nectar.hot'),
-            'build_directory' => 'build/theme/nectar',
-            'manifest_path' => 'manifest.json',
-            'base_path' => 'resources/assets/',
-            'module_path' => $this->module,
-            'module_type' => 'theme',
-        ]);
+        $manager = realAssetManager();
         $this->app->instance(AssetManager::class, $manager);
         $assets = new ModuleAssetManager($this->app);
 
         $assets->setupModuleAssets('nectar', $this->module, 'theme');
 
-        expect($assets->getModuleRoots())->toBe(['theme' => $this->module]);
+        // What the real container received is read back through its getters. The
+        // module path and type are not kept by a container (the asset manager is
+        // final: there is no mock to capture the configuration), so those two
+        // keys are checked on the method that builds the configuration, not on
+        // what was passed to addContainer().
+        $configuration = (new ReflectionMethod($assets, 'getAssetConfiguration'))->invoke($assets, 'nectar', $this->module, 'theme');
+        $container = $manager->getContainer('theme');
+
+        expect(array_keys($manager->containers()))->toBe(['theme'])
+            ->and($configuration)->toBe([
+                'hot_file' => public_path('nectar.hot'),
+                'build_directory' => 'build/theme/nectar',
+                'manifest_path' => 'manifest.json',
+                'base_path' => 'resources/assets/',
+                'module_path' => $this->module,
+                'module_type' => 'theme',
+            ])
+            ->and($container->getHotFile())->toBe(public_path('nectar.hot'))
+            ->and($container->getBuildDirectory())->toBe('build/theme/nectar')
+            ->and($container->getManifestPath())->toBe('manifest.json')
+            ->and($container->getBasePath())->toBe('resources/assets/')
+            ->and($assets->getModuleRoots())->toBe(['theme' => $this->module]);
     });
 
     it('names plugin and other containers after their slug, or the module name', function (): void {
-        $names = [];
-        $manager = Mockery::mock(AssetManager::class);
-        $manager->shouldReceive('addContainer')->andReturnUsing(function (string $name) use (&$names): void {
-            $names[] = $name;
-        });
+        $manager = realAssetManager();
         $this->app->instance(AssetManager::class, $manager);
         $assets = new ModuleAssetManager($this->app);
 
@@ -75,6 +84,8 @@ describe('ModuleAssetManager asset containers', function (): void {
         $assets->setupModuleAssetContainer('Seo', $this->module, 'plugin');
 
         $returned = $assets->setupModuleAssetContainer('Shop', $this->module, 'module', 'shop');
+
+        $names = array_keys($manager->containers());
 
         expect($names)->toBe(['plugin.crm-slug', 'plugin.Seo', 'module.shop'])
             ->and($returned)->toBe('module.shop')
@@ -90,9 +101,7 @@ describe('ModuleAssetManager asset containers', function (): void {
 
     it('logs an asset failure instead of breaking the boot', function (): void {
         $logged = loggedErrors($this->app);
-        $manager = Mockery::mock(AssetManager::class);
-        $manager->shouldReceive('addContainer')->andThrow(new RuntimeException('bad container'));
-        $this->app->instance(AssetManager::class, $manager);
+        $this->app->bind(AssetManager::class, fn (): never => throw new RuntimeException('bad container'));
 
         (new ModuleAssetManager($this->app))->setupModuleAssets('Crm', $this->module, 'plugin');
 

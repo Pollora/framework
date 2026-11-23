@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool exists(string $hook, ?callable $callback = null, ?int $priority = null) Check if an action exists
  * @method static self|false remove(string $hook, callable|string|array|null $callback = null, int $priority = 10) Remove an action hook
  * @method static array|null callbacks(string $hook) Get registered callbacks for a hook
+ * @method static \Pollora\Hook\Async\PendingAsync async(string|array $except = []) Make the hooks of the last add() call asynchronous
  *
  * @see \Pollora\Hook\Domain\Contract\Action
  */

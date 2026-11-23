@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Pollora\Option\Application\Service\OptionService;
+use Pollora\Option\Domain\Contracts\OptionManagerInterface;
 
 /**
  * Facade for WordPress option management.
@@ -24,17 +24,6 @@ final class Option extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return OptionService::class;
-    }
-
-    /**
-     * Laravel-style alias for delete method.
-     *
-     * @param  string  $key  The option key to remove
-     * @return bool True on success, false on failure
-     */
-    public static function forget(string $key): bool
-    {
-        return self::delete($key);
+        return OptionManagerInterface::class;
     }
 }

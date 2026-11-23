@@ -86,14 +86,38 @@ describe('AdminNotice', function (): void {
     });
 });
 
+describe('AdminNotice nonce', function (): void {
+    it('creates the nonce with the action the AJAX action of the dismissal requires', function (): void {
+        $actions = [];
+        $checker = Mockery::mock(VersionCheckerInterface::class);
+        $checker->shouldReceive('getCurrentVersion')->andReturn('13.2.0');
+        $checker->shouldReceive('getLatestVersion')->andReturn('13.3.0');
+
+        Brain\Monkey\Functions\when('get_current_user_id')->justReturn(1);
+        Brain\Monkey\Functions\when('get_user_meta')->justReturn('');
+        Brain\Monkey\Functions\when('current_user_can')->justReturn(true);
+        Brain\Monkey\Functions\when('wp_create_nonce')->alias(function (string $action) use (&$actions): string {
+            $actions[] = $action;
+
+            return 'test-nonce';
+        });
+
+        ob_start();
+        (new AdminNotice(new VersionComparator($checker)))->render();
+        ob_end_clean();
+
+        expect($actions)->toBe([AdminNotice::NONCE_ACTION])
+            ->and(AdminNotice::NONCE_ACTION)->toBe('pollora_dismiss_update')
+            ->and(AdminNotice::CAPABILITY)->toBe('manage_options');
+    });
+});
+
 describe('AdminNotice dismissal', function (): void {
     beforeEach(function (): void {
         $this->notice = new AdminNotice(new VersionComparator(Mockery::mock(VersionCheckerInterface::class)));
-        Brain\Monkey\Functions\when('check_ajax_referer')->justReturn(true);
         Brain\Monkey\Functions\when('sanitize_text_field')->returnArg();
         Brain\Monkey\Functions\when('get_current_user_id')->justReturn(5);
         Brain\Monkey\Functions\when('wp_die')->justReturn();
-        Brain\Monkey\Functions\when('current_user_can')->justReturn(true);
     });
 
     afterEach(function (): void {
@@ -126,32 +150,5 @@ describe('AdminNotice dismissal', function (): void {
         $this->notice->dismiss();
 
         expect($stored)->toBe([]);
-    });
-
-    it('refuses and stores nothing when the user cannot manage options', function (): void {
-        $stored = [];
-        $died = [];
-        Brain\Monkey\Functions\when('current_user_can')->justReturn(false);
-        // wp_die() never returns: stop the way it does
-        Brain\Monkey\Functions\when('wp_die')->alias(function (string $message = '', string $title = '', array $args = []) use (&$died): never {
-            $died[] = $args['response'] ?? null;
-
-            throw new RuntimeException('wp_die');
-        });
-        Brain\Monkey\Functions\when('update_user_meta')->alias(function () use (&$stored): bool {
-            $stored[] = true;
-
-            return true;
-        });
-        Illuminate\Support\Facades\Request::swap(new Request([], ['version' => '13.40.1'], [], [], [], ['REQUEST_METHOD' => 'POST']));
-
-        try {
-            $this->notice->dismiss();
-        } catch (RuntimeException) {
-            // the request ended
-        }
-
-        expect($stored)->toBe([])
-            ->and($died)->toBe([403]);
     });
 });

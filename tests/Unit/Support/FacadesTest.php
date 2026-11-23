@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Facade;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Hook\Domain\Contract\Action as ActionContract;
 use Pollora\Hook\Domain\Contract\Filter as FilterContract;
-use Pollora\Logging\Application\Services\WordPressErrorLoggingService;
+use Pollora\Logging\Domain\Contracts\WordPressErrorReporterInterface;
 use Pollora\Media\Application\Services\ImageSizes;
-use Pollora\Option\Application\Service\OptionService;
-use Pollora\PostType\Infrastructure\Factories\PostTypeFactory;
+use Pollora\Option\Domain\Contracts\OptionManagerInterface;
+use Pollora\PostType\Domain\Contracts\PostTypeFactoryInterface;
 use Pollora\Role\Application\Services\RoleDeclarer;
 use Pollora\Support\Facades\Ability;
 use Pollora\Support\Facades\Action;
@@ -28,7 +28,7 @@ use Pollora\Support\Facades\Taxonomy;
 use Pollora\Support\Facades\Theme;
 use Pollora\Support\Facades\WordPressError;
 use Pollora\Support\Facades\WPHash;
-use Pollora\Taxonomy\Infrastructure\Factories\TaxonomyFactory;
+use Pollora\Taxonomy\Domain\Contracts\TaxonomyFactoryInterface;
 use Pollora\Theme\Domain\Contracts\ThemeService;
 
 beforeEach(function (): void {
@@ -73,32 +73,18 @@ it('forwards the facade calls to the service bound under its accessor', function
     'ImageSize' => [ImageSize::class, ImageSizes::class],
     'Mail' => [Mail::class, 'wp.mail'],
     'Meta' => [Meta::class, 'wp.meta'],
-    'Option' => [Option::class, OptionService::class],
-    'PostType' => [PostType::class, PostTypeFactory::class],
+    'Option' => [Option::class, OptionManagerInterface::class],
+    'PostType' => [PostType::class, PostTypeFactoryInterface::class],
     'Role' => [Role::class, RoleDeclarer::class],
-    'Taxonomy' => [Taxonomy::class, TaxonomyFactory::class],
+    'Taxonomy' => [Taxonomy::class, TaxonomyFactoryInterface::class],
     'Theme' => [Theme::class, ThemeService::class],
-    'WordPressError' => [WordPressError::class, WordPressErrorLoggingService::class],
+    'WordPressError' => [WordPressError::class, WordPressErrorReporterInterface::class],
     'WPHash' => [WPHash::class, 'wp.hash'],
 ]);
 
-it('lets Option::forget() delete the option and report the result', function (bool $deleted): void {
-    $service = new class($deleted)
-    {
-        /** @var array<int, string> */
-        public array $deleted = [];
+it('forwards Option::forget() to the option manager bound under its contract', function (): void {
+    $this->container->instance(OptionManagerInterface::class, $this->service);
 
-        public function __construct(private readonly bool $result) {}
-
-        public function delete(string $key): bool
-        {
-            $this->deleted[] = $key;
-
-            return $this->result;
-        }
-    };
-    $this->container->instance(OptionService::class, $service);
-
-    expect(Option::forget('blogname'))->toBe($deleted)
-        ->and($service->deleted)->toBe(['blogname']);
-})->with([true, false]);
+    expect(Option::forget('blogname'))->toBe('result of forget')
+        ->and($this->service->calls)->toBe([['forget', ['blogname']]]);
+});

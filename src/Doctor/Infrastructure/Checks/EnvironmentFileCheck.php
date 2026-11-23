@@ -66,7 +66,8 @@ final readonly class EnvironmentFileCheck implements CheckInterface
             }
         }
 
-        if (config('database.default') === 'sqlite' && ($env['DB_HOST'] ?? '') !== '') {
+        // DB_CONNECTION=sqlite written in .env is a choice (pollora:install --db=sqlite), the MySQL DB_HOST it leaves behind is harmless
+        if (config('database.default') === 'sqlite' && ($env['DB_HOST'] ?? '') !== '' && ($env['DB_CONNECTION'] ?? '') !== 'sqlite') {
             $errors[] = 'DB_HOST is set, but the connection is sqlite: DB_CONNECTION is missing or not mysql';
         }
 

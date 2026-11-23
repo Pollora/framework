@@ -22,7 +22,8 @@ trait QueryTrait
      * Check if the database is properly configured.
      *
      * Verifies that the database connection settings are valid
-     * and that a connection can be established.
+     * and that a connection can be established. The connection is a MySQL
+     * one, or an opted-in SQLite one whose file exists.
      *
      * @return bool True if database is configured, false otherwise
      *
@@ -32,13 +33,16 @@ trait QueryTrait
     {
         $config = DB::connection()->getConfig();
 
-        $dbSettingsFilled = $config['driver'] === 'mysql'
-            && isset($config['host'])
-            && isset($config['username'])
-            && isset($config['password'])
-            && isset($config['database']);
+        if (! DatabaseSettings::isComplete($config)) {
+            return false;
+        }
 
-        if (! $dbSettingsFilled) {
+        // A missing SQLite file, or a missing plugin to translate WordPress's SQL, is a
+        // project not set up yet, not a failure: WordPress is not loaded, and the
+        // setup page and `pollora:doctor` say what to install. Laravel's connector
+        // would throw on the file, and MySQL's refused connection does.
+        if (DatabaseSettings::isSqlite($config)
+            && (! is_file((string) DatabaseSettings::sqlitePath($config)) || ! SqliteIntegration::isInstalled())) {
             return false;
         }
 

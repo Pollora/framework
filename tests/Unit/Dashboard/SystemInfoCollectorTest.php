@@ -8,7 +8,6 @@ use Pollora\Attributes\Taxonomy;
 use Pollora\Dashboard\Domain\Contracts\WordPressEnvironmentInterface;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Discovery\Application\Services\DiscoveryManager;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryInterface;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Models\DiscoveryItems;
@@ -17,12 +16,25 @@ use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
 use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Cache\NullDiscoverCacheDriver;
+use Tests\Support\FakeDiscoveryEngine;
+use Tests\Support\InstrumentedFakeDiscoveryEngine;
 
 #[PostType('synthese-presse', singular: 'Synthèse de presse', plural: 'Synthèses de presse')]
 class SyntheseDePresse {}
 
 #[Taxonomy('theme-presse', singular: 'Thème de presse', plural: 'Thèmes de presse')]
 class ThemeDePresse {}
+
+/**
+ * A real discovery manager whose discoveries hold the given items; any other
+ * identifier holds none.
+ *
+ * @param  array<string, list<mixed>>  $discovered  The items of each discovery, keyed by identifier
+ */
+function discoveredItemsManager(array $discovered): DiscoveryManager
+{
+    return realDiscoveryManager(new FakeDiscoveryEngine($discovered, knowsEveryIdentifier: true));
+}
 
 function createCollector(
     ?VersionComparator $comparator = null,
@@ -38,7 +50,7 @@ function createCollector(
         ])
     );
 
-    $manager ??= Mockery::mock(DiscoveryManager::class);
+    $manager ??= realDiscoveryManager();
     $container ??= Mockery::mock(ContainerInterface::class);
 
     if (! $wordpress instanceof WordPressEnvironmentInterface) {
@@ -164,13 +176,7 @@ describe('SystemInfoCollector', function (): void {
             $postTypeDiscovery = Mockery::mock(DiscoveryInterface::class);
             $postTypeDiscovery->shouldReceive('getItems')->andReturn($items);
 
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')
-                ->with('post_types')
-                ->andReturn($items->all());
-            $manager->shouldReceive('getDiscoveredItems')
-                ->withAnyArgs()
-                ->andReturn([]);
+            $manager = discoveredItemsManager(['post_types' => $items->all()]);
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectDiscoveryInfo();
@@ -182,10 +188,10 @@ describe('SystemInfoCollector', function (): void {
         });
 
         it('reports the slug and labels of the #[PostType] attribute, not the class name', function (): void {
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')->with('post_types')->andReturn([['class' => SyntheseDePresse::class]]);
-            $manager->shouldReceive('getDiscoveredItems')->with('taxonomies')->andReturn([['class' => ThemeDePresse::class]]);
-            $manager->shouldReceive('getDiscoveredItems')->withAnyArgs()->andReturn([]);
+            $manager = discoveredItemsManager([
+                'post_types' => [['class' => SyntheseDePresse::class]],
+                'taxonomies' => [['class' => ThemeDePresse::class]],
+            ]);
 
             $info = createCollector(manager: $manager)->collectDiscoveryInfo();
 
@@ -194,10 +200,10 @@ describe('SystemInfoCollector', function (): void {
         });
 
         it('prefers the label WordPress registered over the attribute', function (): void {
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')->with('post_types')->andReturn([['class' => SyntheseDePresse::class]]);
-            $manager->shouldReceive('getDiscoveredItems')->with('taxonomies')->andReturn([['class' => ThemeDePresse::class]]);
-            $manager->shouldReceive('getDiscoveredItems')->withAnyArgs()->andReturn([]);
+            $manager = discoveredItemsManager([
+                'post_types' => [['class' => SyntheseDePresse::class]],
+                'taxonomies' => [['class' => ThemeDePresse::class]],
+            ]);
 
             $wordpress = Mockery::mock(WordPressEnvironmentInterface::class);
             $wordpress->shouldReceive('postTypeLabel')->with('synthese-presse')->andReturn('Revues de presse');
@@ -210,17 +216,13 @@ describe('SystemInfoCollector', function (): void {
         });
 
         it('collects hook counts by type', function (): void {
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')
-                ->with('hooks')
-                ->andReturn([
+            $manager = discoveredItemsManager([
+                'hooks' => [
                     ['type' => 'action', 'class' => 'Hooks\\MyHook', 'method' => 'onInit'],
                     ['type' => 'action', 'class' => 'Hooks\\MyHook', 'method' => 'onSave'],
                     ['type' => 'filter', 'class' => 'Hooks\\MyFilter', 'method' => 'filterTitle'],
-                ]);
-            $manager->shouldReceive('getDiscoveredItems')
-                ->withAnyArgs()
-                ->andReturn([]);
+                ],
+            ]);
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectDiscoveryInfo();
@@ -231,15 +233,11 @@ describe('SystemInfoCollector', function (): void {
         });
 
         it('collects schedules with class and method', function (): void {
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')
-                ->with('schedules')
-                ->andReturn([
+            $manager = discoveredItemsManager([
+                'schedules' => [
                     ['class' => 'App\\Schedule\\Cleanup', 'method' => 'run'],
-                ]);
-            $manager->shouldReceive('getDiscoveredItems')
-                ->withAnyArgs()
-                ->andReturn([]);
+                ],
+            ]);
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectDiscoveryInfo();
@@ -249,10 +247,7 @@ describe('SystemInfoCollector', function (): void {
         });
 
         it('collects all discovery types', function (): void {
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')->andReturn([]);
-
-            $collector = createCollector(manager: $manager);
+            $collector = createCollector(manager: discoveredItemsManager([]));
             $info = $collector->collectDiscoveryInfo();
 
             expect($info)->toHaveKeys([
@@ -262,8 +257,7 @@ describe('SystemInfoCollector', function (): void {
         });
 
         it('handles missing discovery gracefully', function (): void {
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')->andThrow(new RuntimeException('Not found'));
+            $manager = realDiscoveryManager((new FakeDiscoveryEngine)->failOn('getDiscovery', new RuntimeException('Not found')));
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectDiscoveryInfo();
@@ -282,8 +276,7 @@ describe('SystemInfoCollector', function (): void {
         it('delegates to discovery manager', function (): void {
             $stats = ['context' => ['cache_hits' => 5, 'cache_misses' => 2]];
 
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getPerformanceStats')->andReturn($stats);
+            $manager = realDiscoveryManager(new InstrumentedFakeDiscoveryEngine(stats: $stats));
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectPerformanceInfo();
@@ -294,12 +287,7 @@ describe('SystemInfoCollector', function (): void {
 
     describe('collectCacheInfo', function (): void {
         it('reports cache as disabled with NullDriver', function (): void {
-            $engine = Mockery::mock(DiscoveryEngineInterface::class);
-            $engine->shouldReceive('getCacheDriver')
-                ->andReturn(new NullDiscoverCacheDriver);
-
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getEngine')->andReturn($engine);
+            $manager = realDiscoveryManager(new InstrumentedFakeDiscoveryEngine(driver: new NullDiscoverCacheDriver));
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectCacheInfo();
@@ -311,11 +299,7 @@ describe('SystemInfoCollector', function (): void {
         it('reports cache as enabled with Laravel driver', function (): void {
             $driver = Mockery::mock(LaravelDiscoverCacheDriver::class);
 
-            $engine = Mockery::mock(DiscoveryEngineInterface::class);
-            $engine->shouldReceive('getCacheDriver')->andReturn($driver);
-
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getEngine')->andReturn($engine);
+            $manager = realDiscoveryManager(new InstrumentedFakeDiscoveryEngine(driver: $driver));
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectCacheInfo();
@@ -324,9 +308,7 @@ describe('SystemInfoCollector', function (): void {
         });
 
         it('falls back gracefully on error', function (): void {
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getEngine')
-                ->andThrow(new RuntimeException('No engine'));
+            $manager = realDiscoveryManager(new InstrumentedFakeDiscoveryEngine(driver: new RuntimeException('No engine')));
 
             $collector = createCollector(manager: $manager);
             $info = $collector->collectCacheInfo();
@@ -469,13 +451,7 @@ describe('SystemInfoCollector', function (): void {
 
     describe('collect', function (): void {
         it('returns all sections', function (): void {
-            $engine = Mockery::mock(DiscoveryEngineInterface::class);
-            $engine->shouldReceive('getCacheDriver')->andReturn(null);
-
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')->andReturn([]);
-            $manager->shouldReceive('getEngine')->andReturn($engine);
-            $manager->shouldReceive('getPerformanceStats')->andReturn([]);
+            $manager = realDiscoveryManager(new InstrumentedFakeDiscoveryEngine(knowsEveryIdentifier: true));
 
             $container = Mockery::mock(ContainerInterface::class);
             $container->shouldReceive('get')
@@ -495,12 +471,12 @@ describe('SystemInfoCollector', function (): void {
 
     describe('discovered items that are incomplete', function (): void {
         it('leaves out entries without a class or a method and counts only the hooks of a known type', function (): void {
-            $manager = Mockery::mock(DiscoveryManager::class);
-            $manager->shouldReceive('getDiscoveredItems')->with('post_types')->andReturn([['slug' => 'no-class']]);
-            $manager->shouldReceive('getDiscoveredItems')->with('taxonomies')->andReturn([['slug' => 'no-class']]);
-            $manager->shouldReceive('getDiscoveredItems')->with('hooks')->andReturn([['type' => 'action'], ['type' => 'filter'], ['type' => 'async'], []]);
-            $manager->shouldReceive('getDiscoveredItems')->with('schedules')->andReturn([['class' => 'App\\Jobs\\Report'], ['method' => 'run']]);
-            $manager->shouldReceive('getDiscoveredItems')->withAnyArgs()->andReturn([]);
+            $manager = discoveredItemsManager([
+                'post_types' => [['slug' => 'no-class']],
+                'taxonomies' => [['slug' => 'no-class']],
+                'hooks' => [['type' => 'action'], ['type' => 'filter'], ['type' => 'async'], []],
+                'schedules' => [['class' => 'App\\Jobs\\Report'], ['method' => 'run']],
+            ]);
 
             $info = createCollector(manager: $manager)->collectDiscoveryInfo();
 

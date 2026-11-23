@@ -6,7 +6,6 @@ use Composer\InstalledVersions;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Http;
 use Pollora\Application\Domain\Contracts\DebugDetectorInterface;
-use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Discovery\Domain\Contracts\DiscoveryLocationInterface;
 use Pollora\Discovery\Domain\Models\DiscoveryLocation;
 use Pollora\Discovery\Infrastructure\Adapters\LaravelDiscoveryCacheManagerFactory;
@@ -19,6 +18,7 @@ use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
 use Pollora\Doctor\Infrastructure\Checks\WordPressCorePatchCheck;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
+use Tests\Support\FakeDiscoveryEngine;
 
 if (! function_exists('putFile')) {
     function putFile(string $path, string $contents): void
@@ -142,6 +142,13 @@ describe('Environment file', function (): void {
             ->toContain('DB_HOST is set, but the connection is sqlite: DB_CONNECTION is missing or not mysql');
     });
 
+    it('accepts MySQL settings left in .env once DB_CONNECTION=sqlite says the connection is a choice', function (): void {
+        config(['database.default' => 'sqlite']);
+        file_put_contents($this->project.'/.env', "DB_CONNECTION=sqlite\nDB_HOST=db\nDB_DATABASE=database/database.sqlite\n");
+
+        expect((new EnvironmentFileCheck)->run(RunContext::Console)->status->value)->toBe('ok');
+    });
+
     it('warns when WP_HOME disagrees with the APP_URL in use', function (): void {
         config(['database.default' => 'mysql']);
         file_put_contents($this->project.'/.env', "APP_URL=https://site.test\nWP_HOME=https://old.test\n");
@@ -217,8 +224,10 @@ describe('Discovery cache', function (): void {
     function discoveryCheck(bool $cacheEnabled, array $missing): DiscoveryCacheCheck
     {
         $location = Mockery::mock(DiscoveryLocationInterface::class);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('getLocations')->andReturn(collect([$location]));
+        $engine = new FakeDiscoveryEngine;
+        $engine->locations = [$location];
+
+        $manager = realDiscoveryManager($engine);
         $cache = Mockery::mock(DiscoveryCacheManager::class);
         $cache->shouldReceive('isCacheEnabled')->andReturn($cacheEnabled);
         $cache->shouldReceive('classesMissingFromCache')->with($location)->andReturn($missing);

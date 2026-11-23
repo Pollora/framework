@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Pollora\Option\Application\Service\OptionService;
+use Pollora\Option\Domain\Contracts\OptionManagerInterface;
 use Pollora\Support\Facades\Option;
 
 describe('OptionIntegration', function (): void {
@@ -16,10 +16,10 @@ describe('OptionIntegration', function (): void {
 
         $accessor = $method->invoke(null);
 
-        expect($accessor)->toBe(OptionService::class);
+        expect($accessor)->toBe(OptionManagerInterface::class);
     });
 
-    it('facade has forget alias', function (): void {
-        expect(method_exists(Option::class, 'forget'))->toBeTrue();
+    it('facade has forget alias through the option manager', function (): void {
+        expect(method_exists(OptionManagerInterface::class, 'forget'))->toBeTrue();
     });
 });

@@ -10,6 +10,7 @@ use Pollora\Route\Domain\Enums\TemplateOutcome;
 use Pollora\Route\UI\Http\Controllers\FrontendController;
 use Pollora\Route\UI\Http\Responses\SetupRequiredResponse;
 use Pollora\View\Domain\Contracts\TemplateFinderInterface;
+use Pollora\WordPress\SqliteIntegration;
 
 beforeEach(function (): void {
     $this->templateFinder = Mockery::mock(TemplateFinderInterface::class);
@@ -309,6 +310,10 @@ describe('FrontendController before WordPress is set up', function (): void {
         config()->set('database.default', 'sqlite');
     });
 
+    afterEach(function (): void {
+        SqliteIntegration::useDirectories();
+    });
+
     it('answers a plain 503 without debug', function (): void {
         config()->set('app.debug', false);
 
@@ -345,5 +350,54 @@ describe('FrontendController before WordPress is set up', function (): void {
         ]);
 
         expect(SetupRequiredResponse::missingSettings())->toBe(['DB_DATABASE']);
+    });
+
+    it('suggests the SQLite opt-in when Laravel only fell back to a SQLite connection with no file', function (): void {
+        config()->set('app.debug', true);
+        config()->set('database.connections.sqlite.database', '/nonexistent/site.sqlite');
+
+        $content = $this->controller->handle(Request::create('/'))->getContent();
+
+        expect($content)->toContain('DB_CONNECTION=mysql')
+            ->toContain('php artisan pollora:install --db=sqlite');
+    });
+
+    it('does not mention SQLite to a MySQL project', function (): void {
+        config()->set('app.debug', true);
+        config()->set('database.default', 'mysql');
+        config()->set('database.connections.mysql.host');
+
+        expect($this->controller->handle(Request::create('/'))->getContent())->not->toContain('sqlite');
+    });
+
+    it('says the plugin is what to install when the SQLite file is there but the plugin is not', function (): void {
+        $file = tempnam(sys_get_temp_dir(), 'pollora-sqlite');
+        SqliteIntegration::useDirectories(sys_get_temp_dir().'/pollora-no-plugins-'.uniqid());
+        config()->set('app.debug', true);
+        config()->set('database.connections.sqlite.database', $file);
+
+        $content = $this->controller->handle(Request::create('/'))->getContent();
+        unlink($file);
+
+        expect($content)->toContain('A SQLite database file exists')
+            ->toContain('composer require wp-plugin/sqlite-database-integration')
+            ->not->toContain('--db=sqlite');
+    });
+
+    it('misses no setting once SQLite has its file and its plugin, and points to the doctor', function (): void {
+        $project = sys_get_temp_dir().'/pollora-ready-'.uniqid();
+        mkdir($project.'/plugins/sqlite-database-integration/wp-includes/sqlite', 0777, true);
+        touch($project.'/plugins/sqlite-database-integration/wp-includes/sqlite/db.php');
+        touch($project.'/site.sqlite');
+        SqliteIntegration::useDirectories($project.'/plugins');
+        config()->set('app.debug', true);
+        config()->set('database.connections.sqlite.database', $project.'/site.sqlite');
+
+        $content = $this->controller->handle(Request::create('/'))->getContent();
+
+        expect(SetupRequiredResponse::missingSettings())->toBe([])
+            ->and($content)->toContain('The SQLite database file and plugin are in place')
+            ->toContain('php artisan pollora:doctor')
+            ->not->toContain('DB_CONNECTION=mysql');
     });
 });

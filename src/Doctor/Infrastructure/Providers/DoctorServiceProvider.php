@@ -6,6 +6,7 @@ namespace Pollora\Doctor\Infrastructure\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Pollora\Doctor\Application\Services\Doctor;
+use Pollora\Doctor\Infrastructure\Checks\ApiSecurityPluginsCheck;
 use Pollora\Doctor\Infrastructure\Checks\AppUrlCheck;
 use Pollora\Doctor\Infrastructure\Checks\AssetBuildCheck;
 use Pollora\Doctor\Infrastructure\Checks\BlockRegistrationCheck;
@@ -14,10 +15,13 @@ use Pollora\Doctor\Infrastructure\Checks\DevelopmentCachesCheck;
 use Pollora\Doctor\Infrastructure\Checks\DiscoveryCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\EnvironmentFileCheck;
 use Pollora\Doctor\Infrastructure\Checks\LegacyBlocksDirectoryCheck;
+use Pollora\Doctor\Infrastructure\Checks\MultisiteCheck;
+use Pollora\Doctor\Infrastructure\Checks\ObjectCachePackageCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatchesLockCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternCacheCheck;
 use Pollora\Doctor\Infrastructure\Checks\PatternFilesCheck;
 use Pollora\Doctor\Infrastructure\Checks\PublicRootCheck;
+use Pollora\Doctor\Infrastructure\Checks\SqliteIntegrationCheck;
 use Pollora\Doctor\Infrastructure\Checks\SymlinkedDirectoryCheck;
 use Pollora\Doctor\Infrastructure\Checks\TemplatePlaceholdersCheck;
 use Pollora\Doctor\Infrastructure\Checks\WooCommercePackageCheck;
@@ -43,6 +47,7 @@ class DoctorServiceProvider extends ServiceProvider
         WordPressCorePatchCheck::class,
         PatchesLockCheck::class,
         EnvironmentFileCheck::class,
+        SqliteIntegrationCheck::class,
         AppUrlCheck::class,
         DevelopmentCachesCheck::class,
         DiscoveryCacheCheck::class,
@@ -57,6 +62,9 @@ class DoctorServiceProvider extends ServiceProvider
         PublicRootCheck::class,
         WooCommercePackageCheck::class,
         WpRocketPackageCheck::class,
+        ObjectCachePackageCheck::class,
+        MultisiteCheck::class,
+        ApiSecurityPluginsCheck::class,
     ];
 
     public function register(): void

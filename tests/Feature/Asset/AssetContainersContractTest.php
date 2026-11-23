@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Filesystem\Filesystem;
 use Pollora\Asset\Application\Services\AssetManager;
-use Pollora\Asset\Application\Services\AssetRetrievalService;
 use Pollora\Asset\Application\Services\MissingBuilds;
 use Pollora\Asset\Domain\Contracts\ViteManagerFactory;
 use Pollora\Asset\Infrastructure\Laravel\LaravelAssetFileResolver;
@@ -37,7 +36,7 @@ beforeEach(function (): void {
     ];
 
     // The manager AssetFile resolves through the container
-    $this->assetManager = new AssetManager(Mockery::mock(AssetRetrievalService::class));
+    $this->assetManager = realAssetManager();
     $this->app->instance(AssetManager::class, $this->assetManager);
     $this->app->singleton(MissingBuilds::class);
     $this->app->singleton(ViteManagerFactory::class, LaravelViteManagerFactory::class);

@@ -20,6 +20,12 @@ use Pollora\Modules\Infrastructure\Activation\DatabaseStateConnector;
 use Pollora\Modules\Infrastructure\Activation\JsonStateConnector;
 use Pollora\Modules\Infrastructure\Activation\ModuleConnectors;
 use Pollora\Modules\UI\Console\ModuleConnectorCommand;
+use Tests\Support\FakeDiscoveryEngine;
+
+function decoded(string $path): array
+{
+    return json_decode((string) file_get_contents($path), true);
+}
 
 beforeEach(function (): void {
     $this->directory = sys_get_temp_dir().'/pollora-module-states-'.uniqid();
@@ -65,6 +71,37 @@ describe('JsonStateConnector', function (): void {
             ->and($connector->writable())->toBeTrue()
             ->and($connector->persistent())->toBeFalse()
             ->and($connector->label())->toBe('JSON file');
+    });
+
+    it('keeps a switch another request made after this one read the file', function (): void {
+        $first = new JsonStateConnector($this->statuses);
+        $second = new JsonStateConnector($this->statuses);
+
+        // Both requests have read the file before either writes
+        $first->all();
+        $second->all();
+
+        $first->set('Shop', true);
+        $second->set('Forum', true);
+
+        expect((new JsonStateConnector($this->statuses))->all())->toBe(['Crm' => true, 'Blog' => false, 'Shop' => true, 'Forum' => true]);
+    });
+
+    it('replaces the file whole, keeps its mode and leaves no temporary file', function (): void {
+        chmod($this->statuses, 0664);
+
+        (new JsonStateConnector($this->statuses))->set('Shop', true);
+
+        clearstatcache();
+        expect(decoded($this->statuses))->toBe(['Crm' => true, 'Blog' => false, 'Shop' => true])
+            ->and(fileperms($this->statuses) & 0777)->toBe(0664)
+            ->and(glob($this->directory.'/*.tmp'))->toBe([]);
+    });
+
+    it('reports a state it cannot write', function (): void {
+        $connector = new JsonStateConnector($this->directory.'/missing-directory/modules_statuses.json');
+
+        expect(fn () => $connector->set('Shop', true))->toThrow(ModuleStateException::class);
     });
 
     it('reads no state from a missing file', function (): void {
@@ -228,17 +265,18 @@ describe('ConnectorActivator', function (): void {
     });
 
     it('clears the discovery cache when a state changes, and carries on when it cannot', function (): void {
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('clearCache')->once();
-        $this->app->instance(DiscoveryManager::class, $manager);
+        $engine = new FakeDiscoveryEngine;
+        $this->app->instance(DiscoveryManager::class, realDiscoveryManager($engine));
         (new ConnectorActivator($this->app))->setActiveByName('Shop', true);
 
-        $broken = Mockery::mock(DiscoveryManager::class);
-        $broken->shouldReceive('clearCache')->once()->andThrow(new RuntimeException('cache locked'));
-        $this->app->instance(DiscoveryManager::class, $broken);
+        expect($engine->calls->getArrayCopy())->toBe(['clearCache']);
+
+        $brokenEngine = (new FakeDiscoveryEngine)->failOn('clearCache', new RuntimeException('cache locked'));
+        $this->app->instance(DiscoveryManager::class, realDiscoveryManager($brokenEngine));
         (new ConnectorActivator($this->app))->setActiveByName('Blog', true);
 
-        expect((new JsonStateConnector($this->statuses))->all())->toMatchArray(['Shop' => true, 'Blog' => true]);
+        expect($brokenEngine->calls->getArrayCopy())->toBe(['clearCache'])
+            ->and((new JsonStateConnector($this->statuses))->all())->toMatchArray(['Shop' => true, 'Blog' => true]);
     });
 
     it('forgets every state on reset', function (): void {
