@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
-use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
@@ -144,7 +143,7 @@ function createMockVite(bool $isHot = false, string $buildDirectory = 'build/pol
 
 function createTestableRegistrar(array &$scripts, array &$styles, array &$blocks): TestableBlockRegistrar
 {
-    $assetManager = Mockery::mock(AssetManager::class);
+    $assetManager = realAssetManager();
     $registrar = new TestableBlockRegistrar($assetManager, Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
     $registrar->mockViteManager = createMockVite();
 
@@ -159,7 +158,7 @@ describe('BlockRegistrar', function (): void {
             'title' => 'Hero',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->registerDirectory($this->tempDir, 'theme');
 
@@ -176,7 +175,7 @@ describe('BlockRegistrar', function (): void {
             'editorScript' => 'file:./index.jsx',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->alreadyRegistered = ['test/hero'];
         $registrar->registerDirectory($this->tempDir, 'theme');
@@ -186,7 +185,7 @@ describe('BlockRegistrar', function (): void {
     });
 
     it('skips non-existent directories gracefully', function (): void {
-        $registrar = new BlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new BlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->registerDirectory('/nonexistent/path', 'theme');
 
         expect($this->registeredBlocks)->toBeEmpty();
@@ -195,7 +194,7 @@ describe('BlockRegistrar', function (): void {
     it('returns early when getBlocksViteManager returns null', function (): void {
         file_put_contents($this->tempDir.'/hero/block.json', json_encode(['name' => 'test/hero']));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = null;
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -208,7 +207,7 @@ describe('BlockRegistrar', function (): void {
             'editorScript' => 'file:./index.jsx',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -228,7 +227,7 @@ describe('BlockRegistrar', function (): void {
         ]));
         file_put_contents($this->tempDir.'/hero/render.blade.php', '<div></div>');
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -254,7 +253,7 @@ describe('BlockRegistrar', function (): void {
             'editorScript' => 'file:./index.jsx',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite(buildDirectory: $buildDirectory);
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -274,7 +273,7 @@ describe('BlockRegistrar', function (): void {
             'editorScript' => 'file:./index.jsx',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite(isHot: true);
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -289,7 +288,7 @@ describe('BlockRegistrar', function (): void {
             'editorStyle' => 'file:./editor.css',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -306,7 +305,7 @@ describe('BlockRegistrar', function (): void {
             'viewScript' => 'file:./view.js',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -323,7 +322,7 @@ describe('BlockRegistrar', function (): void {
             'editorScript' => 'file:./index.jsx',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite(isHot: true);
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -338,7 +337,7 @@ describe('BlockRegistrar', function (): void {
         ]));
         file_put_contents($this->tempDir.'/hero/render.php', '<?php echo "hello"; ?>');
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -361,7 +360,7 @@ describe('BlockRegistrar', function (): void {
             'style' => 'file:./style.css',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -373,7 +372,7 @@ describe('BlockRegistrar', function (): void {
     });
 
     it('builds handles matching WP generate_block_asset_handle format', function (): void {
-        $registrar = new BlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new BlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
 
         $method = new ReflectionMethod($registrar, 'buildHandle');
 
@@ -391,7 +390,7 @@ describe('BlockRegistrar', function (): void {
             'editorScript' => 'my-already-registered-handle',
         ]));
 
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+        $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 
@@ -402,22 +401,14 @@ describe('BlockRegistrar', function (): void {
     it('creates blocks container with empty basePath from parent', function (): void {
         file_put_contents($this->tempDir.'/hero/block.json', json_encode(['name' => 'test/hero']));
 
-        $addedContainers = [];
-        $parentContainer = new AssetContainer('theme', [
+        $assetManager = realAssetManager();
+        $assetManager->addContainer('theme', [
             'hot_file' => '/tmp/test.hot',
             'build_directory' => 'build/theme/my-theme',
             'manifest_path' => 'manifest.json',
             'base_path' => 'resources/assets/',
         ]);
-
-        $assetManager = Mockery::mock(AssetManager::class);
-        $assetManager->shouldReceive('getContainer')->with('theme.blocks')->andReturn(null);
-        $assetManager->shouldReceive('getContainer')->with('theme')->andReturn($parentContainer);
-        $assetManager->shouldReceive('addContainer')->andReturnUsing(
-            function ($name, $config) use (&$addedContainers): void {
-                $addedContainers[$name] = $config;
-            }
-        );
+        $parentContainer = $assetManager->getContainer('theme');
 
         // Use Testable to avoid real ViteManager instantiation
         $registrar = new TestableBlockRegistrar($assetManager, Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
@@ -439,9 +430,11 @@ describe('BlockRegistrar', function (): void {
             // Expected — ViteManager needs Vite facade
         }
 
-        expect($addedContainers)->toHaveKey('theme.blocks');
-        expect($addedContainers['theme.blocks']['base_path'])->toBe('');
-        expect($addedContainers['theme.blocks']['build_directory'])->toBe('build/theme/my-theme');
+        $blocksContainer = $assetManager->getContainer('theme.blocks');
+
+        expect($blocksContainer)->not->toBeNull();
+        expect($blocksContainer->getBasePath())->toBe('');
+        expect($blocksContainer->getBuildDirectory())->toBe('build/theme/my-theme');
     });
 });
 
@@ -460,7 +453,7 @@ function writeBlock(string $blockDir, array $metadata, array $files = []): void
 
 function blockRegistrar(bool $isHot = true): TestableBlockRegistrar
 {
-    $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
+    $registrar = new TestableBlockRegistrar(realAssetManager(), Mockery::mock(HookFilter::class)->shouldIgnoreMissing());
     $registrar->mockViteManager = createMockVite(isHot: $isHot);
 
     return $registrar;
@@ -636,7 +629,7 @@ describe('BlockRegistrar bindings', function (): void {
             return $filter;
         });
         writeBlock($blockDir, $metadata, ['render.blade.php' => '<div></div>']);
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), $filter);
+        $registrar = new TestableBlockRegistrar(realAssetManager(), $filter);
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($blockDir, 'theme');
 
@@ -735,7 +728,7 @@ describe('BlockRegistrar guards and assets', function (): void {
             return $filter;
         });
         writeBlock($this->tempDir.'/hero', ['name' => 'test/hero', 'editorScript' => 'file:./index.jsx']);
-        $registrar = new TestableBlockRegistrar(Mockery::mock(AssetManager::class), $filter);
+        $registrar = new TestableBlockRegistrar(realAssetManager(), $filter);
         $registrar->mockViteManager = createMockVite();
         $registrar->registerBlock($this->tempDir.'/hero', 'theme');
 

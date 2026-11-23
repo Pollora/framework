@@ -20,6 +20,7 @@ use Pollora\Modules\Infrastructure\Activation\DatabaseStateConnector;
 use Pollora\Modules\Infrastructure\Activation\JsonStateConnector;
 use Pollora\Modules\Infrastructure\Activation\ModuleConnectors;
 use Pollora\Modules\UI\Console\ModuleConnectorCommand;
+use Tests\Support\FakeDiscoveryEngine;
 
 beforeEach(function (): void {
     $this->directory = sys_get_temp_dir().'/pollora-module-states-'.uniqid();
@@ -228,17 +229,18 @@ describe('ConnectorActivator', function (): void {
     });
 
     it('clears the discovery cache when a state changes, and carries on when it cannot', function (): void {
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('clearCache')->once();
-        $this->app->instance(DiscoveryManager::class, $manager);
+        $engine = new FakeDiscoveryEngine;
+        $this->app->instance(DiscoveryManager::class, realDiscoveryManager($engine));
         (new ConnectorActivator($this->app))->setActiveByName('Shop', true);
 
-        $broken = Mockery::mock(DiscoveryManager::class);
-        $broken->shouldReceive('clearCache')->once()->andThrow(new RuntimeException('cache locked'));
-        $this->app->instance(DiscoveryManager::class, $broken);
+        expect($engine->calls->getArrayCopy())->toBe(['clearCache']);
+
+        $brokenEngine = (new FakeDiscoveryEngine)->failOn('clearCache', new RuntimeException('cache locked'));
+        $this->app->instance(DiscoveryManager::class, realDiscoveryManager($brokenEngine));
         (new ConnectorActivator($this->app))->setActiveByName('Blog', true);
 
-        expect((new JsonStateConnector($this->statuses))->all())->toMatchArray(['Shop' => true, 'Blog' => true]);
+        expect($brokenEngine->calls->getArrayCopy())->toBe(['clearCache'])
+            ->and((new JsonStateConnector($this->statuses))->all())->toMatchArray(['Shop' => true, 'Blog' => true]);
     });
 
     it('forgets every state on reset', function (): void {

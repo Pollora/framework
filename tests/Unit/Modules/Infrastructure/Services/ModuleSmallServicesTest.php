@@ -8,7 +8,6 @@ use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Route;
 use Pollora\Asset\Application\Services\AssetManager;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Modules\Infrastructure\Services\LaravelModuleAssets;
 use Pollora\Modules\Infrastructure\Services\LeanModuleMake;
@@ -160,7 +159,7 @@ describe('LaravelModuleAssets', function (): void {
     beforeEach(function (): void {
         $this->app = new Container;
         $this->moduleAssets = Mockery::mock(ModuleAssetManager::class);
-        $this->assetManager = Mockery::mock(AssetManager::class);
+        $this->assetManager = realAssetManager();
     });
 
     it('does nothing without the nwidart repository or the asset manager', function (): void {
@@ -229,9 +228,8 @@ describe('LaravelModuleAssets', function (): void {
             }
         });
         $this->app->instance(AssetManager::class, $this->assetManager);
-        $this->assetManager->shouldReceive('getContainer')->andReturnUsing(
-            fn (string $name) => $name === 'module.known' ? Mockery::mock(AssetContainer::class) : null
-        );
+
+        $this->assetManager->addContainer('module.known', []);
         $calls = [];
         $this->moduleAssets->shouldReceive('setupModuleAssetContainer')->andReturnUsing(function (...$args) use (&$calls): string {
             $calls[] = $args;
