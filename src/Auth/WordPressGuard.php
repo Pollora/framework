@@ -11,6 +11,7 @@ use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Facades\Request;
 use Pollora\Models\User;
 use WP_Error;
+use WP_Session_Tokens;
 
 /**
  * WordPress authentication guard for Laravel.
@@ -25,6 +26,11 @@ use WP_Error;
 class WordPressGuard implements StatefulGuard
 {
     use GuardHelpers;
+
+    /**
+     * WordPress's lifetime of a session without "remember me": two days, in seconds.
+     */
+    private const int SESSION_LIFETIME = 172800;
 
     /**
      * The last attempted user authentication.
@@ -65,10 +71,14 @@ class WordPressGuard implements StatefulGuard
      * Validate user credentials without logging them in.
      *
      * @param  array<string, string>  $credentials  User credentials (username and password)
-     * @return bool True if credentials are valid
+     * @return bool True if credentials are valid; false too when the username or the password is missing
      */
     public function validate(array $credentials = []): bool
     {
+        if (! isset($credentials['username'], $credentials['password'])) {
+            return false;
+        }
+
         $user = wp_authenticate($credentials['username'], $credentials['password']);
         $this->lastAttempted = $user instanceof WP_Error ? null : User::find($user->ID);
 
@@ -168,13 +178,41 @@ class WordPressGuard implements StatefulGuard
     }
 
     /**
-     * Check if the user was authenticated via "remember me" cookie.
+     * Check if the current session was opened with "remember me".
      *
-     * @return bool True if authenticated via remember cookie
+     * WordPress keeps no "remember" flag: the choice only sets how long the session
+     * lives (14 days instead of 2, through the `auth_cookie_expiration` filter) and
+     * whether the cookie outlives the browser. The authentication cookie being
+     * present therefore proves nothing; what tells is the lifetime of the session
+     * token the logged-in cookie carries, compared with the lifetime a session
+     * without "remember me" gets. When that cannot be read (no token, no session, a
+     * site whose filter gives both the same lifetime) the answer is false.
+     *
+     * @return bool True if the session lives longer than a session without "remember me"
      */
     public function viaRemember(): bool
     {
-        return Request::hasCookie(Request::secure() ? SECURE_AUTH_COOKIE : AUTH_COOKIE);
+        if (! $this->check()) {
+            return false;
+        }
+
+        $token = wp_get_session_token();
+        $userId = get_current_user_id();
+
+        if ($token === '' || $userId === 0) {
+            return false;
+        }
+
+        $session = WP_Session_Tokens::get_instance($userId)->get($token);
+
+        if (! is_array($session) || ! isset($session['expiration'], $session['login'])) {
+            return false;
+        }
+
+        $lifetime = (int) $session['expiration'] - (int) $session['login'];
+        $withoutRemember = (int) apply_filters('auth_cookie_expiration', self::SESSION_LIFETIME, $userId, false);
+
+        return $lifetime > $withoutRemember;
     }
 
     /**
