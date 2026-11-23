@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Vite as ViteFacade;
 use Pollora\Asset\Application\Services\MissingBuilds;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
 use Pollora\Asset\Domain\Exceptions\AssetException;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
+use Pollora\Asset\Domain\Models\AssetContainer;
 
 /**
  * Infrastructure implementation of ViteManagerInterface using Vite and asset containers.

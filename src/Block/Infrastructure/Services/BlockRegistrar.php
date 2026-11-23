@@ -9,7 +9,7 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Facades\Log;
 use Pollora\Asset\Application\Services\AssetManager;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
+use Pollora\Asset\Domain\Models\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Block\Domain\Contracts\BlockRegistrarInterface;
 use Pollora\Block\Domain\Services\InnerBlocksTag;

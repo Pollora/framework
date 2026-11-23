@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`pollora/assets` is required at `^0.2`, and `pollora/discovery` accepts `^0.3`.** `assets` 0.2.0 makes `AssetManager`, `AssetRetrievalService`, `AssetContainer` and other classes `final` and moves `AssetContainer` to `Domain\Models` and `AssetFile` to `Application\Services`; the framework now imports them from there (the old addresses still load through class aliases, but static analysis does not follow them, so `^0.1` is no longer accepted). A project that extends one of those classes must compose it instead. `discovery` 0.3.0 makes `DiscoveryManager` `final`; it is accepted here, but Composer keeps `discovery` 0.2.x while `block-bindings`, `meta`, `roles`, `schedule`, `wp-cli`, `wp-rest` and `nectar` do not accept 0.3 themselves.
+
 - **The `Option`, `PostType`, `Taxonomy` and `WordPressError` facades resolve a contract (CONV-09).** `Option` fronts the new `OptionManagerInterface` (bound to `OptionManager`, which wraps the `pollora/option` service and carries the `forget()` alias that used to live in the facade), `PostType` and `Taxonomy` front the existing `PostTypeFactoryInterface` and `TaxonomyFactoryInterface`, and `WordPressError` fronts the new `WordPressErrorReporterInterface` (implemented by `WordPressErrorLoggingService`). The facades' calls, `Option::forget()` included, behave as before. The concrete classes stay bound; only code that rebinds a facade's former concrete accessor (`PostTypeFactory`, `TaxonomyFactory`, `WordPressErrorLoggingService`, `OptionService`) to swap what the facade calls must now rebind the contract.
 
 ### Fixed

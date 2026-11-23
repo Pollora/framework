@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
+use Pollora\Asset\Domain\Models\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Block\Infrastructure\Services\BlockRegistrar;
 use Pollora\Hook\Domain\Contract\Filter as HookFilter;
