@@ -20,8 +20,8 @@ describe('LaravelAssetFileResolver', function (): void {
     });
 
     it('gives an empty string, without a log line, for a container the manager does not know', function (): void {
-        $manager = Mockery::mock(AssetManager::class);
-        $manager->shouldReceive('getContainer')->with('ghost')->andReturn(null);
+        $manager = realAssetManager();
+        $manager->addContainer('known', ['build_directory' => 'build/known']);
 
         $app = new Container;
         $app->instance(AssetManager::class, $manager);
