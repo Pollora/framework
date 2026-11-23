@@ -29,12 +29,12 @@ final readonly class ObjectCachePackageCheck implements CheckInterface
     /**
      * @param  (Closure(): bool)|null  $packageInstalled  Tells whether the package is installed; Composer answers by default
      * @param  (Closure(): bool)|null  $redisLoaded  Tells whether phpredis is loaded; the extension list answers by default
-     * @param  (Closure(): ?string)|null  $dropIn  Returns the contents of the drop-in, or null when there is none; WP_CONTENT_DIR answers by default
+     * @param  string|null  $contentDir  The content directory that holds object-cache.php; WP_CONTENT_DIR by default
      */
     public function __construct(
         private ?Closure $packageInstalled = null,
         private ?Closure $redisLoaded = null,
-        private ?Closure $dropIn = null,
+        private ?string $contentDir = null,
     ) {}
 
     public function id(): string
@@ -113,15 +113,13 @@ final readonly class ObjectCachePackageCheck implements CheckInterface
      */
     private function dropInContents(): ?string
     {
-        if ($this->dropIn instanceof Closure) {
-            return ($this->dropIn)();
-        }
+        $directory = $this->contentDir ?? (defined('WP_CONTENT_DIR') ? (string) constant('WP_CONTENT_DIR') : '');
 
-        if (! defined('WP_CONTENT_DIR')) {
+        if ($directory === '') {
             return null;
         }
 
-        $path = rtrim((string) constant('WP_CONTENT_DIR'), '/').'/object-cache.php';
+        $path = rtrim($directory, '/').'/object-cache.php';
         $contents = is_file($path) ? file_get_contents($path) : false;
 
         return $contents === false ? null : $contents;
