@@ -38,15 +38,16 @@ class JsonStateConnector implements ModuleStateConnector
 
     public function set(string $module, bool $enabled): void
     {
-        $this->write([...$this->all(), $module => $enabled]);
+        $this->update(static fn (array $states): array => [...$states, $module => $enabled]);
     }
 
     public function forget(string $module): void
     {
-        $states = $this->all();
-        unset($states[$module]);
+        $this->update(static function (array $states) use ($module): array {
+            unset($states[$module]);
 
-        $this->write($states);
+            return $states;
+        });
     }
 
     public function writable(): bool
@@ -65,14 +66,48 @@ class JsonStateConnector implements ModuleStateConnector
     }
 
     /**
-     * @param  array<string, bool>  $states
+     * Change the states under an exclusive lock, from what the file holds now.
+     *
+     * Two requests switching two modules at once each used to write the whole
+     * file from the states they had read earlier, so the later write erased
+     * the earlier switch. The file is read again once the lock is held, and
+     * replaced by a rename, so a reader never sees a half-written file (which
+     * decodes to no state at all).
+     *
+     * @param  callable(array<string, bool>): array<string, bool>  $change
      */
-    private function write(array $states): void
+    private function update(callable $change): void
     {
-        if (@file_put_contents($this->path, json_encode($states, JSON_PRETTY_PRINT)) === false) {
+        $lock = @fopen(sys_get_temp_dir().'/pollora-module-states-'.md5($this->path).'.lock', 'c');
+
+        if ($lock === false || ! flock($lock, LOCK_EX)) {
             throw ModuleStateException::cannotWriteFile($this->path);
         }
 
-        $this->states = $states;
+        try {
+            $this->states = null;
+            $states = $change($this->all());
+            $temporary = $this->path.'.'.bin2hex(random_bytes(6)).'.tmp';
+
+            if (@file_put_contents($temporary, json_encode($states, JSON_PRETTY_PRINT)) === false) {
+                throw ModuleStateException::cannotWriteFile($this->path);
+            }
+
+            if (is_file($this->path)) {
+                // A replaced file keeps the mode of the one it replaces
+                @chmod($temporary, fileperms($this->path) & 0777);
+            }
+
+            if (! @rename($temporary, $this->path)) {
+                @unlink($temporary);
+
+                throw ModuleStateException::cannotWriteFile($this->path);
+            }
+
+            $this->states = $states;
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
     }
 }
