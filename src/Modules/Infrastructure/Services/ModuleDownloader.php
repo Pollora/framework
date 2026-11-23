@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
 use Pollora\Modules\Domain\Contracts\ModuleInterface;
 use Pollora\Modules\Domain\Exceptions\ModuleException;
-use RuntimeException;
 use Throwable;
 use ZipArchive;
 
@@ -375,11 +374,11 @@ class ModuleDownloader
         try {
             $response = Http::withOptions([
                 'sink' => $tempPath,
-                'progress' => function (int $downloadTotal, int $downloaded) use (&$tooLarge): void {
+                'progress' => function (int $downloadTotal, int $downloaded) use (&$tooLarge, $url, $max): void {
                     if ($this->exceedsCeiling($downloadTotal, $downloaded)) {
                         $tooLarge = true;
 
-                        throw new RuntimeException('The archive is larger than the ceiling.');
+                        throw ModuleException::archiveTooLarge($url, $max);
                     }
                 },
             ])->get($url);
