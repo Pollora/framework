@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.2...develop)
 
+### Changed
+
+- **`pollora/media` is accepted up to `^0.10`** (`^0.8 || ^0.9 || ^0.10`). `media` 0.10.0 refuses an empty signing key for the size signatures (a size URL could be signed by anyone with an empty `app.key`) and aligns the thumbnail drivers on the port; the framework never builds the two drivers whose constructor changed.
+
 ## [v13.43.2](https://github.com/Pollora/framework/compare/v13.43.1...v13.43.2) - 2026-11-23
 
 ### Added
