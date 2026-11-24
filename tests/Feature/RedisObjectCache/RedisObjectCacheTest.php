@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Queue\Events\JobProcessing;
@@ -178,7 +177,7 @@ it('says nothing was flushed when Redis cannot be reached', function (): void {
 
 it('offers the wordpress cache driver, which degrades without Redis', function (): void {
     config(['cache.stores.wordpress' => ['driver' => 'wordpress']]);
-    $store = $this->app->make(CacheManager::class)->store('wordpress');
+    $store = $this->app->make('cache')->store('wordpress');
 
     expect($store->getStore())->toBeInstanceOf(ObjectCacheStore::class)
         ->and($store->get('missing'))->toBeNull();
@@ -187,7 +186,7 @@ it('offers the wordpress cache driver, which degrades without Redis', function (
 it('uses laravel as the group of the wordpress driver when the project leaves it empty', function (): void {
     config(['cache.stores.wordpress' => ['driver' => 'wordpress'], 'pollora.object-cache.laravel.group' => '']);
 
-    expect($this->app->make(CacheManager::class)->store('wordpress')->getStore())->toBeInstanceOf(ObjectCacheStore::class);
+    expect($this->app->make('cache')->store('wordpress')->getStore())->toBeInstanceOf(ObjectCacheStore::class);
 });
 
 it('empties the request cache before each queued job', function (): void {

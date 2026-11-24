@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pollora\RedisObjectCache\Infrastructure\Providers;
 
-use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 use Pollora\ObjectCache\Application\ObjectCache;
 use Pollora\ObjectCache\Infrastructure\Config\Settings;
@@ -125,11 +125,11 @@ final class ObjectCacheServiceProvider extends ServiceProvider
      */
     private function registerCacheDriver(): void
     {
-        $this->callAfterResolving('cache', function (CacheManager $cache): void {
-            $cache->extend(self::DRIVER, function (Application $app, array $config) use ($cache) {
+        $this->callAfterResolving('cache', function (): void {
+            Cache::extend(self::DRIVER, function (Application $app, array $config) {
                 $group = $app->make('config')->get('pollora.object-cache.laravel.group', 'laravel');
 
-                return $cache->repository(new ObjectCacheStore($app->make(ObjectCache::class), is_string($group) && $group !== '' ? $group : 'laravel'), $config);
+                return Cache::repository(new ObjectCacheStore($app->make(ObjectCache::class), is_string($group) && $group !== '' ? $group : 'laravel'), $config);
             });
         });
     }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\RedisObjectCache\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Pollora\ObjectCache\Infrastructure\Exceptions\DropInFileException;
 use Pollora\ObjectCache\Infrastructure\Exceptions\ForeignDropInException;
@@ -13,12 +15,10 @@ use Pollora\ObjectCache\Infrastructure\WordPress\DropInStatus;
 /**
  * Removes the `object-cache.php` drop-in, if it is the package's.
  */
+#[Description('Remove the object-cache.php drop-in: WordPress goes back to its in-memory cache')]
+#[Signature('pollora:object-cache:disable')]
 final class DisableCommand extends Command
 {
-    protected $signature = 'pollora:object-cache:disable';
-
-    protected $description = 'Remove the object-cache.php drop-in: WordPress goes back to its in-memory cache';
-
     public function handle(Manager $manager): int
     {
         try {

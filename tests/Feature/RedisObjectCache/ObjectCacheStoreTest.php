@@ -98,6 +98,7 @@ it('flushes its own group only', function (): void {
     $cache = Caches::make($persistent);
     $store = new ObjectCacheStore($cache, 'laravel');
     $store->put('a', 1, 60);
+
     $cache->set('post', 'p', 'posts');
 
     expect($store->flush())->toBeTrue()
@@ -184,6 +185,7 @@ it('keeps a value forever, past any lifetime', function (): void {
     $clock = new FrozenClock;
     $store = new ObjectCacheStore(Caches::make(new InMemoryCacheStore($clock)), 'laravel');
     $store->forever('k', 'v');
+
     $clock->advance(100000);
 
     expect($store->get('k'))->toBe('v');
@@ -194,6 +196,7 @@ it('gives a touched entry the lifetime asked for, counted from now', function ()
     $store = new ObjectCacheStore(Caches::make(new InMemoryCacheStore($clock)), 'laravel');
     $store->forever('k', 'v');
     $store->touch('k', 100);
+
     $clock->advance(99);
     $stillThere = $store->get('k');
     $clock->advance(2);
@@ -207,6 +210,7 @@ it('lets a touch with no lifetime keep the entry', function (): void {
     $store = new ObjectCacheStore(Caches::make(new InMemoryCacheStore($clock)), 'laravel');
     $store->put('k', 'v', 10);
     $store->touch('k', -5);
+
     $clock->advance(1000);
 
     expect($store->get('k'))->toBe('v');

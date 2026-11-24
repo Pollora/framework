@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollora\RedisObjectCache\UI\Console;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Pollora\ObjectCache\Infrastructure\Config\Settings;
 use Pollora\ObjectCache\Infrastructure\Exceptions\DropInFileException;
@@ -14,12 +16,10 @@ use Pollora\ObjectCache\Infrastructure\WordPress\DropInStatus;
 /**
  * Installs the `object-cache.php` drop-in, or brings it up to date.
  */
+#[Description('Install the object-cache.php drop-in that turns the persistent object cache on')]
+#[Signature('pollora:object-cache:enable {--force : Replace an object-cache.php that belongs to another object cache}')]
 final class EnableCommand extends Command
 {
-    protected $signature = 'pollora:object-cache:enable {--force : Replace an object-cache.php that belongs to another object cache}';
-
-    protected $description = 'Install the object-cache.php drop-in that turns the persistent object cache on';
-
     public function handle(Manager $manager, Settings $settings): int
     {
         try {
