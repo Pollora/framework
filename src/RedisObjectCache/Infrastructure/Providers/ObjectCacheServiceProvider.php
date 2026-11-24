@@ -42,8 +42,11 @@ final class ObjectCacheServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->mergeConfigFrom($this->packageConfig(), 'pollora.object-cache');
-        $this->mergeConfigFrom(__DIR__.'/../../config.php', 'pollora.object-cache');
+        $config = $this->app->make('config');
+        $config->set('pollora.object-cache', self::merge(
+            self::merge($this->packageDefaults(), require dirname(__DIR__, 4).'/config/object-cache.php'),
+            (array) $config->get('pollora.object-cache', []),
+        ));
 
         $this->app->singleton(Settings::class, fn (Application $app): Settings => Settings::fromArray($this->settings($app)));
 
@@ -66,7 +69,7 @@ final class ObjectCacheServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([EnableCommand::class, DisableCommand::class, StatusCommand::class, FlushCommand::class]);
 
-            $this->publishes([__DIR__.'/../../config.php' => $this->app->configPath('object-cache.php')], 'object-cache-config');
+            $this->publishes([dirname(__DIR__, 4).'/config/object-cache.php' => $this->app->configPath('object-cache.php')], 'object-cache-config');
         }
 
         $this->registerCacheDriver();
@@ -114,10 +117,33 @@ final class ObjectCacheServiceProvider extends ServiceProvider
 
     /**
      * The defaults the package ships.
+     *
+     * @return array<string, mixed>
      */
-    private function packageConfig(): string
+    private function packageDefaults(): array
     {
-        return dirname((string) (new ReflectionClass(Settings::class))->getFileName(), 4).'/config/object-cache.php';
+        return require dirname((string) (new ReflectionClass(Settings::class))->getFileName(), 4).'/config/object-cache.php';
+    }
+
+    /**
+     * Lay `$override` over `$base`: keyed arrays are merged key by key, anything else (a value, a list) replaces.
+     *
+     * `mergeConfigFrom()` merges the first level only, so a `prefetch` array set here would hide the
+     * keys of the package's own.
+     *
+     * @param  array<array-key, mixed>  $base
+     * @param  array<array-key, mixed>  $override
+     * @return array<array-key, mixed>
+     */
+    private static function merge(array $base, array $override): array
+    {
+        foreach ($override as $key => $value) {
+            $base[$key] = is_array($value) && ! array_is_list($value) && is_array($base[$key] ?? null) && ! array_is_list($base[$key])
+                ? self::merge($base[$key], $value)
+                : $value;
+        }
+
+        return $base;
     }
 
     /**
