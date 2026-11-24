@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.3...develop)
 
+### Fixed
+
+- **The `OBJECT_CACHE_*` environment variables work again.** v13.43.3 dropped them when the Laravel side of `pollora/object-cache` moved here: `OBJECT_CACHE_PREFETCH`, `OBJECT_CACHE_REDIS_DATABASE`, `OBJECT_CACHE_REDIS_CONNECTION`, `OBJECT_CACHE_CONNECT_TIMEOUT`, `OBJECT_CACHE_READ_TIMEOUT`, `OBJECT_CACHE_PERSISTENT`, `OBJECT_CACHE_PREFIX`, `OBJECT_CACHE_SERIALIZER`, `OBJECT_CACHE_MAX_TTL`, `OBJECT_CACHE_PREFETCH_MAX_KEYS`, `OBJECT_CACHE_PREFETCH_TTL`, `OBJECT_CACHE_LARAVEL_GROUP` and `OBJECT_CACHE_FLUSH_WITH_CACHE_CLEAR` were read by the earlier releases of the package and were silently ignored, so a project that turned the prefetch on or gave the cache a database of its own through `.env` got neither. The settings of `pollora.object-cache` are now merged key by key over the package defaults (a list a project sets replaces the default list instead of mixing with it).
+
 ## [v13.43.3](https://github.com/Pollora/framework/compare/v13.43.2...v13.43.3) - 2026-11-24
 
 ### Added

@@ -98,6 +98,44 @@ it('merges the package defaults and the Laravel keys under pollora.object-cache'
         ->and(config('pollora.object-cache.prefetch.exclude_groups'))->toBe(['userlogins']);
 });
 
+it('reads the environment variables of the first releases, over the package defaults', function (): void {
+    $names = ['OBJECT_CACHE_PREFETCH' => 'true', 'OBJECT_CACHE_PREFETCH_MAX_KEYS' => '120', 'OBJECT_CACHE_REDIS_DATABASE' => '5', 'OBJECT_CACHE_SERIALIZER' => 'igbinary', 'OBJECT_CACHE_MAX_TTL' => '3600', 'OBJECT_CACHE_PREFIX' => 'env-prefix', 'OBJECT_CACHE_LARAVEL_GROUP' => 'mine', 'OBJECT_CACHE_FLUSH_WITH_CACHE_CLEAR' => 'false', 'OBJECT_CACHE_READ_TIMEOUT' => '0.5'];
+
+    foreach ($names as $name => $value) {
+        putenv($name.'='.$value);
+        $_ENV[$name] = $value;
+    }
+
+    try {
+        config(['pollora.object-cache' => []]);
+        (new ObjectCacheServiceProvider($this->app))->register();
+        $merged = config('pollora.object-cache');
+
+        expect($merged['prefetch'])->toMatchArray(['enabled' => true, 'max_keys' => 120, 'ttl' => 604800, 'exclude_groups' => ['userlogins']])
+            ->and($merged['redis'])->toMatchArray(['database' => 5, 'read_timeout' => 0.5, 'connect_timeout' => 1.0, 'port' => 6379])
+            ->and($merged['serializer'])->toBe('igbinary')
+            ->and($merged['max_ttl'])->toBe(3600)
+            ->and($merged['prefix'])->toBe('env-prefix')
+            ->and($merged['laravel'])->toBe(['group' => 'mine', 'flush_with_cache_clear' => false]);
+    } finally {
+        foreach (array_keys($names) as $name) {
+            putenv($name);
+            unset($_ENV[$name]);
+        }
+    }
+});
+
+it('keeps what the project sets over the environment, replacing a list instead of mixing it, and keeps the defaults it does not set', function (): void {
+    config(['pollora.object-cache' => ['prefetch' => ['enabled' => true, 'exclude_groups' => ['a', 'b']], 'global_groups' => ['g']]]);
+    (new ObjectCacheServiceProvider($this->app))->register();
+
+    expect(config('pollora.object-cache.prefetch.enabled'))->toBeTrue()
+        ->and(config('pollora.object-cache.prefetch.max_keys'))->toBe(300)
+        ->and(config('pollora.object-cache.prefetch.exclude_groups'))->toBe(['a', 'b'])
+        ->and(config('pollora.object-cache.global_groups'))->toBe(['g'])
+        ->and(config('pollora.object-cache.laravel.group'))->toBe('laravel');
+});
+
 it('hands the drop-in the settings of the project', function (): void {
     config(['pollora.object-cache.prefix' => 'from-laravel']);
 
