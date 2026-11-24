@@ -20,12 +20,19 @@ import { artisan, homeUrl, runId, wp } from '../support/site';
  *   boot_ms        time from the start of the request to wp_loaded, warm (REST index)
  *   cold_boot_ms   the same, on the first request after `discovery:clear`
  *   thumbnail_ms   wp_generate_attachment_metadata() for one 2400x1600 JPEG, every size
+ *
+ * Next to them the report carries `calibration`: how fast this machine ran two fixed pieces of work
+ * (cpu_ref_ms, fs_ref_ms). The shared runners differ by up to a factor of two from one night to the
+ * next, which the comparison cannot tell from a regression; these are recorded to find out how the
+ * timings follow the machine. They are printed, never judged.
  */
 const out = process.env.E2E_PERF_OUT ?? './test-results/perf-metrics.json';
 const warmRuns = 7;
 const coldRuns = 3;
 const thumbnailRuns = 3;
+const calibrationRuns = 5;
 const metrics: Metrics = {};
+const calibration: Metrics = {};
 
 test.skip(process.env.E2E_PERF !== '1', 'set E2E_PERF=1 to measure');
 test.describe.configure({ mode: 'serial' });
@@ -43,7 +50,7 @@ test.afterAll(() => {
     }
 
     mkdirSync(join(out, '..'), { recursive: true });
-    writeFileSync(out, `${JSON.stringify({ measuredAt: new Date().toISOString(), run: runId, metrics }, null, 2)}\n`);
+    writeFileSync(out, `${JSON.stringify({ measuredAt: new Date().toISOString(), run: runId, metrics, calibration }, null, 2)}\n`);
 });
 
 /** One REST index request, and the boot time the framework reported for it. */
@@ -95,4 +102,20 @@ test('thumbnail generation', () => {
     }
 
     metrics.thumbnail_ms = median(samples);
+});
+
+test('calibration', () => {
+    const script = readFileSync(join(import.meta.dirname, '..', 'fixtures', 'perf', 'calibration.php'), 'utf8').replace(/^<\?php\s*/, '');
+    const cpu: number[] = [];
+    const disk: number[] = [];
+
+    for (let run = 0; run < calibrationRuns; run++) {
+        const result = JSON.parse(wp('eval', script)) as { cpu_ref_ms: number; fs_ref_ms: number };
+
+        cpu.push(result.cpu_ref_ms);
+        disk.push(result.fs_ref_ms);
+    }
+
+    calibration.cpu_ref_ms = median(cpu);
+    calibration.fs_ref_ms = median(disk);
 });

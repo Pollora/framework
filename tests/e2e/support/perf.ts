@@ -151,8 +151,14 @@ export function median(values: number[]): number {
 /** The nightly measures, in milliseconds. Each is the median of several runs. */
 export type Metrics = Record<string, number>;
 
-/** What one nightly run writes: the metrics and what they were measured on. */
-export type MetricsReport = { measuredAt: string; run: string; metrics: Metrics };
+/**
+ * What one nightly run writes: the metrics, and how fast the machine was.
+ *
+ * `calibration` holds fixed pieces of work that do not depend on the framework (see
+ * fixtures/perf/calibration.php). It is printed next to the verdict and never judged: the
+ * reports of the nights before it existed have none.
+ */
+export type MetricsReport = { measuredAt: string; run: string; metrics: Metrics; calibration?: Metrics };
 
 export type MetricFinding = { metric: string; baseline: number; current: number; change: number };
 
@@ -226,6 +232,28 @@ export function describeComparison(comparison: Comparison, tolerance = 0.1): str
     return lines;
 }
 
+/**
+ * The calibration as lines for the CI log: this night's, and the reference night's when it has one.
+ * Information only: the machine is not the code, so it never fails a run.
+ */
+export function describeCalibration(current: Metrics | undefined, baseline: Metrics | undefined): string[] {
+    if (current === undefined) {
+        return [];
+    }
+
+    return Object.entries(current).map(([name, value]) => {
+        const before = baseline?.[name];
+
+        if (before === undefined || before <= 0) {
+            return `calibration ${name}: ${value} ms`;
+        }
+
+        const change = (value - before) / before;
+
+        return `calibration ${name}: ${value} ms (reference night ${before} ms, ${change >= 0 ? '+' : ''}${(change * 100).toFixed(1)} %)`;
+    });
+}
+
 /** The verdict of a nightly run: what to print and whether the job fails. */
 export type Verdict = { failed: boolean; lines: string[] };
 
@@ -238,11 +266,11 @@ export type Verdict = { failed: boolean; lines: string[] };
  */
 export function judgeRun(current: MetricsReport, baseline: MetricsReport | null, tolerance = 0.1): Verdict {
     if (baseline === null) {
-        return { failed: false, lines: ['No baseline yet: this run becomes the reference.', ...Object.entries(current.metrics).map(([metric, value]) => `${metric}: ${value} ms`)] };
+        return { failed: false, lines: ['No baseline yet: this run becomes the reference.', ...Object.entries(current.metrics).map(([metric, value]) => `${metric}: ${value} ms`), ...describeCalibration(current.calibration, undefined)] };
     }
 
     const comparison = compareMetrics(current.metrics, baseline.metrics, tolerance);
-    const lines = [`Baseline of ${baseline.measuredAt} (run ${baseline.run})`, ...describeComparison(comparison, tolerance)];
+    const lines = [`Baseline of ${baseline.measuredAt} (run ${baseline.run})`, ...describeComparison(comparison, tolerance), ...describeCalibration(current.calibration, baseline.calibration)];
 
     return { failed: comparison.regressions.length > 0 || comparison.missing.length > 0, lines };
 }
