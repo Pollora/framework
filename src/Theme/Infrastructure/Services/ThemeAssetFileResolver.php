@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollora\Theme\Infrastructure\Services;
 
-use Pollora\Asset\Infrastructure\Services\AssetFile;
+use Pollora\Asset\Application\Services\AssetFile;
 use Pollora\Theme\Domain\Contracts\ThemeAssetUrlResolverInterface;
 
 /**

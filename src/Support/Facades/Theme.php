@@ -14,14 +14,15 @@ use Pollora\Theme\Domain\Contracts\ThemeService;
  * with improved type safety and modern PHP syntax.
  *
  * @method static ThemeService instance() Get the ThemeService instance
- * @method static void addSupport(string|array $feature, mixed $args = null) Add theme support for a feature
- * @method static void removeSupport(string $feature) Remove theme support for a feature
- * @method static bool supports(string $feature) Check if theme supports a feature
- * @method static void loadTextDomain(string $domain, string $path = '') Load theme text domain
  * @method static void load(string $themeName) Load a theme by name
  * @method static string path(string $path) Get path relative to the active theme
- * @method static string|bool active() Get the active theme name
+ * @method static string|null active() Get the active theme name
  * @method static \Pollora\Theme\Domain\Models\ThemeMetadata|null theme() Get the theme metadata object
+ * @method static string|null parent() Get the parent theme name
+ * @method static array getParentThemes() Get the parent themes of the active theme
+ * @method static array getAvailableThemes() Get the metadata of the available themes
+ * @method static bool hasTheme(string $name) Check whether a theme exists
+ * @method static \Pollora\Modules\Domain\Contracts\ModuleInterface|null getActiveTheme() Get the active theme module
  */
 class Theme extends Facade
 {

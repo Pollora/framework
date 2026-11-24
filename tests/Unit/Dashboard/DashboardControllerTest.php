@@ -9,12 +9,11 @@ use Pollora\Attributes\Taxonomy;
 use Pollora\Dashboard\Domain\Contracts\WordPressEnvironmentInterface;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Dashboard\UI\Http\DashboardController;
-use Pollora\Discovery\Application\Services\DiscoveryManager;
-use Pollora\Discovery\Domain\Contracts\DiscoveryEngineInterface;
 use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
 use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
+use Tests\Support\InstrumentedFakeDiscoveryEngine;
 
 #[PostType('press-summary', singular: 'Press summary', plural: 'Press summaries')]
 class CovDashboardPressSummary {}
@@ -30,16 +29,12 @@ class CovDashboardPressTopic {}
  */
 function renderDashboardPage(string $current, string $latest, array $discovered = [], array $stats = [], ?object $modules = null, bool $multisite = false, ?object $cacheDriver = null): string
 {
-    $manager = Mockery::mock(DiscoveryManager::class);
-    $manager->shouldReceive('getDiscoveredItems')->andReturnUsing(fn (string $id): array => $discovered[$id] ?? []);
-    $manager->shouldReceive('getPerformanceStats')->andReturn($stats);
-    if ($cacheDriver === null) {
-        $manager->shouldReceive('getEngine')->andThrow(new RuntimeException('no engine'));
-    } else {
-        $engine = Mockery::mock(DiscoveryEngineInterface::class);
-        $engine->shouldReceive('getCacheDriver')->andReturn($cacheDriver);
-        $manager->shouldReceive('getEngine')->andReturn($engine);
-    }
+    $manager = realDiscoveryManager(new InstrumentedFakeDiscoveryEngine(
+        driver: $cacheDriver ?? new RuntimeException('no engine'),
+        stats: $stats,
+        discovered: $discovered,
+        knowsEveryIdentifier: true,
+    ));
 
     $container = Mockery::mock(ContainerInterface::class);
     $container->shouldReceive('get')->with('translator')->andThrow(new RuntimeException('none'));

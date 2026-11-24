@@ -96,6 +96,12 @@ return [
     | If specific API routes need a plugin (e.g., WooCommerce for product data),
     | list its directory name here. Only these plugins will be loaded for /api/ requests.
     |
+    | SECURITY: a plugin that is not listed does not run on /api/ routes. A firewall,
+    | a rate limiter or a JWT authentication plugin protects the front and the
+    | administration, but NOT /api/ unless it is listed here (or the protection lives
+    | in front of PHP, or in Laravel middleware). `php artisan pollora:doctor` warns
+    | when a well-known security plugin is active and left out.
+    |
     | Glob patterns are supported:
     |   'api_plugins' => ['woocommerce*'],  // woocommerce, woocommerce-subscriptions, etc.
     |   'api_plugins' => ['woocommerce', 'advanced-custom-fields-pro'],

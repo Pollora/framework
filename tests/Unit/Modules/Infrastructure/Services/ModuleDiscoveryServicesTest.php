@@ -13,6 +13,7 @@ use Pollora\Modules\Infrastructure\Services\FrameworkModuleDiscovery;
 use Pollora\Modules\Infrastructure\Services\LaravelModuleDiscovery;
 use Pollora\Modules\Infrastructure\Services\ModuleDiscoveryOrchestrator;
 use Psr\Log\LoggerInterface;
+use Tests\Support\FakeDiscoveryEngine;
 
 afterEach(fn () => Mockery::close());
 
@@ -102,32 +103,31 @@ describe('ModuleDiscoveryOrchestrator', function (): void {
     });
 
     it('returns what the discovery manager finds for a directory', function (): void {
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->once()->andReturn(['hooks' => ['a']]);
-        $this->container->instance(DiscoveryManager::class, $manager);
+        $engine = (new FakeDiscoveryEngine)->scanning(fn (): array => ['hooks' => ['a']]);
+        $this->container->instance(DiscoveryManager::class, realDiscoveryManager($engine));
 
         $result = (new ModuleDiscoveryOrchestrator($this->container))->discoverAndReturn($this->dir);
 
-        expect($result)->toBe(['hooks' => ['a']]);
+        expect($result)->toBe(['hooks' => ['a']])
+            ->and(array_count_values($engine->calls->getArrayCopy())['discover'])->toBe(1);
     });
 
     it('returns an empty array and logs when the manager fails', function (): void {
         $logger = Mockery::mock(LoggerInterface::class);
         $logger->shouldReceive('error')->once();
         $this->container->instance(LoggerInterface::class, $logger);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->andThrow(new RuntimeException('boom'));
-        $this->container->instance(DiscoveryManager::class, $manager);
+        $engine = (new FakeDiscoveryEngine)->failOn('discover', new RuntimeException('boom'));
+        $this->container->instance(DiscoveryManager::class, realDiscoveryManager($engine));
 
         expect((new ModuleDiscoveryOrchestrator($this->container))->discoverAndReturn($this->dir))->toBe([]);
     });
 
     it('returns an empty array for a missing directory', function (): void {
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->never();
-        $this->container->instance(DiscoveryManager::class, $manager);
+        $engine = new FakeDiscoveryEngine;
+        $this->container->instance(DiscoveryManager::class, realDiscoveryManager($engine));
 
-        expect((new ModuleDiscoveryOrchestrator($this->container))->discoverAndReturn($this->dir.'/nope'))->toBe([]);
+        expect((new ModuleDiscoveryOrchestrator($this->container))->discoverAndReturn($this->dir.'/nope'))->toBe([])
+            ->and($engine->calls->getArrayCopy())->toBe([]);
     });
 
     it('delegates Laravel module operations to a single lazily built discovery service', function (): void {
@@ -154,9 +154,8 @@ describe('ModuleDiscoveryOrchestrator', function (): void {
         mkdir($this->dir.'/app/Blog/Domain', 0777, true);
         mkdir($this->dir.'/app/Plain', 0777, true);
         $app = new Application($this->dir);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->andReturn(['x' => [1]]);
-        $app->instance(DiscoveryManager::class, $manager);
+        $app->instance(DiscoveryManager::class, realDiscoveryManager((new FakeDiscoveryEngine)->scanning(fn (): array => ['x' => [1]])));
+
         $engine = Mockery::mock(DiscoveryEngineInterface::class);
         $engine->shouldReceive('addLocation')->andReturnSelf();
         $engine->shouldReceive('discover')->andReturnSelf();
@@ -232,17 +231,21 @@ describe('LaravelModuleDiscovery', function (): void {
         $engine->shouldReceive('discover')->once()->andReturnSelf();
         $engine->shouldReceive('apply')->once()->andReturnSelf();
         $this->container->bind(DiscoveryEngineInterface::class, fn () => $engine);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->once()->with(Mockery::on(
-            fn (DiscoveryLocationInterface $l): bool => $l->getPath() === $srcOnly.'/src'
-        ))->andReturn(['routes' => [1]]);
-        $this->container->instance(DiscoveryManager::class, $manager);
+        $scanned = [];
+        $this->container->instance(DiscoveryManager::class, realDiscoveryManager((new FakeDiscoveryEngine)->scanning(
+            function (DiscoveryLocationInterface $l) use (&$scanned): array {
+                $scanned[] = $l->getPath();
+
+                return ['routes' => [1]];
+            }
+        )));
         $discovery = new LaravelModuleDiscovery($this->container);
 
         $discovery->discoverLaravelModules();
         $discovery->applyLaravelModules();
 
-        expect($discovery->discoverAndReturnLaravelModules())->toBe(['Blog' => ['routes' => [1]]]);
+        expect($discovery->discoverAndReturnLaravelModules())->toBe(['Blog' => ['routes' => [1]]])
+            ->and($scanned)->toBe([$srcOnly.'/src']);
         discoveryRemoveDir($srcOnly);
     });
 
@@ -280,11 +283,9 @@ describe('LaravelModuleDiscovery', function (): void {
             discoveryFakeModule('Blog', $this->dir),
             discoveryFakeModule('Empty', $other),
         ]);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->andReturnUsing(
+        $this->container->instance(DiscoveryManager::class, realDiscoveryManager((new FakeDiscoveryEngine)->scanning(
             fn (DiscoveryLocationInterface $l): array => str_starts_with($l->getPath(), $this->dir) ? ['routes' => [1]] : []
-        );
-        $this->container->instance(DiscoveryManager::class, $manager);
+        )));
 
         $result = (new LaravelModuleDiscovery($this->container))->discoverAndReturnLaravelModules();
 
@@ -402,11 +403,9 @@ describe('FrameworkModuleDiscovery', function (): void {
     });
 
     it('returns results per module and per layer, skipping empty ones', function (): void {
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->andReturnUsing(
+        $this->app->instance(DiscoveryManager::class, realDiscoveryManager((new FakeDiscoveryEngine)->scanning(
             fn (DiscoveryLocationInterface $l): array => str_ends_with($l->getPath(), 'Blog/UI') ? ['routes' => [1]] : []
-        );
-        $this->app->instance(DiscoveryManager::class, $manager);
+        )));
 
         $result = (new FrameworkModuleDiscovery($this->app))->discoverAndReturnFrameworkModules();
 
@@ -417,9 +416,7 @@ describe('FrameworkModuleDiscovery', function (): void {
         $logger = Mockery::mock(LoggerInterface::class);
         $logger->shouldReceive('error')->atLeast()->once();
         $this->app->instance(LoggerInterface::class, $logger);
-        $manager = Mockery::mock(DiscoveryManager::class);
-        $manager->shouldReceive('discoverAllInLocation')->andThrow(new RuntimeException('boom'));
-        $this->app->instance(DiscoveryManager::class, $manager);
+        $this->app->instance(DiscoveryManager::class, realDiscoveryManager((new FakeDiscoveryEngine)->failOn('discover', new RuntimeException('boom'))));
 
         expect((new FrameworkModuleDiscovery($this->app))->discoverAndReturnFrameworkModules())->toBe([]);
     });

@@ -10,13 +10,13 @@ use Pollora\Attributes\Taxonomy;
 use Pollora\Dashboard\Domain\Contracts\WordPressEnvironmentInterface;
 use Pollora\Dashboard\Domain\Services\SystemInfoCollector;
 use Pollora\Dashboard\UI\Console\StatusCommand;
-use Pollora\Discovery\Application\Services\DiscoveryManager;
 use Pollora\Modules\Application\Services\ModuleStates;
 use Pollora\Modules\Application\Services\ModuleVersions;
 use Pollora\Modules\Domain\Contracts\ModuleStateConnector;
 use Pollora\VersionCheck\Domain\Contracts\VersionCheckerInterface;
 use Pollora\VersionCheck\Domain\Services\VersionComparator;
 use Psr\Container\ContainerInterface;
+use Tests\Support\InstrumentedFakeDiscoveryEngine;
 
 #[PostType('press-summary', singular: 'Press summary', plural: 'Press summaries')]
 class CovStatusPressSummary {}
@@ -37,10 +37,12 @@ function bindStatusCollector(Application $app, string $current, string $latest, 
         'getLatestVersion' => $latest,
     ]);
 
-    $manager = Mockery::mock(DiscoveryManager::class);
-    $manager->shouldReceive('getDiscoveredItems')->andReturnUsing(fn (string $id): array => $discovered[$id] ?? []);
-    $manager->shouldReceive('getPerformanceStats')->andReturn($stats);
-    $manager->shouldReceive('getEngine')->andThrow(new RuntimeException('no engine'));
+    $manager = realDiscoveryManager(new InstrumentedFakeDiscoveryEngine(
+        driver: new RuntimeException('no engine'),
+        stats: $stats,
+        discovered: $discovered,
+        knowsEveryIdentifier: true,
+    ));
 
     $container = Mockery::mock(ContainerInterface::class);
     $container->shouldReceive('get')->with('translator')->andReturn(new class

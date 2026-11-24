@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Pollora\Logging\Application\Services\WordPressErrorLoggingService;
 use Pollora\Logging\Domain\Contracts\WordPressErrorHookRegistrarInterface;
 use Pollora\Logging\Domain\Contracts\WordPressErrorLoggerInterface;
+use Pollora\Logging\Domain\Contracts\WordPressErrorReporterInterface;
 use Pollora\Logging\Domain\Services\WordPressErrorHandler;
 use Pollora\Logging\Infrastructure\Adapters\LaravelWordPressErrorLogger;
 use Pollora\Logging\Infrastructure\Services\WordPressErrorHookRegistrar;
@@ -41,6 +42,7 @@ class LoggingServiceProvider extends ServiceProvider
 
         $this->app->singleton(WordPressErrorHandler::class);
         $this->app->singleton(WordPressErrorLoggingService::class);
+        $this->app->singleton(WordPressErrorReporterInterface::class, fn ($app) => $app->make(WordPressErrorLoggingService::class));
     }
 
     protected function getDefaultLoggingChannels(): array

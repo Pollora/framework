@@ -56,6 +56,11 @@ final class ModuleException extends Exception
         return new self('Unable to download archive from '.$url.'. Check the release exists and that GitHub is reachable.');
     }
 
+    public static function archiveTooLarge(string $url, int $maxBytes): self
+    {
+        return new self(sprintf('The archive at %s is larger than the %d MiB ceiling: download refused.', $url, intdiv($maxBytes, 1024 * 1024)));
+    }
+
     public static function archiveNotReadable(string $path): self
     {
         return new self('Unable to open ZIP archive: '.$path.'. The download may be incomplete: try again.');

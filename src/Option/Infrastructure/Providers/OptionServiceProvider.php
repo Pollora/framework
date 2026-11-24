@@ -8,7 +8,9 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Pollora\Option\Adapter\Out\WordPress\WordPressOptionRepository;
 use Pollora\Option\Application\Service\OptionService;
+use Pollora\Option\Application\Services\OptionManager;
 use Pollora\Option\Domain\Contract\OptionRepositoryInterface;
+use Pollora\Option\Domain\Contracts\OptionManagerInterface;
 use Pollora\Option\Domain\Service\OptionValidationService;
 use Pollora\Support\Facades\Option;
 
@@ -21,7 +23,8 @@ use Pollora\Support\Facades\Option;
  * Bindings:
  *  - {@see OptionRepositoryInterface} → {@see WordPressOptionRepository}
  *  - {@see OptionValidationService} (singleton)
- *  - {@see OptionService} (singleton, used by the Option facade)
+ *  - {@see OptionService} (singleton)
+ *  - {@see OptionManagerInterface} → {@see OptionManager} (singleton, used by the Option facade)
  *
  * @see Option  The Laravel facade.
  */
@@ -42,6 +45,10 @@ final class OptionServiceProvider extends ServiceProvider
         $this->app->singleton(OptionService::class, fn (Application $app): OptionService => new OptionService(
             $app->make(OptionRepositoryInterface::class),
             $app->make(OptionValidationService::class)
+        ));
+
+        $this->app->singleton(OptionManagerInterface::class, fn (Application $app): OptionManager => new OptionManager(
+            $app->make(OptionService::class)
         ));
     }
 }
