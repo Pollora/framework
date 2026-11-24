@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
     compareMetrics,
+    describeCalibration,
     describeComparison,
     judgeRun,
     type Diagnostics,
@@ -187,5 +188,42 @@ describe('judgeRun', () => {
 
     it('passes within the tolerance', () => {
         assert.equal(judgeRun(run({ boot_ms: 109 }), run({ boot_ms: 100 })).failed, false);
+    });
+});
+
+describe('describeCalibration', () => {
+    it('says nothing when the run has no calibration', () => {
+        assert.deepEqual(describeCalibration(undefined, { cpu_ref_ms: 50 }), []);
+    });
+
+    it("prints this night's numbers alone when the reference night has none", () => {
+        assert.deepEqual(describeCalibration({ cpu_ref_ms: 60 }, undefined), ['calibration cpu_ref_ms: 60 ms']);
+        assert.deepEqual(describeCalibration({ cpu_ref_ms: 60, fs_ref_ms: 9 }, { cpu_ref_ms: 0 }), ['calibration cpu_ref_ms: 60 ms', 'calibration fs_ref_ms: 9 ms']);
+    });
+
+    it('compares each number with the reference night', () => {
+        assert.deepEqual(describeCalibration({ cpu_ref_ms: 75, fs_ref_ms: 8 }, { cpu_ref_ms: 50, fs_ref_ms: 10 }), [
+            'calibration cpu_ref_ms: 75 ms (reference night 50 ms, +50.0 %)',
+            'calibration fs_ref_ms: 8 ms (reference night 10 ms, -20.0 %)',
+        ]);
+    });
+});
+
+describe('judgeRun and the calibration', () => {
+    const report = (metrics: Record<string, number>, calibration?: Record<string, number>) => ({ measuredAt: '2026-11-18T03:30:00Z', run: '1', metrics, calibration });
+
+    it('never fails on a calibration that moved: the machine is not the code', () => {
+        const verdict = judgeRun(report({ boot_ms: 100 }, { cpu_ref_ms: 200 }), report({ boot_ms: 100 }, { cpu_ref_ms: 50 }));
+
+        assert.equal(verdict.failed, false);
+        assert.ok(verdict.lines.includes('calibration cpu_ref_ms: 200 ms (reference night 50 ms, +300.0 %)'));
+    });
+
+    it('still fails on a regression, calibration or not', () => {
+        assert.equal(judgeRun(report({ boot_ms: 150 }, { cpu_ref_ms: 50 }), report({ boot_ms: 100 })).failed, true);
+    });
+
+    it('prints the calibration on the first night too', () => {
+        assert.ok(judgeRun(report({ boot_ms: 100 }, { cpu_ref_ms: 50 }), null).lines.includes('calibration cpu_ref_ms: 50 ms'));
     });
 });
