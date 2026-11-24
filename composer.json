@@ -36,7 +36,7 @@
         "pollora/block-bindings": "^0.2",
         "pollora/discovery": "^0.1 || ^0.2 || ^0.3 || ^1.0",
         "pollora/entity": "^2.0",
-        "pollora/media": "^0.8 || ^0.9",
+        "pollora/media": "^0.8 || ^0.9 || ^0.10",
         "pollora/meta": "^0.1",
         "pollora/hook": "^2.0.1",
         "pollora/i18n": "^0.1.1",
