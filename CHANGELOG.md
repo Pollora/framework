@@ -5,7 +5,14 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.4...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.44.0...develop)
+
+## [v13.44.0](https://github.com/Pollora/framework/compare/v13.43.4...v13.44.0) - 2026-11-24
+
+### Changed
+
+- **Built on Laravel 13.44.** The `illuminate/*` packages are required at `^13.44` (they were `^13.43`), and the framework follows Laravel's line again. The test suite and static analysis pass against Laravel 13.44.0.
+- **`pollora/object-cache` is required at `^0.3.1`.** 0.3.1 fixes the drop-in when the Composer autoloader it names cannot be read by the web server: it used to stop the whole site with a fatal error when the file existed but could not be opened, and stayed off without a word otherwise. It now stays inert and writes the path to the PHP error log, and `pollora:object-cache:status` has an `Autoloader` line (the path, whether this user can read it, and a flag for a path in the home directory). Run `pollora:object-cache:enable` again to update the drop-in file.
 
 ## [v13.43.4](https://github.com/Pollora/framework/compare/v13.43.3...v13.43.4) - 2026-11-24
 
