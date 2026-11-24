@@ -10,7 +10,14 @@ updates:
       - "dependencies"
       - "automerge"
     versioning-strategy: "increase"
-    
+    ignore:
+      # PHPStan 2.3.6 removed AnalyserResult::getCollectedData(), which pest-plugin-type-coverage 3.x
+      # still calls: `pest --type-coverage` fails with "Call to undefined method" (#667), so composer.json
+      # caps phpstan/phpstan below 2.3.6. The fix is only in the plugin 4.0.6+ (Pest 4) and 5.x; lift this
+      # ignore, and the cap, when the framework moves to Pest 4 or later.
+      - dependency-name: "phpstan/phpstan"
+        versions: [">=2.3.6"]
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
