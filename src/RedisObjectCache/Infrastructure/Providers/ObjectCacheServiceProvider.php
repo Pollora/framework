@@ -44,7 +44,7 @@ final class ObjectCacheServiceProvider extends ServiceProvider
     {
         $config = $this->app->make('config');
         $config->set('pollora.object-cache', self::merge(
-            self::merge($this->packageDefaults(), require __DIR__.'/../../config.php'),
+            self::merge($this->packageDefaults(), require dirname(__DIR__, 4).'/config/object-cache.php'),
             (array) $config->get('pollora.object-cache', []),
         ));
 
@@ -69,7 +69,7 @@ final class ObjectCacheServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([EnableCommand::class, DisableCommand::class, StatusCommand::class, FlushCommand::class]);
 
-            $this->publishes([__DIR__.'/../../config.php' => $this->app->configPath('object-cache.php')], 'object-cache-config');
+            $this->publishes([dirname(__DIR__, 4).'/config/object-cache.php' => $this->app->configPath('object-cache.php')], 'object-cache-config');
         }
 
         $this->registerCacheDriver();
