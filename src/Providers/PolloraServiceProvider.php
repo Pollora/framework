@@ -35,6 +35,7 @@ use Pollora\Option\Infrastructure\Providers\OptionServiceProvider;
 use Pollora\Permalink\Infrastructure\Providers\PermalinkServiceProvider;
 use Pollora\Plugin\Infrastructure\Providers\PluginServiceProvider;
 use Pollora\PostType\Infrastructure\Providers\PostTypeServiceProvider;
+use Pollora\RedisObjectCache\Infrastructure\Providers\ObjectCacheServiceProvider;
 use Pollora\Role\Infrastructure\Laravel\RoleServiceProvider;
 use Pollora\Route\Infrastructure\Providers\RouteServiceProvider;
 use Pollora\Schedule\SchedulerServiceProvider;
@@ -117,6 +118,7 @@ class PolloraServiceProvider extends ServiceProvider
         $this->app->register(AbilityServiceProvider::class);
         $this->app->register(ConfigServiceProvider::class);
         $this->app->register(QueryServiceProvider::class);
+        $this->app->register(ObjectCacheServiceProvider::class);
         $this->app->register(SageDirectivesServiceProvider::class);
         $this->app->register(WordPressEventServiceProvider::class);
         $this->app->register(TemplateHierarchyServiceProvider::class);
