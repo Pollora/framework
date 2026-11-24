@@ -5,7 +5,17 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.2...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.3...develop)
+
+## [v13.43.3](https://github.com/Pollora/framework/compare/v13.43.2...v13.43.3) - 2026-11-24
+
+### Added
+
+- **A persistent Redis object cache, shipped with the framework.** `pollora/object-cache` ^0.3 is now required: it is independent of Laravel (it also runs on a classic WordPress or Bedrock), and the framework brings the Laravel side. `RedisObjectCache` builds the package's settings from the Redis connection of `config/database.php` (the one `pollora.object-cache.connection` names, `default` unless changed; its `options` are ignored) and from `pollora.object-cache` (the package defaults, merged), registers them for the `object-cache.php` drop-in, and adds the `pollora:object-cache:enable|disable|status|flush` commands, the `Cache::store('wordpress')` driver, a flush of the site's keys with `cache:clear` (`pollora.object-cache.laravel.flush_with_cache_clear`) and an empty request cache before each queued job. The command names and the `pollora.object-cache.*` keys (including `prefetch.exclude_groups`, which `pollora/woocommerce` fills) are the ones of the earlier releases of the package; the drop-in stays off until `pollora:object-cache:enable` installs it, and phpredis (`ext-redis`) is still needed. Re-run `pollora:object-cache:enable` after the update: the drop-in is now version 2.
+
+### Changed
+
+- **`pollora/media` is accepted up to `^0.10`** (`^0.8 || ^0.9 || ^0.10`). `media` 0.10.0 refuses an empty signing key for the size signatures (a size URL could be signed by anyone with an empty `app.key`) and aligns the thumbnail drivers on the port; the framework never builds the two drivers whose constructor changed.
 
 ## [v13.43.2](https://github.com/Pollora/framework/compare/v13.43.1...v13.43.2) - 2026-11-23
 
@@ -16,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`pollora:doctor` and Site Health report a WordPress network**: a "Multisite" check warns that Pollora supports a network in a limited way and lists the limits that were measured (the administration of a sub-site in a sub-directory network, Laravel queries that always read the main site's tables, the discovery cache keyed by path) and what was not verified. It is skipped on a single site. Documented in "Multisite: what works, what does not".
 
 ### Changed
+
+- **`pollora/assets` is required at `^0.2`, and `pollora/discovery` accepts `^0.3`.** `assets` 0.2.0 makes `AssetManager`, `AssetRetrievalService`, `AssetContainer` and other classes `final` and moves `AssetContainer` to `Domain\Models` and `AssetFile` to `Application\Services`; the framework now imports them from there (the old addresses still load through class aliases, but static analysis does not follow them, so `^0.1` is no longer accepted). A project that extends one of those classes must compose it instead. `discovery` 0.3.0 makes `DiscoveryManager` `final`; it is accepted here, but Composer keeps `discovery` 0.2.x while `block-bindings`, `meta`, `roles`, `schedule`, `wp-cli`, `wp-rest` and `nectar` do not accept 0.3 themselves.
 
 - **The `Option`, `PostType`, `Taxonomy` and `WordPressError` facades resolve a contract (CONV-09).** `Option` fronts the new `OptionManagerInterface` (bound to `OptionManager`, which wraps the `pollora/option` service and carries the `forget()` alias that used to live in the facade), `PostType` and `Taxonomy` front the existing `PostTypeFactoryInterface` and `TaxonomyFactoryInterface`, and `WordPressError` fronts the new `WordPressErrorReporterInterface` (implemented by `WordPressErrorLoggingService`). The facades' calls, `Option::forget()` included, behave as before. The concrete classes stay bound; only code that rebinds a facade's former concrete accessor (`PostTypeFactory`, `TaxonomyFactory`, `WordPressErrorLoggingService`, `OptionService`) to swap what the facade calls must now rebind the contract.
 

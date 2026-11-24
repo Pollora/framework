@@ -6,7 +6,7 @@ namespace Pollora\Asset\Infrastructure\Laravel;
 
 use Pollora\Asset\Domain\Contracts\ViteManagerFactory;
 use Pollora\Asset\Domain\Contracts\ViteManagerInterface;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
+use Pollora\Asset\Domain\Models\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 
 /**

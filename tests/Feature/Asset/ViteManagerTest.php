@@ -6,8 +6,8 @@ use Brain\Monkey\Functions;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
 use Pollora\Asset\Application\Services\MissingBuilds;
+use Pollora\Asset\Domain\Models\AssetContainer;
 use Pollora\Asset\Infrastructure\Providers\AssetServiceProvider;
-use Pollora\Asset\Infrastructure\Repositories\AssetContainer;
 use Pollora\Asset\Infrastructure\Services\ViteManager;
 use Pollora\Asset\UI\Http\MissingBuildNotice;
 
