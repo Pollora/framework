@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.43.2...develop)
 
+### Added
+
+- **A persistent Redis object cache, shipped with the framework.** `pollora/object-cache` ^0.3 is now required: it is independent of Laravel (it also runs on a classic WordPress or Bedrock), and the framework brings the Laravel side. `RedisObjectCache` builds the package's settings from the Redis connection of `config/database.php` (the one `pollora.object-cache.connection` names, `default` unless changed; its `options` are ignored) and from `pollora.object-cache` (the package defaults, merged), registers them for the `object-cache.php` drop-in, and adds the `pollora:object-cache:enable|disable|status|flush` commands, the `Cache::store('wordpress')` driver, a flush of the site's keys with `cache:clear` (`pollora.object-cache.laravel.flush_with_cache_clear`) and an empty request cache before each queued job. The command names and the `pollora.object-cache.*` keys (including `prefetch.exclude_groups`, which `pollora/woocommerce` fills) are the ones of the earlier releases of the package; the drop-in stays off until `pollora:object-cache:enable` installs it, and phpredis (`ext-redis`) is still needed. Re-run `pollora:object-cache:enable` after the update: the drop-in is now version 2.
+
 ### Changed
 
 - **`pollora/media` is accepted up to `^0.10`** (`^0.8 || ^0.9 || ^0.10`). `media` 0.10.0 refuses an empty signing key for the size signatures (a size URL could be signed by anyone with an empty `app.key`) and aligns the thumbnail drivers on the port; the framework never builds the two drivers whose constructor changed.
