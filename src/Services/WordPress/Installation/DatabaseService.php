@@ -26,6 +26,11 @@ class DatabaseService
     public const string SQLITE_FILE = 'database/database.sqlite';
 
     /**
+     * The mode of a SQLite file the installer creates: the owner and the group, nobody else.
+     */
+    public const int SQLITE_FILE_MODE = 0640;
+
+    /**
      * Create a new database service instance.
      *
      * @param  DatabaseConnectionService  $connectionService  Service for testing connections
@@ -80,6 +85,7 @@ class DatabaseService
      * `DB_DATABASE`, which a MySQL setup fills with a database name, would be read as a
      * path, and the default `database/database.sqlite` is used. WordPress still
      * needs the SQLite Database Integration plugin: this does not install it.
+     * A file the method creates is mode 0640; one that already exists keeps its mode.
      *
      * @return string The path written to `DB_DATABASE`
      *
@@ -101,9 +107,22 @@ class DatabaseService
                 throw new DatabaseConnectionException(sprintf('Cannot create the directory of the SQLite database: %s', dirname($file)));
             }
 
-            if (@file_put_contents($file, '') === false) {
+            // Created unreadable by others from the start (0640, whatever the umask is): the file
+            // holds the WordPress password hashes. Not 0600, because PHP-FPM and the CLI can be two
+            // users of the same group.
+            $previousUmask = umask(0137);
+
+            try {
+                $created = @file_put_contents($file, '') !== false;
+            } finally {
+                umask($previousUmask);
+            }
+
+            if (! $created) {
                 throw new DatabaseConnectionException(sprintf('Cannot create the SQLite database file: %s', $file));
             }
+
+            @chmod($file, self::SQLITE_FILE_MODE);
         }
 
         $this->envHandler->updateEnvFile([

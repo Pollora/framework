@@ -6,9 +6,10 @@ namespace Pollora\Logging\Application\Services;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use Pollora\Logging\Domain\Contracts\WordPressErrorReporterInterface;
 use Pollora\Logging\Domain\Services\WordPressErrorHandler;
 
-class WordPressErrorLoggingService
+class WordPressErrorLoggingService implements WordPressErrorReporterInterface
 {
     public function __construct(
         private readonly WordPressErrorHandler $errorHandler,

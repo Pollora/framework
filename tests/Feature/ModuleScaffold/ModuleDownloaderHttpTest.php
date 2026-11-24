@@ -160,3 +160,133 @@ describe('ModuleDownloader over HTTP', function (): void {
             ->and(file_exists($path.'/style.css'))->toBeTrue();
     });
 });
+
+/**
+ * A downloader with a tiny ceiling, and a way to ask the transfer guard directly.
+ */
+function capDownloaderIn(string $tmp, int $max): ModuleDownloader
+{
+    return new class('Pollora/theme-default', $tmp, $max) extends ModuleDownloader
+    {
+        public function __construct(string $repository, private readonly string $tmp, private readonly int $max)
+        {
+            parent::__construct($repository);
+        }
+
+        protected function getTempPath(string $filename): string
+        {
+            return $this->tmp.'/scratch/'.$filename;
+        }
+
+        protected function maxArchiveBytes(): int
+        {
+            return $this->max;
+        }
+
+        public function transferExceeds(int $announced, int $received): bool
+        {
+            return $this->exceedsCeiling($announced, $received);
+        }
+    };
+}
+
+describe('ModuleDownloader archive size ceiling', function (): void {
+    it('refuses an archive whose Content-Length is over the ceiling and leaves nothing behind', function (): void {
+        Http::fake(['github.com/*' => Http::response('x', 200, ['Content-Length' => '5000'])]);
+
+        expect(fn (): string => capDownloaderIn($this->tmp, 1000)->setVersion('v1')->downloadAndExtract($this->tmp.'/themes'))
+            ->toThrow(ModuleException::class, 'ceiling');
+        expect(glob($this->tmp.'/scratch/*'))->toBe([]);
+    });
+
+    it('refuses an archive larger than the ceiling whatever the headers say', function (): void {
+        Http::fake(['github.com/*' => Http::response(str_repeat('x', 2000))]);
+
+        expect(fn (): string => capDownloaderIn($this->tmp, 1000)->setVersion('v1')->downloadAndExtract($this->tmp.'/themes'))
+            ->toThrow(ModuleException::class, 'ceiling');
+        expect(glob($this->tmp.'/scratch/*'))->toBe([]);
+    });
+
+    it('accepts an archive exactly at the ceiling', function (): void {
+        $archive = githubZip($this->tmp.'/source.zip');
+        Http::fake(['github.com/*' => Http::response($archive, 200, ['Content-Length' => (string) strlen($archive)])]);
+
+        $path = capDownloaderIn($this->tmp, strlen($archive))->setVersion('v1')->downloadAndExtract($this->tmp.'/themes');
+
+        expect(file_exists($path.'/style.css'))->toBeTrue();
+    });
+
+    it('judges a running transfer on its announced and its received size', function (): void {
+        $downloader = capDownloaderIn($this->tmp, 1000);
+
+        expect($downloader->transferExceeds(0, 0))->toBeFalse()
+            ->and($downloader->transferExceeds(1000, 1000))->toBeFalse()
+            ->and($downloader->transferExceeds(1001, 0))->toBeTrue()
+            ->and($downloader->transferExceeds(0, 1001))->toBeTrue();
+    });
+
+    it('has a ceiling of 100 MiB by default', function (): void {
+        $probe = new class('Pollora/theme-default') extends ModuleDownloader
+        {
+            public function ceiling(): int
+            {
+                return $this->maxArchiveBytes();
+            }
+        };
+
+        expect($probe->ceiling())->toBe(100 * 1024 * 1024);
+    });
+});
+
+describe('ModuleDownloader tags returned by GitHub', function (): void {
+    it('ignores a tag name that setVersion() would refuse', function (): void {
+        $archive = githubZip($this->tmp.'/source.zip');
+        Http::fake([
+            'api.github.com/repos/Pollora/theme-default/tags*' => Http::response([['name' => '9.9.9/../../evil'], ['name' => "9.0.0\nx"], ['name' => 'v1.0.0']]),
+            'github.com/Pollora/theme-default/archive/refs/tags/v1.0.0.zip' => Http::response($archive),
+        ]);
+
+        downloaderIn($this->tmp)->downloadAndExtract($this->tmp.'/themes');
+
+        Http::assertSent(fn ($request): bool => str_ends_with($request->url(), '/archive/refs/tags/v1.0.0.zip'));
+    });
+
+    it('falls back to the default branch when no returned tag is acceptable', function (): void {
+        $archive = githubZip($this->tmp.'/source.zip');
+        Http::fake([
+            'api.github.com/repos/Pollora/theme-default/tags*' => Http::response([['name' => '1.0/../x'], ['name' => 42]]),
+            'api.github.com/repos/Pollora/theme-default' => Http::response(['default_branch' => 'main']),
+            'github.com/Pollora/theme-default/archive/refs/heads/main.zip' => Http::response($archive),
+        ]);
+
+        downloaderIn($this->tmp)->downloadAndExtract($this->tmp.'/themes');
+
+        Http::assertSent(fn ($request): bool => str_ends_with($request->url(), '/archive/refs/heads/main.zip'));
+    });
+
+    it('uses main when the default branch GitHub returns is not a plain branch name', function (): void {
+        $archive = githubZip($this->tmp.'/source.zip');
+        Http::fake([
+            'api.github.com/repos/Pollora/theme-default/tags*' => Http::response([]),
+            'api.github.com/repos/Pollora/theme-default' => Http::response(['default_branch' => '../../other/repo/archive']),
+            'github.com/Pollora/theme-default/archive/refs/heads/main.zip' => Http::response($archive),
+        ]);
+
+        downloaderIn($this->tmp)->downloadAndExtract($this->tmp.'/themes');
+
+        Http::assertSent(fn ($request): bool => str_ends_with($request->url(), '/archive/refs/heads/main.zip'));
+    });
+
+    it('keeps a branch name with a slash', function (): void {
+        $archive = githubZip($this->tmp.'/source.zip');
+        Http::fake([
+            'api.github.com/repos/Pollora/theme-default/tags*' => Http::response([]),
+            'api.github.com/repos/Pollora/theme-default' => Http::response(['default_branch' => 'release/2.x']),
+            'github.com/Pollora/theme-default/archive/refs/heads/release/2.x.zip' => Http::response($archive),
+        ]);
+
+        downloaderIn($this->tmp)->downloadAndExtract($this->tmp.'/themes');
+
+        Http::assertSent(fn ($request): bool => str_ends_with($request->url(), '/archive/refs/heads/release/2.x.zip'));
+    });
+});

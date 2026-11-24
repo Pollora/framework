@@ -16,7 +16,7 @@ interface PostTypeFactoryInterface
      * @param  string|null  $singular  The singular label for the post type
      * @param  string|null  $plural  The plural label for the post type
      * @param  array<string, mixed>  $args  Additional arguments
-     * @param  int  $priority  Registration priority
+     * @param  int  $priority  Registration priority (5 by default, as the implementation and the documentation say)
      */
-    public function make(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 10): object;
+    public function make(string $slug, ?string $singular = null, ?string $plural = null, array $args = [], int $priority = 5): object;
 }

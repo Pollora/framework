@@ -19,18 +19,6 @@ parameters:
 			path: src/Asset/Infrastructure/Services/ViteManager.php
 
 		-
-			message: '#^Constant AUTH_COOKIE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Auth/WordPressGuard.php
-
-		-
-			message: '#^Constant SECURE_AUTH_COOKIE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Auth/WordPressGuard.php
-
-		-
 			message: '#^Access to an undefined property WP_Upgrader_Skin\:\:\$plugin\.$#'
 			identifier: property.notFound
 			count: 1
