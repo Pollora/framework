@@ -84,11 +84,13 @@ trait QueryTrait
      * like robots.txt, favicon, feeds and trackbacks. Normal template resolution
      * is delegated to the Laravel routing system.
      *
-     * `template_redirect` runs once every provider has booted, still before
-     * routing: WordPress is loaded from this provider's boot, and the theme's
-     * providers, registered by functions.php, boot after it. A plugin that
+     * The query and `template_redirect` run once every provider has booted,
+     * still before routing: WordPress is loaded from this provider's boot, and
+     * the application's providers, and the theme's registered by functions.php,
+     * boot after it. A REST request, answered by WordPress while it parses the
+     * request, then gets the hooks those providers add, and a plugin that
      * renders a page from `template_redirect` (WooCommerce's Review Order 404)
-     * then gets the theme's view composers and shared data.
+     * gets the theme's view composers and shared data.
      *
      * @throws WordPressNotLoadedException If WordPress core functions are not available
      */
@@ -104,11 +106,11 @@ trait QueryTrait
             return;
         }
 
-        // Initialize WordPress for the current request
-        wp();
-
         App::booted(function (): void {
             $this->withWordPressErrorHandling(function (): void {
+                // Initialize WordPress for the current request
+                wp();
+
                 $this->handleTemplateRedirect();
 
                 // For normal requests, let Laravel routing handle template resolution
