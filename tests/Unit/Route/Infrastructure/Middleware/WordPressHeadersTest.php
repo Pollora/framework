@@ -500,3 +500,69 @@ describe('shared_max_age (s-maxage)', function (): void {
         expect($response->headers->getCacheControlDirective('s-maxage'))->toBeNull();
     });
 });
+
+describe('responses marked private', function (): void {
+    beforeEach(function (): void {
+        Brain\Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+
+        $this->request = Request::create('/product');
+        $this->request->setRouteResolver(fn (): null => null);
+
+        $this->handle = fn (array $headers = []): SymfonyResponse => $this->middleware->handle(
+            $this->request,
+            fn (): Response => new SymfonyResponse('content', 200, ['Content-Type' => 'text/html'] + $headers)
+        );
+    });
+
+    it('keeps a response public when nothing marks it private', function (): void {
+        $asked = [];
+        Brain\Monkey\Functions\when('apply_filters')->alias(function (string $hook, mixed ...$args) use (&$asked): mixed {
+            $asked[] = [$hook, $args[0], $args[1] ?? null];
+
+            return $args[0];
+        });
+
+        $headers = ($this->handle)()->headers;
+
+        expect($headers->hasCacheControlDirective('public'))->toBeTrue()
+            ->and($asked)->toContain(['pollora/route/private_response', false, $this->request]);
+    });
+
+    it('never sends a marked response as public', function (): void {
+        Brain\Monkey\Functions\when('apply_filters')->justReturn(true);
+
+        $headers = ($this->handle)()->headers;
+
+        expect($headers->hasCacheControlDirective('private'))->toBeTrue()
+            ->and($headers->hasCacheControlDirective('no-cache'))->toBeTrue()
+            ->and($headers->hasCacheControlDirective('must-revalidate'))->toBeTrue()
+            ->and($headers->hasCacheControlDirective('public'))->toBeFalse()
+            ->and($headers->hasCacheControlDirective('max-age'))->toBeFalse();
+    });
+
+    it('wins over the public directives the application set', function (): void {
+        Brain\Monkey\Functions\when('apply_filters')->justReturn(true);
+
+        $headers = ($this->handle)([
+            'Cache-Control' => 'public, max-age=600, s-maxage=3600',
+            'Expires' => 'Wed, 11 Jan 2034 05:00:00 GMT',
+            'CDN-Cache-Control' => 'max-age=3600',
+            'Surrogate-Control' => 'max-age=3600',
+        ])->headers;
+
+        expect($headers->hasCacheControlDirective('public'))->toBeFalse()
+            ->and($headers->hasCacheControlDirective('s-maxage'))->toBeFalse()
+            ->and($headers->has('Expires'))->toBeFalse()
+            ->and($headers->has('CDN-Cache-Control'))->toBeFalse()
+            ->and($headers->has('Surrogate-Control'))->toBeFalse();
+    });
+
+    it('does not weaken a no-store response', function (): void {
+        Brain\Monkey\Functions\when('apply_filters')->justReturn(true);
+
+        $headers = ($this->handle)(['Cache-Control' => 'no-store'])->headers;
+
+        expect($headers->hasCacheControlDirective('no-store'))->toBeTrue()
+            ->and($headers->hasCacheControlDirective('private'))->toBeTrue();
+    });
+});
