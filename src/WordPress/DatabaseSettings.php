@@ -19,6 +19,9 @@ final class DatabaseSettings
 {
     public const string MYSQL = 'mysql';
 
+    /** Laravel has a driver of its own for MariaDB (`DB_CONNECTION=mariadb`); WordPress speaks to it as to MySQL. */
+    public const string MARIADB = 'mariadb';
+
     public const string SQLITE = 'sqlite';
 
     /**
@@ -31,10 +34,18 @@ final class DatabaseSettings
     public static function isComplete(array $config): bool
     {
         return match ($config['driver'] ?? null) {
-            self::MYSQL => isset($config['host'], $config['username'], $config['password'], $config['database']),
+            self::MYSQL, self::MARIADB => isset($config['host'], $config['username'], $config['password'], $config['database']),
             self::SQLITE => self::sqlitePath($config) !== null,
             default => false,
         };
+    }
+
+    /**
+     * Whether the driver is a server WordPress speaks to natively: MySQL or MariaDB.
+     */
+    public static function isMysqlCompatible(mixed $driver): bool
+    {
+        return $driver === self::MYSQL || $driver === self::MARIADB;
     }
 
     /**

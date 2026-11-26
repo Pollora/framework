@@ -30,7 +30,7 @@ class EnvironmentFileHandler
     {
         $envPath = base_path('.env');
 
-        $envContent = File::get(base_path(File::exists('.env') ? '.env' : '.env.example'));
+        $envContent = File::get(File::exists(base_path('.env')) ? base_path('.env') : base_path('.env.example'));
 
         $updatedContent = $this->processEnvContent($envContent, $replacements);
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Pollora\Services\WordPress\Database\DatabaseConnectionService;
 use Pollora\Services\WordPress\Database\EnvironmentFileHandler;
@@ -38,6 +39,19 @@ describe('DatabaseService::configure', function (): void {
         ]);
 
         (new DatabaseService($connection, $handler))->configure($given);
+    });
+
+    it("keeps Laravel's MariaDB driver for a project that chose it", function (): void {
+        $config = new DatabaseConfig('db', 3306, 'shop', 'shopuser', 's3cret', 'https://shop.test');
+        $connection = Mockery::mock(DatabaseConnectionService::class);
+        $connection->shouldReceive('ensureConnection')->andReturn($config);
+        $handler = Mockery::mock(EnvironmentFileHandler::class);
+        $handler->shouldReceive('updateEnvFile')->once()->with(Mockery::on(fn (array $values): bool => $values['DB_CONNECTION'] === 'mariadb'));
+        Container::getInstance()->instance('config', new Repository(['database' => ['default' => 'mariadb']]));
+
+        (new DatabaseService($connection, $handler))->configure($config);
+
+        Container::getInstance()->forgetInstance('config');
     });
 
     it('leaves the environment file alone when no connection can be established', function (): void {
