@@ -33,9 +33,16 @@ describe('DatabaseSettings::isComplete', function () use ($mysql): void {
         expect(DatabaseSettings::isComplete(['driver' => 'sqlite']))->toBeFalse();
     });
 
+    it("accepts Laravel's MariaDB driver as it does MySQL", function () use ($mysql): void {
+        expect(DatabaseSettings::isComplete([...$mysql, 'driver' => 'mariadb']))->toBeTrue()
+            ->and(DatabaseSettings::isMysqlCompatible('mariadb'))->toBeTrue()
+            ->and(DatabaseSettings::isMysqlCompatible('mysql'))->toBeTrue()
+            ->and(DatabaseSettings::isMysqlCompatible('sqlite'))->toBeFalse();
+    });
+
     it('rejects every other driver, even with every MySQL setting', function (?string $driver) use ($mysql): void {
         expect(DatabaseSettings::isComplete([...$mysql, 'driver' => $driver]))->toBeFalse();
-    })->with(['pgsql', 'mariadb', 'sqlsrv', null]);
+    })->with(['pgsql', 'sqlsrv', null]);
 
     it('rejects a connection with no driver at all', function (): void {
         expect(DatabaseSettings::isComplete(['host' => 'db', 'username' => 'u', 'password' => 'p', 'database' => 'd']))->toBeFalse();

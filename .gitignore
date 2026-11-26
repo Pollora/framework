@@ -22,3 +22,6 @@ examples/
 /.windsurf/
 # Pollora harness reports
 /.harness/
+
+# Mutation-testing artefacts
+.mutant-*
