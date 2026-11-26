@@ -1,16 +1,6 @@
 {
     "profile": "framework",
     "mode": "enforce",
-    "ratchet": {
-        "phpstan_level": 5,
-        "phpstan_baseline": 56,
-        "coverage": 94.0,
-        "exempted_rules": 2
-    },
-    "mutation": {
-        "scope": "added",
-        "min": 80
-    },
     "allow_rules": [
         {
             "rule": "ARCH-01",
@@ -20,5 +10,16 @@
             "rule": "ARCH-03",
             "reason": "The application layer of Modules, Plugin and Theme still builds Infrastructure services directly (registrars, managers, discovery orchestrator), and the module named Application is read as a layer. Route, Schedule and VersionCheck are fixed; the rest needs ports, one module at a time."
         }
-    ]
+    ],
+    "ratchet": {
+        "phpstan_level": 5,
+        "phpstan_baseline": 52,
+        "coverage": 94,
+        "type_coverage": 97.9,
+        "exempted_rules": 2
+    },
+    "mutation": {
+        "scope": "added",
+        "min": 80
+    }
 }

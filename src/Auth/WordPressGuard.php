@@ -92,7 +92,7 @@ class WordPressGuard implements StatefulGuard
      * @param  bool  $remember  Whether to "remember" the user
      * @return bool True if authentication successful
      */
-    public function attempt(array $credentials = [], $remember = false): bool
+    public function attempt(array $credentials = [], mixed $remember = false): bool
     {
         if ($this->validate($credentials)) {
             $user = $this->lastAttempted;
@@ -131,7 +131,7 @@ class WordPressGuard implements StatefulGuard
      * @param  Authenticatable  $user  The user to log in
      * @param  bool  $remember  Whether to "remember" the user
      */
-    public function login(Authenticatable $user, $remember = false): void
+    public function login(Authenticatable $user, mixed $remember = false): void
     {
         if ($user instanceof User) {
             wp_set_auth_cookie($user->ID, $remember);
@@ -148,7 +148,7 @@ class WordPressGuard implements StatefulGuard
      * @param  bool  $remember  Whether to "remember" the user
      * @return Authenticatable|null The logged-in user or null
      */
-    public function loginUsingId($id, $remember = false): ?Authenticatable
+    public function loginUsingId(mixed $id, mixed $remember = false): ?Authenticatable
     {
         if ($user = User::find($id)) {
             $this->login($user, $remember);
@@ -165,7 +165,7 @@ class WordPressGuard implements StatefulGuard
      * @param  mixed  $id  User ID
      * @return bool True if successful
      */
-    public function onceUsingId($id): bool
+    public function onceUsingId(mixed $id): bool
     {
         if ($user = User::find($id)) {
             wp_set_current_user($user->ID);

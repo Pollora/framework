@@ -32,7 +32,7 @@ final readonly class ObjectCacheStore implements Store
      *
      * @param  string  $key
      */
-    public function get($key): mixed
+    public function get(mixed $key): mixed
     {
         return $this->cache->get($key, $this->group, true)?->value;
     }
@@ -60,7 +60,7 @@ final readonly class ObjectCacheStore implements Store
      * @param  string  $key
      * @param  int  $seconds
      */
-    public function put($key, $value, $seconds): bool
+    public function put(mixed $key, mixed $value, mixed $seconds): bool
     {
         if ($seconds <= 0) {
             $this->forget($key);
@@ -80,7 +80,7 @@ final readonly class ObjectCacheStore implements Store
      * @param  string  $key
      * @param  int  $seconds
      */
-    public function add($key, $value, $seconds): bool
+    public function add(mixed $key, mixed $value, mixed $seconds): bool
     {
         if ($seconds <= 0) {
             return false;
@@ -95,7 +95,7 @@ final readonly class ObjectCacheStore implements Store
      * @param  array<string, mixed>  $values
      * @param  int  $seconds
      */
-    public function putMany(array $values, $seconds): bool
+    public function putMany(array $values, mixed $seconds): bool
     {
         $stored = true;
 
@@ -112,7 +112,7 @@ final readonly class ObjectCacheStore implements Store
      * @param  string  $key
      * @param  int  $value
      */
-    public function increment($key, $value = 1): int|float|false
+    public function increment(mixed $key, mixed $value = 1): int|float|false
     {
         return $this->cache->increment($key, $value, $this->group);
     }
@@ -123,7 +123,7 @@ final readonly class ObjectCacheStore implements Store
      * @param  string  $key
      * @param  int  $value
      */
-    public function decrement($key, $value = 1): int|float|false
+    public function decrement(mixed $key, mixed $value = 1): int|float|false
     {
         return $this->cache->decrement($key, $value, $this->group);
     }
@@ -133,7 +133,7 @@ final readonly class ObjectCacheStore implements Store
      *
      * @param  string  $key
      */
-    public function forever($key, $value): bool
+    public function forever(mixed $key, mixed $value): bool
     {
         return $this->cache->set($key, $value, $this->group, 0);
     }
@@ -147,7 +147,7 @@ final readonly class ObjectCacheStore implements Store
      * @param  string  $key
      * @param  int  $seconds
      */
-    public function touch($key, $seconds): bool
+    public function touch(mixed $key, mixed $seconds): bool
     {
         $current = $this->cache->get($key, $this->group, true);
 
@@ -163,7 +163,7 @@ final readonly class ObjectCacheStore implements Store
      *
      * @param  string  $key
      */
-    public function forget($key): bool
+    public function forget(mixed $key): bool
     {
         return $this->cache->delete($key, $this->group);
     }
