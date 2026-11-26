@@ -9,9 +9,11 @@ use Pollora\Hook\Domain\Contract\Action;
 use Pollora\WordPress\QueryTrait;
 
 /**
- * WordPress is loaded from a provider's boot, and the theme's providers boot
- * after it: template_redirect waits for every provider to have booted, so a
- * page a plugin renders from it gets the theme's composers and shared data (#419).
+ * WordPress is loaded from a provider's boot, and the application's and the
+ * theme's providers boot after it: the query and template_redirect wait for
+ * every provider to have booted. A REST request, answered while the query parses
+ * the request, then gets the hooks those providers add, and a page a plugin
+ * renders from template_redirect gets the theme's composers and shared data (#419).
  */
 beforeEach(function (): void {
     $this->originalScript = $_SERVER['SCRIPT_FILENAME'] ?? null;
@@ -83,12 +85,12 @@ function wordPressRunner(Action $action): object
     };
 }
 
-it('runs the query at once and template_redirect once every provider has booted', function (): void {
+it('runs the query and template_redirect once every provider has booted', function (): void {
     $runner = wordPressRunner($this->action);
 
     $runner->run();
 
-    expect($this->fired)->toBe(['wp'])
+    expect($this->fired)->toBe([])
         ->and($this->bootedCallbacks)->toHaveCount(1);
 
     ($this->bootedCallbacks[0])();

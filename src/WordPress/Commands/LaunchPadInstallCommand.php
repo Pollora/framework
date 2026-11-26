@@ -11,6 +11,7 @@ use Pollora\Services\WordPress\Installation\DatabaseConnectionException;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 use Pollora\Services\WordPress\Installation\InstallationService;
+use Pollora\Services\WordPress\Installation\SaltsService;
 use Pollora\Services\WordPress\Installation\WordPressInstallationException;
 use Pollora\WordPress\AppUrl;
 use Pollora\WordPress\SqliteIntegration;
@@ -43,7 +44,9 @@ class LaunchPadInstallCommand extends Command
 
     public function __construct(
         private readonly InstallationService $installationService,
-        private readonly DatabaseService $databaseService
+        private readonly DatabaseService $databaseService,
+        // Not optional: the container keeps a default value rather than resolving the class, and nothing would be generated
+        private readonly SaltsService $salts
     ) {
         parent::__construct();
     }
@@ -76,6 +79,7 @@ class LaunchPadInstallCommand extends Command
                 return $this->reportMissingDatabase();
             }
 
+            $this->generateMissingSalts();
             $this->installWordPress($installMode);
 
             return self::SUCCESS;
@@ -86,6 +90,23 @@ class LaunchPadInstallCommand extends Command
             $this->handleError($throwable);
 
             return self::FAILURE;
+        }
+    }
+
+    /**
+     * A new site gets keys and salts of its own, once: nobody is logged in yet. Those that are there are kept.
+     */
+    private function generateMissingSalts(): void
+    {
+        if (! $this->salts->canWrite()) {
+            return;
+        }
+
+        $missing = $this->salts->missing();
+
+        if ($missing !== []) {
+            $this->salts->generate($missing);
+            info(sprintf('%d WordPress key(s) and salt(s) generated in .env.', count($missing)));
         }
     }
 
@@ -109,7 +130,7 @@ class LaunchPadInstallCommand extends Command
             error($message);
         }
 
-        $this->line('  Set DB_CONNECTION=mysql and the DB_* values in .env, or run: php artisan pollora:env:setup');
+        $this->line('  Set DB_CONNECTION=mysql (or mariadb) and the DB_* values in .env, or run: php artisan pollora:env:setup');
         $this->line('  For a development database without a server: php artisan pollora:install --db=sqlite');
         $this->line('  Then: php artisan pollora:install (php artisan pollora:doctor checks the project)');
 

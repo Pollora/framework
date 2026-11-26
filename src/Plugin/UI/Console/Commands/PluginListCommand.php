@@ -104,7 +104,7 @@ class PluginListCommand extends Command
      * @param  PluginCollection  $collection  Plugin collection
      * @return PluginCollection Filtered collection
      */
-    protected function applyFilters($collection)
+    protected function applyFilters(PluginCollection $collection): PluginCollection
     {
         if ($this->option('active')) {
             $collection = $collection->active();
@@ -140,7 +140,7 @@ class PluginListCommand extends Command
      * @param  string  $search  Search term
      * @return PluginCollection Filtered collection
      */
-    protected function applySearch($collection, string $search)
+    protected function applySearch(PluginCollection $collection, string $search): PluginCollection
     {
         return $collection->filter(function (PluginModuleInterface $plugin) use ($search): bool {
             $searchLower = strtolower($search);
@@ -157,7 +157,7 @@ class PluginListCommand extends Command
      * @param  PluginCollection  $collection  Plugin collection
      * @return PluginCollection Sorted collection
      */
-    protected function applySorting($collection)
+    protected function applySorting(PluginCollection $collection): PluginCollection
     {
         $sortBy = $this->option('sort');
         $direction = $this->option('direction');
