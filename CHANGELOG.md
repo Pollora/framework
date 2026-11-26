@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.44.1...develop)
 
+### Added
+
+- **`pollora:salts:generate` writes the eight WordPress keys and salts to `.env`, and `pollora:install` runs it for a new site.** Only the missing ones (neither in the environment of the process nor in `.env`, the sample value counting as missing) are written, 64 random characters each, never printed; `--force` replaces them all, which signs everyone out. Without a `.env` file (a platform that gives variables to the process) nothing is created. Until now nothing generated them: a new project let WordPress make its own and keep them in the database, next to the sessions they sign. An installed site is not touched; run the command once to give it its own (everyone has to log in again).
+
+### Fixed
+
+- **`DB_CONNECTION=mariadb` was treated as no database.** Laravel has a `mariadb` driver of its own, but only `mysql` and `sqlite` counted: the site answered *not set up yet*, and `pollora:install` failed with `Undefined constant … WPINC`. `mariadb` is now accepted like `mysql`, and `pollora:env:setup` keeps it when the project chose it.
+- **`.env` was looked for in the working directory** by the environment file writer: run from elsewhere, it read `.env.example` and could overwrite the real file with it. It now reads the project's.
+
 ## [v13.44.1](https://github.com/Pollora/framework/compare/v13.44.0...v13.44.1) - 2026-11-26
 
 ### Fixed

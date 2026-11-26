@@ -15,6 +15,7 @@ use Pollora\Services\WordPress\Installation\LanguageService;
 use Pollora\Services\WordPress\Installation\WordPressInstallLoaderService;
 use Pollora\WordPress\Commands\LaunchPadInstallCommand;
 use Pollora\WordPress\Commands\LaunchPadSetupCommand;
+use Pollora\WordPress\Commands\SaltsGenerateCommand;
 
 class WordPressServiceProvider extends ServiceProvider
 {
@@ -64,6 +65,7 @@ class WordPressServiceProvider extends ServiceProvider
             $this->commands([
                 LaunchPadSetupCommand::class,
                 LaunchPadInstallCommand::class,
+                SaltsGenerateCommand::class,
             ]);
         } else {
             /** @var Action $action */

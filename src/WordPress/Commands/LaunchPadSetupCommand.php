@@ -69,7 +69,7 @@ class LaunchPadSetupCommand extends Command
             // ("Database name is required", Pollora/pollora#78).
             if (! $this->input->isInteractive() || ! $this->hasTerminal()) {
                 warning('The database is not reachable, and there is no terminal to ask for its settings.');
-                $this->line('  Set DB_CONNECTION=mysql and the DB_* values in .env, or run: php artisan pollora:env:setup');
+                $this->line('  Set DB_CONNECTION=mysql (or mariadb) and the DB_* values in .env, or run: php artisan pollora:env:setup');
                 $this->line('  For a development database without a server: php artisan pollora:env:setup --db=sqlite');
                 $this->line('  Then: php artisan pollora:install (php artisan pollora:doctor checks the project)');
 
