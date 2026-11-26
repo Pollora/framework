@@ -11,9 +11,19 @@ use Illuminate\Events\Dispatcher;
 use Pollora\Services\WordPress\Installation\DatabaseService;
 use Pollora\Services\WordPress\Installation\DTO\InstallationConfig;
 use Pollora\Services\WordPress\Installation\InstallationService;
+use Pollora\Services\WordPress\Installation\SaltsService;
 use Pollora\WordPress\Commands\LaunchPadInstallCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+
+/** The salts of a project that needs none: the command's own tests cover them. */
+function noSaltsToWrite(): SaltsService
+{
+    $salts = Mockery::mock(SaltsService::class);
+    $salts->shouldReceive('canWrite')->andReturnFalse();
+
+    return $salts;
+}
 
 /**
  * Run pollora:install against a console application where pollora:make:theme and
@@ -93,7 +103,7 @@ function runInstallCommand(array $parameters, bool $interactive, int $migrateExi
     $application = new Application($container, new Dispatcher($container), 'testing');
     $application->setAutoExit(false);
 
-    foreach ([new LaunchPadInstallCommand($installation, $database), $recorder, $migrate] as $command) {
+    foreach ([new LaunchPadInstallCommand($installation, $database, noSaltsToWrite()), $recorder, $migrate] as $command) {
         $command->setLaravel($container);
         $application->addCommand($command);
     }
@@ -252,7 +262,7 @@ function runInstallWithoutDatabase(): array
     $application = new Application($container, new Dispatcher($container), 'testing');
     $application->setAutoExit(false);
 
-    $command = new LaunchPadInstallCommand($installation, $database);
+    $command = new LaunchPadInstallCommand($installation, $database, noSaltsToWrite());
     $command->setLaravel($container);
 
     $application->addCommand($command);
@@ -307,4 +317,11 @@ describe('pollora:install without a database', function (): void {
         expect($result['exit'])->toBe(1)
             ->and($result['output'])->toContain('DB_CONNECTION=mysql');
     });
+});
+
+it('gives a new site the keys and salts it lacks, before WordPress is installed, and is given the service by the container', function (): void {
+    $parameter = (new ReflectionClass(LaunchPadInstallCommand::class))->getConstructor()->getParameters()[2];
+
+    // A default value here makes Laravel keep it instead of resolving the class: nothing would ever be generated
+    expect($parameter->getType()?->getName())->toBe(SaltsService::class)->and($parameter->isDefaultValueAvailable())->toBeFalse();
 });

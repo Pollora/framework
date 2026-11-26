@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollora\Services\WordPress\Installation;
 
 use DB;
+use Illuminate\Container\Container;
 use Pollora\Services\WordPress\Database\DatabaseConnectionService;
 use Pollora\Services\WordPress\Database\EnvironmentFileHandler;
 use Pollora\Services\WordPress\Installation\DTO\DatabaseConfig;
@@ -138,7 +139,8 @@ class DatabaseService
     private function updateConfiguration(DatabaseConfig $config): void
     {
         $this->envHandler->updateEnvFile([
-            'DB_CONNECTION' => 'mysql',
+            // A project that chose Laravel's MariaDB driver keeps it
+            'DB_CONNECTION' => $this->chosenDriver(),
             'DB_HOST' => $config->host,
             'DB_PORT' => (string) $config->port,
             'DB_DATABASE' => $config->name,
@@ -146,5 +148,15 @@ class DatabaseService
             'DB_PASSWORD' => $config->password,
             'APP_URL' => $config->siteUrl,
         ]);
+    }
+
+    /**
+     * The driver to write: MariaDB's when the project chose it, MySQL's otherwise.
+     */
+    private function chosenDriver(): string
+    {
+        $default = Container::getInstance()->bound('config') ? config('database.default') : null;
+
+        return $default === DatabaseSettings::MARIADB ? DatabaseSettings::MARIADB : DatabaseSettings::MYSQL;
     }
 }

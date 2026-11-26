@@ -87,7 +87,7 @@ function runSqliteInstall(array $parameters, string $project, ?DatabaseService $
     $application = new Application($container, new Dispatcher($container), 'testing');
     $application->setAutoExit(false);
 
-    $command = new LaunchPadInstallCommand($installation, $database);
+    $command = new LaunchPadInstallCommand($installation, $database, noSaltsToWrite());
     $command->setLaravel($container);
 
     $application->addCommand($command);
