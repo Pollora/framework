@@ -5,7 +5,22 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.44.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.44.1...develop)
+
+## [v13.44.1](https://github.com/Pollora/framework/compare/v13.44.0...v13.44.1) - 2026-11-26
+
+### Fixed
+
+- **REST requests get the hooks the application's providers add in `boot()`.** WordPress answers a REST request (`/wp-json/…`, `/?rest_route=…`) while it parses the request, inside `wp()`, and exits. `wp()` ran from `WordPressServiceProvider::boot()`, before the application's and the theme's providers had booted, so `app()->isBooted()` was `false` there and every filter, action, binding or REST route those providers add in `boot()` was missing: block editor saves did not fire a `save_post` hooked there, and a route registered there answered `rest_no_route`. `wp()` now runs in `App::booted()`, just before `template_redirect` (#419), still before routing. A project that hooked in `register()` to work around this can move its hooks back to `boot()`; one that hooked in both gets them twice.
+- **Behaviour change, front-end pages included: check it before updating.** The main query is now built after the application's and the theme's providers have booted.
+  - Hooks on the main query (`pre_get_posts`, `parse_query`, `request`) added in a provider's `boot()` were not applied until now. They are applied now, so an existing site can show different content.
+  - A provider that reads the main query (`is_*()`, `get_queried_object()`, query vars) in its `boot()` now runs before it is parsed. So does a route file that reads it while it is loaded. Read it from a hook such as `wp`, or inside the route.
+  - A `booted()` callback is not enough: one registered in `register()`, or by a provider that boots before WordPress's, still runs before the query is parsed.
+  - On a REST request WordPress answers and exits, so a `booted()` callback registered from an application provider's `boot()` never runs (it did not before either).
+
+### Changed
+
+- Internal quality only, nothing to do on a project: the type coverage gaps are closed (a stray mutation-testing file removed from the repository, contract-bound parameters typed `mixed`), and the type coverage and PHPStan baseline floors are recorded.
 
 ## [v13.44.0](https://github.com/Pollora/framework/compare/v13.43.4...v13.44.0) - 2026-11-24
 

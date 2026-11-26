@@ -25,7 +25,7 @@ class WordPressHasher implements HasherContract
      *
      * @param  string  $hashedValue
      */
-    public function info($hashedValue): array
+    public function info(mixed $hashedValue): array
     {
         return [];
     }
@@ -37,7 +37,7 @@ class WordPressHasher implements HasherContract
      *
      * @throws RuntimeException
      */
-    public function make(#[\SensitiveParameter] $value, array $options = []): string
+    public function make(#[\SensitiveParameter] mixed $value, array $options = []): string
     {
         return wp_hash_password($value);
     }
@@ -48,7 +48,7 @@ class WordPressHasher implements HasherContract
      * @param  string  $value
      * @param  string  $hashedValue
      */
-    public function check(#[\SensitiveParameter] $value, $hashedValue, array $options = []): bool
+    public function check(#[\SensitiveParameter] mixed $value, mixed $hashedValue, array $options = []): bool
     {
         return wp_check_password($value, $hashedValue, $options['user_id'] ?? '');
     }
@@ -58,7 +58,7 @@ class WordPressHasher implements HasherContract
      *
      * @param  string  $hashedValue
      */
-    public function needsRehash($hashedValue, array $options = []): bool
+    public function needsRehash(mixed $hashedValue, array $options = []): bool
     {
         // if the hashed value is md5 it needs rehashing.
         return strlen($hashedValue) <= 32;
