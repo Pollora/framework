@@ -5,7 +5,9 @@ All notable changes to the Pollora framework will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Pollora/framework/compare/v13.44.0...develop)
+## [Unreleased](https://github.com/Pollora/framework/compare/v13.44.1...develop)
+
+## [v13.44.1](https://github.com/Pollora/framework/compare/v13.44.0...v13.44.1) - 2026-11-26
 
 ### Added
 
@@ -22,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - A provider that reads the main query (`is_*()`, `get_queried_object()`, query vars) in its `boot()` now runs before it is parsed. So does a route file that reads it while it is loaded. Read it from a hook such as `wp`, or inside the route.
   - A `booted()` callback is not enough: one registered in `register()`, or by a provider that boots before WordPress's, still runs before the query is parsed.
   - On a REST request WordPress answers and exits, so a `booted()` callback registered from an application provider's `boot()` never runs (it did not before either).
+
+### Changed
+
+- Internal quality only, nothing to do on a project: the type coverage gaps are closed (a stray mutation-testing file removed from the repository, contract-bound parameters typed `mixed`), and the type coverage and PHPStan baseline floors are recorded.
 
 ## [v13.44.0](https://github.com/Pollora/framework/compare/v13.43.4...v13.44.0) - 2026-11-24
 
