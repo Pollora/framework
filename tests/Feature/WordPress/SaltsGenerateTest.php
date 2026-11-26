@@ -98,3 +98,37 @@ it('is a command that writes what is missing, prints no value, and replaces ever
 
     expect(envValues($this->envPath)['AUTH_KEY'])->not->toBe($first['AUTH_KEY']);
 });
+
+it('counts a blank value and the sample written in capitals as no value', function (string $line): void {
+    File::put($this->envPath, $line."\n");
+
+    expect($this->salts->missing())->toContain('AUTH_KEY');
+})->with(['quoted blanks' => ['AUTH_KEY="   "'], 'capitals' => ['AUTH_KEY="PUT YOUR UNIQUE PHRASE HERE"']]);
+
+it('says where to put them when there is no .env, naming the eight', function (): void {
+    File::delete($this->envPath);
+
+    $this->artisan('pollora:salts:generate')
+        ->expectsOutputToContain('There is no .env file here')
+        ->expectsOutputToContain('  '.implode(', ', SaltsService::KEYS))
+        ->assertFailed();
+});
+
+it('says that nothing is to be done, and writes nothing, when they are all set', function (): void {
+    File::put($this->envPath, "APP_NAME=Pollora\n");
+    $this->salts->generate(SaltsService::KEYS);
+    $before = File::get($this->envPath);
+
+    $this->artisan('pollora:salts:generate')
+        ->expectsOutputToContain('already set')
+        ->doesntExpectOutputToContain('written to .env')
+        ->assertSuccessful();
+
+    expect(File::get($this->envPath))->toBe($before);
+});
+
+it('says how many it wrote', function (): void {
+    File::put($this->envPath, "APP_NAME=Pollora\n");
+
+    $this->artisan('pollora:salts:generate')->expectsOutputToContain('8 key(s) and salt(s) written to .env.')->assertSuccessful();
+});

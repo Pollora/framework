@@ -57,8 +57,8 @@ class SaltsService
         $values = [];
 
         foreach (array_intersect(self::KEYS, $keys) as $key) {
-            // 384 random bits, in characters a .env file takes as they are: no quote, space, `#` or `$`
-            $values[$key] = rtrim(strtr(base64_encode(random_bytes(48)), '+/', '-_'), '=');
+            // 384 random bits, in characters a .env file takes as they are: no quote, space, `#` or `$`; 48 bytes need no padding
+            $values[$key] = strtr(base64_encode(random_bytes(48)), '+/', '-_');
         }
 
         if ($values !== []) {
