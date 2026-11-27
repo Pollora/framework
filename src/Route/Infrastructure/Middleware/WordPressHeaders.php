@@ -20,7 +20,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * 2. Strips WordPress-generated cache headers (Cache-Control, Expires)
  *    for non-WordPress routes served to anonymous visitors
  * 3. Sets public cache directives for cacheable HTML responses served
- *    to non-authenticated visitors
+ *    to non-authenticated visitors, unless the response is marked private
+ *    through the `pollora/route/private_response` filter
  *
  * Cache TTL is resolved from configuration in this order:
  * - `wordpress.cache.ttl.<condition>` — per WordPress condition (e.g. `is_front_page`, `is_single`)
@@ -83,11 +84,57 @@ class WordPressHeaders
             $hasExplicitCacheConfig = false;
         }
 
-        if (! $hasExplicitCacheConfig && $this->shouldApplyPublicCache($response)) {
+        if ($this->isMarkedPrivate($request, $response)) {
+            $this->applyPrivateCacheHeaders($response);
+        } elseif (! $hasExplicitCacheConfig && $this->shouldApplyPublicCache($response)) {
             $this->applyPublicCacheHeaders($response);
         }
 
         return $response;
+    }
+
+    /**
+     * Ask the application and its packages whether this response is personal.
+     *
+     * An anonymous visitor can still receive content of their own (a cart, a
+     * chosen currency): such a response must not be stored by a shared cache.
+     * Any package may mark it with the `pollora/route/private_response` filter.
+     * A callback returns `true` to mark the response, and otherwise passes the
+     * value it received on, so it never undoes the mark of another one.
+     */
+    private function isMarkedPrivate(Request $request, SymfonyResponse $response): bool
+    {
+        return function_exists('apply_filters')
+            && (bool) apply_filters('pollora/route/private_response', false, $request, $response);
+    }
+
+    /**
+     * Forbid shared caches to store the response.
+     *
+     * Wins over the directives already set, including explicit ones. The headers
+     * a CDN reads in preference to `Cache-Control` are removed, and so is a
+     * `Cache-Control` sent with `header()`: Symfony appends to it instead of
+     * replacing it. A `no-store` response stays `no-store`.
+     */
+    private function applyPrivateCacheHeaders(SymfonyResponse $response): void
+    {
+        $noStore = $response->headers->hasCacheControlDirective('no-store');
+
+        foreach (['Cache-Control', 'Expires', 'CDN-Cache-Control', 'Surrogate-Control'] as $header) {
+            $response->headers->remove($header);
+
+            if (! headers_sent()) {
+                header_remove($header);
+            }
+        }
+
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-cache', true);
+        $response->headers->addCacheControlDirective('must-revalidate', true);
+
+        if ($noStore) {
+            $response->headers->addCacheControlDirective('no-store', true);
+        }
     }
 
     /**

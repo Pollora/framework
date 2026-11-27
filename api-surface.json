@@ -145,6 +145,7 @@
         "hook:pollora/login/styles": "hook",
         "hook:pollora/media/deleted": "hook",
         "hook:pollora/media/stored": "hook",
-        "hook:pollora/media/visibility_changed": "hook"
+        "hook:pollora/media/visibility_changed": "hook",
+        "hook:pollora/route/private_response": "filter"
     }
 }

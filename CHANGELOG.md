@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Internal quality only, nothing to do on a project: the type coverage gaps are closed (a stray mutation-testing file removed from the repository, contract-bound parameters typed `mixed`), and the type coverage and PHPStan baseline floors are recorded.
 
+### Added
+
+- **A response can be kept out of shared caches: the `pollora/route/private_response` filter.** On WordPress routes the framework sends `Cache-Control: public` to every visitor who is not logged in, and so did it to a guest carrying a cart or any other content of their own, which a CDN could then serve to someone else. A callback now returns `true` to mark a response: it is sent `private, no-cache, must-revalidate` (`no-store` is kept), even when the application had set public directives, and `Expires`, `CDN-Cache-Control` and `Surrogate-Control` are removed. The filter receives the current value, the request and the response; it defaults to `false`, so nothing changes for a project that adds no callback.
+
 ## [v13.44.0](https://github.com/Pollora/framework/compare/v13.43.4...v13.44.0) - 2026-11-24
 
 ### Changed
