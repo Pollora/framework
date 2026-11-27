@@ -17,10 +17,12 @@ use Psr\Log\LoggerInterface;
  *
  * An admin-ajax action fires the hook; the handler records what it received in
  * the e2e_async_result option, once a queue worker has run the job.
+ *
+ * The test calls it without a page, so it takes no nonce, and says so: pollora/ajax 2.0 verifies one by default.
  */
 class AsyncQueue
 {
-    #[Ajax('e2e_async_dispatch', access: AjaxAccess::ALL)]
+    #[Ajax('e2e_async_dispatch', access: AjaxAccess::ALL, nonce: false)]
     public function dispatch(): void
     {
         do_action('e2e_async_event', absint(Request::input('id') ?? 0));
