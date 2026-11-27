@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/Pollora/framework/compare/v13.44.2...develop)
 
+### Changed
+
+- Accepts `pollora/wp-cli` 0.2. **Check your project if it extends or mocks `Pollora\WpCli\Application\Services\WpCliService`**: the class is `final` from 0.2.0, so a class that extends it no longer loads and Mockery cannot mock it. Use `Pollora\WpCli\Domain\Contracts\WpCliServiceInterface` instead.
+
 ## [v13.44.2](https://github.com/Pollora/framework/compare/v13.44.1...v13.44.2) - 2026-11-26
 
 ### Added
