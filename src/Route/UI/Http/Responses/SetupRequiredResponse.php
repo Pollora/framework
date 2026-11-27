@@ -88,7 +88,7 @@ class SetupRequiredResponse
             return [];
         }
 
-        if (($connection['driver'] ?? null) !== 'mysql') {
+        if (! DatabaseSettings::isMysqlCompatible($connection['driver'] ?? null)) {
             $missing[] = 'DB_CONNECTION=mysql';
             $connection = (array) config('database.connections.mysql', []);
         }

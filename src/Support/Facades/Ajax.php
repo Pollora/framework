@@ -16,6 +16,9 @@ use Pollora\Ajax\Infrastructure\Providers\AjaxServiceProvider;
  * and proxies calls to it. Actions default to logged-in users only;
  * chain `->forAllUsers()` or `->forGuestUsers()` to change targeting.
  *
+ * With pollora/ajax 2.0, an action that chooses nothing verifies a nonce named
+ * after it; `->withoutNonce()` turns that off. With 1.x it runs unchecked.
+ *
  * Usage:
  *     Ajax::listen('my_action', $callback);                // logged-in only (default)
  *     Ajax::listen('public', $callback)->forAllUsers();    // everyone

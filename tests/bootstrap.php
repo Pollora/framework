@@ -13,12 +13,25 @@ use Pest\Mutate\Support\StreamWrapper;
  * In such a process only, this file therefore gives `file` back to Patchwork and loads the mutated source itself,
  * after Patchwork, so that Brain Monkey can still redefine functions in it. A mutated source that PHP has already
  * included (a file listed in `autoload.files`) cannot be replaced: its mutants survive, which the score shows.
+ *
+ * The processes PHPUnit isolates tests in (`RunTestsInSeparateProcesses`) run this file too, with the same variables:
+ * they load the mutated source the same way, or the tests they run would only ever see the original.
  */
 $mutatedSource = getenv('PEST_MUTATION_TESTING');
 $mutating = is_string($mutatedSource) && class_exists(StreamWrapper::class);
 
 if ($mutating) {
-    StreamWrapper::disable();
+    // Only the process Pest started has its wrapper on `file`. A process PHPUnit isolates a test in inherits the
+    // variables above but not the wrapper, and giving `file` back there raises a notice, which fails the test.
+    $handle = fopen(__FILE__, 'r');
+    $wrapped = (stream_get_meta_data($handle)['wrapper_data'] ?? null) instanceof StreamWrapper;
+    fclose($handle);
+
+    if ($wrapped) {
+        StreamWrapper::disable();
+    }
+
+    unset($handle, $wrapped);
 }
 
 // Load Patchwork BEFORE anything else so Brain Monkey can redefine functions
