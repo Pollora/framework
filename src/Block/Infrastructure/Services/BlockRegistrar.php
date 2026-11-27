@@ -400,10 +400,8 @@ class BlockRegistrar implements BlockRegistrarInterface
             }
 
             // Register extracted CSS from JS entry (Vite code-splits CSS)
-            if (! empty($urls['css'])) {
-                foreach ($urls['css'] as $cssUrl) {
-                    wp_register_style($handle.'-style', $cssUrl, [], null);
-                }
+            foreach ($urls['css'] ?? [] as $cssUrl) {
+                wp_register_style($handle.'-style', $cssUrl, [], null);
             }
         }
     }
