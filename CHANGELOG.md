@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING**: **`pollora/ajax` 2.0 is accepted (`^1.3 || ^2.0`), and with it a nonce is verified by default: check your AJAX actions before updating.** A `composer update` may now install 2.0, where an action that says neither `nonce:` / `->requireNonce()` nor `nonce: false` / `->withoutNonce()` refuses a request without a valid nonce for its name (403, `pollora_ajax_invalid_nonce`), guests included. In 1.x it ran without a check. Send the nonce (`wp_create_nonce('action_name')` in `_ajax_nonce`), or declare `nonce: false` where none makes sense; both can be done before updating. To stay on 1.x for now, require `pollora/ajax:^1.3` in the project. `pollora/attributes` 0.1.5 or later is now required.
 - Accepts `pollora/wp-cli` 0.2. **Check your project if it extends or mocks `Pollora\WpCli\Application\Services\WpCliService`**: the class is `final` from 0.2.0, so a class that extends it no longer loads and Mockery cannot mock it. Use `Pollora\WpCli\Domain\Contracts\WpCliServiceInterface` instead.
 
 ## [v13.44.2](https://github.com/Pollora/framework/compare/v13.44.1...v13.44.2) - 2026-11-26
