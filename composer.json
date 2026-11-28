@@ -57,7 +57,7 @@
         "nwidart/laravel-modules": "^13.3",
         "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.44",
-        "laravel/prompts": "^0.3.27"
+        "laravel/prompts": "^0.3.28"
     },
     "autoload": {
         "psr-4": {
