@@ -54,7 +54,7 @@
         "pollora/query": "^3.1.1",
         "spatie/php-structure-discoverer": "^2.4",
         "coduo/php-humanizer": "5.0.3",
-        "nwidart/laravel-modules": "^13.3",
+        "nwidart/laravel-modules": "^13.4",
         "symfony/process": "^7.4 || ^8.0",
         "illuminate/config": "^13.44",
         "laravel/prompts": "^0.3.28"
